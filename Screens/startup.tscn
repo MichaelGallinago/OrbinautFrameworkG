@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://l33qohh6lu7b"]
+
+[node name="Startup" type="Node2D"]
+
+[node name="EcsStartup" type="Node" parent="."]

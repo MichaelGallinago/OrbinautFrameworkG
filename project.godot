@@ -11,8 +11,17 @@ config_version=5
 [application]
 
 config/name="OrbinautFramework3"
-config/features=PackedStringArray("4.1", "GL Compatibility")
-config/icon="res://icon.svg"
+run/main_scene="res://Screens/startup.tscn"
+config/features=PackedStringArray("4.1", "C#", "GL Compatibility")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
+boot_splash/use_filter=false
+
+[display]
+
+window/size/viewport_width=400
+window/size/viewport_height=224
+window/size/resizable=false
 
 [dotnet]
 
@@ -20,5 +29,12 @@ project/assembly_name="OrbinautFramework3"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/lossless_compression/force_png=true
+textures/default_filters/anisotropic_filtering_level=0
+textures/decals/filter=0
+textures/light_projectors/filter=0
+2d/snap/snap_2d_transforms_to_pixel=true
+2d/snap/snap_2d_vertices_to_pixel=true
