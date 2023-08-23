@@ -1,3 +1,5 @@
+using System;
+
 public static class PlayerConstants
 {
     public const byte CpuDelay = 16;
@@ -106,4 +108,11 @@ public static class PlayerConstants
         SwimLift,
         Grab
     }
+
+    /*public enum GravityType : char
+    {
+        
+    }
+    */
+    
 }

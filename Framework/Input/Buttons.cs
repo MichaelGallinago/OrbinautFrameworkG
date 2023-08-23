@@ -1,4 +1,4 @@
-public struct Input
+public struct Buttons
 {
     public bool Up;
     public bool Down;
