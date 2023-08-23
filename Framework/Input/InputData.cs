@@ -2,30 +2,32 @@ using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class InputData : Node
+public static class InputData
 {
     private const byte KeyboardId = 0;
-    
-    public Dictionary<int, Buttons> Down { get; }
-    public Dictionary<int, Buttons> Press { get; }
 
-    public InputData()
+    public static Dictionary<int, Buttons> Down { get; }
+    public static Dictionary<int, Buttons> Press { get; }
+
+    private static Godot.Collections.Array<int> _gamepads;
+
+    static InputData()
     {
         Down = new Dictionary<int, Buttons> { { KeyboardId, new Buttons() } };
         Press = new Dictionary<int, Buttons> { { KeyboardId, new Buttons() } };
     }
 
-    public override void _Process(double delta)
+    public static void Process()
     {
-        Godot.Collections.Array<int> gamepads = Input.GetConnectedJoypads();
-        foreach (int device in Down.Keys.Where(device => !gamepads.Contains(device)))
+        _gamepads = Input.GetConnectedJoypads();
+        foreach (int device in Down.Keys.Where(device => !(device == KeyboardId || _gamepads.Contains(device))))
         {
             Down.Remove(device);
             Press.Remove(device);
         }
 
         var isKeyboardOnly = true;
-        foreach (int device in gamepads)
+        foreach (int device in _gamepads)
         {
             switch (device)
             {
@@ -47,7 +49,13 @@ public partial class InputData : Node
         }
     }
 
-    private void DeviceProcess(int device, bool isKeyboardOnly)
+    public static void SetVibration(int device, float weakMagnitude, float strongMagnitude, float duration)
+    {
+        if (!FrameworkData.GamepadVibration || device > Constants.MaxInputDevices || _gamepads.Contains(device)) return;
+        Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
+    }
+
+    private static void DeviceProcess(int device, bool isKeyboardOnly)
     {
         var down = new Buttons();
         if (!isKeyboardOnly)
@@ -80,6 +88,8 @@ public partial class InputData : Node
         
         Down[KeyboardId] = down;
         Press[KeyboardId] = press;
+        GD.Print(down.A);
+        GD.Print(press.A);
     }
 
     private static void KeyboardProcess(ref Buttons down)
