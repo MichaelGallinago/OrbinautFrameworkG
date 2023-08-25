@@ -4,6 +4,9 @@ public static class Constants
 
 	// Input (keyboard and first gamepad slot are treated as one device)
 	public const byte MaxInputDevices = 4;
+	
+	public const ushort TileLimit = 256;
+	public const byte TileSize = 16;
 
 	public enum EnemyType : byte
 	{
@@ -11,10 +14,18 @@ public static class Constants
 		Boss
 	}
 
-	public enum FlipDirection : sbyte
+	public enum Direction : sbyte
 	{
-		Left = -1,
-		Right = 1
+		Negative = -1,
+		Positive = 1
+	}
+	
+	public enum GroundMode : byte
+	{
+		Floor,
+		RightWall,
+		Ceiling,
+		LeftWall
 	}
 
 	public enum CollisionSensor : byte
@@ -78,7 +89,7 @@ public static class Constants
 		Flash
 	}
 
-	public enum TileLayer : byte
+	public enum TileLayer : sbyte
 	{
 		Main,
 		Secondary,

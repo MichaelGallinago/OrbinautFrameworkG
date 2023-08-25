@@ -60,14 +60,14 @@ public static class InputData
         var down = new Buttons();
         if (!isKeyboardOnly)
         {
-            down.Up = down.Up || Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
-            down.Down = down.Down || Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
-            down.Left = down.Left || Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
-            down.Right = down.Right || Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
-            down.A = down.A || Input.IsJoyButtonPressed(device, JoyButton.A);
-            down.B = down.B || Input.IsJoyButtonPressed(device, JoyButton.B);
-            down.C = down.C || Input.IsJoyButtonPressed(device, JoyButton.Y);
-            down.Start = down.Start || Input.IsJoyButtonPressed(device, JoyButton.Start);
+            down.Up = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
+            down.Down = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
+            down.Left = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
+            down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
+            down.A = Input.IsJoyButtonPressed(device, JoyButton.A);
+            down.B = Input.IsJoyButtonPressed(device, JoyButton.B);
+            down.C = Input.IsJoyButtonPressed(device, JoyButton.Y);
+            down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
         }
         if (device == KeyboardId)
         {
@@ -88,8 +88,6 @@ public static class InputData
         
         Down[KeyboardId] = down;
         Press[KeyboardId] = press;
-        GD.Print(down.A);
-        GD.Print(press.A);
     }
 
     private static void KeyboardProcess(ref Buttons down)
