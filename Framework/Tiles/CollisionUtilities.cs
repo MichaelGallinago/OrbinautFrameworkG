@@ -30,6 +30,25 @@ public static class CollisionUtilities
 
 		return new TileData(heights, widths, angles);
 	}
+
+	public static (byte, float?) FindTileTwoPositions(bool isVertical, 
+		Vector2I position1, Vector2I position2, Direction direction, TileLayer tileLayerType, 
+		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
+	{
+		(byte distance1, float? angle1) = FindTile(isVertical, 
+			position1, direction, tileLayerType, tileMap, groundMode);
+		(byte distance2, float? angle2) = FindTile(isVertical, 
+			position2, direction, tileLayerType, tileMap, groundMode);
+		
+		if (isVertical && FrameworkData.CDTileFixes
+		    && direction == Direction.Positive && angle1 is not 360f
+		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
+		{
+			angle1 = 360f;
+		}
+		
+		return distance1 <= distance2 ? (distance1, angle1) : (distance2, angle2);
+	}
 	
 	public static (byte, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
 		TileLayer tileLayerType, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
@@ -61,13 +80,15 @@ public static class CollisionUtilities
 		
 		// Get tile at position
 		var shift = 0;
-		int index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, position));
-		var transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, position));
+		Vector2I mapPosition = tileMap.LocalToMap(position);
+		int index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, mapPosition));
+		var transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
 		byte size = GetTileCollision(isVertical, position, index, transforms);
 		bool isValid = GetTileValidity(index, isVertical, direction, groundMode);
 		
 		// Remember this tile for later use
 		Vector2I positionBuffer = position;
+		Vector2I mapPositionBuffer = mapPosition;
 		int indexBuffer = index;
 		byte sizeBuffer = size;
 		TileTransforms transformsBuffer = transforms;
@@ -84,11 +105,13 @@ public static class CollisionUtilities
 			{
 				position.X += shift * sign;	
 			}
-			index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, position));
-			transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, position));
+			mapPosition = tileMap.LocalToMap(position);
+			index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, mapPosition));
+			transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
 			size = GetTileCollision(isVertical, position, index, transforms);
 			isValid = GetTileValidity(index, isVertical, direction, groundMode);
 			position = positionBuffer;
+			mapPosition = mapPositionBuffer;
 			
 			// If tile is invalid, return empty data
 			if (!isValid)
@@ -109,11 +132,13 @@ public static class CollisionUtilities
 			{
 				position.X += shift * sign;	
 			}
-			index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, position));
-			transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, position));
+			mapPosition = tileMap.LocalToMap(position);
+			index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, mapPosition));
+			transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
 			size = GetTileCollision(isVertical, position, index, transforms);
 			isValid = GetTileValidity(index, isVertical, direction, groundMode);
 			position = positionBuffer;
+			mapPosition = mapPositionBuffer;
 
 			// If no width found or tile is invalid, return to back to the initial tile
 			if (size == 0 || !isValid)

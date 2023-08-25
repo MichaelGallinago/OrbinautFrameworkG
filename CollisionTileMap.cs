@@ -13,17 +13,16 @@ public partial class CollisionTileMap : TileMap
     
     public override void _Process(double delta)
     {
-        Vector2I position = LocalToMap(GetLocalMousePosition());
+        var position = (Vector2I)GetLocalMousePosition();
+        (byte, float?) tile = CollisionUtilities.FindTile(
+            true, position, Direction.Positive, TileLayer.Main, this);
         
-        Vector2I atlasCoords = GetCellAtlasCoords(0, position);
-        int tileId = GetTileIndex(atlasCoords);
-
-        CollisionUtilities.FindTile(true, position, Direction.Positive, TileLayer.Main, this);
-        var tileTransforms = new TileTransforms(GetCellAlternativeTile(0, position));
-        float rawAngle = CollisionUtilities.GetRawTileAngle(tileId);
-        float angle = Angles.TransformTileAngle(rawAngle, tileTransforms);
+        GD.Print($"height:{tile.Item1} angle:{tile.Item2}");
         
-        GD.Print($"{tileId} Angle:{angle} RawAngle:{rawAngle}");
+        //var tileTransforms = new TileTransforms(GetCellAlternativeTile(0, position));
+        //float rawAngle = CollisionUtilities.GetRawTileAngle(tileId);
+        //float angle = Angles.TransformTileAngle(rawAngle, tileTransforms);
+        //GD.Print($"{tileId} Angle:{angle} RawAngle:{rawAngle}");
     }
 
     public int GetTileIndex(Vector2I atlasCoords)
