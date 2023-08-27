@@ -2,19 +2,21 @@ using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
-public static class InputData
+public static class InputUtilities
 {
     private const byte KeyboardId = 0;
 
     public static Dictionary<int, Buttons> Down { get; }
     public static Dictionary<int, Buttons> Press { get; }
+    public static Dictionary<int, bool> BlockInput { get; }
 
     private static Godot.Collections.Array<int> _gamepads;
 
-    static InputData()
+    static InputUtilities()
     {
         Down = new Dictionary<int, Buttons> { { KeyboardId, new Buttons() } };
         Press = new Dictionary<int, Buttons> { { KeyboardId, new Buttons() } };
+        BlockInput = new Dictionary<int, bool> { { KeyboardId, false } };
     }
 
     public static void Process()
@@ -24,6 +26,7 @@ public static class InputData
         {
             Down.Remove(device);
             Press.Remove(device);
+            BlockInput.Remove(device);
         }
 
         var isKeyboardOnly = true;
@@ -40,6 +43,7 @@ public static class InputData
 
             Down.TryAdd(device, new Buttons());
             Press.TryAdd(device, new Buttons());
+            BlockInput.TryAdd(device, false);
             DeviceProcess(device, false);
         }
 
@@ -57,17 +61,12 @@ public static class InputData
 
     private static void DeviceProcess(int device, bool isKeyboardOnly)
     {
+        if (BlockInput[device]) return;
+        
         var down = new Buttons();
         if (!isKeyboardOnly)
         {
-            down.Up = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
-            down.Down = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
-            down.Left = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
-            down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
-            down.A = Input.IsJoyButtonPressed(device, JoyButton.A);
-            down.B = Input.IsJoyButtonPressed(device, JoyButton.B);
-            down.C = Input.IsJoyButtonPressed(device, JoyButton.Y);
-            down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
+            GamepadProcess(device, ref down);
         }
         if (device == KeyboardId)
         {
@@ -103,5 +102,17 @@ public static class InputData
             down.C = down.C || Input.IsPhysicalKeyPressed(control.C);
             down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
         }
+    }
+
+    private static void GamepadProcess(int device, ref Buttons down)
+    {
+        down.Up = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
+        down.Down = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
+        down.Left = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
+        down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
+        down.A = Input.IsJoyButtonPressed(device, JoyButton.A);
+        down.B = Input.IsJoyButtonPressed(device, JoyButton.B);
+        down.C = Input.IsJoyButtonPressed(device, JoyButton.Y);
+        down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
     }
 }

@@ -31,13 +31,13 @@ public static class CollisionUtilities
 		return new TileData(heights, widths, angles);
 	}
 
-	public static (byte, float?) FindTileTwoPositions(bool isVertical, 
+	public static (sbyte, float?) FindTileTwoPositions(bool isVertical, 
 		Vector2I position1, Vector2I position2, Direction direction, TileLayer tileLayerType, 
 		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
-		(byte distance1, float? angle1) = FindTile(isVertical, 
+		(sbyte distance1, float? angle1) = FindTile(isVertical, 
 			position1, direction, tileLayerType, tileMap, groundMode);
-		(byte distance2, float? angle2) = FindTile(isVertical, 
+		(sbyte distance2, float? angle2) = FindTile(isVertical, 
 			position2, direction, tileLayerType, tileMap, groundMode);
 		
 		if (isVertical && FrameworkData.CDTileFixes
@@ -50,7 +50,7 @@ public static class CollisionUtilities
 		return distance1 <= distance2 ? (distance1, angle1) : (distance2, angle2);
 	}
 	
-	public static (byte, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
+	public static (sbyte, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
 		TileLayer tileLayerType, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
     {
 	    // Get tile layer id
@@ -187,7 +187,7 @@ public static class CollisionUtilities
 		}
 		
 		// Return both the distance and the angle
-		return ((byte)distance, angle);
+		return ((sbyte)distance, angle);
     }
 	
 	private static bool GetTileValidity(int index, bool isVertical, Direction direction, GroundMode groundMode)

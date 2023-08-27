@@ -8,6 +8,7 @@ public static class FrameworkData
     public static bool GamepadVibration { get; set; }
     public static TileData TileData { get; }
     public static bool CDTileFixes { get; set; }
+    public static bool UpdateGraphics { get; set; }
 
     static FrameworkData()
     {
@@ -17,8 +18,9 @@ public static class FrameworkData
             new(Key.None, Key.None, Key.None, Key.None, Key.Z, Key.X, Key.C, Key.Space)
         };
         GamepadVibration = true;
+        UpdateGraphics = false;
         CDTileFixes = true;
         TileData = CollisionUtilities.LoadTileDataBinary(
-            "angles_s1", "heights_s1", "widths_s1");
+            "angles_tsz", "heights_tsz", "widths_tsz");
     }
 }
