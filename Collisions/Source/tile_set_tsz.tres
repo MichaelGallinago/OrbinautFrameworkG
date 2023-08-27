@@ -226,6 +226,7 @@ separation = Vector2i(2, 2)
 2:33/0 = 0
 0:1/0 = 0
 7:1/0 = 0
+7:19/0 = 0
 
 [resource]
 sources/0 = SubResource("TileSetAtlasSource_cdejh")

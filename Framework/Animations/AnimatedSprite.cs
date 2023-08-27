@@ -9,13 +9,15 @@ public partial class AnimatedSprite : AnimatedSprite2D
     public int Index { get; set; }
     public int[] Duration { get; set; }
     public int[] Order { get; set; }
+    public AnimationRespawnData RespawnData { get; set; }
 
     public AnimatedSprite()
     {
         SpeedScale = 0f;
         Index = Frame;
-        Duration = new[]{0};
+        Duration = new[] { 0 };
         Order = Array.Empty<int>();
+        RespawnData = new AnimationRespawnData(Frame, Animation, Visible);
     }
 
     public override void _ExitTree()
@@ -68,6 +70,8 @@ public partial class AnimatedSprite : AnimatedSprite2D
     
     public void UpdateDuration(int[] duration)
     {
+        duration ??= new[] { 0 };
+        
         if (Timer < 0d)
         {
             Timer = duration[0];
@@ -83,6 +87,6 @@ public partial class AnimatedSprite : AnimatedSprite2D
         
         Timer = 0d;
         Order = order ?? Array.Empty<int>();
-        Duration = duration ?? new []{0};
+        Duration = duration ?? new[] { 0 };
     }
 }
