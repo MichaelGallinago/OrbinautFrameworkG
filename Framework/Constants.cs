@@ -104,4 +104,13 @@ public static class Constants
 		Flame,
 		Water
 	}
+	
+	public enum TouchState : byte
+	{
+		None,
+		Up,
+		Down,
+		Left,
+		Right
+	}
 }

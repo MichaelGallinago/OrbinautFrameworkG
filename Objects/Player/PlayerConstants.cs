@@ -11,7 +11,9 @@ public static class PlayerConstants
         Sonic,
         Tails,
         Knuckles,
-        Amy
+        Amy,
+        Global,
+        GlobalAI
     }
     
     public enum State : byte

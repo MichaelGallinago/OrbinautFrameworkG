@@ -1,8 +1,11 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class AnimatedSprite : AnimatedSprite2D
 {
+    public static List<AnimatedSprite> Sprites { get; }
+    
     public bool Sync { get; set; }
     public int LoopFrame { get; set; }
     public double Timer { get; set; }
@@ -11,6 +14,11 @@ public partial class AnimatedSprite : AnimatedSprite2D
     public int[] Order { get; set; }
     public AnimationRespawnData RespawnData { get; set; }
 
+    static AnimatedSprite()
+    {
+        Sprites = new List<AnimatedSprite>();
+    }
+    
     public AnimatedSprite()
     {
         SpeedScale = 0f;
@@ -19,17 +27,17 @@ public partial class AnimatedSprite : AnimatedSprite2D
         Order = Array.Empty<int>();
         RespawnData = new AnimationRespawnData(Frame, Animation, Visible);
     }
+    
+    public override void _EnterTree()
+    {
+        Sprites.Add(this);
+    }
 
     public override void _ExitTree()
     {
-        Animator.Sprites.Remove(this);
+        Sprites.Remove(this);
     }
 
-    public override void _EnterTree()
-    {
-        Animator.Sprites.Add(this);
-    }
-    
     public void SetAnimation(StringName animation, int[] duration = null, 
         int startFrame = 0, int loopFrame = 0, int[] order = null)
     {	

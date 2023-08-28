@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class ProcessLoop : Node2D
+public abstract partial class CommonScene : Node2D
 {
     private const byte BaseFramerate = 60;
     

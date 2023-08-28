@@ -1,16 +1,13 @@
 using Godot;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 public static class Animator
 {
-    public static List<AnimatedSprite> Sprites { get; private set; }
     public static double Timer { get; private set; }
 
     public static void Reset()
     {
-        Sprites = new List<AnimatedSprite>();
+        Timer = 0d;
     }
 
     public static void Process(double processSpeed)
@@ -40,7 +37,7 @@ public static class Animator
 		
         Timer += processSpeed;
 
-        foreach (AnimatedSprite sprite in Sprites)
+        foreach (AnimatedSprite sprite in AnimatedSprite.Sprites)
         {
             int duration = sprite.Duration[sprite.Index];
             bool isCustomOrder = sprite.Order.Length > 0;
