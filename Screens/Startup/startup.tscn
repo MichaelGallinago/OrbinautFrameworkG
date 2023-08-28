@@ -12,7 +12,7 @@ shader_parameter/u_colour = null
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_e3v0d"]
 shader = ExtResource("1_v4hqx")
-shader_parameter/u_step = 70
+shader_parameter/u_step = 805
 shader_parameter/u_mode = false
 shader_parameter/u_colour = 0
 
