@@ -10,6 +10,6 @@ public static class DebugUtilities
         stopwatch.Start();
         action();
         stopwatch.Stop();
-        GD.Print($"{name}:{stopwatch.Elapsed}");
+        GD.Print($"{name}:{stopwatch.ElapsedTicks}");
     }
 }

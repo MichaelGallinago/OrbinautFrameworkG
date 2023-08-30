@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://c6sk0yf3wk0xx"]
+
+[ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_8no3c"]
+[ext_resource type="Script" path="res://Framework/Background/BackgroundLayer.cs" id="1_r2c8j"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ycr7o"]
+shader = ExtResource("1_8no3c")
+shader_parameter/u_bound = null
+shader_parameter/u_UVs1 = null
+shader_parameter/u_texelSize1 = null
+shader_parameter/u_index1 = PackedFloat32Array()
+shader_parameter/u_UVs2 = null
+shader_parameter/u_texelSize2 = null
+shader_parameter/u_index2 = PackedFloat32Array()
+shader_parameter/u_parallaxActive = false
+shader_parameter/u_offset = null
+shader_parameter/u_width = null
+shader_parameter/u_scaling = null
+shader_parameter/u_inclineHeight = null
+shader_parameter/u_inclineStep = null
+shader_parameter/u_height = null
+shader_parameter/u_overlapActive = null
+shader_parameter/u_mapSizeSurf = null
+
+[node name="BackgroundLayer" type="Sprite2D"]
+material = SubResource("ShaderMaterial_ycr7o")
+position = Vector2(256, 160)
+centered = false
+script = ExtResource("1_r2c8j")

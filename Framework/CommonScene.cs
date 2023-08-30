@@ -14,6 +14,16 @@ public abstract partial class CommonScene : Node2D
         Animator.Reset();
     }
 
+    public override void _EnterTree()
+    {
+        FrameworkData.CurrentScene = this;
+    }
+    
+    public override void _ExitTree()
+    {
+        FrameworkData.CurrentScene = null;
+    }
+
     public override void _Process(double processSpeed)
     {
         processSpeed *= BaseFramerate;

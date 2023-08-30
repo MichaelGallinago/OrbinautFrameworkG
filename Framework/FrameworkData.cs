@@ -8,7 +8,12 @@ public static class FrameworkData
     public static bool GamepadVibration { get; set; }
     public static TileData TileData { get; }
     public static bool CDTileFixes { get; set; }
+    public static bool CDCamera { get; set; }
     public static bool UpdateGraphics { get; set; }
+    public static bool UpdateObjects { get; set; }
+    public static CheckpointData CheckpointData { get; set; }
+    public static CommonScene CurrentScene { get; set; }
+    public static Vector2I ViewSize { get; set; }
 
     static FrameworkData()
     {
@@ -20,7 +25,9 @@ public static class FrameworkData
         GamepadVibration = true;
         UpdateGraphics = false;
         CDTileFixes = true;
+        CDCamera = true;
         TileData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
+        ViewSize = new Vector2I(400, 224);
     }
 }

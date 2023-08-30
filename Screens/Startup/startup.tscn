@@ -12,7 +12,7 @@ shader_parameter/u_colour = null
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_e3v0d"]
 shader = ExtResource("1_v4hqx")
-shader_parameter/u_step = 805
+shader_parameter/u_step = 835
 shader_parameter/u_mode = false
 shader_parameter/u_colour = 0
 
@@ -21,6 +21,7 @@ material = SubResource("ShaderMaterial_da42i")
 script = ExtResource("1_5grtg")
 
 [node name="SprSonicDashStrip4" type="Sprite2D" parent="."]
+visible = false
 material = SubResource("ShaderMaterial_e3v0d")
 position = Vector2(139, 77)
 texture = ExtResource("3_5ip3c")
