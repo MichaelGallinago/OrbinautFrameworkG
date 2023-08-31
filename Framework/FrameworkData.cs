@@ -14,6 +14,8 @@ public static class FrameworkData
     public static CheckpointData CheckpointData { get; set; }
     public static CommonScene CurrentScene { get; set; }
     public static Vector2I ViewSize { get; set; }
+    public static PlayerConstants.Type PlayerType { get; set; }
+    public static PlayerConstants.Type PlayerAIType { get; set; }
 
     static FrameworkData()
     {
@@ -23,11 +25,15 @@ public static class FrameworkData
             new(Key.None, Key.None, Key.None, Key.None, Key.Z, Key.X, Key.C, Key.Space)
         };
         GamepadVibration = true;
-        UpdateGraphics = false;
+        UpdateGraphics = true;
+        UpdateObjects = true;
         CDTileFixes = true;
         CDCamera = true;
         TileData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
         ViewSize = new Vector2I(400, 224);
+
+        PlayerType = PlayerConstants.Type.Sonic;
+        PlayerAIType = PlayerConstants.Type.Tails;
     }
 }

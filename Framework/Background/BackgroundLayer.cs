@@ -13,6 +13,7 @@ public partial class BackgroundLayer : Sprite2D
     [Export] public int ScaleTarget;
     
     private Vector2I _offset;
+    private Vector2 _shift;
     private int _height;
 
     public override void _Ready()
@@ -27,8 +28,19 @@ public partial class BackgroundLayer : Sprite2D
         }
     }
 
-    public override void _Process(double delta)
+    public override void _EnterTree()
     {
-        base._Process(delta);
+        FrameworkData.CurrentScene.EndStep += EndStep;
+    }
+
+    public override void _ExitTree()
+    {
+        FrameworkData.CurrentScene.EndStep -= EndStep;
+    }
+
+    private void EndStep(double processSpeed)
+    {
+        if (!FrameworkData.UpdateGraphics) return;
+        _shift += Scroll * (float)processSpeed;
     }
 }

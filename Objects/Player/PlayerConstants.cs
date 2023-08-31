@@ -6,7 +6,7 @@ public static class PlayerConstants
     
     // TODO: PlayerCount
     // byte PlayerCount = instance_number(global.player_obj)
-    public enum Id : byte
+    public enum Type : byte
     {
         Sonic,
         Tails,

@@ -1,16 +1,18 @@
 using Godot;
 using System;
+using System.Linq;
 
 public partial class Camera : Camera2D
 {
 	private const byte CameraCentreOffset = 16;
+	public const float Tolerance = 0.000001f;
 	
     private static readonly int[] ShakeData = {
         1, 2, 1, 3, 1, 2, 2, 1, 2, 3, 1, 2, 1, 2, 0, 0,
         2, 0, 3, 2, 2, 3, 2, 2, 1, 3, 0, 0, 1, 0, 1, 3
     };
     
-    public CommonObject Target { get; set; }
+    [Export] public CommonObject Target { get; set; }
     
     private Vector2I _maxSpeed;
     private Vector2I _speed;
@@ -18,16 +20,16 @@ public partial class Camera : Camera2D
     private Vector2I _delay;
     private Vector2I _offset;
     private Vector2I _boundSpeed;
-    private Vector4I _bound;
-    private Vector4I _limit;
-    private Vector4I _previousLimit;
+    private Vector4 _bound;
+    private Vector4 _limit;
+    private Vector4 _previousLimit;
 
     private Vector2I _shakeOffset;
     private int _shakeTimer;
 
     public Camera()
     {
-        _bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
+	    _bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
         _limit = _bound;
         _previousLimit = _bound;
         _maxSpeed = new Vector2I(16, 16);
@@ -50,7 +52,10 @@ public partial class Camera : Camera2D
 
     private void EndStep(double processSpeed)
     {
-        var boundSpeed = 0;
+	    // TODO: remove this
+	    Target = Player.Players[0];
+	    var processSpeedF = (float)processSpeed;
+	    var boundSpeed = 0;
 		
 		if (FrameworkData.UpdateObjects)
 		{
@@ -142,18 +147,18 @@ public partial class Camera : Camera2D
 			switch (_delay.X)
 			{
 				case 0:
-					_position.X += _speed.X * (float)processSpeed;
+					_position.X += _speed.X * processSpeedF;
 					break;
 				case > 0:
 					_delay.X--;
 					break;
 			}
 			
-			_position.Y += _speed.Y * (float)processSpeed;
+			_position.Y += _speed.Y * processSpeedF;
 		}
 		
 		// Update left boundary
-		if (_previousLimit.X != _limit.X)
+		if (Mathf.Abs(_previousLimit.X - _limit.X) > Tolerance)
 		{
 			_bound.X = _limit.X;
 		}
@@ -170,22 +175,22 @@ public partial class Camera : Camera2D
 					_limit.X = Mathf.RoundToInt(_position.X);
 				}
 				
-				_limit.X = Mathf.Min(_limit.X + boundSpeed, _bound.X);
+				_limit.X = Mathf.Min(_limit.X + boundSpeed * processSpeedF, _bound.X);
 			}
 		}
 		else if (_limit.X > _bound.X)
 		{
-			_limit.X = Mathf.Max(_bound.X, _limit.X - boundSpeed);
+			_limit.X = Mathf.Max(_bound.X, _limit.X - boundSpeed * processSpeedF);
 		}
 	
 		// Update right boundary
-		if (_previousLimit.Z != _limit.Z)
+		if (Mathf.Abs(_previousLimit.Z - _limit.Z) > Tolerance)
 		{
 			_bound.Z = _limit.Z;
 		}
 		else if (_limit.Z < _bound.Z)
 		{
-			_limit.Z = Mathf.Min(_limit.Z + boundSpeed, _bound.Z);
+			_limit.Z = Mathf.Min(_limit.Z + boundSpeed * processSpeedF, _bound.Z);
 		}
 		else if (_limit.Z > _bound.Z)
 		{
@@ -202,12 +207,12 @@ public partial class Camera : Camera2D
 					_limit.Z = Mathf.RoundToInt(_position.X + width);	
 				}
 				
-				_limit.Z = Mathf.Max(_bound.Z, _limit.Z - boundSpeed);
+				_limit.Z = Mathf.Max(_bound.Z, _limit.Z - boundSpeed * processSpeedF);
 			}
 		}
 	
 		// Update top boundary
-		if (_previousLimit.Y != _limit.Y)
+		if (Mathf.Abs(_previousLimit.Y - _limit.Y) > Tolerance)
 		{
 			_bound.Y = _limit.Y;
 		}
@@ -224,22 +229,22 @@ public partial class Camera : Camera2D
 					_limit.Y = Mathf.RoundToInt(_position.Y);
 				}
 				
-				_limit.Y = Mathf.Min(_limit.Y + boundSpeed, _bound.Y);
+				_limit.Y = Mathf.Min(_limit.Y + boundSpeed * processSpeedF, _bound.Y);
 			}
 		}
 		else if (_limit.Y > _bound.Y)
 		{
-			_limit.Y = Mathf.Max(_bound.Y, _limit.Y - boundSpeed);
+			_limit.Y = Mathf.Max(_bound.Y, _limit.Y - boundSpeed * processSpeedF);
 		}
 		
 		// Update bottom boundary
-		if (_previousLimit.W != _limit.W)
+		if (Mathf.Abs(_previousLimit.W - _limit.W) > Tolerance)
 		{
 			_bound.W = _limit.W;
 		}
 		else if (_limit.W < _bound.W)
 		{
-			_limit.W = Mathf.Min(_limit.W + boundSpeed, _bound.W);
+			_limit.W = Mathf.Min(_limit.W + boundSpeed * processSpeedF, _bound.W);
 		}
 		else if (_limit.W > _bound.W)
 		{
@@ -256,7 +261,7 @@ public partial class Camera : Camera2D
 					_limit.W = Mathf.RoundToInt(_position.Y + height);
 				}
 				
-				_limit.W = Mathf.Max(_bound.W, _limit.W - boundSpeed);
+				_limit.W = Mathf.Max(_bound.W, _limit.W - boundSpeed * processSpeedF);
 			}
 		}
 

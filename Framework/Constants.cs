@@ -1,6 +1,6 @@
 public static class Constants
 {
-	public const byte RenderBuffer = 8;
+	public const byte RenderBuffer = 0;
 
 	// Input (keyboard and first gamepad slot are treated as one device)
 	public const byte MaxInputDevices = 4;
