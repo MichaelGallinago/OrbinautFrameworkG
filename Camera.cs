@@ -3,31 +3,34 @@ using System;
 
 public partial class Camera : Camera2D
 {
-    private static int[] _shakeData = {
+	private const byte CameraCentreOffset = 16;
+	
+    private static readonly int[] ShakeData = {
         1, 2, 1, 3, 1, 2, 2, 1, 2, 3, 1, 2, 1, 2, 0, 0,
         2, 0, 3, 2, 2, 3, 2, 2, 1, 3, 0, 0, 1, 0, 1, 3
     };
     
-    public Node2D Target { get; set; }
+    public CommonObject Target { get; set; }
     
-    private Vector2 _maxSpeed;
-    private Vector2 _speed;
+    private Vector2I _maxSpeed;
+    private Vector2I _speed;
     private Vector2 _position;
-    private Vector2 _delay;
-    private Vector2 _offset;
-    private Vector4I _previousLimit; 
-    
-    private Vector2 _boundSpeed;
+    private Vector2I _delay;
+    private Vector2I _offset;
+    private Vector2I _boundSpeed;
     private Vector4I _bound;
+    private Vector4I _limit;
+    private Vector4I _previousLimit;
 
-    private Vector2 _shakeOffset;
+    private Vector2I _shakeOffset;
     private int _shakeTimer;
 
     public Camera()
     {
-        _bound = new Vector4I(LimitTop, LimitBottom, LimitLeft, LimitRight);
+        _bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
+        _limit = _bound;
         _previousLimit = _bound;
-        _maxSpeed = new Vector2(16, 16);
+        _maxSpeed = new Vector2I(16, 16);
 
         if (FrameworkData.CheckpointData is not null)
         {
@@ -47,15 +50,15 @@ public partial class Camera : Camera2D
 
     private void EndStep(double processSpeed)
     {
-        float boundSpeed;
+        var boundSpeed = 0;
 		
 		if (FrameworkData.UpdateObjects)
 		{
-			Vector2I size = FrameworkData.ViewSize / 2;
-			size.Y -= 16;
+			Vector2I centre = FrameworkData.ViewSize / 2;
+			centre.Y -= CameraCentreOffset;
 
 			// Get boundary update speed
-			boundSpeed = Mathf.Max(2f, _boundSpeed.X);
+			boundSpeed = Mathf.Max(2, _boundSpeed.X);
 
 			if (Target != null && !IsInstanceValid(Target))
 			{
@@ -64,208 +67,205 @@ public partial class Camera : Camera2D
 			
 			if (Target != null)
 			{
-				Vector2 targetPosition = (Vector2I)Target.Position - _position;
+				Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_position;
 
-				var extX = !FrameworkData.CDCamera * 16;
+				int extX = FrameworkData.CDCamera ? 0 : 16;
 				
-				if (targetX > halfWidth)
-				{ 
-					spd_x = clamp(targetX - halfWidth, 0, spd_x_max);    
+				if (targetPosition.X > centre.X)
+				{
+					_speed.X = Mathf.Clamp(targetPosition.X - centre.X, 0, _maxSpeed.X);    
 				}
-				else if (targetX < halfWidth - extX)
+				else if (targetPosition.X < centre.X - extX)
 				{ 
-					spd_x = clamp(targetX - halfWidth + extX, -spd_x_max, 0);  
+					_speed.X = Mathf.Clamp(targetPosition.X - centre.X + extX, -_maxSpeed.X, 0);  
 				}
 				else
 				{
-					spd_x = 0;
+					_speed.X = 0;
 				}
-				
-				if (target.object_index == global.player_obj && target.is_grounded)
+
+				Player playerTarget = Player.Players.Contains(Target) ? (Player)Target : null;
+				// TODO: player
+				/*
+				if (playerTarget != null && playerTarget.IsGrounded)
 				{	
-					if (target.is_spinning)
+					if (playerTarget.IsSpinning)
 					{
-						targetY -= (target.radius_y_normal - target.radius_y);
+						targetPosition.Y -= (playerTarget.NormalRadius.Y - playerTarget.InteractData.Radius.Y);
 					}
 				
-					var _limit = spd_y_max;
-					if (abs(target.gsp) < 8)
+					int limit = _maxSpeed.Y;
+					if (Mathf.Abs(playerTarget.GroundSpeed) < 8)
 					{
-						_limit = 6;
+						limit = 6;
 					}
 				
-					spd_y = clamp(targetY - halfHeight, -_limit, _limit);
+					_speed.Y = Mathf.Clamp(targetPosition.Y - centre.Y, -limit, limit);
 				} 
 				else
+				*/
 				{
-					if (targetY > halfHeight + 32)
+					if (targetPosition.Y > centre.Y + 32)
 					{
-						spd_y = clamp(targetY - halfHeight - 32, 0, spd_y_max);  
+						_speed.Y = Mathf.Clamp(targetPosition.Y - centre.Y - 32, 0, _maxSpeed.Y);  
 					}
-					else if (targetY < halfHeight - 32)
+					else if (targetPosition.Y < centre.Y - 32)
 					{ 
-						spd_y = clamp(targetY - halfHeight + 32, -spd_y_max, 0);  
+						_speed.Y = Mathf.Clamp(targetPosition.Y - centre.Y + 32, -_maxSpeed.Y, 0);  
 					} 
 					else
 					{
-						spd_y = 0;
+						_speed.Y = 0;
 					}
 				}
 			}
 			else
 			{
-				spd_x = 0;
-				spd_y = 0;
+				_speed.X = 0;
+				_speed.Y = 0;
 			}
 		
-			if (shake_timer > 0)
+			if (_shakeTimer > 0)
 			{
-				shake_timer--;
+				_shakeTimer--;
 			
-				var _shake_offset = 1;
-				if shake_timer % 2 != 0
-				{
-					_shake_offset = -1;
-				}
-			
-				shake_x = shake_data[ shake_timer       % 31] * _shake_offset;
-				shake_y = shake_data[(shake_timer + 15) % 31] * _shake_offset;
+				int shakeOffset = _shakeTimer % 2 == 0 ? 1 : -1;
+				_shakeOffset.X = ShakeData[_shakeTimer % 31];
+				_shakeOffset.Y = ShakeData[(_shakeTimer + 15) % 31];
+				_shakeOffset *= shakeOffset;
 			}
 			else
 			{
-				shake_x = 0;
-				shake_y = 0;
-			}
-		
-			if (delay_x == 0)
-			{
-				_position.X += spd_x;
-			}
-			else if (delay_x > 0)
-			{
-				delay_x--;
+				_shakeOffset = new Vector2I();
 			}
 			
-			_position.Y += spd_y;
+			switch (_delay.X)
+			{
+				case 0:
+					_position.X += _speed.X * (float)processSpeed;
+					break;
+				case > 0:
+					_delay.X--;
+					break;
+			}
+			
+			_position.Y += _speed.Y * (float)processSpeed;
 		}
 		
 		// Update left boundary
-		if (view_x_min_prev != view_x_min)
+		if (_previousLimit.X != _limit.X)
 		{
-			bound_left = view_x_min;
+			_bound.X = _limit.X;
 		}
-		else if (view_x_min < bound_left)
+		else if (_limit.X < _bound.X)
 		{	
-			if (_position.X >= bound_left)
+			if (_position.X >= _bound.X)
 			{
-				view_x_min = bound_left;
+				_limit.X = _bound.X;
 			}
 			else
 			{
-				if (_position.X >= view_x_min)
+				if (_position.X >= _limit.X)
 				{
-					view_x_min = _position.X;
+					_limit.X = Mathf.RoundToInt(_position.X);
 				}
 				
-				view_x_min = min(view_x_min + boundSpeed, bound_left);
+				_limit.X = Mathf.Min(_limit.X + boundSpeed, _bound.X);
 			}
 		}
-		else if (view_x_min > bound_left)
+		else if (_limit.X > _bound.X)
 		{
-			view_x_min = max(bound_left, view_x_min - boundSpeed);
+			_limit.X = Mathf.Max(_bound.X, _limit.X - boundSpeed);
 		}
 	
 		// Update right boundary
-		if (view_x_max_prev != view_x_max)
+		if (_previousLimit.Z != _limit.Z)
 		{
-			bound_right = view_x_max;
+			_bound.Z = _limit.Z;
 		}
-		else if (view_x_max < bound_right)
+		else if (_limit.Z < _bound.Z)
 		{
-			view_x_max = min(view_x_max + boundSpeed, bound_right);
+			_limit.Z = Mathf.Min(_limit.Z + boundSpeed, _bound.Z);
 		}
-		else if (view_x_max > bound_right)
+		else if (_limit.Z > _bound.Z)
 		{
-			var _width = global.render_width;
+			int width = FrameworkData.ViewSize.X;
 			
-			if (_position.X + _width <= bound_right)
+			if (_position.X + width <= _bound.Z)
 			{
-				view_x_max = bound_right;
+				_limit.Z = _bound.Z;
 			}
 			else
 			{	
-				if (_position.X + _width <= view_x_max)
+				if (_position.X + width <= _limit.Z)
 				{
-					view_x_max = _position.X + _width;	
+					_limit.Z = Mathf.RoundToInt(_position.X + width);	
 				}
 				
-				view_x_max = max(bound_right, view_x_max - boundSpeed);
+				_limit.Z = Mathf.Max(_bound.Z, _limit.Z - boundSpeed);
 			}
 		}
 	
 		// Update top boundary
-		if (view_y_min_prev != view_y_min)
+		if (_previousLimit.Y != _limit.Y)
 		{
-			bound_top = view_y_min;
+			_bound.Y = _limit.Y;
 		}
-		else if (view_y_min < bound_top)
+		else if (_limit.Y < _bound.Y)
 		{
-			if (_position.Y >= bound_top)
+			if (_position.Y >= _bound.Y)
 			{
-				view_y_min = bound_top
+				_limit.Y = _bound.Y;
 			}
 			else
 			{	
-				if (_position.Y >= view_y_min)
+				if (_position.Y >= _limit.Y)
 				{
-					view_y_min = _position.Y
+					_limit.Y = Mathf.RoundToInt(_position.Y);
 				}
 				
-				view_y_min = min(view_y_min + boundSpeed, bound_top);
+				_limit.Y = Mathf.Min(_limit.Y + boundSpeed, _bound.Y);
 			}
 		}
-		else if (view_y_min > bound_top)
+		else if (_limit.Y > _bound.Y)
 		{
-			view_y_min = max(bound_top, view_y_min - boundSpeed);
+			_limit.Y = Mathf.Max(_bound.Y, _limit.Y - boundSpeed);
 		}
 		
 		// Update bottom boundary
-		if (view_y_max_prev != view_y_max)
+		if (_previousLimit.W != _limit.W)
 		{
-			bound_bottom = view_y_max;
+			_bound.W = _limit.W;
 		}
-		else if (view_y_max < bound_bottom)
+		else if (_limit.W < _bound.W)
 		{
-			view_y_max = min(view_y_max + boundSpeed, bound_bottom);
+			_limit.W = Mathf.Min(_limit.W + boundSpeed, _bound.W);
 		}
-		else if (view_y_max > bound_bottom)
+		else if (_limit.W > _bound.W)
 		{
-			var _height = global.render_height;
+			int height = FrameworkData.ViewSize.Y;
 			
-			if (_position.Y + _height <= bound_bottom)
+			if (_position.Y + height <= _bound.W)
 			{
-				view_y_max = bound_bottom;
+				_limit.W = _bound.W;
 			}
 			else
 			{
-				if (_position.Y + _height <= view_y_max)
+				if (_position.Y + height <= _limit.W)
 				{
-					view_y_max = _position.Y + _height;
+					_limit.W = Mathf.RoundToInt(_position.Y + height);
 				}
 				
-				view_y_max = max(bound_bottom, view_y_max - boundSpeed);
+				_limit.W = Mathf.Max(_bound.W, _limit.W - boundSpeed);
 			}
 		}
+
+		_previousLimit = _limit;
+
+		_position.X = Mathf.Clamp(_position.X + _offset.X, _limit.X, _limit.Z - FrameworkData.ViewSize.X);
+		_position.Y = Mathf.Clamp(_position.Y + _offset.Y, _limit.Y, _limit.W - FrameworkData.ViewSize.Y);
+		_position += _shakeOffset;
 		
-		view_x_min_prev = view_x_min;
-		view_x_max_prev = view_x_max;
-		view_y_min_prev = view_y_min;
-		view_y_max_prev = view_y_max;
-		
-		_position.X = clamp(_position.X + offset_x, view_x_min, view_x_max - global.render_width)  + shake_x;
-		_position.Y = clamp(_position.Y + offset_y, view_y_min, view_y_max - global.render_height) + shake_y;
-		
-		camera_set_view_size(instance, global.render_width + RENDER_BUFFER * 2, global.render_height);
-		Position = new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
+		Position = (Vector2I)new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
     }
 }

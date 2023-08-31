@@ -9,8 +9,6 @@ public abstract partial class CommonObject : Node2D
     public InteractData InteractData { get; set; }
     public SolidData SolidData { get; set; }
 
-    protected CommonScene Scene;
-
     static CommonObject()
     {
         Objects = new List<CommonObject>();
@@ -26,22 +24,20 @@ public abstract partial class CommonObject : Node2D
 
     public override void _EnterTree()
     {
-        Scene = (CommonScene)GetTree().CurrentScene;
-        
         Objects.Add(this);
         
-        Scene.BeginStep += BeginStep;
-        Scene.Step += Step;
-        Scene.EndStep += EndStep;
+        FrameworkData.CurrentScene.BeginStep += BeginStep;
+        FrameworkData.CurrentScene.Step += Step;
+        FrameworkData.CurrentScene.EndStep += EndStep;
     }
 
     public override void _ExitTree()
     {
         Objects.Remove(this);
         
-        Scene.BeginStep -= BeginStep;
-        Scene.Step -= Step;
-        Scene.EndStep -= EndStep;
+        FrameworkData.CurrentScene.BeginStep -= BeginStep;
+        FrameworkData.CurrentScene.Step -= Step;
+        FrameworkData.CurrentScene.EndStep -= EndStep;
     }
 
     protected virtual void BeginStep(double processSpeed) {}
