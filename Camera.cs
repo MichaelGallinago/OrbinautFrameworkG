@@ -17,6 +17,7 @@ public partial class Camera : Camera2D
     private Vector2I _maxSpeed;
     private Vector2I _speed;
     private Vector2 _position;
+    private Vector2 _rawPosition;
     private Vector2I _delay;
     private Vector2I _offset;
     private Vector2I _boundSpeed;
@@ -72,7 +73,7 @@ public partial class Camera : Camera2D
 			
 			if (Target != null)
 			{
-				Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_position;
+				Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_rawPosition;
 
 				int extX = FrameworkData.CDCamera ? 0 : 16;
 				
@@ -147,14 +148,22 @@ public partial class Camera : Camera2D
 			switch (_delay.X)
 			{
 				case 0:
-					_position.X += _speed.X * processSpeedF;
+					_rawPosition.X += _speed.X * processSpeedF;
 					break;
 				case > 0:
 					_delay.X--;
 					break;
 			}
 			
-			_position.Y += _speed.Y * processSpeedF;
+			switch (_delay.Y)
+			{
+				case 0:
+					_rawPosition.Y += _speed.Y * processSpeedF;
+					break;
+				case > 0:
+					_delay.Y--;
+					break;
+			}
 		}
 		
 		// Update left boundary
@@ -267,8 +276,8 @@ public partial class Camera : Camera2D
 
 		_previousLimit = _limit;
 
-		_position.X = Mathf.Clamp(_position.X + _offset.X, _limit.X, _limit.Z - FrameworkData.ViewSize.X);
-		_position.Y = Mathf.Clamp(_position.Y + _offset.Y, _limit.Y, _limit.W - FrameworkData.ViewSize.Y);
+		_position.X = Mathf.Clamp(_rawPosition.X + _offset.X, _limit.X, _limit.Z - FrameworkData.ViewSize.X);
+		_position.Y = Mathf.Clamp(_rawPosition.Y + _offset.Y, _limit.Y, _limit.W - FrameworkData.ViewSize.Y);
 		_position += _shakeOffset;
 		
 		Position = (Vector2I)new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
