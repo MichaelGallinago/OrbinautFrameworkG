@@ -16,7 +16,7 @@ public partial class Camera : Camera2D
     
     private Vector2I _maxSpeed;
     private Vector2I _speed;
-    private Vector2 _position;
+    private Vector2I _position;
     private Vector2 _rawPosition;
     private Vector2I _delay;
     private Vector2I _offset;
@@ -275,11 +275,13 @@ public partial class Camera : Camera2D
 		}
 
 		_previousLimit = _limit;
-
-		_position.X = Mathf.Clamp(_rawPosition.X + _offset.X, _limit.X, _limit.Z - FrameworkData.ViewSize.X);
-		_position.Y = Mathf.Clamp(_rawPosition.Y + _offset.Y, _limit.Y, _limit.W - FrameworkData.ViewSize.Y);
+		
+		_position.X = (int)Mathf.Clamp(_rawPosition.X + _offset.X, 
+			_limit.X, _limit.Z - FrameworkData.ViewSize.X);
+		_position.Y = (int)Mathf.Clamp(_rawPosition.Y + _offset.Y, 
+			_limit.Y, _limit.W - FrameworkData.ViewSize.Y);
 		_position += _shakeOffset;
 		
-		Position = (Vector2I)new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
+		Position = new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
     }
 }

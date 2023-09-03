@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public partial class Player : CommonObject
 {
     public static List<CommonObject> Players { get; }
-
+    
     [Export] public PlayerConstants.Type Type;
     
     public bool IsEditMode { get; private set; }
@@ -16,11 +16,6 @@ public partial class Player : CommonObject
     static Player()
     {
         Players = new List<CommonObject>();
-    }
-    
-    public override void _Ready()
-    {
-        RespawnData.ProcessType = Constants.ProcessType.Default;
     }
 
     public override void _EnterTree()
