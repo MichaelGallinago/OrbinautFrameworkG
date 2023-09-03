@@ -1,5 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=11 format=3 uid="uid://bk2gkg61pmtco"]
 
+[ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_18cwq"]
 [ext_resource type="Script" path="res://Stages/TSZ/StageTSZ.cs" id="1_hkdi5"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/camera.tscn" id="1_yqihk"]
@@ -9,7 +10,27 @@
 [ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="4_i6eum"]
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/tsz_background_layer0.png" id="5_gfyke"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w0a6u"]
+shader = ExtResource("1_18cwq")
+shader_parameter/u_bound = null
+shader_parameter/u_UVs1 = null
+shader_parameter/u_texelSize1 = null
+shader_parameter/u_index1 = null
+shader_parameter/u_UVs2 = null
+shader_parameter/u_texelSize2 = null
+shader_parameter/u_index2 = null
+shader_parameter/u_parallaxActive = null
+shader_parameter/u_offset = null
+shader_parameter/u_width = null
+shader_parameter/u_scaling = null
+shader_parameter/u_inclineHeight = null
+shader_parameter/u_inclineStep = null
+shader_parameter/u_height = null
+shader_parameter/u_overlapActive = null
+shader_parameter/u_mapSizeSurf = null
+
 [node name="Node2D" type="Node2D"]
+material = SubResource("ShaderMaterial_w0a6u")
 script = ExtResource("1_hkdi5")
 
 [node name="Camera" parent="." instance=ExtResource("1_yqihk")]
@@ -29,6 +50,7 @@ layer_1/tile_data = PackedInt32Array(4195047, 65536, 268435456, 4195046, 65536, 
 script = ExtResource("2_b03l2")
 
 [node name="Player" parent="." instance=ExtResource("4_i6eum")]
+use_parent_material = true
 position = Vector2(160, 840)
 Type = 4
 

@@ -43,4 +43,10 @@ public abstract partial class CommonObject : Node2D
     protected virtual void BeginStep(double processSpeed) {}
     protected virtual void Step(double processSpeed) {}
     protected virtual void EndStep(double processSpeed) {}
+
+    protected void SetBehaviour(ObjectRespawnData.BehaviourType behaviour)
+    {
+        if (RespawnData.Behaviour == ObjectRespawnData.BehaviourType.Delete) return;
+        RespawnData.Behaviour = behaviour;
+    }
 }

@@ -111,10 +111,11 @@ public static class PlayerConstants
         Grab
     }
 
-    /*public enum GravityType : char
+    public enum RestartState : byte
     {
-        
+        GameOver,
+        ResetLevel,
+        RestartStage,
+        RestartGame
     }
-    */
-    
 }

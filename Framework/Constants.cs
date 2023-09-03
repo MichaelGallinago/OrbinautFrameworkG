@@ -50,15 +50,6 @@ public static class Constants
 		ItemBox
 	}
 
-	public enum ProcessType : byte
-	{
-		Active,
-		Reset,
-		Pause,
-		Delete,
-		Default
-	}
-
 	public enum DepthType : sbyte
 	{
 		Highest = -45,

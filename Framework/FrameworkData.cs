@@ -16,6 +16,7 @@ public static class FrameworkData
     public static Vector2I ViewSize { get; set; }
     public static PlayerConstants.Type PlayerType { get; set; }
     public static PlayerConstants.Type PlayerAIType { get; set; }
+    public static int RotationMode { get; set; }
 
     static FrameworkData()
     {
@@ -35,5 +36,8 @@ public static class FrameworkData
 
         PlayerType = PlayerConstants.Type.Sonic;
         PlayerAIType = PlayerConstants.Type.Tails;
+        
+        //TODO: Ask Triangly
+        RotationMode = 1;
     }
 }
