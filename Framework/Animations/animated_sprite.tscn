@@ -1,8 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://cym44tqrtkdst"]
+[gd_scene load_steps=3 format=3 uid="uid://bgtjolasl4t03"]
 
 [ext_resource type="Script" path="res://Framework/Animations/AnimatedSprite.cs" id="1_00wlb"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_e26w3"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 0.0
+}]
 
 [node name="AnimatedSprite" type="AnimatedSprite2D"]
 sprite_frames = SubResource("SpriteFrames_e26w3")

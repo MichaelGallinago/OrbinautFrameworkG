@@ -8,7 +8,8 @@ public abstract partial class CommonObject : Node2D
     public ObjectRespawnData RespawnData { get; set; }
     public InteractData InteractData { get; set; }
     public SolidData SolidData { get; set; }
-
+    public List<AnimatedSprite> Sprites { get; set; }
+ 
     static CommonObject()
     {
         Objects = new List<CommonObject>();
@@ -20,6 +21,7 @@ public abstract partial class CommonObject : Node2D
         RespawnData = new ObjectRespawnData(Position, Scale, Visible, 0);
         InteractData = new InteractData();
         SolidData = new SolidData();
+        Sprites = new List<AnimatedSprite>();
     }
 
     public override void _EnterTree()

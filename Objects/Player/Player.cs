@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class Player : CommonObject
 {
@@ -129,8 +130,6 @@ public partial class Player : CommonObject
         Facing = Constants.Direction.Positive;
         Animation = PlayerConstants.Animation.Idle;
         AirTimer = 1800f;
-        //TODO:
-        //LifeRewards = 
         CpuState = PlayerConstants.CpuState.Main;
         RestartState = PlayerConstants.RestartState.GameOver;
         InputPress = new Buttons();
@@ -143,56 +142,45 @@ public partial class Player : CommonObject
 			AddChild(tail);
 		}
 		
-		if (array_length(global.giant_ring_data) > 0)
+		if (FrameworkData.GiantRingData != null)
 		{
-			x = global.giant_ring_data[0];
-			y = global.giant_ring_data[1];
+			Position = (Vector2)FrameworkData.GiantRingData;
 		}
 		else if (Id == 0)
 		{
 			// TODO: Respawn CPU on the checkpoint
 			
-			if (array_length(global.checkpoint_data) > 0)
+			if (FrameworkData.CheckpointData != null)
 			{
-				x = global.checkpoint_data[0];
-				y = global.checkpoint_data[1] - radius_y;
+				Vector2I position = FrameworkData.CheckpointData.Position;
+				position.Y -= Radius.Y;
+				Position = position;
 			}
 			
-			if array_length(global.player_backup_data) > 0
+			if (FrameworkData.PlayerBackupData != null)
 			{
-				ring_count	 = global.player_backup_data[0];
-				barrier_type = global.player_backup_data[1];
+				RingCount = FrameworkData.PlayerBackupData.RingCount;
+				BarrierType = FrameworkData.PlayerBackupData.BarrierType;
 			}
 		}
 		
-		if player_id == 0
+		if (Id == 0)
 		{
-			if c_engine.camera.target == noone
+			if (FrameworkData.SavedBarrier != Constants.Barrier.None)
 			{
-				c_engine.camera.target = id;
-				c_engine.camera.view_x = x - global.game_width  / 2;
-				c_engine.camera.view_y = y - global.game_height / 2 + 16;
-			}
-			
-			if global.saved_barrier != 0
-			{
-				barrier_type = global.saved_barrier;
-			
-				instance_create(x, y, obj_barrier, -1,
-				{
-					Target_Player: id
-				});
+				BarrierType = FrameworkData.SavedBarrier;
+				AddChild(new Barrier(this));
 			}
 		
-			global.saved_barrier = 0;
-			global.saved_rings = 0;
+			FrameworkData.SavedBarrier = 0;
+			FrameworkData.SavedRings = 0;
 		}
 		
-		score_count = global.saved_score;
-		ring_count = global.saved_rings;
-		life_count = global.saved_lives;
+		ScoreCount = FrameworkData.SavedScore;
+		RingCount = FrameworkData.SavedRings;
+		LifeCount = FrameworkData.SavedLives;
 		
-		life_rewards = [(ring_count div 100 * 100) + 100, (score_count div 50000 * 50000) + 50000];
+		LifeRewards = new[] { RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000 };
     }
 
     public override void _EnterTree()
@@ -200,24 +188,36 @@ public partial class Player : CommonObject
         base._EnterTree();
         Id = Players.Count;
         Players.Add(this);
+        FrameworkData.CurrentScene.AddPlayerStep(this);
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
         Players.Remove(this);
+        FrameworkData.CurrentScene.RemovePlayerStep(this);
+        if (Players.Count == 0 || !IsCpuRespawn) return;
+        var newPlayer = new Player()
+        {
+	        Type = Type,
+	        Position = Players.First().Position
+        };
+
+        newPlayer.PlayerStep(FrameworkData.ProcessSpeed);
     }
 
-    protected override void BeginStep(double processSpeed)
+    public void PlayerStep(double processSpeed)
     {
-        EditModeObjects = new List<CommonObject>
-        { 
-            new Ring(), new GiantRing(), new ItemBox(), new Spring(), new Motobug(), new Signpost()
-        };
+	    
     }
 
     private void EditModeInit()
     {
+	    EditModeObjects = new List<CommonObject>
+	    { 
+		    new Ring(), new GiantRing(), new ItemBox(), new Spring(), new Motobug(), new Signpost()
+	    };
+	    
         switch (FrameworkData.CurrentScene)
         {
             case StageTSZ:

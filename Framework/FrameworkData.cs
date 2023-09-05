@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public static class FrameworkData
 {
+    public static double ProcessSpeed { get; set; }
+    
     public static List<KeyboardControl> KeyboardControl { get; set; }
     public static bool GamepadVibration { get; set; }
     public static TileData TileData { get; }
@@ -12,11 +14,17 @@ public static class FrameworkData
     public static bool UpdateGraphics { get; set; }
     public static bool UpdateObjects { get; set; }
     public static CheckpointData CheckpointData { get; set; }
+    public static Vector2I? GiantRingData { get; set; }
+    public static PlayerBackupData PlayerBackupData { get; set; }
     public static CommonScene CurrentScene { get; set; }
     public static Vector2I ViewSize { get; set; }
     public static PlayerConstants.Type PlayerType { get; set; }
     public static PlayerConstants.Type PlayerAIType { get; set; }
     public static int RotationMode { get; set; }
+    public static uint SavedScore { get; set; }
+    public static uint SavedRings { get; set; }
+    public static uint SavedLives { get; set; }
+    public static Constants.Barrier SavedBarrier { get; set; }
 
     static FrameworkData()
     {
@@ -37,7 +45,6 @@ public static class FrameworkData
         PlayerType = PlayerConstants.Type.Sonic;
         PlayerAIType = PlayerConstants.Type.Tails;
         
-        //TODO: Ask Triangly
         RotationMode = 1;
     }
 }

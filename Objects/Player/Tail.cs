@@ -13,6 +13,12 @@ public partial class Tail : CommonObject
     
     public override void _Ready()
     {
+	    if (Sprite == null)
+	    {
+		    QueueFree();
+		    return;
+	    }
+	    
         SetBehaviour(ObjectRespawnData.BehaviourType.Unique);
     }
 
@@ -31,6 +37,7 @@ public partial class Tail : CommonObject
 			case PlayerConstants.Animation.Duck:
 			case PlayerConstants.Animation.LookUp:
 				// TODO: tail animation
+				
 				//ani_set(spr_tails_tail_idle, 8);
 				break;
 			case PlayerConstants.Animation.FlyLift:

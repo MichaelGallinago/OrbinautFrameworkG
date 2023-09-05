@@ -40,7 +40,18 @@ public partial class Camera : Camera2D
             LimitBottom = FrameworkData.CheckpointData.BottomCameraBound;
         }
     }
-    
+
+    public override void _Ready()
+    {
+	    if (Target != null || Player.Players.Count == 0) return;
+		var playerTarget = (Player)Player.Players.First();
+		Target = playerTarget;
+		_position = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
+		_position.Y += 16;
+		
+		_rawPosition = _position;
+    }
+
     public override void _EnterTree()
     {
         FrameworkData.CurrentScene.EndStep += EndStep;
@@ -53,8 +64,6 @@ public partial class Camera : Camera2D
 
     private void EndStep(double processSpeed)
     {
-	    // TODO: remove this
-	    Target = Player.Players[0];
 	    var processSpeedF = (float)processSpeed;
 	    var boundSpeed = 0;
 		
@@ -91,25 +100,17 @@ public partial class Camera : Camera2D
 				}
 
 				Player playerTarget = Player.Players.Contains(Target) ? (Player)Target : null;
-				// TODO: player
-				/*
-				if (playerTarget != null && playerTarget.IsGrounded)
+				if (playerTarget is { IsGrounded: true })
 				{	
 					if (playerTarget.IsSpinning)
 					{
-						targetPosition.Y -= (playerTarget.NormalRadius.Y - playerTarget.InteractData.Radius.Y);
+						targetPosition.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
 					}
-				
-					int limit = _maxSpeed.Y;
-					if (Mathf.Abs(playerTarget.GroundSpeed) < 8)
-					{
-						limit = 6;
-					}
-				
+					
+					int limit = Mathf.Abs(playerTarget.GroundSpeed) < 8 ? 6 : _maxSpeed.Y;
 					_speed.Y = Mathf.Clamp(targetPosition.Y - centre.Y, -limit, limit);
 				} 
 				else
-				*/
 				{
 					if (targetPosition.Y > centre.Y + 32)
 					{
@@ -133,12 +134,21 @@ public partial class Camera : Camera2D
 		
 			if (_shakeTimer > 0)
 			{
+				_shakeOffset.X = _shakeOffset.X switch
+				{
+					0 => _shakeTimer,
+					< 0 => -1 - _shakeOffset.X,
+					_ => -_shakeOffset.X
+				};
+
+				_shakeOffset.Y = _shakeOffset.Y switch
+				{
+					0 => _shakeTimer,
+					< 0 => -1 - _shakeOffset.Y,
+					_ => -_shakeOffset.Y
+				};
+
 				_shakeTimer--;
-			
-				int shakeOffset = _shakeTimer % 2 == 0 ? 1 : -1;
-				_shakeOffset.X = ShakeData[_shakeTimer % 31];
-				_shakeOffset.Y = ShakeData[(_shakeTimer + 15) % 31];
-				_shakeOffset *= shakeOffset;
 			}
 			else
 			{
