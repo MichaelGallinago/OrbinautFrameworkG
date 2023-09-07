@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq;
 
 public partial class Tail : CommonObject
 {
@@ -13,13 +14,7 @@ public partial class Tail : CommonObject
     
     public override void _Ready()
     {
-	    if (Sprite == null)
-	    {
-		    QueueFree();
-		    return;
-	    }
-	    
-        SetBehaviour(ObjectRespawnData.BehaviourType.Unique);
+	    SetBehaviour(ObjectRespawnData.BehaviourType.Unique);
     }
 
     protected override void Step(double processSpeed)
@@ -36,17 +31,14 @@ public partial class Tail : CommonObject
 			case PlayerConstants.Animation.Idle:
 			case PlayerConstants.Animation.Duck:
 			case PlayerConstants.Animation.LookUp:
-				// TODO: tail animation
-				
-				//ani_set(spr_tails_tail_idle, 8);
+				Sprite.SetAnimation("idle", new[]{8});
 				break;
 			case PlayerConstants.Animation.FlyLift:
 			case PlayerConstants.Animation.Fly:
 			case PlayerConstants.Animation.FlyTired:
 				int speed = Target.Speed.Y >= 0f || Target.Animation == PlayerConstants.Animation.FlyTired ? 2 : 1;
-				// TODO: tail animation 2
-				//ani_set(spr_tails_tail_fly);
-				//ani_upd_duration(_spd);
+				Sprite.SetAnimation("fly");
+				Sprite.UpdateDuration(new[]{speed});
 				break;
 			case PlayerConstants.Animation.Push:
 			case PlayerConstants.Animation.Skid:
@@ -66,13 +58,12 @@ public partial class Tail : CommonObject
 					offsetX -= 7;
 					offsetY -= 5;
 				}
-				// TODO: tail animation 3
-				//sprite_set_offset(spr_tails_tail, offsetX, offsetY);
-				//ani_set(spr_tails_tail, 4);
+
+				Sprite.Offset = new Vector2(offsetX, offsetY);
+				Sprite.SetAnimation("tail", new[]{4});
 				break;
 			default:
-				// TODO: tail animation 4
-				//ani_set(spr_tails_tail_hidden);
+				Sprite.SetAnimation("hidden");
 				break;
 		}
 		
@@ -108,7 +99,7 @@ public partial class Tail : CommonObject
 				//TODO: check Atan2 2
 				Angle = Mathf.RadToDeg(Mathf.Atan2(Target.Speed.Y, Target.Speed.X));
 				
-				if (Target.Facing == Constants.Direction.Negative)
+				if (Target.Scale.X < 0)
 				{
 					Angle += 180f;
 				}

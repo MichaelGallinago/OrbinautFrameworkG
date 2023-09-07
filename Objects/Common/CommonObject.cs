@@ -8,7 +8,7 @@ public abstract partial class CommonObject : Node2D
     public ObjectRespawnData RespawnData { get; set; }
     public InteractData InteractData { get; set; }
     public SolidData SolidData { get; set; }
-    public List<AnimatedSprite> Sprites { get; set; }
+    public AnimatedSprite Sprite { get; set; }
  
     static CommonObject()
     {
@@ -21,34 +21,38 @@ public abstract partial class CommonObject : Node2D
         RespawnData = new ObjectRespawnData(Position, Scale, Visible, 0);
         InteractData = new InteractData();
         SolidData = new SolidData();
-        Sprites = new List<AnimatedSprite>();
     }
 
     public override void _EnterTree()
     {
         Objects.Add(this);
         
-        FrameworkData.CurrentScene.BeginStep += BeginStep;
-        FrameworkData.CurrentScene.Step += Step;
-        FrameworkData.CurrentScene.EndStep += EndStep;
+        FrameworkData.CurrentScene.EarlyUpdate += BeginStep;
+        FrameworkData.CurrentScene.Update += Step;
+        FrameworkData.CurrentScene.LateUpdate += EndStep;
     }
 
     public override void _ExitTree()
     {
         Objects.Remove(this);
         
-        FrameworkData.CurrentScene.BeginStep -= BeginStep;
-        FrameworkData.CurrentScene.Step -= Step;
-        FrameworkData.CurrentScene.EndStep -= EndStep;
+        FrameworkData.CurrentScene.EarlyUpdate -= BeginStep;
+        FrameworkData.CurrentScene.Update -= Step;
+        FrameworkData.CurrentScene.LateUpdate -= EndStep;
     }
 
     protected virtual void BeginStep(double processSpeed) {}
     protected virtual void Step(double processSpeed) {}
     protected virtual void EndStep(double processSpeed) {}
 
-    protected void SetBehaviour(ObjectRespawnData.BehaviourType behaviour)
+    public void SetBehaviour(ObjectRespawnData.BehaviourType behaviour)
     {
         if (RespawnData.Behaviour == ObjectRespawnData.BehaviourType.Delete) return;
         RespawnData.Behaviour = behaviour;
+    }
+
+    public void ResetZIndex()
+    {
+        ZIndex = RespawnData.ZIndex;
     }
 }

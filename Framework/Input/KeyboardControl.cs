@@ -10,8 +10,9 @@ public struct KeyboardControl
     public readonly Key B;
     public readonly Key C;
     public readonly Key Start;
+    public readonly Key Debug;
 
-    public KeyboardControl(Key up, Key down, Key left, Key right, Key a, Key b, Key c, Key start)
+    public KeyboardControl(Key up, Key down, Key left, Key right, Key a, Key b, Key c, Key start, Key debug)
     {
         Up = up;
         Down = down;
@@ -21,5 +22,6 @@ public struct KeyboardControl
         B = b;
         C = c;
         Start = start;
+        Debug = debug;
     }
 }

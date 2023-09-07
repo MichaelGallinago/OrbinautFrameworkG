@@ -5,6 +5,10 @@ using System.Linq;
 
 public partial class Player : CommonObject
 {
+	private const byte EditModeAccelerationMultiplier = 4;
+	private const float EditModeAcceleration = 0.046875f;
+	private const byte EditModeSpeedLimit = 16;
+	
     public static List<CommonObject> Players { get; }
     
     [Export] public PlayerConstants.Type Type;
@@ -34,6 +38,7 @@ public partial class Player : CommonObject
     public bool IsDead { get; set; }
     public bool IsOnObject { get; set; }
     public bool IsSuper { get; set; }
+    public bool IsInvincible { get; set; }
     public int SuperValue { get; set; }
 
     public PlayerConstants.Action Action { get; set; }
@@ -87,7 +92,7 @@ public partial class Player : CommonObject
     public bool IsEditMode { get; private set; }
     public int EditModeIndex { get; private set; }
     public float EditModeSpeed { get; private set; }
-    public List<CommonObject> EditModeObjects { get; private set; }
+    public List<Type> EditModeObjects { get; private set; }
     
     static Player()
     {
@@ -108,10 +113,6 @@ public partial class Player : CommonObject
 				RadiusNormal = new Vector2I(9, 16);
 				RadiusSpin = new Vector2I(7, 12);
 				break;
-			case PlayerConstants.Type.Sonic:
-			case PlayerConstants.Type.Knuckles:
-			case PlayerConstants.Type.Global:
-			case PlayerConstants.Type.GlobalAI:
 			default:
 				RadiusNormal = new Vector2I(9, 19);
 				RadiusSpin = new Vector2I(7, 14);
@@ -195,6 +196,10 @@ public partial class Player : CommonObject
     {
         base._ExitTree();
         Players.Remove(this);
+        for (int i = Id; i < Players.Count; i++)
+        {
+	        ((Player)Players[i]).Id--;
+        }
         FrameworkData.CurrentScene.RemovePlayerStep(this);
         if (Players.Count == 0 || !IsCpuRespawn) return;
         var newPlayer = new Player()
@@ -208,25 +213,203 @@ public partial class Player : CommonObject
 
     public void PlayerStep(double processSpeed)
     {
+	    UpdateInput();
+
+	    if (ProcessEditMode((float)processSpeed)) return;
 	    
     }
+    
+    public void SetInput(Buttons inputPress, Buttons inputDown)
+    {
+	    InputPress = inputPress;
+	    InputDown = inputDown;
+    }
 
+    public void ResetGravity()
+    {
+	    Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
+    }
+    
+    public void ResetState()
+    {
+	    switch (Action)
+	    {
+		    //TODO: audio
+		    case PlayerConstants.Action.PeelOut:
+				//audio_stop_sfx(sfx_charge2);
+				break;
+		
+		    case PlayerConstants.Action.Flight:
+			    //audio_stop_sfx(sfx_flight);
+				//audio_stop_sfx(sfx_flight2);
+			    break;
+	    }
+	
+	    IsHurt = false;
+	    IsJumping = false;
+	    IsSpinning = false;
+	    IsPushing = false;
+	    IsGrounded = false;
+	    IsOnObject = false;
+	
+	    StickToConvex = false;
+	    GroundMode = 0;
+	
+	    Action = PlayerConstants.Action.None;
+	
+	    Radius = RadiusNormal;
+    }
+    
     private void EditModeInit()
     {
-	    EditModeObjects = new List<CommonObject>
+	    EditModeObjects = new List<Type>
 	    { 
-		    new Ring(), new GiantRing(), new ItemBox(), new Spring(), new Motobug(), new Signpost()
+		    typeof(Ring), typeof(GiantRing), typeof(ItemBox), typeof(Spring), typeof(Motobug), typeof(Signpost)
 	    };
 	    
         switch (FrameworkData.CurrentScene)
         {
             case StageTSZ:
                 // TODO: debug objects
-                EditModeObjects.AddRange(new List<CommonObject>
+                EditModeObjects.AddRange(new List<Type>
                 {
-                    //obj_platform_swing_tsz, obj_platform_tsz, obj_falling_floor_tsz, obj_block_tsz
+                    //typeof(obj_platform_swing_tsz), typeof(obj_platform_tsz), typeof(obj_falling_floor_tsz), typeof(obj_block_tsz)
                 });
                 break;
         }
+    }
+
+    private void UpdateInput()
+    {
+	    if (Id >= InputUtilities.DeviceCount)
+	    {
+		    SetInput(new Buttons(), new Buttons());
+		    return;
+	    }
+	    
+	    SetInput(InputUtilities.Press[Id], InputUtilities.Down[Id]);
+    }
+
+    private bool ProcessEditMode(float processSpeed)
+    {
+	    if (Id > 0 || !(FrameworkData.PlayerEditMode || FrameworkData.DeveloperMode)) return false;
+
+	    var debugButton = false;
+		
+		// If in developer mode, remap debug button to Spacebar
+		if (FrameworkData.DeveloperMode)
+		{
+			debugButton = InputUtilities.DebugButtonPress;
+			
+			if (IsEditMode)
+			{
+				debugButton = debugButton || InputPress.B;
+			}
+		}
+		else
+		{
+			debugButton = InputPress.B;
+		}
+		
+		if (debugButton)
+		{
+			if (!IsEditMode)
+			{
+				if (FrameworkData.CurrentScene.IsStage)
+				{
+					//TODO: audio
+					//stage_reset_bgm();
+				}
+				
+				ResetGravity();
+				ResetState();
+				ResetZIndex();
+
+				FrameworkData.UpdateGraphics = true;
+				FrameworkData.UpdateObjects = true;
+				FrameworkData.UpdateTimer = true;
+				FrameworkData.AllowPause = true;
+				
+				ObjectInteraction = false;
+				
+				EditModeSpeed = 0;
+				IsEditMode = true;
+				
+				Visible = true;
+			}
+			else
+			{
+				Speed = new Vector2();
+				GroundSpeed = 0f;
+
+				Animation = PlayerConstants.Animation.Move;
+				
+				ObjectInteraction = true;
+				IsEditMode = false;
+				IsDead = false;
+			}
+		}
+		
+		// Continue if Edit mode is enabled
+		if (!IsEditMode) return false;
+
+		// Update speed and position (move faster if in developer mode)
+		if (InputDown.Up || InputDown.Down || InputDown.Left || InputDown.Right)
+		{
+			EditModeSpeed = Mathf.Min(EditModeSpeed + (FrameworkData.DeveloperMode ? 
+				EditModeAcceleration * EditModeAccelerationMultiplier : EditModeAcceleration), EditModeSpeedLimit);
+
+			Vector2 position = Position;
+
+			if (InputDown.Up)
+			{
+				position.Y -= EditModeSpeed * processSpeed;
+			}
+			
+			if (InputDown.Down)
+			{
+				position.Y += EditModeSpeed * processSpeed;
+			}
+			
+			if (InputDown.Left)
+			{
+				position.X -= EditModeSpeed * processSpeed;
+			}
+			
+			if (InputDown.Right)
+			{
+				position.X += EditModeSpeed * processSpeed;
+			}
+
+			Position = position;
+		}
+		else
+		{
+			EditModeSpeed = 0;
+		}
+
+		if (InputDown.A && InputPress.C)
+		{
+			if (--EditModeIndex < 0)
+			{
+				EditModeIndex = EditModeObjects.Count - 1;
+			}
+		}
+		else if (InputPress.A)
+		{
+			if (++EditModeIndex >= EditModeObjects.Count)
+			{
+				EditModeIndex = 0;
+			}
+		}
+		else if (InputPress.C)
+		{
+			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) is not CommonObject newObject) return true;
+			newObject.Scale = new Vector2(newObject.Scale.X * (sbyte)Facing, newObject.Scale.Y);
+			newObject.SetBehaviour(ObjectRespawnData.BehaviourType.Delete);
+			FrameworkData.CurrentScene.AddChild(newObject);
+		}
+		
+		return true;
     }
 }

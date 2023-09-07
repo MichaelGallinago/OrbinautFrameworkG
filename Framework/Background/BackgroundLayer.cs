@@ -30,12 +30,12 @@ public partial class BackgroundLayer : Sprite2D
 
     public override void _EnterTree()
     {
-        FrameworkData.CurrentScene.EndStep += EndStep;
+        FrameworkData.CurrentScene.LateUpdate += EndStep;
     }
 
     public override void _ExitTree()
     {
-        FrameworkData.CurrentScene.EndStep -= EndStep;
+        FrameworkData.CurrentScene.LateUpdate -= EndStep;
     }
 
     private void EndStep(double processSpeed)

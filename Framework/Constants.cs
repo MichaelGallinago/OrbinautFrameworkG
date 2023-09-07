@@ -52,12 +52,13 @@ public static class Constants
 
 	public enum DepthType : sbyte
 	{
-		Highest = -45,
-		Above = -25,
-		Default = 0,
-		Enemy = 10,
-		Below = 25,
-		Lowest = 45
+		Background = -128,
+		Level = 0,
+		Lowest,
+		Below,
+		Enemy,
+		Default,
+		Above,
 	}
 
 	public enum FadeState : byte

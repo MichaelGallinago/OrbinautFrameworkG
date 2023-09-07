@@ -16,14 +16,14 @@ public class ObjectRespawnData
     public bool IsVisible { get; }
     public Vector2 Position { get; }
     public Vector2 Scale { get; }
-    public int Depth { get; }
+    public int ZIndex { get; }
 
-    public ObjectRespawnData(Vector2 position, Vector2 scale, bool isVisible, int depth)
+    public ObjectRespawnData(Vector2 position, Vector2 scale, bool isVisible, int zIndex)
     {
         Behaviour = BehaviourType.Active;
         Position = position;
         Scale = scale;
         IsVisible = isVisible;
-        Depth = depth;
+        ZIndex = zIndex;
     }
 }

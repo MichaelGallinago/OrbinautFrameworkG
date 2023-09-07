@@ -21,7 +21,6 @@ material = SubResource("ShaderMaterial_da42i")
 script = ExtResource("1_5grtg")
 
 [node name="SprSonicDashStrip4" type="Sprite2D" parent="."]
-visible = false
 material = SubResource("ShaderMaterial_e3v0d")
 position = Vector2(139, 77)
 texture = ExtResource("3_5ip3c")

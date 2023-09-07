@@ -13,6 +13,8 @@ public static class FrameworkData
     public static bool CDCamera { get; set; }
     public static bool UpdateGraphics { get; set; }
     public static bool UpdateObjects { get; set; }
+    public static bool UpdateTimer { get; set; }
+    public static bool AllowPause { get; set; }
     public static CheckpointData CheckpointData { get; set; }
     public static Vector2I? GiantRingData { get; set; }
     public static PlayerBackupData PlayerBackupData { get; set; }
@@ -25,17 +27,23 @@ public static class FrameworkData
     public static uint SavedRings { get; set; }
     public static uint SavedLives { get; set; }
     public static Constants.Barrier SavedBarrier { get; set; }
+    public static bool PlayerEditMode { get; set; }
+    public static bool DeveloperMode { get; set; }
 
     static FrameworkData()
     {
         KeyboardControl = new List<KeyboardControl>
         {
-            new(Key.Up, Key.Down, Key.Left, Key.Right, Key.A, Key.S, Key.D, Key.Enter),
-            new(Key.None, Key.None, Key.None, Key.None, Key.Z, Key.X, Key.C, Key.Space)
+            new(Key.Up, Key.Down, Key.Left, Key.Right, 
+                Key.A, Key.S, Key.D, Key.Enter, Key.Space),
+            new(Key.None, Key.None, Key.None, Key.None, 
+                Key.Z, Key.X, Key.C, Key.None, Key.None)
         };
         GamepadVibration = true;
         UpdateGraphics = true;
         UpdateObjects = true;
+        UpdateTimer = true;
+        AllowPause = true;
         CDTileFixes = true;
         CDCamera = true;
         TileData = CollisionUtilities.LoadTileDataBinary(
@@ -46,5 +54,7 @@ public static class FrameworkData
         PlayerAIType = PlayerConstants.Type.Tails;
         
         RotationMode = 1;
+
+        DeveloperMode = true;
     }
 }

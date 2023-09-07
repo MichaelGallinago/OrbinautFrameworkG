@@ -5,28 +5,42 @@ using System.Linq;
 public static class InputUtilities
 {
     private const byte KeyboardId = 0;
+    private const byte BaseDeviceCount = 1;
 
-    public static Dictionary<int, Buttons> Down { get; }
-    public static Dictionary<int, Buttons> Press { get; }
-    public static Dictionary<int, bool> BlockInput { get; }
+    public static List<Buttons> Down { get; }
+    public static List<Buttons> Press { get; }
+    public static List<bool> BlockInput { get; }
+    public static int DeviceCount { get; private set; }
+    
+    public static bool DebugButtonDown { get; private set; }
+    public static bool DebugButtonPress { get; private set; }
 
     private static Godot.Collections.Array<int> _gamepads;
 
     static InputUtilities()
     {
-        Down = new Dictionary<int, Buttons> { { KeyboardId, new Buttons() } };
-        Press = new Dictionary<int, Buttons> { { KeyboardId, new Buttons() } };
-        BlockInput = new Dictionary<int, bool> { { KeyboardId, false } };
+        Down = new List<Buttons>();
+        Press = new List<Buttons>();
+        BlockInput = new List<bool>();
+        for (var i = 0; i < BaseDeviceCount; i++)
+        {
+            Down.Add(new Buttons());
+            Press.Add(new Buttons());
+            BlockInput.Add(false);
+        }
+        DeviceCount = BaseDeviceCount;
     }
 
     public static void Process()
     {
         _gamepads = Input.GetConnectedJoypads();
-        foreach (int device in Down.Keys.Where(device => !(device == KeyboardId || _gamepads.Contains(device))))
+        for (var device = 0; device < DeviceCount; device++)
         {
-            Down.Remove(device);
-            Press.Remove(device);
-            BlockInput.Remove(device);
+            if (device == KeyboardId || _gamepads.Contains(device)) continue;
+            Down.RemoveAt(device);
+            Press.RemoveAt(device);
+            BlockInput.RemoveAt(device);
+            DeviceCount--;
         }
 
         var isKeyboardOnly = true;
@@ -41,9 +55,10 @@ public static class InputUtilities
                     break;
             }
 
-            Down.TryAdd(device, new Buttons());
-            Press.TryAdd(device, new Buttons());
-            BlockInput.TryAdd(device, false);
+            Down.Add(new Buttons());
+            Press.Add(new Buttons());
+            BlockInput.Add(false);
+            DeviceCount++;
             DeviceProcess(device, false);
         }
 
@@ -91,6 +106,7 @@ public static class InputUtilities
 
     private static void KeyboardProcess(ref Buttons down)
     {
+        bool previousDebugButtonDownState = DebugButtonDown;
         foreach (KeyboardControl control in FrameworkData.KeyboardControl)
         {
             down.Up = down.Up || Input.IsPhysicalKeyPressed(control.Up);
@@ -101,7 +117,10 @@ public static class InputUtilities
             down.B = down.B || Input.IsPhysicalKeyPressed(control.B);
             down.C = down.C || Input.IsPhysicalKeyPressed(control.C);
             down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
+            DebugButtonDown = Input.IsPhysicalKeyPressed(control.Debug);
         }
+
+        DebugButtonPress = !previousDebugButtonDownState && DebugButtonDown;
     }
 
     private static void GamepadProcess(int device, ref Buttons down)

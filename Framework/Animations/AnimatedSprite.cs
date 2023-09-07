@@ -27,15 +27,23 @@ public partial class AnimatedSprite : AnimatedSprite2D
         Order = Array.Empty<int>();
         RespawnData = new AnimationRespawnData(Frame, Animation, Visible);
     }
-    
+
     public override void _EnterTree()
     {
         Sprites.Add(this);
+        if (GetParent() is CommonObject { Sprite: null } commonObject)
+        {
+            commonObject.Sprite = this;
+        }
     }
 
     public override void _ExitTree()
     {
         Sprites.Remove(this);
+        if (GetParent() is CommonObject commonObject && commonObject.Sprite == this)
+        {
+            commonObject.Sprite = null;
+        }
     }
 
     public void SetAnimation(StringName animation, int[] duration = null, 
