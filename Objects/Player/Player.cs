@@ -213,9 +213,13 @@ public partial class Player : CommonObject
 
     public void PlayerStep(double processSpeed)
     {
+	    // Process player input
 	    UpdateInput();
 
+	    // Process edit mode. Returns true if player is in edit mode state
 	    if (ProcessEditMode((float)processSpeed)) return;
+	    
+	    // Process AI code. Returns true if player is deleted
 	    
     }
     
@@ -411,5 +415,24 @@ public partial class Player : CommonObject
 		}
 		
 		return true;
+    }
+
+    private void ProcessAI()
+    {
+	    
+    }
+
+    private void RespawnAI()
+    {
+	    if (Sprite != null && !Sprite.CheckInView())
+	    {
+		    if (++CpuTimer < 300) return;
+		    IsCpuRespawn = true;
+		    QueueFree();
+	    }
+	    else
+	    {
+		    CpuTimer = 0;
+	    }
     }
 }

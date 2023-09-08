@@ -55,6 +55,7 @@ position = Vector2(160, 840)
 Type = 4
 
 [node name="Background" type="ParallaxBackground" parent="."]
+layer = -128
 script = ExtResource("3_i0vlt")
 
 [node name="BackgroundLayer" parent="Background" instance=ExtResource("4_e23pr")]

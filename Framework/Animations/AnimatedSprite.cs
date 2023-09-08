@@ -96,6 +96,14 @@ public partial class AnimatedSprite : AnimatedSprite2D
         Duration = duration;
     }
 
+    public bool CheckInView()
+    {
+        Vector2 view = Camera.SelectedCamera.Position;
+        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
+        return Position.X >= view.X - size.X && Position.X <= view.X + FrameworkData.ViewSize.X + size.X &&
+               Position.Y >= view.Y - size.Y && Position.Y <= view.Y + FrameworkData.ViewSize.X + size.Y;
+    }
+
     private void SetAnimationData(StringName animation, int[] duration, int[] order)
     {
         Animation = animation;
