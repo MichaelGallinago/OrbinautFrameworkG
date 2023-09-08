@@ -241,82 +241,7 @@ public partial class Player : CommonObject
 			UpdateParameters();
 			
 			// Run a repeat loop once, so we can exit from a sub-state if needed
-			repeat(1)
-			{
-				if is_hurt
-				{
-					scr_player_level_bound();
-					scr_player_position();
-					scr_player_collision_air();
-					scr_player_land();
-				}
-				else if action != ACTION_OBJ_CONTROL and action != ACTION_TRANSFORM
-				{
-					if !is_grounded
-					{
-						if scr_player_jump()
-						{
-							break;
-						}
-						
-						scr_player_dropdash();
-						scr_player_flight();
-						scr_player_hammerspin();
-						scr_player_hammerrush();
-						scr_player_movement_air();	
-						scr_player_level_bound();
-						scr_player_position();
-						scr_player_collision_air();
-						scr_player_land();
-						scr_player_carry();
-					}
-					
-					else if !is_spinning
-					{
-						if scr_player_spindash() 
-						{
-							break;
-						}
-						if scr_player_peelout() 
-						{
-							break;
-						}
-						if scr_player_jump_start()
-						{
-							break;
-						}
-							
-						scr_player_slope_resist();
-						scr_player_hammerrush();
-						scr_player_movement_ground();
-						scr_player_balance();
-						scr_player_collision_ground_walls();
-						scr_player_roll_start();
-						scr_player_level_bound();
-						scr_player_position();
-						scr_player_collision_ground_floor();
-						scr_player_slope_repel();
-					}
-					
-					else
-					{
-						if scr_player_jump_start() 
-						{
-							break;
-						}
-			
-						scr_player_slope_resist_roll();
-						scr_player_movement_roll();
-						scr_player_collision_ground_walls();
-						scr_player_level_bound();
-						scr_player_position();
-						scr_player_collision_ground_floor();
-						scr_player_slope_repel();
-					}
-					
-					scr_player_double_spin();
-				}
-			}
+			UpdatePhysics();
 			
 			scr_player_camera();
 			scr_player_status_update();
@@ -892,5 +817,65 @@ public partial class Player : CommonObject
 		{
 			frc_roll = 0.0234375;
 		}
+    }
+
+    private void UpdatePhysics()
+    {
+	    if (IsHurt)
+	    {
+		    scr_player_level_bound();
+		    scr_player_position();
+		    scr_player_collision_air();
+		    scr_player_land();
+	    }
+	    else if (Action != PlayerConstants.Action.ObjectControl && Action != PlayerConstants.Action.Transform)
+	    {
+		    if (!IsGrounded)
+		    {
+			    if (scr_player_jump()) return;
+
+			    scr_player_dropdash();
+			    scr_player_flight();
+			    scr_player_hammerspin();
+			    scr_player_hammerrush();
+			    scr_player_movement_air();	
+			    scr_player_level_bound();
+			    scr_player_position();
+			    scr_player_collision_air();
+			    scr_player_land();
+			    scr_player_carry();
+		    }
+		    else if (!IsSpinning)
+		    {
+			    if (scr_player_spindash()) return;
+				if (scr_player_peelout()) return;
+				if (scr_player_jump_start()) return;
+
+				scr_player_slope_resist();
+			    scr_player_hammerrush();
+			    scr_player_movement_ground();
+			    scr_player_balance();
+			    scr_player_collision_ground_walls();
+			    scr_player_roll_start();
+			    scr_player_level_bound();
+			    scr_player_position();
+			    scr_player_collision_ground_floor();
+			    scr_player_slope_repel();
+		    }
+		    else
+		    {
+			    if (scr_player_jump_start()) return;
+
+			    scr_player_slope_resist_roll();
+			    scr_player_movement_roll();
+			    scr_player_collision_ground_walls();
+			    scr_player_level_bound();
+			    scr_player_position();
+			    scr_player_collision_ground_floor();
+			    scr_player_slope_repel();
+		    }
+					
+		    scr_player_double_spin();
+	    }
     }
 }
