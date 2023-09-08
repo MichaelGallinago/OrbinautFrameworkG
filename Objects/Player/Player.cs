@@ -234,7 +234,103 @@ public partial class Player : CommonObject
 		    ProcessRestart(processSpeedF);
 	    }
 	    
-	    
+	    // Code to run if player is not dead. Runs only when object processing is enabled
+		else if (FrameworkData.UpdateObjects)
+		{
+			// Apply physics parameters for this step
+			UpdateParameters();
+			
+			// Run a repeat loop once, so we can exit from a sub-state if needed
+			repeat(1)
+			{
+				if is_hurt
+				{
+					scr_player_level_bound();
+					scr_player_position();
+					scr_player_collision_air();
+					scr_player_land();
+				}
+				else if action != ACTION_OBJ_CONTROL and action != ACTION_TRANSFORM
+				{
+					if !is_grounded
+					{
+						if scr_player_jump()
+						{
+							break;
+						}
+						
+						scr_player_dropdash();
+						scr_player_flight();
+						scr_player_hammerspin();
+						scr_player_hammerrush();
+						scr_player_movement_air();	
+						scr_player_level_bound();
+						scr_player_position();
+						scr_player_collision_air();
+						scr_player_land();
+						scr_player_carry();
+					}
+					
+					else if !is_spinning
+					{
+						if scr_player_spindash() 
+						{
+							break;
+						}
+						if scr_player_peelout() 
+						{
+							break;
+						}
+						if scr_player_jump_start()
+						{
+							break;
+						}
+							
+						scr_player_slope_resist();
+						scr_player_hammerrush();
+						scr_player_movement_ground();
+						scr_player_balance();
+						scr_player_collision_ground_walls();
+						scr_player_roll_start();
+						scr_player_level_bound();
+						scr_player_position();
+						scr_player_collision_ground_floor();
+						scr_player_slope_repel();
+					}
+					
+					else
+					{
+						if scr_player_jump_start() 
+						{
+							break;
+						}
+			
+						scr_player_slope_resist_roll();
+						scr_player_movement_roll();
+						scr_player_collision_ground_walls();
+						scr_player_level_bound();
+						scr_player_position();
+						scr_player_collision_ground_floor();
+						scr_player_slope_repel();
+					}
+					
+					scr_player_double_spin();
+				}
+			}
+			
+			scr_player_camera();
+			scr_player_status_update();
+			scr_player_water();
+			scr_player_collision_update();
+			scr_player_record_data();
+		}
+		
+		// Always animate player
+		scr_player_rotation();
+		scr_player_animate();
+		
+		// Always update player palette rotations
+		ProcessPalette();
     }
     
     public void SetInput(Buttons inputPress, Buttons inputDown)
@@ -679,5 +775,122 @@ public partial class Player : CommonObject
 				*/
 			    break;
 	    }
+    }
+
+    private void UpdateParameters()
+    {
+	    if (!IsUnderwater)
+		{
+			if (!IsSuper)
+			{
+				acc = 0.046875;
+				acc_glide = 0.015625;
+				acc_air = 0.09375;
+				dec = 0.5;
+				dec_roll = 0.125;
+				frc	= 0.046875;
+				frc_roll = 0.0234375;
+				acc_top = 6;	
+				acc_climb = 1;
+				jump_min_vel = -4;
+				jump_vel = player_type == PLAYER_KNUCKLES ? -6 : -6.5;
+			}
+			else
+			{
+				if (Type == PlayerConstants.Type.Sonic)
+				{
+				    acc = 0.1875;
+				    acc_air = 0.375;
+				    dec = 1;
+				    dec_roll = 0.125;
+				    frc = 0.046875;
+				    frc_roll = 0.09375;
+				    acc_top = 10;
+				    jump_min_vel = -4;
+				    jump_vel = -8;
+				}
+				else
+				{
+				    acc = 0.09375;
+				    acc_air = 0.1875;
+				    acc_glide = 0.046875;
+				    dec = 0.75;
+				    dec_roll = 0.125;
+				    frc = 0.046875;
+				    frc_roll = 0.0234375;
+				    acc_top = 8;
+				    acc_climb = 2;
+				    jump_min_vel = -4;
+				    jump_vel = player_type == PLAYER_KNUCKLES ? -6 : -6.5;
+				}
+			}
+			
+			if (ItemSpeedTimer > 0)
+			{
+				acc	= 0.09375;
+				acc_air = 0.1875;
+				frc = 0.09375;
+				frc_roll = 0.046875;
+				acc_top = 12;
+			}
+		}
+		else
+		{
+			if (!IsSuper)
+			{
+			    acc = 0.0234375;
+			    acc_air = 0.046875;
+			    acc_glide = 0.015625;
+			    dec = 0.25;
+			    dec_roll = 0.125;
+			    frc = 0.0234375;
+			    frc_roll = 0.01171875;
+			    acc_top = 3;
+			    acc_climb = 1;
+			    jump_min_vel = -2;
+			    jump_vel = player_type == PLAYER_KNUCKLES ? -3 : -3.5;
+			}
+			else
+			{
+			    if (Type == PlayerConstants.Type.Sonic)
+			    {
+			        acc = 0.09375;
+			        acc_air = 0.1875;
+			        dec = 0.5;
+			        dec_roll = 0.125;
+			        frc = 0.046875;
+			        frc_roll = 0.046875;
+			        acc_top = 5;
+			        jump_min_vel = -2;
+			        jump_vel = -3.5;
+			    }
+			    else
+			    {
+			        acc = 0.046875;
+			        acc_air = 0.09375;
+			        acc_glide = 0.046875;
+			        dec = 0.375;
+			        dec_roll = 0.125;
+			        frc = 0.046875;
+			        frc_roll = 0.0234375;
+			        acc_top = 4;
+			        acc_climb = 2;
+			        jump_min_vel = -2;
+			        jump_vel = player_type == PLAYER_KNUCKLES ? -3 : -3.5;
+			    }
+			}
+		}
+		
+		if (FrameworkData.PlayerPhysics < PlayerConstants.PhysicsType.SK)
+		{
+			if (Type == PlayerConstants.Type.Tails)
+			{
+				dec_roll = dec / 4;
+			}
+		}
+		else if (IsSuper)
+		{
+			frc_roll = 0.0234375;
+		}
     }
 }
