@@ -496,7 +496,7 @@ public partial class Player : CommonObject
 	    }
 	
 	    // Apply palette logic
-	    pal_set_rotation(colours, colourLoop, colourLast, duration);
+	    PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
     }
 
     private void ProcessAI()
