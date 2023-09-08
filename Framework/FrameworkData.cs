@@ -29,6 +29,7 @@ public static class FrameworkData
     public static Constants.Barrier SavedBarrier { get; set; }
     public static bool PlayerEditMode { get; set; }
     public static bool DeveloperMode { get; set; }
+    public static bool IsPaused { get; set; }
 
     static FrameworkData()
     {
@@ -56,5 +57,6 @@ public static class FrameworkData
         RotationMode = 1;
 
         DeveloperMode = true;
+        IsPaused = true;
     }
 }

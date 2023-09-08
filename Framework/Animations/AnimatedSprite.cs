@@ -31,9 +31,13 @@ public partial class AnimatedSprite : AnimatedSprite2D
     public override void _EnterTree()
     {
         Sprites.Add(this);
-        if (GetParent() is CommonObject { Sprite: null } commonObject)
+        if (GetParent() is CommonObject commonObject)
         {
-            commonObject.Sprite = this;
+            commonObject.Sprite ??= this;
+        }
+        else
+        {
+            Animator.AutoAnimatedSprites.Add(this, SpeedScale);
         }
     }
 
@@ -98,7 +102,7 @@ public partial class AnimatedSprite : AnimatedSprite2D
 
     public bool CheckInView()
     {
-        Vector2 view = Camera.SelectedCamera.Position;
+        Vector2 view = Camera.MainCamera.Position;
         Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
         return Position.X >= view.X - size.X && Position.X <= view.X + FrameworkData.ViewSize.X + size.X &&
                Position.Y >= view.Y - size.Y && Position.Y <= view.Y + FrameworkData.ViewSize.X + size.Y;

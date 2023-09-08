@@ -11,6 +11,8 @@ public partial class Camera : Camera2D
         1, 2, 1, 3, 1, 2, 2, 1, 2, 3, 1, 2, 1, 2, 0, 0,
         2, 0, 3, 2, 2, 3, 2, 2, 1, 3, 0, 0, 1, 0, 1, 3
     };
+
+    public static Camera MainCamera { get; set; }
     
     [Export] public CommonObject Target { get; set; }
     
@@ -55,15 +57,21 @@ public partial class Camera : Camera2D
     public override void _EnterTree()
     {
         FrameworkData.CurrentScene.LateUpdate += EndStep;
+        MainCamera ??= this;
     }
 
     public override void _ExitTree()
     {
         FrameworkData.CurrentScene.LateUpdate -= EndStep;
+        if (MainCamera == this)
+        {
+	        MainCamera = null;
+        }
     }
 
     private void EndStep(double processSpeed)
     {
+	    if (MainCamera != this) return;
 	    var processSpeedF = (float)processSpeed;
 	    var boundSpeed = 0;
 		

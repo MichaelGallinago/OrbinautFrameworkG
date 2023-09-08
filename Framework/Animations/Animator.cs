@@ -3,37 +3,42 @@ using System.Collections.Generic;
 
 public static class Animator
 {
+    public static Dictionary<AnimatedSprite, float> AutoAnimatedSprites { get; }
+    public static bool IsUpdating { get; private set; }
     public static double Timer { get; private set; }
+
+    static Animator()
+    {
+        IsUpdating = true;
+        AutoAnimatedSprites = new Dictionary<AnimatedSprite, float>();
+    }
 
     public static void Reset()
     {
+        IsUpdating = true;
         Timer = 0d;
     }
 
     public static void Process(double processSpeed)
     {
-        //TODO: this
-        /*
-        if (update_flag != other.update_graphics)
+        //TODO: check this
+        // Process sprite animation
+        bool targetFlag = !FrameworkData.IsPaused && FrameworkData.UpdateGraphics;
+		
+        if (IsUpdating != targetFlag)
         {
-            for (var i = 0; i < array_length(sprite_array); i += 2)
+            foreach (KeyValuePair<AnimatedSprite, float> data in AutoAnimatedSprites)
             {
-                var _speed = 0;
-                if other.update_graphics
-                {
-                    _speed = 1 / sprite_array[i + 1];
-                }
-                sprite_set_speed(sprite_array[i], _speed, spritespeed_framespergameframe);
+                data.Key.SpeedScale = targetFlag ? data.Value : 0f;
             }
-			
-            update_flag = other.update_graphics;
+
+            IsUpdating = targetFlag;
         }
 		
-        if (!other.update_graphics)
+        if (!FrameworkData.UpdateGraphics || FrameworkData.IsPaused)
         {
-            break;
+            return;
         }
-        */
 		
         Timer += processSpeed;
 

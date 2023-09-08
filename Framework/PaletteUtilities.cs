@@ -16,8 +16,7 @@ public static class PaletteUtilities
     public static int[][] ColourId { get; }
     public static int[][] ColourSet { get; }
     public static int SplitBound { get; }
-    split_bound: global.game_height,
-    update_flag: true
+    public static bool UpdateFlag { get; }
 
     static PaletteUtilities()
     {
@@ -31,6 +30,7 @@ public static class PaletteUtilities
             Enumerable.Repeat(1, PaletteLimit).ToArray(), 
             Enumerable.Repeat(1, PaletteLimit).ToArray() 
         };
-        SplitBound = FrameworkData.Si
+        SplitBound = FrameworkData.ViewSize.Y;
+        UpdateFlag = true;
     }
 }
