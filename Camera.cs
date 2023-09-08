@@ -46,7 +46,7 @@ public partial class Camera : Camera2D
     public override void _Ready()
     {
 	    if (Target != null || Player.Players.Count == 0) return;
-		var playerTarget = (Player)Player.Players.First();
+		Player playerTarget = Player.Players.First();
 		Target = playerTarget;
 		_position = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
 		_position.Y += 16;
@@ -106,9 +106,8 @@ public partial class Camera : Camera2D
 				{
 					_speed.X = 0;
 				}
-
-				Player playerTarget = Player.Players.Contains(Target) ? (Player)Target : null;
-				if (playerTarget is { IsGrounded: true })
+				
+				if (Target is Player { IsGrounded: true } playerTarget)
 				{	
 					if (playerTarget.IsSpinning)
 					{

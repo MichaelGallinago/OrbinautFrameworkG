@@ -30,6 +30,7 @@ public static class FrameworkData
     public static bool PlayerEditMode { get; set; }
     public static bool DeveloperMode { get; set; }
     public static bool IsPaused { get; set; }
+    public static PlayerConstants.PhysicsType PlayerPhysics { get; set; }
 
     static FrameworkData()
     {
@@ -58,5 +59,6 @@ public static class FrameworkData
 
         DeveloperMode = true;
         IsPaused = true;
+        PlayerPhysics = PlayerConstants.PhysicsType.S2;
     }
 }

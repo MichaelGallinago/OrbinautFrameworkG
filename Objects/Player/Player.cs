@@ -9,7 +9,7 @@ public partial class Player : CommonObject
 	private const float EditModeAcceleration = 0.046875f;
 	private const byte EditModeSpeedLimit = 16;
 	
-    public static List<CommonObject> Players { get; }
+    public static List<Player> Players { get; }
     
     [Export] public PlayerConstants.Type Type;
 
@@ -96,7 +96,7 @@ public partial class Player : CommonObject
     
     static Player()
     {
-        Players = new List<CommonObject>();
+        Players = new List<Player>();
     }
 
     public override void _Ready()
@@ -198,7 +198,7 @@ public partial class Player : CommonObject
         Players.Remove(this);
         for (int i = Id; i < Players.Count; i++)
         {
-	        ((Player)Players[i]).Id--;
+	        (Players[i]).Id--;
         }
         FrameworkData.CurrentScene.RemovePlayerStep(this);
         if (Players.Count == 0 || !IsCpuRespawn) return;
@@ -213,17 +213,27 @@ public partial class Player : CommonObject
 
     public void PlayerStep(double processSpeed)
     {
+	    var processSpeedF = (float)processSpeed; 
 	    // Process player input
 	    UpdateInput();
 
 	    // Process edit mode. Returns true if player is in edit mode state
-	    if (ProcessEditMode((float)processSpeed))
+	    if (ProcessEditMode(processSpeedF))
 	    {
-		    
+		    ProcessPalette();
 		    return;
 	    }
 	    
 	    // Process AI code. Returns true if player is deleted
+	    if (ProcessAI(processSpeedF)) return;
+	    
+	    // Code to run if player is dead
+	    if (IsDead)
+	    {
+		    ProcessPosition(processSpeedF);
+		    ProcessRestart(processSpeedF);
+	    }
+	    
 	    
     }
     
@@ -499,14 +509,33 @@ public partial class Player : CommonObject
 	    PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
     }
 
-    private void ProcessAI()
+    private bool ProcessAI(float processSpeed)
     {
-	    
+	    if (Id == 0 || !FrameworkData.UpdateObjects) return false;
+
+	    // Find a player to follow
+	    CpuTarget ??= Players[Id - 1];
+	
+	    if (Id < InputUtilities.DeviceCount && (InputDown.A || InputDown.B || InputDown.C || 
+	        InputDown.Abc || InputDown.Up || InputDown.Down || InputDown.Left || InputDown.Right))
+	    {
+		    CpuInputTimer = 600f;
+	    }
+
+	    return true;
+
+	    //TODO: CpuState switch
+	    /*
+	    switch (CpuState)
+	    {
+		    
+	    }
+	    */
     }
 
     private void RespawnAI()
     {
-	    if (Sprite != null && !Sprite.CheckInView())
+	    if (!(Sprite == null || Sprite.CheckInView()))
 	    {
 		    if (++CpuTimer < 300) return;
 		    IsCpuRespawn = true;
@@ -515,6 +544,140 @@ public partial class Player : CommonObject
 	    else
 	    {
 		    CpuTimer = 0;
+	    }
+    }
+
+    private void ProcessPosition(float processSpeed)
+    {
+	    if (Action == PlayerConstants.Action.Carried) return;
+
+	    if (StickToConvex)
+	    {
+		    Speed = new Vector2(
+			    Mathf.Clamp(Speed.X, -16f, 16f), 
+			    Mathf.Clamp(Speed.Y, -16f, 16f));
+	    }
+
+	    Position += Speed * processSpeed;
+
+	    if (!IsGrounded)
+	    {
+		    Speed = new Vector2(Speed.X, Speed.Y + Gravity * processSpeed);
+	    }
+    }
+
+    private void ProcessRestart(float processSpeed)
+    {
+	    if (Id > 0) return;
+
+	    switch (RestartState)
+	    {
+		    // GameOver
+		    case 0:
+			    float bound = FrameworkData.ViewSize.Y + 32f;
+		
+			    if (FrameworkData.PlayerPhysics < PlayerConstants.PhysicsType.S3)
+			    {
+				    bound += Camera.MainCamera.LimitBottom * processSpeed;
+			    }
+			    else
+			    {
+				    bound += Camera.MainCamera.Position.Y * processSpeed;
+			    }
+		
+			    if ((int)Position.Y > bound)
+			    {
+				    RestartState = PlayerConstants.RestartState.ResetLevel;
+					
+				    FrameworkData.UpdateTimer = false;
+					
+				    // TODO: Check this
+				    if (--LifeCount > 0)
+				    {
+					    // if FrameworkData.FrameCounter != 36000
+					    // {
+						    RestartTimer = 60f;
+						    break;
+						// }
+				    }
+					
+				    // TODO: audio + gameOver
+				    //instance_create_depth(0, 0, 0, obj_gui_gameover);				
+				    //audio_play_bgm(bgm_gameover);
+			    }
+			    break;
+		
+		    // Sonic_ResetLevel
+		    case PlayerConstants.RestartState.ResetLevel:
+			    if (RestartTimer > 0)
+			    {
+				    if (--RestartTimer == 0)
+				    {
+					    RestartState = PlayerConstants.RestartState.RestartStage;
+				    }
+				    else
+				    {
+					    break;
+				    }
+			    }
+			    // TODO: audio_bgm_is_playing
+			    /*else if (!audio_bgm_is_playing())
+			    {
+				    RestartState = PlayerConstants.RestartState.RestartGame;	
+			    }*/
+			    else
+			    {
+				    break;
+			    }
+				
+			    // TODO: audio + fade
+			    //audio_stop_bgm(0.5);
+			    //fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);
+			    break;
+		
+		    // Restart Stage
+		    case PlayerConstants.RestartState.RestartStage:
+			    // TODO: Fade
+			    /*if (c_engine.fade.state == FADE_ST_MAX)
+			    {
+				    FrameworkData.SavedLives = LifeCount;
+				    GetTree().ReloadCurrentScene();
+			    }*/
+			
+			    break;
+		
+		    // Restart Game
+		    case PlayerConstants.RestartState.RestartGame:
+			    // TODO: Game restart & fade
+			    /*
+			    if (c_engine.fade.state == FADE_ST_MAX)
+			    {
+				    FrameworkData.collected_giant_rings = [];
+				    FrameworkData.player_backup_data = [];
+				    FrameworkData.checkpoint_data = [];
+					
+				    // TODO: this
+				    if (FrameworkData.Continues > 0)
+				    {
+					    game_restart(); 
+				    }
+				    else
+				    {
+					    /*
+					    if global.save_slot != -1
+					    {
+						    global.saved_lives = 3;
+						    global.saved_score = 0;
+						    global.continues   = 0;
+							    
+						    // gamedata_save(global.activeSave);
+					    }
+						
+					    game_restart();
+				    }
+			    }
+				*/
+			    break;
 	    }
     }
 }
