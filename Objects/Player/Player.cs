@@ -217,7 +217,11 @@ public partial class Player : CommonObject
 	    UpdateInput();
 
 	    // Process edit mode. Returns true if player is in edit mode state
-	    if (ProcessEditMode((float)processSpeed)) return;
+	    if (ProcessEditMode((float)processSpeed))
+	    {
+		    
+		    return;
+	    }
 	    
 	    // Process AI code. Returns true if player is deleted
 	    
@@ -415,6 +419,84 @@ public partial class Player : CommonObject
 		}
 		
 		return true;
+    }
+
+    private void ProcessPalette()
+    {
+	    int[] colours = Type switch
+	    {
+		    PlayerConstants.Type.Tails => new[] { 4, 5, 6 },
+		    PlayerConstants.Type.Knuckles => new[] { 7, 8, 9 },
+		    PlayerConstants.Type.Amy => new[] { 10, 11, 12 },
+		    _ => new[] { 0, 1, 2, 3 }
+	    };
+
+	    // Get current active colour
+	    int colour = PaletteUtilities.Index[colours[0]];
+	
+	    var colourLast = 0;
+	    var colourLoop = 0;
+	    var duration = 0;
+	
+	    // Super State palette logic
+	    switch (Type)
+	    {
+		    case PlayerConstants.Type.Sonic:
+			    duration = colour switch
+			    {
+				    < 2 => 19,
+					< 7 => 4,
+				    _ => 8
+			    };
+			    
+			    colourLast = 16;
+			    colourLoop = 7;
+			    break;
+		    case PlayerConstants.Type.Tails:
+			    duration = colour < 2 ? 28 : 12;
+			    colourLast = 7;
+			    colourLoop = 2;
+			    break;
+		    case PlayerConstants.Type.Knuckles:
+			    duration = colour switch
+			    {
+				    < 2 => 17,
+				    < 3 => 15,
+				    _ => 3
+			    };
+
+			    colourLast = 11;
+			    colourLoop = 3;
+			    break;
+		    case PlayerConstants.Type.Amy:
+			    duration = colour < 2 ? 19 : 4;
+			    colourLast = 11;
+			    colourLoop = 3;
+			    break;
+	    }
+	
+	    // Default palette logic (overwrites Super State palette logic)
+	    if (!IsSuper)
+	    {
+		    if (colour > 1)
+		    {
+			    if (Type == PlayerConstants.Type.Sonic)
+			    {
+				    colourLast = 21;
+				    duration = 4;
+			    }
+		    }
+		    else
+		    {
+			    colourLast = 1;
+			    duration = 0;
+		    }
+		
+		    colourLoop = 1;
+	    }
+	
+	    // Apply palette logic
+	    pal_set_rotation(colours, colourLoop, colourLast, duration);
     }
 
     private void ProcessAI()
