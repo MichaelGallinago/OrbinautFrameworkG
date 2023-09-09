@@ -1,10 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://bgtjolasl4t03"]
+[gd_scene load_steps=4 format=3 uid="uid://bgtjolasl4t03"]
 
 [ext_resource type="Script" path="res://Framework/Animations/AnimatedSprite.cs" id="1_00wlb"]
+[ext_resource type="Texture2D" uid="uid://hq0skigsr0ks" path="res://Framework/Animations/unknown.png" id="1_tegsv"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_e26w3"]
 animations = [{
-"frames": [],
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_tegsv")
+}],
 "loop": true,
 "name": &"default",
 "speed": 1.0

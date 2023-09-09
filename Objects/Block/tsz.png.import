@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfunvb56tv7tx"
-path="res://.godot/imported/spr_sonic_dash_strip4.png-b001eb59176239f89efa1dfdff77daed.ctex"
+uid="uid://jboj272uqh8v"
+path="res://.godot/imported/tsz.png-b9bfaa8da8d744ab248f7cae50f2b227.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://spr_sonic_dash_strip4.png"
-dest_files=["res://.godot/imported/spr_sonic_dash_strip4.png-b001eb59176239f89efa1dfdff77daed.ctex"]
+source_file="res://Objects/Block/tsz.png"
+dest_files=["res://.godot/imported/tsz.png-b9bfaa8da8d744ab248f7cae50f2b227.ctex"]
 
 [params]
 

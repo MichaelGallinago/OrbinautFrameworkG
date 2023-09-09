@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gvy2s2xbcjw7"
-path="res://.godot/imported/tsz_background_layer0.png-1f0ae23fb44568a00036555940b70517.ctex"
+uid="uid://dcye5vkigl66m"
+path="res://.godot/imported/pocky.png-3cfb9fead73151508655c1784da6f1ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Stages/TSZ/Graphics/tsz_background_layer0.png"
-dest_files=["res://.godot/imported/tsz_background_layer0.png-1f0ae23fb44568a00036555940b70517.ctex"]
+source_file="res://Objects/Animal/pocky.png"
+dest_files=["res://.godot/imported/pocky.png-3cfb9fead73151508655c1784da6f1ca.ctex"]
 
 [params]
 

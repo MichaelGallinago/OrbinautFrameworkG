@@ -8,7 +8,7 @@
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="4_i6eum"]
-[ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/tsz_background_layer0.png" id="5_gfyke"]
+[ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w0a6u"]
 shader = ExtResource("1_18cwq")
@@ -60,30 +60,30 @@ script = ExtResource("3_i0vlt")
 
 [node name="BackgroundLayer" parent="Background" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 0)
-texture = ExtResource("5_gfyke")
+texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 0, 512, 64)
 
 [node name="BackgroundLayer2" parent="Background" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 64)
-texture = ExtResource("5_gfyke")
+texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 64, 512, 64)
 
 [node name="BackgroundLayer3" parent="Background" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 128)
-texture = ExtResource("5_gfyke")
+texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 128, 512, 64)
 
 [node name="BackgroundLayer4" parent="Background" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 192)
-texture = ExtResource("5_gfyke")
+texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 192, 512, 64)
 
 [node name="BackgroundLayer5" parent="Background" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 256)
-texture = ExtResource("5_gfyke")
+texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 256, 512, 64)
