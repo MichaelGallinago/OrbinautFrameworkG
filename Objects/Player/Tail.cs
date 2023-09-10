@@ -14,7 +14,7 @@ public partial class Tail : CommonObject
     
     public override void _Ready()
     {
-	    SetBehaviour(ObjectRespawnData.BehaviourType.Unique);
+	    SetBehaviour(BehaviourType.Unique);
     }
 
     protected override void Step(double processSpeed)

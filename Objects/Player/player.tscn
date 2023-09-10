@@ -6,6 +6,7 @@
 
 [node name="Player" type="Node2D"]
 script = ExtResource("1_w3650")
+Type = 4
 
 [node name="AnimatedSprite" parent="." instance=ExtResource("2_4n0gr")]
 sprite_frames = ExtResource("3_x3aox")

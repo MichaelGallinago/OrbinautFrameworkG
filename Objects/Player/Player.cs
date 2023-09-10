@@ -101,7 +101,7 @@ public partial class Player : CommonObject
 
     public override void _Ready()
     {
-        SetBehaviour(ObjectRespawnData.BehaviourType.Unique);
+        SetBehaviour(BehaviourType.Unique);
         
         switch (Type)
 		{
@@ -243,16 +243,18 @@ public partial class Player : CommonObject
 			// Run a repeat loop once, so we can exit from a sub-state if needed
 			UpdatePhysics();
 			
+			/*
 			scr_player_camera();
 			scr_player_status_update();
 			scr_player_water();
 			scr_player_collision_update();
 			scr_player_record_data();
+			*/
 		}
 		
 		// Always animate player
-		scr_player_rotation();
-		scr_player_animate();
+		//scr_player_rotation();
+		//scr_player_animate();
 		
 		// Always update player palette rotations
 		ProcessPalette();
@@ -445,7 +447,7 @@ public partial class Player : CommonObject
 		{
 			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) is not CommonObject newObject) return true;
 			newObject.Scale = new Vector2(newObject.Scale.X * (sbyte)Facing, newObject.Scale.Y);
-			newObject.SetBehaviour(ObjectRespawnData.BehaviourType.Delete);
+			newObject.SetBehaviour(BehaviourType.Delete);
 			FrameworkData.CurrentScene.AddChild(newObject);
 		}
 		
@@ -701,9 +703,10 @@ public partial class Player : CommonObject
 			    break;
 	    }
     }
-
+	
     private void UpdateParameters()
     {
+	    /*
 	    if (!IsUnderwater)
 		{
 			if (!IsSuper)
@@ -817,10 +820,12 @@ public partial class Player : CommonObject
 		{
 			frc_roll = 0.0234375;
 		}
+		*/
     }
 
     private void UpdatePhysics()
     {
+	    /*
 	    if (IsHurt)
 	    {
 		    scr_player_level_bound();
@@ -877,5 +882,6 @@ public partial class Player : CommonObject
 					
 		    scr_player_double_spin();
 	    }
+	    */
     }
 }
