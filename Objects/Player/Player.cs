@@ -28,7 +28,7 @@ public partial class Player : CommonObject
     public Constants.GroundMode GroundMode { get; set; }
     public bool StickToConvex { get; set; }
     
-    public bool ObjectInteraction { get; set; }
+    public bool ObjectInterAction { get; set; }
     public bool IsGrounded { get; set; }
     public bool IsSpinning { get; set; }
     public bool IsJumping { get; set; }
@@ -126,7 +126,7 @@ public partial class Player : CommonObject
         Gravity = GravityType.Default;
         TileLayer = Constants.TileLayer.Main;
         GroundMode = Constants.GroundMode.Floor;
-        ObjectInteraction = true;
+        ObjectInterAction = true;
         BarrierType = Constants.Barrier.None;
         Facing = Constants.Direction.Positive;
         Animation = PlayerConstants.Animation.Idle;
@@ -371,7 +371,7 @@ public partial class Player : CommonObject
 				FrameworkData.UpdateTimer = true;
 				FrameworkData.AllowPause = true;
 				
-				ObjectInteraction = false;
+				ObjectInterAction = false;
 				
 				EditModeSpeed = 0;
 				IsEditMode = true;
@@ -385,7 +385,7 @@ public partial class Player : CommonObject
 
 				Animation = PlayerConstants.Animation.Move;
 				
-				ObjectInteraction = true;
+				ObjectInterAction = true;
 				IsEditMode = false;
 				IsDead = false;
 			}
@@ -883,5 +883,108 @@ public partial class Player : CommonObject
 		    scr_player_double_spin();
 	    }
 	    */
+    }
+    
+    public void Land()
+    {
+	    if (!IsGrounded) return;
+
+	    ResetGravity();
+	
+	    if (Action == PlayerConstants.Action.Flight)
+	    {
+		    //TODO: audio
+		    //audio_stop_sfx(sfx_flight);
+		    //audio_stop_sfx(sfx_flight2);
+	    }
+	    else if (Action is PlayerConstants.Action.SpinDash or PlayerConstants.Action.PeelOut)
+	    {
+		    if (Action == PlayerConstants.Action.PeelOut)
+		    {
+			    GroundSpeed = ActionValue2;
+		    }
+		
+		    return;
+	    }
+	
+	    if (BarrierFlag && BarrierType == Constants.Barrier.Water)
+	    {
+		    float force = IsUnderwater ? -4f : -7.5f;
+		    Speed = new Vector2(Mathf.Sin(Mathf.DegToRad(Angle)), Mathf.Sin(Mathf.DegToRad(Angle))) * force;
+
+		    barrier_flag = false;
+		    is_on_object = false;
+		    IsGrounded = false;
+		
+		    with obj_barrier
+		    {
+			    if Player_Object == other.id
+			    {
+				    ani_upd_frame(0, 1, [3, 2]);
+				    ani_upd_duration([7, 12]);
+				
+				    animation_timer = 20;
+			    }
+		    }
+		
+		    audio_play_sfx(sfx_barrier_water2);
+		
+		    exit;
+	    }
+	
+	    if !is_on_object
+	    {
+		    switch animation
+		    {
+			    case ANI_IDLE:
+			    case ANI_DUCK:
+			    case ANI_HAMMERRUSH:
+			    case ANI_GLIDE_GRND: break;
+			
+			    default:
+			    animation = ANI_MOVE;
+		    }
+	    }
+	    else
+	    {
+		    animation = ANI_MOVE;
+	    }
+	
+	    if is_hurt
+	    {
+		    inv_frames = 120;
+		    gsp = 0;
+	    }
+	
+	    air_lock_flag = false;
+	    is_spinning	= false;
+	    is_jumping = false;
+	    is_pushing = false;
+	    is_hurt	= false;
+	
+	    barrier_flag = 0;
+	    combo_counter = 0;
+	
+	    cpu_state = CPU_STATE_MAIN;
+	
+	    scr_player_dropdash();
+	    scr_player_hammerspin();
+	
+	    if Action != Action_HAMMERRUSH
+	    {
+		    Action = false;
+	    }
+	    else
+	    {
+		    gsp	= 6 * facing;
+	    }
+	
+	    if !is_spinning
+	    {
+		    y -= radius_y_normal - radius_y;
+		
+		    radius_x = radius_x_normal;
+		    radius_y = radius_y_normal; 
+	    }
     }
 }
