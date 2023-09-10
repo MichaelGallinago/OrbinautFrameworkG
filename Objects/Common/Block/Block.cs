@@ -5,6 +5,6 @@ public partial class Block : CommonObject
 {
     public Block()
     {
-        SetSolid(new Vector2I(16, 16));
+        //SetSolid(new Vector2I(16, 16));
     }
 }

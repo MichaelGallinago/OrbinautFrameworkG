@@ -6,8 +6,7 @@ public abstract partial class CommonObject : Node2D
 {
     public enum BehaviourType : byte
     {
-        Active, Reset, Pause, 
-        Delete, Unique
+        Active, Reset, Pause, Delete, Unique
     }
     
     public static List<CommonObject> Objects { get; }
@@ -16,7 +15,7 @@ public abstract partial class CommonObject : Node2D
     
     public ObjectRespawnData RespawnData { get; }
     public InteractData InteractData { get; }
-    public SolidData SolidData;
+    [Export] public SolidData SolidData;
     public AnimatedSprite Sprite { get; set; }
  
     static CommonObject()
@@ -28,7 +27,6 @@ public abstract partial class CommonObject : Node2D
     {
         RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
         InteractData = new InteractData();
-        SolidData = new SolidData();
     }
 
     public override void _EnterTree()
@@ -68,6 +66,6 @@ public abstract partial class CommonObject : Node2D
     {
         SolidData.Radius = radius;
         SolidData.Offset = offset;
-        SolidData.HeightMap = Array.Empty<short>();
+        SolidData.HeightMap = null;
     }
 }
