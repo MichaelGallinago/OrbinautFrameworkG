@@ -1,11 +1,11 @@
 using Godot;
-using Godot.Collections;
+using System.Collections.Generic;
 
-public partial class SolidData : GodotObject
+public class SolidData
 {
-    [Export] public bool NoBalance;
-    [Export] public Vector2I Radius;
-    [Export] public Vector2I Offset;
-    [Export] public Array<short> HeightMap;
-    [Export] public Array<Constants.TouchState> TouchStates;
+    public bool NoBalance { get; set; }
+    public Vector2I Radius { get; set; }
+    public Vector2I Offset { get; set; }
+    public short[] HeightMap { get; set; }
+    public List<Constants.TouchState> TouchStates { get; set; }
 }

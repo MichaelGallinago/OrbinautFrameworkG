@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=12 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_18cwq"]
 [ext_resource type="Script" path="res://Stages/TSZ/StageTSZ.cs" id="1_hkdi5"]
@@ -9,7 +9,6 @@
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="4_i6eum"]
 [ext_resource type="Script" path="res://Objects/Common/Block/Block.cs" id="6_ej1tq"]
-[ext_resource type="Script" path="res://Framework/CommonObject/SolidData.cs" id="8_ok45f"]
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w0a6u"]
@@ -54,13 +53,10 @@ script = ExtResource("2_b03l2")
 [node name="Node2D" type="Node2D" parent="."]
 position = Vector2(160, 840)
 script = ExtResource("6_ej1tq")
-SolidData = Object(Object,"script":ExtResource("8_ok45f"))
-
 
 [node name="Player" parent="." instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(160, 840)
-SolidData = ExtResource("8_ok45f")
 
 [node name="Background" type="ParallaxBackground" parent="."]
 layer = -128

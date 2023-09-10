@@ -17,7 +17,7 @@ public partial class Tail : CommonObject
 	    SetBehaviour(BehaviourType.Unique);
     }
 
-    protected override void Step(double processSpeed)
+    protected override void Update(double processSpeed)
     {
         // Get target player
         if (Target == null || !IsInstanceValid(Target) || Target.Type != PlayerConstants.Type.Tails)

@@ -36,7 +36,7 @@ public partial class Player : CommonObject
     public bool IsUnderwater { get; set; }
     public bool IsHurt { get; set; }
     public bool IsDead { get; set; }
-    public bool IsOnObject { get; set; }
+    public CommonObject OnObject { get; set; }
     public bool IsSuper { get; set; }
     public bool IsInvincible { get; set; }
     public int SuperValue { get; set; }
@@ -60,7 +60,7 @@ public partial class Player : CommonObject
     public bool IsAirLock { get; set; }
     
     public float AirTimer { get; set; }
-    public uint ScoreCombo { get; set; }
+    public uint ComboCounter { get; set; }
     public uint ScoreCount { get; set; }
     public uint RingCount { get; set; }
     public uint LifeCount { get; set; }
@@ -291,7 +291,7 @@ public partial class Player : CommonObject
 	    IsSpinning = false;
 	    IsPushing = false;
 	    IsGrounded = false;
-	    IsOnObject = false;
+	    OnObject = null;
 	
 	    StickToConvex = false;
 	    GroundMode = 0;
