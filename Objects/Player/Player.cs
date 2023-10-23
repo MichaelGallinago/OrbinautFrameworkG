@@ -36,7 +36,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
-	public bool IsPushing { get; set; }
+	public Framework.CommonObject.CommonObject PushingObject { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
@@ -202,7 +202,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		Players.Remove(this);
 		for (int i = Id; i < Players.Count; i++)
 		{
-			(Players[i]).Id--;
+			Players[i].Id--;
 		}
 		FrameworkData.CurrentScene.RemovePlayerStep(this);
 		if (Players.Count == 0 || !IsCpuRespawn) return;
@@ -293,7 +293,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		IsHurt = false;
 		IsJumping = false;
 		IsSpinning = false;
-		IsPushing = false;
+		PushingObject = null;
 		IsGrounded = false;
 		OnObject = null;
 	
@@ -544,7 +544,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		CpuTarget ??= Players[Id - 1];
 	
 		if (Id < InputUtilities.DeviceCount && (InputDown.A || InputDown.B || InputDown.C || 
-		                                        InputDown.Abc || InputDown.Up || InputDown.Down || InputDown.Left || InputDown.Right))
+		    InputDown.Abc || InputDown.Up || InputDown.Down || InputDown.Left || InputDown.Right))
 		{
 			CpuInputTimer = 600f;
 		}
@@ -916,13 +916,13 @@ public partial class Player : Framework.CommonObject.CommonObject
 			float force = IsUnderwater ? -4f : -7.5f;
 			Speed = new Vector2(Mathf.Sin(Mathf.DegToRad(Angle)), Mathf.Sin(Mathf.DegToRad(Angle))) * force;
 
-			barrier_flag = false;
-			is_on_object = false;
+			BarrierFlag = false;
+			OnObject = null;
 			IsGrounded = false;
 		
 			with obj_barrier
 			{
-				if Player_Object == other.id
+				if (Player_Object == other.id)
 				{
 					ani_upd_frame(0, 1, [3, 2]);
 					ani_upd_duration([7, 12]);
@@ -930,65 +930,93 @@ public partial class Player : Framework.CommonObject.CommonObject
 					animation_timer = 20;
 				}
 			}
+			
+			//TODO: audio
+			//audio_play_sfx(sfx_barrier_water2);
 		
-			audio_play_sfx(sfx_barrier_water2);
-		
-			exit;
+			return;
 		}
 	
-		if !is_on_object
+		if (OnObject == null)
 		{
-			switch animation
+			switch (Animation)
 			{
-				case ANI_IDLE:
-				case ANI_DUCK:
-				case ANI_HAMMERRUSH:
-				case ANI_GLIDE_GRND: break;
+				case PlayerConstants.Animation.Idle:
+				case PlayerConstants.Animation.Duck:
+				case PlayerConstants.Animation.HammerRush:
+				case PlayerConstants.Animation.GlideGround: break;
 			
 				default:
-				animation = ANI_MOVE;
+					Animation = PlayerConstants.Animation.Move;
+					break;
 			}
 		}
 		else
 		{
-			animation = ANI_MOVE;
+			Animation = PlayerConstants.Animation.Move;
 		}
 	
-		if is_hurt
+		if (IsHurt)
 		{
-			inv_frames = 120;
-			gsp = 0;
+			InvincibilityFrames = 120;
+			GroundSpeed = 0;
 		}
 	
-		air_lock_flag = false;
-		is_spinning	= false;
-		is_jumping = false;
-		is_pushing = false;
-		is_hurt	= false;
+		IsAirLock = false;
+		IsSpinning	= false;
+		IsJumping = false;
+		PushingObject = null;
+		IsHurt = false;
 	
-		barrier_flag = 0;
-		combo_counter = 0;
+		BarrierFlag = false;
+		ComboCounter = 0;
 	
-		cpu_state = CPU_STATE_MAIN;
+		CpuState = PlayerConstants.CpuState.Main;
 	
 		scr_player_dropdash();
 		scr_player_hammerspin();
 	
-		if Action != Action_HAMMERRUSH
+		if (Action != PlayerConstants.Action.HammerRush)
 		{
-			Action = false;
+			Action = PlayerConstants.Action.None;
 		}
 		else
 		{
-			gsp	= 6 * facing;
+			GroundSpeed	= 6 * (sbyte)Facing;
 		}
-	
-		if !is_spinning
-		{
-			y -= radius_y_normal - radius_y;
+
+		if (IsSpinning) return;
+		Position.Y -= RadiusNormal.Y - Radius.Y;
+
+		Radius = RadiusNormal;
+	}
+
+	public void Kill()
+	{
+		if (IsDead) return;
+
+		Action = PlayerConstants.Action.None;
+		IsDead = true;
+		ObjectInteraction = false;
+		IsGrounded = false;
+		OnObject = null;
+		BarrierType = Constants.Barrier.None;
+		Animation = PlayerConstants.Animation.Death;
+		Gravity = GravityType.Default;
+		//y_vel = -7; // TODO: return variables
+		//x_vel = 0;
+		//ground_vel = 0;
+		//Depth = 50; // TODO: Depth?
 		
-			radius_x = radius_x_normal;
-			radius_y = radius_y_normal; 
+		// TODO: 
+		if (Id == 0)
+		{
+			FrameworkData.UpdateObjects = false;
+			FrameworkData.UpdateTimer = false;
+			FrameworkData.AllowPause = false;
 		}
+		
+		//TODO: Audio
+		//audio_play_sfx(sfx_hurt);
 	}
 }

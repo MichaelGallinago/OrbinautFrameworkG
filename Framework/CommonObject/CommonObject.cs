@@ -71,7 +71,7 @@ public abstract partial class CommonObject : Node2D
 		SolidData.HeightMap = null;
 	}
 
-	public void ActSolid(OrbinautFramework3.Objects.Player.Player player, Constants.SolidType type)
+	public void ActSolid(Player player, Constants.SolidType type)
 	{
 		// The following is long and replicates the method of colliding
 		// with an object from the original games
@@ -174,15 +174,12 @@ public abstract partial class CommonObject : Node2D
 			SolidData.TouchStates[pid] = Constants.TouchState.Up;
 			
 			// Move player with the object
-			player.Position.X += objX - objXPrev;
-			player.Position.Y = objY - objH + slopeOffset - ph - 1;
-			
-			px = player.Position.X;
-			
+			player.Position = new Vector2(player.Position.X + objX - objXPrev, objY - objH + slopeOffset - ph - 1);
+
 			// Is player still within the object?
 			if (type != Constants.SolidType.Top)
 			{
-				float relX = Mathf.Floor(px - objX) + combinedWidth;
+				float relX = Mathf.Floor(player.Position.X - objX) + combinedWidth;
 				if (relX > 0 && relX < combinedWidth * 2)
 				{
 					return;
@@ -190,7 +187,7 @@ public abstract partial class CommonObject : Node2D
 			}
 			else
 			{
-				float relX = Mathf.Floor(px - objX) + objW;
+				float relX = Mathf.Floor(player.Position.X - objX) + objW;
 				if (relX >= 0 - extX && relX <= objW * 2 + extX)
 				{
 					return;
@@ -205,7 +202,7 @@ public abstract partial class CommonObject : Node2D
 		}
 		
 		// Is player trying to collide with non-platform object?
-		else if (_type != SOBJ_TOP)
+		else if (type != Constants.SolidType.Top)
 		{
 			// Is player within the object area?
 			float xDist = Mathf.Floor(px - objX) + combinedWidth;
@@ -215,7 +212,7 @@ public abstract partial class CommonObject : Node2D
 			if (xDist < 0 || xDist > combinedWidth  * 2 
 			              || yDist < 0 || yDist >= combinedHeight * 2 + extY)
 			{
-				obj_act_solid_clear_push(player);
+				ClearPush(player);
 				return;
 			}
 			
@@ -226,14 +223,14 @@ public abstract partial class CommonObject : Node2D
 			// Define if player should collide vertically
 			var vCollision = false;
 			
-			if (_type != SOBJ_SIDES)
+			if (type != Constants.SolidType.Sides)
 			{
 				if (Mathf.Abs(xClip) >= Mathf.Abs(yClip))
 				{
 					vCollision = true;
 				}
 				
-				if (SharedData.player_physics >= PHYSICS_S3 and yClip <= 4)
+				if (SharedData.PlayerPhysics >= PlayerConstants.PhysicsType.S3 && yClip <= 4)
 				{
 					vCollision = true;
 				}
@@ -241,105 +238,83 @@ public abstract partial class CommonObject : Node2D
 				
 			// Try to perform vertical collision
 			if (vCollision)
-			{	
-				// Try to collide from below
-				if (yClip < 0 && _type != SOBJ_ITEMBOX)
+			{
+				switch (yClip)
 				{
-					// If player is standing on the ground, kill them
-					if (player.ysp == 0 && player.IsGrounded)
-					{
-						if (Mathf.Abs(xClip) >= 16)
+					// Try to collide from below
+					case < 0 when type != Constants.SolidType.ItemBox:
+						switch (player.Speed.Y)
 						{
-							player_kill(player);
-						}
-					}
-					
-					// Else just clip player out
-					else if (player.ysp < 0)
-					{
-						if (SharedData.player_physics >= PHYSICS_S3 && !player.IsGrounded)
-						{
-							player.gsp = 0;
-						}
+							// If player is standing on the ground, kill them
+							case 0 when player.IsGrounded:
+								if (Mathf.Abs(xClip) < 16) break;
+								player.Kill();
+								break;
+							// Else just clip player out
+							case < 0:
+								if (SharedData.PlayerPhysics >= PlayerConstants.PhysicsType.S3 && !player.IsGrounded)
+								{
+									player.GroundSpeed = 0;
+								}
 								
-						player.y -= yClip;
-						player.ysp = 0;
+								player.Position = new Vector2(player.Position.X, player.Position.Y - yClip);
+								player.Speed = new Vector2(player.Speed.X, 0);
 						
-						// Set collision flag
-						SolidData.touch_flags[pid] = 2;
-					}
-				}
-				
-				// Try to collide from above
-				else if (yClip >= 0 && yClip < 16)
-				{
-					if (player.ysp < 0)
-					{
-						return;
-					}
-					
-					// If player is within the object and moving down, let them land
-					float relX = Mathf.Floor(px - objX) + objW;
-					if (relX >= 0 - extX && relX <= objW * 2 + extX)
-					{
-						obj_act_solid_land(player, id, _type, yClip - gripY);
+								// Set collision flag
+								SolidData.TouchStates[pid] = Constants.TouchState.Down;
+								break;
+						}
+						break;
+					// Try to collide from above
+					case >= 0 and < 16:
+						if (player.Speed.Y < 0) return;
 						
-						// Set collision flag
-						SolidData.touch_flags[pid] = 1;
-					}
-				}
-					
-				// If failed to collide vertically, clear push flag
-				else
-				{
-					obj_act_solid_clear_push(player);
+						// If player is within the object and moving down, let them land
+						float relX = Mathf.Floor(px - objX) + objW;
+						if (relX >= 0 - extX && relX <= objW * 2 + extX)
+						{
+							LandOnSolid(player, this, type, Mathf.FloorToInt(yClip - gripY));
+						
+							// Set collision flag
+							SolidData.TouchStates[pid] = Constants.TouchState.Up;
+						}
+						break;
+					// If failed to collide vertically, clear push flag
+					default:
+						ClearPush(player);
+						break;
 				}
 			}
 				
 			// HORIZONTAL COLLISION
-				
 			else
 			{
 				// If failed collide horizontally, clear push flag
-				if (!(SharedData.player_physics >= PHYSICS_S3 || Mathf.Abs(yClip) > 4))
+				if (!(SharedData.PlayerPhysics >= PlayerConstants.PhysicsType.S3 || Mathf.Abs(yClip) > 4))
 				{
-					obj_act_solid_clear_push(player);
+					ClearPush(player);
 					return;
 				}
 				
 				// If player is grounded, set their push flag (facing check isn't in the original engine)
-				if (player.IsGrounded && Mathf.Sign(player.facing) == Mathf.Sign(objXf - pxf))
-				{
-					player.is_pushing = id;
-				}
-				else
-				{
-					player.is_pushing = false;
-				}
-				
+				player.PushingObject = player.IsGrounded && Mathf.Sign((sbyte)player.Facing) == Mathf.Sign(objXf - pxf) ? this : null;
+
 				// Set collision flag
-				if (pxf < objXf)
-				{
-					SolidData.touch_flags[pid] = 3;
-				}
-				else
-				{
-					SolidData.touch_flags[pid] = 4;
-				}
+				SolidData.TouchStates[pid] = pxf < objXf ? Constants.TouchState.Left : Constants.TouchState.Right;
 				
 				// Clip player out and reset their speeds
-				if (xClip != 0 && Mathf.Sign(xClip) == Mathf.Sign(player.xsp))
+				if (xClip != 0 && Mathf.Sign(xClip) == Mathf.Sign(player.Speed.X))
 				{
-					player.gsp = 0;
-					player.xsp = 0;
+					player.GroundSpeed = 0;
+					player.Speed = new Vector2(0, player.Speed.Y);
 				}
-						
-				player.x -= xClip;
+
+				player.Position = new Vector2(player.Position.X - xClip, player.Position.Y);
 			}
 		}
 		
 		// Is player trying to collide with platform object while moving down?
-		else if (player.ysp >= 0)
+		else if (player.Speed.Y >= 0f)
 		{
 			// If player isn't within the object, return
 			float relX = Mathf.Floor(px - objX) + objW;
@@ -359,17 +334,15 @@ public abstract partial class CommonObject : Node2D
 			
 			// If player isn't clipping into the object way too much, let them land
 			float yClip = objTop - playerBottom;
-			if (yClip >= -16 && yClip < 0)
-			{
-				obj_act_solid_land(player, id, _type, -yClip - gripY);
+			if (yClip is < -16 or >= 0) return;
+			LandOnSolid(player, this, type, Mathf.FloorToInt(-yClip - gripY));
 				
-				// Set collision flag
-				SolidData.touch_flags[pid] = 1;
-			}
+			// Set collision flag
+			SolidData.TouchStates[pid] = Constants.TouchState.Up;
 		}
 	}
     
-	private void LandOnSolid(OrbinautFramework3.Objects.Player.Player player, CommonObject targetObject, Constants.SolidType type, int distance)
+	private void LandOnSolid(Player player, CommonObject targetObject, Constants.SolidType type, int distance)
 	{
 		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
 		{
@@ -392,14 +365,14 @@ public abstract partial class CommonObject : Node2D
 		}
 	}
     
-	private void ClearPush(OrbinautFramework3.Objects.Player.Player player)
+	private void ClearPush(Player player)
 	{
-		if (player.IsPushing != id) return;
+		if (player.PushingObject != this) return;
 		if (player.Animation != PlayerConstants.Animation.Spin)
 		{
 			player.Animation = PlayerConstants.Animation.Move;
 		}
 				
-		player.IsPushing = false;
+		player.PushingObject = null;
 	}
 }
