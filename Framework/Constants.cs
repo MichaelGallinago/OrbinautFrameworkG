@@ -1,3 +1,5 @@
+namespace OrbinautFramework3.Framework;
+
 public static class Constants
 {
 	public const byte RenderBuffer = 0;

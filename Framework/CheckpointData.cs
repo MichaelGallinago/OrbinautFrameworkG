@@ -1,5 +1,7 @@
 using Godot;
 
+namespace OrbinautFramework3.Framework;
+
 public class CheckpointData
 {
     public Vector2I Position { get; }

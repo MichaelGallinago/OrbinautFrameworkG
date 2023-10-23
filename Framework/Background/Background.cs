@@ -1,5 +1,6 @@
 using Godot;
-using System;
+
+namespace OrbinautFramework3.Framework.Background;
 
 public partial class Background : ParallaxBackground
 {

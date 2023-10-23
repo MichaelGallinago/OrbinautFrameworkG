@@ -1,7 +1,8 @@
 using Godot;
-using System;
 
-public partial class Startup : CommonScene
+namespace OrbinautFramework3.Screens.Startup;
+
+public partial class Startup : Framework.CommonScene
 {
     public override void _Ready()
     {

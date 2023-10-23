@@ -1,7 +1,7 @@
-using Godot;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+
+namespace OrbinautFramework3.Framework;
 
 public static class PaletteUtilities
 {

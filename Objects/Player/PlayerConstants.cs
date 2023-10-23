@@ -1,4 +1,4 @@
-using System;
+namespace OrbinautFramework3.Objects.Player;
 
 public static class PlayerConstants
 {
@@ -8,6 +8,7 @@ public static class PlayerConstants
     // byte PlayerCount = instance_number(global.player_obj)
     public enum Type : byte
     {
+        None,
         Sonic,
         Tails,
         Knuckles,

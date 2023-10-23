@@ -1,5 +1,4 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Framework.Tiles;
 
 public class TileTransforms
 {

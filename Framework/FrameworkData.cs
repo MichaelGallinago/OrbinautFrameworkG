@@ -1,6 +1,11 @@
-using Godot;
-using System;
 using System.Collections.Generic;
+using Godot;
+using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player;
+using TileData = OrbinautFramework3.Framework.Tiles.TileData;
+
+namespace OrbinautFramework3.Framework;
 
 public static class FrameworkData
 {

@@ -1,6 +1,5 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Stages.TSZ;
 
-public partial class StageTSZ : CommonScene
+public partial class StageTSZ : Framework.CommonScene
 {
 }

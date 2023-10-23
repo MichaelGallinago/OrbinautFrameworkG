@@ -1,6 +1,5 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Objects.Common.GiantRing;
 
-public partial class GiantRing : CommonObject
+public partial class GiantRing : Framework.CommonObject.CommonObject
 {
 }

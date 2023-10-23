@@ -1,26 +1,27 @@
 using Godot;
-using System;
-using System.Linq;
+using OrbinautFramework3.Framework;
 
-public partial class Tail : CommonObject
+namespace OrbinautFramework3.Objects.Player;
+
+public partial class Tail : Framework.CommonObject.CommonObject
 {
-    public float Angle { get; set; }
-    public Player Target { get; set; }
+	public float Angle { get; set; }
+	public OrbinautFramework3.Objects.Player.Player Target { get; set; }
 
-    public Tail(Player target)
-    {
-	    Target = target;
-    }
+	public Tail(OrbinautFramework3.Objects.Player.Player target)
+	{
+		Target = target;
+	}
     
-    public override void _Ready()
-    {
-	    SetBehaviour(BehaviourType.Unique);
-    }
+	public override void _Ready()
+	{
+		SetBehaviour(BehaviourType.Unique);
+	}
 
-    protected override void Update(double processSpeed)
-    {
-        // Get target player
-        if (Target == null || !IsInstanceValid(Target) || Target.Type != PlayerConstants.Type.Tails)
+	protected override void Update(double processSpeed)
+	{
+		// Get target player
+		if (Target == null || !IsInstanceValid(Target) || Target.Type != PlayerConstants.Type.Tails)
 		{
 			QueueFree();
 			return;
@@ -130,5 +131,5 @@ public partial class Tail : CommonObject
 		
 		// TODO: check Triangly
 		// visible = _player.visible;
-    }
+	}
 }

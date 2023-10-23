@@ -1,12 +1,11 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Objects.Spawnable.Barrier;
 
-public partial class Barrier : CommonObject
+public partial class Barrier : Framework.CommonObject.CommonObject
 {
     public float Angle { get; set; }
-    public Player Target { get; set; }
+    public Player.Player Target { get; set; }
 
-    public Barrier(Player target)
+    public Barrier(Player.Player target)
     {
         Target = target;
     }

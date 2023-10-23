@@ -1,5 +1,7 @@
 using Godot;
 
+namespace OrbinautFramework3.Framework.CommonObject;
+
 public struct AnimationRespawnData
 {
     public int Frame;

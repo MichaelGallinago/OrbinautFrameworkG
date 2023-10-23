@@ -1,6 +1,5 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Objects.Common.Ring;
 
-public partial class Ring : CommonObject
+public partial class Ring : Framework.CommonObject.CommonObject
 {
 }

@@ -1,6 +1,7 @@
 using Godot;
-using System;
-using static Constants;
+using static OrbinautFramework3.Framework.Constants;
+
+namespace OrbinautFramework3;
 
 public partial class CollisionTileMap : TileMap
 {

@@ -1,6 +1,5 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Objects.Common.Motobug;
 
-public partial class Motobug : CommonObject
+public partial class Motobug : Framework.CommonObject.CommonObject
 {
 }

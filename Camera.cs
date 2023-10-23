@@ -1,79 +1,81 @@
-using Godot;
-using System;
 using System.Linq;
+using Godot;
+using OrbinautFramework3.Framework;
+
+namespace OrbinautFramework3;
 
 public partial class Camera : Camera2D
 {
 	private const byte CameraCentreOffset = 16;
 	public const float Tolerance = 0.000001f;
 	
-    private static readonly int[] ShakeData = {
-        1, 2, 1, 3, 1, 2, 2, 1, 2, 3, 1, 2, 1, 2, 0, 0,
-        2, 0, 3, 2, 2, 3, 2, 2, 1, 3, 0, 0, 1, 0, 1, 3
-    };
+	private static readonly int[] ShakeData = {
+		1, 2, 1, 3, 1, 2, 2, 1, 2, 3, 1, 2, 1, 2, 0, 0,
+		2, 0, 3, 2, 2, 3, 2, 2, 1, 3, 0, 0, 1, 0, 1, 3
+	};
 
-    public static Camera MainCamera { get; set; }
+	public static Camera MainCamera { get; set; }
     
-    [Export] public CommonObject Target { get; set; }
+	[Export] public Framework.CommonObject.CommonObject Target { get; set; }
     
-    private Vector2I _maxSpeed;
-    private Vector2I _speed;
-    private Vector2I _position;
-    private Vector2 _rawPosition;
-    private Vector2I _delay;
-    private Vector2I _offset;
-    private Vector2I _boundSpeed;
-    private Vector4 _bound;
-    private Vector4 _limit;
-    private Vector4 _previousLimit;
+	private Vector2I _maxSpeed;
+	private Vector2I _speed;
+	private Vector2I _position;
+	private Vector2 _rawPosition;
+	private Vector2I _delay;
+	private Vector2I _offset;
+	private Vector2I _boundSpeed;
+	private Vector4 _bound;
+	private Vector4 _limit;
+	private Vector4 _previousLimit;
 
-    private Vector2I _shakeOffset;
-    private int _shakeTimer;
+	private Vector2I _shakeOffset;
+	private int _shakeTimer;
 
-    public Camera()
-    {
-	    _bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
-        _limit = _bound;
-        _previousLimit = _bound;
-        _maxSpeed = new Vector2I(16, 16);
+	public Camera()
+	{
+		_bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
+		_limit = _bound;
+		_previousLimit = _bound;
+		_maxSpeed = new Vector2I(16, 16);
 
-        if (FrameworkData.CheckpointData is not null)
-        {
-            LimitBottom = FrameworkData.CheckpointData.BottomCameraBound;
-        }
-    }
+		if (FrameworkData.CheckpointData is not null)
+		{
+			LimitBottom = FrameworkData.CheckpointData.BottomCameraBound;
+		}
+	}
 
-    public override void _Ready()
-    {
-	    if (Target != null || Player.Players.Count == 0) return;
-		Player playerTarget = Player.Players.First();
+	public override void _Ready()
+	{
+		if (Target != null || OrbinautFramework3.Objects.Player.Player.Players.Count == 0) return;
+		OrbinautFramework3.Objects.Player.Player playerTarget = OrbinautFramework3.Objects.Player.Player.Players.First();
 		Target = playerTarget;
 		_position = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
 		_position.Y += 16;
 		
 		_rawPosition = _position;
-    }
+	}
 
-    public override void _EnterTree()
-    {
-        FrameworkData.CurrentScene.LateUpdate += EndStep;
-        MainCamera ??= this;
-    }
+	public override void _EnterTree()
+	{
+		FrameworkData.CurrentScene.LateUpdate += EndStep;
+		MainCamera ??= this;
+	}
 
-    public override void _ExitTree()
-    {
-        FrameworkData.CurrentScene.LateUpdate -= EndStep;
-        if (MainCamera == this)
-        {
-	        MainCamera = null;
-        }
-    }
+	public override void _ExitTree()
+	{
+		FrameworkData.CurrentScene.LateUpdate -= EndStep;
+		if (MainCamera == this)
+		{
+			MainCamera = null;
+		}
+	}
 
-    private void EndStep(double processSpeed)
-    {
-	    if (MainCamera != this) return;
-	    var processSpeedF = (float)processSpeed;
-	    var boundSpeed = 0;
+	private void EndStep(double processSpeed)
+	{
+		if (MainCamera != this) return;
+		var processSpeedF = (float)processSpeed;
+		var boundSpeed = 0;
 		
 		if (FrameworkData.UpdateObjects)
 		{
@@ -107,7 +109,7 @@ public partial class Camera : Camera2D
 					_speed.X = 0;
 				}
 				
-				if (Target is Player { IsGrounded: true } playerTarget)
+				if (Target is OrbinautFramework3.Objects.Player.Player { IsGrounded: true } playerTarget)
 				{	
 					if (playerTarget.IsSpinning)
 					{
@@ -300,5 +302,5 @@ public partial class Camera : Camera2D
 		_position += _shakeOffset;
 		
 		Position = new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
-    }
+	}
 }

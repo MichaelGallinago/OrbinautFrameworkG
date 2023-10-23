@@ -1,8 +1,10 @@
-using Godot;
 using System.Collections.Generic;
 using System.IO;
-using static Constants;
-using static Angles;
+using Godot;
+using static OrbinautFramework3.Framework.Constants;
+using static OrbinautFramework3.Framework.Tiles.Angles;
+
+namespace OrbinautFramework3.Framework.Tiles;
 
 public static class CollisionUtilities
 {
@@ -41,8 +43,8 @@ public static class CollisionUtilities
 			position2, direction, tileLayerType, tileMap, groundMode);
 		
 		if (isVertical && FrameworkData.CDTileFixes
-		    && direction == Direction.Positive && angle1 is not 360f
-		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
+		               && direction == Direction.Positive && angle1 is not 360f
+		               && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
 		{
 			angle1 = 360f;
 		}
@@ -52,11 +54,11 @@ public static class CollisionUtilities
 	
 	public static (sbyte, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
 		TileLayer tileLayerType, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
-    {
-	    // Get tile layer id
-	    var tileLayerId = (ushort)tileLayerType;
+	{
+		// Get tile layer id
+		var tileLayerId = (ushort)tileLayerType;
 	    
-	    // Return empty data if no tile data was found
+		// Return empty data if no tile data was found
 		if (tileLayerType == TileLayer.None || tileMap.GetLayersCount() < tileLayerId)
 		{
 			return (TileSize * 2, null);
@@ -71,12 +73,12 @@ public static class CollisionUtilities
 		// Add check to the debug list
 		//TODO: debug
 		/*
-		if (global.debug_collision)
-		{
-			ds_list_add(c_engine.collision.ds_sensors, position.X, position.Y, position.X - 
-				Mathf.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
-		}
-		*/
+	if (global.debug_collision)
+	{
+		ds_list_add(c_engine.collision.ds_sensors, position.X, position.Y, position.X - 
+			Mathf.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
+	}
+	*/
 		
 		// Get tile at position
 		var shift = 0;
@@ -188,7 +190,7 @@ public static class CollisionUtilities
 		
 		// Return both the distance and the angle
 		return ((sbyte)distance, angle);
-    }
+	}
 	
 	private static bool GetTileValidity(int index, bool isVertical, Direction direction, GroundMode groundMode)
 	{

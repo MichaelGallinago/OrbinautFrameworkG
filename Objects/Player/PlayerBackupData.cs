@@ -1,5 +1,6 @@
-using Godot;
-using System;
+using OrbinautFramework3.Framework;
+
+namespace OrbinautFramework3.Objects.Player;
 
 public class PlayerBackupData
 {

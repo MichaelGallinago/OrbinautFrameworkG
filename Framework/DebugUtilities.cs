@@ -1,6 +1,8 @@
-using Godot;
 using System;
 using System.Diagnostics;
+using Godot;
+
+namespace OrbinautFramework3.Framework;
 
 public static class DebugUtilities
 {

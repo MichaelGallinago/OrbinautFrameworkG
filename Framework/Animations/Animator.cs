@@ -1,5 +1,7 @@
-using Godot;
 using System.Collections.Generic;
+using Godot;
+
+namespace OrbinautFramework3.Framework.Animations;
 
 public static class Animator
 {

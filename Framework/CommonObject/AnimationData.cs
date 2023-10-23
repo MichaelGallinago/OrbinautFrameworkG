@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+namespace OrbinautFramework3.Framework.CommonObject;
+
 public struct AnimationData
 {
     public int Index;

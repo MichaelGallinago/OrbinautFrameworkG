@@ -1,5 +1,7 @@
 using Godot;
 
+namespace OrbinautFramework3.Framework.Input;
+
 public struct KeyboardControl
 {
     public readonly Key Up;

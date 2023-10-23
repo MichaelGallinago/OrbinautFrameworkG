@@ -1,5 +1,8 @@
 using Godot;
-using System;
+using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Input;
+
+namespace OrbinautFramework3.Objects.Player;
 
 public struct RecordedData
 {

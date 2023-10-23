@@ -1,5 +1,9 @@
-using Godot;
 using System;
+using Godot;
+using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Framework.Input;
+
+namespace OrbinautFramework3.Framework;
 
 public abstract partial class CommonScene : Node2D
 {
@@ -44,12 +48,12 @@ public abstract partial class CommonScene : Node2D
         Animator.Process(processSpeed);
     }
 
-    public void AddPlayerStep(Player player)
+    public void AddPlayerStep(OrbinautFramework3.Objects.Player.Player player)
     {
         PlayerUpdate += player.PlayerStep;
     }
 
-    public void RemovePlayerStep(Player player)
+    public void RemovePlayerStep(OrbinautFramework3.Objects.Player.Player player)
     {
         PlayerUpdate -= player.PlayerStep;
     }

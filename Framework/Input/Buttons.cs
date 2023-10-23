@@ -1,3 +1,5 @@
+namespace OrbinautFramework3.Framework.Input;
+
 public struct Buttons
 {
     public bool Up;

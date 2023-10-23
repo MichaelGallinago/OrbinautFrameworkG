@@ -1,289 +1,291 @@
-using System;
 using System.Collections.Generic;
 using Godot;
+using OrbinautFramework3.Objects.Player;
+
+namespace OrbinautFramework3.Framework.CommonObject;
 
 public abstract partial class CommonObject : Node2D
 {
-    public enum BehaviourType : byte
-    {
-        Active, Reset, Pause, Delete, Unique
-    }
+	public enum BehaviourType : byte
+	{
+		Active, Reset, Pause, Delete, Unique
+	}
     
-    [Export] public BehaviourType Behaviour { get; set; }
+	[Export] public BehaviourType Behaviour { get; set; }
     
-    public static List<CommonObject> Objects { get; }
-    public ObjectRespawnData RespawnData { get; }
-    public InteractData InteractData { get; }
-    public SolidData SolidData { get; set; }
-    public AnimatedSprite Sprite { get; set; }
+	public static List<CommonObject> Objects { get; }
+	public ObjectRespawnData RespawnData { get; }
+	public InteractData InteractData { get; }
+	public SolidData SolidData { get; set; }
+	public Animations.AnimatedSprite Sprite { get; set; }
  
-    static CommonObject()
-    {
-        Objects = new List<CommonObject>();
-    }
+	static CommonObject()
+	{
+		Objects = new List<CommonObject>();
+	}
 
-    protected CommonObject()
-    {
-        RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
-        InteractData = new InteractData();
-        SolidData = new SolidData();
-    }
+	protected CommonObject()
+	{
+		RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
+		InteractData = new InteractData();
+		SolidData = new SolidData();
+	}
 
-    public override void _EnterTree()
-    {
-        Objects.Add(this);
+	public override void _EnterTree()
+	{
+		Objects.Add(this);
         
-        FrameworkData.CurrentScene.EarlyUpdate += EarlyUpdate;
-        FrameworkData.CurrentScene.Update += Update;
-        FrameworkData.CurrentScene.LateUpdate += LateUpdate;
-    }
+		FrameworkData.CurrentScene.EarlyUpdate += EarlyUpdate;
+		FrameworkData.CurrentScene.Update += Update;
+		FrameworkData.CurrentScene.LateUpdate += LateUpdate;
+	}
 
-    public override void _ExitTree()
-    {
-        Objects.Remove(this);
+	public override void _ExitTree()
+	{
+		Objects.Remove(this);
         
-        FrameworkData.CurrentScene.EarlyUpdate -= EarlyUpdate;
-        FrameworkData.CurrentScene.Update -= Update;
-        FrameworkData.CurrentScene.LateUpdate -= LateUpdate;
-    }
+		FrameworkData.CurrentScene.EarlyUpdate -= EarlyUpdate;
+		FrameworkData.CurrentScene.Update -= Update;
+		FrameworkData.CurrentScene.LateUpdate -= LateUpdate;
+	}
 
-    protected virtual void EarlyUpdate(double processSpeed) {}
-    protected virtual void Update(double processSpeed) {}
-    protected virtual void LateUpdate(double processSpeed) {}
+	protected virtual void EarlyUpdate(double processSpeed) {}
+	protected virtual void Update(double processSpeed) {}
+	protected virtual void LateUpdate(double processSpeed) {}
 
-    public void SetBehaviour(BehaviourType behaviour)
-    {
-        if (Behaviour == BehaviourType.Delete) return;
-        Behaviour = behaviour;
-    }
+	public void SetBehaviour(BehaviourType behaviour)
+	{
+		if (Behaviour == BehaviourType.Delete) return;
+		Behaviour = behaviour;
+	}
 
-    public void ResetZIndex()
-    {
-        ZIndex = RespawnData.ZIndex;
-    }
+	public void ResetZIndex()
+	{
+		ZIndex = RespawnData.ZIndex;
+	}
     
-    public void SetSolid(Vector2I radius, Vector2I offset = new())
-    {
-        SolidData.Radius = radius;
-        SolidData.Offset = offset;
-        SolidData.HeightMap = null;
-    }
+	public void SetSolid(Vector2I radius, Vector2I offset = new())
+	{
+		SolidData.Radius = radius;
+		SolidData.Offset = offset;
+		SolidData.HeightMap = null;
+	}
 
-    public void ActSolid(Player player, Constants.SolidType type)
-    {
-	    // The following is long and replicates the method of colliding
+	public void ActSolid(OrbinautFramework3.Objects.Player.Player player, Constants.SolidType type)
+	{
+		// The following is long and replicates the method of colliding
 		// with an object from the original games
 
 		// Get player ID
-		var _pid = player.player_id;
+		int pid = player.Id;
 		
 		// Clear collision flag
-		data_solid.touch_flags[_pid] = 0;
+		SolidData.TouchStates[pid] = Constants.TouchState.None;
 		
 		// Exit if can't collide
-		if player.data_solid.radius_x <= 0 or player.data_solid.radius_y <= 0 or !player.object_interaction 
+		if (player.SolidData.Radius.X <= 0 || player.SolidData.Radius.Y <= 0 || !player.ObjectInteraction)
 		{
-			exit;
+			return;
 		}
 		
-		if data_solid.radius_x <= 0 or data_solid.radius_y <= 0
+		if (SolidData.Radius.X <= 0 || SolidData.Radius.Y <= 0)
 		{
-			exit;
+			return;
 		}
 		
 		// Get player data
-		var _px = player.x;
-		var _py = player.y;
-		var _pw = player.data_solid.radius_x;
-		var _ph = player.data_solid.radius_y;
+		float px = player.Position.X;
+		float py = player.Position.Y;
+		int pw = player.SolidData.Radius.X;
+		int ph = player.SolidData.Radius.Y;
 		
-		var _pxf = floor(_px);
-		var _pyf = floor(_py);
+		float pxf = Mathf.Floor(px);
+		float pyf = Mathf.Floor(py);
 		
 		// Get object data
-		var _obj_x_prev = data_solid.offset_x + xprevious;
-		var _obj_x = data_solid.offset_x + x;
-		var _obj_y = data_solid.offset_y + y;
-		var _obj_w = data_solid.radius_x;
-		var _obj_h = data_solid.radius_y;
-		var _obj_hmap = data_solid.height_map;
+		int objXPrev = SolidData.Offset.X + xprevious;
+		float objX = SolidData.Offset.X + Position.X;
+		float objY = SolidData.Offset.Y + Position.Y;
+		int objW = SolidData.Radius.X;
+		int objH = SolidData.Radius.Y;
+		short[] objHmap = SolidData.HeightMap;
 		
-		var _obj_xf = floor(_obj_x);
-		var _obj_yf = floor(_obj_y);
+		float objXf = Mathf.Floor(objX);
+		float objYf = Mathf.Floor(objY);
 		
-		var _combined_width  = _obj_w + player.data_solid.radius_x + 1;
-		var _combined_height = _obj_h + player.data_solid.radius_y;
+		int combinedWidth  = objW + player.SolidData.Radius.X + 1;
+		int combinedHeight = objH + player.SolidData.Radius.Y;
 		
-		var _slope_offset = 0;
-		var _grip_y = 4;
-		var _ext_x = 0;
-		var _ext_y = 0;
+		var slopeOffset = 0f;
+		var gripY = 4;
+		var extX = 0;
+		var extY = 0;
 		
 		// Calculate offset for a sloped object
-		if array_length(_obj_hmap) > 0
+		if (objHmap.Length > 0)
 		{
-			var _index;
+			int index;
 			
-			if image_xscale >= 0
+			if (Scale.X >= 0)
 			{
-				_index = floor(_px - _obj_x) + _obj_w;
+				index = Mathf.FloorToInt(px - objX) + objW;
 			}
 			else
 			{
-				_index = floor(_obj_x - _px) + _obj_w;
+				index = Mathf.FloorToInt(objX - px) + objW;
 			}	
 			
-			_index = clamp(_index, 0, array_length(_obj_hmap) - 1);
+			index = Mathf.Clamp(index, 0, objHmap.Length - 1);
 			
-			_slope_offset = (_obj_h - _obj_hmap[_index]) * image_yscale;	
+			slopeOffset = (objH - objHmap[index]) * Scale.Y;	
 		}
 		else
 		{
-			_slope_offset = 0;
+			slopeOffset = 0;
 		}
 		
 		// Extend collision box
-		if global.better_solid_collision
+		if (SharedData.BetterSolidCollision)
 		{
-			_ext_x = _pw;
-			_ext_y = _grip_y;
+			extX = pw;
+			extY = gripY;
 		}
 		
 		// Add collision check to the debug list
-		if global.debug_collision == 3
+		if (SharedData.DebugCollision == 3)
 		{
-			var _ds_list = c_engine.collision.ds_solids;
+			var dsList = c_engine.collision.ds_solids;
 			
-			if ds_list_find_index(_ds_list, id) == -1
+			if (ds_list_find_index(dsList, this) == -1)
 			{
-				ds_list_add(_ds_list, _obj_x - _obj_w, _obj_y - _obj_h + _slope_offset, _obj_x + _obj_w, _obj_y + _obj_h + _slope_offset, id);
+				ds_list_add(dsList, objX - objW, objY - objH + slopeOffset, objX + objW, objY + objH + slopeOffset, this);
 			}
 			
-			if ds_list_find_index(_ds_list, player) == -1
+			if (ds_list_find_index(dsList, player) == -1)
 			{
-				ds_list_add(_ds_list, _px - _pw, _py - _ph, _px + _pw, _py + _ph, player);
+				ds_list_add(dsList, px - pw, py - ph, px + pw, py + ph, player);
 			}
 		}
 		
 		// Is player standing on this object?
-		if player.is_on_object == id
+		if (player.OnObject == this)
 		{	
 			// Set collision flag
-			data_solid.touch_flags[_pid] = 1;
+			SolidData.TouchStates[pid] = Constants.TouchState.Up;
 			
 			// Move player with the object
-			player.x += _obj_x - _obj_x_prev;
-			player.y = _obj_y - _obj_h + _slope_offset - _ph - 1;
+			player.Position.X += objX - objXPrev;
+			player.Position.Y = objY - objH + slopeOffset - ph - 1;
 			
-			_px = player.x;
+			px = player.Position.X;
 			
 			// Is player still within the object?
-			if _type != SOBJ_TOP
+			if (type != Constants.SolidType.Top)
 			{
-				var _rel_x = floor(_px - _obj_x) + _combined_width;
-				if _rel_x > 0 and _rel_x < _combined_width * 2
+				float relX = Mathf.Floor(px - objX) + combinedWidth;
+				if (relX > 0 && relX < combinedWidth * 2)
 				{
-					exit;
+					return;
 				}
 			}
 			else
 			{
-				var _rel_x = floor(_px - _obj_x) + _obj_w;
-				if _rel_x >= 0 - _ext_x and _rel_x <= _obj_w * 2 + _ext_x
+				float relX = Mathf.Floor(px - objX) + objW;
+				if (relX >= 0 - extX && relX <= objW * 2 + extX)
 				{
-					exit;
+					return;
 				}
 			}
 			
 			// If not, clear collision flag
-			data_solid.touch_flags[_pid] = 0;
+			SolidData.TouchStates[pid] = Constants.TouchState.None;
 			
 			// Clear player's flag
-			player.is_on_object = false;
+			player.OnObject = null;
 		}
 		
 		// Is player trying to collide with non-platform object?
-		else if _type != SOBJ_TOP
+		else if (_type != SOBJ_TOP)
 		{
 			// Is player within the object area?
-			var _x_dist = floor(_px - _obj_x) + _combined_width;
-			var _y_dist = floor(_py - _obj_y) + _combined_height - _slope_offset + _grip_y;
+			float xDist = Mathf.Floor(px - objX) + combinedWidth;
+			float yDist = Mathf.Floor(py - objY) + combinedHeight - slopeOffset + gripY;
 			
-			// If not, clear push flag and exit
-			if _x_dist < 0 or _x_dist > _combined_width  * 2 
-			or _y_dist < 0 or _y_dist >= _combined_height * 2 + _ext_y
+			// If not, clear push flag and return
+			if (xDist < 0 || xDist > combinedWidth  * 2 
+			              || yDist < 0 || yDist >= combinedHeight * 2 + extY)
 			{
 				obj_act_solid_clear_push(player);
-				exit;
+				return;
 			}
 			
 			// Calculate clip distance
-			var _x_clip = _pxf < _obj_xf ? _x_dist : _x_dist - _combined_width  * 2;
-			var _y_clip = _pyf < _obj_yf ? _y_dist : _y_dist - _combined_height * 2 - _grip_y;
+			float xClip = pxf < objXf ? xDist : xDist - combinedWidth  * 2;
+			float yClip = pyf < objYf ? yDist : yDist - combinedHeight * 2 - gripY;
 			
 			// Define if player should collide vertically
-			var _v_collision = false;
+			var vCollision = false;
 			
-			if _type != SOBJ_SIDES
+			if (_type != SOBJ_SIDES)
 			{
-				if abs(_x_clip) >= abs(_y_clip)
+				if (Mathf.Abs(xClip) >= Mathf.Abs(yClip))
 				{
-					_v_collision = true;
+					vCollision = true;
 				}
 				
-				if global.player_physics >= PHYSICS_S3 and _y_clip <= 4
+				if (SharedData.player_physics >= PHYSICS_S3 and yClip <= 4)
 				{
-					_v_collision = true;
+					vCollision = true;
 				}
 			}
 				
 			// Try to perform vertical collision
-			if _v_collision
+			if (vCollision)
 			{	
 				// Try to collide from below
-				if _y_clip < 0 and _type != SOBJ_ITEMBOX
+				if (yClip < 0 && _type != SOBJ_ITEMBOX)
 				{
 					// If player is standing on the ground, kill them
-					if player.ysp == 0 and player.IsGrounded
+					if (player.ysp == 0 && player.IsGrounded)
 					{
-						if abs(_x_clip) >= 16
+						if (Mathf.Abs(xClip) >= 16)
 						{
 							player_kill(player);
 						}
 					}
 					
 					// Else just clip player out
-					else if player.ysp < 0
+					else if (player.ysp < 0)
 					{
-						if global.player_physics >= PHYSICS_S3 and !player.IsGrounded
+						if (SharedData.player_physics >= PHYSICS_S3 && !player.IsGrounded)
 						{
 							player.gsp = 0;
 						}
 								
-						player.y -= _y_clip;
+						player.y -= yClip;
 						player.ysp = 0;
 						
 						// Set collision flag
-						data_solid.touch_flags[_pid] = 2;
+						SolidData.touch_flags[pid] = 2;
 					}
 				}
 				
 				// Try to collide from above
-				else if _y_clip >= 0 and _y_clip < 16
+				else if (yClip >= 0 && yClip < 16)
 				{
-					if player.ysp < 0
+					if (player.ysp < 0)
 					{
-						exit;
+						return;
 					}
 					
 					// If player is within the object and moving down, let them land
-					var _rel_x = floor(_px - _obj_x) + _obj_w;
-					if _rel_x >= 0 - _ext_x and _rel_x <= _obj_w * 2 + _ext_x
+					float relX = Mathf.Floor(px - objX) + objW;
+					if (relX >= 0 - extX && relX <= objW * 2 + extX)
 					{
-						obj_act_solid_land(player, id, _type, _y_clip - _grip_y);
+						obj_act_solid_land(player, id, _type, yClip - gripY);
 						
 						// Set collision flag
-						data_solid.touch_flags[_pid] = 1;
+						SolidData.touch_flags[pid] = 1;
 					}
 				}
 					
@@ -299,14 +301,14 @@ public abstract partial class CommonObject : Node2D
 			else
 			{
 				// If failed collide horizontally, clear push flag
-				if !(global.player_physics >= PHYSICS_S3 or abs(_y_clip) > 4)
+				if (!(SharedData.player_physics >= PHYSICS_S3 || Mathf.Abs(yClip) > 4))
 				{
 					obj_act_solid_clear_push(player);
-					exit;
+					return;
 				}
 				
 				// If player is grounded, set their push flag (facing check isn't in the original engine)
-				if player.IsGrounded and sign(player.facing) == sign(_obj_xf - _pxf)
+				if (player.IsGrounded && Mathf.Sign(player.facing) == Mathf.Sign(objXf - pxf))
 				{
 					player.is_pushing = id;
 				}
@@ -316,88 +318,88 @@ public abstract partial class CommonObject : Node2D
 				}
 				
 				// Set collision flag
-				if _pxf < _obj_xf
+				if (pxf < objXf)
 				{
-					data_solid.touch_flags[_pid] = 3;
+					SolidData.touch_flags[pid] = 3;
 				}
 				else
 				{
-					data_solid.touch_flags[_pid] = 4;
+					SolidData.touch_flags[pid] = 4;
 				}
 				
 				// Clip player out and reset their speeds
-				if _x_clip != 0 and sign(_x_clip) == sign(player.xsp)
+				if (xClip != 0 && Mathf.Sign(xClip) == Mathf.Sign(player.xsp))
 				{
 					player.gsp = 0;
 					player.xsp = 0;
 				}
 						
-				player.x -= _x_clip;
+				player.x -= xClip;
 			}
 		}
 		
 		// Is player trying to collide with platform object while moving down?
-		else if player.ysp >= 0
+		else if (player.ysp >= 0)
 		{
-			// If player isn't within the object, exit
-			var _rel_x = floor(_px - _obj_x) + _obj_w;
-			if _rel_x < 0 - _ext_x or _rel_x > _obj_w * 2 + _ext_x
+			// If player isn't within the object, return
+			float relX = Mathf.Floor(px - objX) + objW;
+			if (relX < 0 - extX || relX > objW * 2 + extX)
 			{
-				exit;
+				return;
 			}
 			
-			// If player is above the object's top, exit
-			var _obj_top = floor(_obj_y - _obj_h);
-			var _player_bottom = floor(_py + _ph) + _grip_y;
+			// If player is above the object's top, return
+			float objTop = Mathf.Floor(objY - objH);
+			float playerBottom = Mathf.Floor(py + ph) + gripY;
 			
-			if _obj_top > _player_bottom
+			if (objTop > playerBottom)
 			{
-				exit;
+				return;
 			}
 			
 			// If player isn't clipping into the object way too much, let them land
-			var _y_clip = _obj_top - _player_bottom;
-			if _y_clip >= -16 and _y_clip < 0
+			float yClip = objTop - playerBottom;
+			if (yClip >= -16 && yClip < 0)
 			{
-				obj_act_solid_land(player, id, _type, -_y_clip - _grip_y);
+				obj_act_solid_land(player, id, _type, -yClip - gripY);
 				
 				// Set collision flag
-				data_solid.touch_flags[_pid] = 1;
+				SolidData.touch_flags[pid] = 1;
 			}
 		}
-    }
+	}
     
-    private void LandOnSolid(Player player, CommonObject targetObject, Constants.SolidType type, int distance)
-    {
-	    if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
-	    {
-		    player.ResetState();
-	    }
+	private void LandOnSolid(OrbinautFramework3.Objects.Player.Player player, CommonObject targetObject, Constants.SolidType type, int distance)
+	{
+		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
+		{
+			player.ResetState();
+		}
 				
-	    player.Position = new Vector2(player.Position.X, player.Position.Y - distance + 1);
+		player.Position = new Vector2(player.Position.X, player.Position.Y - distance + 1);
 				
-	    player.GroundSpeed = player.Speed.X;
-	    player.Speed = new Vector2(player.Speed.X, 0);
-	    player.Angle = 360f;
+		player.GroundSpeed = player.Speed.X;
+		player.Speed = new Vector2(player.Speed.X, 0);
+		player.Angle = 360f;
 				
-	    player.OnObject = targetObject;
+		player.OnObject = targetObject;
 				
-	    if (!player.IsGrounded)
-	    {
-		    player.IsGrounded = true;
+		if (!player.IsGrounded)
+		{
+			player.IsGrounded = true;
 
-		    player.Land();
-	    }
-    }
+			player.Land();
+		}
+	}
     
-    private void ClearPush(Player player)
-    {
-	    if (player.IsPushing != id) return;
-	    if (player.Animation != PlayerConstants.Animation.Spin)
-	    {
-		    player.Animation = PlayerConstants.Animation.Move;
-	    }
+	private void ClearPush(OrbinautFramework3.Objects.Player.Player player)
+	{
+		if (player.IsPushing != id) return;
+		if (player.Animation != PlayerConstants.Animation.Spin)
+		{
+			player.Animation = PlayerConstants.Animation.Move;
+		}
 				
-	    player.IsPushing = false;
-    }
+		player.IsPushing = false;
+	}
 }

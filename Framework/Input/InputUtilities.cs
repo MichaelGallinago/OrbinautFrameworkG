@@ -1,6 +1,7 @@
-using Godot;
 using System.Collections.Generic;
-using System.Linq;
+using Godot;
+
+namespace OrbinautFramework3.Framework.Input;
 
 public static class InputUtilities
 {
@@ -33,7 +34,7 @@ public static class InputUtilities
 
     public static void Process()
     {
-        _gamepads = Input.GetConnectedJoypads();
+        _gamepads = Godot.Input.GetConnectedJoypads();
         for (var device = 0; device < DeviceCount; device++)
         {
             if (device == KeyboardId || _gamepads.Contains(device)) continue;
@@ -71,7 +72,7 @@ public static class InputUtilities
     public static void SetVibration(int device, float weakMagnitude, float strongMagnitude, float duration)
     {
         if (!FrameworkData.GamepadVibration || device > Constants.MaxInputDevices || _gamepads.Contains(device)) return;
-        Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
+        Godot.Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
     }
 
     private static void DeviceProcess(int device, bool isKeyboardOnly)
@@ -109,15 +110,15 @@ public static class InputUtilities
         bool previousDebugButtonDownState = DebugButtonDown;
         foreach (KeyboardControl control in FrameworkData.KeyboardControl)
         {
-            down.Up = down.Up || Input.IsPhysicalKeyPressed(control.Up);
-            down.Down = down.Down || Input.IsPhysicalKeyPressed(control.Down);
-            down.Left = down.Left || Input.IsPhysicalKeyPressed(control.Left);
-            down.Right = down.Right || Input.IsPhysicalKeyPressed(control.Right);
-            down.A = down.A || Input.IsPhysicalKeyPressed(control.A);
-            down.B = down.B || Input.IsPhysicalKeyPressed(control.B);
-            down.C = down.C || Input.IsPhysicalKeyPressed(control.C);
-            down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
-            DebugButtonDown = Input.IsPhysicalKeyPressed(control.Debug);
+            down.Up = down.Up || Godot.Input.IsPhysicalKeyPressed(control.Up);
+            down.Down = down.Down || Godot.Input.IsPhysicalKeyPressed(control.Down);
+            down.Left = down.Left || Godot.Input.IsPhysicalKeyPressed(control.Left);
+            down.Right = down.Right || Godot.Input.IsPhysicalKeyPressed(control.Right);
+            down.A = down.A || Godot.Input.IsPhysicalKeyPressed(control.A);
+            down.B = down.B || Godot.Input.IsPhysicalKeyPressed(control.B);
+            down.C = down.C || Godot.Input.IsPhysicalKeyPressed(control.C);
+            down.Start = down.Start || Godot.Input.IsPhysicalKeyPressed(control.Start);
+            DebugButtonDown = Godot.Input.IsPhysicalKeyPressed(control.Debug);
         }
 
         DebugButtonPress = !previousDebugButtonDownState && DebugButtonDown;
@@ -125,13 +126,13 @@ public static class InputUtilities
 
     private static void GamepadProcess(int device, ref Buttons down)
     {
-        down.Up = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
-        down.Down = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
-        down.Left = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
-        down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
-        down.A = Input.IsJoyButtonPressed(device, JoyButton.A);
-        down.B = Input.IsJoyButtonPressed(device, JoyButton.B);
-        down.C = Input.IsJoyButtonPressed(device, JoyButton.Y);
-        down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
+        down.Up = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
+        down.Down = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
+        down.Left = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
+        down.Right = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
+        down.A = Godot.Input.IsJoyButtonPressed(device, JoyButton.A);
+        down.B = Godot.Input.IsJoyButtonPressed(device, JoyButton.B);
+        down.C = Godot.Input.IsJoyButtonPressed(device, JoyButton.Y);
+        down.Start = Godot.Input.IsJoyButtonPressed(device, JoyButton.Start);
     }
 }

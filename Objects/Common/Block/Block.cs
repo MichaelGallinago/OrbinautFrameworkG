@@ -1,7 +1,9 @@
 using Godot;
-using System;
+using OrbinautFramework3.Objects.Player;
 
-public partial class Block : CommonObject
+namespace OrbinautFramework3.Objects.Common.Block;
+
+public partial class Block : Framework.CommonObject.CommonObject
 {
     public Block()
     {
@@ -10,7 +12,7 @@ public partial class Block : CommonObject
 
     protected override void Update(double processSpeed)
     {
-        foreach (Player player in Player.Players)
+        foreach (OrbinautFramework3.Objects.Player.Player player in OrbinautFramework3.Objects.Player.Player.Players)
         {
             // Combo counter and spin flag are cleared when player lands, so back them up
             bool isSpinning = player.IsSpinning;
