@@ -210,7 +210,7 @@ public abstract partial class CommonObject : Node2D
 			
 			// If not, clear push flag and return
 			if (xDist < 0 || xDist > combinedWidth  * 2 
-			              || yDist < 0 || yDist >= combinedHeight * 2 + extY)
+			              || yDist < 0 || yDist > combinedHeight * 2 + extY)
 			{
 				ClearPush(player);
 				return;
@@ -230,7 +230,7 @@ public abstract partial class CommonObject : Node2D
 					vCollision = true;
 				}
 				
-				if (SharedData.PlayerPhysics >= PlayerConstants.PhysicsType.S3 && yClip <= 4)
+				if (SharedData.PlayerPhysics == PlayerConstants.PhysicsType.SK && yClip <= 4)
 				{
 					vCollision = true;
 				}
@@ -290,7 +290,7 @@ public abstract partial class CommonObject : Node2D
 			else
 			{
 				// If failed collide horizontally, clear push flag
-				if (!(SharedData.PlayerPhysics >= PlayerConstants.PhysicsType.S3 || Mathf.Abs(yClip) > 4))
+				if (!(SharedData.PlayerPhysics == PlayerConstants.PhysicsType.SK || Mathf.Abs(yClip) > 4))
 				{
 					ClearPush(player);
 					return;
