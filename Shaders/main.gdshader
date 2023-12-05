@@ -21,12 +21,11 @@ uniform vec2      u_texelSize2;
 uniform float     u_index2[PALETTE_LIMIT];
 
 uniform bool  u_parallaxActive;
-uniform vec2  u_offset;
-uniform float u_width;
+uniform vec4  u_offset;
+uniform vec2  u_size;
 uniform float u_scaling;
 uniform float u_inclineHeight;
 uniform float u_inclineStep;
-uniform float u_height;
 	
 uniform bool u_overlapActive;
 uniform vec2 u_mapSizeSurf;
@@ -39,22 +38,23 @@ vec2 parallax(vec2 uv, vec2 texturePixelSize)
 	vec2 Position = uv / texturePixelSize;
 	
 	// Set the pixel offset (can be negative)
-	float OffsetX = u_offset.x; 
+	vec2 Offset = u_offset.xy;
 	
 	// Adjust the pixel offset based on height and incline step
 	if (u_inclineHeight != 0.0)
 	{
-		OffsetX *= floor((Position.y / u_scaling - u_height) 
+		Offset.x *= floor((Position.y / u_scaling - u_size.y) 
 			/ u_inclineHeight + 1.0) * u_inclineStep + 1.0;
 	}
 	
+
 	// Normalise the offset value to ensure
 	// the final pixel position is within u_width
-	OffsetX = mod(mod(floor(OffsetX) + Position.x - u_offset.y, u_width) 
-		+ u_width, u_width) - Position.x;
-
+	Offset.xy = mod(mod(floor(Offset.xy) + Position - u_offset.zw, u_size)
+		+ u_size, u_size) - Position;
+		
 	// Return the new pixel position with the offset converted to uv coordinates
-    return vec2(uv.x + OffsetX * texturePixelSize.x, uv.y);
+	return uv + Offset * texturePixelSize;
 }
 
 // Surface Stack

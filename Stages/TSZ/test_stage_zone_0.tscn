@@ -22,11 +22,10 @@ shader_parameter/u_texelSize2 = null
 shader_parameter/u_index2 = null
 shader_parameter/u_parallaxActive = null
 shader_parameter/u_offset = null
-shader_parameter/u_width = null
+shader_parameter/u_size = null
 shader_parameter/u_scaling = null
 shader_parameter/u_inclineHeight = null
 shader_parameter/u_inclineStep = null
-shader_parameter/u_height = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
