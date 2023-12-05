@@ -16,13 +16,7 @@ public static class MathB
         -256,-255,-255,-255,-254,-254,-253,-252,-251,-249,-248,-246,-244,-243,-241,-238,-236,-234,-231,-228,-225,-222,-219,-216,-212,-209,-205,-201,-197,-193,-189,-185,-181,-176,-171,-167,-162,-157,-152,-147,-142,-136,-131,-126,-120,-115,-109,-103,-97,-92,-86,-80,-74,-68,-62,-56,-49,-43,-37,-31,-25,-18,-12,-6
     };
     
-    public static short Sin(byte angle)
-    {
-        return Array[angle];
-    }
-    
-    public static byte Cos(byte angle)
-    {
-        
-    }
+    public static short Sin(byte angle) => Array[angle];
+    public static short Cos(byte angle) => Array[angle ^ 128];
+    public static (short, short) SinCos(byte angle) => (Sin(angle), Cos(angle));
 }
