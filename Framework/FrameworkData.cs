@@ -39,6 +39,8 @@ public static class FrameworkData
 
     static FrameworkData()
     {
+        GD.Randomize();
+
         KeyboardControl = new List<KeyboardControl>
         {
             new(Key.Up, Key.Down, Key.Left, Key.Right, 

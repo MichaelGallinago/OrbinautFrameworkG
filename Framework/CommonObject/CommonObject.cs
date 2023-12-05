@@ -52,6 +52,7 @@ public abstract partial class CommonObject : Node2D
 	protected virtual void EarlyUpdate(double processSpeed) {}
 	protected virtual void Update(double processSpeed) {}
 	protected virtual void LateUpdate(double processSpeed) {}
+	protected virtual void Initialize() {}
 
 	public void SetBehaviour(BehaviourType behaviour)
 	{
