@@ -80,8 +80,9 @@ public partial class Camera : Camera2D
 
 		if (FrameworkData.UpdateObjects)
 		{
-			// Get boundary update speed
 			var processSpeedF = (float)processSpeed;
+			
+			// Get boundary update speed
 			boundSpeed = Math.Max(2, _boundSpeed.X) * processSpeedF;
 			
 			FollowTarget(processSpeedF);
@@ -141,21 +142,9 @@ public partial class Camera : Camera2D
 		{
 			Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_rawPosition;
 
-			int extX = FrameworkData.CDCamera ? 0 : 16;
+			int extX = FrameworkData.CDCamera ? 0 : 8;
 			
-			int distanceX = targetPosition.X - centre.X;
-			if (distanceX > 0)
-			{
-				_speed.X = Math.Min(distanceX, _maxSpeed.X);    
-			}
-			else if (distanceX + extX < 0)
-			{ 
-				_speed.X = Math.Max(distanceX + extX, -_maxSpeed.X);  
-			}
-			else
-			{
-				_speed.X = 0;
-			}
+			_speed.X = UpdateSpeed(targetPosition.X - centre.X + extX, extX, _maxSpeed.X);
 			
 			if (Target is Objects.Player.Player { IsGrounded: true } playerTarget)
 			{	
@@ -169,19 +158,7 @@ public partial class Camera : Camera2D
 			} 
 			else
 			{
-				int distanceY = targetPosition.Y - centre.Y;
-				if (distanceY - 32 > 0)
-				{
-					_speed.Y = Math.Min(distanceY - 32, _maxSpeed.Y);  
-				}
-				else if (distanceY + 32 < 0)
-				{ 
-					_speed.Y = Math.Max(distanceY + 32, -_maxSpeed.Y);  
-				} 
-				else
-				{
-					_speed.Y = 0;
-				}
+				_speed.Y = UpdateSpeed(targetPosition.Y - centre.Y, 32, _maxSpeed.Y);
 			}
 		}
 		else
@@ -199,25 +176,16 @@ public partial class Camera : Camera2D
 		{
 			_shakeOffset = new Vector2I();
 		}
-		
-		switch (_delay.X)
+
+		for (var i = 0; i < 2; i++)
 		{
-			case 0:
-				_rawPosition.X += _speed.X * processSpeedF;
-				break;
-			case > 0:
-				_delay.X--;
-				break;
-		}
-		
-		switch (_delay.Y)
-		{
-			case 0:
-				_rawPosition.Y += _speed.Y * processSpeedF;
-				break;
-			case > 0:
-				_delay.Y--;
-				break;
+			if (_delay[i] > 0)
+			{
+				_delay[i]--;
+				continue;
+			}
+			
+			_rawPosition[i] += _speed[i] * processSpeedF;
 		}
 	}
 
@@ -229,5 +197,12 @@ public partial class Camera : Camera2D
 			< 0 => -1 - shakeOffset,
 			_ => -shakeOffset
 		};
+	}
+
+	private static int UpdateSpeed(int difference, int threshold, int maxSpeed)
+	{
+		int distance = Math.Abs(difference);
+		return distance <= threshold ? 0 : 
+			Math.Clamp((distance - threshold) * Math.Sign(difference), -maxSpeed, maxSpeed);
 	}
 }
