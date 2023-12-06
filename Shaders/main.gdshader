@@ -1,6 +1,7 @@
 shader_type canvas_item;
 
-// Set to 1 to significantly speed up color replacement (requires a sorted palette)
+// Set to 1 to significantly speed up 
+// color replacement (requires a sorted palette)
 #define BINARY_SEARCH 0
 
 // Also used in c_engine -> Create Event -> Initialise Palette
@@ -33,7 +34,7 @@ uniform sampler2D u_surface;
 
 // Background Parallax
 vec2 parallax(vec2 uv, vec2 texturePixelSize) 
-{		
+{
 	// Get the position on the sprite
 	vec2 Position = uv / texturePixelSize;
 	
@@ -41,7 +42,7 @@ vec2 parallax(vec2 uv, vec2 texturePixelSize)
 	vec2 Offset = u_offset.xy;
 	
 	// Adjust the pixel offset based on height and incline step
-	if (u_inclineHeight != 0.0)
+	if (u_inclineHeight != 0.0) 
 	{
 		Offset.x *= floor((Position.y / u_scaling - u_size.y) 
 			/ u_inclineHeight + 1.0) * u_inclineStep + 1.0;
@@ -139,7 +140,7 @@ vec4 replaceColour(vec4 target, sampler2D tex, vec3 UVs,
 // Palette Swap
 void fragment() {
 	vec4 OutColour = texture(TEXTURE, u_parallaxActive ? 
-		parallax(UV, TEXTURE_PIXEL_SIZE) : UV);	
+		parallax(UV, TEXTURE_PIXEL_SIZE) : UV);
 
 	if (OutColour == ALPHA)
 	{

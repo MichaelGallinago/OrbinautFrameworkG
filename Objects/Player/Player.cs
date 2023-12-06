@@ -174,7 +174,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if (FrameworkData.SavedBarrier != Constants.Barrier.None)
 			{
 				BarrierType = FrameworkData.SavedBarrier;
-				AddChild(new OrbinautFramework3.Objects.Spawnable.Barrier.Barrier(this));
+				AddChild(new Spawnable.Barrier.Barrier(this));
 			}
 		
 			FrameworkData.SavedBarrier = 0;

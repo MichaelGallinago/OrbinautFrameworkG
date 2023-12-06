@@ -19,7 +19,7 @@ public partial class AnimatedSprite : AnimatedSprite2D
 
     static AnimatedSprite()
     {
-        Sprites = new List<AnimatedSprite>();
+        Sprites = [];
     }
     
     public AnimatedSprite()
@@ -37,11 +37,10 @@ public partial class AnimatedSprite : AnimatedSprite2D
         if (GetParent() is CommonObject.CommonObject commonObject)
         {
             commonObject.Sprite ??= this;
+            return;
         }
-        else
-        {
-            Animator.AutoAnimatedSprites.Add(this, SpeedScale);
-        }
+        
+        Animator.AutoAnimatedSprites.Add(this, SpeedScale);
     }
 
     public override void _ExitTree()
@@ -53,19 +52,22 @@ public partial class AnimatedSprite : AnimatedSprite2D
         }
     }
 
-    public void SetAnimation(StringName animation, int[] duration = null, 
+    public int GetDuration() => Duration[Index];
+    public double GetTimer() => Timer == 0 ? Duration[Index] : Timer;
+
+    public void SetAnimation(StringName animationName, int[] duration = null, 
         int startFrame = 0, int loopFrame = 0, int[] order = null)
     {	
-        if (!Sync && Animation == animation) return;
-        SetAnimationData(animation, duration, order);
+        if (!Sync && Animation == animationName) return;
+        SetAnimationData(animationName, duration, order);
         Sync = false;
-        Frame = startFrame;
+        Index = startFrame;
         LoopFrame = loopFrame;
     }
 
     public void SetSyncAnimation(StringName animation, int[] duration = null, int[] order = null)
     {
-        if (Sync && Animation == animation) return;
+        if (!Sync && Animation == animation) return;
         SetAnimationData(animation, duration, order);
         Sync = true;
     }
@@ -87,13 +89,13 @@ public partial class AnimatedSprite : AnimatedSprite2D
             Timer = 0d;
         }
 
-        Frame = frame;
+        Index = frame;
         Sync = false;
     }
     
     public void UpdateDuration(int[] duration)
     {
-        duration ??= new[] { 0 };
+        duration ??= new[] { 0 }; // TODO: check if not needed
         
         if (Timer < 0d)
         {
@@ -105,10 +107,11 @@ public partial class AnimatedSprite : AnimatedSprite2D
 
     public bool CheckInView()
     {
-        Vector2 view = Camera.MainCamera.Position;
+        Vector4I bounds = Camera.MainCamera.Bounds;
         Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
-        return Position.X >= view.X - size.X && Position.X <= view.X + FrameworkData.ViewSize.X + size.X &&
-               Position.Y >= view.Y - size.Y && Position.Y <= view.Y + FrameworkData.ViewSize.X + size.Y;
+        
+        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
+               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
     }
 
     private void SetAnimationData(StringName animation, int[] duration, int[] order)

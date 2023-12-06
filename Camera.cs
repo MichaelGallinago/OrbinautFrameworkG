@@ -18,6 +18,8 @@ public partial class Camera : Camera2D
     
 	[Export] public Framework.CommonObject.CommonObject Target { get; set; }
     
+	public Vector4I Bounds { get; private set; }
+		
 	private Vector2I _maxSpeed;
 	private Vector2I _speed;
 	private Vector2I _position;
@@ -47,8 +49,8 @@ public partial class Camera : Camera2D
 
 	public override void _Ready()
 	{
-		if (Target != null || OrbinautFramework3.Objects.Player.Player.Players.Count == 0) return;
-		OrbinautFramework3.Objects.Player.Player playerTarget = OrbinautFramework3.Objects.Player.Player.Players.First();
+		if (Target != null || Objects.Player.Player.Players.Count == 0) return;
+		Objects.Player.Player playerTarget = Objects.Player.Player.Players.First();
 		Target = playerTarget;
 		_position = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
 		_position.Y += 16;
@@ -109,7 +111,7 @@ public partial class Camera : Camera2D
 					_speed.X = 0;
 				}
 				
-				if (Target is OrbinautFramework3.Objects.Player.Player { IsGrounded: true } playerTarget)
+				if (Target is Objects.Player.Player { IsGrounded: true } playerTarget)
 				{	
 					if (playerTarget.IsSpinning)
 					{
@@ -300,7 +302,11 @@ public partial class Camera : Camera2D
 		_position.Y = (int)Mathf.Clamp(_rawPosition.Y + _offset.Y, 
 			_limit.Y, _limit.W - FrameworkData.ViewSize.Y);
 		_position += _shakeOffset;
+
+		var finalPosition = new Vector2I(_position.X - Constants.RenderBuffer, _position.Y);
 		
-		Position = new Vector2(_position.X - Constants.RenderBuffer, _position.Y);
+		Position = finalPosition;
+		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
+			finalPosition.X + FrameworkData.ViewSize.X, finalPosition.Y + FrameworkData.ViewSize.Y);
 	}
 }

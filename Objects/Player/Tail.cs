@@ -6,9 +6,9 @@ namespace OrbinautFramework3.Objects.Player;
 public partial class Tail : Framework.CommonObject.CommonObject
 {
 	public float Angle { get; set; }
-	public OrbinautFramework3.Objects.Player.Player Target { get; set; }
+	public Player Target { get; set; }
 
-	public Tail(OrbinautFramework3.Objects.Player.Player target)
+	public Tail(Player target)
 	{
 		Target = target;
 	}
@@ -78,7 +78,7 @@ public partial class Tail : Framework.CommonObject.CommonObject
 			{
 				// Smooth rotation code by Nihil
 				var angle = 360f;
-				var step  = 0f;
+				float step;
 				
 				if (Target.Angle > 22.5 && Target.Angle <= 337.5)
 				{
