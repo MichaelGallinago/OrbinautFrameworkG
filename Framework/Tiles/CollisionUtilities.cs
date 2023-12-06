@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Godot;
@@ -33,6 +34,71 @@ public static class CollisionUtilities
 		return new TileData(heights, widths, angles);
 	}
 
+	public static TileData GenerateTileData(Image tileMap, byte[] angleData, 
+		Vector2I offset = new(), Vector2I separation = new())
+	{
+		var widths = new byte[TileLimit][];
+		var heights = new byte[TileLimit][];
+		var angles = new float[TileLimit];
+		
+		Vector2I cellSize = separation + new Vector2I(TileSize, TileSize);
+		
+		for (var j = 0; j < TileSize; j++)
+		{
+			widths[0][j] = 0;
+			heights[0][j] = 0;
+		}
+		angles[0] = 360f;
+
+		FillCollisionDataFromTileMap(tileMap, heights, widths, offset, cellSize);
+		FillAnglesFromAngleData(angleData, angles);
+		
+		return new TileData(heights, widths, angles);
+	}
+
+	private static void FillCollisionDataFromTileMap(Image tileMap, 
+		IList<byte[]> heights, IList<byte[]> widths, Vector2I offset, Vector2I cellSize)
+	{
+		for (var i = 1; i < TileLimit; i++)
+		{
+			Vector2I position = offset + cellSize * new Vector2I(i % TileSize, i / TileSize);
+
+			heights[i] = new byte[TileSize];
+			widths[i] = new byte[TileSize];
+			
+			for (var x = 0; x < TileSize; x++)
+			for (var y = 0; y < TileSize; y++)
+			{
+				if (tileMap.GetPixelv(position + new Vector2I(x, y)).A == 0f) continue;
+				heights[i][x]++;
+				widths[i][y]++;
+			}
+		}
+	}
+
+	private static void FillAnglesFromAngleData(IReadOnlyList<byte> angleData, IList<float> angles)
+	{
+		if (angleData.Count == 0)
+		{
+			for (var j = 1; j < TileLimit; j++)
+			{
+				angles[j] = 0f;
+			}
+			return;
+		}
+
+		var i = 1;
+		for (; i <= angleData.Count; i++)
+		{
+			angles[i] = GetFloatAngle(angleData[i - 1]);
+		}
+	
+		for (; i < TileLimit; i++)
+		{
+			angles[i] = 360f;
+		}
+	}
+
 	public static (sbyte, float?) FindTileTwoPositions(bool isVertical, 
 		Vector2I position1, Vector2I position2, Direction direction, TileLayer tileLayerType, 
 		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
@@ -65,7 +131,7 @@ public static class CollisionUtilities
 		}
 
 		// If above the room, use topmost valid level collision
-		position.Y = Mathf.Max(0, position.Y);
+		position.Y = Math.Max(0, position.Y);
 
 		// Set the direction as an integer (-1 for leftwards, 1 for rightwards)
 		var sign = (sbyte)direction;
@@ -76,7 +142,7 @@ public static class CollisionUtilities
 	if (global.debug_collision)
 	{
 		ds_list_add(c_engine.collision.ds_sensors, position.X, position.Y, position.X - 
-			Mathf.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
+			Math.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
 	}
 	*/
 		

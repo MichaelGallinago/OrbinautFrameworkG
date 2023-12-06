@@ -73,6 +73,21 @@ public partial class Camera : Camera2D
 		}
 	}
 
+	public Vector2I GetActiveArea()
+	{
+		var position = (int)Position.X;
+		
+		// Adjust the view_x based on whether the camera is the framework camera
+		if (MainCamera == this)
+		{
+			position += Constants.RenderBuffer;
+		}
+
+		position &= -128;
+		
+		return new Vector2I(position - 128, position + FrameworkData.ViewSize.X + 320);
+	}
+
 	private void EndStep(double processSpeed)
 	{
 		if (MainCamera != this) return;
@@ -112,7 +127,7 @@ public partial class Camera : Camera2D
 	{
 		if (limit < bound)
 		{
-			return position >= bound ? bound : Math.Min(Math.Max(limit, position) + boundSpeed, bound);
+			return position >= bound ? bound : Math.Min(bound, Math.Max(limit, position) + boundSpeed);
 		}
 		
 		return limit > bound ? Math.Max(bound, limit - boundSpeed) : limit;
@@ -125,58 +140,67 @@ public partial class Camera : Camera2D
 			return position <= bound ? bound : Math.Max(bound, Math.Min(limit, position) - boundSpeed);
 		}
 		
-		return limit < bound ? Math.Min(limit + boundSpeed, bound) : limit;
+		return limit < bound ? Math.Min(bound, limit + boundSpeed) : limit;
 	}
 
 	private void FollowTarget(float processSpeedF)
 	{
-		Vector2I centre = FrameworkData.ViewSize / 2;
-		centre.Y -= CameraCentreOffset;
-
 		if (Target != null && !IsInstanceValid(Target))
 		{
 			Target = null;
 		}
-		
-		if (Target != null)
-		{
-			Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_rawPosition;
 
-			int extX = FrameworkData.CDCamera ? 0 : 8;
-			
-			_speed.X = UpdateSpeed(targetPosition.X - centre.X + extX, extX, _maxSpeed.X);
-			
-			if (Target is Objects.Player.Player { IsGrounded: true } playerTarget)
-			{	
-				if (playerTarget.IsSpinning)
-				{
-					targetPosition.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
-				}
-				
-				int limit = Math.Abs(playerTarget.GroundSpeed) < 8 ? 6 : _maxSpeed.Y;
-				_speed.Y = Math.Clamp(targetPosition.Y - centre.Y, -limit, limit);
-			} 
-			else
-			{
-				_speed.Y = UpdateSpeed(targetPosition.Y - centre.Y, 32, _maxSpeed.Y);
-			}
-		}
-		else
+		UpdateSpeed();
+		UpdateShakeOffset();
+		UpdateRawPosition(processSpeedF);
+	}
+
+	private void UpdateSpeed()
+	{
+		if (Target == null)
 		{
 			_speed = new Vector2I();
+			return;
 		}
+		
+		Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_rawPosition - FrameworkData.ViewSize / 2;
+		targetPosition.Y += CameraCentreOffset;
+
+		int extX = FrameworkData.CDCamera ? 0 : 8;
+			
+		_speed.X = CalculateSpeed(targetPosition.X + extX, extX, _maxSpeed.X);
+			
+		if (Target is Objects.Player.Player { IsGrounded: true } playerTarget)
+		{	
+			if (playerTarget.IsSpinning)
+			{
+				targetPosition.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
+			}
+				
+			int limit = Math.Abs(playerTarget.GroundSpeed) < 8 ? 6 : _maxSpeed.Y;
+			_speed.Y = Math.Clamp(targetPosition.Y, -limit, limit);
+			return;
+		}
+
+		_speed.Y = CalculateSpeed(targetPosition.Y, 32, _maxSpeed.Y);
+	}
 	
+	private void UpdateShakeOffset()
+	{
 		if (_shakeTimer > 0)
 		{
-			_shakeOffset.X = UpdateShakeOffset(_shakeTimer, _shakeOffset.X);
-			_shakeOffset.Y = UpdateShakeOffset(_shakeTimer, _shakeOffset.Y);
+			_shakeOffset.X = CalculateShakeOffset(_shakeTimer, _shakeOffset.X);
+			_shakeOffset.Y = CalculateShakeOffset(_shakeTimer, _shakeOffset.Y);
 			_shakeTimer--;
 		}
 		else
 		{
 			_shakeOffset = new Vector2I();
 		}
+	}
 
+	private void UpdateRawPosition(float processSpeedF)
+	{
 		for (var i = 0; i < 2; i++)
 		{
 			if (_delay[i] > 0)
@@ -189,7 +213,15 @@ public partial class Camera : Camera2D
 		}
 	}
 
-	private static int UpdateShakeOffset(int shakeTimer, int shakeOffset)
+	private static int CalculateSpeed(int difference, int threshold, int maxSpeed)
+	{
+		int distance = Math.Abs(difference);
+		return distance <= threshold ? 0 : 
+			Math.Clamp((distance - threshold) * Math.Sign(difference), -maxSpeed, maxSpeed);
+	}
+	
+	
+	private static int CalculateShakeOffset(int shakeTimer, int shakeOffset)
 	{
 		return shakeOffset switch
 		{
@@ -197,12 +229,5 @@ public partial class Camera : Camera2D
 			< 0 => -1 - shakeOffset,
 			_ => -shakeOffset
 		};
-	}
-
-	private static int UpdateSpeed(int difference, int threshold, int maxSpeed)
-	{
-		int distance = Math.Abs(difference);
-		return distance <= threshold ? 0 : 
-			Math.Clamp((distance - threshold) * Math.Sign(difference), -maxSpeed, maxSpeed);
 	}
 }

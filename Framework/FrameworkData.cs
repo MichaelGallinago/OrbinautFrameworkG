@@ -41,13 +41,14 @@ public static class FrameworkData
     {
         GD.Randomize();
 
-        KeyboardControl = new List<KeyboardControl>
-        {
-            new(Key.Up, Key.Down, Key.Left, Key.Right, 
+        KeyboardControl =
+        [
+            new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right,
                 Key.A, Key.S, Key.D, Key.Enter, Key.Space),
-            new(Key.None, Key.None, Key.None, Key.None, 
+
+            new KeyboardControl(Key.None, Key.None, Key.None, Key.None,
                 Key.Z, Key.X, Key.C, Key.None, Key.None)
-        };
+        ];
         GamepadVibration = true;
         UpdateGraphics = true;
         UpdateObjects = true;

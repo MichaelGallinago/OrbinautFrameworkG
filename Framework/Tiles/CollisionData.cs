@@ -1,15 +1,8 @@
 namespace OrbinautFramework3.Framework.Tiles;
 
-public struct TileData
+public struct TileData(byte[][] heights, byte[][] widths, float[] angles)
 {
-    public readonly byte[][] Heights;
-    public readonly byte[][] Widths;
-    public readonly float[] Angles;
-
-    public TileData(byte[][] heights, byte[][] widths, float[] angles)
-    {
-        Heights = heights;
-        Widths = widths;
-        Angles = angles;
-    }
+    public readonly byte[][] Heights = heights;
+    public readonly byte[][] Widths = widths;
+    public readonly float[] Angles = angles;
 }
