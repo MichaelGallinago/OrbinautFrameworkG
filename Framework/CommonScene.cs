@@ -10,16 +10,12 @@ public abstract partial class CommonScene : Node2D
     private const byte BaseFramerate = 60;
 
     public bool IsStage { get; protected set; }
-    
+
+    public event Action<double> PreUpdate;
     public event Action<double> EarlyUpdate;
     public event Action<double> Update;
     public event Action<double> LateUpdate;
     private event Action<double> PlayerUpdate;
-
-    protected CommonScene()
-    {
-        IsStage = false;
-    }
 
     public override void _Ready()
     {
@@ -41,6 +37,7 @@ public abstract partial class CommonScene : Node2D
         processSpeed *= BaseFramerate;
         FrameworkData.ProcessSpeed = processSpeed;
         InputUtilities.Process();
+        PreUpdate?.Invoke(processSpeed);
         EarlyUpdate?.Invoke(processSpeed);
         PlayerUpdate?.Invoke(processSpeed);
         Update?.Invoke(processSpeed);

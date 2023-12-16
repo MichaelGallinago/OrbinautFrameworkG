@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bbjv1134nouqh"
-path="res://.godot/imported/dust_dropdash.png-33d9486660da350bd1f61fdc480e4722.ctex"
+path="res://.godot/imported/dust_dropdash.png-27a0b1eea0913dde945f651593026e0a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Player/Sprites/dust_dropdash.png"
-dest_files=["res://.godot/imported/dust_dropdash.png-33d9486660da350bd1f61fdc480e4722.ctex"]
+source_file="res://Objects/Spawnable/PlayerParticles/dust_dropdash.png"
+dest_files=["res://.godot/imported/dust_dropdash.png-27a0b1eea0913dde945f651593026e0a.ctex"]
 
 [params]
 

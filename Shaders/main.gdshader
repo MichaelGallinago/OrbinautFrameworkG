@@ -2,12 +2,13 @@ shader_type canvas_item;
 
 // Set to 1 to significantly speed up 
 // color replacement (requires a sorted palette)
-#define BINARY_SEARCH 0
+#define BINARY_SEARCH 1
 
 // Also used in c_engine -> Create Event -> Initialise Palette
 #define PALETTE_LIMIT 256
 
 #define ALPHA vec4(1.0, 0.0, 1.0, 1.0)
+#define PRIORITY vec4(8.0, 4.0, 2.0, 1.0)
 
 uniform float u_bound;
 
@@ -75,10 +76,10 @@ vec4 surfaceOverlap(vec4 inColour, vec2 fragCoord)
 
 #if (BINARY_SEARCH > 0)
 
-bool colorIsGreater(vec4 first, vec4 second)
+float colorIsGreater(vec4 first, vec4 second)
 {
-    vec4 Diff = sign(first - second) * vec4(8.0, 4.0, 2.0, 1.0);
-    return Diff.r + Diff.g + Diff.b + Diff.a >= 0.0;
+    vec4 Diff = sign(first - second) * PRIORITY;
+    return Diff.r + Diff.g + Diff.b + Diff.a;
 }
 
 vec4 replaceColour(vec4 target, sampler2D tex, vec3 UVs, 
@@ -91,22 +92,23 @@ vec4 replaceColour(vec4 target, sampler2D tex, vec3 UVs,
 	{
 		int Mid = (Left + Right) / 2;
 		vec2 TestPosition = vec2(UVs.x, float(Mid) * texelSize.y + UVs.y);
-		vec4 CompareColour = texture2D(tex, TestPosition);
-		if (CompareColour == target)
-		{
-			float Index = index[Mid];
-	        TestPosition.x += texelSize.x * floor(Index + 1.0);
-			return mix(texture2D(tex, 
-				vec2(TestPosition.x - texelSize.x, TestPosition.y)), 
-				texture2D(tex, TestPosition), fract(Index));
-		}
-		else if (colorIsGreater(target, CompareColour))
+		vec4 CompareColour = texture(tex, TestPosition);
+		float Difference = colorIsGreater(target, CompareColour);
+		if (Difference > 0.0)
 		{
 		    Left = Mid + 1;
 		}
-		else
+		else if (Difference < 0.0)
 		{
 		    Right = Mid - 1;
+		}
+		else
+		{
+			float Index = index[Mid];
+	        TestPosition.x += texelSize.x * floor(Index + 1.0);
+			return mix(texture(tex, 
+				vec2(TestPosition.x - texelSize.x, TestPosition.y)), 
+				texture(tex, TestPosition), fract(Index));
 		}
 	}
 
@@ -147,16 +149,9 @@ void fragment() {
 		OutColour = vec4(0.0);
 	}
 	
-	if (u_bound > FRAGCOORD.y)
-	{
-		OutColour = replaceColour(
-			OutColour, u_texture1, u_UVs1, u_texelSize1, u_index1);
-	}
-	else
-	{
-		OutColour = replaceColour(
-			OutColour, u_texture2, u_UVs2, u_texelSize2, u_index2);
-	}
+	OutColour = u_bound > FRAGCOORD.y ? 
+		replaceColour(OutColour, u_texture1, u_UVs1, u_texelSize1, u_index1) :
+		replaceColour(OutColour, u_texture2, u_UVs2, u_texelSize2, u_index2);
 	
 	if (u_overlapActive)
 	{

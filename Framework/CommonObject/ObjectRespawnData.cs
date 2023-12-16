@@ -2,18 +2,10 @@ using Godot;
 
 namespace OrbinautFramework3.Framework.CommonObject;
 
-public class ObjectRespawnData
+public class ObjectRespawnData(Vector2 position, Vector2 scale, bool isVisible, int zIndex)
 {
-    public bool IsVisible { get; }
-    public Vector2 Position { get; }
-    public Vector2 Scale { get; }
-    public int ZIndex { get; }
-
-    public ObjectRespawnData(Vector2 position, Vector2 scale, bool isVisible, int zIndex)
-    {
-        Position = position;
-        Scale = scale;
-        IsVisible = isVisible;
-        ZIndex = zIndex;
-    }
+    public bool IsVisible { get; } = isVisible;
+    public Vector2 Position { get; } = position;
+    public Vector2 Scale { get; } = scale;
+    public int ZIndex { get; } = zIndex;
 }

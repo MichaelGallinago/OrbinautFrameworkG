@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Spawnable.Barrier;
 using TileData = OrbinautFramework3.Framework.Tiles.TileData;
 
 namespace OrbinautFramework3.Framework;
@@ -20,6 +21,7 @@ public static class FrameworkData
     public static bool UpdateObjects { get; set; }
     public static bool UpdateTimer { get; set; }
     public static bool AllowPause { get; set; }
+    public static bool DropDash { get; set; }
     public static CheckpointData CheckpointData { get; set; }
     public static Vector2I? GiantRingData { get; set; }
     public static PlayerBackupData PlayerBackupData { get; set; }
@@ -31,7 +33,7 @@ public static class FrameworkData
     public static uint SavedScore { get; set; }
     public static uint SavedRings { get; set; }
     public static uint SavedLives { get; set; }
-    public static Constants.Barrier SavedBarrier { get; set; }
+    public static Barrier.Types SavedBarrier { get; set; }
     public static bool PlayerEditMode { get; set; }
     public static bool DeveloperMode { get; set; }
     public static bool IsPaused { get; set; }

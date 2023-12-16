@@ -64,6 +64,7 @@ public static class PlayerConstants
         Transform,
         HammerRush,
         HammerSpin,
+        HammerSpinCancel,
         Carried,
         ObjectControl
     }

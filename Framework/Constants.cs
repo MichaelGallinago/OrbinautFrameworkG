@@ -90,15 +90,6 @@ public static class Constants
 		None
 	}
 	
-	public enum Barrier : byte
-	{
-		None,
-		Normal,
-		Thunder,
-		Flame,
-		Water
-	}
-	
 	public enum TouchState : byte
 	{
 		None,

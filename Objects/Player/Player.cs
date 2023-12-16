@@ -4,6 +4,8 @@ using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Objects.Spawnable.Barrier;
+using OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -12,6 +14,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private const byte EditModeAccelerationMultiplier = 4;
 	private const float EditModeAcceleration = 0.046875f;
 	private const byte EditModeSpeedLimit = 16;
+	private const byte MaxDropDashCharge = 20;
 	
 	public static List<Player> Players { get; }
     
@@ -50,7 +53,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public int ActionValue { get; set; }
 	public int ActionValue2 { get; set; }
 	public bool BarrierFlag { get; set; }
-	public Constants.Barrier BarrierType { get; set; }
+	public Barrier Barrier { get; set; }
     
 	public Constants.Direction Facing { get; set; }
 	public PlayerConstants.Animation Animation { get; set; }
@@ -100,7 +103,7 @@ public partial class Player : Framework.CommonObject.CommonObject
     
 	static Player()
 	{
-		Players = new List<Player>();
+		Players = [];
 	}
 
 	public override void _Ready()
@@ -131,7 +134,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		TileLayer = Constants.TileLayer.Main;
 		GroundMode = Constants.GroundMode.Floor;
 		ObjectInteraction = true;
-		BarrierType = Constants.Barrier.None;
+		Barrier = new Barrier(this);
 		Facing = Constants.Direction.Positive;
 		Animation = PlayerConstants.Animation.Idle;
 		AirTimer = 1800f;
@@ -139,7 +142,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		RestartState = PlayerConstants.RestartState.GameOver;
 		InputPress = new Buttons();
 		InputDown = new Buttons();
-		RecordedData = new List<RecordedData>();
+		RecordedData = [];
 
 		if (Type == PlayerConstants.Type.Tails)
 		{
@@ -165,16 +168,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if (FrameworkData.PlayerBackupData != null)
 			{
 				RingCount = FrameworkData.PlayerBackupData.RingCount;
-				BarrierType = FrameworkData.PlayerBackupData.BarrierType;
+				Barrier.Type = FrameworkData.PlayerBackupData.BarrierType;
 			}
 		}
 		
 		if (Id == 0)
 		{
-			if (FrameworkData.SavedBarrier != Constants.Barrier.None)
+			if (FrameworkData.SavedBarrier != Barrier.Types.None)
 			{
-				BarrierType = FrameworkData.SavedBarrier;
-				AddChild(new Spawnable.Barrier.Barrier(this));
+				Barrier.Type = FrameworkData.SavedBarrier;
 			}
 		
 			FrameworkData.SavedBarrier = 0;
@@ -206,7 +208,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		FrameworkData.CurrentScene.RemovePlayerStep(this);
 		if (Players.Count == 0 || !IsCpuRespawn) return;
-		var newPlayer = new Player()
+		var newPlayer = new Player
 		{
 			Type = Type,
 			Position = Players.First().Position
@@ -307,10 +309,11 @@ public partial class Player : Framework.CommonObject.CommonObject
     
 	private void EditModeInit()
 	{
-		EditModeObjects = new List<Type>
-		{ 
-			typeof(Common.Ring.Ring), typeof(Common.GiantRing.GiantRing), typeof(Common.ItemBox.ItemBox), typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
-		};
+		EditModeObjects =
+		[
+			typeof(Common.Ring.Ring), typeof(Common.GiantRing.GiantRing), typeof(Common.ItemBox.ItemBox),
+			typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
+		];
 	    
 		switch (FrameworkData.CurrentScene)
 		{
@@ -339,7 +342,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		if (Id > 0 || !(FrameworkData.PlayerEditMode || FrameworkData.DeveloperMode)) return false;
 
-		var debugButton = false;
+		bool debugButton;
 		
 		// If in developer mode, remap debug button to Spacebar
 		if (FrameworkData.DeveloperMode)
@@ -911,7 +914,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 	
-		if (BarrierFlag && BarrierType == Constants.Barrier.Water)
+		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
 		{
 			float force = IsUnderwater ? -4f : -7.5f;
 			Speed = new Vector2(Mathf.Sin(Mathf.DegToRad(Angle)), Mathf.Sin(Mathf.DegToRad(Angle))) * force;
@@ -920,16 +923,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 			OnObject = null;
 			IsGrounded = false;
 		
-			with obj_barrier
-			{
-				if (Player_Object == other.id)
-				{
-					ani_upd_frame(0, 1, [3, 2]);
-					ani_upd_duration([7, 12]);
-				
-					animation_timer = 20;
-				}
-			}
+			Barrier.UpdateFrame(0, 1, [3, 2]);
+			Barrier.UpdateDuration([7, 12]);
+			Barrier.Timer = 20d;
 			
 			//TODO: audio
 			//audio_play_sfx(sfx_barrier_water2);
@@ -944,7 +940,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 				case PlayerConstants.Animation.Idle:
 				case PlayerConstants.Animation.Duck:
 				case PlayerConstants.Animation.HammerRush:
-				case PlayerConstants.Animation.GlideGround: break;
+				case PlayerConstants.Animation.GlideGround: 
+					break;
 			
 				default:
 					Animation = PlayerConstants.Animation.Move;
@@ -972,9 +969,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 		ComboCounter = 0;
 	
 		CpuState = PlayerConstants.CpuState.Main;
-	
-		scr_player_dropdash();
-		scr_player_hammerspin();
+
+		DropDash();
+		HammerSpin();
 	
 		if (Action != PlayerConstants.Action.HammerRush)
 		{
@@ -986,7 +983,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 
 		if (IsSpinning) return;
-		Position.Y -= RadiusNormal.Y - Radius.Y;
+		Position = new Vector2(Position.X, Position.Y - RadiusNormal.Y + Radius.Y);
 
 		Radius = RadiusNormal;
 	}
@@ -1000,7 +997,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		ObjectInteraction = false;
 		IsGrounded = false;
 		OnObject = null;
-		BarrierType = Constants.Barrier.None;
+		Barrier.Type = Barrier.Types.None;
 		Animation = PlayerConstants.Animation.Death;
 		Gravity = GravityType.Default;
 		//y_vel = -7; // TODO: return variables
@@ -1018,5 +1015,238 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		//TODO: Audio
 		//audio_play_sfx(sfx_hurt);
+	}
+
+	private void DropDash()
+	{
+		if (!FrameworkData.DropDash || Action != PlayerConstants.Action.DropDash) return;
+	
+		if (!IsGrounded)
+		{
+			ChargeDropDash();
+		}
+		else if (ActionValue == MaxDropDashCharge) // Called from player_land() function
+		{
+			ReleaseDropDash();
+		}
+	}
+	
+	private void ChargeDropDash()
+	{
+		if (InputDown.Abc)
+		{
+			IsAirLock = false;	
+			if (ActionValue < MaxDropDashCharge)
+			{
+				ActionValue++;
+			}
+			else
+			{
+				if (Animation != PlayerConstants.Animation.DropDash)
+				{
+					Animation = PlayerConstants.Animation.DropDash;
+					// TODO: audio
+					//audio_play_sfx(sfx_charge);
+				}
+			}
+		}
+		else if (ActionValue > 0)
+		{
+			if (ActionValue == MaxDropDashCharge)
+			{
+				Animation = PlayerConstants.Animation.Spin;
+				Action = PlayerConstants.Action.DropDashCancel;
+			}
+			
+			ActionValue = 0;
+		}
+	}
+	
+	private void ReleaseDropDash()
+	{
+		Position = new Vector2(Position.X, Position.Y + Radius.Y - RadiusSpin.Y);
+		Radius = RadiusSpin;
+		
+		var force = 8f;
+		var maxSpeed = 12f;
+		
+		if (IsSuper)
+		{
+			force = 12f;
+			maxSpeed = 13f;
+			Camera.MainCamera.UpdateShakeTimer(6);
+		}
+		
+		if (Facing == Constants.Direction.Negative)
+		{
+			if (Angle <= 0)
+			{
+				GroundSpeed = Mathf.Floor(GroundSpeed / 4f) - force;
+				if (GroundSpeed < -maxSpeed)
+				{
+					GroundSpeed = -maxSpeed;
+				}
+			}
+			else if (Angle != 360)
+			{
+				GroundSpeed = Mathf.Floor(GroundSpeed / 2f) - force;
+			}
+			else
+			{
+				GroundSpeed = -force;
+			}
+		}
+		else
+		{
+			if (Angle >= 0)
+			{
+				GroundSpeed = Mathf.Floor(GroundSpeed / 4f) + force;
+				if (GroundSpeed > maxSpeed)
+				{
+					GroundSpeed = maxSpeed;
+				}
+			}
+			else if (Angle != 360)
+			{
+				GroundSpeed = Mathf.Floor(GroundSpeed / 2f) + force;
+			}
+			else 
+			{
+				GroundSpeed = force;
+			}
+		}
+		
+		Animation = PlayerConstants.Animation.Spin;
+		IsSpinning = true;
+		
+		if (!FrameworkData.CDCamera)
+		{
+			Camera.MainCamera.UpdateDelay(8);
+		}
+		
+		Vector2 dustPosition = Position;
+		dustPosition.Y += Radius.Y;
+		Constants.Direction facing = Facing;
+		
+		AddChild(new DropDashDust
+		{
+			Position = dustPosition,
+			Scale = new Vector2((float)facing, Scale.Y)
+		});
+		
+		//TODO: audio
+		//audio_stop_sfx(sfx_charge);
+		//audio_play_sfx(sfx_release);
+	}
+
+	private void HammerSpin()
+	{
+		if (Action != PlayerConstants.Action.HammerSpin) return;
+	
+		const int maxHammerSpinCharge = 20;
+	
+		if (!InputDown.Abc)
+		{
+			if (ActionValue >= maxHammerSpinCharge)
+			{
+				Action = PlayerConstants.Action.HammerSpinCancel;
+			}
+		
+			ActionValue = 0;
+			Animation = PlayerConstants.Animation.Spin;
+		
+			return;
+		}
+
+		if (ActionValue < maxHammerSpinCharge)
+		{
+			if (ActionValue == 0)
+			{
+				SetHitboxExtra(new Vector2I(25, 25));
+				Animation = PlayerConstants.Animation.HammerSpin;
+			}
+		
+			ActionValue++;
+			if (ActionValue != maxHammerSpinCharge) return;
+			
+			// TODO: audio
+			//audio_play_sfx(sfx_charge);
+		}
+	
+		// Called from player_land() function
+		if (!IsGrounded) return;
+		
+		Animation = PlayerConstants.Animation.HammerRush;
+		Action = PlayerConstants.Action.HammerRush;
+		ActionValue = 59; // (60)
+	
+		// TODO: audio
+		//audio_stop_sfx(sfx_charge);
+		//audio_play_sfx(sfx_release);
+	}
+
+	private void ProcessPlayerCamera()
+	{
+		if (IsDead) return;
+		
+		var camera = Camera.MainCamera;
+		if (camera.Target != this) return;
+	
+		// Store initial timer value (120)
+		static _default_view_timer = CameraViewTimer;
+	
+		if (SharedData.CDCamera)
+		{
+			const int shiftDistanceX = 64;
+			const int shiftSpeedX = 2;
+
+			int shiftDirectionX = GroundSpeed != 0f ? Mathf.Sign(GroundSpeed) : (int)Facing;
+
+			if (abs(GroundSpeed) >= 6 || camera.Target.action == ACTION_SPINDASH)
+			{
+				if (delay_x == 0 && offset_x != shiftDistanceX * shiftDirectionX)
+				{
+					offset_x += shiftSpeedX * shiftDirectionX;
+				}
+			}
+			else
+			{
+				offset_x -= shiftSpeedX * sign(offset_x);
+			}
+		}
+	
+		var _do_shift_down = target.animation == ANI_DUCK;
+		var _do_shift_up = target.animation == ANI_LOOKUP;
+	
+		if _do_shift_down || _do_shift_up
+		{
+			if target.camera_view_timer > 0
+			{
+				target.camera_view_timer--;
+			}
+		}
+		else if global.spin_dash || global.peel_out
+		{
+			target.camera_view_timer = _default_view_timer;
+		}
+	
+		if target.camera_view_timer > 0
+		{
+			if offset_y != 0
+			{
+				offset_y -= 2 * sign(offset_y);
+			}
+		}
+		else
+		{
+			if _do_shift_down && offset_y < 88 	
+			{
+				offset_y += 2;
+			}
+			else if _do_shift_up && offset_y > -104 
+			{
+				offset_y -= 2;
+			}
+		}
 	}
 }

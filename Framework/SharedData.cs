@@ -1,4 +1,5 @@
 ﻿using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Spawnable.Barrier;
 
 namespace OrbinautFramework3.Framework;
 
@@ -48,5 +49,5 @@ public static class SharedData
     public static byte SavedLives { get; set; } = 3;
     public static long SavedScore { get; set; } = 0;
     public static byte SavedRings { get; set; } = 0;
-    public static Constants.Barrier SavedBarrier { get; set; } = Constants.Barrier.None;
+    public static Barrier.Types SavedBarrier { get; set; } = Barrier.Types.None;
 }

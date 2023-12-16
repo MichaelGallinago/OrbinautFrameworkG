@@ -73,6 +73,13 @@ public partial class Camera : Camera2D
 		}
 	}
 
+	public void UpdateDelay(int? delayX = null, int? delayY = null)
+	{
+		_delay = new Vector2I(delayX ?? _delay.X, delayY ?? _delay.Y);
+	}
+
+	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
+
 	public Vector2I GetActiveArea()
 	{
 		var position = (int)Position.X;
