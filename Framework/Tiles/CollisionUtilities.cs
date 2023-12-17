@@ -139,12 +139,12 @@ public static class CollisionUtilities
 		// Add check to the debug list
 		//TODO: debug
 		/*
-	if (global.debug_collision)
-	{
-		ds_list_add(c_engine.collision.ds_sensors, position.X, position.Y, position.X - 
-			Math.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
-	}
-	*/
+		if (global.debug_collision)
+		{
+			ds_list_add(c_engine.collision.ds_sensors, position.X, position.Y, position.X - 
+				Math.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
+		}
+		*/
 		
 		// Get tile at position
 		var shift = 0;

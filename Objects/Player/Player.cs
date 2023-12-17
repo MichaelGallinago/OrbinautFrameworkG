@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
@@ -118,12 +119,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	public enum RestartStates : byte
 	{
-		GameOver,
-		ResetLevel,
-		RestartStage,
-		RestartGame
+		GameOver, ResetLevel, RestartStage, RestartGame
 	}
-
+	
 	#endregion
 
 	#region Variables
@@ -213,7 +211,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public int EditModeIndex { get; private set; }
 	public float EditModeSpeed { get; private set; }
 	public List<Type> EditModeObjects { get; private set; }
-
+	
 	#endregion
     
 	static Player()
@@ -716,7 +714,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				
 				if (Speed.Y < 0)
 				{
-					Speed.Y = 0
+					Speed.Y = 0;
 				}
 				break;
 			
@@ -728,45 +726,30 @@ public partial class Player : Framework.CommonObject.CommonObject
 				Animation = Animations.HammerSpin;
 				Action = Actions.HammerSpin;
 				ActionValue = 0;
-				
-				audio_play_sfx(sfx_hammer_spin);
-				
-			break;
+				// TODO: audio
+				//audio_play_sfx(sfx_hammer_spin);
+				break;
 		}
+
+		return false;
 	}
 
 	private bool StartJump()
 	{
-		if Action == ACTION_SPINDASH || Action == Actions.PeelOut || forced_spin || !IsGrounded
+		if (Action == Actions.SpinDash || Action == Actions.PeelOut || IsForcedRoll || !IsGrounded) return false;
+		
+		if (!InputPress.Abc) return false;
+	
+		const int maxCeilingDist = 6;
+		int ceilDist = GroundMode switch
 		{
-			return;
-		}
+			Constants.GroundMode.Floor => CollisionUtilities.FindTileTwoPositions(true, (Vector2I)Position - Radius, (Vector2I)Position + new Vector2I(Radius.X, -Radius.Y), Constants.Direction.Negative, TileLayer, GroundMode).Item1,
+			Constants.GroundMode.RightWall => CollisionUtilities.FindTileTwoPositions(true, x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, Constants.Direction.Negative, TileLayer, GroundMode).Item1,
+			Constants.GroundMode.LeftWall => CollisionUtilities.FindTileTwoPositions(true, x + Radius.Y, y - Radius.X, x + Radius.Y, y + Radius.X, Constants.Direction.Positive, TileLayer, GroundMode).Item1,
+			_ => maxCeilingDist
+		};
 	
-		var InputPress = player_get_input(0);
-		if !InputPress.Abc
-		{
-			return;
-		}
-	
-		var MAX_CEILING_DIST = 6;
-		var _ceil_dist = MAX_CEILING_DIST;
-	
-		switch collision_mode
-		{
-			case 0:
-			_ceil_dist = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, tile_layer, collision_mode)[0];
-			break;
-
-			case 1:
-			_ceil_dist = tile_find_2h(x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, false, tile_layer, collision_mode)[0];
-			break;
-
-			case 3:
-			_ceil_dist = tile_find_2h(x + Radius.Y, y - Radius.X, x + Radius.Y, y + Radius.X, true, tile_layer, collision_mode)[0];
-			break;
-		}
-	
-		if _ceil_dist < MAX_CEILING_DIST
+		if ceilDist < maxCeilingDist
 		{
 			return;
 		}
@@ -797,7 +780,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		IsGrounded = false;
 		is_on_object = false;
 		stick_to_convex = false;
-		collision_mode = 0;
+		GroundMode = 0;
 	
 		if Type == Types.Amy
 		{
@@ -1049,7 +1032,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				if Speed.Y < 0
 				{
 					// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-					var _wall_dist = tile_find_h(x + _radius_x * Facing, y - Radius.Y - 1, Facing, tile_layer)[0];
+					var _wall_dist = tile_find_h(x + _radius_x * Facing, y - Radius.Y - 1, Facing, TileLayer)[0];
 					if _wall_dist >= 4
 					{
 						ActionState = CLIMB_STATE_LEDGE;
@@ -1066,7 +1049,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 		
 					// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-					var _ceil_dist = tile_find_v(x + _radius_x * Facing, y - radius_y_normal + 1, false, tile_layer)[0];
+					var _ceil_dist = tile_find_v(x + _radius_x * Facing, y - radius_y_normal + 1, false, TileLayer)[0];
 					if _ceil_dist < 0
 					{
 						y -= _ceil_dist;
@@ -1076,7 +1059,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				else
 				{
 					// If Knuckles is no longer against the wall, make him let go
-					var _wall_dist = tile_find_h(x + _radius_x * Facing, y + Radius.Y + 1, Facing, tile_layer)[0];
+					var _wall_dist = tile_find_h(x + _radius_x * Facing, y + Radius.Y + 1, Facing, TileLayer)[0];
 					if _wall_dist != 0
 					{
 						sub_PlayerClimbRelease();
@@ -1084,7 +1067,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 					
 					// If Knuckles has reached the floor, make him land
-					var _floor_data = tile_find_v(x + _radius_x * Facing, y + radius_y_normal, true, tile_layer);
+					var _floor_data = tile_find_v(x + _radius_x * Facing, y + radius_y_normal, true, TileLayer);
 					var _floor_dist = _floor_data[0];
 					var _floor_angle = _floor_data[1];
 					
@@ -1214,7 +1197,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				
 				// Turn around
-				if ActionValue != 0 && InputDown.left
+				if ActionValue != 0 && InputDown.Left
 				{
 					if ActionValue > 0
 					{
@@ -1223,7 +1206,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					
 					ActionValue += ANGLE_INC;
 				}
-				else if ActionValue != 180 && InputDown.right
+				else if ActionValue != 180 && InputDown.Right
 				{
 					if ActionValue < 0
 					{
@@ -1365,7 +1348,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 	
 		Animation = ANI_HAMMERRUSH;
-		Action = ACTION_HAMMERRUSH;
+		Action = Actions.HammerRush;
 		ActionValue = 59; // (60)
 			
 		audio_stop_sfx(sfx_charge);
@@ -1374,7 +1357,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	
 	private void ProcessHammerRush()
 	{
-		if Action != ACTION_HAMMERRUSH
+		if Action != Actions.HammerRush
 		{
 			return;
 		}
@@ -1409,7 +1392,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 			ActionValue--;
 		
-			if InputDown.left && GroundSpeed > 0 || InputDown.right && GroundSpeed < 0
+			if InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0
 			{
 				Facing *= -1;
 				GroundSpeed *= -1;
@@ -1441,7 +1424,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 	
-		if Action == ACTION_HAMMERRUSH || Action == Actions.PeelOut
+		if Action == Actions.HammerRush || Action == Actions.PeelOut
 		{
 			return;
 		}
@@ -1467,16 +1450,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private void ProcessMovementGround()
 	{
 		// Control routine checks
-		if !IsGrounded || IsSpinning
-		{
-			return;
-		}
+		if (!IsGrounded || IsSpinning) return;
 		
 		// Action checks
-		if Action == ACTION_SPINDASH || Action == Actions.PeelOut || Action == ACTION_HAMMERRUSH 
-		{
-			return;
-		}
+		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerRush) return;
 		
 		var InputDown = player_get_input(1);
 		var _do_skid = false;
@@ -1491,7 +1468,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if ground_lock_timer == 0
 		{
 			// Move left
-			if InputDown.left
+			if InputDown.Left
 			{	
 				if GroundSpeed > 0 
 				{
@@ -1522,7 +1499,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 			
 			// Move right
-			if InputDown.right
+			if InputDown.Right
 			{
 				if GroundSpeed < 0 
 				{
@@ -1608,7 +1585,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Apply friction
-		if !InputDown.left && !InputDown.right
+		if !InputDown.Left && !InputDown.Right
 		{
 			if GroundSpeed > 0
 			{
@@ -1638,7 +1615,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if ground_lock_timer == 0
 		{
 			// Move left
-			if InputDown.left
+			if InputDown.Left
 			{
 				if GroundSpeed > 0
 				{
@@ -1656,7 +1633,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 		
 			// Move right
-			if InputDown.right
+			if InputDown.Right
 			{
 				if GroundSpeed < 0
 				{
@@ -1685,7 +1662,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 	
 		// Stop spinning
-		if !forced_spin
+		if !IsForcedRoll
 		{
 			if GroundSpeed == 0 || SharedData.PlayerPhysics == PHYSICS_SK && abs(GroundSpeed) < 0.5
 			{
@@ -1755,7 +1732,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 	
 		// Limit upward speed
-		if !IsJumping && Action != ACTION_SPINDASH && !forced_spin
+		if !IsJumping && Action != Actions.SpinDash && !IsForcedRoll
 		{
 			if Speed.Y < -15.75
 			{
@@ -1774,7 +1751,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			var InputDown = player_get_input(1);
 		
 			// Move left
-			if InputDown.left
+			if InputDown.Left
 			{
 				if Speed.X > 0 
 				{
@@ -1789,7 +1766,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 		
 			// Move right
-			if InputDown.right
+			if InputDown.Right
 			{
 				if Speed.X < 0 
 				{
@@ -1818,7 +1795,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 	
-		if GroundSpeed != 0 || Action == ACTION_SPINDASH || Action == Actions.PeelOut
+		if GroundSpeed != 0 || Action == Actions.SpinDash || Action == Actions.PeelOut
 		{
 			return;
 		}
@@ -1839,14 +1816,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 				return;
 			}
 		
-			var _floor_dist = tile_find_v(x, y + Radius.Y, true, tile_layer)[0];	
+			var _floor_dist = tile_find_v(x, y + Radius.Y, true, TileLayer)[0];	
 			if _floor_dist < 12
 			{
 				return;
 			}
 		
-			var _angle_left = tile_find_v(x - Radius.X, y + Radius.Y, true, tile_layer)[1];
-			var _angle_right = tile_find_v(x + Radius.X, y + Radius.Y, true, tile_layer)[1];
+			var _angle_left = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer)[1];
+			var _angle_right = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer)[1];
 		
 			if _angle_left != noone && _angle_right != noone
 			{
@@ -1855,12 +1832,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 			if _angle_left == noone
 			{	
-				var _left_dist = tile_find_v(x + 6, y + Radius.Y, true, tile_layer)[0];
+				var _left_dist = tile_find_v(x + 6, y + Radius.Y, true, TileLayer)[0];
 				sub_PlayerBalanceLeft(_left_dist >= 12);
 			}
 			else
 			{
-				var _right_dist = tile_find_v(x - 6, y + Radius.Y, true, tile_layer)[0];
+				var _right_dist = tile_find_v(x - 6, y + Radius.Y, true, TileLayer)[0];
 				sub_PlayerBalanceRight(_right_dist >= 12);
 			}
 		}
@@ -1981,19 +1958,19 @@ public partial class Player : Framework.CommonObject.CommonObject
 			switch _cast_dir
 			{
 				case 0:
-					_wall_dist = tile_find_h(x + Speed.X - _wall_radius, y + Speed.Y + _y_offset, false, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_h(x + Speed.X - _wall_radius, y + Speed.Y + _y_offset, false, TileLayer, GroundMode)[0];
 				break;
 				
 				case 1:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y + _wall_radius, true, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y + _wall_radius, true, TileLayer, GroundMode)[0];
 				break;
 				
 				case 2:
-					_wall_dist = tile_find_h(x + Speed.X + _wall_radius, y + Speed.Y, true, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_h(x + Speed.X + _wall_radius, y + Speed.Y, true, TileLayer, GroundMode)[0];
 				break;
 				
 				case 3:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y - _wall_radius, false, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y - _wall_radius, false, TileLayer, GroundMode)[0];
 				break;
 			}
 			
@@ -2043,19 +2020,19 @@ public partial class Player : Framework.CommonObject.CommonObject
 			switch _cast_dir
 			{
 				case 0:
-					_wall_dist = tile_find_h(x + Speed.X + _wall_radius, y + Speed.Y + _y_offset, true, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_h(x + Speed.X + _wall_radius, y + Speed.Y + _y_offset, true, TileLayer, GroundMode)[0];
 				break;
 				
 				case 1:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y - _wall_radius, false, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y - _wall_radius, false, TileLayer, GroundMode)[0];
 				break;
 				
 				case 2:
-					_wall_dist = tile_find_h(x + Speed.X - _wall_radius, y + Speed.Y, false, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_h(x + Speed.X - _wall_radius, y + Speed.Y, false, TileLayer, GroundMode)[0];
 				break;
 				
 				case 3:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y + _wall_radius, true, tile_layer, collision_mode)[0];
+					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y + _wall_radius, true, TileLayer, GroundMode)[0];
 				break;
 			}
 			
@@ -2103,13 +2080,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessRollStart()
 	{
-		if !IsGrounded || IsSpinning || Action == ACTION_SPINDASH || Action == ACTION_HAMMERRUSH
-		{
-			return;
-		}
-	
-		var InputDown = player_get_input(1);
-		if !forced_spin && (InputDown.left || InputDown.right)
+		if (!IsGrounded || IsSpinning || Action == Actions.SpinDash || Action == Actions.HammerRush) return;
+		
+		if (!IsForcedRoll && (InputDown.Left || InputDown.Right))
 		{
 			return;
 		}
@@ -2134,7 +2107,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 		}
 	
-		if _allow_spin || forced_spin
+		if _allow_spin || IsForcedRoll
 		{
 			y += Radius.Y - radius_y_spin;
 			Radius.Y = radius_y_spin;
@@ -2233,30 +2206,30 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		if angle <= 45 || angle >= 315
 		{
-			collision_mode = 0;	// Floor
+			GroundMode = 0;	// Floor
 		}
 		else if angle > 45 && angle < 135
 		{
-			collision_mode = 1;	// Right wall
+			GroundMode = 1;	// Right wall
 		}
 		else if angle >= 135 && angle <= 225
 		{
-			collision_mode = 2;	// Ceiling
+			GroundMode = 2;	// Ceiling
 		}
 		else
 		{
-			collision_mode = 3;	// Left wall
+			GroundMode = 3;	// Left wall
 		}
 
 		var _MIN_TOLERANCE = 4;
 		var _MAX_TOLERANCE = 14;
 		
-		switch collision_mode
+		switch GroundMode
 		{
 			// Floor
 			case 0:
 			
-				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, tile_layer, collision_mode);
+				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
@@ -2291,7 +2264,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			// Right wall
 			case 1:
 			
-				var _floor_data = tile_find_2h(x + Radius.Y, y + Radius.X, x + Radius.Y, y - Radius.X, true, tile_layer, collision_mode);
+				var _floor_data = tile_find_2h(x + Radius.Y, y + Radius.X, x + Radius.Y, y - Radius.X, true, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
@@ -2326,7 +2299,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			// Ceiling
 			case 2:
 			
-				var _floor_data = tile_find_2v(x + Radius.X, y - Radius.Y, x - Radius.X, y - Radius.Y, false, tile_layer, collision_mode);
+				var _floor_data = tile_find_2v(x + Radius.X, y - Radius.Y, x - Radius.X, y - Radius.Y, false, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
@@ -2361,7 +2334,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			// Left wall
 			case 3:
 			
-				var _floor_data = tile_find_2h(x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, false, tile_layer, collision_mode);
+				var _floor_data = tile_find_2h(x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, false, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
@@ -2412,7 +2385,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessSlopeRepel()
 	{
-		if !IsGrounded || stick_to_convex || Action == ACTION_HAMMERRUSH
+		if !IsGrounded || stick_to_convex || Action == Actions.HammerRush
 		{
 			return;
 		}
@@ -2469,7 +2442,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform left wall collision if not moving mostly right
 		if _move_quad != 1
 		{
-			var _wall_dist = tile_find_h(x - _wall_radius, y, false, tile_layer)[0];
+			var _wall_dist = tile_find_h(x - _wall_radius, y, false, TileLayer)[0];
 			if _wall_dist < 0
 			{
 				x -= _wall_dist;
@@ -2486,7 +2459,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform right wall collision if not moving mostly left
 		if _move_quad != 3
 		{
-			var _wall_dist = tile_find_h(x + _wall_radius, y, true, tile_layer)[0];
+			var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
 			if _wall_dist < 0
 			{
 				x += _wall_dist;
@@ -2503,14 +2476,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform ceiling collision if not moving mostly down
 		if _move_quad != 0
 		{
-			var _roof_data = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, tile_layer);
+			var _roof_data = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer);
 			var _roof_dist = _roof_data[0];
 			var _roof_angle = _roof_data[1];
 			
 			if _move_quad == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && _roof_dist <= -14
 			{
 				// Perform right wall collision if moving mostly left and too far into the ceiling
-				var _wall_dist = tile_find_h(x + _wall_radius, y, true, tile_layer)[0];
+				var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
 				if _wall_dist < 0
 				{
 					x += _wall_dist;
@@ -2555,8 +2528,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 			if _move_quad == 0
 			{
-				var _floor_data_l = tile_find_v(x - Radius.X, y + Radius.Y, true, tile_layer);
-				var _floor_data_r = tile_find_v(x + Radius.X, y + Radius.Y, true, tile_layer);
+				var _floor_data_l = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer);
+				var _floor_data_r = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer);
 
 				if _floor_data_l[0] > _floor_data_r[0]
 				{
@@ -2598,7 +2571,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 			else if Speed.Y >= 0
 			{
-				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, tile_layer);
+				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
 				_floor_dist = _floor_data[0];
 				_floor_angle = _floor_data[1];
 							
@@ -2642,7 +2615,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform left wall collision if not moving mostly right
 		if _move_quad != 1
 		{
-			var _wall_dist = tile_find_h(x - _wall_radius, y, false, tile_layer)[0];
+			var _wall_dist = tile_find_h(x - _wall_radius, y, false, TileLayer)[0];
 			if _wall_dist < 0
 			{
 				x -= _wall_dist;
@@ -2654,7 +2627,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform right wall collision if not moving mostly left
 		if _move_quad != 3
 		{
-			var _wall_dist = tile_find_h(x + _wall_radius, y, true, tile_layer)[0];
+			var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
 			if _wall_dist < 0
 			{
 				x += _wall_dist;
@@ -2666,11 +2639,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform ceiling collision if not moving mostly down
 		if _move_quad != 0
 		{
-			var _roof_dist = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, tile_layer)[0];
+			var _roof_dist = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer)[0];
 			if _move_quad == 3 && _roof_dist <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3
 			{
 				// Perform right wall collision instead if moving mostly left and too far into the ceiling
-				var _wall_dist = tile_find_h(x + _wall_radius, y, true, tile_layer)[0];
+				var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
 				if _wall_dist < 0
 				{
 					x += _wall_dist;
@@ -2691,7 +2664,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform floor collision if not moving mostly up
 		if _move_quad != 2
 		{
-			var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, tile_layer);
+			var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
 			var _floor_dist = _floor_data[0];
 			var _floor_angle = _floor_data[1];
 		
@@ -2765,14 +2738,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 			
 			// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he is either inside the ceiling or above the floor edge
-			var _wall_dist = tile_find_h(x + _wall_radius * Facing, _climb_y - Radius.Y, Facing, tile_layer)[0];
+			var _wall_dist = tile_find_h(x + _wall_radius * Facing, _climb_y - Radius.Y, Facing, TileLayer)[0];
 			if _wall_dist != 0
 			{
 				// Cast a vertical sensor now. If the distance returned is negative, Knuckles is inside
 				// the ceiling, else he is above the edge
 				
 				// Note: _find_mode is set to 2. LBR tiles are not ignored in this case
-				var _floor_dist = tile_find_v(x + (_wall_radius + 1) * Facing, _climb_y - Radius.Y - 1, true, tile_layer, 2)[0];
+				var _floor_dist = tile_find_v(x + (_wall_radius + 1) * Facing, _climb_y - Radius.Y - 1, true, TileLayer, 2)[0];
 				if _floor_dist < 0 || _floor_dist >= 12
 				{
 					sub_PlayerGlideRelease();
@@ -2834,7 +2807,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 			
 				var _player = player_get(p);
-				if _player.Action == ACTION_SPINDASH || _player.Action == ACTION_CARRIED
+				if _player.Action == Actions.SpinDash || _player.Action == ACTION_CARRIED
 				{
 					continue;
 				}
@@ -2888,11 +2861,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.Y = PhysicParams.MinimalJumpVelocity;
 				
 					var InputDown = player_get_input(1);
-					if InputDown.left
+					if InputDown.Left
 					{
 						Speed.X = -2;
 					}
-					else if InputDown.right
+					else if InputDown.Right
 					{
 						Speed.X = 2;
 					}
@@ -3172,7 +3145,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					
 					depth = 50;
 					Animation = ANI_DROWN;
-					tile_layer = TILELAYER_NONE;
+					TileLayer = TILELAYER_NONE;
 					Speed.X = 0;
 					Speed.Y = 0;
 					Gravity	= 0.0625;
@@ -3496,7 +3469,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		OnObject = null;
 	
 		StickToConvex = false;
-		GroundMode = 0;
+		GroundMode = Constants.GroundMode.Floor;
 	
 		Action = Actions.None;
 	
