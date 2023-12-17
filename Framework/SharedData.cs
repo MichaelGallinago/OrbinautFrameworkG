@@ -13,7 +13,7 @@ public static class SharedData
     public static bool ShowSplash { get; set; } = false;
 	
     // Originals differences
-    public static PlayerConstants.PhysicsType PlayerPhysics { get; set; } = PlayerConstants.PhysicsType.S2;
+    public static Player.PhysicsTypes PlayerPhysics { get; set; } = Player.PhysicsTypes.S2;
     public static bool SpinDash { get; set; } = true;
     public static bool PeelOut { get; set; } = true;
     public static bool DropDash { get; set; } = true;
@@ -33,7 +33,7 @@ public static class SharedData
     public static bool NoCameraCap { get; set; } = false;
     
     // Common global variables
-    public static byte CurrentSaveSlot { get; set; } = 0;
+    public static byte? CurrentSaveSlot { get; set; } = 0;
     public static float MusicVolume { get; set; } = 0.5f;
     public static float SoundVolume { get; set; } = 0.5f;
     public static byte DebugCollision { get; set; } = 0;
@@ -41,8 +41,8 @@ public static class SharedData
     //public static giant_ring_data { get; set; } = [];
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static bool PlayerEditMode { get; set; } = false;
-    public static PlayerConstants.Type PlayerMain { get; set; } = PlayerConstants.Type.Sonic;
-    public static PlayerConstants.Type PlayerCpu { get; set; } = PlayerConstants.Type.None;
+    public static Player.Types PlayerMain { get; set; } = Player.Types.Sonic;
+    public static Player.Types PlayerCpu { get; set; } = Player.Types.None;
     public static byte StageId { get; set; } = 0;
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;

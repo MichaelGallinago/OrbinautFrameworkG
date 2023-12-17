@@ -11,17 +11,126 @@ namespace OrbinautFramework3.Objects.Player;
 
 public partial class Player : Framework.CommonObject.CommonObject
 {
+	#region Constants
+
 	private const byte EditModeAccelerationMultiplier = 4;
 	private const float EditModeAcceleration = 0.046875f;
 	private const byte EditModeSpeedLimit = 16;
 	private const byte MaxDropDashCharge = 20;
+	private const byte DefaultViewTime = 120;
+	
+	public const byte CpuDelay = 16;
+    
+	// TODO: PlayerCount
+	// byte PlayerCount = instance_number(global.player_obj)
+	public enum Types : byte
+	{
+		None, Sonic, Tails, Knuckles, Amy, Global, GlobalAI
+	}
+    
+	public enum States : byte
+	{
+		Normal,
+		Spin,
+		Jump,
+		SpinDash,
+		PeelOut,
+		DropDash,
+		Flight,
+		HammerRush,
+		HammerSpin,
+		Carried
+	}
+
+	public enum CpuStates : byte
+	{
+		Main, Fly, Stuck
+	}
+    
+	public enum PhysicsTypes : byte
+	{
+		S1, CD, S2, S3, SK
+	}
+    
+	public enum Actions : byte
+	{
+		None,
+		SpinDash,
+		PeelOut,
+		DropDash,
+		DropDashCancel,
+		Glide,
+		GlideCancel,
+		Climb,
+		Flight,
+		TwinAttack,
+		TwinAttackCancel,
+		Transform,
+		HammerRush,
+		HammerSpin,
+		HammerSpinCancel,
+		Carried,
+		ObjectControl
+	}
+
+	public enum GlideState : sbyte
+	{
+		Left = -1,
+		Right = 1,
+		Ground = 2
+	}
+    
+	public enum Animations : byte
+	{
+		Idle,
+		Move,
+		Spin,
+		DropDash,
+		SpinDash,
+		Push,
+		Duck,
+		LookUp,
+		Fly,
+		FlyTired,
+		Swim,
+		SwimTired,
+		Hurt,
+		Death,
+		Drown,
+		Glide,
+		GlideFall,
+		GlideGround,
+		ClimbWall,
+		ClimbLedge,
+		Skid,
+		Balance,
+		BalanceFlip,
+		BalancePanic,
+		BalanceTurn,
+		Bounce,
+		Transform,
+		Breathe,
+		HammerSpin,
+		HammerRush,
+		FlyLift,
+		SwimLift,
+		Grab
+	}
+
+	public enum RestartStates : byte
+	{
+		GameOver, ResetLevel, RestartStage, RestartGame
+	}
+
+	#endregion
 	
 	public static List<Player> Players { get; }
     
-	[Export] public PlayerConstants.Type Type;
+	[Export] public Types Type;
 
 	public int Id { get; private set; }
-
+	
+	public PhysicParams PhysicParams { get; set; }
 	public Vector2I Radius { get; set; }
 	public Vector2I RadiusNormal { get; set; }
 	public Vector2I RadiusSpin { get; set; }
@@ -48,7 +157,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public bool IsInvincible { get; set; }
 	public int SuperValue { get; set; }
 
-	public PlayerConstants.Action Action { get; set; }
+	public Actions Action { get; set; }
 	public int ActionState { get; set; }
 	public int ActionValue { get; set; }
 	public int ActionValue2 { get; set; }
@@ -56,7 +165,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public Barrier Barrier { get; set; }
     
 	public Constants.Direction Facing { get; set; }
-	public PlayerConstants.Animation Animation { get; set; }
+	public Animations Animation { get; set; }
 	public float AnimationTimer { get; set; }
 	public float VisualAngle { get; set; }
     
@@ -80,14 +189,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public float CarryTimer { get; set; }
 	public Vector2 CarryParentPosition { get; set; }
     
-	public PlayerConstants.CpuState CpuState { get; set; }
+	public CpuStates CpuState { get; set; }
 	public float CpuTimer { get; set; }
 	public float CpuInputTimer { get; set; }
 	public bool IsCpuJumping { get; set; }
 	public bool IsCpuRespawn { get; set; }
 	public Player CpuTarget { get; set; }
     
-	public PlayerConstants.RestartState RestartState { get; set; }
+	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 
 	public Buttons InputPress { get; set; }
@@ -112,11 +221,11 @@ public partial class Player : Framework.CommonObject.CommonObject
         
 		switch (Type)
 		{
-			case PlayerConstants.Type.Tails:
+			case Types.Tails:
 				RadiusNormal = new Vector2I(9, 15);
 				RadiusSpin = new Vector2I(7, 14);
 				break;
-			case PlayerConstants.Type.Amy:
+			case Types.Amy:
 				RadiusNormal = new Vector2I(9, 16);
 				RadiusSpin = new Vector2I(7, 12);
 				break;
@@ -136,15 +245,16 @@ public partial class Player : Framework.CommonObject.CommonObject
 		ObjectInteraction = true;
 		Barrier = new Barrier(this);
 		Facing = Constants.Direction.Positive;
-		Animation = PlayerConstants.Animation.Idle;
+		Animation = Animations.Idle;
 		AirTimer = 1800f;
-		CpuState = PlayerConstants.CpuState.Main;
-		RestartState = PlayerConstants.RestartState.GameOver;
+		CpuState = CpuStates.Main;
+		RestartState = RestartStates.GameOver;
 		InputPress = new Buttons();
 		InputDown = new Buttons();
+		CameraViewTimer = DefaultViewTime;
 		RecordedData = [];
 
-		if (Type == PlayerConstants.Type.Tails)
+		if (Type == Types.Tails)
 		{
 			var tail = new Tail(this);
 			AddChild(tail);
@@ -219,44 +329,32 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	public void PlayerStep(double processSpeed)
 	{
+		if (FrameworkData.IsPaused || !FrameworkData.UpdateObjects && !IsDead) return;
+		
 		var processSpeedF = (float)processSpeed; 
-		// Process player input
+		
+		// Process local input
 		UpdateInput();
 
-		// Process edit mode. Returns true if player is in edit mode state
-		if (ProcessEditMode(processSpeedF))
-		{
-			ProcessPalette();
-			return;
-		}
+		// Process Edit Mode
+		if (ProcessEditMode(processSpeedF)) return;
 	    
-		// Process AI code. Returns true if player is deleted
+		// Process CPU Player logic (exit if flying in or respawning)
 		if (ProcessAI(processSpeedF)) return;
 	    
-		// Code to run if player is dead
-		if (IsDead)
-		{
-			ProcessPosition(processSpeedF);
-			ProcessRestart(processSpeedF);
-		}
+		// Process Restart Event
+		ProcessRestart(processSpeedF);
 	    
-		// Code to run if player is not dead. Runs only when object processing is enabled
-		else if (FrameworkData.UpdateObjects)
-		{
-			// Apply physics parameters for this step
-			UpdateParameters();
-			
-			// Run a repeat loop once, so we can exit from a sub-state if needed
-			UpdatePhysics();
-			
-			/*
-		scr_player_camera();
-		scr_player_status_update();
+		// Process default player control routine
+		
+		// Run a repeat loop once, so we can exit from a sub-state if needed
+		UpdatePhysics();
+		
+		ProcessPlayerCamera();
+		UpdatePlayerStatus();
 		scr_player_water();
 		scr_player_collision_update();
 		scr_player_record_data();
-		*/
-		}
 		
 		// Always animate player
 		//scr_player_rotation();
@@ -282,11 +380,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 		switch (Action)
 		{
 			//TODO: audio
-			case PlayerConstants.Action.PeelOut:
+			case Actions.PeelOut:
 				//audio_stop_sfx(sfx_charge2);
 				break;
 		
-			case PlayerConstants.Action.Flight:
+			case Actions.Flight:
 				//audio_stop_sfx(sfx_flight);
 				//audio_stop_sfx(sfx_flight2);
 				break;
@@ -302,7 +400,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		StickToConvex = false;
 		GroundMode = 0;
 	
-		Action = PlayerConstants.Action.None;
+		Action = Actions.None;
 	
 		Radius = RadiusNormal;
 	}
@@ -390,7 +488,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				Speed = new Vector2();
 				GroundSpeed = 0f;
 
-				Animation = PlayerConstants.Animation.Move;
+				Animation = Animations.Move;
 				
 				ObjectInteraction = true;
 				IsEditMode = false;
@@ -465,9 +563,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		int[] colours = Type switch
 		{
-			PlayerConstants.Type.Tails => new[] { 4, 5, 6 },
-			PlayerConstants.Type.Knuckles => new[] { 7, 8, 9 },
-			PlayerConstants.Type.Amy => new[] { 10, 11, 12 },
+			Types.Tails => new[] { 4, 5, 6 },
+			Types.Knuckles => new[] { 7, 8, 9 },
+			Types.Amy => new[] { 10, 11, 12 },
 			_ => new[] { 0, 1, 2, 3 }
 		};
 
@@ -481,7 +579,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Super State palette logic
 		switch (Type)
 		{
-			case PlayerConstants.Type.Sonic:
+			case Types.Sonic:
 				duration = colour switch
 				{
 					< 2 => 19,
@@ -492,12 +590,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 				colourLast = 16;
 				colourLoop = 7;
 				break;
-			case PlayerConstants.Type.Tails:
+			case Types.Tails:
 				duration = colour < 2 ? 28 : 12;
 				colourLast = 7;
 				colourLoop = 2;
 				break;
-			case PlayerConstants.Type.Knuckles:
+			case Types.Knuckles:
 				duration = colour switch
 				{
 					< 2 => 17,
@@ -508,7 +606,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				colourLast = 11;
 				colourLoop = 3;
 				break;
-			case PlayerConstants.Type.Amy:
+			case Types.Amy:
 				duration = colour < 2 ? 19 : 4;
 				colourLast = 11;
 				colourLoop = 3;
@@ -520,7 +618,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			if (colour > 1)
 			{
-				if (Type == PlayerConstants.Type.Sonic)
+				if (Type == Types.Sonic)
 				{
 					colourLast = 21;
 					duration = 4;
@@ -579,7 +677,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessPosition(float processSpeed)
 	{
-		if (Action == PlayerConstants.Action.Carried) return;
+		if (Action == Actions.Carried) return;
 
 		if (StickToConvex)
 		{
@@ -598,37 +696,36 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessRestart(float processSpeed)
 	{
-		if (Id > 0) return;
+		if (!IsDead || Id > 0) return;
 
+		bool isTimeOver = FrameworkData.Time >= 36000d; // TODO: add constant
 		switch (RestartState)
 		{
 			// GameOver
-			case 0:
-				float bound = FrameworkData.ViewSize.Y + 32f;
+			case RestartStates.GameOver:
+				var bound = 32f;
 		
-				if (FrameworkData.PlayerPhysics < PlayerConstants.PhysicsType.S3)
+				if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
 				{
-					bound += Camera.MainCamera.LimitBottom * processSpeed;
+					bound += Camera.MainCamera.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
 				}
 				else
 				{
-					bound += Camera.MainCamera.Position.Y * processSpeed;
+					bound += Camera.MainCamera.BufferPosition.Y * processSpeed + SharedData.GameHeight;
 				}
 		
 				if ((int)Position.Y > bound)
 				{
-					RestartState = PlayerConstants.RestartState.ResetLevel;
+					RestartState = RestartStates.ResetLevel;
 					
+					FrameworkData.AllowPause = false;
 					FrameworkData.UpdateTimer = false;
 					
 					// TODO: Check this
-					if (--LifeCount > 0)
+					if (--LifeCount > 0 && !isTimeOver)
 					{
-						// if FrameworkData.FrameCounter != 36000
-						// {
 						RestartTimer = 60f;
 						break;
-						// }
 					}
 					
 					// TODO: audio + gameOver
@@ -637,28 +734,17 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				break;
 		
-			// Sonic_ResetLevel
-			case PlayerConstants.RestartState.ResetLevel:
+			// If RestartTimer was set
+			case RestartStates.ResetLevel:
 				if (RestartTimer > 0)
 				{
-					if (--RestartTimer == 0)
-					{
-						RestartState = PlayerConstants.RestartState.RestartStage;
-					}
-					else
-					{
-						break;
-					}
+					if (--RestartTimer != 0) break;
+					RestartState = RestartStates.RestartStage;
 				}
 				// TODO: audio_bgm_is_playing
-				/*else if (!audio_bgm_is_playing())
-		    {
-			    RestartState = PlayerConstants.RestartState.RestartGame;	
-		    }*/
-				else
-				{
-					break;
-				}
+				// If restart_timer wasn't set (Game Over or Time Over)
+				//else if (audio_bgm_is_playing()) break;
+				RestartState = RestartStates.RestartGame;	
 				
 				// TODO: audio + fade
 				//audio_stop_bgm(0.5);
@@ -666,230 +752,87 @@ public partial class Player : Framework.CommonObject.CommonObject
 				break;
 		
 			// Restart Stage
-			case PlayerConstants.RestartState.RestartStage:
+			case RestartStates.RestartStage:
 				// TODO: Fade
-				/*if (c_engine.fade.state == FADE_ST_MAX)
-		    {
+				//if (FrameworkData.fade.state != Constants.FadeState.Max) break;
+
 			    FrameworkData.SavedLives = LifeCount;
 			    GetTree().ReloadCurrentScene();
-		    }*/
-			
 				break;
 		
 			// Restart Game
-			case PlayerConstants.RestartState.RestartGame:
+			case RestartStates.RestartGame:
 				// TODO: Game restart & fade
-				/*
-		    if (c_engine.fade.state == FADE_ST_MAX)
-		    {
-			    FrameworkData.collected_giant_rings = [];
-			    FrameworkData.player_backup_data = [];
-			    FrameworkData.checkpoint_data = [];
+			    //if (FrameworkData.fade.state != Constants.FadeState.Max) break;
+				
+				//TODO: saved data
+			    //FrameworkData.collected_giant_rings = [];
+			    //FrameworkData.player_backup_data = [];
+			    //FrameworkData.checkpoint_data = [];
 				
 			    // TODO: this
-			    if (FrameworkData.Continues > 0)
+				//game_clear_temp_data();
+			    if (SharedData.ContinueCount > 0)
 			    {
-				    game_restart(); 
+				    //TODO: game_restart
+				    //game_restart(); 
+				    break;
 			    }
-			    else
+				
+				// Override save data
+			    if (SharedData.CurrentSaveSlot != null)
 			    {
-				    /*
-				    if global.save_slot != -1
-				    {
-					    global.saved_lives = 3;
-					    global.saved_score = 0;
-					    global.continues   = 0;
-						    
-					    // gamedata_save(global.activeSave);
-				    }
-					
-				    game_restart();
+				    SharedData.SavedLives = 3;
+				    SharedData.SavedScore = 0;
+				    SharedData.ContinueCount = 0;
+					    
+				    // game_save_data(global.current_save_slot);
 			    }
-		    }
-			*/
+				
+				//TODO: game_restart
+			    //game_restart();
 				break;
 		}
-	}
-	
-	private void UpdateParameters()
-	{
-		/*
-    if (!IsUnderwater)
-	{
-		if (!IsSuper)
-		{
-			acc = 0.046875;
-			acc_glide = 0.015625;
-			acc_air = 0.09375;
-			dec = 0.5;
-			dec_roll = 0.125;
-			frc	= 0.046875;
-			frc_roll = 0.0234375;
-			acc_top = 6;	
-			acc_climb = 1;
-			jump_min_vel = -4;
-			jump_vel = player_type == PLAYER_KNUCKLES ? -6 : -6.5;
-		}
-		else
-		{
-			if (Type == PlayerConstants.Type.Sonic)
-			{
-			    acc = 0.1875;
-			    acc_air = 0.375;
-			    dec = 1;
-			    dec_roll = 0.125;
-			    frc = 0.046875;
-			    frc_roll = 0.09375;
-			    acc_top = 10;
-			    jump_min_vel = -4;
-			    jump_vel = -8;
-			}
-			else
-			{
-			    acc = 0.09375;
-			    acc_air = 0.1875;
-			    acc_glide = 0.046875;
-			    dec = 0.75;
-			    dec_roll = 0.125;
-			    frc = 0.046875;
-			    frc_roll = 0.0234375;
-			    acc_top = 8;
-			    acc_climb = 2;
-			    jump_min_vel = -4;
-			    jump_vel = player_type == PLAYER_KNUCKLES ? -6 : -6.5;
-			}
-		}
-		
-		if (ItemSpeedTimer > 0)
-		{
-			acc	= 0.09375;
-			acc_air = 0.1875;
-			frc = 0.09375;
-			frc_roll = 0.046875;
-			acc_top = 12;
-		}
-	}
-	else
-	{
-		if (!IsSuper)
-		{
-		    acc = 0.0234375;
-		    acc_air = 0.046875;
-		    acc_glide = 0.015625;
-		    dec = 0.25;
-		    dec_roll = 0.125;
-		    frc = 0.0234375;
-		    frc_roll = 0.01171875;
-		    acc_top = 3;
-		    acc_climb = 1;
-		    jump_min_vel = -2;
-		    jump_vel = player_type == PLAYER_KNUCKLES ? -3 : -3.5;
-		}
-		else
-		{
-		    if (Type == PlayerConstants.Type.Sonic)
-		    {
-		        acc = 0.09375;
-		        acc_air = 0.1875;
-		        dec = 0.5;
-		        dec_roll = 0.125;
-		        frc = 0.046875;
-		        frc_roll = 0.046875;
-		        acc_top = 5;
-		        jump_min_vel = -2;
-		        jump_vel = -3.5;
-		    }
-		    else
-		    {
-		        acc = 0.046875;
-		        acc_air = 0.09375;
-		        acc_glide = 0.046875;
-		        dec = 0.375;
-		        dec_roll = 0.125;
-		        frc = 0.046875;
-		        frc_roll = 0.0234375;
-		        acc_top = 4;
-		        acc_climb = 2;
-		        jump_min_vel = -2;
-		        jump_vel = player_type == PLAYER_KNUCKLES ? -3 : -3.5;
-		    }
-		}
-	}
-	
-	if (FrameworkData.PlayerPhysics < PlayerConstants.PhysicsType.SK)
-	{
-		if (Type == PlayerConstants.Type.Tails)
-		{
-			dec_roll = dec / 4;
-		}
-	}
-	else if (IsSuper)
-	{
-		frc_roll = 0.0234375;
-	}
-	*/
 	}
 
 	private void UpdatePhysics()
 	{
-		/*
-    if (IsHurt)
-    {
-	    scr_player_level_bound();
-	    scr_player_position();
-	    scr_player_collision_air();
-	    scr_player_land();
-    }
-    else if (Action != PlayerConstants.Action.ObjectControl && Action != PlayerConstants.Action.Transform)
-    {
-	    if (!IsGrounded)
-	    {
-		    if (scr_player_jump()) return;
+		if (Action == ACTION_OBJ_CONTROL || Action == Actions.Transform) return;
 
-		    scr_player_dropdash();
-		    scr_player_flight();
-		    scr_player_hammerspin();
-		    scr_player_hammerrush();
-		    scr_player_movement_air();	
-		    scr_player_level_bound();
-		    scr_player_position();
-		    scr_player_collision_air();
-		    scr_player_land();
-		    scr_player_carry();
-	    }
-	    else if (!IsSpinning)
-	    {
-		    if (scr_player_spindash()) return;
-			if (scr_player_peelout()) return;
-			if (scr_player_jump_start()) return;
+		// Define physics for this step
+		PhysicParams = PhysicParams.Get(IsUnderwater, IsSuper, Type, ItemSpeedTimer);
 
-			scr_player_slope_resist();
-		    scr_player_hammerrush();
-		    scr_player_movement_ground();
-		    scr_player_balance();
-		    scr_player_collision_ground_walls();
-		    scr_player_roll_start();
-		    scr_player_level_bound();
-		    scr_player_position();
-		    scr_player_collision_ground_floor();
-		    scr_player_slope_repel();
-	    }
-	    else
-	    {
-		    if (scr_player_jump_start()) return;
-
-		    scr_player_slope_resist_roll();
-		    scr_player_movement_roll();
-		    scr_player_collision_ground_walls();
-		    scr_player_level_bound();
-		    scr_player_position();
-		    scr_player_collision_ground_floor();
-		    scr_player_slope_repel();
-	    }
-				
-	    scr_player_double_spin();
-    }
-    */
+		
+		// Abilities logic
+		if scr_player_spindash() break;
+		if scr_player_peelout() break;
+		if scr_player_jump() break;
+		if scr_player_jump_start() break;
+		scr_player_dropdash();
+		scr_player_flight();
+		scr_player_climb();
+		scr_player_glide();
+		scr_player_hammerspin();
+		scr_player_hammerrush();
+		
+		// Core player logic
+		scr_player_slope_resist();
+		scr_player_slope_resist_roll();
+		scr_player_movement_ground();
+		scr_player_movement_ground_roll();
+		scr_player_movement_air();
+		scr_player_balance();
+		scr_player_collision_ground_walls();
+		scr_player_roll_start();
+		scr_player_level_bound();
+		scr_player_position();
+		scr_player_collision_ground_floor();
+		scr_player_slope_repel();
+		scr_player_collision_air();
+		
+		// Late abilities logic
+		scr_player_glide_collision();
+		scr_player_carry();
 	}
     
 	public void Land()
@@ -898,15 +841,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 		ResetGravity();
 	
-		if (Action == PlayerConstants.Action.Flight)
+		if (Action == Actions.Flight)
 		{
 			//TODO: audio
 			//audio_stop_sfx(sfx_flight);
 			//audio_stop_sfx(sfx_flight2);
 		}
-		else if (Action is PlayerConstants.Action.SpinDash or PlayerConstants.Action.PeelOut)
+		else if (Action is Actions.SpinDash or Actions.PeelOut)
 		{
-			if (Action == PlayerConstants.Action.PeelOut)
+			if (Action == Actions.PeelOut)
 			{
 				GroundSpeed = ActionValue2;
 			}
@@ -937,20 +880,20 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			switch (Animation)
 			{
-				case PlayerConstants.Animation.Idle:
-				case PlayerConstants.Animation.Duck:
-				case PlayerConstants.Animation.HammerRush:
-				case PlayerConstants.Animation.GlideGround: 
+				case Animations.Idle:
+				case Animations.Duck:
+				case Animations.HammerRush:
+				case Animations.GlideGround: 
 					break;
 			
 				default:
-					Animation = PlayerConstants.Animation.Move;
+					Animation = Animations.Move;
 					break;
 			}
 		}
 		else
 		{
-			Animation = PlayerConstants.Animation.Move;
+			Animation = Animations.Move;
 		}
 	
 		if (IsHurt)
@@ -968,14 +911,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 		BarrierFlag = false;
 		ComboCounter = 0;
 	
-		CpuState = PlayerConstants.CpuState.Main;
+		CpuState = CpuStates.Main;
 
 		DropDash();
 		HammerSpin();
 	
-		if (Action != PlayerConstants.Action.HammerRush)
+		if (Action != Actions.HammerRush)
 		{
-			Action = PlayerConstants.Action.None;
+			Action = Actions.None;
 		}
 		else
 		{
@@ -992,13 +935,13 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		if (IsDead) return;
 
-		Action = PlayerConstants.Action.None;
+		Action = Actions.None;
 		IsDead = true;
 		ObjectInteraction = false;
 		IsGrounded = false;
 		OnObject = null;
 		Barrier.Type = Barrier.Types.None;
-		Animation = PlayerConstants.Animation.Death;
+		Animation = Animations.Death;
 		Gravity = GravityType.Default;
 		//y_vel = -7; // TODO: return variables
 		//x_vel = 0;
@@ -1019,7 +962,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void DropDash()
 	{
-		if (!FrameworkData.DropDash || Action != PlayerConstants.Action.DropDash) return;
+		if (!FrameworkData.DropDash || Action != Actions.DropDash) return;
 	
 		if (!IsGrounded)
 		{
@@ -1042,9 +985,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 			else
 			{
-				if (Animation != PlayerConstants.Animation.DropDash)
+				if (Animation != Animations.DropDash)
 				{
-					Animation = PlayerConstants.Animation.DropDash;
+					Animation = Animations.DropDash;
 					// TODO: audio
 					//audio_play_sfx(sfx_charge);
 				}
@@ -1054,8 +997,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			if (ActionValue == MaxDropDashCharge)
 			{
-				Animation = PlayerConstants.Animation.Spin;
-				Action = PlayerConstants.Action.DropDashCancel;
+				Animation = Animations.Spin;
+				Action = Actions.DropDashCancel;
 			}
 			
 			ActionValue = 0;
@@ -1116,7 +1059,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 		}
 		
-		Animation = PlayerConstants.Animation.Spin;
+		Animation = Animations.Spin;
 		IsSpinning = true;
 		
 		if (!FrameworkData.CDCamera)
@@ -1141,7 +1084,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void HammerSpin()
 	{
-		if (Action != PlayerConstants.Action.HammerSpin) return;
+		if (Action != Actions.HammerSpin) return;
 	
 		const int maxHammerSpinCharge = 20;
 	
@@ -1149,11 +1092,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			if (ActionValue >= maxHammerSpinCharge)
 			{
-				Action = PlayerConstants.Action.HammerSpinCancel;
+				Action = Actions.HammerSpinCancel;
 			}
 		
 			ActionValue = 0;
-			Animation = PlayerConstants.Animation.Spin;
+			Animation = Animations.Spin;
 		
 			return;
 		}
@@ -1163,7 +1106,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if (ActionValue == 0)
 			{
 				SetHitboxExtra(new Vector2I(25, 25));
-				Animation = PlayerConstants.Animation.HammerSpin;
+				Animation = Animations.HammerSpin;
 			}
 		
 			ActionValue++;
@@ -1176,8 +1119,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Called from player_land() function
 		if (!IsGrounded) return;
 		
-		Animation = PlayerConstants.Animation.HammerRush;
-		Action = PlayerConstants.Action.HammerRush;
+		Animation = Animations.HammerRush;
+		Action = Actions.HammerRush;
 		ActionValue = 59; // (60)
 	
 		// TODO: audio
@@ -1192,61 +1135,149 @@ public partial class Player : Framework.CommonObject.CommonObject
 		var camera = Camera.MainCamera;
 		if (camera.Target != this) return;
 	
-		// Store initial timer value (120)
-		static _default_view_timer = CameraViewTimer;
-	
 		if (SharedData.CDCamera)
 		{
 			const int shiftDistanceX = 64;
 			const int shiftSpeedX = 2;
 
-			int shiftDirectionX = GroundSpeed != 0f ? Mathf.Sign(GroundSpeed) : (int)Facing;
+			int shiftDirectionX = GroundSpeed != 0f ? Math.Sign(GroundSpeed) : (int)Facing;
 
-			if (abs(GroundSpeed) >= 6 || camera.Target.action == ACTION_SPINDASH)
+			if (Math.Abs(GroundSpeed) >= 6 || Action == Actions.SpinDash)
 			{
-				if (delay_x == 0 && offset_x != shiftDistanceX * shiftDirectionX)
+				if (camera.Delay.X == 0 && camera.BufferOffset.X != shiftDistanceX * shiftDirectionX)
 				{
-					offset_x += shiftSpeedX * shiftDirectionX;
+					camera.BufferOffset.X += shiftSpeedX * shiftDirectionX;
 				}
 			}
 			else
 			{
-				offset_x -= shiftSpeedX * sign(offset_x);
+				camera.BufferOffset.X -= shiftSpeedX * Math.Sign(camera.BufferOffset.X);
 			}
 		}
 	
-		var _do_shift_down = target.animation == ANI_DUCK;
-		var _do_shift_up = target.animation == ANI_LOOKUP;
+		bool doShiftDown = Animation == Animations.Duck;
+		bool doShiftUp = Animation == Animations.LookUp;
 	
-		if _do_shift_down || _do_shift_up
+		if (doShiftDown || doShiftUp)
 		{
-			if target.camera_view_timer > 0
+			if (CameraViewTimer > 0)
 			{
-				target.camera_view_timer--;
+				CameraViewTimer--;
 			}
 		}
-		else if global.spin_dash || global.peel_out
+		else if (SharedData.SpinDash || SharedData.PeelOut)
 		{
-			target.camera_view_timer = _default_view_timer;
+			CameraViewTimer = DefaultViewTime;
 		}
 	
-		if target.camera_view_timer > 0
+		if (CameraViewTimer > 0)
 		{
-			if offset_y != 0
+			if (camera.BufferOffset.Y != 0)
 			{
-				offset_y -= 2 * sign(offset_y);
+				camera.BufferOffset.Y -= 2 * Math.Sign(camera.BufferOffset.Y);
 			}
 		}
 		else
 		{
-			if _do_shift_down && offset_y < 88 	
+			if (doShiftDown && camera.BufferOffset.Y < 88) 	
 			{
-				offset_y += 2;
+				camera.BufferOffset.Y += 2;
 			}
-			else if _do_shift_up && offset_y > -104 
+			else if (doShiftUp && camera.BufferOffset.Y > -104)
 			{
-				offset_y -= 2;
+				camera.BufferOffset.Y -= 2;
 			}
+		}
+	}
+
+	private void UpdatePlayerStatus()
+	{
+		if (IsDead) return;
+
+		// TODO: find a better place for this (and make obj_dust_skid)
+		if (Animation == Animations.Skid && AnimationTimer % 4 == 0)
+		{
+			//instance_create(x, y + radius_y, obj_dust_skid);
+		}
+	
+		if (InvincibilityFrames > 0)
+		{
+			Visible = (InvincibilityFrames-- & 4) >= 1 || InvincibilityFrames == 0;
+		}
+	
+		if (ItemSpeedTimer > 0 && --ItemSpeedTimer == 0)
+		{
+			//TODO: audio
+			//stage_reset_bgm();	
+		}
+	
+		if (ItemInvincibilityTimer > 0 && --ItemInvincibilityTimer == 0)
+		{
+			//TODO: audio
+			//stage_reset_bgm();
+		}
+	
+		if (IsSuper)
+		{
+			if (Action == Actions.Transform)
+			{
+				if (--ActionValue == 0)
+				{
+					ObjectInteraction = true;
+					Action = Actions.None;
+				}
+			}
+		
+			if (SuperValue == 0)
+			{
+				if (--RingCount <= 0)
+				{
+					RingCount = 0;
+					InvincibilityFrames = 1;
+					IsSuper = false;
+					
+					//TODO: audio
+					//stage_reset_bgm();
+				}
+				else
+				{
+					SuperValue = 60;
+				}
+			}
+			else
+			{
+				SuperValue--;
+			}
+		}
+	
+		IsInvincible = InvincibilityFrames != 0 || ItemInvincibilityTimer != 0 || IsHurt || IsSuper || barrier_state == BARRIER_STATE_DOUBLESPIN;
+				 
+		if (Id == 0 && FrameworkData.Time >= 36000d)
+		{
+			Kill();
+		}
+	
+		if (Id == 0 && LifeRewards.Length > 0)
+		{
+			if (RingCount >= LifeRewards[0] && LifeRewards[0] <= 200)
+			{
+				LifeCount++;
+				LifeRewards[0] += 100;
+					
+				//TODO: audio
+				//audio_play_sfx(sfx_extra_life);
+			}
+
+			if (ScoreCount < LifeRewards[1]) return;
+			LifeCount++;
+			LifeRewards[1] += 50000;
+				
+			//TODO: audio
+			//audio_play_sfx(sfx_extra_life);
+		}
+		else
+		{
+			LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 		}
 	}
 }

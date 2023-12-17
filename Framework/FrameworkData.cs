@@ -27,8 +27,8 @@ public static class FrameworkData
     public static PlayerBackupData PlayerBackupData { get; set; }
     public static CommonScene CurrentScene { get; set; }
     public static Vector2I ViewSize { get; set; }
-    public static PlayerConstants.Type PlayerType { get; set; }
-    public static PlayerConstants.Type PlayerAIType { get; set; }
+    public static Player.Types PlayerType { get; set; }
+    public static Player.Types PlayerAIType { get; set; }
     public static int RotationMode { get; set; }
     public static uint SavedScore { get; set; }
     public static uint SavedRings { get; set; }
@@ -37,7 +37,8 @@ public static class FrameworkData
     public static bool PlayerEditMode { get; set; }
     public static bool DeveloperMode { get; set; }
     public static bool IsPaused { get; set; }
-    public static PlayerConstants.PhysicsType PlayerPhysics { get; set; }
+    public static Player.PhysicsTypes PlayerPhysics { get; set; }
+    public static double Time { get; set; }
 
     static FrameworkData()
     {
@@ -62,13 +63,13 @@ public static class FrameworkData
             "angles_tsz", "heights_tsz", "widths_tsz");
         ViewSize = new Vector2I(400, 224);
 
-        PlayerType = PlayerConstants.Type.Sonic;
-        PlayerAIType = PlayerConstants.Type.Tails;
+        PlayerType = Player.Types.Sonic;
+        PlayerAIType = Player.Types.Tails;
         
         RotationMode = 1;
 
         DeveloperMode = true;
         IsPaused = true;
-        PlayerPhysics = PlayerConstants.PhysicsType.S2;
+        PlayerPhysics = Player.PhysicsTypes.S2;
     }
 }

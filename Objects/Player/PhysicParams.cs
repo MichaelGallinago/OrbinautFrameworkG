@@ -1,0 +1,170 @@
+using System.Collections.Generic;
+using OrbinautFramework3.Framework;
+
+namespace OrbinautFramework3.Objects.Player;
+
+public struct PhysicParams(
+    float acceleration, float accelerationGlide, float accelerationAir, float accelerationTop, float accelerationClimb,
+    float deceleration, float decelerationRoll, float friction, float frictionRoll, 
+    float minimalJumpVelocity, float jumpVelocity)
+{
+	private enum Type : byte
+    {
+        Default, SuperSonic, Super, Underwater, UnderwaterSuperSonic, UnderwaterSuper
+    }
+    
+    public float Acceleration { get; private set; } = acceleration;
+    public float AccelerationGlide { get; private set; }  = accelerationGlide;
+    public float AccelerationAir { get; private set; }  = accelerationAir;
+    public float AccelerationTop { get; private set; }  = accelerationTop;
+    public float AccelerationClimb { get; private set; }  = accelerationClimb;
+    public float Deceleration { get; private set; }  = deceleration;
+    public float DecelerationRoll { get; private set; }  = decelerationRoll;
+    public float Friction { get; private set; }  = friction;
+    public float FrictionRoll { get; private set; }  = frictionRoll;
+    public float MinimalJumpVelocity { get; private set; }  = minimalJumpVelocity;
+    public float JumpVelocity { get; private set; }  = jumpVelocity;
+
+    private static readonly Dictionary<Type, PhysicParams> ParamsMap = new()
+    {
+	    { Type.Default, new PhysicParams(
+		    0.046875f,
+		    0.015625f,
+		    0.09375f,
+		    6f,
+		    1f,
+		    0.5f,
+		    0.125f,
+		    0.046875f,
+		    0.0234375f,
+		    -4f,
+		    -6.5f
+		)},
+	    
+	    { Type.SuperSonic, new PhysicParams(
+		    0.1875f,
+		    0.015625f,
+		    0.375f,
+		    10f,
+		    2f,
+		    1f,
+		    0.125f,
+		    0.046875f,
+		    0.09375f,
+		    -4f,
+		    -8f
+	    )},
+	    
+	    { Type.Super, new PhysicParams(
+		    0.09375f,
+		    0.046875f,
+		    0.1875f,
+		    8f,
+		    2f,
+		    0.75f,
+		    0.125f,
+		    0.046875f,
+		    0.0234375f,
+		    -4f,
+		    -6.5f
+		)},
+	    
+	    { Type.Underwater, new PhysicParams(
+		    0.0234375f,
+		    0.015625f,
+		    0.046875f,
+		    3f,
+		    1f,
+		    0.25f,
+		    0.125f,
+		    0.0234375f,
+		    0.0234375f,
+		    -2f,
+		    -3.5f
+	    )},
+	    
+	    { Type.UnderwaterSuperSonic, new PhysicParams(
+		    0.09375f,
+		    0.015625f,
+		    0.1875f,
+		    5f,
+		    2f,
+		    0.5f,
+		    0.125f,
+		    0.046875f,
+		    0.046875f,
+		    -2f,
+		    -3.5f
+		)},
+	    
+	    { Type.UnderwaterSuper, new PhysicParams(
+		    0.046875f,
+		    0.046875f,
+		    0.09375f,
+		    4f,
+		    2f,
+		    0.375f,
+		    0.125f,
+		    0.046875f,
+		    0.0234375f,
+		    -2f,
+		    -3.5f
+	    )}
+    };
+
+    public static PhysicParams Get(bool isUnderwater, bool isSuper, 
+	    Player.Types playerType, float itemSpeedTimer)
+    {
+	    PhysicParams physicParams = ParamsMap[GetType(isUnderwater, isSuper, playerType)];
+	    
+	    if (playerType == Player.Types.Knuckles)
+	    {
+		    physicParams.JumpVelocity += 0.5f;
+	    }
+	    
+	    if (itemSpeedTimer > 0 && !isUnderwater)
+	    {
+		    physicParams.Acceleration = 0.09375f;
+		    physicParams.AccelerationAir = 0.1875f;
+		    physicParams.Friction = 0.09375f;
+		    physicParams.FrictionRoll = 0.046875f;
+		    physicParams.AccelerationTop = 12f;
+	    }
+	    
+	    if (FrameworkData.PlayerPhysics >= Player.PhysicsTypes.SK)
+	    {
+		    if (isSuper)
+		    {
+			    physicParams.FrictionRoll = 0.0234375f;
+		    }
+	    }
+	    else if (playerType == Player.Types.Tails)
+	    {
+		    physicParams.DecelerationRoll = physicParams.Deceleration / 4;
+	    }
+	    
+	    return physicParams;
+    }
+
+    private static Type GetType(bool isUnderwater, bool isSuper, Player.Types playerType)
+    {
+	    byte type = 0;
+	    
+	    if (isUnderwater)
+	    {
+		    type += 3;
+	    }
+
+	    if (isSuper)
+	    {
+		    type++;
+	    }
+
+	    if (playerType == Player.Types.Sonic)
+	    {
+		    type++;
+	    }
+
+	    return (Type)type;
+    }
+}

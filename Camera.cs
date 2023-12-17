@@ -8,11 +8,6 @@ namespace OrbinautFramework3;
 public partial class Camera : Camera2D
 {
 	private const byte CameraCentreOffset = 16;
-	
-	private static readonly int[] ShakeData = {
-		1, 2, 1, 3, 1, 2, 2, 1, 2, 3, 1, 2, 1, 2, 0, 0,
-		2, 0, 3, 2, 2, 3, 2, 2, 1, 3, 0, 0, 1, 0, 1, 3
-	};
 
 	public static Camera MainCamera { get; set; }
     
@@ -20,26 +15,26 @@ public partial class Camera : Camera2D
     
 	public Vector4I Bounds { get; private set; }
 		
-	private Vector2I _maxSpeed;
-	private Vector2I _speed;
-	private Vector2I _position;
-	private Vector2 _rawPosition;
-	private Vector2I _delay;
-	private Vector2I _offset;
-	private Vector2I _boundSpeed;
-	private Vector4 _bound;
-	private Vector4 _limit;
-	private Vector4 _previousLimit; // TODO: check if needed
+	public Vector2I MaxSpeed;
+	public Vector2I Speed;
+	public Vector2I BufferPosition;
+	public Vector2 RawPosition;
+	public Vector2I Delay;
+	public Vector2I BufferOffset;
+	public Vector2I BoundSpeed;
+	public Vector4 Bound;
+	public Vector4 Limit;
+	public Vector4 PreviousLimit; // TODO: check if needed
 
-	private Vector2I _shakeOffset;
+	public Vector2I ShakeOffset;
 	private int _shakeTimer;
 
 	public Camera()
 	{
-		_bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
-		_limit = _bound;
-		_previousLimit = _bound;
-		_maxSpeed = new Vector2I(16, 16);
+		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
+		Limit = Bound;
+		PreviousLimit = Bound;
+		MaxSpeed = new Vector2I(16, 16);
 
 		if (FrameworkData.CheckpointData is not null)
 		{
@@ -52,10 +47,10 @@ public partial class Camera : Camera2D
 		if (Target != null || Objects.Player.Player.Players.Count == 0) return;
 		Objects.Player.Player playerTarget = Objects.Player.Player.Players.First();
 		Target = playerTarget;
-		_position = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
-		_position.Y += 16;
+		BufferPosition = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
+		BufferPosition.Y += 16;
 		
-		_rawPosition = _position;
+		RawPosition = BufferPosition;
 	}
 
 	public override void _EnterTree()
@@ -75,7 +70,7 @@ public partial class Camera : Camera2D
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
 	{
-		_delay = new Vector2I(delayX ?? _delay.X, delayY ?? _delay.Y);
+		Delay = new Vector2I(delayX ?? Delay.X, delayY ?? Delay.Y);
 	}
 
 	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
@@ -105,25 +100,24 @@ public partial class Camera : Camera2D
 			var processSpeedF = (float)processSpeed;
 			
 			// Get boundary update speed
-			boundSpeed = Math.Max(2, _boundSpeed.X) * processSpeedF;
+			boundSpeed = Math.Max(2, BoundSpeed.X) * processSpeedF;
 			
 			FollowTarget(processSpeedF);
 		}
 		
 		// Update boundaries
-		Vector2I farBounds = _position + FrameworkData.ViewSize;
-		_limit.X = MoveBoundaryForward(_limit.X, _bound.X, _position.X, boundSpeed); // Left
-		_limit.Y = MoveBoundaryForward(_limit.Y, _bound.Y, _position.Y, boundSpeed); // Top
-		_limit.Z = MoveBoundaryBackward(_limit.Z, _bound.Z, farBounds.X, boundSpeed); // Right
-		_limit.W = MoveBoundaryBackward(_limit.W, _bound.W, farBounds.Y, boundSpeed); // Bottom
+		Vector2I farBounds = BufferPosition + FrameworkData.ViewSize;
+		Limit.X = MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed); // Left
+		Limit.Y = MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed); // Top
+		Limit.Z = MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed); // Right
+		Limit.W = MoveBoundaryBackward(Limit.W, Bound.W, farBounds.Y, boundSpeed); // Bottom
 
-		_previousLimit = _limit;
-		
-		_position.X = (int)Math.Clamp(_rawPosition.X + _offset.X, _limit.X, _limit.Z - FrameworkData.ViewSize.X);
-		_position.Y = (int)Math.Clamp(_rawPosition.Y + _offset.Y, _limit.Y, _limit.W - FrameworkData.ViewSize.Y);
-		_position += _shakeOffset;
+		PreviousLimit = Limit;
 
-		var finalPosition = new Vector2I(_position.X - Constants.RenderBuffer, _position.Y);
+		BufferPosition = ShakeOffset + (Vector2I)(RawPosition + BufferOffset).Clamp(
+			new Vector2(Limit.X, Limit.Y), new Vector2(Limit.Z, Limit.W) - FrameworkData.ViewSize);
+
+		var finalPosition = new Vector2I(BufferPosition.X - Constants.RenderBuffer, BufferPosition.Y);
 		
 		Position = finalPosition;
 		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
@@ -166,16 +160,16 @@ public partial class Camera : Camera2D
 	{
 		if (Target == null)
 		{
-			_speed = new Vector2I();
+			Speed = new Vector2I();
 			return;
 		}
 		
-		Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)_rawPosition - FrameworkData.ViewSize / 2;
+		Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)RawPosition - FrameworkData.ViewSize / 2;
 		targetPosition.Y += CameraCentreOffset;
 
-		int extX = FrameworkData.CDCamera ? 0 : 8;
+		int extraX = FrameworkData.CDCamera ? 0 : 8;
 			
-		_speed.X = CalculateSpeed(targetPosition.X + extX, extX, _maxSpeed.X);
+		Speed.X = CalculateSpeed(targetPosition.X + extraX, extraX, MaxSpeed.X);
 			
 		if (Target is Objects.Player.Player { IsGrounded: true } playerTarget)
 		{	
@@ -184,25 +178,25 @@ public partial class Camera : Camera2D
 				targetPosition.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
 			}
 				
-			int limit = Math.Abs(playerTarget.GroundSpeed) < 8 ? 6 : _maxSpeed.Y;
-			_speed.Y = Math.Clamp(targetPosition.Y, -limit, limit);
+			int limit = Math.Abs(playerTarget.GroundSpeed) < 8 ? 6 : MaxSpeed.Y;
+			Speed.Y = Math.Clamp(targetPosition.Y, -limit, limit);
 			return;
 		}
 
-		_speed.Y = CalculateSpeed(targetPosition.Y, 32, _maxSpeed.Y);
+		Speed.Y = CalculateSpeed(targetPosition.Y, 32, MaxSpeed.Y);
 	}
 	
 	private void UpdateShakeOffset()
 	{
 		if (_shakeTimer > 0)
 		{
-			_shakeOffset.X = CalculateShakeOffset(_shakeTimer, _shakeOffset.X);
-			_shakeOffset.Y = CalculateShakeOffset(_shakeTimer, _shakeOffset.Y);
+			ShakeOffset.X = CalculateShakeOffset(_shakeTimer, ShakeOffset.X);
+			ShakeOffset.Y = CalculateShakeOffset(_shakeTimer, ShakeOffset.Y);
 			_shakeTimer--;
 		}
 		else
 		{
-			_shakeOffset = new Vector2I();
+			ShakeOffset = new Vector2I();
 		}
 	}
 
@@ -210,13 +204,13 @@ public partial class Camera : Camera2D
 	{
 		for (var i = 0; i < 2; i++)
 		{
-			if (_delay[i] > 0)
+			if (Delay[i] > 0)
 			{
-				_delay[i]--;
+				Delay[i]--;
 				continue;
 			}
 			
-			_rawPosition[i] += _speed[i] * processSpeedF;
+			RawPosition[i] += Speed[i] * processSpeedF;
 		}
 	}
 
