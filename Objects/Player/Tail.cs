@@ -21,7 +21,7 @@ public partial class Tail : Framework.CommonObject.CommonObject
 	protected override void Update(double processSpeed)
 	{
 		// Get target player
-		if (Target == null || !IsInstanceValid(Target) || Target.Type != PlayerConstants.Type.Tails)
+		if (Target == null || !IsInstanceValid(Target) || Target.Type != Player.Types.Tails)
 		{
 			QueueFree();
 			return;
@@ -29,39 +29,39 @@ public partial class Tail : Framework.CommonObject.CommonObject
 		
 		switch (Target.Animation)
 		{
-			case PlayerConstants.Animation.Idle:
-			case PlayerConstants.Animation.Duck:
-			case PlayerConstants.Animation.LookUp:
-				Sprite.SetAnimation("idle", new[]{8});
+			case Player.Animations.Idle:
+			case Player.Animations.Duck:
+			case Player.Animations.LookUp:
+				Sprite.SetAnimation("idle", [8]);
 				break;
-			case PlayerConstants.Animation.FlyLift:
-			case PlayerConstants.Animation.Fly:
-			case PlayerConstants.Animation.FlyTired:
-				int speed = Target.Speed.Y >= 0f || Target.Animation == PlayerConstants.Animation.FlyTired ? 2 : 1;
+			case Player.Animations.FlyLift:
+			case Player.Animations.Fly:
+			case Player.Animations.FlyTired:
+				int speed = Target.Speed.Y >= 0f || Target.Animation == Player.Animations.FlyTired ? 2 : 1;
 				Sprite.SetAnimation("fly");
 				Sprite.UpdateDuration(new[]{speed});
 				break;
-			case PlayerConstants.Animation.Push:
-			case PlayerConstants.Animation.Skid:
-			case PlayerConstants.Animation.Spin:
-			case PlayerConstants.Animation.Grab:
-			case PlayerConstants.Animation.Balance:
-			case PlayerConstants.Animation.SpinDash:
+			case Player.Animations.Push:
+			case Player.Animations.Skid:
+			case Player.Animations.Spin:
+			case Player.Animations.Grab:
+			case Player.Animations.Balance:
+			case Player.Animations.SpinDash:
 				var offsetX = 36;
 				var offsetY = 24;
 				
-				if (Target.Animation is PlayerConstants.Animation.SpinDash or PlayerConstants.Animation.Grab)
+				if (Target.Animation is Player.Animations.SpinDash or Player.Animations.Grab)
 				{
 					offsetX -= 5;
 				}
-				else if (Target.Animation != PlayerConstants.Animation.Spin)
+				else if (Target.Animation != Player.Animations.Spin)
 				{
 					offsetX -= 7;
 					offsetY -= 5;
 				}
 
 				Sprite.Offset = new Vector2(offsetX, offsetY);
-				Sprite.SetAnimation("tail", new[]{4});
+				Sprite.SetAnimation("tail", [4]);
 				break;
 			default:
 				Sprite.SetAnimation("hidden");

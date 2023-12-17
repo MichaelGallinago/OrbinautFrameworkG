@@ -10,8 +10,15 @@ public partial class Barrier(CommonObject target) : AnimatedSprite
         None, Normal, Thunder, Flame, Water
     }
     
+    public enum States : byte
+    { 
+        None, Active, Disabled, DoubleSpin
+    }
+    
     public float Angle { get; set; }
+    public States State { get; set; }
     public CommonObject Target { get; set; } = target;
+    public float AnimationTimer { get; set; } = -1f;
     
     private Types _type;
     

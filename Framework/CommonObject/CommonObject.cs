@@ -192,7 +192,7 @@ public abstract partial class CommonObject : Node2D
 				integerPlayerPosition.Y < integerObjectPosition.Y ? 0 : combinedSize.Y * 2 + gripY);
 			
 			bool vCollision = Math.Abs(clip.X) >= Math.Abs(clip.Y) || 
-			    SharedData.PlayerPhysics == PlayerConstants.PhysicsType.SK && Math.Abs(clip.Y) <= 4;
+			    SharedData.PlayerPhysics == Player.PhysicsTypes.SK && Math.Abs(clip.Y) <= 4;
 				
 			// VERTICAL COLLISION
 			if (vCollision)
@@ -210,7 +210,7 @@ public abstract partial class CommonObject : Node2D
 								break;
 							// Handle upward (bottom) collision
 							case < 0:
-								if (SharedData.PlayerPhysics >= PlayerConstants.PhysicsType.S3 && !player.IsGrounded)
+								if (SharedData.PlayerPhysics >= Player.PhysicsTypes.S3 && !player.IsGrounded)
 								{
 									player.GroundSpeed = 0;
 								}
@@ -247,7 +247,7 @@ public abstract partial class CommonObject : Node2D
 			}
 				
 			// HORIZONTAL COLLISION
-			if (!(SharedData.PlayerPhysics == PlayerConstants.PhysicsType.SK || Math.Abs(clip.Y) > 4))
+			if (!(SharedData.PlayerPhysics == Player.PhysicsTypes.SK || Math.Abs(clip.Y) > 4))
 			{
 				ClearPush(player);
 				return;
@@ -310,9 +310,9 @@ public abstract partial class CommonObject : Node2D
 	private void ClearPush(Player player)
 	{
 		if (player.PushingObject != this) return;
-		if (player.Animation != PlayerConstants.Animation.Spin)
+		if (player.Animation != Player.Animations.Spin)
 		{
-			player.Animation = PlayerConstants.Animation.Move;
+			player.Animation = Player.Animations.Move;
 		}
 				
 		player.PushingObject = null;
