@@ -194,7 +194,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	public Player CarryTarget { get; set; }
 	public float CarryTimer { get; set; }
-	public Vector2 CarryParentPosition { get; set; }
+	public Vector2 CarryTargetPosition { get; set; }
     
 	public CpuStates CpuState { get; set; }
 	public float CpuTimer { get; set; }
@@ -1645,10 +1645,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private void ProcessMovementAir()
 	{
 		// Control routine checks
-		if (IsGrounded || IsDead)
-		{
-			return;
-		}
+		if (IsGrounded || IsDead) return;
 	
 		// Action checks
 		if (Action is Actions.Carried or Actions.Climb or Actions.Glide
@@ -1856,16 +1853,16 @@ public partial class Player : Framework.CommonObject.CommonObject
 		};
 
 		int wallRadius = RadiusNormal.X + 1;
-		int offsetY = 8 * (Angle == 360 ? 1 : 0);
+		int offsetY = 8 * (Mathf.IsEqualApprox(Angle, 360f) ? 1 : 0);
 		
 		if (GroundSpeed < 0)
 		{
 			var wallDist = castDir switch
 			{
-				0 => tile_find_h(x + Speed.X - wallRadius, y + Speed.Y + offsetY, false, TileLayer, GroundMode)[0],
-				1 => tile_find_v(x + Speed.X, y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
-				2 => tile_find_h(x + Speed.X + wallRadius, y + Speed.Y, true, TileLayer, GroundMode)[0],
-				3 => tile_find_v(x + Speed.X, y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
+				0 => tile_find_h(Position.X + Speed.X - wallRadius, Position.Y + Speed.Y + offsetY, false, TileLayer, GroundMode)[0],
+				1 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
+				2 => tile_find_h(Position.X + Speed.X + wallRadius, Position.Y + Speed.Y, true, TileLayer, GroundMode)[0],
+				3 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
 				_ => 0
 			};
 
@@ -1906,10 +1903,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			var wallDist = castDir switch
 			{
-				0 => tile_find_h(x + Speed.X + wallRadius, y + Speed.Y + offsetY, true, TileLayer, GroundMode)[0],
-				1 => tile_find_v(x + Speed.X, y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
-				2 => tile_find_h(x + Speed.X - wallRadius, y + Speed.Y, false, TileLayer, GroundMode)[0],
-				3 => tile_find_v(x + Speed.X, y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
+				0 => tile_find_h(Position.X + Speed.X + wallRadius, Position.Y + Speed.Y + offsetY, true, TileLayer, GroundMode)[0],
+				1 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
+				2 => tile_find_h(Position.X + Speed.X - wallRadius, Position.Y + Speed.Y, false, TileLayer, GroundMode)[0],
+				3 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
 				_ => 0
 			};
 
@@ -2253,20 +2250,20 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Action checks
 		if (Action is Actions.Glide or Actions.Climb) return;
 		
-		var _wall_radius = RadiusNormal.X + 1;
-		var _move_vector = math_get_vector_256(Speed.X, Speed.Y);
-		var _move_quad = MathB.GetAngleQuadrant(_move_vector);
+		int wallRadius = RadiusNormal.X + 1;
+		var moveVector = math_get_vector_256(Speed.X, Speed.Y);
+		byte moveQuad = MathB.GetAngleQuadrant(moveVector);
 		
 		// Perform left wall collision if not moving mostly right
-		if _move_quad != 1
+		if (moveQuad != 1)
 		{
-			var _wall_dist = tile_find_h(x - _wall_radius, y, false, TileLayer)[0];
-			if _wall_dist < 0
+			var wallDist = tile_find_h(Position.X - wallRadius, Position.Y, false, TileLayer)[0];
+			if (wallDist < 0f)
 			{
-				x -= _wall_dist;
+				Position -= new Vector2(wallDist, 0f);
 				Speed.X = 0;
 				
-				if _move_quad == 3
+				if (moveQuad == 3)
 				{
 					GroundSpeed = Speed.Y;
 					return;
@@ -2275,15 +2272,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Perform right wall collision if not moving mostly left
-		if _move_quad != 3
+		if (moveQuad != 3)
 		{
-			var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
-			if _wall_dist < 0
+			var wallDist = tile_find_h(Position.X + wallRadius, Position.Y, true, TileLayer)[0];
+			if (wallDist < 0f)
 			{
-				x += _wall_dist;
-				Speed.X = 0;
+				Position += new Vector2(wallDist, 0f);;
+				Speed.X = 0f;
 				
-				if _move_quad == 1
+				if (moveQuad == 1)
 				{
 					GroundSpeed = Speed.Y;
 					return;
@@ -2292,43 +2289,43 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Perform ceiling collision if not moving mostly down
-		if _move_quad != 0
+		if (moveQuad != 0)
 		{
-			var _roof_data = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer);
-			var _roof_dist = _roof_data[0];
-			var _roof_angle = _roof_data[1];
+			var roofData = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer);
+			var roofDist = roofData[0];
+			var roofAngle = roofData[1];
 			
-			if _move_quad == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && _roof_dist <= -14
+			if (moveQuad == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDist <= -14f)
 			{
 				// Perform right wall collision if moving mostly left and too far into the ceiling
-				var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
-				if _wall_dist < 0
+				var wallDist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
+				if (wallDist < 0)
 				{
-					x += _wall_dist;
+					x += wallDist;
 					Speed.X = 0;
 					
 					return;
 				}
 			}
-			else if _roof_dist < 0
+			else if (roofDist < 0)
 			{
-				y -= _roof_dist;
-				if _move_quad == 2 && MathB.GetAngleQuadrant(_roof_angle) % 2 > 0 && Action != Actions.Flight
+				y -= roofDist;
+				if (moveQuad == 2 && MathB.GetAngleQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
 				{
-					Angle = _roof_angle;
-					GroundSpeed = _roof_angle < 180 ? -Speed.Y : Speed.Y;
+					Angle = roofAngle;
+					GroundSpeed = roofAngle < 180 ? -Speed.Y : Speed.Y;
 					Speed.Y = 0;
 					
-					player_land(id);
+					Land();
 				}
 				else
 				{
-					if Speed.Y < 0
+					if (Speed.Y < 0f)
 					{
-						Speed.Y = 0;
+						Speed.Y = 0f;
 					}
 						
-					if Action == Actions.Flight
+					if (Action == Actions.Flight)
 					{
 						Gravity	= GravityType.TailsDown;
 					}
@@ -2339,78 +2336,72 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Perform floor collision if not moving mostly up
-		if _move_quad != 2
+		var _floor_dist;
+		var _floor_angle;
+
+		if (moveQuad == 0)
 		{
-			var _floor_dist;
-			var _floor_angle;
+			var floorDataL = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer);
+			var floorDataR = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer);
 
-			if _move_quad == 0
+			if (floorDataL[0] > floorDataR[0])
 			{
-				var _floor_data_l = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer);
-				var _floor_data_r = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer);
-
-				if _floor_data_l[0] > _floor_data_r[0]
-				{
-					_floor_dist = _floor_data_r[0];
-					_floor_angle = _floor_data_r[1];
-				}
-				else
-				{
-					_floor_dist = _floor_data_l[0];
-					_floor_angle = _floor_data_l[1];
-				}
-					
-				var _min_clip = -(Speed.Y + 8);		
-				if _floor_dist >= 0 || _min_clip >= _floor_data_l[0] && _min_clip >= _floor_data_r[0]
-				{
-					return;
-				}
-					
-				if MathB.GetAngleQuadrant(_floor_angle) > 0
-				{
-					if Speed.Y > 15.75
-					{
-						Speed.Y = 15.75;
-					}
-						
-					GroundSpeed = _floor_angle < 180 ? -Speed.Y : Speed.Y;
-					Speed.X = 0;
-				}
-				else if _floor_angle > 22.5 && _floor_angle <= 337.5
-				{
-					GroundSpeed = _floor_angle < 180 ? -Speed.Y : Speed.Y;
-					GroundSpeed /= 2;
-				}
-				else 
-				{
-					GroundSpeed = Speed.X;
-					Speed.Y = 0;
-				}
-			}
-			else if Speed.Y >= 0
-			{
-				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
-				_floor_dist = _floor_data[0];
-				_floor_angle = _floor_data[1];
-							
-				if _floor_dist >= 0
-				{
-					return;
-				}
-				
-				GroundSpeed = Speed.X;
-				Speed.Y = 0;
+				_floor_dist = floorDataR[0];
+				_floor_angle = floorDataR[1];
 			}
 			else
 			{
+				_floor_dist = floorDataL[0];
+				_floor_angle = floorDataL[1];
+			}
+					
+			float minClip = -(Speed.Y + 8f);		
+			if (_floor_dist >= 0 || minClip >= floorDataL[0] && minClip >= floorDataR[0]) return;
+					
+			if (MathB.GetAngleQuadrant(_floor_angle) > 0)
+			{
+				if (Speed.Y > 15.75f)
+				{
+					Speed.Y = 15.75f;
+				}
+						
+				GroundSpeed = _floor_angle < 180f ? -Speed.Y : Speed.Y;
+				Speed.X = 0f;
+			}
+			else if (_floor_angle > 22.5f && _floor_angle <= 337.5f)
+			{
+				GroundSpeed = _floor_angle < 180f ? -Speed.Y : Speed.Y;
+				GroundSpeed /= 2f;
+			}
+			else 
+			{
+				GroundSpeed = Speed.X;
+				Speed.Y = 0;
+			}
+		}
+		else if (Speed.Y >= 0)
+		{
+			var floorData = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
+			_floor_dist = floorData[0];
+			_floor_angle = floorData[1];
+							
+			if (_floor_dist >= 0)
+			{
 				return;
 			}
-
-			y += _floor_dist;
-			Angle = _floor_angle;
-			
-			player_land(id);
+				
+			GroundSpeed = Speed.X;
+			Speed.Y = 0;
 		}
+		else
+		{
+			return;
+		}
+
+		y += _floor_dist;
+		Angle = _floor_angle;
+			
+		Land();
 	}
 
 	private void ProcessGlideCollision()
@@ -2419,57 +2410,57 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		if (Action != Actions.Glide) return;
 		
-		var _wall_radius = RadiusNormal.X + 1;
-		var _move_vector = math_get_vector_256(Speed.X, Speed.Y);
-		var _move_quad = MathB.GetAngleQuadrant(_move_vector);
+		var wallRadius = RadiusNormal.X + 1;
+		var moveVector = math_get_vector_256(Speed.X, Speed.Y);
+		var moveQuad = MathB.GetAngleQuadrant(moveVector);
 		
-		var _collision_flag_wall = false;
-		var _collision_flag_floor = false;
-		var _climb_y = y;
+		var collisionFlagWall = false;
+		var collisionFlagFloor = false;
+		var climbY = Position.Y;
 		
 		// Perform left wall collision if not moving mostly right
-		if _move_quad != 1
+		if (moveQuad != 1)
 		{
-			var _wall_dist = tile_find_h(x - _wall_radius, y, false, TileLayer)[0];
-			if _wall_dist < 0
+			var wallDist = tile_find_h(x - wallRadius, y, false, TileLayer)[0];
+			if (wallDist < 0)
 			{
-				x -= _wall_dist;
+				x -= wallDist;
 				Speed.X = 0;
-				_collision_flag_wall = true;
+				collisionFlagWall = true;
 			}
 		}
 		
 		// Perform right wall collision if not moving mostly left
-		if _move_quad != 3
+		if (moveQuad != 3)
 		{
-			var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
-			if _wall_dist < 0
+			var _wall_dist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
+			if (_wall_dist < 0)
 			{
 				x += _wall_dist;
 				Speed.X = 0;
-				_collision_flag_wall = true;
+				collisionFlagWall = true;
 			}
 		}
 		
 		// Perform ceiling collision if not moving mostly down
-		if _move_quad != 0
+		if (moveQuad != 0)
 		{
-			var _roof_dist = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer)[0];
-			if _move_quad == 3 && _roof_dist <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3
+			var roofDist = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer)[0];
+			if (moveQuad == 3 && roofDist <= -14f && SharedData.PlayerPhysics >= PhysicsTypes.S3)
 			{
 				// Perform right wall collision instead if moving mostly left and too far into the ceiling
-				var _wall_dist = tile_find_h(x + _wall_radius, y, true, TileLayer)[0];
-				if _wall_dist < 0
+				var _wall_dist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
+				if (_wall_dist < 0)
 				{
 					x += _wall_dist;
 					Speed.X = 0;
-					_collision_flag_wall = true;
+					collisionFlagWall = true;
 				}
 			}
-			else if _roof_dist < 0
+			else if (roofDist < 0)
 			{
-				y -= _roof_dist;
-				if Speed.Y < 0 or _move_quad == 2
+				y -= roofDist;
+				if (Speed.Y < 0 || moveQuad == 2)
 				{
 					Speed.Y = 0;
 				}
@@ -2477,62 +2468,63 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Perform floor collision if not moving mostly up
-		if _move_quad != 2
+		if (moveQuad != 2)
 		{
-			var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
-			var _floor_dist = _floor_data[0];
-			var _floor_angle = _floor_data[1];
+			var floorData = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
+			var floorDist = floorData[0];
+			var floorAngle = floorData[1];
 		
-			if ActionState == GLIDE_STATE_GROUND
+			if ((GlideStates)ActionState == GlideStates.Ground)
 			{
-				if _floor_dist > 14
+				if (floorDist > 14f)
 				{
-					sub_PlayerGlideRelease();
+					ReleaseGlide();
 				}
 				else
 				{
-					y += _floor_dist;
-					Angle = _floor_angle;
+					y += floorDist;
+					Angle = floorAngle;
 				}
 				
 				return;
 			}
 
-			if _floor_dist < 0
+			if (floorDist < 0f)
 			{
-				y += _floor_dist;
-				Angle = _floor_angle;
+				y += floorDist;
+				Angle = floorAngle;
 				Speed.Y = 0;
-				_collision_flag_floor = true;
+				collisionFlagFloor = true;
 			}
 		}
 		
 		// Land logic
-		if _collision_flag_floor
+		if (collisionFlagFloor)
 		{
-			if ActionState == GlideStates.Air
+			if ((GlideStates)ActionState == GlideStates.Air)
 			{
-				if MathB.GetAngleQuadrant(Angle) == 0
+				if (MathB.GetAngleQuadrant(Angle) == 0)
 				{
 					Animation = Animations.GlideGround;
-					ActionState = GLIDE_STATE_GROUND;
+					ActionState = (int)GlideStates.Ground;
 					ActionValue = 0;
 					Gravity = 0;
 				}
 				else
 				{
 					GroundSpeed = Angle < 180 ? Speed.X : -Speed.X;
-					player_land(id);
+					Land();
 				}
 			}
-			else if ActionState == GlideStates.Fall
+			else if ((GlideStates)ActionState == GlideStates.Fall)
 			{
-				player_land(id);
-				audio_play_sfx(sfx_land);
+				Land();
+				//TODO: audio
+				//audio_play_sfx(sfx_land);
 				
-				if MathB.GetAngleQuadrant(Angle) == 0
+				if (MathB.GetAngleQuadrant(Angle) == 0)
 				{
-					Animation = ANI_GLIDE_LAND;
+					Animation = Animations.GlideLand;
 					GroundLockTimer = 16;
 					GroundSpeed = 0;
 					Speed.X = 0;
@@ -2545,46 +2537,44 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Wall attach logic
-		else if _collision_flag_wall
+		else if (collisionFlagWall)
 		{
-			if ActionState != GlideStates.Air
-			{
-				return;
-			}
-			
+			if ((GlideStates)ActionState != GlideStates.Air) return;
+
 			// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he is either inside the ceiling or above the floor edge
-			var _wall_dist = tile_find_h(x + _wall_radius * Facing, _climb_y - Radius.Y, Facing, TileLayer)[0];
-			if _wall_dist != 0
+			var wallDist = tile_find_h(x + wallRadius * Facing, climbY - Radius.Y, Facing, TileLayer)[0];
+			if (wallDist != 0)
 			{
 				// Cast a vertical sensor now. If the distance returned is negative, Knuckles is inside
 				// the ceiling, else he is above the edge
 				
 				// Note: _find_mode is set to 2. LBR tiles are not ignored in this case
-				var _floor_dist = tile_find_v(x + (_wall_radius + 1) * Facing, _climb_y - Radius.Y - 1, true, TileLayer, 2)[0];
-				if _floor_dist < 0 || _floor_dist >= 12
+				var floorDist = tile_find_v(x + (wallRadius + 1) * Facing, climbY - Radius.Y - 1, true, TileLayer, 2)[0];
+				if (floorDist < 0f || floorDist >= 12f)
 				{
-					sub_PlayerGlideRelease();
+					ReleaseGlide();
 					return;
 				}
 				
 				// Adjust Knuckles' Y position to place him just below the edge
-				y += _floor_dist;
+				y += floorDist;
 			}
 			
-			if Facing == Constants.Direction.Negative
+			if (Facing == Constants.Direction.Negative)
 			{
 				x++;
 			}
 			
-			Animation = ANI_CLIMB_WALL;
+			Animation = Animations.ClimbWall;
 			Action = Actions.Climb;
-			ActionState = CLIMB_STATE_NORMAL;
+			ActionState = (int)ClimbStates.Normal;
 			ActionValue = 0;
 			GroundSpeed = 0;
 			Speed.Y = 0;
 			Gravity	= 0;
 			
-			audio_play_sfx(sfx_grab);
+			//TODO: audio
+			//audio_play_sfx(sfx_grab);
 		}
 	}
 
@@ -2601,114 +2591,96 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessCarry()
 	{
-		if (Type != Types.Tails || carry_timer > 0 && --carry_timer != 0) return;
+		if (Type != Types.Tails || CarryTimer > 0 && --CarryTimer != 0) return;
 	
-		if CarryTarget == null
+		if (CarryTarget == null)
 		{
-			if Action != Actions.Flight 
-			{
-				return;
-			}
+			if (Action != Actions.Flight) return;
 		
 			// Try to grab another player
-			for (var p = 0; p < PLAYER_COUNT; p++)
+			foreach (Player player in Players)
 			{
-				if p == Id
-				{
-					continue;
-				}
+				if (player == this) continue;
+
+				if (player.Action is Actions.SpinDash or Actions.Carried) continue;
 			
-				var _player = player_get(p);
-				if _player.Action == Actions.SpinDash || _player.Action == Actions.Carried 
-				{
-					continue;
-				}
+				float distanceX = Mathf.Floor(player.Position.X - Position.X);
+				if (distanceX is < -16f or >= 16f) continue;
 			
-				var _x_dist = floor(_player.x - x);
-				if _x_dist < -16 || _x_dist >= 16 
-				{
-					continue;
-				}
+				float distanceY = Mathf.Floor(player.Position.Y - Position.Y);
+				if (distanceY is < 32f or >= 48f) continue;
+				
+				player.ResetState();
+				//TODO: audio
+				//audio_play_sfx(sfx_grab);
 			
-				var _y_dist = floor(_player.y - y) - 32;
-				if _y_dist < 0 || _y_dist >= 16
-				{
-					continue;
-				}
-			
-				player_reset_state(_player);
-				audio_play_sfx(sfx_grab);
-			
-				_player.Animation = ANI_GRAB;
-				_player.Action = Actions.Carried ;
-				CarryTarget = _player;
-			
-				with _player
-				{
-					sub_PlayerCarryAttachTo(other);
-				}
+				player.Animation = Animations.Grab;
+				player.Action = Actions.Carried;
+				CarryTarget = player;
+
+				player.AttachToPlayer(this);
 			}
 		}
 		else
 		{
-			with CarryTarget
-			{
-				var _tails = other;
-				var _previous_x = other.carry_target_x;
-				var _previous_y = other.carry_target_y;	
-			
-				var InputPress = player_get_input(0);
-				if InputPress.Abc
-				{
-					_tails.CarryTarget = null;
-					_tails.carry_timer = 18;
-				
-					IsSpinning = true;
-					IsJumping = true;
-					Action = Actions.None;
-					Animation = Animations.Spin;
-					Radius.X = RadiusSpin.X;
-					Radius.Y = RadiusSpin.Y;
-					Speed.X = 0;
-					Speed.Y = PhysicParams.MinimalJumpVelocity;
-				
-					var InputDown = player_get_input(1);
-					if InputDown.Left
-					{
-						Speed.X = -2;
-					}
-					else if InputDown.Right
-					{
-						Speed.X = 2;
-					}
-				
-					audio_play_sfx(sfx_jump);
-				}
-				else if _tails.Action != Actions.Flight || x != _previous_x || y != _previous_y
-				{
-					_tails.CarryTarget = null;
-					_tails.carry_timer = 60;
-					Action = Actions.None;
-				}
-				else
-				{
-					sub_PlayerCarryAttachTo(_tails);
-				}
-			}
+			CarryTarget.OnPlayerAttached(this);
 		}
 	}
 
-	private void AttachToPlayer(Player player)
+	private void OnPlayerAttached(Player carrier)
 	{
-		Facing = _carrier.Facing;
-		Speed.X = _carrier.Speed.X;
-		Speed.Y = _carrier.Speed.Y;
-		x = _carrier.x;
-		y = _carrier.y + 28;
-		image_xscale = _carrier.Facing;
+		Vector2 previousPosition = carrier.CarryTargetPosition;
+				
+		if (InputPress.Abc)
+		{
+			carrier.CarryTarget = null;
+			carrier.CarryTimer = 18f;
+				
+			IsSpinning = true;
+			IsJumping = true;
+			Action = Actions.None;
+			Animation = Animations.Spin;
+			Radius.X = RadiusSpin.X;
+			Radius.Y = RadiusSpin.Y;
+			Speed.X = 0f;
+			Speed.Y = PhysicParams.MinimalJumpVelocity;
+					
+			if (InputDown.Left)
+			{
+				Speed.X = -2;
+			}
+			else if (InputDown.Right)
+			{
+				Speed.X = 2;
+			}
+					
+			//TODO: audio
+			//audio_play_sfx(sfx_jump);
+			
+		}
+		else if (carrier.Action != Actions.Flight 
+		    || !Mathf.IsEqualApprox(Position.X, previousPosition.X) 
+		    || !Mathf.IsEqualApprox(Position.Y, previousPosition.Y))
+		{
+			carrier.CarryTarget = null;
+			carrier.CarryTimer = 60;
+			Action = Actions.None;
+		}
+		else
+		{
+			AttachToPlayer(carrier);
+		}
+	}
+
+	private void AttachToPlayer(Player carrier)
+	{
+		Facing = carrier.Facing;
+		Speed.X = carrier.Speed.X;
+		Speed.Y = carrier.Speed.Y;
+		Position = carrier.Position + new Vector2(0f, 28f);
+		Scale = new Vector2(Math.Abs(Scale.X) * (float)carrier.Facing, Scale.Y);
 		
-		_carrier.carry_target_x = x;
-		_carrier.carry_target_y = y;
+		carrier.CarryTargetPosition = Position;
 	}
 
 	#endregion
@@ -2837,7 +2809,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 		}
 	
-		IsInvincible = InvincibilityFrames != 0 || ItemInvincibilityTimer != 0 || IsHurt || IsSuper || Barrier.State == BARRIER_STATE_DOUBLESPIN;
+		IsInvincible = InvincibilityFrames != 0 || ItemInvincibilityTimer != 0 
+			|| IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
 				 
 		if (Id == 0 && FrameworkData.Time >= 36000d)
 		{
@@ -2870,47 +2843,45 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessWater()
 	{
-		if IsDead || !instance_exists(c_stage) || !c_stage.water_enabled
-		{
-			return;
-		}
+		if (IsDead || !instance_exists(c_stage) || !c_stage.water_enabled) return;
 		
 		// On surface
 		
-		if !IsUnderwater
+		if (!IsUnderwater)
 		{
-			if floor(y) >= c_stage.water_level
+			if (Mathf.Floor(Position.Y) >= c_stage.water_level)
 			{	
 				IsUnderwater = true;
 				
 				instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
 				sub_PlayerWaterSplash();
 				
-				if !is_hurt
+				if (!IsHurt)
 				{
-					if !(Action == Actions.Flight || Action == Actions.Glide && ActionState != GlideStates.Fall)
+					if (Action != Actions.Flight && !(Action == Actions.Glide && (GlideStates)ActionState != GlideStates.Fall))
 					{
-						Gravity = GRV_UNDERWATER;
+						Gravity = GravityType.Underwater;
 					}
 					
-					Speed.X *= 0.5;
-					Speed.Y *= 0.25;
+					Speed *= new Vector2(0.5f, 0.25f);
 				}
 				
-				if Barrier.Type == BARRIER_FLAME || Barrier.Type == BARRIER_THUNDER
+				if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
 				{	
-					if Barrier.Type == BARRIER_THUNDER
+					if (Barrier.Type == Barrier.Types.Thunder)
 					{
-						instance_create(x, y, obj_water_flash);
+						//TODO: obj_water_flash
+						//instance_create(x, y, obj_water_flash);
 					}
 					
 					Barrier.Type = Barrier.Types.None;			
 				}
 				
-				if Action == Actions.Flight
+				if (Action == Actions.Flight)
 				{
-					audio_stop_sfx(sfx_flight);
-					audio_stop_sfx(sfx_flight2);
+					//TODO: audio
+					//audio_stop_sfx(sfx_flight);
+					//audio_stop_sfx(sfx_flight2);
 				}
 			}
 			else
@@ -2921,42 +2892,38 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		// Underwater
 		
-		if Barrier.Type != BARRIER_WATER
+		if (Barrier.Type != Barrier.Types.Water)
 		{
-			if AirTimer > -1
+			if (AirTimer > -1f)
 			{
 				AirTimer--;
 			}
 			
-			switch AirTimer
+			//TODO: fix float comparison
+			switch (AirTimer)
 			{
 				case 1500: 
 				case 1200:
 				case 900:
-						
-					if Id == 0
-					{
-						audio_play_sfx(sfx_air_alert);
-					}
-						
-				break;
+					if (Id != 0) break;
+					//TODO: audio
+					//audio_play_sfx(sfx_air_alert);
+					break;
 					
 				case 720:
-					
-					if Id == 0
-					{
-						audio_play_bgm(bgm_drowning);
-					}
-						
-				break;
+					if (Id != 0) break;
+					//TODO: audio
+					//audio_play_bgm(bgm_drowning);
+					break;
 					
 				case 0:
-						
-					audio_play_sfx(sfx_drown);
+					//TODO: audio
+					//audio_play_sfx(sfx_drown);
 					ResetState();
 					
-					depth = 50;
-					Animation = ANI_DROWN;
+					//TODO: depth
+					//depth = 50;
+					Animation = Animations.Drown;
 					TileLayer = TILELAYER_NONE;
 					Speed.X = 0;
 					Speed.Y = 0;
@@ -2986,7 +2953,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			
 		if floor(y) < c_stage.water_level
 		{
-			if !is_hurt && Action != Actions.Glide
+			if !IsHurt && Action != Actions.Glide
 			{
 				if SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4
 				{
