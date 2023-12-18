@@ -1,3 +1,5 @@
+using Godot;
+
 namespace OrbinautFramework3.Framework;
 
 public static class MathB
@@ -12,5 +14,16 @@ public static class MathB
     
     public static short Sin(byte angle) => Array[angle];
     public static short Cos(byte angle) => Array[angle ^ 128];
+    public static float SinF(byte angle) => 1f / Array[angle];
+    public static float CosF(byte angle) => 1f / Array[angle ^ 128];
     public static (short, short) SinCos(byte angle) => (Sin(angle), Cos(angle));
+    public static (float, float) SinCosF(byte angle) => (SinF(angle), CosF(angle));
+    
+    //TODO: remove this
+    public static byte GetAngleQuadrant(float angle)
+    {
+        return (byte)(Mathf.FloorToInt(angle % 360f + 45f - Constants.AngleIncrement) / 90 & 3);
+    }
+    
+    public static byte GetAngleQuadrant(byte angle) => (byte)((angle + 225) >> 6 & 3);
 }

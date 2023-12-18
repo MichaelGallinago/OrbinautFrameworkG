@@ -27,7 +27,7 @@ public partial class Camera : Camera2D
 	public Vector4 PreviousLimit; // TODO: check if needed
 
 	public Vector2I ShakeOffset;
-	private int _shakeTimer;
+	public int ShakeTimer;
 
 	public Camera()
 	{
@@ -73,7 +73,7 @@ public partial class Camera : Camera2D
 		Delay = new Vector2I(delayX ?? Delay.X, delayY ?? Delay.Y);
 	}
 
-	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
+	public void UpdateShakeTimer(int shakeTimer) => ShakeTimer = shakeTimer;
 
 	public Vector2I GetActiveArea()
 	{
@@ -188,11 +188,11 @@ public partial class Camera : Camera2D
 	
 	private void UpdateShakeOffset()
 	{
-		if (_shakeTimer > 0)
+		if (ShakeTimer > 0)
 		{
-			ShakeOffset.X = CalculateShakeOffset(_shakeTimer, ShakeOffset.X);
-			ShakeOffset.Y = CalculateShakeOffset(_shakeTimer, ShakeOffset.Y);
-			_shakeTimer--;
+			ShakeOffset.X = CalculateShakeOffset(ShakeTimer, ShakeOffset.X);
+			ShakeOffset.Y = CalculateShakeOffset(ShakeTimer, ShakeOffset.Y);
+			ShakeTimer--;
 		}
 		else
 		{

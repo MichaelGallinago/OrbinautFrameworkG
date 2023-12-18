@@ -79,6 +79,12 @@ public abstract partial class CommonObject : Node2D
 		SolidData.HeightMap = null;
 	}
 
+	public void SetHitbox(Vector2I radius, Vector2I offset = default)
+	{
+		InteractData.Radius = radius;
+		InteractData.Offset = offset;
+	}
+
 	public void SetHitboxExtra(Vector2I radius, Vector2I offset = default)
 	{
 		InteractData.RadiusExtra = radius;

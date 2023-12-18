@@ -78,6 +78,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		Air, Ground, Fall
 	}
+	
+	public enum ClimbStates : byte
+	{
+		Normal, Ledge
+	}
     
 	public enum Animations : byte
 	{
@@ -201,8 +206,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 
-	public Buttons InputPress { get; set; }
-	public Buttons InputDown { get; set; }
+	public Buttons InputPress;
+	public Buttons InputDown;
 
 	public List<RecordedData> RecordedData { get; set; }
 
@@ -241,7 +246,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 		Radius = RadiusNormal;
 
-		Position = new Vector2(Position.X, Position.Y - Radius.Y + 1);
+		Position += new Vector2(0f, 1f - Radius.Y);
 
 		Gravity = GravityType.Default;
 		TileLayer = Constants.TileLayer.Main;
@@ -462,7 +467,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 			int baseSpeed = IsSuper ? 11 : 8;
 		
-			Position = new Vector2(Position.X, Position.Y + Radius.Y - RadiusSpin.Y);
+			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 			Radius = RadiusSpin;
 			Animation = Animations.Spin;
 			IsSpinning = true;
@@ -522,7 +527,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			//audio_stop_sfx(sfx_charge2);
 			Action = Actions.None;
 		
-			if (ActionValue != 30f)
+			if (!Mathf.IsEqualApprox(ActionValue, 30f))
 			{
 				GroundSpeed = 0f;
 			}
@@ -744,56 +749,62 @@ public partial class Player : Framework.CommonObject.CommonObject
 		var position = (Vector2I)Position;
 		int ceilDist = GroundMode switch
 		{
-			Constants.GroundMode.Floor => CollisionUtilities.FindTileTwoPositions(true, position - Radius, position + new Vector2I(Radius.X, -Radius.Y), Constants.Direction.Negative, TileLayer, GroundMode).Item1,
-			Constants.GroundMode.RightWall => CollisionUtilities.FindTileTwoPositions(true, x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, Constants.Direction.Negative, TileLayer, GroundMode).Item1,
-			Constants.GroundMode.LeftWall => CollisionUtilities.FindTileTwoPositions(true, x + Radius.Y, y - Radius.X, x + Radius.Y, y + Radius.X, Constants.Direction.Positive, TileLayer, GroundMode).Item1,
+			Constants.GroundMode.Floor => CollisionUtilities.FindTileTwoPositions(true, 
+				position - Radius, 
+				position + new Vector2I(Radius.X, -Radius.Y), 
+				Constants.Direction.Negative, TileLayer, GroundMode).Item1,
+			Constants.GroundMode.RightWall => CollisionUtilities.FindTileTwoPositions(true, 
+				position - new Vector2I(Radius.Y, Radius.X), 
+				position + new Vector2I(-Radius.Y, Radius.X), 
+				Constants.Direction.Negative, TileLayer, GroundMode).Item1,
+			Constants.GroundMode.LeftWall => CollisionUtilities.FindTileTwoPositions(true, 
+				x + Radius.Y, y - Radius.X, 
+				x + Radius.Y, y + Radius.X, 
+				Constants.Direction.Positive, TileLayer, GroundMode).Item1,
 			_ => maxCeilingDist
 		};
 	
-		if ceilDist < maxCeilingDist
-		{
-			return;
-		}
+		if (ceilDist < maxCeilingDist) return false;
 	
 		// ???
-		if !SharedData.fix_jump_size
+		if (!SharedData.FixJumpSize)
 		{
-			Radius.X = radius_x_normal;
-			Radius.Y = radius_y_normal;
+			Radius = RadiusNormal;
 		}
 	
-		if !IsSpinning
-		{	
-			y += Radius.Y - radius_y_spin;
-			Radius.X = radius_x_spin;
-			Radius.Y = radius_y_spin;
+		if (!IsSpinning)
+		{
+			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
+			Radius = RadiusSpin;
 		}
-		else if !SharedData.no_roll_lock && SharedData.PlayerPhysics != PHYSICS_CD
+		else if (!SharedData.NoRollLock && SharedData.PlayerPhysics != PhysicsTypes.CD)
 		{
 			IsAirLock = true;
 		}
-	
-		Speed.X += jump_vel * dsin(angle);
-		Speed.Y += jump_vel * dcos(angle);
+
+		float radians = Mathf.DegToRad(Angle);
+		Speed += PhysicParams.JumpVelocity * new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
+		
 		IsSpinning = true;	
 		IsJumping = true;
-		is_pushing = false;
+		PushingObject = null;
 		IsGrounded = false;
-		is_on_object = false;
-		stick_to_convex = false;
+		OnObject = null;
+		StickToConvex = false;
 		GroundMode = 0;
 	
-		if Type == Types.Amy
+		if (Type == Types.Amy)
 		{
-			obj_set_hitbox_ext(25, 25);
+			SetHitboxExtra(new Vector2I(25, 25));
 			Animation = Animations.HammerSpin;
 		}
 		else
 		{
 			Animation = Animations.Spin;
 		}
-	 
-		audio_play_sfx(sfx_jump);
+		
+		//TODO: audio
+		//audio_play_sfx(sfx_jump);
 	
 		// return player control routine
 		return true;
@@ -801,38 +812,35 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessDropDash()
 	{
-		if (!SharedData.DropDash || Action != Actions.DropDash)
-		{
-			return;
-		}
+		if (!SharedData.DropDash || Action != Actions.DropDash) return;
 	
-		var MAX_DROPDASH_CHARGE = 20;
+		const int maxDropDashCharge = 20;
 	
-		if !IsGrounded
+		if (!IsGrounded)
 		{		
-			var InputDown = player_get_input(1);
-			if InputDown.Abc
+			if (InputDown.Abc)
 			{
 				IsAirLock = false;		
-				if ActionValue < MAX_DROPDASH_CHARGE
+				if (ActionValue < maxDropDashCharge)
 				{
 					ActionValue++;
 				}
 				else 
 				{
-					if Animation != ANI_DROPDASH
+					if (Animation != Animations.DropDash)
 					{
-						Animation = ANI_DROPDASH;
-						audio_play_sfx(sfx_charge);
+						Animation = Animations.DropDash;
+						//TODO: audio
+						//audio_play_sfx(sfx_charge);
 					}
 				}
 			}
-			else if ActionValue > 0
+			else if (ActionValue > 0)
 			{
-				if ActionValue == MAX_DROPDASH_CHARGE
+				if (Mathf.IsEqualApprox(ActionValue, maxDropDashCharge))
 				{		
 					Animation = Animations.Spin;
-					Action = ACTION_DROPDASH_C;
+					Action = Actions.DropDashCancel;
 				}
 			
 				ActionValue = 0;
@@ -840,120 +848,116 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 	
 		// Called from player_land() function
-		else if ActionValue == MAX_DROPDASH_CHARGE
+		else if (Mathf.IsEqualApprox(ActionValue, maxDropDashCharge))
 		{
-			y += Radius.Y - radius_y_spin;
-			Radius.X = radius_x_spin;
-			Radius.Y = radius_y_spin;
+			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
+			Radius = RadiusSpin;
 		
-			var _force = 8;
-			var _max_speed = 12;
+			var force = 8;
+			var maxSpeed = 12;
 		
-			if IsSuper
+			if (IsSuper)
 			{
-				_force = 12;
-				_max_speed = 13;
-				Camera.MainCamera.shake_timer = 6;
+				force = 12;
+				maxSpeed = 13;
+				Camera.MainCamera.ShakeTimer = 6;
 			}
 		
-			if Facing == FLIP_LEFT
+			if (Facing == Constants.Direction.Negative)
 			{
-				if Speed.X <= 0 
+				if (Speed.X <= 0)
 				{
-					GroundSpeed = (GroundSpeed >> 2) - _force;	// floor(GroundSpeed / 4)
-					if GroundSpeed < -_max_speed
+					GroundSpeed = Mathf.Floor(GroundSpeed / 4f) - force;
+					if (GroundSpeed < -maxSpeed)
 					{
-						GroundSpeed = -_max_speed;
+						GroundSpeed = -maxSpeed;
 					}
 				}
-				else if angle != 360 
+				else if (!Mathf.IsEqualApprox(Angle, 360f)) 
 				{
-					GroundSpeed = (GroundSpeed >> 1) - _force;	// floor(GroundSpeed / 2)
+					GroundSpeed = Mathf.Floor(GroundSpeed / 2f) - force;
 				}
 				else
 				{
-					GroundSpeed = -_force;
+					GroundSpeed = -force;
 				}
 			}
 			else 
 			{
-				if Speed.X >= 0
+				if (Speed.X >= 0f)
 				{
-					GroundSpeed = (GroundSpeed >> 2) + _force;
-					if GroundSpeed > _max_speed
+					GroundSpeed = Mathf.Floor(GroundSpeed / 4f) + force;
+					if (GroundSpeed > maxSpeed)
 					{
-						GroundSpeed = _max_speed;
+						GroundSpeed = maxSpeed;
 					}
 				}
-				else if angle != 360
+				else if (!Mathf.IsEqualApprox(Angle, 360f))
 				{
-					GroundSpeed = (GroundSpeed >> 1) + _force;
+					GroundSpeed = Mathf.Floor(GroundSpeed / 2f) + force;
 				}
 				else 
 				{
-					GroundSpeed = _force;
+					GroundSpeed = force;
 				}
 			}
 		
 			Animation = Animations.Spin;
 			IsSpinning = true;
 		
-			if !SharedData.CDCamera
+			if (!SharedData.CDCamera)
 			{
 				Camera.MainCamera.Delay.X = 8;
 			}
-		
-			instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-			audio_stop_sfx(sfx_charge);
-			audio_play_sfx(sfx_release);	
+			
+			//TODO: audio & obj_dust_dropdash
+			//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
+			//audio_stop_sfx(sfx_charge);
+			//audio_play_sfx(sfx_release);
 		}
 	}
 	
 	private void ProcessFlight()
 	{
-		if Action != Actions.Flight
-		{
-			return;
-		}
+		if (Action != Actions.Flight) return;
 	
-		var InputPress = player_get_input(0);
-		var InputDown = player_get_input(1);
-	
-		if ActionValue > 0
+		if (ActionValue > 0f)
 		{
-			if --ActionValue == 0
+			if (--ActionValue == 0f)
 			{
-				if !IsUnderwater
+				if (!IsUnderwater)
 				{
-					Animation = ANI_FLY_TIRED;
-					audio_play_sfx(sfx_flight2, true);
+					Animation = Animations.FlyTired;
+					//TODO: audio
+					//audio_play_sfx(sfx_flight2, true);
 				}
 				else
 				{
-					Animation = ANI_SWIM_TIRED;
+					Animation = Animations.SwimTired;
 				}
 			
 				Gravity = GravityType.TailsDown;
-				audio_stop_sfx(sfx_flight);
+				//TODO: audio
+				//audio_stop_sfx(sfx_flight);
 			}
 			else
 			{	
-				if !IsUnderwater
+				if (!IsUnderwater)
 				{
-					Animation = carry_target == noone ? ANI_FLY : ANI_FLY_LIFT;
+					Animation = CarryTarget == null ? Animations.Fly : Animations.FlyLift;
 				}
 				else
 				{
-					Animation = carry_target == noone ? ANI_SWIM : ANI_SWIM_LIFT;
+					Animation = CarryTarget == null ? Animations.Swim : Animations.SwimLift;
 				}
 			
-				if !(IsUnderwater && carry_target != noone)
+				if (!IsUnderwater || CarryTarget == null)
 				{
-					if InputPress.Abc
+					if (InputPress.Abc)
 					{
-						Gravity = GRV_TAILS_UP;
+						Gravity = GravityType.TailsUp;
 					}
-					else if Speed.Y < -1
+					else if (Speed.Y < -1)
 					{
 						Gravity = GravityType.TailsDown;
 					}
@@ -962,81 +966,73 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 			}
 		}
-	
-		if SharedData.flight_cancel && InputDown.down && InputPress.Abc
-		{	
-			Camera.MainCamera.view_y += Radius.Y - radius_y_spin;
-			Radius.X = radius_x_spin;
-			Radius.Y = radius_y_spin;
-			Animation = Animations.Spin;
-			IsSpinning	= true;
-			Action = Actions.None;
+
+		if (!SharedData.FlightCancel || !InputDown.Down || !InputPress.Abc) return;
 		
-			audio_stop_sfx(sfx_flight);
-			audio_stop_sfx(sfx_flight2);
-			player_reset_gravity(id);
-		}
+		Camera.MainCamera.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
+		Radius= RadiusSpin;
+		Animation = Animations.Spin;
+		IsSpinning	= true;
+		Action = Actions.None;
+		
+		//audio_stop_sfx(sfx_flight);
+		//audio_stop_sfx(sfx_flight2);
+		ResetGravity();
 	}
 	
 	private void ProcessClimb()
 	{
-		if Action != ACTION_CLIMB
-		{
-			return;
-		}
+		if (Action != Actions.Climb) return;
 		
-		var InputPress = player_get_input(0);
-		var InputDown = player_get_input(1);
-		
-		switch ActionState
+		switch ((ClimbStates)ActionState)
 		{
-			case CLIMB_STATE_NORMAL:
-			
-				if x != xprevious
+			case ClimbStates.Normal:
+				if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X))
 				{
-					sub_PlayerClimbRelease();
+					ReleaseClimb();
 					break;
 				}
 		
-				var STEPS_PER_FRAME = 4;
-				var _max_value = image_number * STEPS_PER_FRAME;
+				const int stepsPerFrame = 4;
+				var maxValue = image_number * stepsPerFrame;
 				
-				if InputDown.Up
+				if (InputDown.Up)
 				{
-					if ++ActionValue > _max_value
+					if (++ActionValue > maxValue)
 					{
 						ActionValue = 0;
 					}
 					
-					Speed.Y = -acc_climb;
+					Speed.Y = -PhysicParams.AccelerationClimb;
 				}
-				else if InputDown.down
+				else if (InputDown.Down)
 				{
-					if --ActionValue < 0
+					if (--ActionValue < 0)
 					{
-						ActionValue = _max_value;
+						ActionValue = maxValue;
 					}
 					
-					Speed.Y = acc_climb;
+					Speed.Y = PhysicParams.AccelerationClimb;
 				}
 				else
 				{
 					Speed.Y = 0;
 				}
 				
-				var _radius_x = Radius.X;
-				if Facing == FLIP_LEFT
+				int radiusX = Radius.X;
+				if (Facing == Constants.Direction.Negative)
 				{
-					_radius_x++;
+					radiusX++;
 				}
 		
-				if Speed.Y < 0
+				if (Speed.Y < 0)
 				{
 					// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-					var _wall_dist = tile_find_h(x + _radius_x * Facing, y - Radius.Y - 1, Facing, TileLayer)[0];
-					if _wall_dist >= 4
+					Vector2I position = (Vector2I)Position + new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
+					(sbyte wallDistance, float? _) = CollisionUtilities.FindTile(false, position, Facing, TileLayer, );
+					if (wallDistance >= 4)
 					{
-						ActionState = CLIMB_STATE_LEDGE;
+						ActionState = (int)ClimbStates.Ledge;
 						ActionValue = 0;
 						Speed.Y = 0;
 						
@@ -1044,264 +1040,238 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 		
 					// If Knuckles has encountered a small dip in the wall, cancel climb movement
-					if _wall_dist != 0
+					if (wallDistance != 0)
 					{
 						Speed.Y = 0;
 					}
 		
 					// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-					var _ceil_dist = tile_find_v(x + _radius_x * Facing, y - radius_y_normal + 1, false, TileLayer)[0];
-					if _ceil_dist < 0
+					var ceilDist = tile_find_v(x + radiusX * Facing, y - RadiusNormal.Y + 1, false, TileLayer)[0];
+					if (ceilDist < 0)
 					{
-						y -= _ceil_dist;
+						Position.Y -= ceilDist;
 						Speed.Y = 0;
 					}
 				}
 				else
 				{
 					// If Knuckles is no longer against the wall, make him let go
-					var _wall_dist = tile_find_h(x + _radius_x * Facing, y + Radius.Y + 1, Facing, TileLayer)[0];
-					if _wall_dist != 0
+					var wallDist = tile_find_h(x + radiusX * Facing, y + Radius.Y + 1, Facing, TileLayer)[0];
+					if (wallDist != 0)
 					{
-						sub_PlayerClimbRelease();
+						ReleaseClimb();
 						break;
 					}
 					
 					// If Knuckles has reached the floor, make him land
-					var _floor_data = tile_find_v(x + _radius_x * Facing, y + radius_y_normal, true, TileLayer);
-					var _floor_dist = _floor_data[0];
-					var _floor_angle = _floor_data[1];
+					var floorData = tile_find_v(x + radiusX * Facing, y + RadiusNormal.Y, true, TileLayer);
+					var floorDist = floorData[0];
+					var floorAngle = floorData[1];
 					
-					if _floor_dist < 0
+					if (floorDist < 0)
 					{
-						y += _floor_dist + radius_y_normal - Radius.Y;
-						angle = _floor_angle;
+						Position += new Vector2(0f, floorDist + RadiusNormal.Y - Radius.Y);
+						Angle = floorAngle;
 						
-						player_land(id);
+						Land();
 
-						Animation = ANI_IDLE;
+						Animation = Animations.Idle;
 						Speed.Y = 0;
 						
 						break;
 					}
 				}
 				
-				if InputPress.Abc
+				if (InputPress.Abc)
 				{
 					Animation = Animations.Spin;
 					IsSpinning = true;
 					IsJumping = true;		
 					Action = Actions.None;
-					Facing *= -1;
-					Speed.X = 3.5 * Facing;
-					Speed.Y = PhysicParams.MinimalJumpVelocity;
+					Facing = (Constants.Direction)(-(int)Facing);
+					Speed = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
 					
-					audio_play_sfx(sfx_jump);
-					player_reset_gravity(id);	
+					//TODO: audio
+					//audio_play_sfx(sfx_jump);
+					ResetGravity();
 				}
-				else if Speed.Y != 0
+				else if (Speed.Y != 0)
 				{
-					ani_upd_frame(floor(ActionValue / STEPS_PER_FRAME));
+					Sprite.UpdateFrame(Mathf.FloorToInt(ActionValue / stepsPerFrame));
 				}
-				
-			break;
+				break;
 			
-			case CLIMB_STATE_LEDGE:
-			
-				switch ActionValue
+			case ClimbStates.Ledge:
+				switch (ActionValue++)
 				{
-					// Frame 0
-					case 0:
+					case 0: // Frame 0
+						Animation = Animations.ClimbLedge;
+						Position += new Vector2(3f * (float)Facing, -2f);
+						break;
 					
-						Animation = ANI_CLIMB_LEDGE;
-						x += 3 * Facing;
-						y -= 2;
-						
-					break;
+					case 6: // Frame 1
+						Position += new Vector2(8f * (float)Facing, -10f);
+						break;
 					
-					// Frame 1
-					case 6:
+					case 12: // Frame 2
+						Position -= new Vector2(8f * (float)Facing, 12f);
+						break;
 					
-						x += 8 * Facing;
-						y -= 10;
-						
-					break;
-					
-					// Frame 2
-					case 12:
-					
-						x -= 8 * Facing;
-						y -= 12;
-						
-					break;
-					
-					// End
-					case 18:
-					
-						player_land(id);
-						
-						Animation = ANI_IDLE;
-						x += 8 * Facing;
-						y += 4;
-						
-					break;
+					case 18: // End
+						Land();
+						Animation = Animations.Idle;
+						Position += new Vector2(8f * (float)Facing, 4f);
+						break;
 				}
-				
-				ActionValue++;
-				
-			break;
+				break;
 		}
 	}
 
 	private void ReleaseClimb()
 	{
-		Animation = ANI_GLIDE_FALL;
+		Animation = Animations.GlideFall;
 		Action = Actions.Glide;
-		ActionState = GLIDE_STATE_FALL;
+		ActionState = (int)GlideStates.Fall;
 		ActionValue = 1;
-		Radius.X = radius_x_normal;
-		Radius.Y = radius_y_normal;
+		Radius = RadiusNormal;
 		
-		player_reset_gravity(id);
+		ResetGravity();
 	}
 	
 	private void ProcessGlide()
 	{
-		if Action != Actions.Glide || ActionState == GLIDE_STATE_FALL
-		{
-			return;
-		}
+		if (Action != Actions.Glide || (GlideStates)ActionState == GlideStates.Fall) return;
 		
-		var ANGLE_INC = 2.8125;
-		var GLIDE_GRV = 0.125;
-		var SLIDE_FRC = 0.09375;
-		var InputDown = player_get_input(1);
+		const float angleIncrement = 2.8125f;
+		const float glideGravity = 0.125f;
+		const float slideFriction = 0.09375f;
 		
-		switch ActionState
+		switch ((GlideStates)ActionState)
 		{
-			case GLIDE_STATE_AIR:
-				
+			case GlideStates.Air:
+				//TODO: check this
 				// ground vel - glide speed
-				// ActionValue - glide angle
+				// ActionValue - glide Angle
 				
 				// Update glide speed
-				if GroundSpeed >= 4
+				if (GroundSpeed >= 4f)
 				{
-					if ActionValue % 180 == 0
+					if (ActionValue % 180f == 0)
 					{
-						GroundSpeed = min(GroundSpeed + acc_glide, 24);
+						GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide, 24f);
 					}
 				}
 				else
 				{
-					GroundSpeed += 0.03125;
+					GroundSpeed += 0.03125f;
 				}
 				
 				// Turn around
-				if ActionValue != 0 && InputDown.Left
+				if (InputDown.Left && !Mathf.IsZeroApprox(ActionValue))
 				{
-					if ActionValue > 0
+					if (ActionValue > 0f)
 					{
 						ActionValue = -ActionValue;
 					}
 					
-					ActionValue += ANGLE_INC;
+					ActionValue += angleIncrement;
 				}
-				else if ActionValue != 180 && InputDown.Right
+				else if (InputDown.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
 				{
-					if ActionValue < 0
+					if (ActionValue < 0f)
 					{
 						ActionValue = -ActionValue;
 					}
 					
-					ActionValue += ANGLE_INC;
+					ActionValue += angleIncrement;
 				}
-				else if ActionValue % 180 != 0
+				else if (!Mathf.IsZeroApprox(ActionValue % 180f))
 				{
-					ActionValue += ANGLE_INC;
+					ActionValue += angleIncrement;
 				}
 				
 				// Update horizontal and vertical speed
-				Speed.X = GroundSpeed * -dcos(ActionValue);
-				if Speed.Y < 0.5
+				Speed.X = GroundSpeed * -Mathf.Cos(Mathf.DegToRad(ActionValue));
+				if (Speed.Y < 0.5f)
 				{
-					Gravity = GLIDE_GRV;
+					Gravity = glideGravity;
 				}
 				else
 				{
-					Gravity = -GLIDE_GRV;
+					Gravity = -glideGravity;
 				}
 				
 				// Update Animation frame
-				var _angle = abs(ActionValue) % 180;
-				if _angle < 30 || _angle > 150
+				float angle = Math.Abs(ActionValue) % 180f;
+				switch (angle)
 				{
-					ani_upd_frame(0);
-				}
-				else if _angle < 60 || _angle > 120
-				{
-					ani_upd_frame(1);
-				}
-				else
-				{	
-					Facing = _angle < 90 ? FLIP_LEFT : FLIP_RIGHT;
-					ani_upd_frame(2);
+					case < 30f or > 150f:
+						Sprite.UpdateFrame(0);
+						break;
+					case < 60f or > 120f:
+						Sprite.UpdateFrame(1);
+						break;
+					default:
+						Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
+						Sprite.UpdateFrame(2);
+						break;
 				}
 				
-				if !InputDown.Abc
+				if (!InputDown.Abc)
 				{
-					Animation = ANI_GLIDE_FALL;
-					ActionState = GLIDE_STATE_FALL;
-					ActionValue = 0;
-					Radius.X = radius_x_normal;
-					Radius.Y = radius_y_normal;
-					Speed.X *= 0.25;
+					Animation = Animations.GlideFall;
+					ActionState = (int)GlideStates.Fall;
+					ActionValue = 0f;
+					Radius = RadiusNormal;
+					Speed.X *= 0.25f;
 
-					player_reset_gravity(id);
+					ResetGravity();
 				}
-				
-			break;
+				break;
 			
-			case GLIDE_STATE_GROUND:
-				
-				if !InputDown.Abc
+			case GlideStates.Ground:
+				if (!InputDown.Abc)
 				{
 					Speed.X = 0;
 				}
-				else if Speed.X > 0
+				else if (Speed.X > 0)
 				{
-					Speed.X = Math.Max(0, Speed.X - SLIDE_FRC);
+					Speed.X = Math.Max(0f, Speed.X - slideFriction);
 				}
-				else if Speed.X < 0
+				else if (Speed.X < 0)
 				{
-					Speed.X = min(0, Speed.X + SLIDE_FRC);
+					Speed.X = Math.Min(0f, Speed.X + slideFriction);
 				}
 
-				if Speed.X == 0
+				if (Speed.X == 0)
 				{
-					player_land(id);
-					ani_upd_frame(1);
+					Land();
+					Sprite.UpdateFrame(1);
 
-					Animation = ANI_GLIDE_GROUND;
-					ground_lock_timer = 16;
+					Animation = Animations.GlideGround;
+					GroundLockTimer = 16;
 					GroundSpeed = 0;
 
 					break;
 				}
 
-				if ActionValue % 4 == 0
+				if (ActionValue % 4 == 0)
 				{
-					instance_create(x, y + Radius.Y, obj_dust_skid);
+					//TODO: obj_dust_skid
+					//instance_create(x, y + Radius.Y, obj_dust_skid);
 				}
 				
-				if ActionValue > 0 && ActionValue % 8 == 0
+				if (ActionValue > 0 && ActionValue % 8 == 0)
 				{
-					audio_play_sfx(sfx_slide);
+					//TODO: audio
+					//audio_play_sfx(sfx_slide);
 				}
 					
 				ActionValue++;
-				
-			break;
+				break;
+			
+			default:
+				throw new ArgumentOutOfRangeException();
 		}
 	}
 	
@@ -1309,14 +1279,13 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		if (Action != Actions.HammerSpin) return;
 	
-		var MAX_HAMMERSPIN_CHARGE = 20;
-		var InputDown = player_get_input(1);
+		var maxHammerSpinCharge = 20;
 	
-		if !InputDown.Abc
+		if (!InputDown.Abc)
 		{
-			if ActionValue >= MAX_HAMMERSPIN_CHARGE
+			if (ActionValue >= maxHammerSpinCharge)
 			{
-				Action = ACTION_HAMMERSPIN_C;
+				Action = Actions.HammerSpinCancel;
 			}
 		
 			ActionValue = 0;
@@ -1325,90 +1294,81 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 
-		if ActionValue < MAX_HAMMERSPIN_CHARGE
+		if (ActionValue < maxHammerSpinCharge)
 		{
-			if ActionValue == 0
+			if (ActionValue == 0)
 			{
-				obj_set_hitbox_ext(25, 25);
+				SetHitboxExtra(new Vector2I(25, 25));
 				Animation = Animations.HammerSpin;
 			}
 			
 			ActionValue++;
-			if ActionValue != MAX_HAMMERSPIN_CHARGE
+			if (!Mathf.IsEqualApprox(ActionValue, maxHammerSpinCharge))
 			{
 				return;
 			}
-		
-			audio_play_sfx(sfx_charge);
+			
+			//TODO: audio
+			//audio_play_sfx(sfx_charge);
 		}
 		
 		// Called from player_land() function
-		if !IsGrounded
+		if (!IsGrounded)
 		{
 			return;
 		}
 	
-		Animation = ANI_HAMMERRUSH;
+		Animation = Animations.HammerRush;
 		Action = Actions.HammerRush;
 		ActionValue = 59; // (60)
 			
-		audio_stop_sfx(sfx_charge);
-		audio_play_sfx(sfx_release);
+		//TODO: audio
+		//audio_stop_sfx(sfx_charge);
+		//audio_play_sfx(sfx_release);
 	}
 	
 	private void ProcessHammerRush()
 	{
-		if Action != Actions.HammerRush
+		if (Action != Actions.HammerRush) return;
+
+		var sign = (int)Facing;
+		(Vector2I radius, Vector2I offset) = (Sprite.Frame & 3) switch
 		{
-			return;
-		}
-	
-		switch ani_get_frame() % 4
+			0 => (new Vector2I(16, 16), new Vector2I(6 * sign, 0)),
+			1 => (new Vector2I(16, 16), new Vector2I(-7 * sign, 0)),
+			2 => (new Vector2I(14, 20), new Vector2I(-4 * sign, -4)),
+			3 => (new Vector2I(17, 21), new Vector2I(7 * sign, -5)),
+			_ => throw new ArgumentOutOfRangeException()
+		};
+		SetHitboxExtra(radius, offset);
+
+		if (IsGrounded)
 		{
-			case 0:
-			obj_set_hitbox_ext(16, 16, 6 * Facing, 0);
-			break;
-			
-			case 1:
-			obj_set_hitbox_ext(16, 16, -7 * Facing, 0);
-			break;
-			
-			case 2:
-			obj_set_hitbox_ext(14, 20, -4 * Facing, -4);
-			break;
-			
-			case 3:
-			obj_set_hitbox_ext(17, 21, 7 * Facing, -5);
-			break;
-		}
-	
-		var InputDown = player_get_input(1)
-		if IsGrounded
-		{
-			if !InputDown.Abc || ActionValue == 0 || GroundSpeed == 0 || dcos(angle) <= 0
+			float radians = Mathf.DegToRad(Angle);
+			if (!InputDown.Abc || ActionValue == 0 || GroundSpeed == 0 || Math.Cos(radians) <= 0)
 			{
-				sub_PlayerHammerRushCancel();
+				CancelHammerRush();
 				return;
 			}
 		
 			ActionValue--;
 		
-			if InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0
+			if (InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0)
 			{
-				Facing *= -1;
+				Facing = (Constants.Direction)(-(int)Facing);
 				GroundSpeed *= -1;
 			}
-		
-			Speed.X = GroundSpeed * dcos(angle);
-			Speed.Y = GroundSpeed * -dsin(angle);
+
+			radians = Mathf.DegToRad(Angle);
+			Speed = GroundSpeed * new Vector2(MathF.Cos(radians), MathF.Sin(radians));
 		}
-		else if Speed.X == 0
+		else if (Speed.X == 0f)
 		{
-			sub_PlayerHammerRushCancel();
+			CancelHammerRush();
 		}
 		else
 		{
-			Speed.X = 6 * sign(GroundSpeed);
+			Speed.X = 6f * Math.Sign(GroundSpeed);
 		}
 	}
 
@@ -1420,32 +1380,25 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessSlopeResist()
 	{
-		if !IsGrounded || IsSpinning || angle > 135 && angle <= 225
-		{
-			return;
-		}
+		if (!IsGrounded || IsSpinning || Angle is > 135f and <= 225f) return;
 	
-		if Action == Actions.HammerRush || Action == Actions.PeelOut
+		if (Action is Actions.HammerRush or Actions.PeelOut) return;
+
+		float radians = Mathf.DegToRad(Angle);
+		float slopeGrv = 0.125f * MathF.Sin(radians);
+		if (GroundSpeed != 0f || SharedData.PlayerPhysics >= PhysicsTypes.S3 && Math.Abs(slopeGrv) > 0.05078125f)
 		{
-			return;
-		}
-	
-		var _slope_grv = 0.125 * dsin(angle);
-		if GroundSpeed != 0 || SharedData.PlayerPhysics >= PhysicsTypes.S3 && abs(_slope_grv) > 0.05078125
-		{
-			GroundSpeed -= _slope_grv;
+			GroundSpeed -= slopeGrv;
 		}
 	}
 
 	private void ProcessSlopeResistRoll()
 	{
-		if !IsGrounded || !IsSpinning || angle > 135 && angle <= 225
-		{
-			return;
-		}
+		if (!IsGrounded || !IsSpinning || Angle is > 135 and <= 225) return;
 	
-		var _slope_grv = sign(GroundSpeed) != sign(dsin(angle)) ? 0.3125 : 0.078125;
-		GroundSpeed -= _slope_grv * dsin(angle);
+		float radians = Mathf.DegToRad(Angle);
+		float slopeGrv = Math.Sign(GroundSpeed) != Math.Sign(MathF.Sin(radians)) ? 0.3125f : 0.078125f;
+		GroundSpeed -= slopeGrv * MathF.Sin(radians);
 	}
 
 	private void ProcessMovementGround()
@@ -1456,742 +1409,647 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Action checks
 		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerRush) return;
 		
-		var InputDown = player_get_input(1);
-		var _do_skid = false;
+		var doSkid = false;
 		
 		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
 		// control lock. This allows him to Spin Dash
-		if Animation == ANI_GLIDE_GROUND && InputDown.down
+		if (Animation == Animations.GlideGround && InputDown.Down)
 		{
-			ground_lock_timer = 0;
+			GroundLockTimer = 0f;
 		}
 		
-		if ground_lock_timer == 0
+		if (Mathf.IsZeroApprox(GroundLockTimer))
 		{
 			// Move left
-			if InputDown.Left
+			if (InputDown.Left)
 			{	
-				if GroundSpeed > 0 
+				if (GroundSpeed > 0f)
 				{
-					GroundSpeed -= dec;
-					if GroundSpeed <= 0
+					GroundSpeed -= PhysicParams.Deceleration;
+					if (GroundSpeed <= 0f)
 					{
-						GroundSpeed = -0.5;
+						GroundSpeed = -0.5f;
 					}
 					
-					_do_skid = true;
+					doSkid = true;
 				}
 				else
 				{
-					if !SharedData.no_speed_cap || GroundSpeed > -PhysicParams.AccelerationTop
+					if (!SharedData.NoSpeedCap || GroundSpeed > -PhysicParams.AccelerationTop)
 					{
-						GroundSpeed = Math.Max(GroundSpeed - acc, -PhysicParams.AccelerationTop);
+						GroundSpeed = Math.Max(GroundSpeed - PhysicParams.Acceleration, -PhysicParams.AccelerationTop);
 					}
 					
-					if Facing != FLIP_LEFT
+					if (Facing != Constants.Direction.Negative)
 					{
 						Animation = Animations.Move;
-						Facing = FLIP_LEFT;
-						is_pushing = false;
+						Facing = Constants.Direction.Negative;
+						PushingObject = null;
 						
-						ani_upd_frame(0);
+						Sprite.UpdateFrame(0);
 					}
 				}
 			}
 			
 			// Move right
-			if InputDown.Right
+			if (InputDown.Right)
 			{
-				if GroundSpeed < 0 
+				if (GroundSpeed < 0f)
 				{
-					GroundSpeed += dec;
-					if GroundSpeed >= 0
+					GroundSpeed += PhysicParams.Deceleration;
+					if (GroundSpeed >= 0f)
 					{
-						GroundSpeed = 0.5;
+						GroundSpeed = 0.5f;
 					}
 					
-					_do_skid = true;
+					doSkid = true;
 				} 
 				else
 				{
-					if !SharedData.no_speed_cap || GroundSpeed < PhysicParams.AccelerationTop
+					if (!SharedData.NoSpeedCap || GroundSpeed < PhysicParams.AccelerationTop)
 					{
-						GroundSpeed = min(GroundSpeed + acc, PhysicParams.AccelerationTop);
+						GroundSpeed = Math.Min(GroundSpeed + PhysicParams.Acceleration, PhysicParams.AccelerationTop);
 					}
 					
-					if Facing != FLIP_RIGHT
+					if (Facing != Constants.Direction.Positive)
 					{
 						Animation = Animations.Move;
-						Facing = FLIP_RIGHT;
-						is_pushing = false;
+						Facing = Constants.Direction.Positive;
+						PushingObject = null;
 						
-						ani_upd_frame(0);
+						Sprite.UpdateFrame(0);;
 					}
 				}
 			}
 			
 			// Set idle / move / skid Animation
-			if math_get_angle_quad(angle) == 0
+			if (MathB.GetAngleQuadrant(Angle) == 0f)
 			{
-				if _do_skid && abs(GroundSpeed) >= 4 && Animation != ANI_SKID
+				if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
 				{
-					AnimationTimer = Type == Types.Sonic ? 24 : 16;
-					Animation = ANI_SKID;
+					AnimationTimer = Type == Types.Sonic ? 24f : 16f;
+					Animation = Animations.Skid;
 					
-					audio_play_sfx(sfx_skid);
+					//TODO: audio
+					//audio_play_sfx(sfx_skid);
 				}
 				
-				if GroundSpeed == 0
+				if (GroundSpeed == 0)
 				{
-					if InputDown.Up
+					if (InputDown.Up)
 					{
 						Animation = Animations.LookUp;
 					}
-					else if InputDown.down
+					else if (InputDown.Down)
 					{
-						Animation = ANI_DUCK;
+						Animation = Animations.Duck;
 					}
 					else
 					{
-						Animation = ANI_IDLE;
+						Animation = Animations.Idle;
 					}
 					
-					is_pushing = false;
+					PushingObject = null;
 				}
 				
 				// TODO: This
-				else if Animation != ANI_SKID && Animation != ANI_PUSH
+				else if (Animation != Animations.Skid && Animation != Animations.Push)
 				{
 					Animation = Animations.Move;
 				}
 			}
 			
-			else if Animation != ANI_SKID && Animation != ANI_PUSH
+			else if (Animation != Animations.Skid && Animation != Animations.Push)
 			{
 				Animation = Animations.Move;
 			}
 			
 			// Set / clear push Animation
-			if is_pushing
+			if (PushingObject != null)
 			{
-				if Animation == Animations.Move && ani_get_timer() == ani_get_duration()
+				if (Animation == Animations.Move && Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration()))
 				{
-					Animation = ANI_PUSH;
+					Animation = Animations.Push;
 				}
 			}
-			else if Animation == ANI_PUSH
+			else if (Animation == Animations.Push)
 			{
-				Animation = Animations.Move
+				Animation = Animations.Move;
 			}
 		}
 		
 		// Apply friction
-		if !InputDown.Left && !InputDown.Right
+		if (InputDown is { Left: false, Right: false })
 		{
-			if GroundSpeed > 0
+			GroundSpeed = GroundSpeed switch
 			{
-				GroundSpeed = Math.Max(GroundSpeed - frc, 0);
-			}
-			else if GroundSpeed < 0
-			{
-				GroundSpeed = min(GroundSpeed + frc, 0);
-			}
+				> 0f => Math.Max(GroundSpeed - PhysicParams.Friction, 0f),
+				< 0f => Math.Min(GroundSpeed + PhysicParams.Friction, 0f),
+				_ => GroundSpeed
+			};
 		}
 		
 		// Convert ground velocity into directional velocity
-		Speed.X = GroundSpeed * dcos(angle);
-		Speed.Y = GroundSpeed * -dsin(angle);
+		float radians = Mathf.DegToRad(Angle);
+		Speed = GroundSpeed * new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
 	}
 
 	private void ProcessMovementGroundRoll()
 	{
 		// Control routine checks
-		if !IsGrounded || !IsSpinning
-		{
-			return;
-		}
-	
-		var InputDown = player_get_input(1);
-	
-		if ground_lock_timer == 0
+		if (!IsGrounded || !IsSpinning) return;
+
+		if (GroundLockTimer == 0f)
 		{
 			// Move left
-			if InputDown.Left
+			if (InputDown.Left)
 			{
-				if GroundSpeed > 0
+				if (GroundSpeed > 0)
 				{
-					GroundSpeed -= dec_roll;
-					if GroundSpeed < 0
+					
+					GroundSpeed -= PhysicParams.DecelerationRoll;
+					if (GroundSpeed < 0)
 					{
-						GroundSpeed = -0.5;
+						GroundSpeed = -0.5f;
 					}
 				}
 				else
 				{
-					Facing = FLIP_LEFT;
-					is_pushing = false;	
+					Facing = Constants.Direction.Negative;
+					PushingObject = null;	
 				}
 			}
 		
 			// Move right
-			if InputDown.Right
+			if (InputDown.Right)
 			{
-				if GroundSpeed < 0
+				if (GroundSpeed < 0)
 				{
-					GroundSpeed += dec_roll;
-					if GroundSpeed >= 0
+					GroundSpeed += PhysicParams.DecelerationRoll;
+					if (GroundSpeed >= 0)
 					{
-						GroundSpeed = 0.5;
+						GroundSpeed = 0.5f;
 					}
 				}
 				else
 				{
-					Facing = FLIP_RIGHT;
-					is_pushing = false;	
+					Facing = Constants.Direction.Positive;
+					PushingObject = null;	
 				}
 			}
 		}
 	
 		// Apply friction
-		if GroundSpeed > 0
+		GroundSpeed = GroundSpeed switch
 		{
-			GroundSpeed = Math.Max(GroundSpeed - frc_roll, 0);
-		}
-		else if GroundSpeed < 0
-		{
-			GroundSpeed = min(GroundSpeed + frc_roll, 0);
-		}
-	
+			> 0 => Math.Max(GroundSpeed - PhysicParams.FrictionRoll, 0),
+			< 0 => Math.Min(GroundSpeed + PhysicParams.FrictionRoll, 0),
+			_ => GroundSpeed
+		};
+
 		// Stop spinning
-		if !IsForcedRoll
+		if (!IsForcedRoll)
 		{
-			if GroundSpeed == 0 || SharedData.PlayerPhysics == PHYSICS_SK && abs(GroundSpeed) < 0.5
+			if (GroundSpeed == 0f || SharedData.PlayerPhysics == PhysicsTypes.SK && Math.Abs(GroundSpeed) < 0.5f)
 			{
-				y += Radius.Y - radius_y_normal;
-			
-				Radius.X = radius_x_normal;
-				Radius.Y = radius_y_normal;
+				Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
+
+				Radius = RadiusNormal;
 			
 				IsSpinning = false;
-				Animation = ANI_IDLE;
+				Animation = Animations.Idle;
 			}
 		}
 	
 		// If forced to spin, keep moving player
 		else
 		{
-			if SharedData.PlayerPhysics == PHYSICS_CD
+			if (SharedData.PlayerPhysics == PhysicsTypes.CD)
 			{
-				if GroundSpeed >= 0 && GroundSpeed < 2
+				if (GroundSpeed is >= 0f and < 2f)
 				{
-					GroundSpeed = 2;
+					GroundSpeed = 2f;
 				}
 			}
-			else if GroundSpeed == 0
+			else if (GroundSpeed == 0f)
 			{
-				GroundSpeed = SharedData.PlayerPhysics == PHYSICS_S1 ? 2 : 4 * Facing;
+				GroundSpeed = SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f * (float)Facing;
 			}
 		}
 	
-		Speed.X = GroundSpeed * dcos(angle);
-		Speed.Y = GroundSpeed * -dsin(angle);
-	
-		Speed.X = Math.Clamp(Speed.X, -16, 16);
+		float radians = Mathf.DegToRad(Angle);
+		Speed = GroundSpeed * new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
+		Speed.X = Math.Clamp(Speed.X, -16f, 16f);
 	}
 
 	private void ProcessMovementAir()
 	{
 		// Control routine checks
-		if IsGrounded || is_dead
+		if (IsGrounded || IsDead)
 		{
 			return;
 		}
 	
 		// Action checks
-		if Action == ACTION_CARRIED || Action == ACTION_CLIMB 
-			|| Action == Actions.Glide && ActionState != GLIDE_STATE_FALL
-		{
-			return;
-		}
+		if (Action is Actions.Carried or Actions.Climb or Actions.Glide
+		    && (GlideStates)ActionState != GlideStates.Fall) return;
 	
-		// Update angle (rotate player)
-		if angle != 360
+		// Update Angle (rotate player)
+		if (!Mathf.IsEqualApprox(Angle, 360f))
 		{
-			if angle >= 180
+			if (Angle >= 180f)
 			{
-				angle += 2.8125;
+				Angle += 2.8125f;
 			}
 			else
 			{
-				angle -= 2.8125;
+				Angle -= 2.8125f;
 			}
 		
-			if angle <= 0 || angle > 360
+			if (Angle is <= 0f or > 360f)
 			{
-				angle = 360;
+				Angle = 360f;
 			}
 		}
 	
 		// Limit upward speed
-		if !IsJumping && Action != Actions.SpinDash && !IsForcedRoll
+		if (!IsJumping && Action != Actions.SpinDash && !IsForcedRoll)
 		{
-			if Speed.Y < -15.75
+			if (Speed.Y < -15.75f)
 			{
-				Speed.Y = -15.75;
+				Speed.Y = -15.75f;
 			}
 		}
 	
 		// Limit downward speed
-		if SharedData.PlayerPhysics == PHYSICS_CD && Speed.Y > 16
+		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Speed.Y > 16)
 		{
 			Speed.Y = 16;
 		}
 	
-		if !IsAirLock
+		if (!IsAirLock)
 		{
-			var InputDown = player_get_input(1);
-		
 			// Move left
-			if InputDown.Left
+			if (InputDown.Left)
 			{
-				if Speed.X > 0 
+				if (Speed.X > 0) 
 				{
-					Speed.X -= acc_air;
+					Speed.X -= PhysicParams.AccelerationAir;
 				}
-				else if !SharedData.no_speed_cap || Speed.X > -PhysicParams.AccelerationTop
+				else if (!SharedData.NoSpeedCap || Speed.X > -PhysicParams.AccelerationTop)
 				{
-					Speed.X = Math.Max(Speed.X - acc_air, -PhysicParams.AccelerationTop);
+					Speed.X = Math.Max(Speed.X - PhysicParams.AccelerationAir, -PhysicParams.AccelerationTop);
 				}
 			
-				Facing = FLIP_LEFT;
+				Facing = Constants.Direction.Negative;
 			}
 		
 			// Move right
-			if InputDown.Right
+			if (InputDown.Right)
 			{
-				if Speed.X < 0 
+				if (Speed.X < 0)
 				{
-					Speed.X += acc_air;
+					Speed.X += PhysicParams.AccelerationAir;
 				} 
-				else if !SharedData.no_speed_cap || Speed.X < PhysicParams.AccelerationTop
+				else if (!SharedData.NoSpeedCap || Speed.X < PhysicParams.AccelerationTop)
 				{
-					Speed.X = min(Speed.X + acc_air, PhysicParams.AccelerationTop);
+					Speed.X = Math.Min(Speed.X + PhysicParams.AccelerationAir, PhysicParams.AccelerationTop);
 				}
 			
-				Facing = FLIP_RIGHT;
+				Facing = Constants.Direction.Positive;
 			}	
 		}
 	
 		// Apply air drag
-		if !is_hurt && Speed.Y < 0 && Speed.Y > -4
+		if (!IsHurt && Speed.Y is < 0f and > -4f)
 		{
-			Speed.X -= floor(Speed.X / 0.125) / 256;
+			Speed.X -= Mathf.Floor(Speed.X * 8f) / 256f;
 		}
 	}
 
 	private void ProcessBalance()
 	{
-		if !IsGrounded || IsSpinning
-		{
-			return;
-		}
+		if (!IsGrounded || IsSpinning) return;
+
+		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.PeelOut) return;
+		
+		if (SharedData.PlayerPhysics == PhysicsTypes.SK && InputDown.Down || InputDown.Up && SharedData.PeelOut) return;
 	
-		if GroundSpeed != 0 || Action == Actions.SpinDash || Action == Actions.PeelOut
+		if (OnObject == null)
 		{
-			return;
-		}
-	
-		if SharedData.PlayerPhysics == PHYSICS_SK
-		{
-			var InputDown = player_get_input(1);	
-			if InputDown.down || InputDown.Up && SharedData.PeelOut
-			{
-				return;
-			}	
-		}
-	
-		if !is_on_object
-		{
-			if math_get_angle_quad(angle) > 0
-			{
-				return;
-			}
+			if (MathB.GetAngleQuadrant(Angle) > 0) return;
 		
-			var _floor_dist = tile_find_v(x, y + Radius.Y, true, TileLayer)[0];	
-			if _floor_dist < 12
-			{
-				return;
-			}
+			var floorDist = tile_find_v(x, y + Radius.Y, true, TileLayer)[0];	
+			if (floorDist < 12) return;
 		
-			var _angle_left = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer)[1];
-			var _angle_right = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer)[1];
+			var angleLeft = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer)[1];
+			var angleRight = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer)[1];
 		
-			if _angle_left != noone && _angle_right != noone
-			{
-				return;
-			}
+			if (angleLeft != null && angleRight != null) return;
 		
-			if _angle_left == noone
+			if (angleLeft == null)
 			{	
-				var _left_dist = tile_find_v(x + 6, y + Radius.Y, true, TileLayer)[0];
-				sub_PlayerBalanceLeft(_left_dist >= 12);
+				var leftDist = tile_find_v(x + 6, y + Radius.Y, true, TileLayer)[0];
+				BalanceLeft(leftDist >= 12);
 			}
 			else
 			{
-				var _right_dist = tile_find_v(x - 6, y + Radius.Y, true, TileLayer)[0];
-				sub_PlayerBalanceRight(_right_dist >= 12);
+				var rightDist = tile_find_v(x - 6, y + Radius.Y, true, TileLayer)[0];
+				BalanceRight(rightDist >= 12);
 			}
 		}
-		else if instance_exists(is_on_object)
+		else if (IsInstanceValid(OnObject)) // TODO: check IsInstanceValid == instance_exist
 		{
-			if is_on_object.data_solid.no_balance
+			if (OnObject.SolidData.NoBalance)
 			{
 				return;
 			}
 		
-			var _player_x = floor(is_on_object.data_solid.Radius.X - is_on_object.x + x);
-			var _left_edge = 2;
-			var _right_edge = is_on_object.data_solid.Radius.X * 2 - _left_edge;
-		
-			if _player_x < _left_edge
+			const int leftEdge = 2;
+			int rightEdge = OnObject.SolidData.Radius.X * 2 - leftEdge;
+			int playerX = Mathf.FloorToInt(OnObject.SolidData.Radius.X - OnObject.Position.X + Position.X);
+			
+			if (playerX < leftEdge)
 			{
-				_left_edge -= 4;
-				sub_PlayerBalanceLeft(_player_x < _left_edge);
+				BalanceLeft(playerX < leftEdge - 4);
 			}
-			else if _player_x > _right_edge
+			else if (playerX > rightEdge)
 			{
-				_right_edge += 4;
-				sub_PlayerBalanceRight(_player_x > _left_edge);
+				BalanceRight(playerX > rightEdge + 4);
 			}
 		}
 	}
 
 	private void BalanceLeft(bool isPanic)
 	{
-		if Type != Types.Sonic || IsSuper
+		if (Type != Types.Sonic || IsSuper)
 		{
-			Animation = ANI_BALANCE;
-			Facing = FLIP_LEFT;
+			Animation = Animations.Balance;
+			Facing = Constants.Direction.Negative;
 			
 			return;
 		}
 		
-		if !isPanic
+		if (!isPanic)
 		{
-			Animation = (Facing == FLIP_LEFT) ? ANI_BALANCE : ANI_BALANCE_FLIP;
+			Animation = Facing == Constants.Direction.Negative ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if Facing == FLIP_RIGHT
+		else if (Facing == Constants.Direction.Positive)
 		{
-			Animation = ANI_BALANCE_TURN;
-			Facing = FLIP_LEFT;
+			Animation = Animations.BalanceTurn;
+			Facing = Constants.Direction.Negative;
 		}
-		else if Animation != ANI_BALANCE_TURN
+		else if (Animation != Animations.BalanceTurn)
 		{
-			Animation = ANI_BALANCE_PANIC;
+			Animation = Animations.BalancePanic;
 		}
 	}
 
 	private void BalanceRight(bool isPanic)
 	{
-		if Type != Types.Sonic || IsSuper
+		if (Type != Types.Sonic || IsSuper)
 		{
-			Animation = ANI_BALANCE;
-			Facing = FLIP_RIGHT;
+			Animation = Animations.Balance;
+			Facing = Constants.Direction.Positive;
 			
 			return;
 		}
 		
-		if !isPanic
+		if (!isPanic)
 		{
-			Animation = (Facing == FLIP_RIGHT) ? ANI_BALANCE : ANI_BALANCE_FLIP;
+			Animation = (Facing == Constants.Direction.Positive) ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if Facing == FLIP_LEFT
+		else if (Facing == Constants.Direction.Negative)
 		{
-			Animation = ANI_BALANCE_TURN;
-			Facing = FLIP_RIGHT;
+			Animation = Animations.BalanceTurn;
+			Facing = Constants.Direction.Positive;
 		}
-		else if Animation != ANI_BALANCE_TURN
+		else if (Animation != Animations.BalanceTurn)
 		{
-			Animation = ANI_BALANCE_PANIC;
+			Animation = Animations.BalancePanic;
 		}
 	}
 
 	private void ProcessCollisionGroundWalls()
 	{
 		// Control routine checks
-		if !IsGrounded
+		if (!IsGrounded)
 		{
 			return;
 		}
 		
-		if SharedData.PlayerPhysics < PHYSICS_SK
+		if (SharedData.PlayerPhysics < PhysicsTypes.SK)
 		{
-			if angle > 90 && angle <= 270
-			{
-				return;
-			}
+			if (Angle is > 90f and <= 270f) return;
 		}
-		else if angle >= 90 && angle <= 270 && angle % 90 != 0
+		else if (Angle is >= 90f and <= 270f && Angle % 90f != 0f)
 		{
 			return;
 		}
+
+		int castDir = Angle switch
+		{
+			>= 45 and <= 128 => 1,
+			> 128 and < 225 => 2,
+			>= 225 and < 315 => 3,
+			_ => 0
+		};
+
+		int wallRadius = RadiusNormal.X + 1;
+		int offsetY = 8 * (Angle == 360 ? 1 : 0);
 		
-		var _cast_dir = 0;
-		if angle >= 45 && angle <= 128
+		if (GroundSpeed < 0)
 		{
-			_cast_dir = 1;
-		}
-		else if angle > 128 && angle < 225
-		{
-			_cast_dir = 2;
-		}
-		else if angle >= 225 && angle < 315
-		{
-			_cast_dir = 3;
-		}
-		
-		var _wall_radius = radius_x_normal + 1;
-		var _y_offset = 8 * (angle == 360);
-		
-		if GroundSpeed < 0
-		{
-			var _wall_dist = 0;
-			switch _cast_dir
+			var wallDist = castDir switch
+			{
+				0 => tile_find_h(x + Speed.X - wallRadius, y + Speed.Y + offsetY, false, TileLayer, GroundMode)[0],
+				1 => tile_find_v(x + Speed.X, y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
+				2 => tile_find_h(x + Speed.X + wallRadius, y + Speed.Y, true, TileLayer, GroundMode)[0],
+				3 => tile_find_v(x + Speed.X, y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
+				_ => 0
+			};
+
+			if (wallDist >= 0) return;
+			
+			switch (MathB.GetAngleQuadrant(Angle))
 			{
 				case 0:
-					_wall_dist = tile_find_h(x + Speed.X - _wall_radius, y + Speed.Y + _y_offset, false, TileLayer, GroundMode)[0];
-				break;
-				
-				case 1:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y + _wall_radius, true, TileLayer, GroundMode)[0];
-				break;
-				
-				case 2:
-					_wall_dist = tile_find_h(x + Speed.X + _wall_radius, y + Speed.Y, true, TileLayer, GroundMode)[0];
-				break;
-				
-				case 3:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y - _wall_radius, false, TileLayer, GroundMode)[0];
-				break;
-			}
-			
-			if _wall_dist >= 0
-			{
-				return;
-			}
-			
-			switch math_get_angle_quad(angle)
-			{
-				case 0:
-					
-					Speed.X -= _wall_dist;
+					Speed.X -= wallDist;
 					GroundSpeed = 0;
 						
-					if Facing == FLIP_LEFT && !IsSpinning
+					if (Facing == Constants.Direction.Negative && !IsSpinning)
 					{
-						is_pushing = true;
+						PushingObject = this;
 					}
-						
-				break;
+					break;
 					
 				case 1:
-					Speed.Y += _wall_dist;
-				break;
+					Speed.Y += wallDist;
+					break;
 					
 				case 2:
-					
-					Speed.X += _wall_dist;
+					Speed.X += wallDist;
 					GroundSpeed = 0;
 						
-					if Facing == FLIP_LEFT && !IsSpinning
+					if (Facing == Constants.Direction.Negative && !IsSpinning)
 					{
-						is_pushing = true;
+						PushingObject = this;
 					}
-						
-				break;
+					break;
 					
 				case 3:
-					Speed.Y -= _wall_dist;
-				break;
+					Speed.Y -= wallDist;
+					break;
 			}
 		}
-		else if GroundSpeed > 0
+		else if (GroundSpeed > 0)
 		{
-			var _wall_dist = 0;
-			switch _cast_dir
+			var wallDist = castDir switch
+			{
+				0 => tile_find_h(x + Speed.X + wallRadius, y + Speed.Y + offsetY, true, TileLayer, GroundMode)[0],
+				1 => tile_find_v(x + Speed.X, y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
+				2 => tile_find_h(x + Speed.X - wallRadius, y + Speed.Y, false, TileLayer, GroundMode)[0],
+				3 => tile_find_v(x + Speed.X, y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
+				_ => 0
+			};
+
+			if (wallDist >= 0) return;
+			
+			switch (MathB.GetAngleQuadrant(Angle))
 			{
 				case 0:
-					_wall_dist = tile_find_h(x + Speed.X + _wall_radius, y + Speed.Y + _y_offset, true, TileLayer, GroundMode)[0];
-				break;
-				
-				case 1:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y - _wall_radius, false, TileLayer, GroundMode)[0];
-				break;
-				
-				case 2:
-					_wall_dist = tile_find_h(x + Speed.X - _wall_radius, y + Speed.Y, false, TileLayer, GroundMode)[0];
-				break;
-				
-				case 3:
-					_wall_dist = tile_find_v(x + Speed.X, y + Speed.Y + _wall_radius, true, TileLayer, GroundMode)[0];
-				break;
-			}
-			
-			if _wall_dist >= 0
-			{
-				return;
-			}
-			
-			switch math_get_angle_quad(angle)
-			{
-				case 0:
-					
-					Speed.X += _wall_dist;
+					Speed.X += wallDist;
 					GroundSpeed = 0;
 						
-					if Facing == FLIP_RIGHT && !IsSpinning
+					if (Facing == Constants.Direction.Positive && !IsSpinning)
 					{
-						is_pushing = true;
+						PushingObject = this;
 					}
-					
-				break;
+					break;
 					
 				case 1:
-					Speed.Y -= _wall_dist;
-				break;
+					Speed.Y -= wallDist;
+					break;
 					
 				case 2:
-					
-					Speed.X -= _wall_dist;
+					Speed.X -= wallDist;
 					GroundSpeed = 0;
 						
-					if Facing == FLIP_RIGHT && !IsSpinning
+					if (Facing == Constants.Direction.Positive && !IsSpinning)
 					{
-						is_pushing = true;
+						PushingObject = this;
 					}
-						
-				break;
+					break;
 						
 				case 3:
-					Speed.Y += _wall_dist;
-				break;
+					Speed.Y += wallDist;
+					break;
 			}
 		}
 	}
 
 	private void ProcessRollStart()
 	{
-		if (!IsGrounded || IsSpinning || Action == Actions.SpinDash || Action == Actions.HammerRush) return;
+		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerRush) return;
 		
-		if (!IsForcedRoll && (InputDown.Left || InputDown.Right))
-		{
-			return;
-		}
+		if (!IsForcedRoll && (InputDown.Left || InputDown.Right)) return;
 	
-		var _allow_spin = false;
-		if InputDown.down
+		var allowSpin = false;
+		if (InputDown.Down)
 		{
-			if SharedData.PlayerPhysics == PHYSICS_SK
+			if (SharedData.PlayerPhysics == PhysicsTypes.SK)
 			{
-				if abs(GroundSpeed) >= 1
+				if (Math.Abs(GroundSpeed) >= 1f)
 				{
-					_allow_spin = true;
+					allowSpin = true;
 				}
 				else
 				{
-					Animation = ANI_DUCK;
+					Animation = Animations.Duck;
 				}
 			}
-			else if abs(GroundSpeed) >= 0.5
+			else if (Math.Abs(GroundSpeed) >= 0.5f)
 			{
-				_allow_spin = true;
+				allowSpin = true;
 			}
 		}
-	
-		if _allow_spin || IsForcedRoll
-		{
-			y += Radius.Y - radius_y_spin;
-			Radius.Y = radius_y_spin;
-			Radius.X = radius_x_spin;
-			IsSpinning = true;
-			Animation = Animations.Spin;
 
-			audio_play_sfx(sfx_roll);
-		}
+		if (!allowSpin && !IsForcedRoll) return;
+		Position += new Vector2(0f,  Radius.Y - RadiusSpin.Y);
+		Radius.Y = RadiusSpin.Y;
+		Radius.X = RadiusSpin.X;
+		IsSpinning = true;
+		Animation = Animations.Spin;
+			
+		//TODO: audio
+		//audio_play_sfx(sfx_roll);
 	}
 
 	private void ProcessLevelBound()
 	{
-		if is_dead
-		{
-			return;
-		}
+		if (IsDead) return;
 	
-		var _camera = Camera.MainCamera;
+		var camera = Camera.MainCamera;
 	
 		// Note that position here is checked including subpixel
-		if x + Speed.X < _camera.view_x_min + 16
+		if (Position.X + Speed.X < camera.Limit.X + 16f)
 		{
 			GroundSpeed = 0;
 			Speed.X = 0;
-			x = _camera.view_x_min + 16;
+			Position = new Vector2(camera.Limit.X + 16f, Position.Y);
 		}
 	
-		var _right_bound = _camera.view_x_max - 24;
-		if instance_exists(obj_signpost)
+		float rightBound = camera.Limit.Z - 24f;
+		//TODO: replace instance_exists
+		/*if (instance_exists(obj_signpost))
 		{
 			// TODO: There should be a better way?
-			_right_bound += 64;
-		}
+			rightBound += 64;
+		}*/
 	
-		if x + Speed.X > _right_bound
+		if (Position.X + Speed.X > rightBound)
 		{
 			GroundSpeed = 0;
 			Speed.X = 0;
-			x = _right_bound;
+			Position = new Vector2(rightBound, Position.Y);
 		}
 	
-		if Action == Actions.Flight || Action == ACTION_CLIMB
+		if (Action is Actions.Flight or Actions.Climb)
 		{
-			if y + Speed.Y < _camera.view_y_min + 16
+			if (Position.Y + Speed.Y < camera.Limit.Y + 16)
 			{ 	
-				if Action == Actions.Flight
+				if (Action == Actions.Flight)
 				{
 					Gravity	= GravityType.TailsDown;
 				}
 			
 				Speed.Y = 0;
-				y = _camera.view_y_min + 16;
+				Position = new Vector2(Position.X, camera.Limit.Y + 16);
 			}
-		}	
-		else if Action == Actions.Glide && y < _camera.view_y_min + 10
+		}
+		else if (Action == Actions.Glide && Position.Y < camera.Limit.Y + 10)
 		{
 			Speed.X = 0;
 		}
 	
-		if air_timer > 0 && y > Math.Max(_camera.view_y_max, _camera.bound_bottom)
+		if (AirTimer > 0 && Position.Y > Math.Max(camera.Limit.W, camera.Bound.Z))
 		{
-			player_kill(id);
+			Kill();
 		}
 	}
 
 	private void ProcessPosition()
 	{
-		if Action == ACTION_CARRIED
+		if (Action == Actions.Carried) return;
+	
+		if (StickToConvex)
 		{
-			return;
+			Speed = Speed.Clamp(new Vector2(-16f, -16f), new Vector2(16, 16));
 		}
+
+		Position += Speed;
 	
-		if stick_to_convex
-		{
-			Speed.X = Math.Clamp(Speed.X, -16, 16);
-			Speed.Y = Math.Clamp(Speed.Y, -16, 16);
-		}
-	
-		x += Speed.X;
-		y += Speed.Y;
-	
-		if !IsGrounded && Action != ACTION_CARRIED
+		if (!IsGrounded && Action != Actions.Carried)
 		{
 			Speed.Y += Gravity;
 		}
@@ -2200,224 +2058,189 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private void ProcessCollisionGroundFloor()
 	{
 		// Control routine checks
-		if !IsGrounded || is_on_object
-		{
-			return;
-		}
-		
-		if angle <= 45 || angle >= 315
-		{
-			GroundMode = 0;	// Floor
-		}
-		else if angle > 45 && angle < 135
-		{
-			GroundMode = 1;	// Right wall
-		}
-		else if angle >= 135 && angle <= 225
-		{
-			GroundMode = 2;	// Ceiling
-		}
-		else
-		{
-			GroundMode = 3;	// Left wall
-		}
+		if (!IsGrounded || OnObject != null) return;
 
-		var _MIN_TOLERANCE = 4;
-		var _MAX_TOLERANCE = 14;
-		
-		switch GroundMode
+		GroundMode = Angle switch
 		{
-			// Floor
-			case 0:
-			
+			<= 45 or >= 315 => Constants.GroundMode.Floor,
+			> 45 and < 135 => Constants.GroundMode.RightWall,
+			>= 135 and <= 225 => Constants.GroundMode.Ceiling,
+			_ => Constants.GroundMode.LeftWall
+		};
+
+		const int minTolerance = 4;
+		const int maxTolerance = 14;
+		
+		switch (GroundMode)
+		{
+			case Constants.GroundMode.Floor:
 				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
-				if !stick_to_convex
+				if (!StickToConvex)
 				{
-					var _tolerance = SharedData.PlayerPhysics < PHYSICS_S2 ? _MAX_TOLERANCE : min(_MIN_TOLERANCE + abs(floor(Speed.X)), _MAX_TOLERANCE);
-					if _floor_dist > _tolerance
+					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
+						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.X)), maxTolerance);
+					
+					if (_floor_dist > tolerance)
 					{
-						is_pushing = false;
+						PushingObject = null;
 						IsGrounded = false;
 						
-						ani_upd_frame(0);
+						Sprite.UpdateFrame(0);
 						break;
 					}		
 				}
 
-				if _floor_dist < -_MAX_TOLERANCE
+				if (_floor_dist < -maxTolerance) break;
+				
+				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					break;
+					_floor_angle = SnapFloorAngle(_floor_angle);
 				}
 				
-				if SharedData.PlayerPhysics >= PHYSICS_S2
-				{
-					_floor_angle = sub_PlayerSnapFloorAngle(_floor_angle);
-				}
-				
-				y += _floor_dist;
-				angle = _floor_angle;
+				Position += new Vector2(0f, _floor_dist);
+				Angle = _floor_angle;
+				break;
 			
-			break;
-
-			// Right wall
-			case 1:
-			
+			case Constants.GroundMode.RightWall:
 				var _floor_data = tile_find_2h(x + Radius.Y, y + Radius.X, x + Radius.Y, y - Radius.X, true, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
-				if !stick_to_convex
+				if (!StickToConvex)
 				{
-					var _tolerance = SharedData.PlayerPhysics < PHYSICS_S2 ? _MAX_TOLERANCE : min(_MIN_TOLERANCE + abs(floor(Speed.Y)), _MAX_TOLERANCE);
-					if _floor_dist > _tolerance
+					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
+						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.Y)), maxTolerance);
+					if (_floor_dist > tolerance)
 					{
-						is_pushing = false;
+						PushingObject = null;
 						IsGrounded = false;
 						
-						ani_upd_frame(0);
+						Sprite.UpdateFrame(0);
 						break;
 					}	
 				}
 				
-				if _floor_dist < -_MAX_TOLERANCE
-				{
-					break;
-				}
+				if (_floor_dist < -maxTolerance) break;
 
-				if SharedData.PlayerPhysics >= PHYSICS_S2
+				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					_floor_angle = sub_PlayerSnapFloorAngle(_floor_angle);
+					_floor_angle = SnapFloorAngle(_floor_angle);
 				}
 				
-				x += _floor_dist;
-				angle = _floor_angle;
-
-			break;
-
-			// Ceiling
-			case 2:
+				Position += new Vector2(_floor_dist, 0f);
+				Angle = _floor_angle;
+				break;
 			
+			case Constants.GroundMode.Ceiling:
 				var _floor_data = tile_find_2v(x + Radius.X, y - Radius.Y, x - Radius.X, y - Radius.Y, false, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
-				if !stick_to_convex
+				if (!StickToConvex)
 				{
-					var _tolerance = SharedData.PlayerPhysics < PHYSICS_S2 ? _MAX_TOLERANCE : min(_MIN_TOLERANCE + abs(floor(Speed.X)), _MAX_TOLERANCE);
-					if _floor_dist > _tolerance
+					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
+						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.X)), maxTolerance);
+					if (_floor_dist > tolerance)
 					{
-						is_pushing = false;
+						PushingObject = null;
 						IsGrounded = false;
 						
-						ani_upd_frame(0);
+						Sprite.UpdateFrame(0);
 						break;
 					}
 				}
 				
-				if _floor_dist < -_MAX_TOLERANCE
-				{
-					break;
-				}
+				if (_floor_dist < -maxTolerance) break;
 
-				if SharedData.PlayerPhysics >= PHYSICS_S2
+				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					_floor_angle = sub_PlayerSnapFloorAngle(_floor_angle);
+					_floor_angle = SnapFloorAngle(_floor_angle);
 				}
 				
-				y -= _floor_dist;
-				angle = _floor_angle;
-
-			break;
-
-			// Left wall
-			case 3:
+				Position -= new Vector2(0, _floor_dist);
+				Angle = _floor_angle;
+				break;
 			
+			case Constants.GroundMode.LeftWall:
 				var _floor_data = tile_find_2h(x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, false, TileLayer, GroundMode);
 				var _floor_dist = _floor_data[0];
 				var _floor_angle = _floor_data[1];
 				
-				if !stick_to_convex
+				if (!StickToConvex)
 				{
-					var _tolerance = SharedData.PlayerPhysics < PHYSICS_S2 ? _MAX_TOLERANCE : min(_MIN_TOLERANCE + abs(floor(Speed.Y)), _MAX_TOLERANCE);
-					if _floor_dist > _tolerance
+					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
+						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.Y)), maxTolerance);
+					if (_floor_dist > tolerance)
 					{
-						is_pushing = false;
+						PushingObject = null;
 						IsGrounded = false;
 						
-						ani_upd_frame(0);
+						Sprite.UpdateFrame(0);
 						break;
 					}
 				}
 				
-			    if _floor_dist < -_MAX_TOLERANCE
+			    if (_floor_dist < -maxTolerance) break;
+
+				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					break;
+					_floor_angle = SnapFloorAngle(_floor_angle);
 				}
 
-				if SharedData.PlayerPhysics >= PHYSICS_S2
-				{
-					_floor_angle = sub_PlayerSnapFloorAngle(_floor_angle);
-				}
-				
-				x -= _floor_dist;
-				angle = _floor_angle;
-
-			break;
+				Position -= new Vector2(_floor_dist, 0f);
+				Angle = _floor_angle;
+				break;
 		}
 	}
 
-	private float SnapFloorAngle(float angle)
+	private float SnapFloorAngle(float floorAngle)
 	{
-		var _diff = abs(Angle % 180 - angle % 180);		
-		if _diff > 45 && _diff < 135
+		float difference = Math.Abs(Angle % 180f - floorAngle % 180f);
+		
+		if (difference is <= 45 or >= 135) return floorAngle;
+		
+		floorAngle = MathF.Round(Angle / 90f) % 4f * 90f;
+		if (floorAngle == 0f)
 		{
-			angle = round(Angle / 90) % 4 * 90;
-			if angle == 0
-			{
-				angle = 360;
-			}
+			floorAngle = 360;
 		}
 
-		return angle;
+		return floorAngle;
 	}
 
 	private void ProcessSlopeRepel()
 	{
-		if !IsGrounded || stick_to_convex || Action == Actions.HammerRush
-		{
-			return;
-		}
+		if (!IsGrounded || StickToConvex || Action == Actions.HammerRush) return;
 	
-		if ground_lock_timer > 0
+		if (GroundLockTimer > 0f)
 		{
-			ground_lock_timer--;
+			GroundLockTimer--;
 		}
-		else if abs(GroundSpeed) < 2.5
+		else if (Math.Abs(GroundSpeed) < 2.5f)
 		{
-			if SharedData.PlayerPhysics < PhysicsTypes.S3
+			if (SharedData.PlayerPhysics < PhysicsTypes.S3)
 			{
-				if math_get_angle_quad(angle) != 0
-				{	
-					GroundSpeed = 0;	
-					ground_lock_timer = 30;
-					IsGrounded = false;
-				} 
+				if (MathB.GetAngleQuadrant(Angle) == 0) return;
+				
+				GroundSpeed = 0f;	
+				GroundLockTimer = 30f;
+				IsGrounded = false;
 			}
-			else if angle > 33.75 && angle <= 326.25
+			else if (Angle is > 33.75f and <= 326.25f)
 			{
-				if angle > 67.5 && angle <= 292.5
+				if (Angle is > 67.5f and <= 292.5f)
 				{
 					IsGrounded = false;
 				}
 				else
 				{
-					GroundSpeed += angle < 180 ? -0.5 : 0.5;
+					GroundSpeed += Angle < 180f ? -0.5f : 0.5f;
 				}
 		
-				ground_lock_timer = 30;
+				GroundLockTimer = 30;
 			}
 		}
 	}
@@ -2425,20 +2248,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private void ProcessCollisionAir()
 	{
 		// Control routine checks
-		if IsGrounded || is_dead
-		{
-			return;
-		}
+		if (IsGrounded || IsDead) return;
 		
 		// Action checks
-		if Action == Actions.Glide || Action == ACTION_CLIMB
-		{
-			return;
-		}
+		if (Action is Actions.Glide or Actions.Climb) return;
 		
-		var _wall_radius = radius_x_normal + 1;
+		var _wall_radius = RadiusNormal.X + 1;
 		var _move_vector = math_get_vector_256(Speed.X, Speed.Y);
-		var _move_quad = math_get_angle_quad(_move_vector);
+		var _move_quad = MathB.GetAngleQuadrant(_move_vector);
 		
 		// Perform left wall collision if not moving mostly right
 		if _move_quad != 1
@@ -2496,9 +2313,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 			else if _roof_dist < 0
 			{
 				y -= _roof_dist;
-				if _move_quad == 2 && math_get_angle_quad(_roof_angle) % 2 > 0 && Action != Actions.Flight
+				if _move_quad == 2 && MathB.GetAngleQuadrant(_roof_angle) % 2 > 0 && Action != Actions.Flight
 				{
-					angle = _roof_angle;
+					Angle = _roof_angle;
 					GroundSpeed = _roof_angle < 180 ? -Speed.Y : Speed.Y;
 					Speed.Y = 0;
 					
@@ -2549,7 +2366,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					return;
 				}
 					
-				if math_get_angle_quad(_floor_angle) > 0
+				if MathB.GetAngleQuadrant(_floor_angle) > 0
 				{
 					if Speed.Y > 15.75
 					{
@@ -2590,7 +2407,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 
 			y += _floor_dist;
-			angle = _floor_angle;
+			Angle = _floor_angle;
 			
 			player_land(id);
 		}
@@ -2600,14 +2417,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		// This script is a modified copy of scr_player_collision_air()
 		
-		if Action != Actions.Glide
-		{
-			return;
-		}
+		if (Action != Actions.Glide) return;
 		
-		var _wall_radius = radius_x_normal + 1;
+		var _wall_radius = RadiusNormal.X + 1;
 		var _move_vector = math_get_vector_256(Speed.X, Speed.Y);
-		var _move_quad = math_get_angle_quad(_move_vector);
+		var _move_quad = MathB.GetAngleQuadrant(_move_vector);
 		
 		var _collision_flag_wall = false;
 		var _collision_flag_floor = false;
@@ -2678,7 +2492,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				else
 				{
 					y += _floor_dist;
-					angle = _floor_angle;
+					Angle = _floor_angle;
 				}
 				
 				return;
@@ -2687,7 +2501,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if _floor_dist < 0
 			{
 				y += _floor_dist;
-				angle = _floor_angle;
+				Angle = _floor_angle;
 				Speed.Y = 0;
 				_collision_flag_floor = true;
 			}
@@ -2696,30 +2510,30 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Land logic
 		if _collision_flag_floor
 		{
-			if ActionState == GLIDE_STATE_AIR
+			if ActionState == GlideStates.Air
 			{
-				if math_get_angle_quad(angle) == 0
+				if MathB.GetAngleQuadrant(Angle) == 0
 				{
-					Animation = ANI_GLIDE_GROUND;
+					Animation = Animations.GlideGround;
 					ActionState = GLIDE_STATE_GROUND;
 					ActionValue = 0;
 					Gravity = 0;
 				}
 				else
 				{
-					GroundSpeed = angle < 180 ? Speed.X : -Speed.X;
+					GroundSpeed = Angle < 180 ? Speed.X : -Speed.X;
 					player_land(id);
 				}
 			}
-			else if ActionState == GLIDE_STATE_FALL
+			else if ActionState == GlideStates.Fall
 			{
 				player_land(id);
 				audio_play_sfx(sfx_land);
 				
-				if math_get_angle_quad(angle) == 0
+				if MathB.GetAngleQuadrant(Angle) == 0
 				{
 					Animation = ANI_GLIDE_LAND;
-					ground_lock_timer = 16;
+					GroundLockTimer = 16;
 					GroundSpeed = 0;
 					Speed.X = 0;
 				}
@@ -2733,7 +2547,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Wall attach logic
 		else if _collision_flag_wall
 		{
-			if ActionState != GLIDE_STATE_AIR
+			if ActionState != GlideStates.Air
 			{
 				return;
 			}
@@ -2757,13 +2571,13 @@ public partial class Player : Framework.CommonObject.CommonObject
 				y += _floor_dist;
 			}
 			
-			if Facing == FLIP_LEFT
+			if Facing == Constants.Direction.Negative
 			{
 				x++;
 			}
 			
 			Animation = ANI_CLIMB_WALL;
-			Action = ACTION_CLIMB;
+			Action = Actions.Climb;
 			ActionState = CLIMB_STATE_NORMAL;
 			ActionValue = 0;
 			GroundSpeed = 0;
@@ -2776,23 +2590,20 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ReleaseGlide()
 	{
-		Animation = ANI_GLIDE_FALL;
-		ActionState = GLIDE_STATE_FALL;
+		Animation = Animations.GlideFall;
+		ActionState = (int)GlideStates.Fall;
 		ActionValue = 0;
-		Radius.X = radius_x_normal;
-		Radius.Y = radius_y_normal;
+		Radius.X = RadiusNormal.X;
+		Radius.Y = RadiusNormal.Y;
 		
-		player_reset_gravity(id);
+		ResetGravity();
 	}
 
 	private void ProcessCarry()
 	{
-		if Type != PLAYER_TAILS || carry_timer > 0 && --carry_timer != 0
-		{
-			return;
-		}
+		if (Type != Types.Tails || carry_timer > 0 && --carry_timer != 0) return;
 	
-		if carry_target == noone
+		if CarryTarget == null
 		{
 			if Action != Actions.Flight 
 			{
@@ -2808,7 +2619,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 			
 				var _player = player_get(p);
-				if _player.Action == Actions.SpinDash || _player.Action == ACTION_CARRIED
+				if _player.Action == Actions.SpinDash || _player.Action == Actions.Carried 
 				{
 					continue;
 				}
@@ -2829,8 +2640,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 				audio_play_sfx(sfx_grab);
 			
 				_player.Animation = ANI_GRAB;
-				_player.Action = ACTION_CARRIED;
-				carry_target = _player;
+				_player.Action = Actions.Carried ;
+				CarryTarget = _player;
 			
 				with _player
 				{
@@ -2840,7 +2651,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		else
 		{
-			with carry_target
+			with CarryTarget
 			{
 				var _tails = other;
 				var _previous_x = other.carry_target_x;
@@ -2849,15 +2660,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 				var InputPress = player_get_input(0);
 				if InputPress.Abc
 				{
-					_tails.carry_target = noone;
+					_tails.CarryTarget = null;
 					_tails.carry_timer = 18;
 				
 					IsSpinning = true;
 					IsJumping = true;
 					Action = Actions.None;
 					Animation = Animations.Spin;
-					Radius.X = radius_x_spin;
-					Radius.Y = radius_y_spin;
+					Radius.X = RadiusSpin.X;
+					Radius.Y = RadiusSpin.Y;
 					Speed.X = 0;
 					Speed.Y = PhysicParams.MinimalJumpVelocity;
 				
@@ -2875,7 +2686,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				else if _tails.Action != Actions.Flight || x != _previous_x || y != _previous_y
 				{
-					_tails.carry_target = noone;
+					_tails.CarryTarget = null;
 					_tails.carry_timer = 60;
 					Action = Actions.None;
 				}
@@ -3059,7 +2870,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessWater()
 	{
-		if is_dead || !instance_exists(c_stage) || !c_stage.water_enabled
+		if IsDead || !instance_exists(c_stage) || !c_stage.water_enabled
 		{
 			return;
 		}
@@ -3077,7 +2888,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				
 				if !is_hurt
 				{
-					if !(Action == Actions.Flight || Action == Actions.Glide && ActionState != GLIDE_STATE_FALL)
+					if !(Action == Actions.Flight || Action == Actions.Glide && ActionState != GlideStates.Fall)
 					{
 						Gravity = GRV_UNDERWATER;
 					}
@@ -3112,12 +2923,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		if Barrier.Type != BARRIER_WATER
 		{
-			if air_timer > -1
+			if AirTimer > -1
 			{
-				air_timer--;
+				AirTimer--;
 			}
 			
-			switch air_timer
+			switch AirTimer
 			{
 				case 1500: 
 				case 1200:
@@ -3151,7 +2962,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.Y = 0;
 					Gravity	= 0.0625;
 					IsAirLock = true;
-					Camera.MainCamera.target = noone;
+					Camera.MainCamera.target = null;
 				
 				return;
 				
@@ -3162,11 +2973,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 						if Id == 0
 						{
 							FrameworkData.update_effects = false;
-							FrameworkData.update_objects = false;
+							FrameworkData.UpdateObjects = false;
 							FrameworkData.allow_pause = false;
 						}
 						
-						is_dead = true;
+						IsDead = true;
 					}
 				
 				return;
@@ -3177,7 +2988,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			if !is_hurt && Action != Actions.Glide
 			{
-				if SharedData.PlayerPhysics <= PHYSICS_S2 || Speed.Y >= -4
+				if SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4
 				{
 					Speed.Y *= 2;
 				}
@@ -3204,7 +3015,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 				
 			IsUnderwater = false;	
-			air_timer = AIR_VALUE_MAX;
+			AirTimer = AIR_VALUE_MAX;
 			
 			sub_PlayerWaterSplash();
 		}
@@ -3212,103 +3023,104 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessWaterSplash()
 	{
-		if Action != ACTION_CLIMB && Action != Actions.Glide
+		if (Action != Actions.Climb && Action != Actions.Glide)
 		{
-			instance_create(x, c_stage.water_level, obj_water_splash);
+			//TODO: obj_water_splash
+			//instance_create(x, c_stage.water_level, obj_water_splash);
 		}
-				
-		audio_play_sfx(sfx_water_splash);
+		
+		//TODO: audio
+		//audio_play_sfx(sfx_water_splash);
 	}
 
 	private void UpdateCollision()
 	{
-		if is_dead
-		{
-			return;
-		}
+		if (IsDead) return;
 	
-		if Animation != ANI_DUCK || SharedData.PlayerPhysics >= PhysicsTypes.S3
+		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
-			obj_set_hitbox(8, Radius.Y - 3);
+			SetHitbox(new Vector2I(8, Radius.Y - 3));
 		}
-		else if Type != PLAYER_TAILS && Type != Types.Amy
+		else if (Type != Types.Tails && Type != Types.Amy)
 		{
-			obj_set_hitbox(8, 10, 0, 6);
+			SetHitbox(new Vector2I(8, 10), new Vector2I(0, 6));
 		}
 	
 		// Clear extra hitbox
-		if Animation != ANI_HAMMERRUSH && Animation != Animations.HammerSpin && Barrier.State != BARRIER_STATE_DOUBLESPIN
+		if (Animation != Animations.HammerRush && Animation != Animations.HammerSpin && Barrier.State != Barrier.States.DoubleSpin)
 		{
-			obj_set_hitbox_ext(0, 0);
+			SetHitboxExtra(new Vector2I(0, 0));
 		}
-	
-		obj_set_solid(radius_x_normal + 1, Radius.Y);
+
+		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
 	}
 
 	private void RecordData()
 	{
-		if is_dead
-		{
-			return;
-		}
+		if (IsDead) return;
 	
-		ds_list_insert(ds_record_data, 0, [x, y, player_get_input(0), player_get_input(1), is_pushing, Facing]);
-		ds_list_delete(ds_record_data, 32);
+		//TODO: record data
+		//ds_list_insert(ds_record_data, 0, [x, y, player_get_input(0), player_get_input(1), PushingObject, Facing]);
+		//ds_list_delete(ds_record_data, 32);
 	}
 
 	private void ProcessRotation()
 	{
-		if Animation != Animations.Move
+		if (Animation != Animations.Move)
 		{
-			visual_angle = 360;
+			VisualAngle = 360f;
 		}
 		else
 		{
-			if IsGrounded && SharedData.rotation_mode > 0
+			if (IsGrounded && SharedData.RotationMode > 0f)
 			{
-				var _angle = 360;
-				var _step = 0;
+				var angle = 360f;
+				float step;
 			
-				if angle > 22.5 && angle <= 337.5
+				if (Angle is > 22.5f and <= 337.5f)
 				{
-					_angle = angle;
-					_step = 2 - abs(GroundSpeed) * 3 / 32;
+					angle = Angle;
+					step = 2f - Math.Abs(GroundSpeed) * 3f / 32f;
 				}
 				else
 				{
-					_step = 2 - abs(GroundSpeed) / 16;
+					step = 2f - Math.Abs(GroundSpeed) / 16f;
 				}
-			
-				visual_angle = darctan2(dsin(_angle) + dsin(visual_angle) * _step, dcos(_angle) + dcos(visual_angle) * _step);
+
+				float radians = Mathf.DegToRad(angle);
+				float radiansVisual = Mathf.DegToRad(VisualAngle);
+				VisualAngle = MathF.Atan2(
+					Mathf.DegToRad(MathF.Sin(radians) + MathF.Sin(radiansVisual) * step), 
+					Mathf.DegToRad(MathF.Cos(radians) + MathF.Cos(radiansVisual) * step));
 			}
 			else
 			{
-				visual_angle = angle;
+				VisualAngle = Angle;
 			}
 		}
 	
-		if SharedData.rotation_mode > 0
+		if (SharedData.RotationMode > 0)
 		{
-			image_angle = visual_angle;
+			RotationDegrees = VisualAngle;
 		}
 		else
 		{
-			image_angle = ceil((visual_angle - 22.5) / 45) * 45;
+			RotationDegrees = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
 		}
 	}
 
 	private void ProcessAnimate()
 	{
-		if FrameworkData.update_objects
+		if (FrameworkData.UpdateObjects)
 		{
-			if animation_buffer == -1 && AnimationTimer > 0
+			if (animation_buffer == -1 && AnimationTimer > 0f)
 			{
 				animation_buffer = Animation;
 			}
 		
-			if AnimationTimer < 0
+			if (AnimationTimer < 0)
 			{
-				if Animation == animation_buffer
+				if (Animation == animation_buffer)
 				{
 					Animation = Animations.Move;
 				}
@@ -3316,43 +3128,41 @@ public partial class Player : Framework.CommonObject.CommonObject
 				AnimationTimer = 0;
 				animation_buffer = -1;
 			}
-			else if animation_buffer != -1
+			else if (animation_buffer != -1)
 			{
 				AnimationTimer--;
 			}
 		}
 	
-		if Animation != Animations.Spin || ani_get_timer() == ani_get_duration()
+		if (Animation != Animations.Spin || Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration()))
 		{
-			image_xscale = Facing;
+			Sprite.Scale = new Vector2(Math.Abs(Sprite.Scale.X) * (float)Facing, Sprite.Scale.Y);
 		}
 	
-		switch Type
+		switch (Type)
 		{
 			case Types.Sonic:
+				if (IsSuper)
+				{
+					scr_player_animate_supersonic();
+				}
+				else
+				{
+					scr_player_animate_sonic();
+				}
+				break;
 		
-			if IsSuper
-			{
-				scr_player_animate_supersonic();
-			}
-			else
-			{
-				scr_player_animate_sonic();
-			}
+			case Types.Tails:
+				scr_player_animate_tails();
+				break;
 		
-			break;
-		
-			case PLAYER_TAILS:
-			scr_player_animate_tails();
-			break;
-		
-			case PLAYER_KNUCKLES:
-			scr_player_animate_knuckles();
-			break;
+			case Types.Knuckles:
+				scr_player_animate_knuckles();
+				break;
 		
 			case Types.Amy:
-			scr_player_animate_amy();
-			break;
+				scr_player_animate_amy();
+				break;
 		}
 	}
 	
@@ -3623,7 +3433,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		else if (InputPress.C)
 		{
 			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) is not Framework.CommonObject.CommonObject newObject) return true;
-			newObject.Scale = new Vector2(newObject.Scale.X * (sbyte)Facing, newObject.Scale.Y);
+			newObject.Scale = new Vector2(newObject.Scale.X * (int)Facing, newObject.Scale.Y);
 			newObject.SetBehaviour(BehaviourType.Delete);
 			FrameworkData.CurrentScene.AddChild(newObject);
 		}
@@ -3676,8 +3486,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (StickToConvex)
 		{
 			Speed = new Vector2(
-				MathF.Clamp(Speed.X, -16f, 16f), 
-				MathF.Clamp(Speed.Y, -16f, 16f));
+				Math.Clamp(Speed.X, -16f, 16f), 
+				Math.Clamp(Speed.Y, -16f, 16f));
 		}
 
 		Position += Speed * processSpeed;
@@ -3814,7 +3624,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
 		{
 			float force = IsUnderwater ? -4f : -7.5f;
-			Speed = new Vector2(MathF.Sin(MathF.DegToRad(Angle)), MathF.Sin(MathF.DegToRad(Angle))) * force;
+			float radians = Mathf.DegToRad(Angle);
+			Speed = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
 
 			BarrierFlag = false;
 			OnObject = null;
@@ -3876,11 +3687,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		else
 		{
-			GroundSpeed	= 6 * (sbyte)Facing;
+			GroundSpeed	= 6 * (int)Facing;
 		}
 
 		if (IsSpinning) return;
-		Position = new Vector2(Position.X, Position.Y - RadiusNormal.Y + Radius.Y);
+		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
 
 		Radius = RadiusNormal;
 	}
@@ -3922,7 +3733,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			ChargeDropDash();
 		}
-		else if (ActionValue == MaxDropDashCharge) // Called from player_land() function
+		else if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge)) // Called from player_land() function
 		{
 			ReleaseDropDash();
 		}
@@ -3949,7 +3760,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		else if (ActionValue > 0)
 		{
-			if (ActionValue == MaxDropDashCharge)
+			if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge))
 			{
 				Animation = Animations.Spin;
 				Action = Actions.DropDashCancel;
@@ -3961,7 +3772,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	
 	private void ReleaseDropDash()
 	{
-		Position = new Vector2(Position.X, Position.Y + Radius.Y - RadiusSpin.Y);
+		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
 		
 		var force = 8f;
@@ -3984,7 +3795,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					GroundSpeed = -maxSpeed;
 				}
 			}
-			else if (Angle != 360)
+			else if (!Mathf.IsEqualApprox(Angle, 360f))
 			{
 				GroundSpeed = MathF.Floor(GroundSpeed / 2f) - force;
 			}
@@ -4003,7 +3814,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					GroundSpeed = maxSpeed;
 				}
 			}
-			else if (Angle != 360)
+			else if (!Mathf.IsEqualApprox(Angle, 360f))
 			{
 				GroundSpeed = MathF.Floor(GroundSpeed / 2f) + force;
 			}
@@ -4023,7 +3834,6 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		Vector2 dustPosition = Position;
 		dustPosition.Y += Radius.Y;
-		Constants.Direction Facing = Facing;
 		
 		AddChild(new DropDashDust
 		{
@@ -4064,7 +3874,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			}
 		
 			ActionValue++;
-			if (ActionValue != maxHammerSpinCharge) return;
+			if (!Mathf.IsEqualApprox(ActionValue, maxHammerSpinCharge)) return;
 			
 			// TODO: audio
 			//audio_play_sfx(sfx_charge);
