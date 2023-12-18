@@ -741,9 +741,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (!InputPress.Abc) return false;
 	
 		const int maxCeilingDist = 6;
+		var position = (Vector2I)Position;
 		int ceilDist = GroundMode switch
 		{
-			Constants.GroundMode.Floor => CollisionUtilities.FindTileTwoPositions(true, (Vector2I)Position - Radius, (Vector2I)Position + new Vector2I(Radius.X, -Radius.Y), Constants.Direction.Negative, TileLayer, GroundMode).Item1,
+			Constants.GroundMode.Floor => CollisionUtilities.FindTileTwoPositions(true, position - Radius, position + new Vector2I(Radius.X, -Radius.Y), Constants.Direction.Negative, TileLayer, GroundMode).Item1,
 			Constants.GroundMode.RightWall => CollisionUtilities.FindTileTwoPositions(true, x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, Constants.Direction.Negative, TileLayer, GroundMode).Item1,
 			Constants.GroundMode.LeftWall => CollisionUtilities.FindTileTwoPositions(true, x + Radius.Y, y - Radius.X, x + Radius.Y, y + Radius.X, Constants.Direction.Positive, TileLayer, GroundMode).Item1,
 			_ => maxCeilingDist
