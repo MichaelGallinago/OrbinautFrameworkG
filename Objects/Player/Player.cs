@@ -753,11 +753,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private bool StartJump()
 	{
-		if (Action == Actions.SpinDash || Action == Actions.PeelOut || IsForcedRoll || !IsGrounded) return false;
+		if (Action is Actions.SpinDash or Actions.PeelOut || IsForcedRoll || !IsGrounded) return false;
 		
-		if (!InputPress.Abc) return false;
-
-		if (!CheckCeilingDistance()) return false;
+		if (!InputPress.Abc || !CheckCeilingDistance()) return false;
 		
 		if (!SharedData.FixJumpSize)
 		{
@@ -776,7 +774,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 
 		float radians = Mathf.DegToRad(Angle);
-		Speed += PhysicParams.JumpVelocity * new Vector2(Mathf.Sin(radians), Mathf.Cos(radians));
+		Speed += PhysicParams.JumpVelocity * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
 		
 		IsSpinning = true;	
 		IsJumping = true;
@@ -806,31 +804,37 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private bool CheckCeilingDistance()
 	{
 		if (TileMap == null) return false;
-		
-		const sbyte targetCeilingDistance = 6;
 
 		if (GroundMode == Constants.GroundMode.Ceiling) return true;
 		
+		return CalculateCellDistance() >= 6; // Target ceiling distance
+	}
+
+	private sbyte CalculateCellDistance()
+	{
 		var position = (Vector2I)Position;
 		(Vector2I position1, Vector2I position2, Constants.Direction direction) = GroundMode switch
 		{
 			Constants.GroundMode.Floor => (
-				-Radius, new Vector2I(Radius.X, -Radius.Y), 
+				Radius.Shuffle(false, -1, -1), 
+				Radius.Shuffle(false, 1, -1), 
 				Constants.Direction.Negative),
 			Constants.GroundMode.RightWall => (
-				new Vector2I(-Radius.Y, -Radius.X), new Vector2I(-Radius.Y, Radius.X), 
+				Radius.Shuffle(true, -1, -1), 
+				Radius.Shuffle(true, 1, -1), 
 				Constants.Direction.Negative),
 			Constants.GroundMode.LeftWall => (
-				new Vector2I(Radius.Y,  -Radius.X), new Vector2I(Radius.Y, Radius.X), 
+				Radius.Shuffle(true, -1, 1), 
+				Radius.Shuffle(true, 1, 1),
 				Constants.Direction.Positive),
+			Constants.GroundMode.Ceiling => throw new ArgumentOutOfRangeException(),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 
-		sbyte ceilDistance = CollisionUtilities.FindTileTwoPositions(true, 
+		return CollisionUtilities.FindTileTwoPositions(
+			GroundMode == Constants.GroundMode.Floor, 
 			position + position1, position + position2, 
 			direction, TileLayer, TileMap, GroundMode).Item1;
-		
-		return ceilDistance >= targetCeilingDistance;
 	}
 
 	private void ProcessDropDash()
@@ -875,54 +879,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 			Radius = RadiusSpin;
-		
-			var force = 8;
-			var maxSpeed = 12;
-		
+
 			if (IsSuper)
 			{
-				force = 12;
-				maxSpeed = 13;
+				UpdateDropDashGroundSpeed(13f, 12f);
 				Camera.MainCamera.ShakeTimer = 6;
 			}
-		
-			if (Facing == Constants.Direction.Negative)
+			else
 			{
-				if (Speed.X <= 0)
-				{
-					GroundSpeed = Mathf.Floor(GroundSpeed / 4f) - force;
-					if (GroundSpeed < -maxSpeed)
-					{
-						GroundSpeed = -maxSpeed;
-					}
-				}
-				else if (!Mathf.IsEqualApprox(Angle, 360f)) 
-				{
-					GroundSpeed = Mathf.Floor(GroundSpeed / 2f) - force;
-				}
-				else
-				{
-					GroundSpeed = -force;
-				}
-			}
-			else 
-			{
-				if (Speed.X >= 0f)
-				{
-					GroundSpeed = Mathf.Floor(GroundSpeed / 4f) + force;
-					if (GroundSpeed > maxSpeed)
-					{
-						GroundSpeed = maxSpeed;
-					}
-				}
-				else if (!Mathf.IsEqualApprox(Angle, 360f))
-				{
-					GroundSpeed = Mathf.Floor(GroundSpeed / 2f) + force;
-				}
-				else 
-				{
-					GroundSpeed = force;
-				}
+				UpdateDropDashGroundSpeed(12f, 8f);
 			}
 		
 			Animation = Animations.Spin;
@@ -938,6 +903,26 @@ public partial class Player : Framework.CommonObject.CommonObject
 			//audio_stop_sfx(sfx_charge);
 			//audio_play_sfx(sfx_release);
 		}
+	}
+
+	private void UpdateDropDashGroundSpeed(float limitSpeed, float force)
+	{
+		var sign = (float)Facing;
+		limitSpeed *= sign;
+		force *= sign;
+		
+		if (Speed.X * sign >= 0f)
+		{
+			GroundSpeed = Mathf.Floor(GroundSpeed / 4f) + force;
+			if (GroundSpeed * sign <= limitSpeed) return;
+			GroundSpeed = limitSpeed;
+			return;
+		}
+
+		GroundSpeed = force;
+		if (Mathf.IsEqualApprox(Angle, 360f)) return;
+		
+		GroundSpeed += Mathf.Floor(GroundSpeed / 2f);
 	}
 	
 	private void ProcessFlight()
@@ -980,12 +965,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 					{
 						Gravity = GravityType.TailsUp;
 					}
-					else if (Speed.Y < -1)
+					else if (Speed.Y < -1f)
 					{
 						Gravity = GravityType.TailsDown;
 					}
 				
-					Speed.Y = Math.Max(Speed.Y, -4);
+					Speed.Y = Math.Max(Speed.Y, -4f);
 				}
 			}
 		}
@@ -1015,9 +1000,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 					ReleaseClimb();
 					break;
 				}
-		
+				
+				//TODO: check GetFrameCount
 				const int stepsPerFrame = 4;
-				var maxValue = image_number * stepsPerFrame;
+				int maxValue = Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame;
 				
 				if (InputDown.Up)
 				{
@@ -1047,18 +1033,21 @@ public partial class Player : Framework.CommonObject.CommonObject
 				{
 					radiusX++;
 				}
+				
+				var integerPosition = (Vector2I)Position;
 		
 				if (Speed.Y < 0)
 				{
 					// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-					Vector2I position = (Vector2I)Position + new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
-					(sbyte wallDistance, float? _) = CollisionUtilities.FindTile(false, position, Facing, TileLayer, );
+					Vector2I position = integerPosition + new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
+					sbyte wallDistance = CollisionUtilities.FindTile(
+						false, position, Facing, TileLayer, TileMap).Item1;
+					
 					if (wallDistance >= 4)
 					{
 						ActionState = (int)ClimbStates.Ledge;
 						ActionValue = 0;
 						Speed.Y = 0;
-						
 						break;
 					}
 		
@@ -1069,31 +1058,37 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 		
 					// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-					var ceilDist = tile_find_v(x + radiusX * Facing, y - RadiusNormal.Y + 1, false, TileLayer)[0];
-					if (ceilDist < 0)
+					position = integerPosition + new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
+					sbyte ceilDistance = CollisionUtilities.FindTile(
+						true, position, Constants.Direction.Negative, TileLayer, TileMap).Item1;
+					
+					if (ceilDistance < 0)
 					{
-						Position.Y -= ceilDist;
+						Position -= new Vector2(0f, ceilDistance);
 						Speed.Y = 0;
 					}
 				}
 				else
 				{
 					// If Knuckles is no longer against the wall, make him let go
-					var wallDist = tile_find_h(x + radiusX * Facing, y + Radius.Y + 1, Facing, TileLayer)[0];
-					if (wallDist != 0)
+					Vector2I position = integerPosition + new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
+					sbyte wallDistance = CollisionUtilities.FindTile(
+						false, position, Facing, TileLayer, TileMap).Item1;
+					
+					if (wallDistance != 0)
 					{
 						ReleaseClimb();
 						break;
 					}
 					
 					// If Knuckles has reached the floor, make him land
-					var floorData = tile_find_v(x + radiusX * Facing, y + RadiusNormal.Y, true, TileLayer);
-					var floorDist = floorData[0];
-					var floorAngle = floorData[1];
+					position = integerPosition + new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
+					(sbyte floorDistance, float? floorAngle) = CollisionUtilities.FindTile(
+						true, position, Constants.Direction.Positive, TileLayer, TileMap);
 					
-					if (floorDist < 0)
+					if (floorDistance < 0)
 					{
-						Position += new Vector2(0f, floorDist + RadiusNormal.Y - Radius.Y);
+						Position += new Vector2(0f, floorDistance + RadiusNormal.Y - Radius.Y);
 						Angle = floorAngle;
 						
 						Land();
@@ -1758,7 +1753,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (OnObject == null)
 		{
 			if (MathB.GetAngleQuadrant(Angle) > 0) return;
-		
+
+			var integerPosition = (Vector2I)Position;
+			CollisionUtilities.FindTile(true, )
 			var floorDist = tile_find_v(x, y + Radius.Y, true, TileLayer)[0];	
 			if (floorDist < 12) return;
 		
