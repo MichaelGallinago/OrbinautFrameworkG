@@ -147,7 +147,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public float Angle { get; set; }
 	public float SlopeGravity { get; set; }
 
-	public Constants.TileLayer TileLayer { get; set; }
+	public Constants.TileLayers TileLayer { get; set; }
 	public Constants.GroundMode GroundMode { get; set; }
 	public bool StickToConvex { get; set; }
     
@@ -210,6 +210,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public Buttons InputDown;
 
 	public List<RecordedData> RecordedData { get; set; }
+	
+	public CollisionTileMap TileMap { get; set; }
+	public CommonStage Stage { get; set; }
 
 	// Edit mode
 	public bool IsEditMode { get; private set; }
@@ -227,7 +230,16 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public override void _Ready()
 	{
 		SetBehaviour(BehaviourType.Unique);
-        
+
+		if (GetOwner<Node>() is CommonScene scene)
+		{
+			TileMap = scene.CollisionTileMap;
+			if (scene is CommonStage stage)
+			{
+				Stage = stage;
+			}
+		}
+		
 		switch (Type)
 		{
 			case Types.Tails:
@@ -249,7 +261,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		Position += new Vector2(0f, 1f - Radius.Y);
 
 		Gravity = GravityType.Default;
-		TileLayer = Constants.TileLayer.Main;
+		TileLayer = Constants.TileLayers.Main;
 		GroundMode = Constants.GroundMode.Floor;
 		ObjectInteraction = true;
 		Barrier = new Barrier(this);
@@ -744,31 +756,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (Action == Actions.SpinDash || Action == Actions.PeelOut || IsForcedRoll || !IsGrounded) return false;
 		
 		if (!InputPress.Abc) return false;
-	
-		const int maxCeilingDist = 6;
-		var position = (Vector2I)Position;
-		int ceilDist = GroundMode switch
-		{
-			Constants.GroundMode.Floor => CollisionUtilities.FindTileTwoPositions(true, 
-				position - Radius, 
-				position + new Vector2I(Radius.X, -Radius.Y), 
-				Constants.Direction.Negative, TileLayer, GroundMode).Item1,
-			Constants.GroundMode.RightWall => CollisionUtilities.FindTileTwoPositions(true, 
-				position - new Vector2I(Radius.Y, Radius.X), 
-				position + new Vector2I(-Radius.Y, Radius.X), 
-				Constants.Direction.Negative, TileLayer, GroundMode).Item1,
-			Constants.GroundMode.LeftWall => CollisionUtilities.FindTileTwoPositions(true, 
-				x + Radius.Y, y - Radius.X, 
-				x + Radius.Y, y + Radius.X, 
-				Constants.Direction.Positive, TileLayer, GroundMode).Item1,
-			_ => maxCeilingDist
-		};
-	
-		if (ceilDist < maxCeilingDist) return false;
-	
-		// ???
+
+		if (!CheckCeilingDistance()) return false;
+		
 		if (!SharedData.FixJumpSize)
 		{
+			// Why they even do that???
 			Radius = RadiusNormal;
 		}
 	
@@ -810,11 +803,41 @@ public partial class Player : Framework.CommonObject.CommonObject
 		return true;
 	}
 
+	private bool CheckCeilingDistance()
+	{
+		if (TileMap == null) return false;
+		
+		const sbyte targetCeilingDistance = 6;
+
+		if (GroundMode == Constants.GroundMode.Ceiling) return true;
+		
+		var position = (Vector2I)Position;
+		(Vector2I position1, Vector2I position2, Constants.Direction direction) = GroundMode switch
+		{
+			Constants.GroundMode.Floor => (
+				-Radius, new Vector2I(Radius.X, -Radius.Y), 
+				Constants.Direction.Negative),
+			Constants.GroundMode.RightWall => (
+				new Vector2I(-Radius.Y, -Radius.X), new Vector2I(-Radius.Y, Radius.X), 
+				Constants.Direction.Negative),
+			Constants.GroundMode.LeftWall => (
+				new Vector2I(Radius.Y,  -Radius.X), new Vector2I(Radius.Y, Radius.X), 
+				Constants.Direction.Positive),
+			_ => throw new ArgumentOutOfRangeException()
+		};
+
+		sbyte ceilDistance = CollisionUtilities.FindTileTwoPositions(true, 
+			position + position1, position + position2, 
+			direction, TileLayer, TileMap, GroundMode).Item1;
+		
+		return ceilDistance >= targetCeilingDistance;
+	}
+
 	private void ProcessDropDash()
 	{
 		if (!SharedData.DropDash || Action != Actions.DropDash) return;
 	
-		const int maxDropDashCharge = 20;
+		const float maxDropDashCharge = 20f;
 	
 		if (!IsGrounded)
 		{		
@@ -835,7 +858,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 				}
 			}
-			else if (ActionValue > 0)
+			else if (ActionValue > 0f)
 			{
 				if (Mathf.IsEqualApprox(ActionValue, maxDropDashCharge))
 				{		
@@ -843,7 +866,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Action = Actions.DropDashCancel;
 				}
 			
-				ActionValue = 0;
+				ActionValue = 0f;
 			}
 		}
 	

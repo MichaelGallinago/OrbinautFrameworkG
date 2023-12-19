@@ -46,36 +46,28 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
     private static bool GetTileValidity(int index, bool isVertical, 
         Direction direction, GroundMode groundMode)
     {
-        return index switch
+        return (index / TileLimit) switch
         {
-            >= TileLimit * 2 when isVertical => groundMode switch
+            2 when isVertical => groundMode switch
             {
                 GroundMode.Floor => direction == Direction.Negative,
                 GroundMode.Ceiling => direction == Direction.Positive,
-                GroundMode.RightWall => true,
-                GroundMode.LeftWall => true,
-                _ => direction == Direction.Negative
+                _ => true
             },
-            >= TileLimit when isVertical => groundMode switch
+            1 when isVertical => groundMode switch
             {
                 GroundMode.Floor => direction == Direction.Positive,
                 GroundMode.Ceiling => direction == Direction.Negative,
-                GroundMode.RightWall => false,
-                GroundMode.LeftWall => false,
-                _ => direction == Direction.Positive
+                _ => false
             },
-            >= TileLimit * 2 => groundMode switch
+            2 => groundMode switch
             {
-                GroundMode.Floor => true,
-                GroundMode.Ceiling => true,
                 GroundMode.RightWall => direction == Direction.Negative,
                 GroundMode.LeftWall => direction == Direction.Positive,
                 _ => true
             },
-            >= TileLimit => groundMode switch
+            1 => groundMode switch
             {
-                GroundMode.Floor => false,
-                GroundMode.Ceiling => false,
                 GroundMode.RightWall => direction == Direction.Positive,
                 GroundMode.LeftWall => direction == Direction.Negative,
                 _ => false
@@ -83,4 +75,4 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
             _ => true
         };
     }
-} 
+}

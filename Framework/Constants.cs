@@ -10,48 +10,31 @@ public static class Constants
 	public const float AngleIncrement = 1.40625f;
 	public const ushort TileLimit = 256;
 	public const byte TileSize = 16;
+	public const float AirValueMax = 1800f;
 
 	public enum EnemyType : byte
 	{
-		Badnik,
-		Boss
+		Badnik, Boss
 	}
 
 	public enum Direction : sbyte
 	{
-		Negative = -1,
-		Neutral = 0,
-		Positive = 1
+		Negative = -1, Neutral = 0, Positive = 1
 	}
 	
 	public enum GroundMode : byte
 	{
-		Floor,
-		RightWall,
-		Ceiling,
-		LeftWall
+		Floor, RightWall, Ceiling, LeftWall
 	}
 
 	public enum CollisionSensor : byte
 	{
-		Hitbox,
-		HitboxExtra,
-		Trigger,
-		SolidU,
-		SolidD,
-		SolidL,
-		SolidR,
-		SolidAny
+		Hitbox, HitboxExtra, Trigger, SolidU, SolidD, SolidL, SolidR, SolidAny
 	}
 
 	public enum SolidType : byte
 	{
-		All,
-		AllReset,
-		Top,
-		TopReset,
-		Sides,
-		ItemBox
+		All, AllReset, Top, TopReset, Sides, ItemBox
 	}
 
 	public enum DepthType : sbyte
@@ -67,37 +50,26 @@ public static class Constants
 
 	public enum FadeState : byte
 	{
-		None,
-		Active,
-		Max
+		None, Active, Max
 	}
 
 	public enum FadeMode : byte
 	{
-		Out,
-		In
+		Out, In
 	}
 
 	public enum FadeBlend : byte
 	{
-		Black,
-		White,
-		Flash
+		Black, White, Flash
 	}
 
-	public enum TileLayer : sbyte
+	public enum TileLayers : sbyte
 	{
-		Main,
-		Secondary,
-		None
+		Main, Secondary, None
 	}
 	
 	public enum TouchState : byte
 	{
-		None,
-		Up,
-		Down,
-		Left,
-		Right
+		None, Up, Down, Left, Right
 	}
 }

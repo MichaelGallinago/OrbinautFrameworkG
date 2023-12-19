@@ -10,6 +10,7 @@ public abstract partial class CommonScene : Node2D
     private const byte BaseFramerate = 60;
 
     public bool IsStage { get; protected set; }
+    public CollisionTileMap CollisionTileMap { get; set; }
 
     public event Action<double> PreUpdate;
     public event Action<double> EarlyUpdate;

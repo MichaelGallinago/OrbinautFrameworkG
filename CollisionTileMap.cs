@@ -1,4 +1,5 @@
 using Godot;
+using OrbinautFramework3.Framework;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3;
@@ -9,6 +10,11 @@ public partial class CollisionTileMap : TileMap
     
     public override void _Ready()
     {
+        if (GetOwner<Node>() is CommonScene scene)
+        {
+            scene.CollisionTileMap = this;
+        }
+        
         _columnCount = GetTileSetColumnCount(0);
     }
     

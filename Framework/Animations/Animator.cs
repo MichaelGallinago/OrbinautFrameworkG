@@ -25,7 +25,7 @@ public static class Animator
     {
         //TODO: check this
         // Process sprite animation
-        bool targetFlag = !FrameworkData.IsPaused && FrameworkData.UpdateGraphics;
+        bool targetFlag = !FrameworkData.IsPaused && FrameworkData.UpdateEffects;
 		
         if (IsUpdating != targetFlag)
         {
@@ -37,7 +37,7 @@ public static class Animator
             IsUpdating = targetFlag;
         }
 		
-        if (!FrameworkData.UpdateGraphics || FrameworkData.IsPaused)
+        if (!FrameworkData.UpdateEffects || FrameworkData.IsPaused)
         {
             return;
         }

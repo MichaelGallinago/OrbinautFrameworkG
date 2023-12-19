@@ -100,13 +100,13 @@ public static class CollisionUtilities
 	}
 
 	public static (sbyte, float?) FindTileTwoPositions(bool isVertical, 
-		Vector2I position1, Vector2I position2, Direction direction, TileLayer tileLayerType, 
+		Vector2I position1, Vector2I position2, Direction direction, TileLayers type, 
 		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
 		(sbyte distance1, float? angle1) = FindTile(isVertical, 
-			position1, direction, tileLayerType, tileMap, groundMode);
+			position1, direction, type, tileMap, groundMode);
 		(sbyte distance2, float? angle2) = FindTile(isVertical, 
-			position2, direction, tileLayerType, tileMap, groundMode);
+			position2, direction, type, tileMap, groundMode);
 		
 		if (isVertical && FrameworkData.CDTileFixes
 		               && direction == Direction.Positive && angle1 is not 360f
@@ -119,13 +119,13 @@ public static class CollisionUtilities
 	}
 	
 	public static (sbyte, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
-		TileLayer tileLayerType, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
+		TileLayers type, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
 		// Get tile layer id
-		var tileLayerId = (ushort)tileLayerType;
+		var tileLayerId = (ushort)type;
 	    
 		// Return empty data if no tile data was found
-		if (tileLayerType == TileLayer.None || tileMap.GetLayersCount() < tileLayerId)
+		if (type == TileLayers.None || tileMap.GetLayersCount() < tileLayerId)
 		{
 			return (TileSize * 2, null);
 		}
@@ -257,8 +257,5 @@ public static class CollisionUtilities
 		}
 	}
 
-	private static byte[] OpenBinaryByName(string fileName)
-	{
-		return File.ReadAllBytes($"{BinariesPath}{fileName}.bin");
-	}
+	private static byte[] OpenBinaryByName(string fileName) => File.ReadAllBytes($"{BinariesPath}{fileName}.bin");
 }

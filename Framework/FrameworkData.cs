@@ -17,7 +17,7 @@ public static class FrameworkData
     public static TileData TileData { get; }
     public static bool CDTileFixes { get; set; }
     public static bool CDCamera { get; set; }
-    public static bool UpdateGraphics { get; set; }
+    public static bool UpdateEffects { get; set; }
     public static bool UpdateObjects { get; set; }
     public static bool UpdateTimer { get; set; }
     public static bool AllowPause { get; set; }
@@ -53,7 +53,7 @@ public static class FrameworkData
                 Key.Z, Key.X, Key.C, Key.None, Key.None)
         ];
         GamepadVibration = true;
-        UpdateGraphics = true;
+        UpdateEffects = true;
         UpdateObjects = true;
         UpdateTimer = true;
         AllowPause = true;

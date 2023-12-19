@@ -41,7 +41,7 @@ public partial class BackgroundLayer : Sprite2D
 
     private void EndStep(double processSpeed)
     {
-        if (!FrameworkData.UpdateGraphics) return;
+        if (!FrameworkData.UpdateEffects) return;
         _shift += Scroll * (float)processSpeed;
     }
 }

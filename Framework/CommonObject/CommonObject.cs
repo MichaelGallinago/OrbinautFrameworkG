@@ -261,7 +261,8 @@ public abstract partial class CommonObject : Node2D
 			
 			// Update player's pushing status if grounded
 			player.PushingObject = player.IsGrounded && 
-			    Math.Sign((sbyte)player.Facing) == Math.Sign(integerObjectPosition.X - integerPlayerPosition.X) ? this : null;
+			    Math.Sign((int)player.Facing) == Math.Sign(integerObjectPosition.X - integerPlayerPosition.X) ? 
+				this : null;
 			
 			SolidData.TouchStates[player.Id] = integerPlayerPosition.X < integerObjectPosition.X ? 
 				Constants.TouchState.Left : Constants.TouchState.Right;
