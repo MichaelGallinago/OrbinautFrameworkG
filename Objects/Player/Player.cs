@@ -169,7 +169,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public bool BarrierFlag { get; set; }
 	public Barrier Barrier { get; set; }
     
-	public Constants.DirectionSign Facing { get; set; }
+	public Constants.Direction Facing { get; set; }
 	public Animations Animation { get; set; }
 	public float AnimationTimer { get; set; }
 	public float VisualAngle { get; set; }
@@ -267,7 +267,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		GroundMode = Constants.GroundMode.Floor;
 		ObjectInteraction = true;
 		Barrier = new Barrier(this);
-		Facing = Constants.DirectionSign.Positive;
+		Facing = Constants.Direction.Positive;
 		Animation = Animations.Idle;
 		AirTimer = 1800f;
 		CpuState = CpuStates.Main;
@@ -726,7 +726,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				Animation = Animations.GlideAir;	
 				Action = Actions.Glide;
 				ActionState = (int)GlideStates.Air;
-				ActionValue = Facing == Constants.DirectionSign.Negative ? 0f : 180f;
+				ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
 				Radius = new Vector2I(10, 10);
 				GroundSpeed = 4f;
 				Speed = new Vector2(0f, Speed.Y + 2f);
@@ -805,33 +805,31 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private bool CheckCeilingDistance()
 	{
-		if (TileMap == null) return false;
-
 		if (GroundMode == Constants.GroundMode.Ceiling) return true;
 		
 		return CalculateCellDistance() >= 6; // Target ceiling distance
 	}
 
-	private sbyte CalculateCellDistance()
+	private int CalculateCellDistance()
 	{
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
 		
 		return GroundMode switch
 		{
-			Constants.GroundMode.Floor => TileCollider.FindTileTwoPositions(
+			Constants.GroundMode.Floor => TileCollider.FindClosestDistance(
 				Radius.Shuffle(false, -1, -1), 
 				Radius.Shuffle(false, 1, -1), 
-				Constants.Directions.Up).Item1,
+				true, Constants.Direction.Negative),
 			
-			Constants.GroundMode.RightWall => TileCollider.FindTileTwoPositions(
+			Constants.GroundMode.RightWall => TileCollider.FindClosestDistance(
 				Radius.Shuffle(true, -1, -1), 
 				Radius.Shuffle(true, 1, -1), 
-				Constants.Directions.Left).Item1,
+				false, Constants.Direction.Negative),
 			
-			Constants.GroundMode.LeftWall => TileCollider.FindTileTwoPositions(
+			Constants.GroundMode.LeftWall => TileCollider.FindClosestDistance(
 				Radius.Shuffle(true, -1, 1), 
 				Radius.Shuffle(true, 1, 1),
-				Constants.Directions.Right).Item1,
+				false, Constants.Direction.Positive),
 			
 			Constants.GroundMode.Ceiling => throw new ArgumentOutOfRangeException(),
 			
@@ -1005,33 +1003,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 				
 				//TODO: check GetFrameCount
 				const int stepsPerFrame = 4;
-				int maxValue = Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame;
-				
-				if (InputDown.Up)
-				{
-					if (++ActionValue > maxValue)
-					{
-						ActionValue = 0;
-					}
-					
-					Speed.Y = -PhysicParams.AccelerationClimb;
-				}
-				else if (InputDown.Down)
-				{
-					if (--ActionValue < 0)
-					{
-						ActionValue = maxValue;
-					}
-					
-					Speed.Y = PhysicParams.AccelerationClimb;
-				}
-				else
-				{
-					Speed.Y = 0;
-				}
+				UpdateSpeedOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
 				
 				int radiusX = Radius.X;
-				if (Facing == Constants.DirectionSign.Negative)
+				if (Facing == Constants.Direction.Negative)
 				{
 					radiusX++;
 				}
@@ -1042,7 +1017,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				{
 					// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
 					var offset = new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
-					sbyte wallDistance = TileCollider.FindTile(offset).Item1;
+					int wallDistance = TileCollider.FindDistance(offset, false, Facing);
 					
 					if (wallDistance >= 4)
 					{
@@ -1059,9 +1034,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 		
 					// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-					var offset = new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
-					sbyte ceilDistance = TileCollider.FindTile(
-						true, position, Constants.DirectionSign.Negative, TileLayer, TileMap).Item1;
+					offset = new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
+					int ceilDistance = TileCollider.FindDistance(offset, true, Constants.Direction.Negative);
 					
 					if (ceilDistance < 0)
 					{
@@ -1072,9 +1046,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 				else
 				{
 					// If Knuckles is no longer against the wall, make him let go
-					Vector2I position = integerPosition + new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
-					sbyte wallDistance = CollisionUtilities.FindTile(
-						false, position, Facing, TileLayer, TileMap).Item1;
+					var offset = new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
+					int wallDistance = TileCollider.FindDistance(offset, false, Facing);
 					
 					if (wallDistance != 0)
 					{
@@ -1083,14 +1056,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 					
 					// If Knuckles has reached the floor, make him land
-					position = integerPosition + new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
-					(sbyte floorDistance, float? floorAngle) = CollisionUtilities.FindTile(
-						true, position, Constants.DirectionSign.Positive, TileLayer, TileMap);
+					offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
+					(int floorDistance, float? floorAngle) =
+						TileCollider.FindTile(offset, true, Constants.Direction.Positive);
 					
 					if (floorDistance < 0)
 					{
 						Position += new Vector2(0f, floorDistance + RadiusNormal.Y - Radius.Y);
-						Angle = floorAngle;
+						Angle = (float)floorAngle;
 						
 						Land();
 
@@ -1107,7 +1080,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					IsSpinning = true;
 					IsJumping = true;
 					Action = Actions.None;
-					Facing = (Constants.DirectionSign)(-(int)Facing);
+					Facing = (Constants.Direction)(-(int)Facing);
 					Speed = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
 					
 					//TODO: audio
@@ -1143,6 +1116,32 @@ public partial class Player : Framework.CommonObject.CommonObject
 						break;
 				}
 				break;
+		}
+	}
+
+	private void UpdateSpeedOnClimb(int maxValue)
+	{
+		if (InputDown.Up)
+		{
+			if (++ActionValue > maxValue)
+			{
+				ActionValue = 0;
+			}
+					
+			Speed.Y = -PhysicParams.AccelerationClimb;
+		}
+		else if (InputDown.Down)
+		{
+			if (--ActionValue < 0)
+			{
+				ActionValue = maxValue;
+			}
+					
+			Speed.Y = PhysicParams.AccelerationClimb;
+		}
+		else
+		{
+			Speed.Y = 0;
 		}
 	}
 
@@ -1231,7 +1230,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 						Sprite.UpdateFrame(1);
 						break;
 					default:
-						Facing = angle < 90 ? Constants.DirectionSign.Negative : Constants.DirectionSign.Positive;
+						Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
 						Sprite.UpdateFrame(2);
 						break;
 				}
@@ -1374,7 +1373,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 			if (InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0)
 			{
-				Facing = (Constants.DirectionSign)(-(int)Facing);
+				Facing = (Constants.Direction)(-(int)Facing);
 				GroundSpeed *= -1;
 			}
 
@@ -1459,10 +1458,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 						GroundSpeed = Math.Max(GroundSpeed - PhysicParams.Acceleration, -PhysicParams.AccelerationTop);
 					}
 					
-					if (Facing != Constants.DirectionSign.Negative)
+					if (Facing != Constants.Direction.Negative)
 					{
 						Animation = Animations.Move;
-						Facing = Constants.DirectionSign.Negative;
+						Facing = Constants.Direction.Negative;
 						PushingObject = null;
 						
 						Sprite.UpdateFrame(0);
@@ -1490,10 +1489,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 						GroundSpeed = Math.Min(GroundSpeed + PhysicParams.Acceleration, PhysicParams.AccelerationTop);
 					}
 					
-					if (Facing != Constants.DirectionSign.Positive)
+					if (Facing != Constants.Direction.Positive)
 					{
 						Animation = Animations.Move;
-						Facing = Constants.DirectionSign.Positive;
+						Facing = Constants.Direction.Positive;
 						PushingObject = null;
 						
 						Sprite.UpdateFrame(0);;
@@ -1594,7 +1593,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				else
 				{
-					Facing = Constants.DirectionSign.Negative;
+					Facing = Constants.Direction.Negative;
 					PushingObject = null;	
 				}
 			}
@@ -1612,7 +1611,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				else
 				{
-					Facing = Constants.DirectionSign.Positive;
+					Facing = Constants.Direction.Positive;
 					PushingObject = null;	
 				}
 			}
@@ -1717,7 +1716,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X = Math.Max(Speed.X - PhysicParams.AccelerationAir, -PhysicParams.AccelerationTop);
 				}
 			
-				Facing = Constants.DirectionSign.Negative;
+				Facing = Constants.Direction.Negative;
 			}
 		
 			// Move right
@@ -1732,7 +1731,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X = Math.Min(Speed.X + PhysicParams.AccelerationAir, PhysicParams.AccelerationTop);
 				}
 			
-				Facing = Constants.DirectionSign.Positive;
+				Facing = Constants.Direction.Positive;
 			}	
 		}
 	
@@ -1754,26 +1753,27 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (OnObject == null)
 		{
 			if (MathB.GetAngleQuadrant(Angle) > 0) return;
-
-			var integerPosition = (Vector2I)Position;
-			CollisionUtilities.FindTile(true, )
-			var floorDist = tile_find_v(x, y + Radius.Y, true, TileLayer)[0];	
+			
+			TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
+			int floorDist = TileCollider.FindDistance(new Vector2I(), true, Constants.Direction.Positive);	
 			if (floorDist < 12) return;
-		
-			var angleLeft = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer)[1];
-			var angleRight = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer)[1];
+
+			const Constants.Direction direction = Constants.Direction.Positive;
+			
+			float? angleLeft = TileCollider.FindTile(new Vector2I(-Radius.X, 0), true, direction).Item2;
+			float? angleRight = TileCollider.FindTile(new Vector2I(Radius.X, 0), true, direction).Item2;
 		
 			if (angleLeft != null && angleRight != null) return;
 		
 			if (angleLeft == null)
-			{	
-				var leftDist = tile_find_v(x + 6, y + Radius.Y, true, TileLayer)[0];
-				BalanceLeft(leftDist >= 12);
+			{
+				BalanceLeft(TileCollider.FindDistance(
+					new Vector2I(6, 0), true, direction) >= 12);
 			}
 			else
 			{
-				var rightDist = tile_find_v(x - 6, y + Radius.Y, true, TileLayer)[0];
-				BalanceRight(rightDist >= 12);
+				BalanceRight(TileCollider.FindDistance(
+					new Vector2I(-6, 0), true, direction) >= 12);
 			}
 		}
 		else if (IsInstanceValid(OnObject)) // TODO: check IsInstanceValid == instance_exist
@@ -1803,19 +1803,19 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (Type != Types.Sonic || IsSuper)
 		{
 			Animation = Animations.Balance;
-			Facing = Constants.DirectionSign.Negative;
+			Facing = Constants.Direction.Negative;
 			
 			return;
 		}
 		
 		if (!isPanic)
 		{
-			Animation = Facing == Constants.DirectionSign.Negative ? Animations.Balance : Animations.BalanceFlip;
+			Animation = Facing == Constants.Direction.Negative ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if (Facing == Constants.DirectionSign.Positive)
+		else if (Facing == Constants.Direction.Positive)
 		{
 			Animation = Animations.BalanceTurn;
-			Facing = Constants.DirectionSign.Negative;
+			Facing = Constants.Direction.Negative;
 		}
 		else if (Animation != Animations.BalanceTurn)
 		{
@@ -1828,19 +1828,19 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (Type != Types.Sonic || IsSuper)
 		{
 			Animation = Animations.Balance;
-			Facing = Constants.DirectionSign.Positive;
+			Facing = Constants.Direction.Positive;
 			
 			return;
 		}
 		
 		if (!isPanic)
 		{
-			Animation = (Facing == Constants.DirectionSign.Positive) ? Animations.Balance : Animations.BalanceFlip;
+			Animation = (Facing == Constants.Direction.Positive) ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if (Facing == Constants.DirectionSign.Negative)
+		else if (Facing == Constants.Direction.Negative)
 		{
 			Animation = Animations.BalanceTurn;
-			Facing = Constants.DirectionSign.Positive;
+			Facing = Constants.Direction.Positive;
 		}
 		else if (Animation != Animations.BalanceTurn)
 		{
@@ -1851,10 +1851,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private void ProcessCollisionGroundWalls()
 	{
 		// Control routine checks
-		if (!IsGrounded)
-		{
-			return;
-		}
+		if (!IsGrounded) return;
 		
 		if (SharedData.PlayerPhysics < PhysicsTypes.SK)
 		{
@@ -1865,7 +1862,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 
-		int castDir = Angle switch
+		int castDirection = Angle switch
 		{
 			>= 45 and <= 128 => 1,
 			> 128 and < 225 => 2,
@@ -1876,93 +1873,78 @@ public partial class Player : Framework.CommonObject.CommonObject
 		int wallRadius = RadiusNormal.X + 1;
 		int offsetY = 8 * (Mathf.IsEqualApprox(Angle, 360f) ? 1 : 0);
 		
-		if (GroundSpeed < 0)
-		{
-			var wallDist = castDir switch
-			{
-				0 => tile_find_h(Position.X + Speed.X - wallRadius, Position.Y + Speed.Y + offsetY, false, TileLayer, GroundMode)[0],
-				1 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
-				2 => tile_find_h(Position.X + Speed.X + wallRadius, Position.Y + Speed.Y, true, TileLayer, GroundMode)[0],
-				3 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
-				_ => 0
-			};
+		TileCollider.SetData((Vector2I)(Position + Speed), TileLayer, TileMap, GroundMode);
 
-			if (wallDist >= 0) return;
+		int sign;
+		Constants.Direction firstDirection, secondDirection;
+		switch (GroundSpeed)
+		{
+			case < 0f:
+				sign = 1;
+				firstDirection = Constants.Direction.Negative;
+				secondDirection = Constants.Direction.Positive;
+				break;
+			case > 0f:
+				sign = -1;
+				firstDirection = Constants.Direction.Positive;
+				secondDirection = Constants.Direction.Negative;
+				wallRadius *= -1;
+				break;
+			default:
+				return;
 			
-			switch (MathB.GetAngleQuadrant(Angle))
-			{
-				case 0:
-					Speed.X -= wallDist;
-					GroundSpeed = 0;
-						
-					if (Facing == Constants.DirectionSign.Negative && !IsSpinning)
-					{
-						PushingObject = this;
-					}
-					break;
-					
-				case 1:
-					Speed.Y += wallDist;
-					break;
-					
-				case 2:
-					Speed.X += wallDist;
-					GroundSpeed = 0;
-						
-					if (Facing == Constants.DirectionSign.Negative && !IsSpinning)
-					{
-						PushingObject = this;
-					}
-					break;
-					
-				case 3:
-					Speed.Y -= wallDist;
-					break;
-			}
 		}
-		else if (GroundSpeed > 0)
+		
+		int wallDist = castDirection switch
 		{
-			var wallDist = castDir switch
-			{
-				0 => tile_find_h(Position.X + Speed.X + wallRadius, Position.Y + Speed.Y + offsetY, true, TileLayer, GroundMode)[0],
-				1 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y - wallRadius, false, TileLayer, GroundMode)[0],
-				2 => tile_find_h(Position.X + Speed.X - wallRadius, Position.Y + Speed.Y, false, TileLayer, GroundMode)[0],
-				3 => tile_find_v(Position.X + Speed.X, Position.Y + Speed.Y + wallRadius, true, TileLayer, GroundMode)[0],
-				_ => 0
-			};
-
-			if (wallDist >= 0) return;
+			0 => TileCollider.FindDistance(
+				new Vector2I(-wallRadius, offsetY), false, firstDirection),
 			
-			switch (MathB.GetAngleQuadrant(Angle))
-			{
-				case 0:
-					Speed.X += wallDist;
-					GroundSpeed = 0;
-						
-					if (Facing == Constants.DirectionSign.Positive && !IsSpinning)
-					{
-						PushingObject = this;
-					}
-					break;
+			1 => TileCollider.FindDistance(
+				new Vector2I(0, wallRadius), true, secondDirection),
+			
+			2 => TileCollider.FindDistance(
+				new Vector2I(wallRadius, 0), false, secondDirection),
+			
+			3 => TileCollider.FindDistance(
+				new Vector2I(0, -wallRadius), true, firstDirection),
+			
+			_ => throw new ArgumentOutOfRangeException()
+		};
+
+		if (wallDist >= 0) return;
+
+		wallDist *= sign;
+		
+		switch (MathB.GetAngleQuadrant(Angle))
+		{
+			case 0:
+				Speed.X -= wallDist;
+				GroundSpeed = 0f;
 					
-				case 1:
-					Speed.Y -= wallDist;
-					break;
+				if (Facing == firstDirection && !IsSpinning)
+				{
+					PushingObject = this;
+				}
+				break;
+				
+			case 1:
+				Speed.Y += wallDist;
+				break;
+				
+			case 2:
+				Speed.X += wallDist;
+				GroundSpeed = 0;
 					
-				case 2:
-					Speed.X -= wallDist;
-					GroundSpeed = 0;
-						
-					if (Facing == Constants.DirectionSign.Positive && !IsSpinning)
-					{
-						PushingObject = this;
-					}
-					break;
-						
-				case 3:
-					Speed.Y += wallDist;
-					break;
-			}
+				if (Facing == firstDirection && !IsSpinning)
+				{
+					PushingObject = this;
+				}
+				break;
+				
+			case 3:
+				Speed.Y -= wallDist;
+				break;
 		}
 	}
 
@@ -2089,49 +2071,57 @@ public partial class Player : Framework.CommonObject.CommonObject
 		const int minTolerance = 4;
 		const int maxTolerance = 14;
 		
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
+
+		int distance;
+		float? angle;
+		
 		switch (GroundMode)
 		{
 			case Constants.GroundMode.Floor:
-				var _floor_data = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer, GroundMode);
-				var _floor_dist = _floor_data[0];
-				var _floor_angle = _floor_data[1];
+				(distance, angle) = TileCollider.FindClosestTile(
+					new Vector2I(-Radius.X, Radius.Y),
+					new Vector2I(Radius.X, Radius.Y), 
+					true, Constants.Direction.Positive);
 				
 				if (!StickToConvex)
 				{
 					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
 						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.X)), maxTolerance);
 					
-					if (_floor_dist > tolerance)
+					if (distance > tolerance)
 					{
 						PushingObject = null;
 						IsGrounded = false;
 						
 						Sprite.UpdateFrame(0);
 						break;
-					}		
+					}
 				}
 
-				if (_floor_dist < -maxTolerance) break;
+				if (distance < -maxTolerance) break;
 				
 				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					_floor_angle = SnapFloorAngle(_floor_angle);
+					angle = SnapFloorAngle((float)angle);
 				}
 				
-				Position += new Vector2(0f, _floor_dist);
-				Angle = _floor_angle;
+				Position += new Vector2(0f, distance);
+				Angle = (float)angle;
 				break;
 			
 			case Constants.GroundMode.RightWall:
-				var _floor_data = tile_find_2h(x + Radius.Y, y + Radius.X, x + Radius.Y, y - Radius.X, true, TileLayer, GroundMode);
-				var _floor_dist = _floor_data[0];
-				var _floor_angle = _floor_data[1];
+				(distance, angle) = TileCollider.FindClosestTile(
+					new Vector2I(Radius.Y, Radius.X),
+					new Vector2I(Radius.Y, -Radius.X), 
+					false, Constants.Direction.Positive);
 				
 				if (!StickToConvex)
 				{
 					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
 						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.Y)), maxTolerance);
-					if (_floor_dist > tolerance)
+					
+					if (distance > tolerance)
 					{
 						PushingObject = null;
 						IsGrounded = false;
@@ -2141,27 +2131,29 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}	
 				}
 				
-				if (_floor_dist < -maxTolerance) break;
+				if (distance < -maxTolerance) break;
 
 				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					_floor_angle = SnapFloorAngle(_floor_angle);
+					angle = SnapFloorAngle((float)angle);
 				}
 				
-				Position += new Vector2(_floor_dist, 0f);
-				Angle = _floor_angle;
+				Position += new Vector2(distance, 0f);
+				Angle = (float)angle;
 				break;
 			
 			case Constants.GroundMode.Ceiling:
-				var _floor_data = tile_find_2v(x + Radius.X, y - Radius.Y, x - Radius.X, y - Radius.Y, false, TileLayer, GroundMode);
-				var _floor_dist = _floor_data[0];
-				var _floor_angle = _floor_data[1];
+				(distance, angle) = TileCollider.FindClosestTile(
+					new Vector2I(Radius.X, -Radius.Y),
+					new Vector2I(-Radius.X, -Radius.Y), 
+					true, Constants.Direction.Negative);
 				
 				if (!StickToConvex)
 				{
 					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
 						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.X)), maxTolerance);
-					if (_floor_dist > tolerance)
+					
+					if (distance > tolerance)
 					{
 						PushingObject = null;
 						IsGrounded = false;
@@ -2171,27 +2163,29 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 				}
 				
-				if (_floor_dist < -maxTolerance) break;
+				if (distance < -maxTolerance) break;
 
 				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					_floor_angle = SnapFloorAngle(_floor_angle);
+					angle = SnapFloorAngle((float)angle);
 				}
 				
-				Position -= new Vector2(0, _floor_dist);
-				Angle = _floor_angle;
+				Position -= new Vector2(0f, distance);
+				Angle = (float)angle;
 				break;
 			
 			case Constants.GroundMode.LeftWall:
-				var _floor_data = tile_find_2h(x - Radius.Y, y - Radius.X, x - Radius.Y, y + Radius.X, false, TileLayer, GroundMode);
-				var _floor_dist = _floor_data[0];
-				var _floor_angle = _floor_data[1];
+				(distance, angle) = TileCollider.FindClosestTile(
+					new Vector2I(-Radius.Y, -Radius.X),
+					new Vector2I(-Radius.Y, Radius.X), 
+					false, Constants.Direction.Negative);
 				
 				if (!StickToConvex)
 				{
 					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
 						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.Y)), maxTolerance);
-					if (_floor_dist > tolerance)
+					
+					if (distance > tolerance)
 					{
 						PushingObject = null;
 						IsGrounded = false;
@@ -2201,15 +2195,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 				}
 				
-			    if (_floor_dist < -maxTolerance) break;
+			    if (distance < -maxTolerance) break;
 
 				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
 				{
-					_floor_angle = SnapFloorAngle(_floor_angle);
+					angle = SnapFloorAngle((float)angle);
 				}
 
-				Position -= new Vector2(_floor_dist, 0f);
-				Angle = _floor_angle;
+				Position -= new Vector2(distance, 0f);
+				Angle = (float)angle;
 				break;
 		}
 	}
@@ -2218,12 +2212,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		float difference = Math.Abs(Angle % 180f - floorAngle % 180f);
 		
-		if (difference is <= 45 or >= 135) return floorAngle;
+		if (difference is <= 45f or >= 135f) return floorAngle;
 		
 		floorAngle = MathF.Round(Angle / 90f) % 4f * 90f;
 		if (floorAngle == 0f)
 		{
-			floorAngle = 360;
+			floorAngle = 360f;
 		}
 
 		return floorAngle;
@@ -2357,8 +2351,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Perform floor collision if not moving mostly up
-		var _floor_dist;
-		var _floor_angle;
+		var distance;
+		var angle;
 
 		if (moveQuad == 0)
 		{
@@ -2367,31 +2361,31 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 			if (floorDataL[0] > floorDataR[0])
 			{
-				_floor_dist = floorDataR[0];
-				_floor_angle = floorDataR[1];
+				distance = floorDataR[0];
+				angle = floorDataR[1];
 			}
 			else
 			{
-				_floor_dist = floorDataL[0];
-				_floor_angle = floorDataL[1];
+				distance = floorDataL[0];
+				angle = floorDataL[1];
 			}
 					
 			float minClip = -(Speed.Y + 8f);		
-			if (_floor_dist >= 0 || minClip >= floorDataL[0] && minClip >= floorDataR[0]) return;
+			if (distance >= 0 || minClip >= floorDataL[0] && minClip >= floorDataR[0]) return;
 					
-			if (MathB.GetAngleQuadrant(_floor_angle) > 0)
+			if (MathB.GetAngleQuadrant(angle) > 0)
 			{
 				if (Speed.Y > 15.75f)
 				{
 					Speed.Y = 15.75f;
 				}
 						
-				GroundSpeed = _floor_angle < 180f ? -Speed.Y : Speed.Y;
+				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
 				Speed.X = 0f;
 			}
-			else if (_floor_angle > 22.5f && _floor_angle <= 337.5f)
+			else if (angle > 22.5f && angle <= 337.5f)
 			{
-				GroundSpeed = _floor_angle < 180f ? -Speed.Y : Speed.Y;
+				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
 				GroundSpeed /= 2f;
 			}
 			else 
@@ -2403,10 +2397,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 		else if (Speed.Y >= 0)
 		{
 			var floorData = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
-			_floor_dist = floorData[0];
-			_floor_angle = floorData[1];
+			distance = floorData[0];
+			angle = floorData[1];
 							
-			if (_floor_dist >= 0)
+			if (distance >= 0)
 			{
 				return;
 			}
@@ -2419,8 +2413,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 
-		y += _floor_dist;
-		Angle = _floor_angle;
+		y += distance;
+		Angle = angle;
 			
 		Land();
 	}
@@ -2581,7 +2575,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				y += floorDist;
 			}
 			
-			if (Facing == Constants.DirectionSign.Negative)
+			if (Facing == Constants.Direction.Negative)
 			{
 				x++;
 			}
@@ -3773,7 +3767,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			Camera.MainCamera.UpdateShakeTimer(6);
 		}
 		
-		if (Facing == Constants.DirectionSign.Negative)
+		if (Facing == Constants.Direction.Negative)
 		{
 			if (Angle <= 0)
 			{

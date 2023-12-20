@@ -19,25 +19,27 @@ public class TileCollider
         _groundMode = groundMode;
     }
 
-    public (sbyte, float?) FindTile(Directions direction, Vector2I offset)
+    public (int, float?) FindTile(Vector2I offset, bool isVertical, Direction direction)
     {
-        return CollisionUtilities.FindTile(
-            CheckIsVertical(direction), _position + offset, 
-            GetDirectionSign(direction), _type, _tileMap, _groundMode);
-    }
-
-    public (sbyte, float?) FindTileTwoPositions(
-        Vector2I offset1, Vector2I offset2, Directions direction)
-    {
-        return CollisionUtilities.FindTileTwoPositions(
-            CheckIsVertical(direction), _position + offset1, _position + offset2, 
-            GetDirectionSign(direction), _type, _tileMap, _groundMode);
+        return CollisionUtilities.FindTile(isVertical, 
+            _position + offset, direction, _type, _tileMap, _groundMode);
     }
     
-    private static DirectionSign GetDirectionSign(Directions direction)
+    public int FindDistance(Vector2I offset, bool isVertical, Direction direction)
     {
-        return direction <= Directions.Right ? DirectionSign.Positive : DirectionSign.Negative;
+        return CollisionUtilities.FindDistance(isVertical, 
+            _position + offset, direction, _type, _tileMap, _groundMode);
     }
 
-    private static bool CheckIsVertical(Directions direction) => ((int)direction & 1) == 0;
+    public (int, float?) FindClosestTile(Vector2I offset1, Vector2I offset2, bool isVertical, Direction direction)
+    {
+        return CollisionUtilities.FindClosestTile(isVertical, 
+            _position + offset1, _position + offset2, direction, _type, _tileMap, _groundMode);
+    }
+    
+    public int FindClosestDistance(Vector2I offset1, Vector2I offset2, bool isVertical, Direction direction)
+    {
+        return CollisionUtilities.FindClosestDistance(isVertical, 
+            _position + offset1, _position + offset2, direction, _type, _tileMap, _groundMode);
+    }
 }

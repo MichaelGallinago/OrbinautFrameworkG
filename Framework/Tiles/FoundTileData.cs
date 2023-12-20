@@ -1,6 +1,6 @@
 namespace OrbinautFramework3.Framework.Tiles;
 
-public struct FoundTileData(int index, TileTransforms transforms, bool isValid, byte size)
+public class FoundTileData(int index, TileTransforms transforms, bool isValid, byte size)
 {
     public readonly int Index = index;
     public readonly TileTransforms Transforms = transforms;
