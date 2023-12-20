@@ -84,6 +84,7 @@ public partial class Player : Framework.CommonObject.CommonObject
     
 	public enum Animations : byte
 	{
+		None,
 		Idle,
 		Move,
 		Spin,
@@ -171,6 +172,7 @@ public partial class Player : Framework.CommonObject.CommonObject
     
 	public Constants.Direction Facing { get; set; }
 	public Animations Animation { get; set; }
+	public Animations AnimationBuffer { get; set; }
 	public float AnimationTimer { get; set; }
 	public float VisualAngle { get; set; }
     
@@ -2073,139 +2075,59 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
 
-		int distance;
-		float? angle;
-		
-		switch (GroundMode)
+		(int distance, float? angle) = GroundMode switch
 		{
-			case Constants.GroundMode.Floor:
-				(distance, angle) = TileCollider.FindClosestTile(
-					new Vector2I(-Radius.X, Radius.Y),
-					new Vector2I(Radius.X, Radius.Y), 
-					true, Constants.Direction.Positive);
-				
-				if (!StickToConvex)
-				{
-					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
-						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.X)), maxTolerance);
-					
-					if (distance > tolerance)
-					{
-						PushingObject = null;
-						IsGrounded = false;
-						
-						Sprite.UpdateFrame(0);
-						break;
-					}
-				}
-
-				if (distance < -maxTolerance) break;
-				
-				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
-				{
-					angle = SnapFloorAngle((float)angle);
-				}
-				
-				Position += new Vector2(0f, distance);
-				Angle = (float)angle;
-				break;
+			Constants.GroundMode.Floor => TileCollider.FindClosestTile(new Vector2I(-Radius.X, Radius.Y),
+				new Vector2I(Radius.X, Radius.Y), true, Constants.Direction.Positive),
 			
-			case Constants.GroundMode.RightWall:
-				(distance, angle) = TileCollider.FindClosestTile(
-					new Vector2I(Radius.Y, Radius.X),
-					new Vector2I(Radius.Y, -Radius.X), 
-					false, Constants.Direction.Positive);
-				
-				if (!StickToConvex)
-				{
-					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
-						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.Y)), maxTolerance);
-					
-					if (distance > tolerance)
-					{
-						PushingObject = null;
-						IsGrounded = false;
-						
-						Sprite.UpdateFrame(0);
-						break;
-					}	
-				}
-				
-				if (distance < -maxTolerance) break;
-
-				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
-				{
-					angle = SnapFloorAngle((float)angle);
-				}
-				
-				Position += new Vector2(distance, 0f);
-				Angle = (float)angle;
-				break;
+			Constants.GroundMode.RightWall => TileCollider.FindClosestTile(new Vector2I(Radius.Y, Radius.X),
+				new Vector2I(Radius.Y, -Radius.X), false, Constants.Direction.Positive),
 			
-			case Constants.GroundMode.Ceiling:
-				(distance, angle) = TileCollider.FindClosestTile(
-					new Vector2I(Radius.X, -Radius.Y),
-					new Vector2I(-Radius.X, -Radius.Y), 
-					true, Constants.Direction.Negative);
-				
-				if (!StickToConvex)
-				{
-					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
-						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.X)), maxTolerance);
-					
-					if (distance > tolerance)
-					{
-						PushingObject = null;
-						IsGrounded = false;
-						
-						Sprite.UpdateFrame(0);
-						break;
-					}
-				}
-				
-				if (distance < -maxTolerance) break;
-
-				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
-				{
-					angle = SnapFloorAngle((float)angle);
-				}
-				
-				Position -= new Vector2(0f, distance);
-				Angle = (float)angle;
-				break;
+			Constants.GroundMode.Ceiling => TileCollider.FindClosestTile(new Vector2I(Radius.X, -Radius.Y),
+				new Vector2I(-Radius.X, -Radius.Y), true, Constants.Direction.Negative),
 			
-			case Constants.GroundMode.LeftWall:
-				(distance, angle) = TileCollider.FindClosestTile(
-					new Vector2I(-Radius.Y, -Radius.X),
-					new Vector2I(-Radius.Y, Radius.X), 
-					false, Constants.Direction.Negative);
-				
-				if (!StickToConvex)
-				{
-					float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
-						maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(Speed.Y)), maxTolerance);
+			Constants.GroundMode.LeftWall => TileCollider.FindClosestTile(new Vector2I(-Radius.Y, -Radius.X), 
+				new Vector2I(-Radius.Y, Radius.X), false, Constants.Direction.Negative),
+			
+			_ => throw new ArgumentOutOfRangeException()
+		};
+
+		if (!StickToConvex)
+		{
+			float toleranceCheckSpeed = GroundMode switch
+			{
+				Constants.GroundMode.Floor => Speed.X,
+				Constants.GroundMode.RightWall => Speed.Y,
+				Constants.GroundMode.Ceiling => Speed.X,
+				Constants.GroundMode.LeftWall => Speed.Y,
+				_ => throw new ArgumentOutOfRangeException()
+			};
+			
+			float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
+				maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), maxTolerance);
 					
-					if (distance > tolerance)
-					{
-						PushingObject = null;
-						IsGrounded = false;
+			if (distance > tolerance)
+			{
+				PushingObject = null;
+				IsGrounded = false;
 						
-						Sprite.UpdateFrame(0);
-						break;
-					}
-				}
-				
-			    if (distance < -maxTolerance) break;
-
-				if (SharedData.PlayerPhysics >= PhysicsTypes.S2)
-				{
-					angle = SnapFloorAngle((float)angle);
-				}
-
-				Position -= new Vector2(distance, 0f);
-				Angle = (float)angle;
-				break;
+				Sprite.UpdateFrame(0);
+				return;
+			}
 		}
+
+		if (distance < -maxTolerance) return;
+		
+		Position += GroundMode switch
+		{
+			Constants.GroundMode.Floor => new Vector2(0f, distance),
+			Constants.GroundMode.RightWall => new Vector2(distance, 0f),
+			Constants.GroundMode.Ceiling => new Vector2(0f, -distance),
+			Constants.GroundMode.LeftWall => new Vector2(-distance, 0f),
+			_ => throw new ArgumentOutOfRangeException()
+		};
+
+		Angle = SharedData.PlayerPhysics >= PhysicsTypes.S2 ? SnapFloorAngle((float)angle) : (float)angle;
 	}
 
 	private float SnapFloorAngle(float floorAngle)
@@ -2776,7 +2698,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	
 		if (InvincibilityFrames > 0)
 		{
-			Visible = (InvincibilityFrames-- & 4) >= 1 || InvincibilityFrames == 0;
+			Visible = ((int)InvincibilityFrames-- & 4) >= 1 || InvincibilityFrames == 0;
 		}
 	
 		if (ItemSpeedTimer > 0 && --ItemSpeedTimer == 0)
@@ -2858,55 +2780,49 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessWater()
 	{
-		if (IsDead || !instance_exists(c_stage) || !c_stage.water_enabled) return;
+		if (IsDead || Stage is not { IsWaterEnabled: true }) return;
 		
 		// On surface
-		
 		if (!IsUnderwater)
 		{
-			if (Mathf.Floor(Position.Y) >= c_stage.water_level)
-			{	
-				IsUnderwater = true;
-				
-				instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
-				sub_PlayerWaterSplash();
-				
-				if (!IsHurt)
-				{
-					if (Action != Actions.Flight && !(Action == Actions.Glide && (GlideStates)ActionState != GlideStates.Fall))
-					{
-						Gravity = GravityType.Underwater;
-					}
-					
-					Speed *= new Vector2(0.5f, 0.25f);
-				}
-				
-				if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
-				{	
-					if (Barrier.Type == Barrier.Types.Thunder)
-					{
-						//TODO: obj_water_flash
-						//instance_create(x, y, obj_water_flash);
-					}
-					
-					Barrier.Type = Barrier.Types.None;			
-				}
-				
-				if (Action == Actions.Flight)
-				{
-					//TODO: audio
-					//audio_stop_sfx(sfx_flight);
-					//audio_stop_sfx(sfx_flight2);
-				}
-			}
-			else
+			if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return;
+			
+			IsUnderwater = true;
+			
+			//TODO: obj_bubbles_player
+			//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
+			ProcessWaterSplash();
+			
+			if (!IsHurt)
 			{
-				return;
+				if (Action != Actions.Flight && !(Action == Actions.Glide && (GlideStates)ActionState != GlideStates.Fall))
+				{
+					Gravity = GravityType.Underwater;
+				}
+				
+				Speed *= new Vector2(0.5f, 0.25f);
+			}
+			
+			if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
+			{	
+				if (Barrier.Type == Barrier.Types.Thunder)
+				{
+					//TODO: obj_water_flash
+					//instance_create(x, y, obj_water_flash);
+				}
+				
+				Barrier.Type = Barrier.Types.None;			
+			}
+			
+			if (Action == Actions.Flight)
+			{
+				//TODO: audio
+				//audio_stop_sfx(sfx_flight);
+				//audio_stop_sfx(sfx_flight2);
 			}
 		}
 		
 		// Underwater
-		
 		if (Barrier.Type != Barrier.Types.Water)
 		{
 			if (AirTimer > -1f)
@@ -2917,21 +2833,21 @@ public partial class Player : Framework.CommonObject.CommonObject
 			//TODO: fix float comparison
 			switch (AirTimer)
 			{
-				case 1500: 
-				case 1200:
-				case 900:
+				case 1500f: 
+				case 1200f:
+				case 900f:
 					if (Id != 0) break;
 					//TODO: audio
 					//audio_play_sfx(sfx_air_alert);
 					break;
 					
-				case 720:
+				case 720f:
 					if (Id != 0) break;
 					//TODO: audio
 					//audio_play_bgm(bgm_drowning);
 					break;
 					
-				case 0:
+				case 0f:
 					//TODO: audio
 					//audio_play_sfx(sfx_drown);
 					ResetState();
@@ -2939,68 +2855,66 @@ public partial class Player : Framework.CommonObject.CommonObject
 					//TODO: depth
 					//depth = 50;
 					Animation = Animations.Drown;
-					TileLayer = TILELAYER_NONE;
+					TileLayer = Constants.TileLayers.None;
 					Speed.X = 0;
 					Speed.Y = 0;
-					Gravity	= 0.0625;
+					Gravity	= 0.0625f;
 					IsAirLock = true;
-					Camera.MainCamera.target = null;
+					Camera.MainCamera.Target = null;
+					return;
 				
-				return;
-				
-				case -1:
-				
-					if floor(y) > Camera.MainCamera.view_y + SharedData.game_height + 276
+				case -1f:
+					if ((int)Position.Y <= Camera.MainCamera.BufferPosition.Y + SharedData.GameHeight + 276) return;
+					
+					if (Id == 0)
 					{
-						if Id == 0
-						{
-							FrameworkData.update_effects = false;
-							FrameworkData.UpdateObjects = false;
-							FrameworkData.allow_pause = false;
-						}
-						
-						IsDead = true;
+						FrameworkData.UpdateEffects = false;
+						FrameworkData.UpdateObjects = false;
+						FrameworkData.AllowPause = false;
 					}
-				
-				return;
+						
+					IsDead = true;
+					return;
+			}
+		}
+
+		if (MathF.Floor(Position.Y) >= Stage.WaterLevel) return;
+		
+		if (!IsHurt && Action != Actions.Glide)
+		{
+			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4f)
+			{
+				Speed.Y *= 2f;
+			}
+					
+			if (Speed.Y < -16f)
+			{
+				Speed.Y = -16f;
+			}
+					
+			if (Action != Actions.Flight)
+			{
+				Gravity = GravityType.Default;
 			}
 		}
 			
-		if floor(y) < c_stage.water_level
-		{
-			if !IsHurt && Action != Actions.Glide
-			{
-				if SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4
-				{
-					Speed.Y *= 2;
-				}
-					
-				if Speed.Y < -16
-				{
-					Speed.Y = -16;
-				}
-					
-				if Action != Actions.Flight
-				{
-					Gravity = GRV_DEFAULT;
-				}
-			}
-				
-			if Action == Actions.Flight
+		//TODO: audio
+		/*
+			if (Action == Actions.Flight)
 			{
 				audio_play_sfx(sfx_flight, true);
 			}
 				
-			if audio_is_playing(bgm_drowning)
+			if (audio_is_playing(bgm_drowning))
 			{
 				stage_reset_bgm();
 			}
+			*/
 				
-			IsUnderwater = false;	
-			AirTimer = AIR_VALUE_MAX;
+		IsUnderwater = false;	
+		AirTimer = Constants.AirValueMax;
 			
-			sub_PlayerWaterSplash();
-		}
+		ProcessWaterSplash();
 	}
 
 	private void ProcessWaterSplash()
@@ -3095,22 +3009,22 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		if (FrameworkData.UpdateObjects)
 		{
-			if (animation_buffer == -1 && AnimationTimer > 0f)
+			if (AnimationBuffer == Animations.None && AnimationTimer > 0f)
 			{
-				animation_buffer = Animation;
+				AnimationBuffer = Animation;
 			}
 		
 			if (AnimationTimer < 0)
 			{
-				if (Animation == animation_buffer)
+				if (Animation == AnimationBuffer)
 				{
 					Animation = Animations.Move;
 				}
 			
 				AnimationTimer = 0;
-				animation_buffer = -1;
+				AnimationBuffer = Animations.None;
 			}
-			else if (animation_buffer != -1)
+			else if (AnimationBuffer != Animations.None)
 			{
 				AnimationTimer--;
 			}
@@ -3279,7 +3193,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	    
 		switch (FrameworkData.CurrentScene)
 		{
-			case Stages.TSZ.StageTSZ:
+			case Stages.TSZ.StageTsz:
 				// TODO: debug objects
 				EditModeObjects.AddRange(new List<Type>
 				{
@@ -3335,7 +3249,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				ResetState();
 				ResetZIndex();
 
-				FrameworkData.UpdateGraphics = true;
+				FrameworkData.UpdateAnimations = true;
 				FrameworkData.UpdateObjects = true;
 				FrameworkData.UpdateTimer = true;
 				FrameworkData.AllowPause = true;
@@ -3414,7 +3328,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		else if (InputPress.C)
 		{
-			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) is not Framework.CommonObject.CommonObject newObject) return true;
+			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) 
+			    is not Framework.CommonObject.CommonObject newObject) return true;
+			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)Facing, newObject.Scale.Y);
 			newObject.SetBehaviour(BehaviourType.Delete);
 			FrameworkData.CurrentScene.AddChild(newObject);
