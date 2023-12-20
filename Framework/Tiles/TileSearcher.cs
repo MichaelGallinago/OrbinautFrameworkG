@@ -4,25 +4,25 @@ using static OrbinautFramework3.Framework.Constants;
 namespace OrbinautFramework3.Framework.Tiles;
 
 public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap tileMap, 
-    ushort tileLayerId, Direction direction, GroundMode groundMode)
+    ushort tileLayerId, DirectionSign directionSign, GroundMode groundMode)
 {
     public FoundTileData Search(int shift)
     {
         Vector2I shiftedPosition = position;
         if (isVertical)
         {
-            shiftedPosition.Y += shift * (sbyte)direction;	
+            shiftedPosition.Y += shift * (sbyte)directionSign;	
         }
         else
         {
-            shiftedPosition.X += shift * (sbyte)direction;	
+            shiftedPosition.X += shift * (sbyte)directionSign;	
         }
         
         Vector2I mapPosition = tileMap.LocalToMap(shiftedPosition);
         int index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, mapPosition));
         var transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
         byte size = GetTileCollision(isVertical, shiftedPosition, index, transforms);
-        bool isValid = GetTileValidity(index, isVertical, direction, groundMode);
+        bool isValid = GetTileValidity(index, isVertical, directionSign, groundMode);
 
         return new FoundTileData(index, transforms, isValid, size);
     }
@@ -43,33 +43,32 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
             FrameworkData.TileData.Widths[index][collisionIndex];
     }
     
-    private static bool GetTileValidity(int index, bool isVertical, 
-        Direction direction, GroundMode groundMode)
+    private static bool GetTileValidity(int index, bool isVertical, DirectionSign directionSign, GroundMode groundMode)
     {
         return (index / TileLimit) switch
         {
             2 when isVertical => groundMode switch
             {
-                GroundMode.Floor => direction == Direction.Negative,
-                GroundMode.Ceiling => direction == Direction.Positive,
+                GroundMode.Floor => directionSign == DirectionSign.Negative,
+                GroundMode.Ceiling => directionSign == DirectionSign.Positive,
                 _ => true
             },
             1 when isVertical => groundMode switch
             {
-                GroundMode.Floor => direction == Direction.Positive,
-                GroundMode.Ceiling => direction == Direction.Negative,
+                GroundMode.Floor => directionSign == DirectionSign.Positive,
+                GroundMode.Ceiling => directionSign == DirectionSign.Negative,
                 _ => false
             },
             2 => groundMode switch
             {
-                GroundMode.RightWall => direction == Direction.Negative,
-                GroundMode.LeftWall => direction == Direction.Positive,
+                GroundMode.RightWall => directionSign == DirectionSign.Negative,
+                GroundMode.LeftWall => directionSign == DirectionSign.Positive,
                 _ => true
             },
             1 => groundMode switch
             {
-                GroundMode.RightWall => direction == Direction.Positive,
-                GroundMode.LeftWall => direction == Direction.Negative,
+                GroundMode.RightWall => directionSign == DirectionSign.Positive,
+                GroundMode.LeftWall => directionSign == DirectionSign.Negative,
                 _ => false
             },
             _ => true

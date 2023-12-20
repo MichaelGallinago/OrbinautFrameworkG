@@ -17,9 +17,14 @@ public static class Constants
 		Badnik, Boss
 	}
 
-	public enum Direction : sbyte
+	public enum DirectionSign : sbyte
 	{
 		Negative = -1, Neutral = 0, Positive = 1
+	}
+	
+	public enum Directions : byte
+	{
+		Down, Right, Up, Left 
 	}
 	
 	public enum GroundMode : byte

@@ -21,9 +21,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private const byte DefaultViewTime = 120;
 	
 	public const byte CpuDelay = 16;
-    
-	// TODO: PlayerCount
-	// byte PlayerCount = instance_number(SharedData.player_obj)
+	
 	public enum Types : byte
 	{
 		None, Sonic, Tails, Knuckles, Amy, Global, GlobalAI
@@ -171,7 +169,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public bool BarrierFlag { get; set; }
 	public Barrier Barrier { get; set; }
     
-	public Constants.Direction Facing { get; set; }
+	public Constants.DirectionSign Facing { get; set; }
 	public Animations Animation { get; set; }
 	public float AnimationTimer { get; set; }
 	public float VisualAngle { get; set; }
@@ -213,6 +211,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	
 	public CollisionTileMap TileMap { get; set; }
 	public CommonStage Stage { get; set; }
+	public TileCollider TileCollider { get; set; }
 
 	// Edit mode
 	public bool IsEditMode { get; private set; }
@@ -239,6 +238,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 				Stage = stage;
 			}
 		}
+
+		TileCollider = new TileCollider();
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
 		switch (Type)
 		{
@@ -265,7 +267,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		GroundMode = Constants.GroundMode.Floor;
 		ObjectInteraction = true;
 		Barrier = new Barrier(this);
-		Facing = Constants.Direction.Positive;
+		Facing = Constants.DirectionSign.Positive;
 		Animation = Animations.Idle;
 		AirTimer = 1800f;
 		CpuState = CpuStates.Main;
@@ -724,7 +726,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				Animation = Animations.GlideAir;	
 				Action = Actions.Glide;
 				ActionState = (int)GlideStates.Air;
-				ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
+				ActionValue = Facing == Constants.DirectionSign.Negative ? 0f : 180f;
 				Radius = new Vector2I(10, 10);
 				GroundSpeed = 4f;
 				Speed = new Vector2(0f, Speed.Y + 2f);
@@ -812,29 +814,29 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private sbyte CalculateCellDistance()
 	{
-		var position = (Vector2I)Position;
-		(Vector2I position1, Vector2I position2, Constants.Direction direction) = GroundMode switch
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
+		
+		return GroundMode switch
 		{
-			Constants.GroundMode.Floor => (
+			Constants.GroundMode.Floor => TileCollider.FindTileTwoPositions(
 				Radius.Shuffle(false, -1, -1), 
 				Radius.Shuffle(false, 1, -1), 
-				Constants.Direction.Negative),
-			Constants.GroundMode.RightWall => (
+				Constants.Directions.Up).Item1,
+			
+			Constants.GroundMode.RightWall => TileCollider.FindTileTwoPositions(
 				Radius.Shuffle(true, -1, -1), 
 				Radius.Shuffle(true, 1, -1), 
-				Constants.Direction.Negative),
-			Constants.GroundMode.LeftWall => (
+				Constants.Directions.Left).Item1,
+			
+			Constants.GroundMode.LeftWall => TileCollider.FindTileTwoPositions(
 				Radius.Shuffle(true, -1, 1), 
 				Radius.Shuffle(true, 1, 1),
-				Constants.Direction.Positive),
+				Constants.Directions.Right).Item1,
+			
 			Constants.GroundMode.Ceiling => throw new ArgumentOutOfRangeException(),
+			
 			_ => throw new ArgumentOutOfRangeException()
 		};
-
-		return CollisionUtilities.FindTileTwoPositions(
-			GroundMode == Constants.GroundMode.Floor, 
-			position + position1, position + position2, 
-			direction, TileLayer, TileMap, GroundMode).Item1;
 	}
 
 	private void ProcessDropDash()
@@ -1029,19 +1031,18 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				
 				int radiusX = Radius.X;
-				if (Facing == Constants.Direction.Negative)
+				if (Facing == Constants.DirectionSign.Negative)
 				{
 					radiusX++;
 				}
 				
-				var integerPosition = (Vector2I)Position;
+				TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
 				if (Speed.Y < 0)
 				{
 					// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-					Vector2I position = integerPosition + new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
-					sbyte wallDistance = CollisionUtilities.FindTile(
-						false, position, Facing, TileLayer, TileMap).Item1;
+					var offset = new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
+					sbyte wallDistance = TileCollider.FindTile(offset).Item1;
 					
 					if (wallDistance >= 4)
 					{
@@ -1058,9 +1059,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 					}
 		
 					// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-					position = integerPosition + new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
-					sbyte ceilDistance = CollisionUtilities.FindTile(
-						true, position, Constants.Direction.Negative, TileLayer, TileMap).Item1;
+					var offset = new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
+					sbyte ceilDistance = TileCollider.FindTile(
+						true, position, Constants.DirectionSign.Negative, TileLayer, TileMap).Item1;
 					
 					if (ceilDistance < 0)
 					{
@@ -1084,7 +1085,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					// If Knuckles has reached the floor, make him land
 					position = integerPosition + new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
 					(sbyte floorDistance, float? floorAngle) = CollisionUtilities.FindTile(
-						true, position, Constants.Direction.Positive, TileLayer, TileMap);
+						true, position, Constants.DirectionSign.Positive, TileLayer, TileMap);
 					
 					if (floorDistance < 0)
 					{
@@ -1104,9 +1105,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 				{
 					Animation = Animations.Spin;
 					IsSpinning = true;
-					IsJumping = true;		
+					IsJumping = true;
 					Action = Actions.None;
-					Facing = (Constants.Direction)(-(int)Facing);
+					Facing = (Constants.DirectionSign)(-(int)Facing);
 					Speed = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
 					
 					//TODO: audio
@@ -1230,7 +1231,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 						Sprite.UpdateFrame(1);
 						break;
 					default:
-						Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
+						Facing = angle < 90 ? Constants.DirectionSign.Negative : Constants.DirectionSign.Positive;
 						Sprite.UpdateFrame(2);
 						break;
 				}
@@ -1373,7 +1374,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 			if (InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0)
 			{
-				Facing = (Constants.Direction)(-(int)Facing);
+				Facing = (Constants.DirectionSign)(-(int)Facing);
 				GroundSpeed *= -1;
 			}
 
@@ -1458,10 +1459,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 						GroundSpeed = Math.Max(GroundSpeed - PhysicParams.Acceleration, -PhysicParams.AccelerationTop);
 					}
 					
-					if (Facing != Constants.Direction.Negative)
+					if (Facing != Constants.DirectionSign.Negative)
 					{
 						Animation = Animations.Move;
-						Facing = Constants.Direction.Negative;
+						Facing = Constants.DirectionSign.Negative;
 						PushingObject = null;
 						
 						Sprite.UpdateFrame(0);
@@ -1489,10 +1490,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 						GroundSpeed = Math.Min(GroundSpeed + PhysicParams.Acceleration, PhysicParams.AccelerationTop);
 					}
 					
-					if (Facing != Constants.Direction.Positive)
+					if (Facing != Constants.DirectionSign.Positive)
 					{
 						Animation = Animations.Move;
-						Facing = Constants.Direction.Positive;
+						Facing = Constants.DirectionSign.Positive;
 						PushingObject = null;
 						
 						Sprite.UpdateFrame(0);;
@@ -1593,7 +1594,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				else
 				{
-					Facing = Constants.Direction.Negative;
+					Facing = Constants.DirectionSign.Negative;
 					PushingObject = null;	
 				}
 			}
@@ -1611,7 +1612,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				else
 				{
-					Facing = Constants.Direction.Positive;
+					Facing = Constants.DirectionSign.Positive;
 					PushingObject = null;	
 				}
 			}
@@ -1716,7 +1717,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X = Math.Max(Speed.X - PhysicParams.AccelerationAir, -PhysicParams.AccelerationTop);
 				}
 			
-				Facing = Constants.Direction.Negative;
+				Facing = Constants.DirectionSign.Negative;
 			}
 		
 			// Move right
@@ -1731,7 +1732,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X = Math.Min(Speed.X + PhysicParams.AccelerationAir, PhysicParams.AccelerationTop);
 				}
 			
-				Facing = Constants.Direction.Positive;
+				Facing = Constants.DirectionSign.Positive;
 			}	
 		}
 	
@@ -1802,19 +1803,19 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (Type != Types.Sonic || IsSuper)
 		{
 			Animation = Animations.Balance;
-			Facing = Constants.Direction.Negative;
+			Facing = Constants.DirectionSign.Negative;
 			
 			return;
 		}
 		
 		if (!isPanic)
 		{
-			Animation = Facing == Constants.Direction.Negative ? Animations.Balance : Animations.BalanceFlip;
+			Animation = Facing == Constants.DirectionSign.Negative ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if (Facing == Constants.Direction.Positive)
+		else if (Facing == Constants.DirectionSign.Positive)
 		{
 			Animation = Animations.BalanceTurn;
-			Facing = Constants.Direction.Negative;
+			Facing = Constants.DirectionSign.Negative;
 		}
 		else if (Animation != Animations.BalanceTurn)
 		{
@@ -1827,19 +1828,19 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (Type != Types.Sonic || IsSuper)
 		{
 			Animation = Animations.Balance;
-			Facing = Constants.Direction.Positive;
+			Facing = Constants.DirectionSign.Positive;
 			
 			return;
 		}
 		
 		if (!isPanic)
 		{
-			Animation = (Facing == Constants.Direction.Positive) ? Animations.Balance : Animations.BalanceFlip;
+			Animation = (Facing == Constants.DirectionSign.Positive) ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if (Facing == Constants.Direction.Negative)
+		else if (Facing == Constants.DirectionSign.Negative)
 		{
 			Animation = Animations.BalanceTurn;
-			Facing = Constants.Direction.Positive;
+			Facing = Constants.DirectionSign.Positive;
 		}
 		else if (Animation != Animations.BalanceTurn)
 		{
@@ -1894,7 +1895,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X -= wallDist;
 					GroundSpeed = 0;
 						
-					if (Facing == Constants.Direction.Negative && !IsSpinning)
+					if (Facing == Constants.DirectionSign.Negative && !IsSpinning)
 					{
 						PushingObject = this;
 					}
@@ -1908,7 +1909,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X += wallDist;
 					GroundSpeed = 0;
 						
-					if (Facing == Constants.Direction.Negative && !IsSpinning)
+					if (Facing == Constants.DirectionSign.Negative && !IsSpinning)
 					{
 						PushingObject = this;
 					}
@@ -1938,7 +1939,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X += wallDist;
 					GroundSpeed = 0;
 						
-					if (Facing == Constants.Direction.Positive && !IsSpinning)
+					if (Facing == Constants.DirectionSign.Positive && !IsSpinning)
 					{
 						PushingObject = this;
 					}
@@ -1952,7 +1953,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 					Speed.X -= wallDist;
 					GroundSpeed = 0;
 						
-					if (Facing == Constants.Direction.Positive && !IsSpinning)
+					if (Facing == Constants.DirectionSign.Positive && !IsSpinning)
 					{
 						PushingObject = this;
 					}
@@ -2580,7 +2581,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				y += floorDist;
 			}
 			
-			if (Facing == Constants.Direction.Negative)
+			if (Facing == Constants.DirectionSign.Negative)
 			{
 				x++;
 			}
@@ -3772,7 +3773,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			Camera.MainCamera.UpdateShakeTimer(6);
 		}
 		
-		if (Facing == Constants.Direction.Negative)
+		if (Facing == Constants.DirectionSign.Negative)
 		{
 			if (Angle <= 0)
 			{

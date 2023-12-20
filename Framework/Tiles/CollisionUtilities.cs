@@ -100,16 +100,16 @@ public static class CollisionUtilities
 	}
 
 	public static (sbyte, float?) FindTileTwoPositions(bool isVertical, 
-		Vector2I position1, Vector2I position2, Direction direction, TileLayers type, 
+		Vector2I position1, Vector2I position2, DirectionSign directionSign, TileLayers type, 
 		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
 		(sbyte distance1, float? angle1) = FindTile(isVertical, 
-			position1, direction, type, tileMap, groundMode);
+			position1, directionSign, type, tileMap, groundMode);
 		(sbyte distance2, float? angle2) = FindTile(isVertical, 
-			position2, direction, type, tileMap, groundMode);
+			position2, directionSign, type, tileMap, groundMode);
 		
 		if (isVertical && FrameworkData.CDTileFixes
-		               && direction == Direction.Positive && angle1 is not 360f
+		               && directionSign == DirectionSign.Positive && angle1 is not 360f
 		               && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
 		{
 			angle1 = 360f;
@@ -118,7 +118,7 @@ public static class CollisionUtilities
 		return distance1 <= distance2 ? (distance1, angle1) : (distance2, angle2);
 	}
 	
-	public static (sbyte, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
+	public static (sbyte, float?) FindTile(bool isVertical, Vector2I position, DirectionSign directionSign, 
 		TileLayers type, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
 		// Get tile layer id
@@ -134,7 +134,7 @@ public static class CollisionUtilities
 		position.Y = Math.Max(0, position.Y);
 		
 		// Set the direction as an integer (-1 for leftwards, 1 for rightwards)
-		var sign = (sbyte)direction;
+		var sign = (sbyte)directionSign;
 		
 		// Add check to the debug list
 		//TODO: debug
@@ -148,7 +148,7 @@ public static class CollisionUtilities
 		
 		// Get tile at position
 		sbyte shift;
-		var tileSearcher = new TileSearcher(isVertical, position, tileMap, tileLayerId, direction, groundMode);
+		var tileSearcher = new TileSearcher(isVertical, position, tileMap, tileLayerId, directionSign, groundMode);
 		FoundTileData tileData = tileSearcher.Search(shift = 0);
 		
 		// If no width found or tile is invalid, get a further tile
@@ -187,15 +187,15 @@ public static class CollisionUtilities
 		}
 		else if (isVertical)
 		{
-			angle = (float)(direction == Direction.Positive ? Circle.Full : Circle.Half);
+			angle = (float)(directionSign == DirectionSign.Positive ? Circle.Full : Circle.Half);
 		}
 		else
 		{
-			angle = (float)(direction == Direction.Positive ? Circle.Quarter : Circle.ThreeQuarters);
+			angle = (float)(directionSign == DirectionSign.Positive ? Circle.Quarter : Circle.ThreeQuarters);
 		}
 		
 		// Run an additional check from CD'96
-		if (isVertical && FrameworkData.CDTileFixes && direction == Direction.Positive)
+		if (isVertical && FrameworkData.CDTileFixes && directionSign == DirectionSign.Positive)
 		{
 			// If tile angle is in the bottom half, we assume it's bottom is flat, so in case it is flipped
 			// we should treat it as a flat ground
@@ -209,7 +209,7 @@ public static class CollisionUtilities
 		// Calculate distance to the edge of the found tile
 		int distancePosition = isVertical ? position.Y : position.X;
 		int distance = ((distancePosition + shift * sign) / TileSize * TileSize - distancePosition) * sign - tileData.Size;
-		if (direction == Direction.Positive)
+		if (directionSign == DirectionSign.Positive)
 		{
 			distance += TileSize - 1;
 		}

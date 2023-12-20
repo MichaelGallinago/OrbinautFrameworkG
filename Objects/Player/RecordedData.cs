@@ -10,15 +10,15 @@ public struct RecordedData
     public Buttons InputPress;
     public Buttons InputDown;
     public bool IsPushing;
-    public Constants.Direction Direction;
+    public Constants.DirectionSign DirectionSign;
 
     public RecordedData(Vector2 position, Buttons inputPress, 
-        Buttons inputDown, bool isPushing, Constants.Direction direction)
+        Buttons inputDown, bool isPushing, Constants.DirectionSign directionSign)
     {
         Position = position;
         InputPress = inputPress;
         InputDown = inputDown;
         IsPushing = isPushing;
-        Direction = direction;
+        DirectionSign = directionSign;
     }
 }
