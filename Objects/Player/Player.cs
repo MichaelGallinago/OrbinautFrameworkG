@@ -3478,8 +3478,6 @@ public partial class Player : Framework.CommonObject.CommonObject
     
 	public void Land()
 	{
-		if (!IsGrounded) return;
-
 		ResetGravity();
 	
 		if (Action == Actions.Flight)

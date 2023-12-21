@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Framework.Input;
 public static class InputUtilities
 {
     private const byte KeyboardId = 0;
-    private const byte BaseDeviceCount = 1;
+    private const byte BaseDeviceCount = 4;
 
     public static List<Buttons> Down { get; }
     public static List<Buttons> Press { get; }
@@ -20,9 +20,9 @@ public static class InputUtilities
 
     static InputUtilities()
     {
-        Down = new List<Buttons>();
-        Press = new List<Buttons>();
-        BlockInput = new List<bool>();
+        Down = [];
+        Press = [];
+        BlockInput = [];
         for (var i = 0; i < BaseDeviceCount; i++)
         {
             Down.Add(new Buttons());

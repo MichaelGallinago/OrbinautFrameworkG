@@ -105,7 +105,7 @@ public abstract partial class CommonObject : Node2D
 		
 		// Check if object radius are valid
 		Vector2I objectRadius = SolidData.Radius;
-		if (objectRadius.X <= 0 ||objectRadius.Y <= 0) return;
+		if (objectRadius.X <= 0 || objectRadius.Y <= 0) return;
 		
 		Vector2 playerPosition = player.Position;
 		var integerPlayerPosition = (Vector2I)playerPosition;
@@ -124,7 +124,7 @@ public abstract partial class CommonObject : Node2D
 		var extraSize = new Vector2I();
 		
 		// Adjust slope offset based on height map
-		if (objHeightMap.Length > 0)
+		if (objHeightMap is { Length: > 0 })
 		{
 			int index = Math.Clamp(
 				Mathf.FloorToInt(playerPosition.X - objectPosition.X) * (Scale.X >= 0 ? 1 : -1) + objectRadius.X, 

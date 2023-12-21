@@ -71,7 +71,7 @@ public static class FrameworkData
         RotationMode = 1;
 
         DeveloperMode = true;
-        IsPaused = true;
+        IsPaused = false;
         PlayerPhysics = Player.PhysicsTypes.S2;
     }
 }
