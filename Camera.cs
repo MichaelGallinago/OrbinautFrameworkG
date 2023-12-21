@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3;
 
@@ -11,7 +13,7 @@ public partial class Camera : Camera2D
 
 	public static Camera MainCamera { get; set; }
     
-	[Export] public Framework.CommonObject.CommonObject Target { get; set; }
+	[Export] public CommonObject Target { get; set; }
     
 	public Vector4I Bounds { get; private set; }
 		
@@ -44,8 +46,8 @@ public partial class Camera : Camera2D
 
 	public override void _Ready()
 	{
-		if (Target != null || Objects.Player.Player.Players.Count == 0) return;
-		Objects.Player.Player playerTarget = Objects.Player.Player.Players.First();
+		if (Target != null || Player.Players.Count == 0) return;
+		Player playerTarget = Player.Players.First();
 		Target = playerTarget;
 		BufferPosition = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
 		BufferPosition.Y += 16;
@@ -171,7 +173,7 @@ public partial class Camera : Camera2D
 			
 		Speed.X = CalculateSpeed(targetPosition.X + extraX, extraX, MaxSpeed.X);
 			
-		if (Target is Objects.Player.Player { IsGrounded: true } playerTarget)
+		if (Target is Player { IsGrounded: true } playerTarget)
 		{	
 			if (playerTarget.IsSpinning)
 			{

@@ -15,8 +15,7 @@ public partial class CollisionTileMap : TileMap
             scene.CollisionTileMap = this;
         }
         
-        //_columnCount = GetTileSetColumnCount(0);
-        _columnCount = 16; //TODO: FIX _columnCount HARDCODE!!!!!
+        _columnCount = GetTileSetColumnCount(0);
     }
     
     public override void _Process(double delta)
@@ -34,19 +33,12 @@ public partial class CollisionTileMap : TileMap
 
     public int GetTileIndex(Vector2I atlasCoords)
     {
-        int index = (atlasCoords.X + atlasCoords.Y * _columnCount) % TileLimit;
+        int index = atlasCoords.X + atlasCoords.Y * _columnCount;
         return index < 0 ? 0 : index;
     }
 
     private int GetTileSetColumnCount(int sourceId)
     {
-        TileSetSource source = TileSet.GetSource(sourceId);
-        var atlasCoords = new Vector2I();
-        while (source.HasTile(atlasCoords))
-        {
-            atlasCoords.X++;
-        }
-
-        return atlasCoords.X;
+        return ((TileSetAtlasSource)TileSet.GetSource(sourceId)).GetAtlasGridSize().X;
     }
 }

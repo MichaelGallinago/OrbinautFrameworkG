@@ -11,7 +11,7 @@ using OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : Framework.CommonObject.CommonObject
+public partial class Player : CommonObject
 {
 	#region Constants
 
@@ -155,11 +155,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
-	public Framework.CommonObject.CommonObject PushingObject { get; set; }
+	public CommonObject PushingObject { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
-	public Framework.CommonObject.CommonObject OnObject { get; set; }
+	public CommonObject OnObject { get; set; }
 	public bool IsSuper { get; set; }
 	public bool IsInvincible { get; set; }
 	public int SuperValue { get; set; }

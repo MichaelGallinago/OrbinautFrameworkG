@@ -1,9 +1,10 @@
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.CommonObject;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Tail : Framework.CommonObject.CommonObject
+public partial class Tail : CommonObject
 {
 	public float Angle { get; set; }
 	public Player Target { get; set; }
