@@ -40,7 +40,7 @@ public partial class Tail : CommonObject
 			case Player.Animations.FlyTired:
 				int speed = Target.Speed.Y >= 0f || Target.Animation == Player.Animations.FlyTired ? 2 : 1;
 				Sprite.SetAnimation("fly");
-				Sprite.UpdateDuration(new[]{speed});
+				Sprite.UpdateDuration([speed]);
 				break;
 			case Player.Animations.Push:
 			case Player.Animations.Skid:

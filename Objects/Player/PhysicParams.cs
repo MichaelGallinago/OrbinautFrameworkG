@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Godot;
 using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -155,16 +156,8 @@ public struct PhysicParams(
 		    type += 3;
 	    }
 
-	    if (isSuper)
-	    {
-		    type++;
-	    }
+	    if (!isSuper) return (Type)type;
 
-	    if (playerType == Player.Types.Sonic)
-	    {
-		    type++;
-	    }
-
-	    return (Type)type;
+	    return (Type)(playerType == Player.Types.Sonic ? type + 2 : type + 1);
     }
 }
