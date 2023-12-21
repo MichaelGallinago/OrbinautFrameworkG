@@ -2299,7 +2299,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		var collisionFlagWall = false;
 		var collisionFlagFloor = false;
-		float climbY = Position.Y;
+		var climbY = (int)Position.Y;
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
@@ -2444,7 +2444,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if ((GlideStates)ActionState != GlideStates.Air) return;
 
 			// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he is either inside the ceiling or above the floor edge
-			var wallDistance = tile_find_h(x + wallRadius * Facing, climbY - Radius.Y, Facing, TileLayer)[0];
+			TileCollider.Position.Y = climbY - Radius.Y;
+			int wallDistance = TileCollider.FindDistance(
+				new Vector2I(wallRadius * (int)Facing, 0), false, Facing);
+			
 			if (wallDistance != 0)
 			{
 				// Cast a vertical sensor now. If the distance returned is negative, Knuckles is inside
@@ -2452,8 +2455,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 				
 				// Note: _find_mode is set to 2. LBR tiles are not ignored in this case
 				TileCollider.GroundMode = Constants.GroundMode.Ceiling;
-				var floorDistance = tile_find_v(x + (wallRadius + 1) * Facing, climbY - Radius.Y - 1, true, TileLayer, 2)[0];
-				if (floorDistance < 0 || floorDistance >= 12)
+				int floorDistance = TileCollider.FindDistance(
+					new Vector2I((wallRadius + 1) * (int)Facing, -1), 
+					true, Constants.Direction.Positive);
+				
+				if (floorDistance is < 0 or >= 12)
 				{
 					ReleaseGlide();
 					return;
