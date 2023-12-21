@@ -1113,11 +1113,11 @@ public partial class Player : Framework.CommonObject.CommonObject
 			
 		// If Knuckles has reached the floor, make him land
 		offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
-		(int distance, float? angle) = TileCollider.FindTile(offset, true, Constants.Direction.Positive);
+		(int distance, float angle) = TileCollider.FindTile(offset, true, Constants.Direction.Positive);
 
 		if (distance >= 0) return false;
 		Position += new Vector2(0f, distance + RadiusNormal.Y - Radius.Y);
-		Angle = (float)angle;
+		Angle = angle;
 				
 		Land();
 
@@ -1724,97 +1724,60 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		if (SharedData.PlayerPhysics == PhysicsTypes.SK && InputDown.Down || InputDown.Up && SharedData.PeelOut) return;
 	
-		if (OnObject == null)
+		if (OnObject != null)
 		{
-			if (Angles.GetQuadrant(Angle) > 0) return;
-			
-			TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
-			int floorDist = TileCollider.FindDistance(new Vector2I(), true, Constants.Direction.Positive);	
-			if (floorDist < 12) return;
-
-			const Constants.Direction direction = Constants.Direction.Positive;
-			
-			float? angleLeft = TileCollider.FindTile(new Vector2I(-Radius.X, 0), true, direction).Item2;
-			float? angleRight = TileCollider.FindTile(new Vector2I(Radius.X, 0), true, direction).Item2;
-		
-			if (angleLeft != null && angleRight != null) return;
-		
-			if (angleLeft == null)
-			{
-				BalanceLeft(TileCollider.FindDistance(
-					new Vector2I(6, 0), true, direction) >= 12);
-			}
-			else
-			{
-				BalanceRight(TileCollider.FindDistance(
-					new Vector2I(-6, 0), true, direction) >= 12);
-			}
-		}
-		else if (IsInstanceValid(OnObject)) // TODO: check IsInstanceValid == instance_exist
-		{
-			if (OnObject.SolidData.NoBalance)
-			{
-				return;
-			}
-		
+			// TODO: check IsInstanceValid == instance_exist
+			if (!IsInstanceValid(OnObject) || OnObject.SolidData.NoBalance) return;
+	
 			const int leftEdge = 2;
 			int rightEdge = OnObject.SolidData.Radius.X * 2 - leftEdge;
 			int playerX = Mathf.FloorToInt(OnObject.SolidData.Radius.X - OnObject.Position.X + Position.X);
-			
+		
 			if (playerX < leftEdge)
 			{
-				BalanceLeft(playerX < leftEdge - 4);
+				BalanceToDirection(Constants.Direction.Negative, playerX < leftEdge - 4);
 			}
 			else if (playerX > rightEdge)
 			{
-				BalanceRight(playerX > rightEdge + 4);
+				BalanceToDirection(Constants.Direction.Positive, playerX > rightEdge + 4);
 			}
 		}
+		
+		if (Angles.GetQuadrant(Angle) > 0) return;
+			
+		TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
+		int floorDist = TileCollider.FindDistance(new Vector2I(), true, Constants.Direction.Positive);	
+		if (floorDist < 12) return;
+
+		const Constants.Direction direction = Constants.Direction.Positive;
+			
+		int distanceLeft = TileCollider.FindDistance(new Vector2I(-Radius.X, 0), true, direction);
+		int distanceRight = TileCollider.FindDistance(new Vector2I(Radius.X, 0), true, direction);
+		
+		if (distanceLeft != Constants.TileSize * 2 && distanceRight != Constants.TileSize * 2) return;
+
+		int offsetX = distanceLeft == Constants.TileSize * 2 ? 6 : -6;
+		bool isPanic = TileCollider.FindDistance(new Vector2I(offsetX, 0), true, direction) >= 12;
+		BalanceToDirection(Constants.Direction.Negative, isPanic);
 	}
 
-	private void BalanceLeft(bool isPanic)
+	private void BalanceToDirection(Constants.Direction direction, bool isPanic)
 	{
 		if (Type != Types.Sonic || IsSuper)
 		{
 			Animation = Animations.Balance;
-			Facing = Constants.Direction.Negative;
-			
+			Facing = direction;
 			return;
 		}
 		
 		if (!isPanic)
 		{
-			Animation = Facing == Constants.Direction.Negative ? Animations.Balance : Animations.BalanceFlip;
+			Animation = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 		}
-		else if (Facing == Constants.Direction.Positive)
+		else if (Facing != direction)
 		{
 			Animation = Animations.BalanceTurn;
-			Facing = Constants.Direction.Negative;
-		}
-		else if (Animation != Animations.BalanceTurn)
-		{
-			Animation = Animations.BalancePanic;
-		}
-	}
-
-	private void BalanceRight(bool isPanic)
-	{
-		if (Type != Types.Sonic || IsSuper)
-		{
-			Animation = Animations.Balance;
-			Facing = Constants.Direction.Positive;
-			
-			return;
-		}
-		
-		if (!isPanic)
-		{
-			Animation = (Facing == Constants.Direction.Positive) ? Animations.Balance : Animations.BalanceFlip;
-		}
-		else if (Facing == Constants.Direction.Negative)
-		{
-			Animation = Animations.BalanceTurn;
-			Facing = Constants.Direction.Positive;
+			Facing = direction;
 		}
 		else if (Animation != Animations.BalanceTurn)
 		{
@@ -2047,7 +2010,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
 
-		(int distance, float? angle) = GroundMode switch
+		(int distance, float angle) = GroundMode switch
 		{
 			Constants.GroundMode.Floor => TileCollider.FindClosestTile(new Vector2I(-Radius.X, Radius.Y),
 				new Vector2I(Radius.X, Radius.Y), true, Constants.Direction.Positive),
@@ -2099,7 +2062,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			_ => throw new ArgumentOutOfRangeException()
 		};
 
-		Angle = SharedData.PlayerPhysics >= PhysicsTypes.S2 ? SnapFloorAngle((float)angle) : (float)angle;
+		Angle = SharedData.PlayerPhysics >= PhysicsTypes.S2 ? SnapFloorAngle(angle) : angle;
 	}
 
 	private float SnapFloorAngle(float floorAngle)
@@ -2160,8 +2123,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		if (Action is Actions.Glide or Actions.Climb) return;
 		
 		int wallRadius = RadiusNormal.X + 1;
-		var moveVector = math_get_vector_256(Speed.X, Speed.Y);
-		byte moveQuad = Angles.GetQuadrant(moveVector);
+		byte moveQuad = Angles.GetQuadrant(Angles.GetVector256(Speed));
 		
 		// Perform left wall collision if not moving mostly right
 		if (moveQuad != 1)
@@ -3196,7 +3158,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 		bool debugButton;
 		
-		// If in developer mode, remap debug button to Spacebar
+		// If in developer mode, remap debug button to SpaceBar
 		if (FrameworkData.DeveloperMode)
 		{
 			debugButton = InputUtilities.DebugButtonPress;

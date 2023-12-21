@@ -19,7 +19,7 @@ public static class Constants
 
 	public enum Direction : sbyte
 	{
-		Negative = -1, Neutral = 0, Positive = 1
+		Negative = -1, Positive = 1
 	}
 	
 	public enum GroundMode : byte

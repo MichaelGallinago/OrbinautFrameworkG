@@ -19,7 +19,7 @@ public class TileCollider
         _groundMode = groundMode;
     }
 
-    public (int, float?) FindTile(Vector2I offset, bool isVertical, Direction direction)
+    public (int, float) FindTile(Vector2I offset, bool isVertical, Direction direction)
     {
         return CollisionUtilities.FindTile(isVertical, 
             _position + offset, direction, _type, _tileMap, _groundMode);
@@ -31,7 +31,7 @@ public class TileCollider
             _position + offset, direction, _type, _tileMap, _groundMode);
     }
 
-    public (int, float?) FindClosestTile(Vector2I offset1, Vector2I offset2, bool isVertical, Direction direction)
+    public (int, float) FindClosestTile(Vector2I offset1, Vector2I offset2, bool isVertical, Direction direction)
     {
         return CollisionUtilities.FindClosestTile(isVertical, 
             _position + offset1, _position + offset2, direction, _type, _tileMap, _groundMode);

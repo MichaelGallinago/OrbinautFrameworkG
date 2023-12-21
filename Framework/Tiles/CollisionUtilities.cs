@@ -99,14 +99,14 @@ public static class CollisionUtilities
 		}
 	}
 
-	public static (int, float?) FindClosestTile(bool isVertical, 
+	public static (int, float) FindClosestTile(bool isVertical, 
 		Vector2I position1, Vector2I position2, Direction direction, TileLayers type, 
 		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
-		(int distance1, float? angle1) = FindTile(isVertical, position1, direction, type, tileMap, groundMode);
-		(int distance2, float? angle2) = FindTile(isVertical, position2, direction, type, tileMap, groundMode);
+		(int distance1, float angle1) = FindTile(isVertical, position1, direction, type, tileMap, groundMode);
+		(int distance2, float angle2) = FindTile(isVertical, position2, direction, type, tileMap, groundMode);
 		
-		if (isVertical && FrameworkData.CDTileFixes && direction == Direction.Positive && angle1 is not 360f
+		if (isVertical && FrameworkData.CDTileFixes && direction == Direction.Positive 
 		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
 		{
 			return (distance1, 360f);
@@ -124,7 +124,7 @@ public static class CollisionUtilities
 		return distance1 <= distance2 ? distance1 : distance2;
 	}
 	
-	public static (int, float?) FindTile(bool isVertical, Vector2I position, Direction direction, 
+	public static (int, float) FindTile(bool isVertical, Vector2I position, Direction direction, 
 		TileLayers type, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
 	{
 		(int distance, FoundTileData tileData) = 
@@ -216,6 +216,8 @@ public static class CollisionUtilities
 
 	private static float GetTileAngle(FoundTileData tileData, bool isVertical, Direction direction)
 	{
+		if (tileData == null) return 0f;
+		
 		float angle;
 		float rawAngle = GetRawTileAngle(tileData.Index);
 		if (rawAngle is not (float)Circle.Full)

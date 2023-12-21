@@ -1,9 +1,12 @@
+using System;
 using Godot;
 
 namespace OrbinautFramework3.Framework.Tiles;
 
 public static class Angles
 {
+    public const short ByteAngleLimit = 256;
+    
     public enum Circle : ushort
     {
         Quarter = 90,
@@ -12,12 +15,7 @@ public static class Angles
         Full = 360,
         OneAndAHalf = 540
     }
-
-    public static float GetFloatAngle(byte angle)
-    {
-        return (256 - angle) * 360 / 256f;
-    }
-
+    
     public static float TransformTileAngle(float angle, TileTransforms tileTransforms)
     {
         if (tileTransforms.IsRotated)
@@ -39,5 +37,28 @@ public static class Angles
     public static byte GetQuadrant(float angle)
     {
         return (byte)(Mathf.FloorToInt(angle % 360f + 45f - Constants.AngleIncrement) / 90 & 3);
+    }
+    
+    public static float GetVector256(Vector2 distance)
+    {
+        float ang360 = GetVector360(distance);
+        byte ang256 = GetByteAngle(ang360);
+	
+        return GetFloatAngle(ang256);
+    }
+    
+    public static float GetVector360(Vector2 distance)
+    {
+        return (point_direction(0, 0, _x_dist, _y_dist) + 90) % 360;
+    }
+    
+    public static byte GetByteAngle(float angle)
+    {
+        return (byte)MathF.Round(((float)Circle.Full - angle) / (float)Circle.Full * ByteAngleLimit);
+    }
+    
+    public static float GetFloatAngle(byte angle)
+    {
+        return (ByteAngleLimit - angle) * (int)Circle.Full / (float)ByteAngleLimit;
     }
 }
