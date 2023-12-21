@@ -11,11 +11,11 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         Vector2I shiftedPosition = position;
         if (isVertical)
         {
-            shiftedPosition.Y += shift * (sbyte)direction;
+            shiftedPosition.Y += shift * (int)direction;
         }
         else
         {
-            shiftedPosition.X += shift * (sbyte)direction;
+            shiftedPosition.X += shift * (int)direction;
         }
         
         Vector2I mapPosition = tileMap.LocalToMap(shiftedPosition);
@@ -23,6 +23,11 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         var transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
         byte size = GetTileCollision(isVertical, shiftedPosition, index, transforms);
         bool isValid = GetTileValidity(index, isVertical, direction, groundMode);
+
+        if (isVertical && direction == Direction.Positive)
+        {
+            GD.Print(index);
+        }
 
         return new FoundTileData(index, transforms, isValid, size);
     }

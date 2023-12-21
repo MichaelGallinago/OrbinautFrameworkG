@@ -172,11 +172,11 @@ public static class CollisionUtilities
 		int shift;
 		var tileSearcher = new TileSearcher(isVertical, position, tileMap, tileLayerId, direction, groundMode);
 		FoundTileData tileData = tileSearcher.Search(shift = 0);
-		
+
 		if (tileData.Size == 0 || !tileData.IsValid)
 		{
 			// If no width found or tile is invalid, get a further tile
-			tileData = tileSearcher.Search(TileSize);
+			tileData = tileSearcher.Search(shift = TileSize);
 
 			if (!tileData.IsValid)
 			{

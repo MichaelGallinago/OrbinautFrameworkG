@@ -2031,7 +2031,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			
 			_ => throw new ArgumentOutOfRangeException()
 		};
-
+		
 		if (!StickToConvex)
 		{
 			float toleranceCheckSpeed = GroundMode switch
@@ -2045,7 +2045,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			
 			float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
 				maxTolerance : Math.Min(minTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), maxTolerance);
-					
+			
 			if (distance > tolerance)
 			{
 				PushingObject = null;

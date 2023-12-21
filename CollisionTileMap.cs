@@ -33,7 +33,8 @@ public partial class CollisionTileMap : TileMap
 
     public int GetTileIndex(Vector2I atlasCoords)
     {
-        return (atlasCoords.X + atlasCoords.Y * _columnCount) % TileLimit;
+        int index = (atlasCoords.X + atlasCoords.Y * _columnCount) % TileLimit;
+        return index < 0 ? 0 : index;
     }
 
     private int GetTileSetColumnCount(int sourceId)
