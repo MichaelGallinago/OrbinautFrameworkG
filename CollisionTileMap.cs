@@ -15,7 +15,8 @@ public partial class CollisionTileMap : TileMap
             scene.CollisionTileMap = this;
         }
         
-        _columnCount = GetTileSetColumnCount(0);
+        //_columnCount = GetTileSetColumnCount(0);
+        _columnCount = 16; //TODO: FIX _columnCount HARDCODE!!!!!
     }
     
     public override void _Process(double delta)

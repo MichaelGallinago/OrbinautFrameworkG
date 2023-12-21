@@ -24,11 +24,6 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         byte size = GetTileCollision(isVertical, shiftedPosition, index, transforms);
         bool isValid = GetTileValidity(index, isVertical, direction, groundMode);
 
-        if (isVertical && direction == Direction.Positive)
-        {
-            GD.Print(index);
-        }
-
         return new FoundTileData(index, transforms, isValid, size);
     }
     
