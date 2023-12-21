@@ -49,7 +49,7 @@ public static class Angles
     
     public static float GetVector360(Vector2 distance)
     {
-        return (point_direction(0, 0, _x_dist, _y_dist) + 90) % 360;
+        return (MathF.Atan2(distance.Y, distance.X) + 90f) % 360f;
     }
     
     public static byte GetByteAngle(float angle)

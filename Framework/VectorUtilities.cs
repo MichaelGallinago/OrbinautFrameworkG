@@ -4,7 +4,7 @@ namespace OrbinautFramework3.Framework;
 
 public static class VectorUtilities
 {
-    public static Vector2I Shuffle(this Vector2I vector, bool swap, int multiplierX, int multiplierY)
+    public static Vector2I Shuffle(this Vector2I vector, int multiplierX, int multiplierY, bool swap = false)
     {
         vector.X *= multiplierX;
         vector.Y *= multiplierY;
@@ -16,7 +16,7 @@ public static class VectorUtilities
         return vector;
     }
 
-    public static Vector2 Shuffle(this Vector2 vector, bool swap, int multiplierX, int multiplierY)
+    public static Vector2 Shuffle(this Vector2 vector, int multiplierX, int multiplierY, bool swap = false)
     {
         vector.X *= multiplierX;
         vector.Y *= multiplierY;

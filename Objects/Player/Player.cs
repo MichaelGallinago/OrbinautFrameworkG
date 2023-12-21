@@ -819,18 +819,18 @@ public partial class Player : Framework.CommonObject.CommonObject
 		return GroundMode switch
 		{
 			Constants.GroundMode.Floor => TileCollider.FindClosestDistance(
-				Radius.Shuffle(false, -1, -1), 
-				Radius.Shuffle(false, 1, -1), 
+				Radius.Shuffle(-1, -1),
+				Radius.Shuffle( 1, -1),
 				true, Constants.Direction.Negative),
 			
 			Constants.GroundMode.RightWall => TileCollider.FindClosestDistance(
-				Radius.Shuffle(true, -1, -1), 
-				Radius.Shuffle(true, 1, -1), 
+				Radius.Shuffle(-1, -1, true),
+				Radius.Shuffle(1, -1, true),
 				false, Constants.Direction.Negative),
 			
 			Constants.GroundMode.LeftWall => TileCollider.FindClosestDistance(
-				Radius.Shuffle(true, -1, 1), 
-				Radius.Shuffle(true, 1, 1),
+				Radius.Shuffle(-1, 1, true),
+				Radius.Shuffle(1, 1, true),
 				false, Constants.Direction.Positive),
 			
 			Constants.GroundMode.Ceiling => throw new ArgumentOutOfRangeException(),
@@ -1809,8 +1809,6 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 		int wallRadius = RadiusNormal.X + 1;
 		int offsetY = 8 * (Mathf.IsEqualApprox(Angle, 360f) ? 1 : 0);
-		
-		TileCollider.SetData((Vector2I)(Position + Speed), TileLayer, TileMap, GroundMode);
 
 		int sign;
 		Constants.Direction firstDirection, secondDirection;
@@ -1829,8 +1827,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 				break;
 			default:
 				return;
-			
 		}
+		
+		TileCollider.SetData((Vector2I)(Position + Speed), TileLayer, TileMap, GroundMode);
 		
 		int wallDist = castDirection switch
 		{
@@ -2125,13 +2124,18 @@ public partial class Player : Framework.CommonObject.CommonObject
 		int wallRadius = RadiusNormal.X + 1;
 		byte moveQuad = Angles.GetQuadrant(Angles.GetVector256(Speed));
 		
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		
 		// Perform left wall collision if not moving mostly right
 		if (moveQuad != 1)
 		{
-			var wallDist = tile_find_h(Position.X - wallRadius, Position.Y, false, TileLayer)[0];
-			if (wallDist < 0f)
+			int wallDistance = TileCollider.FindDistance(
+				new Vector2I(-wallRadius, 0), false, Constants.Direction.Negative);
+			
+			if (wallDistance < 0f)
 			{
-				Position -= new Vector2(wallDist, 0f);
+				Position -= new Vector2(wallDistance, 0f);
+				TileCollider.Position = (Vector2I)Position;
 				Speed.X = 0;
 				
 				if (moveQuad == 3)
@@ -2145,10 +2149,13 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform right wall collision if not moving mostly left
 		if (moveQuad != 3)
 		{
-			var wallDist = tile_find_h(Position.X + wallRadius, Position.Y, true, TileLayer)[0];
-			if (wallDist < 0f)
+			int wallDistance = TileCollider.FindDistance(
+				new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
+			
+			if (wallDistance < 0f)
 			{
-				Position += new Vector2(wallDist, 0f);;
+				Position += new Vector2(wallDistance, 0f);
+				TileCollider.Position = (Vector2I)Position;
 				Speed.X = 0f;
 				
 				if (moveQuad == 1)
@@ -2162,26 +2169,29 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform ceiling collision if not moving mostly down
 		if (moveQuad != 0)
 		{
-			var roofData = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer);
-			var roofDist = roofData[0];
-			var roofAngle = roofData[1];
+			(int roofDistance, float roofAngle) = TileCollider.FindClosestTile(
+				Radius.Shuffle(-1, -1), 
+				Radius.Shuffle(1, -1),
+				true, Constants.Direction.Negative);
 			
-			if (moveQuad == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDist <= -14f)
+			if (moveQuad == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
 			{
 				// Perform right wall collision if moving mostly left and too far into the ceiling
-				var wallDist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
+				int wallDist = TileCollider.FindDistance(
+					new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
+				
 				if (wallDist < 0)
 				{
-					x += wallDist;
+					Position += new Vector2(wallDist, 0f);
 					Speed.X = 0;
 					
 					return;
 				}
 			}
-			else if (roofDist < 0)
+			else if (roofDistance < 0)
 			{
-				y -= roofDist;
-				if (moveQuad == 2 && MathB.GetAngleQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
+				Position -= new Vector2(0f, roofDistance);
+				if (moveQuad == 2 && Angles.GetQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
 				{
 					Angle = roofAngle;
 					GroundSpeed = roofAngle < 180 ? -Speed.Y : Speed.Y;
@@ -2207,29 +2217,34 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 		
 		// Perform floor collision if not moving mostly up
-		var distance;
-		var angle;
+		int distance;
+		float angle;
 
 		if (moveQuad == 0)
 		{
-			var floorDataL = tile_find_v(x - Radius.X, y + Radius.Y, true, TileLayer);
-			var floorDataR = tile_find_v(x + Radius.X, y + Radius.Y, true, TileLayer);
+			(int distanceL, float angleL) = TileCollider.FindTile(
+				Radius.Shuffle(-1, 1), 
+				true, Constants.Direction.Positive);
+			
+			(int distanceR, float angleR) = TileCollider.FindTile(
+				Radius.Shuffle(1, 1), 
+				true, Constants.Direction.Positive);
 
-			if (floorDataL[0] > floorDataR[0])
+			if (distanceL > distanceR)
 			{
-				distance = floorDataR[0];
-				angle = floorDataR[1];
+				distance = distanceR;
+				angle = angleR;
 			}
 			else
 			{
-				distance = floorDataL[0];
-				angle = floorDataL[1];
+				distance = distanceL;
+				angle = angleL;
 			}
 					
 			float minClip = -(Speed.Y + 8f);		
-			if (distance >= 0 || minClip >= floorDataL[0] && minClip >= floorDataR[0]) return;
+			if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return;
 					
-			if (MathB.GetAngleQuadrant(angle) > 0)
+			if (Angles.GetQuadrant(angle) > 0)
 			{
 				if (Speed.Y > 15.75f)
 				{
@@ -2239,7 +2254,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
 				Speed.X = 0f;
 			}
-			else if (angle > 22.5f && angle <= 337.5f)
+			else if (angle is > 22.5f and <= 337.5f)
 			{
 				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
 				GroundSpeed /= 2f;
@@ -2247,19 +2262,17 @@ public partial class Player : Framework.CommonObject.CommonObject
 			else 
 			{
 				GroundSpeed = Speed.X;
-				Speed.Y = 0;
+				Speed.Y = 0f;
 			}
 		}
 		else if (Speed.Y >= 0)
 		{
-			var floorData = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
-			distance = floorData[0];
-			angle = floorData[1];
-							
-			if (distance >= 0)
-			{
-				return;
-			}
+			(distance, angle) = TileCollider.FindClosestTile(
+				Radius.Shuffle(-1, 1), 
+				Radius.Shuffle(1, 1),
+				true, Constants.Direction.Positive);
+			
+			if (distance >= 0) return;
 				
 			GroundSpeed = Speed.X;
 			Speed.Y = 0;
@@ -2281,23 +2294,25 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		if (Action != Actions.Glide) return;
 		
-		var wallRadius = RadiusNormal.X + 1;
-		var moveVector = math_get_vector_256(Speed.X, Speed.Y);
-		var moveQuad = MathB.GetAngleQuadrant(moveVector);
+		int wallRadius = RadiusNormal.X + 1;
+		byte moveQuad = Angles.GetQuadrant(Angles.GetVector256(Speed));
 		
 		var collisionFlagWall = false;
 		var collisionFlagFloor = false;
-		var climbY = Position.Y;
+		float climbY = Position.Y;
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
 		// Perform left wall collision if not moving mostly right
 		if (moveQuad != 1)
 		{
-			var wallDist = tile_find_h(x - wallRadius, y, false, TileLayer)[0];
-			if (wallDist < 0)
+			int wallDistance = TileCollider.FindDistance(
+				new Vector2I(-wallRadius, 0), false, Constants.Direction.Negative);
+
+			if (wallDistance < 0)
 			{
-				Position -= new Vector2(wallDist, 0f);
+				Position -= new Vector2(wallDistance, 0f);
+				TileCollider.Position = (Vector2I)Position;
 				Speed.X = 0;
 				collisionFlagWall = true;
 			}
@@ -2306,10 +2321,13 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform right wall collision if not moving mostly left
 		if (moveQuad != 3)
 		{
-			var wallDist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
-			if (wallDist < 0)
+			int wallDistance = TileCollider.FindDistance(
+				new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
+			
+			if (wallDistance < 0)
 			{
-				Position += new Vector2(wallDist, 0f);
+				Position += new Vector2(wallDistance, 0f);
+				TileCollider.Position = (Vector2I)Position;
 				Speed.X = 0;
 				collisionFlagWall = true;
 			}
@@ -2318,21 +2336,29 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform ceiling collision if not moving mostly down
 		if (moveQuad != 0)
 		{
-			var roofDist = tile_find_2v(x - Radius.X, y - Radius.Y, x + Radius.X, y - Radius.Y, false, TileLayer)[0];
-			if (moveQuad == 3 && roofDist <= -14f && SharedData.PlayerPhysics >= PhysicsTypes.S3)
+			int roofDistance = TileCollider.FindClosestDistance(
+				Radius.Shuffle(-1, -1),
+				Radius.Shuffle(1, -1),
+				true, Constants.Direction.Negative);
+
+			if (moveQuad == 3 && roofDistance <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3)
 			{
 				// Perform right wall collision instead if moving mostly left and too far into the ceiling
-				var wallDist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
-				if (wallDist < 0)
+				int findDistance = TileCollider.FindDistance(
+					new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
+				
+				if (findDistance < 0)
 				{
-					Position += new Vector2(wallDist, 0f);
+					Position += new Vector2(findDistance, 0f);
+					TileCollider.Position = (Vector2I)Position;
 					Speed.X = 0;
 					collisionFlagWall = true;
 				}
 			}
-			else if (roofDist < 0)
+			else if (roofDistance < 0)
 			{
-				Position -= new Vector2(0f, roofDist);
+				Position -= new Vector2(0f, roofDistance);
+				TileCollider.Position = (Vector2I)Position;
 				if (Speed.Y < 0 || moveQuad == 2)
 				{
 					Speed.Y = 0;
@@ -2343,28 +2369,30 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform floor collision if not moving mostly up
 		if (moveQuad != 2)
 		{
-			var floorData = tile_find_2v(x - Radius.X, y + Radius.Y, x + Radius.X, y + Radius.Y, true, TileLayer);
-			var floorDist = floorData[0];
-			var floorAngle = floorData[1];
+			(int floorDistance, float floorAngle) = TileCollider.FindClosestTile(
+				Radius.Shuffle(-1, 1), 
+				Radius.Shuffle(1, 1),
+				true, Constants.Direction.Positive);
 		
 			if ((GlideStates)ActionState == GlideStates.Ground)
 			{
-				if (floorDist > 14f)
+				if (floorDistance > 14f)
 				{
 					ReleaseGlide();
 				}
 				else
 				{
-					Position += new Vector2(0f, floorDist);
+					Position += new Vector2(0f, floorDistance);
 					Angle = floorAngle;
 				}
 				
 				return;
 			}
 
-			if (floorDist < 0f)
+			if (floorDistance < 0f)
 			{
-				Position += new Vector2(0f, floorDist);
+				Position += new Vector2(0f, floorDistance);
+				TileCollider.Position = (Vector2I)Position;
 				Angle = floorAngle;
 				Speed.Y = 0;
 				collisionFlagFloor = true;
@@ -2374,38 +2402,39 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Land logic
 		if (collisionFlagFloor)
 		{
-			if ((GlideStates)ActionState == GlideStates.Air)
+			switch ((GlideStates)ActionState)
 			{
-				if (MathB.GetAngleQuadrant(Angle) == 0)
-				{
+				case GlideStates.Air when Angles.GetQuadrant(Angle) == 0:
 					Animation = Animations.GlideGround;
 					ActionState = (int)GlideStates.Ground;
 					ActionValue = 0;
 					Gravity = 0;
-				}
-				else
-				{
+					break;
+				
+				case GlideStates.Air:
 					GroundSpeed = Angle < 180 ? Speed.X : -Speed.X;
 					Land();
-				}
-			}
-			else if ((GlideStates)ActionState == GlideStates.Fall)
-			{
-				Land();
-				//TODO: audio
-				//audio_play_sfx(sfx_land);
+					break;
 				
-				if (MathB.GetAngleQuadrant(Angle) == 0)
-				{
+				case GlideStates.Fall:
+					Land();
+					//TODO: audio
+					//audio_play_sfx(sfx_land);
+				
+					if (Angles.GetQuadrant(Angle) != 0)
+					{
+						GroundSpeed = Speed.X;
+						break;
+					}
+					
 					Animation = Animations.GlideLand;
 					GroundLockTimer = 16;
 					GroundSpeed = 0;
 					Speed.X = 0;
-				}
-				else
-				{
-					GroundSpeed = Speed.X;
-				}
+					break;
+				
+				case GlideStates.Ground:
+					break;
 			}
 		}
 		
@@ -2415,23 +2444,23 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if ((GlideStates)ActionState != GlideStates.Air) return;
 
 			// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he is either inside the ceiling or above the floor edge
-			var wallDist = tile_find_h(x + wallRadius * Facing, climbY - Radius.Y, Facing, TileLayer)[0];
-			if (wallDist != 0)
+			var wallDistance = tile_find_h(x + wallRadius * Facing, climbY - Radius.Y, Facing, TileLayer)[0];
+			if (wallDistance != 0)
 			{
 				// Cast a vertical sensor now. If the distance returned is negative, Knuckles is inside
 				// the ceiling, else he is above the edge
 				
 				// Note: _find_mode is set to 2. LBR tiles are not ignored in this case
-				TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, Constants.GroundMode.Ceiling);
-				var floorDist = tile_find_v(x + (wallRadius + 1) * Facing, climbY - Radius.Y - 1, true, TileLayer, 2)[0];
-				if (floorDist < 0f || floorDist >= 12f)
+				TileCollider.GroundMode = Constants.GroundMode.Ceiling;
+				var floorDistance = tile_find_v(x + (wallRadius + 1) * Facing, climbY - Radius.Y - 1, true, TileLayer, 2)[0];
+				if (floorDistance < 0 || floorDistance >= 12)
 				{
 					ReleaseGlide();
 					return;
 				}
 				
 				// Adjust Knuckles' Y position to place him just below the edge
-				Position += new Vector2(0f, floorDist);
+				Position += new Vector2(0f, floorDistance);
 			}
 			
 			if (Facing == Constants.Direction.Negative)
