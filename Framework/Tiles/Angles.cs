@@ -1,3 +1,5 @@
+using Godot;
+
 namespace OrbinautFramework3.Framework.Tiles;
 
 public static class Angles
@@ -32,5 +34,10 @@ public static class Angles
         }
 
         return angle;
+    }
+    
+    public static byte GetQuadrant(float angle)
+    {
+        return (byte)(Mathf.FloorToInt(angle % 360f + 45f - Constants.AngleIncrement) / 90 & 3);
     }
 }

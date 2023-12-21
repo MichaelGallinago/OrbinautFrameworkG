@@ -997,121 +997,26 @@ public partial class Player : Framework.CommonObject.CommonObject
 		switch ((ClimbStates)ActionState)
 		{
 			case ClimbStates.Normal:
-				if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X))
-				{
-					ReleaseClimb();
-					break;
-				}
-				
-				//TODO: check GetFrameCount
-				const int stepsPerFrame = 4;
-				UpdateSpeedOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
-				
-				int radiusX = Radius.X;
-				if (Facing == Constants.Direction.Negative)
-				{
-					radiusX++;
-				}
-				
-				TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
-		
-				if (Speed.Y < 0)
-				{
-					// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-					var offset = new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
-					int wallDistance = TileCollider.FindDistance(offset, false, Facing);
-					
-					if (wallDistance >= 4)
-					{
-						ActionState = (int)ClimbStates.Ledge;
-						ActionValue = 0;
-						Speed.Y = 0;
-						break;
-					}
-		
-					// If Knuckles has encountered a small dip in the wall, cancel climb movement
-					if (wallDistance != 0)
-					{
-						Speed.Y = 0;
-					}
-		
-					// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-					offset = new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
-					int ceilDistance = TileCollider.FindDistance(offset, true, Constants.Direction.Negative);
-					
-					if (ceilDistance < 0)
-					{
-						Position -= new Vector2(0f, ceilDistance);
-						Speed.Y = 0;
-					}
-				}
-				else
-				{
-					// If Knuckles is no longer against the wall, make him let go
-					var offset = new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
-					int wallDistance = TileCollider.FindDistance(offset, false, Facing);
-					
-					if (wallDistance != 0)
-					{
-						ReleaseClimb();
-						break;
-					}
-					
-					// If Knuckles has reached the floor, make him land
-					offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
-					(int floorDistance, float? floorAngle) =
-						TileCollider.FindTile(offset, true, Constants.Direction.Positive);
-					
-					if (floorDistance < 0)
-					{
-						Position += new Vector2(0f, floorDistance + RadiusNormal.Y - Radius.Y);
-						Angle = (float)floorAngle;
-						
-						Land();
-
-						Animation = Animations.Idle;
-						Speed.Y = 0;
-						
-						break;
-					}
-				}
-				
-				if (InputPress.Abc)
-				{
-					Animation = Animations.Spin;
-					IsSpinning = true;
-					IsJumping = true;
-					Action = Actions.None;
-					Facing = (Constants.Direction)(-(int)Facing);
-					Speed = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
-					
-					//TODO: audio
-					//audio_play_sfx(sfx_jump);
-					ResetGravity();
-				}
-				else if (Speed.Y != 0)
-				{
-					Sprite.UpdateFrame(Mathf.FloorToInt(ActionValue / stepsPerFrame));
-				}
+				ClimbNormal();
 				break;
 			
 			case ClimbStates.Ledge:
 				switch (ActionValue++)
 				{
-					case 0: // Frame 0
+					case 0f: // Frame 0
 						Animation = Animations.ClimbLedge;
 						Position += new Vector2(3f * (float)Facing, -2f);
 						break;
 					
-					case 6: // Frame 1
+					case 6f: // Frame 1
 						Position += new Vector2(8f * (float)Facing, -10f);
 						break;
 					
-					case 12: // Frame 2
+					case 12f: // Frame 2
 						Position -= new Vector2(8f * (float)Facing, 12f);
 						break;
 					
-					case 18: // End
+					case 18f: // End
 						Land();
 						Animation = Animations.Idle;
 						Position += new Vector2(8f * (float)Facing, 4f);
@@ -1121,30 +1026,131 @@ public partial class Player : Framework.CommonObject.CommonObject
 		}
 	}
 
-	private void UpdateSpeedOnClimb(int maxValue)
+	private void ClimbNormal()
+	{
+		if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X))
+		{
+			ReleaseClimb();
+			return;
+		}
+		
+		//TODO: check GetFrameCount
+		const int stepsPerFrame = 4;
+		UpdateSpeedYOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
+		
+		int radiusX = Radius.X;
+		if (Facing == Constants.Direction.Negative)
+		{
+			radiusX++;
+		}
+		
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+
+		if (Speed.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+		
+		if (!InputPress.Abc)
+		{
+			if (Speed.Y != 0)
+			{
+				Sprite.UpdateFrame(Mathf.FloorToInt(ActionValue / stepsPerFrame));
+			}
+			return;
+		}
+		
+		Animation = Animations.Spin;
+		IsSpinning = true;
+		IsJumping = true;
+		Action = Actions.None;
+		Facing = (Constants.Direction)(-(int)Facing);
+		Speed = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
+			
+		//TODO: audio
+		//audio_play_sfx(sfx_jump);
+		ResetGravity();
+	}
+
+	private bool ClimbUpOntoWall(int radiusX)
+	{
+		// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
+		var offset = new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
+		int wallDistance = TileCollider.FindDistance(offset, false, Facing);
+			
+		if (wallDistance >= 4)
+		{
+			ActionState = (int)ClimbStates.Ledge;
+			ActionValue = 0;
+			Speed.Y = 0;
+			return true;
+		}
+
+		// If Knuckles has encountered a small dip in the wall, cancel climb movement
+		if (wallDistance != 0)
+		{
+			Speed.Y = 0;
+		}
+
+		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
+		offset = new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
+		int ceilDistance = TileCollider.FindDistance(offset, true, Constants.Direction.Negative);
+
+		if (ceilDistance >= 0) return false;
+		Position -= new Vector2(0f, ceilDistance);
+		Speed.Y = 0;
+		return false;
+	}
+
+	private bool ReleaseClimbing(int radiusX)
+	{
+		// If Knuckles is no longer against the wall, make him let go
+		var offset = new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
+		int wallDistance = TileCollider.FindDistance(offset, false, Facing);
+			
+		if (wallDistance != 0)
+		{
+			ReleaseClimb();
+			return true;
+		}
+			
+		// If Knuckles has reached the floor, make him land
+		offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
+		(int distance, float? angle) = TileCollider.FindTile(offset, true, Constants.Direction.Positive);
+
+		if (distance >= 0) return false;
+		Position += new Vector2(0f, distance + RadiusNormal.Y - Radius.Y);
+		Angle = (float)angle;
+				
+		Land();
+
+		Animation = Animations.Idle;
+		Speed.Y = 0;
+				
+		return true;
+	}
+
+	private void UpdateSpeedYOnClimb(int maxValue)
 	{
 		if (InputDown.Up)
 		{
 			if (++ActionValue > maxValue)
 			{
-				ActionValue = 0;
+				ActionValue = 0f;
 			}
 					
 			Speed.Y = -PhysicParams.AccelerationClimb;
+			return;
 		}
-		else if (InputDown.Down)
+		if (InputDown.Down)
 		{
-			if (--ActionValue < 0)
+			if (--ActionValue < 0f)
 			{
 				ActionValue = maxValue;
 			}
 					
 			Speed.Y = PhysicParams.AccelerationClimb;
+			return;
 		}
-		else
-		{
-			Speed.Y = 0;
-		}
+
+		Speed.Y = 0;
 	}
 
 	private void ReleaseClimb()
@@ -1162,144 +1168,142 @@ public partial class Player : Framework.CommonObject.CommonObject
 	{
 		if (Action != Actions.Glide || (GlideStates)ActionState == GlideStates.Fall) return;
 		
-		const float angleIncrement = 2.8125f;
-		const float glideGravity = 0.125f;
-		const float slideFriction = 0.09375f;
-		
 		switch ((GlideStates)ActionState)
 		{
-			case GlideStates.Air:
-				//TODO: check this
-				// ground vel - glide speed
-				// ActionValue - glide Angle
-				
-				// Update glide speed
-				if (GroundSpeed >= 4f)
-				{
-					if (ActionValue % 180f == 0)
-					{
-						GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide, 24f);
-					}
-				}
-				else
-				{
-					GroundSpeed += 0.03125f;
-				}
-				
-				// Turn around
-				if (InputDown.Left && !Mathf.IsZeroApprox(ActionValue))
-				{
-					if (ActionValue > 0f)
-					{
-						ActionValue = -ActionValue;
-					}
-					
-					ActionValue += angleIncrement;
-				}
-				else if (InputDown.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
-				{
-					if (ActionValue < 0f)
-					{
-						ActionValue = -ActionValue;
-					}
-					
-					ActionValue += angleIncrement;
-				}
-				else if (!Mathf.IsZeroApprox(ActionValue % 180f))
-				{
-					ActionValue += angleIncrement;
-				}
-				
-				// Update horizontal and vertical speed
-				Speed.X = GroundSpeed * -Mathf.Cos(Mathf.DegToRad(ActionValue));
-				if (Speed.Y < 0.5f)
-				{
-					Gravity = glideGravity;
-				}
-				else
-				{
-					Gravity = -glideGravity;
-				}
-				
-				// Update Animation frame
-				float angle = Math.Abs(ActionValue) % 180f;
-				switch (angle)
-				{
-					case < 30f or > 150f:
-						Sprite.UpdateFrame(0);
-						break;
-					case < 60f or > 120f:
-						Sprite.UpdateFrame(1);
-						break;
-					default:
-						Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
-						Sprite.UpdateFrame(2);
-						break;
-				}
-				
-				if (!InputDown.Abc)
-				{
-					Animation = Animations.GlideFall;
-					ActionState = (int)GlideStates.Fall;
-					ActionValue = 0f;
-					Radius = RadiusNormal;
-					Speed.X *= 0.25f;
-
-					ResetGravity();
-				}
-				break;
-			
-			case GlideStates.Ground:
-				if (!InputDown.Abc)
-				{
-					Speed.X = 0;
-				}
-				else if (Speed.X > 0)
-				{
-					Speed.X = Math.Max(0f, Speed.X - slideFriction);
-				}
-				else if (Speed.X < 0)
-				{
-					Speed.X = Math.Min(0f, Speed.X + slideFriction);
-				}
-
-				if (Speed.X == 0)
-				{
-					Land();
-					Sprite.UpdateFrame(1);
-
-					Animation = Animations.GlideGround;
-					GroundLockTimer = 16;
-					GroundSpeed = 0;
-
-					break;
-				}
-
-				if (ActionValue % 4 == 0)
-				{
-					//TODO: obj_dust_skid
-					//instance_create(x, y + Radius.Y, obj_dust_skid);
-				}
-				
-				if (ActionValue > 0 && ActionValue % 8 == 0)
-				{
-					//TODO: audio
-					//audio_play_sfx(sfx_slide);
-				}
-					
-				ActionValue++;
-				break;
-			
-			default:
-				throw new ArgumentOutOfRangeException();
+			case GlideStates.Air: GlideAir(); break;
+			case GlideStates.Ground: GlideGround(); break;
+			default: throw new ArgumentOutOfRangeException();
 		}
+	}
+
+	private void GlideAir()
+	{
+		const float glideGravity = 0.125f;
+		
+		//TODO: check this
+		// ground vel - glide speed
+		// ActionValue - glide Angle
+				
+		// Update glide speed
+		if (GroundSpeed >= 4f)
+		{
+			if (ActionValue % 180f == 0)
+			{
+				GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide, 24f);
+			}
+		}
+		else
+		{
+			GroundSpeed += 0.03125f;
+		}
+
+		GlideAirTurnAround();
+				
+		// Update horizontal and vertical speed
+		Speed.X = GroundSpeed * -Mathf.Cos(Mathf.DegToRad(ActionValue));
+		Gravity = Speed.Y < 0.5f ? glideGravity : -glideGravity;
+				
+		// Update Animation frame
+		float angle = Math.Abs(ActionValue) % 180f;
+		switch (angle)
+		{
+			case < 30f or > 150f:
+				Sprite.UpdateFrame(0);
+				break;
+			case < 60f or > 120f:
+				Sprite.UpdateFrame(1);
+				break;
+			default:
+				Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
+				Sprite.UpdateFrame(2);
+				break;
+		}
+
+		if (InputDown.Abc) return;
+		
+		Animation = Animations.GlideFall;
+		ActionState = (int)GlideStates.Fall;
+		ActionValue = 0f;
+		Radius = RadiusNormal;
+		Speed.X *= 0.25f;
+
+		ResetGravity();
+	}
+
+	private void GlideGround()
+	{
+		GlideGroundUpdateSpeedX();
+				
+		if (Speed.X == 0f)
+		{
+			Land();
+			Sprite.UpdateFrame(1);
+
+			Animation = Animations.GlideGround;
+			GroundLockTimer = 16;
+			GroundSpeed = 0;
+
+			return;
+		}
+
+		if (ActionValue % 4 == 0)
+		{
+			//TODO: obj_dust_skid
+			//instance_create(x, y + Radius.Y, obj_dust_skid);
+		}
+				
+		if (ActionValue > 0 && ActionValue % 8 == 0)
+		{
+			//TODO: audio
+			//audio_play_sfx(sfx_slide);
+		}
+					
+		ActionValue++;
+	}
+
+	private void GlideGroundUpdateSpeedX()
+	{
+		const float slideFriction = 0.09375f;
+		
+		if (!InputDown.Abc)
+		{
+			Speed.X = 0f;
+			return;
+		}
+
+		Speed.X = Speed.X switch
+		{
+			> 0f => Math.Max(0f, Speed.X - slideFriction),
+			< 0f => Math.Min(0f, Speed.X + slideFriction),
+			_ => Speed.X
+		};
+	}
+
+	private void GlideAirTurnAround()
+	{
+		const float angleIncrement = 2.8125f;
+		
+		if (InputDown.Left && !Mathf.IsZeroApprox(ActionValue))
+		{
+			ActionValue = (ActionValue > 0f ? -ActionValue : ActionValue) + angleIncrement;
+			return;
+		}
+		
+		if (InputDown.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
+		{
+			ActionValue = (ActionValue < 0f ? -ActionValue : ActionValue) + angleIncrement;
+			return;
+		}
+		
+		if (Mathf.IsZeroApprox(ActionValue % 180f)) return;
+		ActionValue += angleIncrement;
 	}
 	
 	private void ProcessHammerSpin()
 	{
 		if (Action != Actions.HammerSpin) return;
 	
-		var maxHammerSpinCharge = 20;
+		const int maxHammerSpinCharge = 20;
 	
 		if (!InputDown.Abc)
 		{
@@ -1350,7 +1354,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	private void ProcessHammerRush()
 	{
 		if (Action != Actions.HammerRush) return;
-
+		
 		var sign = (int)Facing;
 		(Vector2I radius, Vector2I offset) = (Sprite.Frame & 3) switch
 		{
@@ -1362,34 +1366,35 @@ public partial class Player : Framework.CommonObject.CommonObject
 		};
 		SetHitboxExtra(radius, offset);
 
-		if (IsGrounded)
+		if (!IsGrounded)
 		{
-			float radians = Mathf.DegToRad(Angle);
-			if (!InputDown.Abc || ActionValue == 0 || GroundSpeed == 0 || Math.Cos(radians) <= 0)
+			if (Speed.X != 0f)
 			{
-				CancelHammerRush();
+				Speed.X = 6f * Math.Sign(GroundSpeed);
 				return;
 			}
 		
-			ActionValue--;
-		
-			if (InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0)
-			{
-				Facing = (Constants.Direction)(-(int)Facing);
-				GroundSpeed *= -1;
-			}
-
-			radians = Mathf.DegToRad(Angle);
-			Speed = GroundSpeed * new Vector2(MathF.Cos(radians), MathF.Sin(radians));
+			CancelHammerRush();
+			return;
 		}
-		else if (Speed.X == 0f)
+
+		float radians = Mathf.DegToRad(Angle);
+		if (!InputDown.Abc || ActionValue == 0 || GroundSpeed == 0 || Math.Cos(radians) <= 0)
 		{
 			CancelHammerRush();
+			return;
 		}
-		else
+	
+		ActionValue--;
+	
+		if (InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0)
 		{
-			Speed.X = 6f * Math.Sign(GroundSpeed);
+			Facing = (Constants.Direction)(-(int)Facing);
+			GroundSpeed *= -1;
 		}
+
+		radians = Mathf.DegToRad(Angle);
+		Speed = GroundSpeed * new Vector2(MathF.Cos(radians), MathF.Sin(radians));
 	}
 
 	private void CancelHammerRush()
@@ -1414,7 +1419,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 	private void ProcessSlopeResistRoll()
 	{
-		if (!IsGrounded || !IsSpinning || Angle is > 135 and <= 225) return;
+		if (!IsGrounded || !IsSpinning || Angle is > 135f and <= 225f) return;
 	
 		float radians = Mathf.DegToRad(Angle);
 		float slopeGrv = Math.Sign(GroundSpeed) != Math.Sign(MathF.Sin(radians)) ? 0.3125f : 0.078125f;
@@ -1429,8 +1434,6 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Action checks
 		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerRush) return;
 		
-		var doSkid = false;
-		
 		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
 		// control lock. This allows him to Spin Dash
 		if (Animation == Animations.GlideGround && InputDown.Down)
@@ -1440,122 +1443,22 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		if (Mathf.IsZeroApprox(GroundLockTimer))
 		{
+			var doSkid = false;
+			
 			// Move left
 			if (InputDown.Left)
 			{	
-				if (GroundSpeed > 0f)
-				{
-					GroundSpeed -= PhysicParams.Deceleration;
-					if (GroundSpeed <= 0f)
-					{
-						GroundSpeed = -0.5f;
-					}
-					
-					doSkid = true;
-				}
-				else
-				{
-					if (!SharedData.NoSpeedCap || GroundSpeed > -PhysicParams.AccelerationTop)
-					{
-						GroundSpeed = Math.Max(GroundSpeed - PhysicParams.Acceleration, -PhysicParams.AccelerationTop);
-					}
-					
-					if (Facing != Constants.Direction.Negative)
-					{
-						Animation = Animations.Move;
-						Facing = Constants.Direction.Negative;
-						PushingObject = null;
-						
-						Sprite.UpdateFrame(0);
-					}
-				}
+				doSkid = MoveOnGround(Constants.Direction.Negative);
 			}
 			
 			// Move right
 			if (InputDown.Right)
 			{
-				if (GroundSpeed < 0f)
-				{
-					GroundSpeed += PhysicParams.Deceleration;
-					if (GroundSpeed >= 0f)
-					{
-						GroundSpeed = 0.5f;
-					}
-					
-					doSkid = true;
-				} 
-				else
-				{
-					if (!SharedData.NoSpeedCap || GroundSpeed < PhysicParams.AccelerationTop)
-					{
-						GroundSpeed = Math.Min(GroundSpeed + PhysicParams.Acceleration, PhysicParams.AccelerationTop);
-					}
-					
-					if (Facing != Constants.Direction.Positive)
-					{
-						Animation = Animations.Move;
-						Facing = Constants.Direction.Positive;
-						PushingObject = null;
-						
-						Sprite.UpdateFrame(0);;
-					}
-				}
+				doSkid = MoveOnGround(Constants.Direction.Positive);
 			}
 			
-			// Set idle / move / skid Animation
-			if (MathB.GetAngleQuadrant(Angle) == 0f)
-			{
-				if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
-				{
-					AnimationTimer = Type == Types.Sonic ? 24f : 16f;
-					Animation = Animations.Skid;
-					
-					//TODO: audio
-					//audio_play_sfx(sfx_skid);
-				}
-				
-				if (GroundSpeed == 0)
-				{
-					if (InputDown.Up)
-					{
-						Animation = Animations.LookUp;
-					}
-					else if (InputDown.Down)
-					{
-						Animation = Animations.Duck;
-					}
-					else
-					{
-						Animation = Animations.Idle;
-					}
-					
-					PushingObject = null;
-				}
-				
-				// TODO: This
-				else if (Animation != Animations.Skid && Animation != Animations.Push)
-				{
-					Animation = Animations.Move;
-				}
-			}
-			
-			else if (Animation != Animations.Skid && Animation != Animations.Push)
-			{
-				Animation = Animations.Move;
-			}
-			
-			// Set / clear push Animation
-			if (PushingObject != null)
-			{
-				if (Animation == Animations.Move && Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration()))
-				{
-					Animation = Animations.Push;
-				}
-			}
-			else if (Animation == Animations.Push)
-			{
-				Animation = Animations.Move;
-			}
+			UpdateMovementGroundAnimation(doSkid);
+			SetPushAnimation();
 		}
 		
 		// Apply friction
@@ -1574,6 +1477,82 @@ public partial class Player : Framework.CommonObject.CommonObject
 		Speed = GroundSpeed * new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
 	}
 
+	private bool MoveOnGround(Constants.Direction direction)
+	{
+		var sign = (float)direction;
+		
+		if (GroundSpeed * sign < 0f)
+		{
+			GroundSpeed += PhysicParams.Deceleration * sign;
+			if (GroundSpeed * sign >= 0f)
+			{
+				GroundSpeed = 0.5f * sign;
+			}
+					
+			return true;
+		}
+
+		if (!SharedData.NoSpeedCap || GroundSpeed * sign < PhysicParams.AccelerationTop)
+		{
+			GroundSpeed = direction == Constants.Direction.Positive
+				? Math.Min(GroundSpeed + PhysicParams.Acceleration,  PhysicParams.AccelerationTop)
+				: Math.Max(GroundSpeed - PhysicParams.Acceleration, -PhysicParams.AccelerationTop);
+		}
+
+		if (Facing == direction) return false;
+		
+		Animation = Animations.Move;
+		Facing = direction;
+		PushingObject = null;
+					
+		Sprite.UpdateFrame(0);
+
+		return false;
+	}
+
+	private void UpdateMovementGroundAnimation(bool doSkid)
+	{
+		if (Angles.GetQuadrant(Angle) != 0f)
+		{
+			if (Animation is Animations.Skid or Animations.Push) return;
+			Animation = Animations.Move;
+			return;
+		}
+		
+		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
+		{
+			AnimationTimer = Type == Types.Sonic ? 24f : 16f;
+			Animation = Animations.Skid;
+					
+			//TODO: audio
+			//audio_play_sfx(sfx_skid);
+		}
+				
+		if (GroundSpeed != 0f)
+		{
+			// TODO: This
+			if (Animation is Animations.Skid or Animations.Push) return;
+			Animation = Animations.Move;
+			return;
+		}
+		
+		PushingObject = null;
+		Animation = InputDown.Up ? Animations.LookUp : InputDown.Down ? Animations.Duck : Animations.Idle;
+	}
+
+	private void SetPushAnimation()
+	{
+		if (PushingObject == null)
+		{
+			if (Animation != Animations.Push) return;
+			Animation = Animations.Move;
+			return;
+		}
+		
+		if (Animation != Animations.Move || !Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration())) return;
+		Animation = Animations.Push;
+	}
+
 	private void ProcessMovementGroundRoll()
 	{
 		// Control routine checks
@@ -1581,41 +1560,14 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 		if (GroundLockTimer == 0f)
 		{
-			// Move left
 			if (InputDown.Left)
 			{
-				if (GroundSpeed > 0)
-				{
-					
-					GroundSpeed -= PhysicParams.DecelerationRoll;
-					if (GroundSpeed < 0)
-					{
-						GroundSpeed = -0.5f;
-					}
-				}
-				else
-				{
-					Facing = Constants.Direction.Negative;
-					PushingObject = null;	
-				}
+				RollOnGround(Constants.Direction.Negative); // Move left
 			}
-		
-			// Move right
+			
 			if (InputDown.Right)
 			{
-				if (GroundSpeed < 0)
-				{
-					GroundSpeed += PhysicParams.DecelerationRoll;
-					if (GroundSpeed >= 0)
-					{
-						GroundSpeed = 0.5f;
-					}
-				}
-				else
-				{
-					Facing = Constants.Direction.Positive;
-					PushingObject = null;	
-				}
+				RollOnGround(Constants.Direction.Positive); // Move right
 			}
 		}
 	
@@ -1627,39 +1579,59 @@ public partial class Player : Framework.CommonObject.CommonObject
 			_ => GroundSpeed
 		};
 
-		// Stop spinning
-		if (!IsForcedRoll)
-		{
-			if (GroundSpeed == 0f || SharedData.PlayerPhysics == PhysicsTypes.SK && Math.Abs(GroundSpeed) < 0.5f)
-			{
-				Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
-
-				Radius = RadiusNormal;
-			
-				IsSpinning = false;
-				Animation = Animations.Idle;
-			}
-		}
-	
-		// If forced to spin, keep moving player
-		else
-		{
-			if (SharedData.PlayerPhysics == PhysicsTypes.CD)
-			{
-				if (GroundSpeed is >= 0f and < 2f)
-				{
-					GroundSpeed = 2f;
-				}
-			}
-			else if (GroundSpeed == 0f)
-			{
-				GroundSpeed = SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f * (float)Facing;
-			}
-		}
+		UpdateSpinningOnGround();
 	
 		float radians = Mathf.DegToRad(Angle);
 		Speed = GroundSpeed * new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
 		Speed.X = Math.Clamp(Speed.X, -16f, 16f);
+	}
+
+	private void RollOnGround(Constants.Direction direction)
+	{
+		var sign = (float)direction;
+		if (sign * GroundSpeed >= 0f)
+		{
+			Facing = direction;
+			PushingObject = null;
+			return;
+		}
+
+		GroundSpeed += sign * PhysicParams.DecelerationRoll;
+		if (sign * GroundSpeed < 0f) return;
+		GroundSpeed = sign * 0.5f;
+	}
+
+	private void UpdateSpinningOnGround()
+	{
+		// Stop spinning
+		if (!IsForcedRoll)
+		{
+			if (GroundSpeed != 0f)
+			{
+				if (SharedData.PlayerPhysics != PhysicsTypes.SK || Math.Abs(GroundSpeed) >= 0.5f) return;
+			}
+			
+			Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
+
+			Radius = RadiusNormal;
+			
+			IsSpinning = false;
+			Animation = Animations.Idle;
+			return;
+		}
+	
+		// If forced to spin, keep moving player
+		if (SharedData.PlayerPhysics == PhysicsTypes.CD)
+		{
+			if (GroundSpeed is >= 0f and < 2f)
+			{
+				GroundSpeed = 2f;
+			}
+			return;
+		}
+		
+		if (GroundSpeed != 0f) return;
+		GroundSpeed = SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f * (float)Facing;
 	}
 
 	private void ProcessMovementAir()
@@ -1754,7 +1726,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 	
 		if (OnObject == null)
 		{
-			if (MathB.GetAngleQuadrant(Angle) > 0) return;
+			if (Angles.GetQuadrant(Angle) > 0) return;
 			
 			TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
 			int floorDist = TileCollider.FindDistance(new Vector2I(), true, Constants.Direction.Positive);	
@@ -1918,7 +1890,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 		wallDist *= sign;
 		
-		switch (MathB.GetAngleQuadrant(Angle))
+		switch (Angles.GetQuadrant(Angle))
 		{
 			case 0:
 				Speed.X -= wallDist;
@@ -2157,7 +2129,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			if (SharedData.PlayerPhysics < PhysicsTypes.S3)
 			{
-				if (MathB.GetAngleQuadrant(Angle) == 0) return;
+				if (Angles.GetQuadrant(Angle) == 0) return;
 				
 				GroundSpeed = 0f;	
 				GroundLockTimer = 30f;
@@ -2189,7 +2161,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		
 		int wallRadius = RadiusNormal.X + 1;
 		var moveVector = math_get_vector_256(Speed.X, Speed.Y);
-		byte moveQuad = MathB.GetAngleQuadrant(moveVector);
+		byte moveQuad = Angles.GetQuadrant(moveVector);
 		
 		// Perform left wall collision if not moving mostly right
 		if (moveQuad != 1)
@@ -2335,7 +2307,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 			return;
 		}
 
-		y += distance;
+		Position += new Vector2(0f, distance);
 		Angle = angle;
 			
 		Land();
@@ -2355,13 +2327,15 @@ public partial class Player : Framework.CommonObject.CommonObject
 		var collisionFlagFloor = false;
 		var climbY = Position.Y;
 		
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		
 		// Perform left wall collision if not moving mostly right
 		if (moveQuad != 1)
 		{
 			var wallDist = tile_find_h(x - wallRadius, y, false, TileLayer)[0];
 			if (wallDist < 0)
 			{
-				x -= wallDist;
+				Position -= new Vector2(wallDist, 0f);
 				Speed.X = 0;
 				collisionFlagWall = true;
 			}
@@ -2370,10 +2344,10 @@ public partial class Player : Framework.CommonObject.CommonObject
 		// Perform right wall collision if not moving mostly left
 		if (moveQuad != 3)
 		{
-			var _wall_dist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
-			if (_wall_dist < 0)
+			var wallDist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
+			if (wallDist < 0)
 			{
-				x += _wall_dist;
+				Position += new Vector2(wallDist, 0f);
 				Speed.X = 0;
 				collisionFlagWall = true;
 			}
@@ -2386,17 +2360,17 @@ public partial class Player : Framework.CommonObject.CommonObject
 			if (moveQuad == 3 && roofDist <= -14f && SharedData.PlayerPhysics >= PhysicsTypes.S3)
 			{
 				// Perform right wall collision instead if moving mostly left and too far into the ceiling
-				var _wall_dist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
-				if (_wall_dist < 0)
+				var wallDist = tile_find_h(x + wallRadius, y, true, TileLayer)[0];
+				if (wallDist < 0)
 				{
-					x += _wall_dist;
+					Position += new Vector2(wallDist, 0f);
 					Speed.X = 0;
 					collisionFlagWall = true;
 				}
 			}
 			else if (roofDist < 0)
 			{
-				y -= roofDist;
+				Position -= new Vector2(0f, roofDist);
 				if (Speed.Y < 0 || moveQuad == 2)
 				{
 					Speed.Y = 0;
@@ -2419,7 +2393,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				else
 				{
-					y += floorDist;
+					Position += new Vector2(0f, floorDist);
 					Angle = floorAngle;
 				}
 				
@@ -2428,7 +2402,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 
 			if (floorDist < 0f)
 			{
-				y += floorDist;
+				Position += new Vector2(0f, floorDist);
 				Angle = floorAngle;
 				Speed.Y = 0;
 				collisionFlagFloor = true;
@@ -2486,6 +2460,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 				// the ceiling, else he is above the edge
 				
 				// Note: _find_mode is set to 2. LBR tiles are not ignored in this case
+				TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, Constants.GroundMode.Ceiling);
 				var floorDist = tile_find_v(x + (wallRadius + 1) * Facing, climbY - Radius.Y - 1, true, TileLayer, 2)[0];
 				if (floorDist < 0f || floorDist >= 12f)
 				{
@@ -2494,12 +2469,12 @@ public partial class Player : Framework.CommonObject.CommonObject
 				}
 				
 				// Adjust Knuckles' Y position to place him just below the edge
-				y += floorDist;
+				Position += new Vector2(0f, floorDist);
 			}
 			
 			if (Facing == Constants.Direction.Negative)
 			{
-				x++;
+				Position += new Vector2(1f, 0f);
 			}
 			
 			Animation = Animations.ClimbWall;
@@ -3034,30 +3009,31 @@ public partial class Player : Framework.CommonObject.CommonObject
 		{
 			Sprite.Scale = new Vector2(Math.Abs(Sprite.Scale.X) * (float)Facing, Sprite.Scale.Y);
 		}
-	
+		
+		//TODO: animation!!!!
 		switch (Type)
 		{
 			case Types.Sonic:
 				if (IsSuper)
 				{
-					scr_player_animate_supersonic();
+					//scr_player_animate_supersonic();
 				}
 				else
 				{
-					scr_player_animate_sonic();
+					//scr_player_animate_sonic();
 				}
 				break;
 		
 			case Types.Tails:
-				scr_player_animate_tails();
+				//scr_player_animate_tails();
 				break;
 		
 			case Types.Knuckles:
-				scr_player_animate_knuckles();
+				//scr_player_animate_knuckles();
 				break;
 		
 			case Types.Amy:
-				scr_player_animate_amy();
+				//scr_player_animate_amy();
 				break;
 		}
 	}
