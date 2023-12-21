@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_18cwq"]
-[ext_resource type="Script" path="res://Stages/TSZ/StageTSZ.cs" id="1_hkdi5"]
+[ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/camera.tscn" id="1_yqihk"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="2_b03l2"]
@@ -29,7 +29,7 @@ shader_parameter/u_inclineStep = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
-[node name="Node2D" type="Node2D"]
+[node name="StageTSZ" type="Node2D"]
 material = SubResource("ShaderMaterial_w0a6u")
 script = ExtResource("1_hkdi5")
 
@@ -51,6 +51,7 @@ script = ExtResource("6_ej1tq")
 [node name="Player" parent="." instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(160, 840)
+Type = 1
 
 [node name="Background" type="ParallaxBackground" parent="."]
 layer = -128

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
@@ -215,6 +216,8 @@ public partial class Player : Framework.CommonObject.CommonObject
 	public CommonStage Stage { get; set; }
 	public TileCollider TileCollider { get; set; }
 
+	public Dictionary<CommonObject, Constants.TouchState> TouchObjects { get; private set; }
+
 	// Edit mode
 	public bool IsEditMode { get; private set; }
 	public int EditModeIndex { get; private set; }
@@ -322,7 +325,9 @@ public partial class Player : Framework.CommonObject.CommonObject
 		RingCount = FrameworkData.SavedRings;
 		LifeCount = FrameworkData.SavedLives;
 		
-		LifeRewards = new[] { RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000 };
+		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
+
+		TouchObjects = [];
 	}
 
 	public override void _EnterTree()
@@ -331,6 +336,7 @@ public partial class Player : Framework.CommonObject.CommonObject
 		Id = Players.Count;
 		Players.Add(this);
 		FrameworkData.CurrentScene.AddPlayerStep(this);
+		FrameworkData.CurrentScene.PreUpdate += _ => TouchObjects.Clear();
 	}
 
 	public override void _ExitTree()

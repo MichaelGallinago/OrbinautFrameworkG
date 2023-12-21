@@ -97,7 +97,7 @@ public abstract partial class CommonObject : Node2D
 		// with an object from the original games
 		
 		// Initialise touch flags for the player collision
-		SolidData.TouchStates[player.Id] = Constants.TouchState.None;
+		player.TouchObjects.Add(this, Constants.TouchState.None);
 		
 		// Check if player properties are valid
 		Vector2I playerRadius = player.SolidData.Radius;
@@ -160,8 +160,8 @@ public abstract partial class CommonObject : Node2D
 		
 		// Is player standing on this object?
 		if (player.OnObject == this)
-		{	
-			SolidData.TouchStates[player.Id] = Constants.TouchState.Up;
+		{
+			player.TouchObjects[this] = Constants.TouchState.Up;
 			
 			// Adjust player's position
 			player.Position = new Vector2(
@@ -174,7 +174,7 @@ public abstract partial class CommonObject : Node2D
 			if (Math.Abs(MathF.Floor(playerPosition.X - objectPosition.X)) < combinedSize.X) return;
 			
 			// Reset touch flags and player's on-object status if they are out of bounds
-			SolidData.TouchStates[player.Id] = Constants.TouchState.None;
+			player.TouchObjects[this] = Constants.TouchState.None;
 			player.OnObject = null;
 		}
 		
@@ -225,7 +225,7 @@ public abstract partial class CommonObject : Node2D
 								player.Speed = new Vector2(player.Speed.X, 0);
 						
 								// Set collision flag
-								SolidData.TouchStates[player.Id] = Constants.TouchState.Down;
+								player.TouchObjects[this] = Constants.TouchState.Down;
 								break;
 						}
 						break;
@@ -236,7 +236,7 @@ public abstract partial class CommonObject : Node2D
 						float relX = MathF.Floor(playerPosition.X - objectPosition.X) + objectRadius.X;
 						if (relX >= 0 - extraSize.X && relX <= objectRadius.X * 2 + extraSize.X)
 						{
-							SolidData.TouchStates[player.Id] = Constants.TouchState.Up;
+							player.TouchObjects[this] = Constants.TouchState.Up;
 							
 							// Attach player to the object
 							LandOnSolid(player, this, type, Mathf.FloorToInt(clip.Y - gripY));
@@ -264,7 +264,7 @@ public abstract partial class CommonObject : Node2D
 			    Math.Sign((int)player.Facing) == Math.Sign(integerObjectPosition.X - integerPlayerPosition.X) ? 
 				this : null;
 			
-			SolidData.TouchStates[player.Id] = integerPlayerPosition.X < integerObjectPosition.X ? 
+			player.TouchObjects[this] = integerPlayerPosition.X < integerObjectPosition.X ? 
 				Constants.TouchState.Left : Constants.TouchState.Right;
 			
 			if (clip.X != 0 && Math.Sign(clip.X) == Math.Sign(player.Speed.X))
@@ -286,7 +286,7 @@ public abstract partial class CommonObject : Node2D
 			
 			if (yClip is < -16 or >= 0) return;
 			
-			SolidData.TouchStates[player.Id] = Constants.TouchState.Up;
+			player.TouchObjects[this] = Constants.TouchState.Up;
 			
 			// Attach player to the object
 			LandOnSolid(player, this, type, -((int)yClip + gripY));
