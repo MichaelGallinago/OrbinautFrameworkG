@@ -34,22 +34,12 @@ public partial class AnimatedSprite : AnimatedSprite2D
     public override void _EnterTree()
     {
         Sprites.Add(this);
-        if (GetParent() is CommonObject.CommonObject commonObject)
-        {
-            commonObject.Sprite ??= this;
-            return;
-        }
-        
         Animator.AutoAnimatedSprites.Add(this, SpeedScale);
     }
 
     public override void _ExitTree()
     {
         Sprites.Remove(this);
-        if (GetParent() is CommonObject.CommonObject commonObject && commonObject.Sprite == this)
-        {
-            commonObject.Sprite = null;
-        }
     }
 
     public int GetDuration() => Duration[Index];

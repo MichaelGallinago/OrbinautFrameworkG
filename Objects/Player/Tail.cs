@@ -1,12 +1,15 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.CommonObject;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public partial class Tail : CommonObject
 {
+	[Export] public AnimatedSprite Sprite { get; private set; }
+	
 	public float Angle { get; set; }
 	public Player Target { get; set; }
 

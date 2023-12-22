@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.Tiles;
@@ -134,6 +135,7 @@ public partial class Player : CommonObject
 	public static List<Player> Players { get; }
     
 	[Export] public Types Type;
+	[Export] public AnimatedSprite Sprite { get; private set; }
 
 	public int Id { get; private set; }
 	

@@ -2,16 +2,9 @@ using Godot;
 
 namespace OrbinautFramework3.Framework.CommonObject;
 
-public struct AnimationRespawnData
+public struct AnimationRespawnData(int frame, StringName animation, bool isVisible)
 {
-    public int Frame;
-    public bool IsVisible;
-    public StringName Animation;
-    
-    public AnimationRespawnData(int frame, StringName animation, bool isVisible)
-    {
-        Frame = frame;
-        IsVisible = isVisible;
-        Animation = animation;
-    }
+    public int Frame = frame;
+    public bool IsVisible = isVisible;
+    public StringName Animation = animation;
 }

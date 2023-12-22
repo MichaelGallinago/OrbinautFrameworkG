@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework.CommonObject;
@@ -17,7 +18,6 @@ public abstract partial class CommonObject : Node2D
 	public static List<CommonObject> Objects { get; }
 	public ObjectRespawnData RespawnData { get; }
 	public SolidData SolidData { get; set; }
-	public Animations.AnimatedSprite Sprite { get; set; }
 	public Vector2 PreviousPosition { get; set; }
 
 	public InteractData InteractData;

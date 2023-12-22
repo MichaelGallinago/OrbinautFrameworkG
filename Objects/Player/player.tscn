@@ -4,9 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://bgtjolasl4t03" path="res://Framework/Animations/animated_sprite.tscn" id="2_4n0gr"]
 [ext_resource type="SpriteFrames" uid="uid://d05sdgk8gto6s" path="res://Objects/Player/player_sprite_frames.tres" id="3_x3aox"]
 
-[node name="Player" type="Node2D"]
+[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite")]
 script = ExtResource("1_w3650")
 Type = 4
+Sprite = NodePath("AnimatedSprite")
 
 [node name="AnimatedSprite" parent="." instance=ExtResource("2_4n0gr")]
 sprite_frames = ExtResource("3_x3aox")
