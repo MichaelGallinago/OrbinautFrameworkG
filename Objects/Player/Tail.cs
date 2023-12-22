@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.CommonObject;
@@ -92,9 +93,10 @@ public partial class Tail : CommonObject
 				}
 				// TODO: Check Atan2 1
 				angle = Mathf.DegToRad(angle);
-				Angle = Mathf.RadToDeg(Mathf.Atan2(
-					Mathf.Sin(angle) + Mathf.Sin(Angle) * step, 
-					Mathf.Cos(angle) + Mathf.Cos(Angle) * step));
+				float mainAngle = Mathf.DegToRad(Angle);
+				Angle = Mathf.RadToDeg(MathF.Atan2(
+					MathF.Sin(angle) + MathF.Sin(mainAngle) * step, 
+					MathF.Cos(angle) + MathF.Cos(mainAngle) * step));
 			}
 			else
 			{	

@@ -33,12 +33,12 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         if (index <= 0) return 0;
         var collisionIndex = (byte)((isHeight ? position.X : position.Y) % TileSize);
 	
-        if (tileTransforms.IsMirrored)
+        if (isHeight && tileTransforms.IsMirrored || !isHeight && tileTransforms.IsFlipped)
         {
             collisionIndex = (byte)(TileSize - 1 - collisionIndex);
         }
 		
-        return tileTransforms.IsRotated ^ isHeight ?
+        return tileTransforms.IsRotated ^ isHeight ? 
             FrameworkData.TileData.Heights[index][collisionIndex] : 
             FrameworkData.TileData.Widths[index][collisionIndex];
     }

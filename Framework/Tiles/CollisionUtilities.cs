@@ -153,7 +153,10 @@ public static class CollisionUtilities
 		}
 
 		// If above the room, use topmost valid level collision
-		position.Y = Math.Max(0, position.Y);
+		if (!isVertical)
+		{
+			position.Y = Math.Max(0, position.Y);
+		}
 		
 		// Set the direction as an integer (-1 for leftwards, 1 for rightwards)
 		var sign = (sbyte)direction;
@@ -176,7 +179,8 @@ public static class CollisionUtilities
 		if (tileData.Size == 0 || !tileData.IsValid)
 		{
 			// If no width found or tile is invalid, get a further tile
-			tileData = tileSearcher.Search(shift = TileSize);
+			shift = TileSize;
+			tileData = tileSearcher.Search(shift);
 
 			if (!tileData.IsValid)
 			{
@@ -186,7 +190,8 @@ public static class CollisionUtilities
 		else if (tileData.Size == TileSize)
 		{
 			// If width found is TileSize and tile is valid, get a closer tile
-			FoundTileData newTileData = tileSearcher.Search(shift = -TileSize);
+			shift = -TileSize;
+			FoundTileData newTileData = tileSearcher.Search(shift);
 
 			// If no width found or tile is invalid, return to back to the initial tile
 			if (newTileData.Size == 0 || !newTileData.IsValid)
@@ -199,18 +204,17 @@ public static class CollisionUtilities
 			}
 		}
 
-
 		// Calculate distance to the edge of the found tile
 		int distance = CalculateDistance(tileData.Size, sign, shift, isVertical ? position.Y : position.X);
-		
-		// Return both the distance and the angle
+
+		// Return both the distance and the tileData
 		return (distance, tileData);
 	}
 
 	private static int CalculateDistance(byte size, int sign, int shift, int distancePosition)
 	{
 		const int tileSizeMinusOne = TileSize - 1;
-		int distance = ((distancePosition + shift * sign) / TileSize * TileSize - distancePosition) * sign - size;
+		int distance = sign * (distancePosition / TileSize * TileSize - distancePosition) + shift - size;
 		return sign == 1 ? distance + tileSizeMinusOne : distance;
 	}
 

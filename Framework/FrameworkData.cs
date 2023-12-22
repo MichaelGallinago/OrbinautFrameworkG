@@ -61,6 +61,7 @@ public static class FrameworkData
         AllowPause = true;
         CDTileFixes = true;
         CDCamera = true;
+        DropDash = true;
         TileData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
         ViewSize = new Vector2I(400, 224);

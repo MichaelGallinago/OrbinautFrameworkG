@@ -1414,9 +1414,8 @@ public partial class Player : CommonObject
 		if (!IsGrounded || IsSpinning || Angle is > 135f and <= 225f) return;
 	
 		if (Action is Actions.HammerRush or Actions.PeelOut) return;
-
-		float radians = Mathf.DegToRad(Angle);
-		float slopeGrv = 0.125f * MathF.Sin(radians);
+		
+		float slopeGrv = 0.125f * MathF.Sin(Mathf.DegToRad(Angle));
 		if (GroundSpeed != 0f || SharedData.PlayerPhysics >= PhysicsTypes.S3 && Math.Abs(slopeGrv) > 0.05078125f)
 		{
 			GroundSpeed -= slopeGrv;
@@ -1427,9 +1426,9 @@ public partial class Player : CommonObject
 	{
 		if (!IsGrounded || !IsSpinning || Angle is > 135f and <= 225f) return;
 	
-		float radians = Mathf.DegToRad(Angle);
-		float slopeGrv = Math.Sign(GroundSpeed) != Math.Sign(MathF.Sin(radians)) ? 0.3125f : 0.078125f;
-		GroundSpeed -= slopeGrv * MathF.Sin(radians);
+		float angleSine = MathF.Sin(Mathf.DegToRad(Angle));
+		float slopeGrv = Math.Sign(GroundSpeed) != Math.Sign(angleSine) ? 0.3125f : 0.078125f;
+		GroundSpeed -= slopeGrv * angleSine;
 	}
 
 	private void ProcessMovementGround()
@@ -1807,9 +1806,9 @@ public partial class Player : CommonObject
 
 		int castDirection = Angle switch
 		{
-			>= 45 and <= 128 => 1,
-			> 128 and < 225 => 2,
-			>= 225 and < 315 => 3,
+			>= 45f and <= 128f => 1,
+			> 128f and < 225f => 2,
+			>= 225f and < 315f => 3,
 			_ => 0
 		};
 
@@ -1821,16 +1820,18 @@ public partial class Player : CommonObject
 		switch (GroundSpeed)
 		{
 			case < 0f:
-				sign = 1;
+				sign = (int)Constants.Direction.Positive;
 				firstDirection = Constants.Direction.Negative;
 				secondDirection = Constants.Direction.Positive;
 				break;
+			
 			case > 0f:
-				sign = -1;
+				sign = (int)Constants.Direction.Negative;
 				firstDirection = Constants.Direction.Positive;
 				secondDirection = Constants.Direction.Negative;
-				wallRadius *= -1;
+				wallRadius *= sign;
 				break;
+			
 			default:
 				return;
 		}
@@ -1839,23 +1840,15 @@ public partial class Player : CommonObject
 		
 		int wallDist = castDirection switch
 		{
-			0 => TileCollider.FindDistance(
-				new Vector2I(-wallRadius, offsetY), false, firstDirection),
-			
-			1 => TileCollider.FindDistance(
-				new Vector2I(0, wallRadius), true, secondDirection),
-			
-			2 => TileCollider.FindDistance(
-				new Vector2I(wallRadius, 0), false, secondDirection),
-			
-			3 => TileCollider.FindDistance(
-				new Vector2I(0, -wallRadius), true, firstDirection),
-			
+			0 => TileCollider.FindDistance(new Vector2I(-wallRadius, offsetY), false, firstDirection),
+			1 => TileCollider.FindDistance(new Vector2I(0, wallRadius), true, secondDirection),
+			2 => TileCollider.FindDistance(new Vector2I(wallRadius, 0), false, secondDirection),
+			3 => TileCollider.FindDistance(new Vector2I(0, -wallRadius), true, firstDirection),
 			_ => throw new ArgumentOutOfRangeException()
 		};
-
+		
 		if (wallDist >= 0) return;
-
+		
 		wallDist *= sign;
 		
 		switch (Angles.GetQuadrant(Angle))
@@ -2946,7 +2939,7 @@ public partial class Player : CommonObject
 		}
 		else
 		{
-			if (IsGrounded && SharedData.RotationMode > 0f)
+			if (IsGrounded && SharedData.RotationMode > 0)
 			{
 				var angle = 360f;
 				float step;
@@ -2963,9 +2956,9 @@ public partial class Player : CommonObject
 
 				float radians = Mathf.DegToRad(angle);
 				float radiansVisual = Mathf.DegToRad(VisualAngle);
-				VisualAngle = MathF.Atan2(
+				VisualAngle = Mathf.RadToDeg(MathF.Atan2(
 					Mathf.DegToRad(MathF.Sin(radians) + MathF.Sin(radiansVisual) * step), 
-					Mathf.DegToRad(MathF.Cos(radians) + MathF.Cos(radiansVisual) * step));
+					Mathf.DegToRad(MathF.Cos(radians) + MathF.Cos(radiansVisual) * step)));
 			}
 			else
 			{
