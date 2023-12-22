@@ -19,7 +19,7 @@ public struct AnimationData
         Sync = false;
         LoopFrame = 0;
         Timer = -1;
-        Duration = new List<int> {0};
-        Order = new List<int>();
+        Duration = [0];
+        Order = [];
     }
 }

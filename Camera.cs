@@ -17,11 +17,11 @@ public partial class Camera : Camera2D
     
 	public Vector4I Bounds { get; private set; }
 		
-	public Vector2I MaxSpeed;
-	public Vector2I Speed;
+	public readonly Vector2I MaxSpeed;
+	public Vector2 Speed;
 	public Vector2I BufferPosition;
 	public Vector2 RawPosition;
-	public Vector2I Delay;
+	public Vector2 Delay;
 	public Vector2I BufferOffset;
 	public Vector2I BoundSpeed;
 	public Vector4 Bound;
@@ -29,7 +29,7 @@ public partial class Camera : Camera2D
 	public Vector4 PreviousLimit; // TODO: check if needed
 
 	public Vector2I ShakeOffset;
-	public int ShakeTimer;
+	public float ShakeTimer;
 
 	public Camera()
 	{
@@ -72,7 +72,7 @@ public partial class Camera : Camera2D
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
 	{
-		Delay = new Vector2I(delayX ?? Delay.X, delayY ?? Delay.Y);
+		Delay = new Vector2(delayX ?? Delay.X, delayY ?? Delay.Y);
 	}
 
 	public void UpdateShakeTimer(int shakeTimer) => ShakeTimer = shakeTimer;
@@ -87,16 +87,16 @@ public partial class Camera : Camera2D
 			position += Constants.RenderBuffer;
 		}
 
-		position &= -128;
+		position &= sbyte.MinValue;
 		
-		return new Vector2I(position - 128, position + FrameworkData.ViewSize.X + 320);
+		return new Vector2I(position + sbyte.MinValue, position + FrameworkData.ViewSize.X + 320);
 	}
 
 	private void EndStep(double processSpeed)
 	{
 		if (MainCamera != this) return;
 		var boundSpeed = 0f;
-
+		
 		if (FrameworkData.UpdateObjects)
 		{
 			var processSpeedF = (float)processSpeed;
@@ -146,19 +146,19 @@ public partial class Camera : Camera2D
 		return limit < bound ? Math.Min(bound, limit + boundSpeed) : limit;
 	}
 
-	private void FollowTarget(float processSpeedF)
+	private void FollowTarget(float processSpeed)
 	{
 		if (Target != null && !IsInstanceValid(Target))
 		{
 			Target = null;
 		}
 
-		UpdateSpeed();
-		UpdateShakeOffset();
-		UpdateRawPosition(processSpeedF);
+		UpdateSpeed(processSpeed);
+		UpdateShakeOffset(processSpeed);
+		UpdateRawPosition(processSpeed);
 	}
 
-	private void UpdateSpeed()
+	private void UpdateSpeed(float processSpeed)
 	{
 		if (Target == null)
 		{
@@ -166,69 +166,68 @@ public partial class Camera : Camera2D
 			return;
 		}
 		
-		Vector2I targetPosition = (Vector2I)Target.Position - (Vector2I)RawPosition - FrameworkData.ViewSize / 2;
-		targetPosition.Y += CameraCentreOffset;
+		Vector2I distance = (Vector2I)Target.Position - (Vector2I)RawPosition - FrameworkData.ViewSize / 2;
+		distance.Y += CameraCentreOffset;
 
 		int extraX = FrameworkData.CDCamera ? 0 : 8;
 			
-		Speed.X = CalculateSpeed(targetPosition.X + extraX, extraX, MaxSpeed.X);
+		Speed.X = CalculateSpeed(distance.X + extraX, extraX, MaxSpeed.X * processSpeed);
 			
 		if (Target is Player { IsGrounded: true } playerTarget)
 		{	
 			if (playerTarget.IsSpinning)
 			{
-				targetPosition.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
+				distance.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
 			}
 				
-			int limit = Math.Abs(playerTarget.GroundSpeed) < 8 ? 6 : MaxSpeed.Y;
-			Speed.Y = Math.Clamp(targetPosition.Y, -limit, limit);
+			float limit = Math.Abs(playerTarget.GroundSpeed) < 8f ? 6f : MaxSpeed.Y * processSpeed;
+			Speed.Y = Math.Clamp(distance.Y, -limit, limit);
 			return;
 		}
 
-		Speed.Y = CalculateSpeed(targetPosition.Y, 32, MaxSpeed.Y);
+		Speed.Y = CalculateSpeed(distance.Y, 32, MaxSpeed.Y * processSpeed);
 	}
 	
-	private void UpdateShakeOffset()
+	private void UpdateShakeOffset(float processSpeed)
 	{
-		if (ShakeTimer > 0)
-		{
-			ShakeOffset.X = CalculateShakeOffset(ShakeTimer, ShakeOffset.X);
-			ShakeOffset.Y = CalculateShakeOffset(ShakeTimer, ShakeOffset.Y);
-			ShakeTimer--;
-		}
-		else
+		if (ShakeTimer <= 0f)
 		{
 			ShakeOffset = new Vector2I();
+			return;
 		}
+		
+		ShakeOffset.X = CalculateShakeOffset(ShakeTimer, ShakeOffset.X);
+		ShakeOffset.Y = CalculateShakeOffset(ShakeTimer, ShakeOffset.Y);
+		ShakeTimer -= processSpeed;
 	}
 
-	private void UpdateRawPosition(float processSpeedF)
+	private void UpdateRawPosition(float processSpeed)
 	{
 		for (var i = 0; i < 2; i++)
 		{
-			if (Delay[i] > 0)
+			if (Delay[i] > 0f)
 			{
-				Delay[i]--;
+				Delay[i] -= processSpeed;
 				continue;
 			}
 			
-			RawPosition[i] += Speed[i] * processSpeedF;
+			RawPosition[i] += Speed[i];
 		}
 	}
 
-	private static int CalculateSpeed(int difference, int threshold, int maxSpeed)
+	private static float CalculateSpeed(int difference, int threshold, float maxSpeed)
 	{
-		int distance = Math.Abs(difference);
+		float distance = Math.Abs(difference);
 		return distance <= threshold ? 0 : 
 			Math.Clamp((distance - threshold) * Math.Sign(difference), -maxSpeed, maxSpeed);
 	}
 	
 	
-	private static int CalculateShakeOffset(int shakeTimer, int shakeOffset)
+	private static int CalculateShakeOffset(float shakeTimer, int shakeOffset)
 	{
 		return shakeOffset switch
 		{
-			0 => shakeTimer,
+			0 => (int)shakeTimer,
 			< 0 => -1 - shakeOffset,
 			_ => -shakeOffset
 		};

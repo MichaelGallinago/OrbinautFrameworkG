@@ -2128,23 +2128,24 @@ public partial class Player : CommonObject
 		if (Action is Actions.Glide or Actions.Climb) return;
 		
 		int wallRadius = RadiusNormal.X + 1;
-		byte moveQuad = Angles.GetQuadrant(Angles.GetVector256(Speed));
+		byte moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Speed));
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
+		GD.Print(moveQuadrant);
+		
 		// Perform left wall collision if not moving mostly right
-		if (moveQuad != 1)
+		if (moveQuadrant != 1)
 		{
 			int wallDistance = TileCollider.FindDistance(
 				new Vector2I(-wallRadius, 0), false, Constants.Direction.Negative);
-			
 			if (wallDistance < 0f)
 			{
 				Position -= new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
 				Speed.X = 0;
 				
-				if (moveQuad == 3)
+				if (moveQuadrant == 3)
 				{
 					GroundSpeed = Speed.Y;
 					return;
@@ -2153,7 +2154,7 @@ public partial class Player : CommonObject
 		}
 		
 		// Perform right wall collision if not moving mostly left
-		if (moveQuad != 3)
+		if (moveQuadrant != 3)
 		{
 			int wallDistance = TileCollider.FindDistance(
 				new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
@@ -2164,7 +2165,7 @@ public partial class Player : CommonObject
 				TileCollider.Position = (Vector2I)Position;
 				Speed.X = 0f;
 				
-				if (moveQuad == 1)
+				if (moveQuadrant == 1)
 				{
 					GroundSpeed = Speed.Y;
 					return;
@@ -2173,14 +2174,14 @@ public partial class Player : CommonObject
 		}
 		
 		// Perform ceiling collision if not moving mostly down
-		if (moveQuad != 0)
+		if (moveQuadrant != 0)
 		{
 			(int roofDistance, float roofAngle) = TileCollider.FindClosestTile(
 				Radius.Shuffle(-1, -1), 
 				Radius.Shuffle(1, -1),
 				true, Constants.Direction.Negative);
 			
-			if (moveQuad == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
+			if (moveQuadrant == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
 			{
 				// Perform right wall collision if moving mostly left and too far into the ceiling
 				int wallDist = TileCollider.FindDistance(
@@ -2197,7 +2198,7 @@ public partial class Player : CommonObject
 			else if (roofDistance < 0)
 			{
 				Position -= new Vector2(0f, roofDistance);
-				if (moveQuad == 2 && Angles.GetQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
+				if (moveQuadrant == 2 && Angles.GetQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
 				{
 					Angle = roofAngle;
 					GroundSpeed = roofAngle < 180 ? -Speed.Y : Speed.Y;
@@ -2226,7 +2227,7 @@ public partial class Player : CommonObject
 		int distance;
 		float angle;
 
-		if (moveQuad == 0)
+		if (moveQuadrant == 0)
 		{
 			(int distanceL, float angleL) = TileCollider.FindTile(
 				Radius.Shuffle(-1, 1), 
@@ -2982,73 +2983,15 @@ public partial class Player : CommonObject
 			RotationDegrees = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
 		}
 	}
-
-	private void ProcessAnimate()
-	{
-		if (FrameworkData.UpdateObjects)
-		{
-			if (AnimationBuffer == Animations.None && AnimationTimer > 0f)
-			{
-				AnimationBuffer = Animation;
-			}
-		
-			if (AnimationTimer < 0)
-			{
-				if (Animation == AnimationBuffer)
-				{
-					Animation = Animations.Move;
-				}
-			
-				AnimationTimer = 0;
-				AnimationBuffer = Animations.None;
-			}
-			else if (AnimationBuffer != Animations.None)
-			{
-				AnimationTimer--;
-			}
-		}
-	
-		if (Animation != Animations.Spin || Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration()))
-		{
-			Sprite.Scale = new Vector2(Math.Abs(Sprite.Scale.X) * (float)Facing, Sprite.Scale.Y);
-		}
-		
-		//TODO: animation!!!!
-		switch (Type)
-		{
-			case Types.Sonic:
-				if (IsSuper)
-				{
-					//scr_player_animate_supersonic();
-				}
-				else
-				{
-					//scr_player_animate_sonic();
-				}
-				break;
-		
-			case Types.Tails:
-				//scr_player_animate_tails();
-				break;
-		
-			case Types.Knuckles:
-				//scr_player_animate_knuckles();
-				break;
-		
-			case Types.Amy:
-				//scr_player_animate_amy();
-				break;
-		}
-	}
 	
 	private void ProcessPalette()
 	{
 		int[] colours = Type switch
 		{
-			Types.Tails => new[] { 4, 5, 6 },
-			Types.Knuckles => new[] { 7, 8, 9 },
-			Types.Amy => new[] { 10, 11, 12 },
-			_ => new[] { 0, 1, 2, 3 }
+			Types.Tails => [4, 5, 6],
+			Types.Knuckles => [7, 8, 9],
+			Types.Amy => [10, 11, 12],
+			_ => [0, 1, 2, 3]
 		};
 
 		// Get current active colour
@@ -3117,6 +3060,80 @@ public partial class Player : CommonObject
 	
 		// Apply palette logic
 		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
+	}
+
+	#endregion
+	
+	#region Animation
+
+	private void ProcessAnimate()
+	{
+		if (FrameworkData.UpdateObjects)
+		{
+			if (AnimationBuffer == Animations.None && AnimationTimer > 0f)
+			{
+				AnimationBuffer = Animation;
+			}
+		
+			if (AnimationTimer < 0)
+			{
+				if (Animation == AnimationBuffer)
+				{
+					Animation = Animations.Move;
+				}
+			
+				AnimationTimer = 0;
+				AnimationBuffer = Animations.None;
+			}
+			else if (AnimationBuffer != Animations.None)
+			{
+				AnimationTimer--;
+			}
+		}
+	
+		if (Animation != Animations.Spin || Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration()))
+		{
+			Sprite.Scale = new Vector2(Math.Abs(Sprite.Scale.X) * (float)Facing, Sprite.Scale.Y);
+		}
+		
+		//TODO: ANIMATIONS!!!!
+		switch (Type)
+		{
+			case Types.Sonic when IsSuper: AnimateSuperSonic(); break;
+			case Types.Sonic: AnimateSuperSonic(); break;
+			case Types.Tails: AnimateTails(); break;
+			case Types.Knuckles: AnimateKnuckles(); break;
+			case Types.Amy: AnimateAmy(); break;
+			
+			case Types.None:
+			case Types.Global:
+			case Types.GlobalAI: break;
+		}
+	}
+
+	public void AnimateSuperSonic()
+	{
+		
+	}
+	
+	public void AnimateSonic()
+	{
+		
+	}
+
+	public void AnimateTails()
+	{
+		
+	}
+	
+	public void AnimateKnuckles()
+	{
+		
+	}
+	
+	public void AnimateAmy()
+	{
+		
 	}
 
 	#endregion

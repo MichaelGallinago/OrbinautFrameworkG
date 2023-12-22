@@ -20,17 +20,17 @@ public static class PaletteUtilities
 
     static PaletteUtilities()
     {
-        Colors = new List<int>();
+        Colors = [];
         Duration = new int[PaletteLimit];
         Timer = new int[PaletteLimit];
         Last = new int[PaletteLimit];
         Loop = new int[PaletteLimit];
         Index = Enumerable.Repeat(1, PaletteLimit).ToArray();
-        ColourId = new[] 
-        {
+        ColourId =
+        [
             Enumerable.Repeat(1, PaletteLimit).ToArray(), 
-            Enumerable.Repeat(1, PaletteLimit).ToArray() 
-        };
+            Enumerable.Repeat(1, PaletteLimit).ToArray()
+        ];
         SplitBound = FrameworkData.ViewSize.Y;
         UpdateFlag = true;
     }

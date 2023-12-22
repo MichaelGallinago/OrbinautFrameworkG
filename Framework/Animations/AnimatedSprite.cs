@@ -26,7 +26,7 @@ public partial class AnimatedSprite : AnimatedSprite2D
     {
         SpeedScale = 0f;
         Index = Frame;
-        Duration = new[] { 0 };
+        Duration = [0];
         Order = Array.Empty<int>();
         RespawnData = new AnimationRespawnData(Frame, Animation, Visible);
     }
@@ -95,7 +95,7 @@ public partial class AnimatedSprite : AnimatedSprite2D
     
     public void UpdateDuration(int[] duration)
     {
-        duration ??= new[] { 0 }; // TODO: check if not needed
+        duration ??= [0]; // TODO: check if not needed
         
         if (Timer < 0d)
         {
@@ -121,6 +121,6 @@ public partial class AnimatedSprite : AnimatedSprite2D
         
         Timer = 0d;
         Order = order ?? Array.Empty<int>();
-        Duration = duration ?? new[] { 0 };
+        Duration = duration ?? [0];
     }
 }
