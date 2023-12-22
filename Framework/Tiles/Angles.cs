@@ -41,15 +41,13 @@ public static class Angles
     
     public static float GetVector256(Vector2 distance)
     {
-        float ang360 = GetVector360(distance);
-        byte ang256 = GetByteAngle(ang360);
-	
-        return GetFloatAngle(ang256);
+        return GetFloatAngle(GetByteAngle(GetFloatVector(distance)));
     }
-    
-    public static float GetVector360(Vector2 distance)
+
+    public static float GetFloatVector(Vector2 distance)
     {
-        return (MathF.Atan2(distance.Y, distance.X) + 90f) % 360f;
+        //TODO: analyze the accuracy
+        return (360f - Mathf.RadToDeg(MathF.Atan2(distance.Y, distance.X)) + 90f) % 360f;
     }
     
     public static byte GetByteAngle(float angle)

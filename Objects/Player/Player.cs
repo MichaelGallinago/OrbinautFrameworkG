@@ -2132,13 +2132,12 @@ public partial class Player : CommonObject
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
-		GD.Print(moveQuadrant);
-		
 		// Perform left wall collision if not moving mostly right
 		if (moveQuadrant != 1)
 		{
 			int wallDistance = TileCollider.FindDistance(
 				new Vector2I(-wallRadius, 0), false, Constants.Direction.Negative);
+			
 			if (wallDistance < 0f)
 			{
 				Position -= new Vector2(wallDistance, 0f);
