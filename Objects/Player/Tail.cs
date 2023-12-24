@@ -23,10 +23,10 @@ public partial class Tail : CommonObject
 		SetBehaviour(BehaviourType.Unique);
 	}
 
-	protected override void Update(double processSpeed)
+	protected override void Update(float processSpeed)
 	{
 		// Get target player
-		if (Target == null || !IsInstanceValid(Target) || Target.Type != Player.Types.Tails)
+		if (!IsInstanceValid(Target) || Target.Type != Player.Types.Tails)
 		{
 			QueueFree();
 			return;

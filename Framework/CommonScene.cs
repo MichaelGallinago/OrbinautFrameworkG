@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Objects.Player;
+using Player = OrbinautFramework3.Objects.Player.Player;
 
 namespace OrbinautFramework3.Framework;
 
@@ -13,11 +14,11 @@ public abstract partial class CommonScene : Node2D
     public bool IsStage { get; protected set; }
     public CollisionTileMap CollisionTileMap { get; set; }
 
-    public event Action<double> PreUpdate;
-    public event Action<double> EarlyUpdate;
-    public event Action<double> Update;
-    public event Action<double> LateUpdate;
-    private event Action<double> PlayerUpdate;
+    public event Action<float> PreUpdate;
+    public event Action<float> EarlyUpdate;
+    public event Action<float> Update;
+    public event Action<float> LateUpdate;
+    private event Action<float> PlayerUpdate;
 
     public override void _Ready()
     {
@@ -34,9 +35,9 @@ public abstract partial class CommonScene : Node2D
         FrameworkData.CurrentScene = null;
     }
 
-    public override void _Process(double processSpeed)
+    public override void _Process(double deltaTime)
     {
-        processSpeed *= BaseFramerate;
+        var processSpeed = (float)(deltaTime * BaseFramerate);
         FrameworkData.ProcessSpeed = processSpeed;
         InputUtilities.Process();
         PreUpdate?.Invoke(processSpeed);

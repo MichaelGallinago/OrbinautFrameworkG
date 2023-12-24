@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player;
+using Player = OrbinautFramework3.Objects.Player.Player;
 
 namespace OrbinautFramework3.Framework.CommonObject;
 
@@ -54,14 +54,14 @@ public abstract partial class CommonObject : Node2D
 		FrameworkData.CurrentScene.LateUpdate -= LateUpdate;
 	}
 
-	private void PreUpdate(double processSpeed)
+	private void PreUpdate(float processSpeed)
 	{
 		PreviousPosition = Position;
 	}
 	
-	protected virtual void EarlyUpdate(double processSpeed) {}
-	protected virtual void Update(double processSpeed) {}
-	protected virtual void LateUpdate(double processSpeed) {}
+	protected virtual void EarlyUpdate(float processSpeed) {}
+	protected virtual void Update(float processSpeed) {}
+	protected virtual void LateUpdate(float processSpeed) {}
 	protected virtual void Initialize() {}
 
 	public void SetBehaviour(BehaviourType behaviour)

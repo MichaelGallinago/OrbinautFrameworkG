@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://1gciguema0rh"]
+
+[ext_resource type="Script" path="res://Objects/Common/PathSwapTrigger/PathSwapTriggerVertical.cs" id="1_cqh6t"]
+[ext_resource type="Texture2D" uid="uid://k1ir016cixbt" path="res://Objects/Common/PathSwapTrigger/path_swap_horizontal.png" id="2_e5ydh"]
+
+[node name="PathSwapTriggerVertical" type="Node2D" node_paths=PackedStringArray("Sprite")]
+script = ExtResource("1_cqh6t")
+_layerBelow = 1
+Sprite = NodePath("Sprite2D")
+Behaviour = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.501961)
+rotation = 1.5708
+texture = ExtResource("2_e5ydh")

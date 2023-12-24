@@ -4,13 +4,14 @@ using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
+using Player = OrbinautFramework3.Objects.Player.Player;
 using TileData = OrbinautFramework3.Framework.Tiles.TileData;
 
 namespace OrbinautFramework3.Framework;
 
 public static class FrameworkData
 {
-    public static double ProcessSpeed { get; set; }
+    public static float ProcessSpeed { get; set; }
     
     public static List<KeyboardControl> KeyboardControl { get; set; }
     public static bool GamepadVibration { get; set; }

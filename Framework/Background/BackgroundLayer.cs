@@ -17,31 +17,12 @@ public partial class BackgroundLayer : Sprite2D
     private Vector2 _shift;
     private int _height;
 
-    public override void _Ready()
-    {
-        if (RegionEnabled)
-        {
-            _height = (int)RegionRect.Size.Y;
-        }
-        else
-        {
-            _height = Texture.GetHeight();
-        }
-    }
+    public override void _Ready() => _height = RegionEnabled ? (int)RegionRect.Size.Y : Texture.GetHeight();
+    public override void _EnterTree() => FrameworkData.CurrentScene.LateUpdate += EndStep;
 
-    public override void _EnterTree()
-    {
-        FrameworkData.CurrentScene.LateUpdate += EndStep;
-    }
-
-    public override void _ExitTree()
-    {
-        FrameworkData.CurrentScene.LateUpdate -= EndStep;
-    }
-
-    private void EndStep(double processSpeed)
+    private void EndStep(float processSpeed)
     {
         if (!FrameworkData.UpdateEffects) return;
-        _shift += Scroll * (float)processSpeed;
+        _shift += Scroll * processSpeed;
     }
 }

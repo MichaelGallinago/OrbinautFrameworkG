@@ -92,19 +92,17 @@ public partial class Camera : Camera2D
 		return new Vector2I(position + sbyte.MinValue, position + FrameworkData.ViewSize.X + 320);
 	}
 
-	private void EndStep(double processSpeed)
+	private void EndStep(float processSpeed)
 	{
 		if (MainCamera != this) return;
 		var boundSpeed = 0f;
 		
 		if (FrameworkData.UpdateObjects)
 		{
-			var processSpeedF = (float)processSpeed;
-			
 			// Get boundary update speed
-			boundSpeed = Math.Max(2, BoundSpeed.X) * processSpeedF;
+			boundSpeed = Math.Max(2, BoundSpeed.X) * processSpeed;
 			
-			FollowTarget(processSpeedF);
+			FollowTarget(processSpeed);
 		}
 		
 		// Update boundaries

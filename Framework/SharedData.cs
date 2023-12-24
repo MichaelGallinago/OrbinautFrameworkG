@@ -1,5 +1,6 @@
 ﻿using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
+using Player = OrbinautFramework3.Objects.Player.Player;
 
 namespace OrbinautFramework3.Framework;
 

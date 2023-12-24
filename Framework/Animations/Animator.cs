@@ -21,7 +21,7 @@ public static class Animator
         Timer = 0d;
     }
 
-    public static void Process(double processSpeed)
+    public static void Process(float processSpeed)
     {
         //TODO: check this
         // Process sprite animation

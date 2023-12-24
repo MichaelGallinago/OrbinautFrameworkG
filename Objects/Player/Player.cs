@@ -360,23 +360,21 @@ public partial class Player : CommonObject
 		newPlayer.PlayerStep(FrameworkData.ProcessSpeed);
 	}
 
-	public void PlayerStep(double processSpeed)
+	public void PlayerStep(float processSpeed)
 	{
 		if (FrameworkData.IsPaused || !FrameworkData.UpdateObjects && !IsDead) return;
-		
-		var processSpeedF = (float)processSpeed; 
 		
 		// Process local input
 		UpdateInput();
 
 		// Process Edit Mode
-		if (ProcessEditMode(processSpeedF)) return;
+		if (ProcessEditMode(processSpeed)) return;
 	    
 		// Process CPU Player logic (return if flying in or respawning)
-		if (ProcessAI(processSpeedF)) return;
+		if (ProcessAI(processSpeed)) return;
 	    
 		// Process Restart Event
-		ProcessRestart(processSpeedF);
+		ProcessRestart(processSpeed);
 	    
 		// Process default player control routine
 		UpdatePhysics();
@@ -3132,12 +3130,6 @@ public partial class Player : CommonObject
 
 	#endregion
 	
-	public void SetInput(Buttons inputPress, Buttons inputDown)
-	{
-		InputPress = inputPress;
-		InputDown = inputDown;
-	}
-
 	public void ResetGravity()
 	{
 		Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
@@ -3171,6 +3163,12 @@ public partial class Player : CommonObject
 		Action = Actions.None;
 	
 		Radius = RadiusNormal;
+	}
+	
+	private void SetInput(Buttons inputPress, Buttons inputDown)
+	{
+		InputPress = inputPress;
+		InputDown = inputDown;
 	}
     
 	private void EditModeInit()
@@ -3319,7 +3317,7 @@ public partial class Player : CommonObject
 		else if (InputPress.C)
 		{
 			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) 
-			    is not Framework.CommonObject.CommonObject newObject) return true;
+			    is not CommonObject newObject) return true;
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)Facing, newObject.Scale.Y);
 			newObject.SetBehaviour(BehaviourType.Delete);

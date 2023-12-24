@@ -13,7 +13,7 @@ public partial class Block : CommonObject
         SetSolid(new Vector2I(16, 16));
     }
 
-    protected override void Update(double processSpeed)
+    protected override void Update(float processSpeed)
     {
         foreach (Player player in Player.Players)
         {
