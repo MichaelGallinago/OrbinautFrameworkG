@@ -292,6 +292,35 @@ public abstract partial class CommonObject : Node2D
 			LandOnSolid(player, this, type, -((int)yClip + gripY));
 		}
 	}
+	
+	public bool CheckCollision(CommonObject target, Constants.CollisionSensor type)
+	{
+		if (target is Player { ObjectInteraction: false }) return false;
+
+		switch (type)
+		{
+			case Constants.CollisionSensor.Hitbox:
+				break;
+			case Constants.CollisionSensor.HitboxExtra:
+				break;
+			case Constants.CollisionSensor.Trigger:
+				break;
+			case Constants.CollisionSensor.SolidU:
+				break;
+			case Constants.CollisionSensor.SolidD:
+				break;
+			case Constants.CollisionSensor.SolidL:
+				break;
+			case Constants.CollisionSensor.SolidR:
+				break;
+			case Constants.CollisionSensor.SolidAny:
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(type), type, null);
+		}
+
+		return false;
+	}
     
 	private static void LandOnSolid(Player player, CommonObject targetObject, Constants.SolidType type, int distance)
 	{

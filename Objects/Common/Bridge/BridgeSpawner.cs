@@ -15,7 +15,7 @@ public partial class BridgeSpawner : Node2D
         }
     }
     
-    [Export] private byte _logCount = 8;
+    [Export] private byte _logAmount = 8;
     [Export] private short _logOffset;
     [Export] private Texture2D _stampTexture;
 
@@ -60,15 +60,15 @@ public partial class BridgeSpawner : Node2D
     {
         if (!Engine.IsEditorHint()) return;
         
-        int length = _logSeparation * _logCount;
+        int length = _logSeparation * _logAmount;
         for (var drawX = 0; drawX < length; drawX += _logSeparation)
         {
-            DrawTexture(LogTexture, Position + new Vector2(drawX, 0f));
+            DrawTexture(LogTexture,  new Vector2(drawX, 0f));
         }
 
         if (_stampTexture == null) return;
-        DrawTexture(_stampTexture, Position - _stampSize);
-        DrawTexture(_stampTexture, Position + new Vector2(length, -_stampSize.Y));
+        DrawTexture(_stampTexture, -_stampSize);
+        DrawTexture(_stampTexture, new Vector2(length, -_stampSize.Y));
     }
 
     public override string[] _GetConfigurationWarnings() => _logTexture == null ? ["Please set `Log Texture`."] : [];
@@ -77,15 +77,15 @@ public partial class BridgeSpawner : Node2D
     {
         Node parent = GetParent();
         if (parent == null) return;
-        GD.Print("aboba");
-        var bridge = new Bridge(LogTexture, _logCount, _logSeparation);
+        
+        var bridge = new Bridge(LogTexture, _logAmount, _logSeparation);
         bridge.Position = Position;
         parent.CallDeferred("add_child", bridge);
         
         if (_stampTexture == null) return;
         
         SpawnStamp(parent, -_stampSize);
-        SpawnStamp(parent, new Vector2(_logCount * _logOffset, -_stampSize.Y));
+        SpawnStamp(parent, new Vector2(_logAmount * _logSeparation, -_stampSize.Y));
     }
 
     private void SpawnStamp(GodotObject parent, Vector2 offset)
