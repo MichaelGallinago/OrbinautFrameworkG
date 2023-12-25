@@ -22,6 +22,7 @@ public partial class BridgeSpawner : Node2D
     private Texture2D _logTexture;
     private Vector2 _stampSize;
     private int _logSeparation;
+    private int _length;
 
     public override void _Ready()
     {
@@ -38,6 +39,7 @@ public partial class BridgeSpawner : Node2D
         }
         
         _logSeparation = (int)LogTexture.GetSize().X + _logOffset;
+        _length = _logSeparation * _logAmount;
         
         if (Engine.IsEditorHint())
         {
@@ -60,15 +62,14 @@ public partial class BridgeSpawner : Node2D
     {
         if (!Engine.IsEditorHint()) return;
         
-        int length = _logSeparation * _logAmount;
-        for (var drawX = 0; drawX < length; drawX += _logSeparation)
+        for (var drawX = 0; drawX < _length; drawX += _logSeparation)
         {
             DrawTexture(LogTexture,  new Vector2(drawX, 0f));
         }
 
         if (_stampTexture == null) return;
         DrawTexture(_stampTexture, -_stampSize);
-        DrawTexture(_stampTexture, new Vector2(length, -_stampSize.Y));
+        DrawTexture(_stampTexture, new Vector2(_length, -_stampSize.Y));
     }
 
     public override string[] _GetConfigurationWarnings() => _logTexture == null ? ["Please set `Log Texture`."] : [];
@@ -79,13 +80,13 @@ public partial class BridgeSpawner : Node2D
         if (parent == null) return;
         
         var bridge = new Bridge(LogTexture, _logAmount, _logSeparation);
-        bridge.Position = Position;
+        bridge.Position = Position + new Vector2((_length - _logSeparation) / 2f, 0f);
         parent.CallDeferred("add_child", bridge);
         
         if (_stampTexture == null) return;
         
-        SpawnStamp(parent, -_stampSize);
-        SpawnStamp(parent, new Vector2(_logAmount * _logSeparation, -_stampSize.Y));
+        SpawnStamp(parent, -_stampSize / 2f);
+        SpawnStamp(parent, new Vector2(_length + _stampSize.X / 2f, -_stampSize.Y / 2f));
     }
 
     private void SpawnStamp(GodotObject parent, Vector2 offset)

@@ -338,7 +338,10 @@ public partial class Player : CommonObject
 		Id = Players.Count;
 		Players.Add(this);
 		FrameworkData.CurrentScene.AddPlayerStep(this);
-		FrameworkData.CurrentScene.PreUpdate += _ => TouchObjects.Clear();
+		FrameworkData.CurrentScene.PreUpdate += _ =>
+		{
+			TouchObjects.Clear();
+		};
 	}
 
 	public override void _ExitTree()

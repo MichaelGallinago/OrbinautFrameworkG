@@ -10,25 +10,26 @@ using Player;
 public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : CommonObject
 {
     private int _activeLogId;
-    private int _maxDepression;
+    private int _maxDip;
     private float _angle;
     private int _width;
 
     private Vector2[] _logPositions;
-    private int[] _depression;
+    private int[] _dip;
     private int _logSizeHalf;
 
     public override void _Ready()
     {
         _width = logAmount * logSize;
         _logPositions = new Vector2[logAmount];
-        _depression = new int[logAmount];
+        _dip = new int[logAmount];
         
         _logSizeHalf = logSize / 2;
+        int halfWidth = logAmount * _logSizeHalf - _logSizeHalf;
         for (var i = 0; i < logAmount; i++)
         {
-            _logPositions[i] = -new Vector2(logAmount * _logSizeHalf + logSize * i + _logSizeHalf, 0f);
-            _depression[i] = (i < logAmount / 2 ? i + 1 : logAmount - i) * 2;
+            _logPositions[i] = new Vector2(logSize * i - halfWidth, 0f);
+            _dip[i] = (i < logAmount / 2 ? i + 1 : logAmount - i) * 2;
         }
 
         // Player should not balance on this object
@@ -42,7 +43,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
     public override void _Draw()
     {
-        for (var i = 0; i < logAmount; i += logSize)
+        for (var i = 0; i < logAmount; i++)
         {
             DrawTexture(logTexture, _logPositions[i]);
         }
@@ -50,7 +51,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
     protected override void Update(float processSpeed)
     {
-        var maxDepression = 0;
+        var maxDip = 0;
 		var isPlayerTouch = false;
 		
 		foreach (Player player in Player.Players)
@@ -64,18 +65,17 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 			int activeLogId = Math.Clamp(
 				((int)(player.Position.X - Position.X) + logAmount * _logSizeHalf) / logSize + 1, 1, logAmount);
 				
-			int depressionValue = _depression[activeLogId - 1];
-			if (depressionValue > maxDepression)
+			int dip = _dip[activeLogId - 1];
+			if (dip > maxDip)
 			{
 				_activeLogId = activeLogId;
-				_maxDepression = depressionValue;
+				_maxDip = dip;
 				
 				// Remember current dip value for the next player
-				maxDepression = _maxDepression;
+				maxDip = _maxDip;
 			}
 			
-			player.Position += new Vector2(0f, 
-				MathF.Round(depressionValue * MathF.Sin(Mathf.DegToRad(_angle))) + 1);
+			player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))) + 1);
 		}
 
 		UpdateLogPositions();
@@ -87,22 +87,13 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
     private void UpdateLogPositions()
     {
+	    float sine = MathF.Sin(Mathf.DegToRad(_angle));
 	    for (var i = 0; i < logAmount; i++)
 	    {
-		    int logDifference = Math.Abs(i - _activeLogId + 1);
-		    var logDistance = 1;
+		    float logDifference = Math.Abs(i - _activeLogId + 1);
+		    float logDistance = 1f - logDifference / (i < _activeLogId ? _activeLogId : logAmount - _activeLogId + 1);
 			
-		    if (i < _activeLogId)
-		    {
-			    logDistance -= logDifference / _activeLogId;
-		    }
-		    else
-		    {
-			    logDistance -= logDifference / (logAmount - _activeLogId + 1);
-		    }
-			
-		    _logPositions[i].Y = MathF.Round(
-			    _maxDepression * MathF.Sin(Mathf.DegToRad(90 * logDistance) * MathF.Sin(Mathf.DegToRad(_angle))));
+		    _logPositions[i].Y = MathF.Round(_maxDip * MathF.Sin(Mathf.DegToRad(90 * logDistance)) * sine);
 	    }
     }
 

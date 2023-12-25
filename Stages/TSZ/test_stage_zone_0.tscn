@@ -11,7 +11,7 @@
 [ext_resource type="Script" path="res://Objects/Common/Block/Block.cs" id="6_ej1tq"]
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 [ext_resource type="PackedScene" uid="uid://djgcqtur5n565" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_horizontal.tscn" id="11_1127g"]
-[ext_resource type="PackedScene" uid="uid://3si7gmx3l372" path="res://Objects/Common/Bridge/bridge_spawner.tscn" id="12_svap5"]
+[ext_resource type="PackedScene" uid="uid://cr02pmwqgey42" path="res://Objects/Common/Bridge/tsz_bridge.tscn" id="12_ncrh2"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w0a6u"]
 shader = ExtResource("1_18cwq")
@@ -93,9 +93,6 @@ _layerLeft = 1
 _layerRight = 0
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
-[node name="BridgeSpawner" parent="." instance=ExtResource("12_svap5")]
-position = Vector2(1280, 896)
-
 [node name="Background" type="ParallaxBackground" parent="."]
 layer = -128
 script = ExtResource("3_i0vlt")
@@ -129,3 +126,15 @@ position = Vector2(0, 256)
 texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 256, 512, 64)
+
+[node name="BridgeTSZ" parent="." instance=ExtResource("12_ncrh2")]
+position = Vector2(6144, 1152)
+
+[node name="BridgeTSZ2" parent="." instance=ExtResource("12_ncrh2")]
+position = Vector2(6784, 1088)
+
+[node name="BridgeTSZ3" parent="." instance=ExtResource("12_ncrh2")]
+position = Vector2(8512, 1408)
+
+[node name="BridgeTSZ4" parent="." instance=ExtResource("12_ncrh2")]
+position = Vector2(1280, 896)
