@@ -2,12 +2,13 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
 using Player;
 
-public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : CommonObject
+public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : BaseObject
 {
     private int _activeLogId;
     private int _maxDip;
@@ -40,6 +41,42 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
         SetSolid(new Vector2I(logAmount * _logSizeHalf, _logSizeHalf));
         SetBehaviour(BehaviourType.Pause);
     }
+    
+    public override void _Process(double delta)
+    {
+	    var maxDip = 0;
+	    var isPlayerTouch = false;
+		
+	    foreach (Player player in Player.Players)
+	    {
+		    ActSolid(player, Constants.SolidType.Top);
+		    
+		    if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
+			
+		    isPlayerTouch = true;
+			
+		    int activeLogId = Math.Clamp(
+			    ((int)(player.Position.X - Position.X) + logAmount * _logSizeHalf) / logSize + 1, 1, logAmount);
+				
+		    int dip = _dip[activeLogId - 1];
+		    if (dip > maxDip)
+		    {
+			    _activeLogId = activeLogId;
+			    _maxDip = dip;
+				
+			    // Remember current dip value for the next player
+			    maxDip = _maxDip;
+		    }
+			
+		    player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))) + 1f);
+	    }
+
+	    UpdateLogPositions();
+
+	    UpdateAngle(isPlayerTouch, FrameworkData.ProcessSpeed);
+		
+	    QueueRedraw();
+    }
 
     public override void _Draw()
     {
@@ -48,43 +85,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
             DrawTexture(logTexture, _logPositions[i]);
         }
     }
-
-    protected override void Update(float processSpeed)
-    {
-        var maxDip = 0;
-		var isPlayerTouch = false;
-		
-		foreach (Player player in Player.Players)
-		{
-		    ActSolid(player, Constants.SolidType.Top);
-		    
-			if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
-			
-			isPlayerTouch = true;
-			
-			int activeLogId = Math.Clamp(
-				((int)(player.Position.X - Position.X) + logAmount * _logSizeHalf) / logSize + 1, 1, logAmount);
-				
-			int dip = _dip[activeLogId - 1];
-			if (dip > maxDip)
-			{
-				_activeLogId = activeLogId;
-				_maxDip = dip;
-				
-				// Remember current dip value for the next player
-				maxDip = _maxDip;
-			}
-			
-			player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))) + 1f);
-		}
-
-		UpdateLogPositions();
-
-		UpdateAngle(isPlayerTouch, processSpeed);
-		
-		QueueRedraw();
-    }
-
+    
     private void UpdateLogPositions()
     {
 	    float sine = MathF.Sin(Mathf.DegToRad(_angle));

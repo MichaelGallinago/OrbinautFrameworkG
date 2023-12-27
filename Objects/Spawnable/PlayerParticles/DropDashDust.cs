@@ -1,8 +1,9 @@
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
-public partial class DropDashDust : CommonObject
+public partial class DropDashDust : BaseObject
 {
     public override void _Ready()
     {

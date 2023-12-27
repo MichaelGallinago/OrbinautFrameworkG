@@ -18,11 +18,10 @@ public partial class BackgroundLayer : Sprite2D
     private int _height;
 
     public override void _Ready() => _height = RegionEnabled ? (int)RegionRect.Size.Y : Texture.GetHeight();
-    public override void _EnterTree() => FrameworkData.CurrentScene.LateUpdate += EndStep;
 
-    private void EndStep(float processSpeed)
+    public override void _Process(double delta)
     {
         if (!FrameworkData.UpdateEffects) return;
-        _shift += Scroll * processSpeed;
+        _shift += Scroll * FrameworkData.ProcessSpeed;
     }
 }

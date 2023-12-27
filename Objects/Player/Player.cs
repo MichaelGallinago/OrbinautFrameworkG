@@ -6,13 +6,14 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : CommonObject
+public partial class Player : BaseObject
 {
 	#region Constants
 
@@ -159,11 +160,11 @@ public partial class Player : CommonObject
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
-	public CommonObject PushingObject { get; set; }
+	public BaseObject PushingObject { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
-	public CommonObject OnObject { get; set; }
+	public BaseObject OnObject { get; set; }
 	public bool IsSuper { get; set; }
 	public bool IsInvincible { get; set; }
 	public int SuperValue { get; set; }
@@ -220,7 +221,7 @@ public partial class Player : CommonObject
 	public CommonStage Stage { get; set; }
 	public TileCollider TileCollider { get; set; }
 
-	public Dictionary<CommonObject, Constants.TouchState> TouchObjects { get; private set; }
+	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; private set; }
 
 	// Edit mode
 	public bool IsEditMode { get; private set; }
@@ -339,11 +340,6 @@ public partial class Player : CommonObject
 		base._EnterTree();
 		Id = Players.Count;
 		Players.Add(this);
-		FrameworkData.CurrentScene.AddPlayerStep(this);
-		FrameworkData.CurrentScene.PreUpdate += _ =>
-		{
-			TouchObjects.Clear();
-		};
 	}
 
 	public override void _ExitTree()
@@ -354,20 +350,22 @@ public partial class Player : CommonObject
 		{
 			Players[i].Id--;
 		}
-		FrameworkData.CurrentScene.RemovePlayerStep(this);
 		if (Players.Count == 0 || !IsCpuRespawn) return;
+		//TODO: check respawn Player cpu
 		var newPlayer = new Player
 		{
 			Type = Type,
 			Position = Players.First().Position
 		};
 
-		newPlayer.PlayerStep(FrameworkData.ProcessSpeed);
+		newPlayer._Process(FrameworkData.ProcessSpeed / Constants.BaseFramerate);
 	}
 
-	public void PlayerStep(float processSpeed)
+	public override void _Process(double delta)
 	{
 		if (FrameworkData.IsPaused || !FrameworkData.UpdateObjects && !IsDead) return;
+
+		float processSpeed = FrameworkData.ProcessSpeed;
 		
 		// Process local input
 		UpdateInput();
@@ -489,7 +487,7 @@ public partial class Player : CommonObject
 		{
 			if (!SharedData.CDCamera && Id == 0)
 			{
-				Camera.MainCamera.Delay.X = 16;
+				Camera.Main.Delay.X = 16;
 			}
 		
 			int baseSpeed = IsSuper ? 11 : 8;
@@ -562,7 +560,7 @@ public partial class Player : CommonObject
 			{
 				if (!SharedData.CDCamera && Id == 0)
 				{
-					Camera.MainCamera.Delay.X = 16;
+					Camera.Main.Delay.X = 16;
 				}
 			
 				if (SharedData.FixDashRelease)
@@ -675,7 +673,7 @@ public partial class Player : CommonObject
 					case Barrier.Types.Flame:
 						if (!SharedData.CDCamera)
 						{
-							Camera.MainCamera.Delay.X = 16;
+							Camera.Main.Delay.X = 16;
 						}
 						
 						IsAirLock = true;
@@ -896,7 +894,7 @@ public partial class Player : CommonObject
 			if (IsSuper)
 			{
 				UpdateDropDashGroundSpeed(13f, 12f);
-				Camera.MainCamera.ShakeTimer = 6;
+				Camera.Main.ShakeTimer = 6;
 			}
 			else
 			{
@@ -908,7 +906,7 @@ public partial class Player : CommonObject
 		
 			if (!SharedData.CDCamera)
 			{
-				Camera.MainCamera.Delay.X = 8;
+				Camera.Main.Delay.X = 8;
 			}
 			
 			//TODO: audio & obj_dust_dropdash
@@ -990,7 +988,7 @@ public partial class Player : CommonObject
 
 		if (!SharedData.FlightCancel || !InputDown.Down || !InputPress.Abc) return;
 		
-		Camera.MainCamera.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
+		Camera.Main.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
 		Radius= RadiusSpin;
 		Animation = Animations.Spin;
 		IsSpinning	= true;
@@ -1929,7 +1927,7 @@ public partial class Player : CommonObject
 	{
 		if (IsDead) return;
 	
-		var camera = Camera.MainCamera;
+		var camera = Camera.Main;
 	
 		// Note that position here is checked including subpixel
 		if (Position.X + Speed.X < camera.Limit.X + 16f)
@@ -2604,7 +2602,7 @@ public partial class Player : CommonObject
 	{
 		if (IsDead) return;
 		
-		var camera = Camera.MainCamera;
+		var camera = Camera.Main;
 		if (camera.Target != this) return;
 	
 		if (SharedData.CDCamera)
@@ -2836,11 +2834,11 @@ public partial class Player : CommonObject
 					Speed.Y = 0;
 					Gravity	= 0.0625f;
 					IsAirLock = true;
-					Camera.MainCamera.Target = null;
+					Camera.Main.Target = null;
 					return;
 				
 				case -1f:
-					if ((int)Position.Y <= Camera.MainCamera.BufferPosition.Y + SharedData.GameHeight + 276) return;
+					if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.GameHeight + 276) return;
 					
 					if (Id == 0)
 					{
@@ -3174,12 +3172,6 @@ public partial class Player : CommonObject
 	
 		Radius = RadiusNormal;
 	}
-	
-	private void SetInput(Buttons inputPress, Buttons inputDown)
-	{
-		InputPress = inputPress;
-		InputDown = inputDown;
-	}
     
 	private void EditModeInit()
 	{
@@ -3205,11 +3197,12 @@ public partial class Player : CommonObject
 	{
 		if (Id >= InputUtilities.DeviceCount)
 		{
-			SetInput(new Buttons(), new Buttons());
+			InputDown = InputPress = new Buttons();
 			return;
 		}
 	    
-		SetInput(InputUtilities.Press[Id], InputUtilities.Down[Id]);
+		InputPress = InputUtilities.Press[Id];
+		InputDown = InputUtilities.Down[Id];
 	}
 
 	private bool ProcessEditMode(float processSpeed)
@@ -3327,7 +3320,7 @@ public partial class Player : CommonObject
 		else if (InputPress.C)
 		{
 			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) 
-			    is not CommonObject newObject) return true;
+			    is not BaseObject newObject) return true;
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)Facing, newObject.Scale.Y);
 			newObject.SetBehaviour(BehaviourType.Delete);
@@ -3407,11 +3400,11 @@ public partial class Player : CommonObject
 		
 				if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
 				{
-					bound += Camera.MainCamera.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
+					bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
 				}
 				else
 				{
-					bound += Camera.MainCamera.BufferPosition.Y * processSpeed + SharedData.GameHeight;
+					bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.GameHeight;
 				}
 		
 				if ((int)Position.Y > bound)
@@ -3678,7 +3671,7 @@ public partial class Player : CommonObject
 		{
 			force = 12f;
 			maxSpeed = 13f;
-			Camera.MainCamera.UpdateShakeTimer(6);
+			Camera.Main.UpdateShakeTimer(6);
 		}
 		
 		if (Facing == Constants.Direction.Negative)
@@ -3725,7 +3718,7 @@ public partial class Player : CommonObject
 		
 		if (!FrameworkData.CDCamera)
 		{
-			Camera.MainCamera.UpdateDelay(8);
+			Camera.Main.UpdateDelay(8);
 		}
 		
 		Vector2 dustPosition = Position;

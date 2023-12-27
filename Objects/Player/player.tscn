@@ -5,8 +5,9 @@
 [ext_resource type="SpriteFrames" uid="uid://d05sdgk8gto6s" path="res://Objects/Player/player_sprite_frames.tres" id="3_x3aox"]
 
 [node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite")]
+process_priority = -1
 script = ExtResource("1_w3650")
-Type = 4
+Type = 1
 Sprite = NodePath("AnimatedSprite")
 
 [node name="AnimatedSprite" parent="." instance=ExtResource("2_4n0gr")]

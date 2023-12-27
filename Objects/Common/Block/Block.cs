@@ -1,19 +1,20 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.Block;
 
 using Player;
 
-public partial class Block : CommonObject
+public partial class Block : BaseObject
 {
     public Block()
     {
         SetSolid(new Vector2I(16, 16));
     }
 
-    protected override void Update(float processSpeed)
+    public override void _Process(double delta)
     {
         foreach (Player player in Player.Players)
         {

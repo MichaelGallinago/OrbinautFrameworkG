@@ -1,9 +1,10 @@
 using Godot;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.AirBubbler;
 
-public partial class AirBubbler : CommonObject
+public partial class AirBubbler : BaseObject
 {
     private int _state;
     private byte _waitTime;

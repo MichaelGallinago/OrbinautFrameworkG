@@ -3,6 +3,7 @@ using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3;
@@ -11,9 +12,9 @@ public partial class Camera : Camera2D
 {
 	private const byte CameraCentreOffset = 16;
 
-	public static Camera MainCamera { get; set; }
+	public static Camera Main { get; set; }
     
-	[Export] public CommonObject Target { get; set; }
+	[Export] public BaseObject Target { get; set; }
     
 	public Vector4I Bounds { get; private set; }
 		
@@ -54,51 +55,27 @@ public partial class Camera : Camera2D
 		
 		RawPosition = BufferPosition;
 	}
-
-	public override void _EnterTree()
-	{
-		FrameworkData.CurrentScene.LateUpdate += EndStep;
-		MainCamera ??= this;
-	}
+	
+	public override void _EnterTree() => Main ??= this;
 
 	public override void _ExitTree()
 	{
-		FrameworkData.CurrentScene.LateUpdate -= EndStep;
-		if (MainCamera == this)
+		if (Main == this)
 		{
-			MainCamera = null;
+			Main = null;
 		}
 	}
-
-	public void UpdateDelay(int? delayX = null, int? delayY = null)
+	
+	public override void _Process(double delta)
 	{
-		Delay = new Vector2(delayX ?? Delay.X, delayY ?? Delay.Y);
-	}
-
-	public void UpdateShakeTimer(int shakeTimer) => ShakeTimer = shakeTimer;
-
-	public Vector2I GetActiveArea()
-	{
-		var position = (int)Position.X;
+		if (Main != this) return;
 		
-		// Adjust the view_x based on whether the camera is the framework camera
-		if (MainCamera == this)
-		{
-			position += Constants.RenderBuffer;
-		}
-
-		position &= sbyte.MinValue;
-		
-		return new Vector2I(position + sbyte.MinValue, position + FrameworkData.ViewSize.X + 320);
-	}
-
-	private void EndStep(float processSpeed)
-	{
-		if (MainCamera != this) return;
 		var boundSpeed = 0f;
 		
 		if (FrameworkData.UpdateObjects)
 		{
+			float processSpeed = FrameworkData.ProcessSpeed;
+			
 			// Get boundary update speed
 			boundSpeed = Math.Max(2, BoundSpeed.X) * processSpeed;
 			
@@ -122,6 +99,28 @@ public partial class Camera : Camera2D
 		Position = finalPosition;
 		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
 			finalPosition.X + FrameworkData.ViewSize.X, finalPosition.Y + FrameworkData.ViewSize.Y);
+	}
+
+	public void UpdateDelay(int? delayX = null, int? delayY = null)
+	{
+		Delay = new Vector2(delayX ?? Delay.X, delayY ?? Delay.Y);
+	}
+
+	public void UpdateShakeTimer(int shakeTimer) => ShakeTimer = shakeTimer;
+
+	public Vector2I GetActiveArea()
+	{
+		var position = (int)Position.X;
+		
+		// Adjust the view_x based on whether the camera is the framework camera
+		if (Main == this)
+		{
+			position += Constants.RenderBuffer;
+		}
+
+		position &= sbyte.MinValue;
+		
+		return new Vector2I(position + sbyte.MinValue, position + FrameworkData.ViewSize.X + 320);
 	}
 
 	private static float MoveBoundaryForward(float limit, float bound, float position, float boundSpeed)
@@ -215,9 +214,8 @@ public partial class Camera : Camera2D
 
 	private static float CalculateSpeed(int difference, int threshold, float maxSpeed)
 	{
-		float distance = Math.Abs(difference);
-		return distance <= threshold ? 0 : 
-			Math.Clamp((distance - threshold) * Math.Sign(difference), -maxSpeed, maxSpeed);
+		int distance = Math.Abs(difference) - threshold;
+		return distance <= 0 ? 0 : Math.Clamp(distance * Math.Sign(difference), -maxSpeed, maxSpeed);
 	}
 	
 	

@@ -1,68 +1,43 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using OrbinautFramework3.Objects.Common.Bumper;
+using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Objects.Player;
 
-namespace OrbinautFramework3.Framework.CommonObject;
+namespace OrbinautFramework3.Framework.ObjectBase;
 
-public abstract partial class CommonObject : Node2D
+public abstract partial class BaseObject : Node2D
 {
 	public enum BehaviourType : byte
 	{
-		Active, Reset, Pause, Delete, Unique
+		NoBounds, Reset, Pause, Delete, Unique
 	}
     
 	[Export] public BehaviourType Behaviour { get; set; }
     
-	public static List<CommonObject> Objects { get; }
+	public static List<BaseObject> Objects { get; }
 	public ObjectRespawnData RespawnData { get; }
 	public SolidData SolidData { get; set; }
 	public Vector2 PreviousPosition { get; set; }
 
 	public InteractData InteractData;
  
-	static CommonObject()
+	static BaseObject()
 	{
 		Objects = [];
 	}
 
-	protected CommonObject()
+	protected BaseObject()
 	{
 		RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
 		InteractData = new InteractData();
 		SolidData = new SolidData();
 	}
-
-	public override void _EnterTree()
-	{
-		Objects.Add(this);
-
-		FrameworkData.CurrentScene.PreUpdate += PreUpdate;
-		FrameworkData.CurrentScene.EarlyUpdate += EarlyUpdate;
-		FrameworkData.CurrentScene.Update += Update;
-		FrameworkData.CurrentScene.LateUpdate += LateUpdate;
-	}
-
-	public override void _ExitTree()
-	{
-		Objects.Remove(this);
-        
-		FrameworkData.CurrentScene.PreUpdate -= PreUpdate;
-		FrameworkData.CurrentScene.EarlyUpdate -= EarlyUpdate;
-		FrameworkData.CurrentScene.Update -= Update;
-		FrameworkData.CurrentScene.LateUpdate -= LateUpdate;
-	}
-
-	private void PreUpdate(float processSpeed)
-	{
-		PreviousPosition = Position;
-	}
 	
-	protected virtual void EarlyUpdate(float processSpeed) {}
-	protected virtual void Update(float processSpeed) {}
-	protected virtual void LateUpdate(float processSpeed) {}
-	protected virtual void Initialize() {}
+	public virtual void Init() {}
+
+	public override void _EnterTree() => Objects.Add(this);
+	public override void _ExitTree() => Objects.Remove(this);
 
 	public void SetBehaviour(BehaviourType behaviour)
 	{
@@ -89,6 +64,12 @@ public abstract partial class CommonObject : Node2D
 	{
 		InteractData.RadiusExtra = radius;
 		InteractData.OffsetExtra = offset;
+	}
+
+	public void SetActivity(bool isActive)
+	{
+		SetProcess(isActive);
+		Visible = isActive;
 	}
 
 	public void ActSolid(Player player, Constants.SolidType type)
@@ -292,7 +273,7 @@ public abstract partial class CommonObject : Node2D
 		}
 	}
 	
-	public bool CheckCollision(CommonObject target, Constants.CollisionSensor type)
+	public bool CheckCollision(BaseObject target, Constants.CollisionSensor type)
 	{
 		if (target is Player { ObjectInteraction: false }) return false;
 
@@ -304,7 +285,7 @@ public abstract partial class CommonObject : Node2D
 		};
 	}
 	
-	private bool CheckHitboxCollision(CommonObject target, Constants.CollisionSensor type)
+	private bool CheckHitboxCollision(BaseObject target, Constants.CollisionSensor type)
 	{
 		if (!InteractData.IsInteract || !target.InteractData.IsInteract) return false;
 		var debugColor = new Color();
@@ -373,7 +354,7 @@ public abstract partial class CommonObject : Node2D
 		return true;
 	}
 
-	private bool CheckSolidCollision(CommonObject target, Constants.CollisionSensor type)
+	private bool CheckSolidCollision(BaseObject target, Constants.CollisionSensor type)
 	{
 		if (target is not Player player) return false;
 
@@ -405,7 +386,7 @@ public abstract partial class CommonObject : Node2D
 		};
 	}
     
-	private static void LandOnSolid(Player player, CommonObject targetObject, Constants.SolidType type, int distance)
+	private static void LandOnSolid(Player player, BaseObject targetObject, Constants.SolidType type, int distance)
 	{
 		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
 		{

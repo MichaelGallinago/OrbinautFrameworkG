@@ -2,12 +2,13 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.PathSwapTrigger;
 
 using Player;
 
-public abstract partial class PathSwapTrigger : CommonObject
+public abstract partial class PathSwapTrigger : BaseObject
 {
     [Export] protected Sprite2D Sprite;
     [Export] protected bool IsGroundOnly;
@@ -23,7 +24,7 @@ public abstract partial class PathSwapTrigger : CommonObject
         Borders = new Vector2(-size, size);
     }
 
-    protected override void Update(float processSpeed)
+    public override void _Process(double delta)
     {
         Visible = SharedData.DebugCollision > 0;
 
@@ -33,6 +34,6 @@ public abstract partial class PathSwapTrigger : CommonObject
             UpdatePlayerTileLayer(player);
         }
     }
-
+    
     protected abstract void UpdatePlayerTileLayer(Player player);
 }

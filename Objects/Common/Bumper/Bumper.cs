@@ -2,14 +2,14 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
-using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 
 namespace OrbinautFramework3.Objects.Common.Bumper;
 
 using Player;
 
-public partial class Bumper : CommonObject
+public partial class Bumper : BaseObject
 {
     // There is no limit in Sonic 2. Set to 10 to match S1 behaviour
     [Export] private int _hitsLeft = -1;
@@ -20,15 +20,10 @@ public partial class Bumper : CommonObject
     {
         //TODO: depth
         SetHitbox(new Vector2I(8, 8));
-    }
-
-    public override void _Ready()
-    {
-        SetProcess(false);
         _sprite.AnimationFinished += () => _sprite.Animation = "default";
     }
 
-    protected override void Update(float processSpeed)
+    public override void _Process(double delta)
     {
         foreach (Player player in Player.Players)
         {

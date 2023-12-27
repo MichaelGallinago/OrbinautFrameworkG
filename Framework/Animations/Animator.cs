@@ -23,7 +23,7 @@ public static class Animator
         SyncTimer = 0f;
     }
 
-    public static void Process(float processSpeed)
+    public static void Update(float processSpeed)
     {
         //TODO: check this
         // Process sprite animation
