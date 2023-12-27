@@ -75,7 +75,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 				maxDip = _maxDip;
 			}
 			
-			player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))) + 1);
+			player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))) + 1f);
 		}
 
 		UpdateLogPositions();

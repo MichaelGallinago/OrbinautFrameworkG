@@ -3,7 +3,6 @@ using Godot;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Objects.Player;
-using Player = OrbinautFramework3.Objects.Player.Player;
 
 namespace OrbinautFramework3.Framework;
 
@@ -57,4 +56,6 @@ public abstract partial class CommonScene : Node2D
     {
         PlayerUpdate -= player.PlayerStep;
     }
+
+    
 }

@@ -6,26 +6,28 @@ namespace OrbinautFramework3.Framework.Animations;
 public static class Animator
 {
     public static Dictionary<AnimatedSprite, float> AutoAnimatedSprites { get; }
+    public static Dictionary<AnimatedSprite, float> SyncSprites { get; }
     public static bool IsUpdating { get; private set; }
-    public static double Timer { get; private set; }
+    public static float SyncTimer { get; private set; }
 
     static Animator()
     {
         IsUpdating = true;
+        AutoAnimatedSprites = new Dictionary<AnimatedSprite, float>();
         AutoAnimatedSprites = new Dictionary<AnimatedSprite, float>();
     }
 
     public static void Reset()
     {
         IsUpdating = true;
-        Timer = 0d;
+        SyncTimer = 0f;
     }
 
     public static void Process(float processSpeed)
     {
         //TODO: check this
         // Process sprite animation
-        bool targetFlag = !FrameworkData.IsPaused && FrameworkData.UpdateEffects;
+        bool targetFlag = !FrameworkData.IsPaused && FrameworkData.UpdateAnimations;
 		
         if (IsUpdating != targetFlag)
         {
@@ -37,12 +39,9 @@ public static class Animator
             IsUpdating = targetFlag;
         }
 		
-        if (!FrameworkData.UpdateEffects || FrameworkData.IsPaused)
-        {
-            return;
-        }
-		
-        Timer += processSpeed;
+        if (!targetFlag) return;
+
+        SyncTimer += processSpeed;
 
         foreach (AnimatedSprite sprite in AnimatedSprite.Sprites)
         {
@@ -60,7 +59,7 @@ public static class Animator
             int loopIndex = isCustomOrder ? sprite.Order.Length : GetSpriteFrameCount(sprite);
             if (sprite.Sync)
             {
-                sprite.Index = (int)Timer / Mathf.Abs(duration) % loopIndex;
+                sprite.Index = (int)(SyncTimer / Mathf.Abs(duration)) % loopIndex;
             }
             else if (sprite.Timer > 0d)
             {

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cii7g248focye"]
+
+[ext_resource type="Texture2D" uid="uid://hq0skigsr0ks" path="res://Framework/Animations/unknown.png" id="1_aa6j4"]
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedAnimatedSprite.cs" id="2_nwdi7"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vxyum"]
+resource_local_to_scene = true
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_aa6j4")
+}],
+"loop": false,
+"name": &"default",
+"speed": 60.0
+}]
+
+[node name="AdvancedAnimatedSprite" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_vxyum")
+script = ExtResource("2_nwdi7")

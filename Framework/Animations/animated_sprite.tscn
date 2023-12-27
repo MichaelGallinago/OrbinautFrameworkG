@@ -3,7 +3,8 @@
 [ext_resource type="Script" path="res://Framework/Animations/AnimatedSprite.cs" id="1_00wlb"]
 [ext_resource type="Texture2D" uid="uid://hq0skigsr0ks" path="res://Framework/Animations/unknown.png" id="1_tegsv"]
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_e26w3"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_hphlj"]
+resource_local_to_scene = true
 animations = [{
 "frames": [{
 "duration": 1.0,
@@ -15,5 +16,5 @@ animations = [{
 }]
 
 [node name="AnimatedSprite" type="AnimatedSprite2D"]
-sprite_frames = SubResource("SpriteFrames_e26w3")
+sprite_frames = SubResource("SpriteFrames_hphlj")
 script = ExtResource("1_00wlb")

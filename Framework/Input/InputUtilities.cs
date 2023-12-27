@@ -7,7 +7,7 @@ public static class InputUtilities
 {
     private const byte KeyboardId = 0;
     private const byte BaseDeviceCount = 4;
-
+    
     public static List<Buttons> Down { get; }
     public static List<Buttons> Press { get; }
     public static List<bool> BlockInput { get; }

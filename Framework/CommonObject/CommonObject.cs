@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using OrbinautFramework3.Objects.Common.Bumper;
 using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework.CommonObject;
@@ -306,7 +307,6 @@ public abstract partial class CommonObject : Node2D
 	private bool CheckHitboxCollision(CommonObject target, Constants.CollisionSensor type)
 	{
 		if (!InteractData.IsInteract || !target.InteractData.IsInteract) return false;
-
 		var debugColor = new Color();
 
 		var targetOffset = new Vector2I();

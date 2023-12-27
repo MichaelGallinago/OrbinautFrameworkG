@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=15 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_18cwq"]
 [ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 [ext_resource type="PackedScene" uid="uid://djgcqtur5n565" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_horizontal.tscn" id="11_1127g"]
 [ext_resource type="PackedScene" uid="uid://cr02pmwqgey42" path="res://Objects/Common/Bridge/tsz_bridge.tscn" id="12_ncrh2"]
+[ext_resource type="PackedScene" uid="uid://b8uvs02jxyk0t" path="res://Objects/Common/Bumper/bumper.tscn" id="13_qd0sa"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w0a6u"]
 shader = ExtResource("1_18cwq")
@@ -138,3 +139,6 @@ position = Vector2(8512, 1408)
 
 [node name="BridgeTSZ4" parent="." instance=ExtResource("12_ncrh2")]
 position = Vector2(1280, 896)
+
+[node name="Bumper" parent="." instance=ExtResource("13_qd0sa")]
+position = Vector2(112, 840)

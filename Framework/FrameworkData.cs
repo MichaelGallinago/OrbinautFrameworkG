@@ -48,7 +48,7 @@ public static class FrameworkData
 
         KeyboardControl =
         [
-            new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right,
+            new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
                 Key.A, Key.S, Key.D, Key.Enter, Key.Space),
 
             new KeyboardControl(Key.None, Key.None, Key.None, Key.None,
@@ -75,5 +75,135 @@ public static class FrameworkData
         DeveloperMode = true;
         IsPaused = false;
         PlayerPhysics = Player.PhysicsTypes.S2;
+    }
+    
+    private static void UpdateEarly(float processSpeed)
+    {
+	    /*
+        if (AllowPause && input.press[0].start)
+		{
+			IsPaused = !IsPaused;
+			
+			//TODO: audio
+			/*
+			if (FrameworkData.IsPaused)
+			{	
+				audio_pause_all();
+			}
+			else
+			{
+				audio_resume_all();
+			}
+			*/
+	    /*
+		}
+		
+		if (UpdateTimer && !IsPaused)
+		{
+			Time += processSpeed;
+		}
+		
+		if (local_update_objects != UpdateObjects)
+		{
+			// Whenever update_objects is set from false to true, activate ALL objects (needed to make BEHAVE_NOBOUNDS objects work correctly)
+			if (UpdateObjects)
+			{
+				instance_activate_all();
+			}
+		
+			local_update_objects = UpdateObjects;
+		}
+	
+		if (!UpdateObjects || IsPaused)
+		{
+			// Deactivate objects
+			with c_object
+			{
+				if data_respawn.behaviour != BEHAVE_UNIQUE
+				{
+					instance_deactivate_object(id);
+				}
+			}
+			
+			exit;
+		}
+		
+		// Deactivate or reset objects outside the new active area
+		var _active_area = camera_get_active_area(camera.instance);
+		with c_object
+		{
+			switch data_respawn.behaviour
+			{
+				case BEHAVE_NOBOUNDS:
+				case BEHAVE_UNIQUE:
+				
+					continue;
+					
+				case BEHAVE_DELETE:
+				
+					if x < _active_area[0] || x > _active_area[1] || y < 0 || y > room_height
+					{
+						instance_destroy();
+					}
+					
+				continue;
+					
+				case BEHAVE_RESET:
+				
+					if x >= _active_area[0] && x <= _active_area[1]
+					{
+						continue;
+					}
+			
+					if data_respawn.start_x >= _active_area[0] && data_respawn.start_x <= _active_area[1]
+					{
+						x = -128;
+						y = -128;
+						visible = false;
+						
+						continue;
+					}
+
+					// Reset properties and re-initialise all variables
+					x = data_respawn.start_x;
+					y = data_respawn.start_y;
+					image_xscale = data_respawn.scale_x;
+					image_yscale = data_respawn.scale_y;
+					image_index = data_respawn.img_index;
+					sprite_index = data_respawn.spr_index;
+					visible = data_respawn.is_visible;
+					depth = data_respawn.priority;
+						
+					event_perform(ev_create, 0);
+					
+					instance_deactivate_object(id);
+					
+				continue;
+				
+				default: 
+				
+					if x >= _active_area[0] && x <= _active_area[1]
+					{
+						continue;
+					}
+					
+					if data_respawn.start_x < _active_area[0] || data_respawn.start_x > _active_area[1]
+					{
+						instance_deactivate_object(id);
+					}
+					
+				continue;
+			}
+		}
+		
+		// Activate objects within the new active area
+		instance_activate_region(_active_area[0], 0, _active_area[1] - _active_area[0], room_height, true);
+			
+		// Reset interaction flag for all active objects
+		with c_object
+		{
+			data_interact.interact = true;
+		}
+*/
     }
 }

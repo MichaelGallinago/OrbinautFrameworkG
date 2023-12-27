@@ -127,7 +127,9 @@ public partial class Player : CommonObject
 	{
 		GameOver, ResetLevel, RestartStage, RestartGame
 	}
-	
+
+	private static readonly uint[] ComboScoreValues = [10, 100, 200, 500, 1000, 10000];
+
 	#endregion
 
 	#region Variables
@@ -3136,6 +3138,11 @@ public partial class Player : CommonObject
 	public void ResetGravity()
 	{
 		Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
+	}
+
+	public void IncreaseComboScore(int comboCounter = 0)
+	{
+		ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
     
 	public void ResetState()
