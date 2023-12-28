@@ -21,7 +21,7 @@ public partial class BridgeSpawner : Node2D
 
     private Texture2D _logTexture;
     private Vector2 _stampSize;
-    private int _logSeparation;
+    private Vector2I _logSize;
     private int _length;
 
     public override void _Ready()
@@ -37,9 +37,10 @@ public partial class BridgeSpawner : Node2D
         {
             _stampSize = _stampTexture.GetSize();
         }
-        
-        _logSeparation = (int)LogTexture.GetSize().X + _logOffset;
-        _length = _logSeparation * _logAmount;
+
+        _logSize = (Vector2I)LogTexture.GetSize();
+        _logSize.X += _logOffset;
+        _length = _logSize.X * _logAmount;
         
         if (Engine.IsEditorHint())
         {
@@ -62,14 +63,15 @@ public partial class BridgeSpawner : Node2D
     {
         if (!Engine.IsEditorHint()) return;
         
-        for (var drawX = 0; drawX < _length; drawX += _logSeparation)
+        for (var drawX = 0; drawX < _length; drawX += _logSize.X)
         {
-            DrawTexture(LogTexture,  new Vector2(drawX, 0f));
+            DrawTexture(LogTexture,  new Vector2(drawX, -_logSize.Y / 2f));
         }
 
         if (_stampTexture == null) return;
-        DrawTexture(_stampTexture, -_stampSize);
-        DrawTexture(_stampTexture, new Vector2(_length, -_stampSize.Y));
+        float stampY = -_stampSize.Y * 1.5f;
+        DrawTexture(_stampTexture, new Vector2(-_stampSize.X, stampY));
+        DrawTexture(_stampTexture, new Vector2(_length, stampY));
     }
 
     public override string[] _GetConfigurationWarnings() => _logTexture == null ? ["Please set `Log Texture`."] : [];
@@ -78,23 +80,30 @@ public partial class BridgeSpawner : Node2D
     {
         Node parent = GetParent();
         if (parent == null) return;
-        
-        var bridge = new Bridge(LogTexture, _logAmount, _logSeparation);
-        bridge.Position = Position + new Vector2((_length - _logSeparation) / 2f, 0f);
+
+        var bridge = new Bridge(LogTexture, _logAmount, _logSize.X)
+        {
+            Position = Position + new Vector2((_length - _logSize.X) / 2f, 0f),
+            ProcessPriority = ProcessPriority,
+            ZIndex = ZIndex
+        };
         parent.CallDeferred("add_child", bridge);
         
         if (_stampTexture == null) return;
-        
-        SpawnStamp(parent, -_stampSize / 2f);
-        SpawnStamp(parent, new Vector2(_length + _stampSize.X / 2f, -_stampSize.Y / 2f));
+
+        float stampY = (_stampSize.Y + _logSize.Y) / -2f;
+        SpawnStamp(parent, new Vector2(-_stampSize.X / 2f, stampY));
+        SpawnStamp(parent, new Vector2(_length + _stampSize.X / 2f, stampY));
     }
 
     private void SpawnStamp(GodotObject parent, Vector2 offset)
     {
         //TODO: depth
-        var stamp = new Sprite2D();
-        stamp.Texture = _stampTexture;
-        stamp.Position = Position + offset;
+        var stamp = new Sprite2D
+        {
+            Texture = _stampTexture, 
+            Position = Position + offset
+        };
         parent.CallDeferred("add_child", stamp);
     }
 }

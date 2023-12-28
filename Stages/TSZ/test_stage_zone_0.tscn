@@ -129,16 +129,16 @@ region_enabled = true
 region_rect = Rect2(0, 256, 512, 64)
 
 [node name="BridgeTSZ" parent="." instance=ExtResource("12_ncrh2")]
-position = Vector2(6144, 1152)
+position = Vector2(6144, 1160)
 
 [node name="BridgeTSZ2" parent="." instance=ExtResource("12_ncrh2")]
-position = Vector2(6784, 1088)
+position = Vector2(6784, 1096)
 
 [node name="BridgeTSZ3" parent="." instance=ExtResource("12_ncrh2")]
-position = Vector2(8512, 1408)
+position = Vector2(8512, 1416)
 
 [node name="BridgeTSZ4" parent="." instance=ExtResource("12_ncrh2")]
-position = Vector2(1280, 896)
+position = Vector2(1280, 904)
 
 [node name="Bumper" parent="." instance=ExtResource("13_qd0sa")]
 position = Vector2(264, 816)

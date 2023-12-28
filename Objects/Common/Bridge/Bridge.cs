@@ -94,7 +94,8 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 		    float logDifference = Math.Abs(i - _activeLogId + 1);
 		    float logDistance = 1f - logDifference / (i < _activeLogId ? _activeLogId : logAmount - _activeLogId + 1);
 			
-		    _logPositions[i].Y = MathF.Round(_maxDip * MathF.Sin(Mathf.DegToRad(90 * logDistance)) * sine);
+		    _logPositions[i].Y = -_logSizeHalf +
+				MathF.Round(_maxDip * MathF.Sin(Mathf.DegToRad(90 * logDistance)) * sine);
 	    }
     }
 
