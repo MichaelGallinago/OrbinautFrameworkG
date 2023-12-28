@@ -14,15 +14,15 @@ shader_parameter/u_texelSize2 = null
 shader_parameter/u_index2 = PackedFloat32Array()
 shader_parameter/u_parallaxActive = false
 shader_parameter/u_offset = null
-shader_parameter/u_width = null
+shader_parameter/u_size = null
 shader_parameter/u_scaling = null
 shader_parameter/u_inclineHeight = null
 shader_parameter/u_inclineStep = null
-shader_parameter/u_height = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
 [node name="BackgroundLayer" type="Sprite2D"]
+process_priority = 1
 material = SubResource("ShaderMaterial_ycr7o")
 position = Vector2(256, 160)
 centered = false

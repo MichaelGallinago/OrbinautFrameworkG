@@ -2,6 +2,8 @@ namespace OrbinautFramework3.Framework;
 
 public static class Constants
 {
+	public const byte BaseFramerate = 60;
+	
 	public const byte RenderBuffer = 8;
 
 	// Input (keyboard and first gamepad slot are treated as one device)

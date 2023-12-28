@@ -1,9 +1,10 @@
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Spawnable.Barrier;
 
-public partial class Barrier(CommonObject target) : AnimatedSprite
+public partial class Barrier(BaseObject target) : AnimatedSprite
 {
     public enum Types : byte
     {
@@ -17,7 +18,7 @@ public partial class Barrier(CommonObject target) : AnimatedSprite
     
     public float Angle { get; set; }
     public States State { get; set; }
-    public CommonObject Target { get; set; } = target;
+    public BaseObject Target { get; set; } = target;
     public float AnimationTimer { get; set; } = -1f;
     
     private Types _type;

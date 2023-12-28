@@ -18,10 +18,10 @@ public static class CollisionUtilities
 
 	public static float GetRawTileAngle(int index)
 	{
-		return index > 0 ? FrameworkData.TileData.Angles[index % TileLimit] : 360f;
+		return index > 0 ? FrameworkData.TilesData.Angles[index % TileLimit] : 360f;
 	}
 
-	public static TileData LoadTileDataBinary(string anglesFileName, string heightsFileName, string widthsFileName)
+	public static TilesData LoadTileDataBinary(string anglesFileName, string heightsFileName, string widthsFileName)
 	{
 		var widths = new byte[TileLimit][];
 		var heights = new byte[TileLimit][];
@@ -31,10 +31,10 @@ public static class CollisionUtilities
 		LoadCollisionArrays(heights, OpenBinaryByName(heightsFileName));
 		LoadCollisionArrays(widths, OpenBinaryByName(widthsFileName));
 
-		return new TileData(heights, widths, angles);
+		return new TilesData(heights, widths, angles);
 	}
 
-	public static TileData GenerateTileData(Image tileMap, byte[] angleData, 
+	public static TilesData GenerateTileData(Image tileMap, byte[] angleData, 
 		Vector2I offset = new(), Vector2I separation = new())
 	{
 		var widths = new byte[TileLimit][];
@@ -53,7 +53,7 @@ public static class CollisionUtilities
 		FillCollisionDataFromTileMap(tileMap, heights, widths, offset, cellSize);
 		FillAnglesFromAngleData(angleData, angles);
 		
-		return new TileData(heights, widths, angles);
+		return new TilesData(heights, widths, angles);
 	}
 
 	private static void FillCollisionDataFromTileMap(Image tileMap, 

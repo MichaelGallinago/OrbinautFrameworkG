@@ -97,7 +97,7 @@ public partial class AnimatedSprite : AnimatedSprite2D
 
     public bool CheckInView()
     {
-        Vector4I bounds = Camera.MainCamera.Bounds;
+        Vector4I bounds = Camera.Main.Bounds;
         Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
         
         return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&

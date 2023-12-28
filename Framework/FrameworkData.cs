@@ -4,8 +4,8 @@ using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
-using Player = OrbinautFramework3.Objects.Player.Player;
-using TileData = OrbinautFramework3.Framework.Tiles.TileData;
+using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Common.Bumper;
 
 namespace OrbinautFramework3.Framework;
 
@@ -15,12 +15,13 @@ public static class FrameworkData
     
     public static List<KeyboardControl> KeyboardControl { get; set; }
     public static bool GamepadVibration { get; set; }
-    public static TileData TileData { get; }
+    public static TilesData TilesData { get; }
     public static bool CDTileFixes { get; set; }
     public static bool CDCamera { get; set; }
     public static bool UpdateAnimations { get; set; }
     public static bool UpdateEffects { get; set; }
     public static bool UpdateObjects { get; set; }
+    public static bool LastUpdateObjects { get; set; }
     public static bool UpdateTimer { get; set; }
     public static bool AllowPause { get; set; }
     public static bool DropDash { get; set; }
@@ -63,7 +64,7 @@ public static class FrameworkData
         CDTileFixes = true;
         CDCamera = true;
         DropDash = true;
-        TileData = CollisionUtilities.LoadTileDataBinary(
+        TilesData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
         ViewSize = new Vector2I(400, 224);
 
@@ -77,10 +78,9 @@ public static class FrameworkData
         PlayerPhysics = Player.PhysicsTypes.S2;
     }
     
-    private static void UpdateEarly(float processSpeed)
+    public static void UpdateEarly(float processSpeed)
     {
-	    /*
-        if (AllowPause && input.press[0].start)
+        if (AllowPause && InputUtilities.Press[0].Start)
 		{
 			IsPaused = !IsPaused;
 			
@@ -95,7 +95,6 @@ public static class FrameworkData
 				audio_resume_all();
 			}
 			*/
-	    /*
 		}
 		
 		if (UpdateTimer && !IsPaused)
@@ -103,107 +102,99 @@ public static class FrameworkData
 			Time += processSpeed;
 		}
 		
-		if (local_update_objects != UpdateObjects)
+		if (LastUpdateObjects != UpdateObjects)
 		{
 			// Whenever update_objects is set from false to true, activate ALL objects (needed to make BEHAVE_NOBOUNDS objects work correctly)
 			if (UpdateObjects)
 			{
-				instance_activate_all();
+				foreach (BaseObject commonObject in BaseObject.Objects)
+				{
+					commonObject.SetActivity(true);
+				}
 			}
 		
-			local_update_objects = UpdateObjects;
+			LastUpdateObjects = UpdateObjects;
 		}
 	
 		if (!UpdateObjects || IsPaused)
 		{
 			// Deactivate objects
-			with c_object
+			foreach (BaseObject commonObject in BaseObject.Objects)
 			{
-				if data_respawn.behaviour != BEHAVE_UNIQUE
-				{
-					instance_deactivate_object(id);
-				}
+				if (commonObject.Behaviour == BaseObject.BehaviourType.Unique) return;
+				commonObject.SetActivity(false);
 			}
-			
-			exit;
+
+			return;
 		}
 		
 		// Deactivate or reset objects outside the new active area
-		var _active_area = camera_get_active_area(camera.instance);
-		with c_object
-		{
-			switch data_respawn.behaviour
-			{
-				case BEHAVE_NOBOUNDS:
-				case BEHAVE_UNIQUE:
-				
-					continue;
-					
-				case BEHAVE_DELETE:
-				
-					if x < _active_area[0] || x > _active_area[1] || y < 0 || y > room_height
-					{
-						instance_destroy();
-					}
-					
-				continue;
-					
-				case BEHAVE_RESET:
-				
-					if x >= _active_area[0] && x <= _active_area[1]
-					{
-						continue;
-					}
-			
-					if data_respawn.start_x >= _active_area[0] && data_respawn.start_x <= _active_area[1]
-					{
-						x = -128;
-						y = -128;
-						visible = false;
-						
-						continue;
-					}
-
-					// Reset properties and re-initialise all variables
-					x = data_respawn.start_x;
-					y = data_respawn.start_y;
-					image_xscale = data_respawn.scale_x;
-					image_yscale = data_respawn.scale_y;
-					image_index = data_respawn.img_index;
-					sprite_index = data_respawn.spr_index;
-					visible = data_respawn.is_visible;
-					depth = data_respawn.priority;
-						
-					event_perform(ev_create, 0);
-					
-					instance_deactivate_object(id);
-					
-				continue;
-				
-				default: 
-				
-					if x >= _active_area[0] && x <= _active_area[1]
-					{
-						continue;
-					}
-					
-					if data_respawn.start_x < _active_area[0] || data_respawn.start_x > _active_area[1]
-					{
-						instance_deactivate_object(id);
-					}
-					
-				continue;
-			}
-		}
+		Vector2I activeArea = Camera.Main.GetActiveArea();
+		int limitBottom = Camera.Main.LimitBottom;
 		
-		// Activate objects within the new active area
-		instance_activate_region(_active_area[0], 0, _active_area[1] - _active_area[0], room_height, true);
-			
-		// Reset interaction flag for all active objects
-		with c_object
+		foreach (BaseObject commonObject in BaseObject.Objects)
 		{
-			data_interact.interact = true;
+			DeactivateObjectsByBehaviour(commonObject, limitBottom, ref activeArea);
+			
+			// Activate objects within the new active area and reset interaction flag for all active objects
+			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
+			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) continue;
+			commonObject.SetActivity(true);
+			commonObject.InteractData.IsInteract = true;
 		}
-*/
+    }
+    
+    private static void DeactivateObjectsByBehaviour(BaseObject commonObject, int limitBottom, ref Vector2I activeArea)
+    {		
+	    switch (commonObject.Behaviour)
+	    {
+		    case BaseObject.BehaviourType.NoBounds:
+		    case BaseObject.BehaviourType.Unique:
+			    break;
+					
+		    case BaseObject.BehaviourType.Delete:
+			    Vector2 position = commonObject.Position;
+			    if (position.X < activeArea.X || position.X > activeArea.Y || 
+			        position.Y < 0 || position.Y > limitBottom)
+			    {
+				    commonObject.QueueFree();
+			    }
+			    break;
+					
+		    case BaseObject.BehaviourType.Reset:
+			    if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) break;
+			    
+			    float resetX = commonObject.RespawnData.Position.X;
+			    if (resetX >= activeArea.X && resetX <= activeArea.Y)
+			    {
+				    commonObject.Position = new Vector2(sbyte.MinValue, sbyte.MinValue);
+				    commonObject.Hide();
+						
+				    break;
+			    }
+
+			    // Reset properties and re-initialise all variables
+			    commonObject.Position = commonObject.RespawnData.Position;
+			    commonObject.Scale = commonObject.RespawnData.Scale;
+			    //TODO: respawn sprite
+			    //image_index = data_respawn.img_index;
+			    //sprite_index = data_respawn.spr_index;
+			    commonObject.Visible = commonObject.RespawnData.IsVisible;
+			    commonObject.ZIndex = commonObject.RespawnData.ZIndex;
+					
+			    //TODO: replace to "Init"?
+			    commonObject.Init();
+					
+			    commonObject.SetActivity(false);
+			    break;
+				
+		    default: 
+			    if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) break;
+					
+			    float respawnX = commonObject.RespawnData.Position.X;
+			    if (respawnX >= activeArea.X && respawnX <= activeArea.Y) break;
+			    commonObject.SetActivity(false);
+			    break;
+	    }
     }
 }

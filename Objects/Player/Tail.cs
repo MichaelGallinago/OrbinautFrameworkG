@@ -3,10 +3,11 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.CommonObject;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Tail : CommonObject
+public partial class Tail : BaseObject
 {
 	[Export] public AnimatedSprite Sprite { get; private set; }
 	
@@ -22,8 +23,8 @@ public partial class Tail : CommonObject
 	{
 		SetBehaviour(BehaviourType.Unique);
 	}
-
-	protected override void Update(float processSpeed)
+	
+	public override void _Process(double delta)
 	{
 		// Get target player
 		if (!IsInstanceValid(Target) || Target.Type != Player.Types.Tails)
