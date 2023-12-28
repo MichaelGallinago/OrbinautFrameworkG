@@ -98,6 +98,8 @@ public partial class Camera : Camera2D
 		Position = finalPosition;
 		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
 			finalPosition.X + FrameworkData.ViewSize.X, finalPosition.Y + FrameworkData.ViewSize.Y);
+		
+		ForceUpdateScroll();
 	}
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
