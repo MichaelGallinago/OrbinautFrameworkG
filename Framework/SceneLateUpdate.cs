@@ -11,7 +11,6 @@ public partial class SceneLateUpdate : Node
     public override void _Process(double delta)
     {
         Animator.Update(FrameworkData.ProcessSpeed);
-        
         Update?.Invoke();
     }
 }

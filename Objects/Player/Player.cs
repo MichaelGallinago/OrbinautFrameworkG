@@ -4,7 +4,6 @@ using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
-using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
@@ -3597,12 +3596,10 @@ public partial class Player : BaseObject
 		Barrier.Type = Barrier.Types.None;
 		Animation = Animations.Death;
 		Gravity = GravityType.Default;
-		//y_vel = -7; // TODO: return variables
-		//x_vel = 0;
-		//ground_vel = 0;
+		Speed = new Vector2(0f, -7f);
+		GroundSpeed = 0f;
 		//Depth = 50; // TODO: Depth?
 		
-		// TODO: 
 		if (Id == 0)
 		{
 			FrameworkData.UpdateObjects = false;

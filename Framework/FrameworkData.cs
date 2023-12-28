@@ -137,14 +137,10 @@ public static class FrameworkData
 			DeactivateObjectsByBehaviour(commonObject, limitBottom, ref activeArea);
 			
 			// Activate objects within the new active area and reset interaction flag for all active objects
-			commonObject.InteractData.IsInteract = true;
 			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
 			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) continue;
-			if (commonObject is Bumper)
-			{
-				GD.Print(commonObject.InteractData.IsInteract);
-			}
 			commonObject.SetActivity(true);
+			commonObject.InteractData.IsInteract = true;
 		}
     }
     

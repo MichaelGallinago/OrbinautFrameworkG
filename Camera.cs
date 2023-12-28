@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 
