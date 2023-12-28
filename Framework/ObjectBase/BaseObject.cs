@@ -36,7 +36,11 @@ public abstract partial class BaseObject : Node2D
 	
 	public virtual void Init() {}
 
-	public override void _EnterTree() => Objects.Add(this);
+	public override void _EnterTree()
+	{
+		Objects.Add(this);
+	}
+
 	public override void _ExitTree() => Objects.Remove(this);
 
 	public void SetBehaviour(BehaviourType behaviour)

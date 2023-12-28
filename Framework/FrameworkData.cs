@@ -5,7 +5,7 @@ using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Common.Bumper;
 
 namespace OrbinautFramework3.Framework;
 
@@ -134,65 +134,71 @@ public static class FrameworkData
 		
 		foreach (BaseObject commonObject in BaseObject.Objects)
 		{
-			switch (commonObject.Behaviour)
-			{
-				case BaseObject.BehaviourType.NoBounds:
-				case BaseObject.BehaviourType.Unique:
-					continue;
-					
-				case BaseObject.BehaviourType.Delete:
-					Vector2 position = commonObject.Position;
-					if (position.X < activeArea.X || position.X > activeArea.Y 
-					    || position.Y < 0 || position.Y > limitBottom)
-					{
-						commonObject.QueueFree();
-					}
-					continue;
-					
-				case BaseObject.BehaviourType.Reset:
-					if (commonObject.Position.X >= activeArea.X && commonObject.Position.Y <= activeArea.Y) continue;
-
-					float resetX = commonObject.RespawnData.Position.X;
-					if (resetX >= activeArea.X && resetX <= activeArea.Y)
-					{
-						commonObject.Position = new Vector2(sbyte.MinValue, sbyte.MinValue);
-						commonObject.Hide();
-						
-						continue;
-					}
-
-					// Reset properties and re-initialise all variables
-					commonObject.Position = commonObject.RespawnData.Position;
-					commonObject.Scale = commonObject.RespawnData.Scale;
-					//TODO: respawn sprite
-					//image_index = data_respawn.img_index;
-					//sprite_index = data_respawn.spr_index;
-					commonObject.Visible = commonObject.RespawnData.IsVisible;
-					commonObject.ZIndex = commonObject.RespawnData.ZIndex;
-					
-					//TODO: replace to "Init"?
-					commonObject.Init();
-					
-					commonObject.SetActivity(false);
-					continue;
-				
-				default: 
-					if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) continue;
-					
-					float respawnX = commonObject.RespawnData.Position.X;
-					if (respawnX >= activeArea.X && respawnX <= activeArea.Y) continue;
-					commonObject.SetActivity(false);
-					continue;
-			}
-		}
-		
-		// Activate objects within the new active area and reset interaction flag for all active objects
-		foreach (BaseObject commonObject in BaseObject.Objects)
-		{
-			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
-			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) return;
-			commonObject.SetActivity(true);
+			DeactivateObjectsByBehaviour(commonObject, limitBottom, ref activeArea);
+			
+			// Activate objects within the new active area and reset interaction flag for all active objects
 			commonObject.InteractData.IsInteract = true;
+			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
+			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) continue;
+			if (commonObject is Bumper)
+			{
+				GD.Print(commonObject.InteractData.IsInteract);
+			}
+			commonObject.SetActivity(true);
 		}
+    }
+    
+    private static void DeactivateObjectsByBehaviour(BaseObject commonObject, int limitBottom, ref Vector2I activeArea)
+    {		
+	    switch (commonObject.Behaviour)
+	    {
+		    case BaseObject.BehaviourType.NoBounds:
+		    case BaseObject.BehaviourType.Unique:
+			    break;
+					
+		    case BaseObject.BehaviourType.Delete:
+			    Vector2 position = commonObject.Position;
+			    if (position.X < activeArea.X || position.X > activeArea.Y || 
+			        position.Y < 0 || position.Y > limitBottom)
+			    {
+				    commonObject.QueueFree();
+			    }
+			    break;
+					
+		    case BaseObject.BehaviourType.Reset:
+			    if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) break;
+			    
+			    float resetX = commonObject.RespawnData.Position.X;
+			    if (resetX >= activeArea.X && resetX <= activeArea.Y)
+			    {
+				    commonObject.Position = new Vector2(sbyte.MinValue, sbyte.MinValue);
+				    commonObject.Hide();
+						
+				    break;
+			    }
+
+			    // Reset properties and re-initialise all variables
+			    commonObject.Position = commonObject.RespawnData.Position;
+			    commonObject.Scale = commonObject.RespawnData.Scale;
+			    //TODO: respawn sprite
+			    //image_index = data_respawn.img_index;
+			    //sprite_index = data_respawn.spr_index;
+			    commonObject.Visible = commonObject.RespawnData.IsVisible;
+			    commonObject.ZIndex = commonObject.RespawnData.ZIndex;
+					
+			    //TODO: replace to "Init"?
+			    commonObject.Init();
+					
+			    commonObject.SetActivity(false);
+			    break;
+				
+		    default: 
+			    if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) break;
+					
+			    float respawnX = commonObject.RespawnData.Position.X;
+			    if (respawnX >= activeArea.X && respawnX <= activeArea.Y) break;
+			    commonObject.SetActivity(false);
+			    break;
+	    }
     }
 }

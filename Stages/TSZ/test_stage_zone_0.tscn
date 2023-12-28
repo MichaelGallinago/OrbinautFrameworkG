@@ -141,4 +141,4 @@ position = Vector2(8512, 1408)
 position = Vector2(1280, 896)
 
 [node name="Bumper" parent="." instance=ExtResource("13_qd0sa")]
-position = Vector2(112, 840)
+position = Vector2(264, 816)

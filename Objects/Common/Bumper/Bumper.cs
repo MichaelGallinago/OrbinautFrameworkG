@@ -20,6 +20,10 @@ public partial class Bumper : BaseObject
     {
         //TODO: depth
         SetHitbox(new Vector2I(8, 8));
+    }
+
+    public override void _Ready()
+    {
         _sprite.AnimationFinished += () => _sprite.Animation = "default";
     }
 
