@@ -43,6 +43,7 @@ animations = [{
 }]
 
 [node name="Bumper" type="Node2D" node_paths=PackedStringArray("_sprite")]
+z_index = -1
 script = ExtResource("1_ur7uk")
 _sprite = NodePath("AdvancedAnimatedSprite")
 Behaviour = 1

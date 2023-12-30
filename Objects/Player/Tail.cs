@@ -2,7 +2,6 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
-using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -133,10 +132,7 @@ public partial class Tail : BaseObject
 		}
 
 		//TODO: Check position & depth
-		//Position = Target.Position;
-		//depth = _player.depth + 1;
-		
-		// TODO: check Triangly
-		// visible = _player.visible;
+		Position = Target.Position;
+		ZIndex = Target.ZIndex - 1;
 	}
 }

@@ -98,7 +98,6 @@ public partial class BridgeSpawner : Node2D
 
     private void SpawnStamp(GodotObject parent, Vector2 offset)
     {
-        //TODO: depth
         var stamp = new Sprite2D
         {
             Texture = _stampTexture, 

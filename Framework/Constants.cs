@@ -39,17 +39,6 @@ public static class Constants
 		All, AllReset, Top, TopReset, Sides, ItemBox
 	}
 
-	public enum DepthType : sbyte
-	{
-		Background = -128,
-		Level = 0,
-		Lowest,
-		Below,
-		Enemy,
-		Default,
-		Above,
-	}
-
 	public enum FadeState : byte
 	{
 		None, Active, Max

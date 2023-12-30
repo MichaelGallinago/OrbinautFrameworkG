@@ -18,7 +18,6 @@ public partial class Bumper : BaseObject
 
     public Bumper()
     {
-        //TODO: depth
         SetHitbox(new Vector2I(8, 8));
     }
 

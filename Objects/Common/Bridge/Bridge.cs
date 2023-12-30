@@ -37,7 +37,6 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
         SolidData.NoBalance = true;
 
         // Properties
-        //TODO: depth
         SetSolid(new Vector2I(logAmount * _logSizeHalf, _logSizeHalf));
         SetBehaviour(BehaviourType.Pause);
     }

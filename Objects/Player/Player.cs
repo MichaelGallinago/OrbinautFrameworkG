@@ -681,8 +681,7 @@ public partial class Player : BaseObject
 
 						// TODO: SetAnimation
 						//Barrier.SetAnimation(, [2]);
-						// TODO: depth
-						//obj_set_priority(1);
+						ZIndex = -1;
 						
 						Barrier.AnimationTimer = 24f;
 						
@@ -2824,9 +2823,8 @@ public partial class Player : BaseObject
 					//TODO: audio
 					//audio_play_sfx(sfx_drown);
 					ResetState();
-					
-					//TODO: depth
-					//depth = 50;
+
+					ZIndex = 0;
 					Animation = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
 					Speed.X = 0;
@@ -3598,7 +3596,7 @@ public partial class Player : BaseObject
 		Gravity = GravityType.Default;
 		Speed = new Vector2(0f, -7f);
 		GroundSpeed = 0f;
-		//Depth = 50; // TODO: Depth?
+		ZIndex = 0;
 		
 		if (Id == 0)
 		{
