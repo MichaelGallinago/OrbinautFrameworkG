@@ -1930,7 +1930,7 @@ public partial class Player : BaseObject
 	{
 		if (IsDead) return;
 	
-		var camera = Camera.Main;
+		Camera camera = Camera.Main;
 	
 		// Note that position here is checked including subpixel
 		if (Position.X + Speed.X < camera.Limit.X + 16f)
@@ -2016,17 +2016,25 @@ public partial class Player : BaseObject
 
 		(int distance, float angle) = GroundMode switch
 		{
-			Constants.GroundMode.Floor => TileCollider.FindClosestTile(new Vector2I(-Radius.X, Radius.Y),
-				new Vector2I(Radius.X, Radius.Y), true, Constants.Direction.Positive),
+			Constants.GroundMode.Floor => TileCollider.FindClosestTile(
+				new Vector2I(-Radius.X, Radius.Y),
+				new Vector2I(Radius.X, Radius.Y), 
+				true, Constants.Direction.Positive),
 			
-			Constants.GroundMode.RightWall => TileCollider.FindClosestTile(new Vector2I(Radius.Y, Radius.X),
-				new Vector2I(Radius.Y, -Radius.X), false, Constants.Direction.Positive),
+			Constants.GroundMode.RightWall => TileCollider.FindClosestTile(
+				new Vector2I(Radius.Y, Radius.X),
+				new Vector2I(Radius.Y, -Radius.X), 
+				false, Constants.Direction.Positive),
 			
-			Constants.GroundMode.Ceiling => TileCollider.FindClosestTile(new Vector2I(Radius.X, -Radius.Y),
-				new Vector2I(-Radius.X, -Radius.Y), true, Constants.Direction.Negative),
+			Constants.GroundMode.Ceiling => TileCollider.FindClosestTile(
+				new Vector2I(Radius.X, -Radius.Y),
+				new Vector2I(-Radius.X, -Radius.Y), 
+				true, Constants.Direction.Negative),
 			
-			Constants.GroundMode.LeftWall => TileCollider.FindClosestTile(new Vector2I(-Radius.Y, -Radius.X), 
-				new Vector2I(-Radius.Y, Radius.X), false, Constants.Direction.Negative),
+			Constants.GroundMode.LeftWall => TileCollider.FindClosestTile(
+				new Vector2I(-Radius.Y, -Radius.X), 
+				new Vector2I(-Radius.Y, Radius.X), 
+				false, Constants.Direction.Negative),
 			
 			_ => throw new ArgumentOutOfRangeException()
 		};
