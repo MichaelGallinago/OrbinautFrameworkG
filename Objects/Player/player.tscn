@@ -21,13 +21,18 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="Player" type="Node2D"]
+[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite")]
 process_priority = -1
 z_index = -2
 script = ExtResource("1_w3650")
 Type = 1
+Sprite = NodePath("Sprite")
 Behaviour = 4
 
 [node name="Sprite" parent="." instance=ExtResource("2_3rkx6")]
 sprite_frames = SubResource("SpriteFrames_bsp8c")
-animation = &"new_animation"
+offset = Vector2(42, 0)
+AnimationOffset = Vector2(42, 0)
+_offsets = {
+"default": Vector2(42, 0)
+}

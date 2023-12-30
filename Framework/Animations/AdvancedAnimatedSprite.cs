@@ -1,6 +1,7 @@
 using System;
-using System.Collections.Generic;
+using Godot.Collections;
 using Godot;
+using CollectionExtensions = System.Collections.Generic.CollectionExtensions;
 
 namespace OrbinautFramework3.Framework.Animations;
 
@@ -19,7 +20,7 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
                 return;
             }
 
-            if (_frameLoops.TryAdd(Animation, value)) return;
+            if (CollectionExtensions.TryAdd(_frameLoops, Animation, value)) return;
             _frameLoops[Animation] = value;
         }
     }
@@ -32,17 +33,17 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
             Offset = value;
             if (value == Vector2.Zero)
             {
-                _frameLoops.Remove(Animation);
+                _offsets.Remove(Animation);
                 return;
             }
-            
-            if (_offsets.TryAdd(Animation, value)) return;
+
+            if (CollectionExtensions.TryAdd(_offsets, Animation, value)) return;
             _offsets[Animation] = value;
         }
     }
 
-    private Dictionary<StringName, int> _frameLoops;
-    private Dictionary<StringName, Vector2> _offsets;
+    [Export] private Dictionary<StringName, int> _frameLoops = [];
+    [Export] private Dictionary<StringName, Vector2> _offsets = [];
     
     public StringName NextAnimation { get; set; }
     
@@ -50,9 +51,6 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     
     public override void _Ready()
     {
-        _frameLoops = [];
-        _offsets = [];
-        
         AnimationChanged += UpdateValues;
         AnimationFinished += SetNextAnimation;
         AnimationLooped += LoopFrame;
@@ -66,13 +64,22 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 
     private void UpdateValues()
     {
-        _frameLoop = _frameLoops.GetValueOrDefault(Animation);
-        Offset = _offsets.GetValueOrDefault(Animation);
+        _frameLoop = CollectionExtensions.GetValueOrDefault(_frameLoops, Animation);
+        Offset = CollectionExtensions.GetValueOrDefault(_offsets, Animation);
     }
     
     private void SetNextAnimation()
     {
         if (NextAnimation == null) return;
         Animation = NextAnimation;
+    }
+    
+    public bool CheckInView()
+    {
+        Vector4I bounds = Camera.Main.Bounds;
+        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
+        
+        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
+               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
     }
 }

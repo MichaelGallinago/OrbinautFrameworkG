@@ -137,7 +137,8 @@ public partial class Player : BaseObject
 	public static List<Player> Players { get; }
     
 	[Export] public Types Type;
-	[Export] public AnimatedSprite Sprite { get; private set; }
+	[Export] public AdvancedAnimatedSprite Sprite { get; private set; }
+	private bool _isFrameChanged;
 
 	public int Id { get; private set; }
 	
@@ -332,6 +333,8 @@ public partial class Player : BaseObject
 		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 
 		TouchObjects = [];
+
+		Sprite.FrameChanged += () => _isFrameChanged = true;
 	}
 
 	public override void _EnterTree()
@@ -363,7 +366,7 @@ public partial class Player : BaseObject
 	public override void _Process(double delta)
 	{
 		if (FrameworkData.IsPaused || !FrameworkData.UpdateObjects && !IsDead) return;
-
+		
 		float processSpeed = FrameworkData.ProcessSpeed;
 		
 		// Process local input
@@ -389,6 +392,8 @@ public partial class Player : BaseObject
 		ProcessRotation();
 		ProcessAnimate();
 		ProcessPalette();
+
+		_isFrameChanged = false;
 	}
 	
 	#region UpdatePhysics
@@ -475,7 +480,7 @@ public partial class Player : BaseObject
 				var sound = audio_play_sfx(sfx_charge);
 				audio_sound_pitch(sound, ActionValue2);
 				*/
-				Sprite.UpdateFrame(0);
+				Sprite.Frame = 0;
 			}
 			else
 			{
@@ -1059,7 +1064,7 @@ public partial class Player : BaseObject
 		{
 			if (Speed.Y != 0)
 			{
-				Sprite.UpdateFrame(Mathf.FloorToInt(ActionValue / stepsPerFrame));
+				Sprite.Frame = Mathf.FloorToInt(ActionValue / stepsPerFrame);
 			}
 			return;
 		}
@@ -1215,14 +1220,14 @@ public partial class Player : BaseObject
 		switch (angle)
 		{
 			case < 30f or > 150f:
-				Sprite.UpdateFrame(0);
+				Sprite.Frame = 0;
 				break;
 			case < 60f or > 120f:
-				Sprite.UpdateFrame(1);
+				Sprite.Frame = 1;
 				break;
 			default:
 				Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
-				Sprite.UpdateFrame(2);
+				Sprite.Frame = 2;
 				break;
 		}
 
@@ -1244,7 +1249,7 @@ public partial class Player : BaseObject
 		if (Speed.X == 0f)
 		{
 			Land();
-			Sprite.UpdateFrame(1);
+			Sprite.Frame = 1;
 
 			Animation = Animations.GlideGround;
 			GroundLockTimer = 16;
@@ -1511,7 +1516,7 @@ public partial class Player : BaseObject
 		Facing = direction;
 		PushingObject = null;
 					
-		Sprite.UpdateFrame(0);
+		Sprite.Frame = 0;
 
 		return false;
 	}
@@ -1555,7 +1560,7 @@ public partial class Player : BaseObject
 			return;
 		}
 		
-		if (Animation != Animations.Move || !Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration())) return;
+		if (Animation != Animations.Move || !_isFrameChanged) return;
 		Animation = Animations.Push;
 	}
 
@@ -2045,7 +2050,7 @@ public partial class Player : BaseObject
 				PushingObject = null;
 				IsGrounded = false;
 						
-				Sprite.UpdateFrame(0);
+				Sprite.Frame = 0;
 				return;
 			}
 		}
@@ -3082,8 +3087,8 @@ public partial class Player : BaseObject
 				AnimationTimer--;
 			}
 		}
-	
-		if (Animation != Animations.Spin || Mathf.IsEqualApprox(Sprite.GetTimer(), Sprite.GetDuration()))
+		
+		if (Animation != Animations.Spin || _isFrameChanged)
 		{
 			Sprite.Scale = new Vector2(Math.Abs(Sprite.Scale.X) * (float)Facing, Sprite.Scale.Y);
 		}

@@ -14,9 +14,29 @@ public partial class BridgeSpawner : Node2D
             UpdateConfigurationWarnings();
         }
     }
-    
-    [Export] private byte _logAmount = 8;
-    [Export] private short _logOffset;
+
+    [Export] private byte LogAmount
+    {
+        get => _logAmount;
+        set
+        {
+            _logAmount = value;
+            UpdateLength();
+        }
+    }
+
+    [Export] private short LogOffset
+    {
+        get => _logOffset;
+        set 
+        {
+            _logOffset = value;
+            UpdateLength();
+        }
+    }
+
+    private byte _logAmount = 8;
+    private short _logOffset;
     [Export] private Texture2D _stampTexture;
 
     private Texture2D _logTexture;
@@ -38,9 +58,7 @@ public partial class BridgeSpawner : Node2D
             _stampSize = _stampTexture.GetSize();
         }
 
-        _logSize = (Vector2I)LogTexture.GetSize();
-        _logSize.X += _logOffset;
-        _length = _logSize.X * _logAmount;
+        UpdateLength();
         
         if (Engine.IsEditorHint())
         {
@@ -75,6 +93,13 @@ public partial class BridgeSpawner : Node2D
     }
 
     public override string[] _GetConfigurationWarnings() => _logTexture == null ? ["Please set `Log Texture`."] : [];
+
+    private void UpdateLength()
+    {
+        _logSize = (Vector2I)LogTexture.GetSize();
+        _logSize.X += _logOffset;
+        _length = _logSize.X * _logAmount;
+    }
 
     private void SpawnBridge()
     {
