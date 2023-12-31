@@ -102,4 +102,17 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
                Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
     }
+
+    public void SetAnimation(StringName animation, float customSpeed = 1f)
+    {
+        if (Animation == animation) return;
+        Play(animation, customSpeed);
+    }
+    
+    public void SetAnimation(StringName animation, int startFrame, float customSpeed = 1f)
+    {
+        if (Animation == animation) return;
+        Play(animation, customSpeed);
+        Frame = startFrame;
+    }
 }
