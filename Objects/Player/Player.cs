@@ -1600,7 +1600,8 @@ public partial class Player : BaseObject
 	private void RollOnGround(Constants.Direction direction)
 	{
 		var sign = (float)direction;
-		if (sign * GroundSpeed >= 0f)
+		float unsignedSpeed = sign * GroundSpeed;
+		if (unsignedSpeed >= 0f || Mathf.IsZeroApprox(unsignedSpeed))
 		{
 			Facing = direction;
 			PushingObject = null;

@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://Objects/Player/Player.cs" id="1_w3650"]
 [ext_resource type="PackedScene" uid="uid://cii7g248focye" path="res://Framework/Animations/advanced_animated_sprite.tscn" id="2_3rkx6"]
-[ext_resource type="Texture2D" uid="uid://hq0skigsr0ks" path="res://Framework/Animations/unknown.png" id="3_3nfia"]
 [ext_resource type="Texture2D" uid="uid://c0dcxkn3l54ff" path="res://Objects/Player/Sprites/Amy/balance.png" id="3_xirum"]
 [ext_resource type="Texture2D" uid="uid://d3riui6la2ve6" path="res://Objects/Player/Sprites/Amy/bounce.png" id="4_ockga"]
 [ext_resource type="Texture2D" uid="uid://bjy4mu35mxxrx" path="res://Objects/Player/Sprites/Amy/breathe.png" id="5_pnpxd"]
@@ -23,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://co7l1y4y7l8os" path="res://Objects/Player/Sprites/Amy/spindash.png" id="20_b70xb"]
 [ext_resource type="Texture2D" uid="uid://boqh1tiocs88u" path="res://Objects/Player/Sprites/Amy/transform.png" id="21_6rvoj"]
 [ext_resource type="Texture2D" uid="uid://b5xwlp1hwlr1m" path="res://Objects/Player/Sprites/Amy/walk.png" id="22_lxh2k"]
+[ext_resource type="Texture2D" uid="uid://dq75qrva0tkb8" path="res://Objects/Player/Sprites/spawner.png" id="23_udt4c"]
 [ext_resource type="Texture2D" uid="uid://lbm7kgy35d4t" path="res://Objects/Player/Sprites/Knuckles/bounce.png" id="24_uvwpf"]
 [ext_resource type="Texture2D" uid="uid://85nivsmcwl4m" path="res://Objects/Player/Sprites/Knuckles/breathe.png" id="25_7njhs"]
 [ext_resource type="Texture2D" uid="uid://cf6y2saxvbw1b" path="res://Objects/Player/Sprites/Knuckles/climb.png" id="26_vgwof"]
@@ -1820,7 +1820,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_3nfia")
+"texture": ExtResource("23_udt4c")
 }],
 "loop": true,
 "name": &"default",
@@ -3267,9 +3267,6 @@ Behaviour = 4
 
 [node name="Sprite" parent="." instance=ExtResource("2_3rkx6")]
 sprite_frames = SubResource("SpriteFrames_bsp8c")
-animation = &"tails_spin_dash"
-offset = Vector2(1, 4)
-AnimationOffset = Vector2(1, 4)
 _frameLoops = {
 "amy_duck": 1,
 "amy_lookup": 1,
