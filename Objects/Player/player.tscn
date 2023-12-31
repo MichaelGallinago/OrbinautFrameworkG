@@ -333,6 +333,30 @@ region = Rect2(50, 0, 25, 26)
 atlas = ExtResource("18_82g03")
 region = Rect2(75, 0, 25, 26)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_4qt1g"]
+atlas = ExtResource("20_b70xb")
+region = Rect2(0, 0, 30, 27)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ool32"]
+atlas = ExtResource("20_b70xb")
+region = Rect2(150, 0, 30, 27)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4orlw"]
+atlas = ExtResource("20_b70xb")
+region = Rect2(30, 0, 30, 27)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_omvn7"]
+atlas = ExtResource("20_b70xb")
+region = Rect2(60, 0, 30, 27)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1lxb5"]
+atlas = ExtResource("20_b70xb")
+region = Rect2(90, 0, 30, 27)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lbj31"]
+atlas = ExtResource("20_b70xb")
+region = Rect2(120, 0, 30, 27)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_qhs8e"]
 atlas = ExtResource("19_ae4fa")
 region = Rect2(0, 0, 49, 49)
@@ -364,30 +388,6 @@ region = Rect2(294, 0, 49, 49)
 [sub_resource type="AtlasTexture" id="AtlasTexture_5xo4y"]
 atlas = ExtResource("19_ae4fa")
 region = Rect2(343, 0, 49, 49)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_4qt1g"]
-atlas = ExtResource("20_b70xb")
-region = Rect2(0, 0, 30, 27)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ool32"]
-atlas = ExtResource("20_b70xb")
-region = Rect2(150, 0, 30, 27)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_4orlw"]
-atlas = ExtResource("20_b70xb")
-region = Rect2(30, 0, 30, 27)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_omvn7"]
-atlas = ExtResource("20_b70xb")
-region = Rect2(60, 0, 30, 27)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1lxb5"]
-atlas = ExtResource("20_b70xb")
-region = Rect2(90, 0, 30, 27)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lbj31"]
-atlas = ExtResource("20_b70xb")
-region = Rect2(120, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1bpi1"]
 atlas = ExtResource("21_6rvoj")
@@ -1710,35 +1710,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_qhs8e")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ruqn2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_s5pm7")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_sn6n8")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_oljjj")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ses43")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_h12bp")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5xo4y")
-}],
-"loop": true,
-"name": &"amy_spin_hammer",
-"speed": 60.0
-}, {
-"frames": [{
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_4qt1g")
 }, {
 "duration": 1.0,
@@ -1769,7 +1740,36 @@ animations = [{
 "texture": SubResource("AtlasTexture_ool32")
 }],
 "loop": true,
-"name": &"amy_spindash",
+"name": &"amy_spin_dash",
+"speed": 60.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhs8e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ruqn2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s5pm7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sn6n8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oljjj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ses43")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h12bp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5xo4y")
+}],
+"loop": true,
+"name": &"amy_spin_hammer",
 "speed": 60.0
 }, {
 "frames": [{
@@ -2263,7 +2263,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_akw28")
 }],
 "loop": true,
-"name": &"knuckles_spindash",
+"name": &"knuckles_spin_dash",
 "speed": 60.0
 }, {
 "frames": [{
@@ -2613,7 +2613,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_lr5pw")
 }],
 "loop": true,
-"name": &"sonic_spindash",
+"name": &"sonic_spin_dash",
 "speed": 60.0
 }, {
 "frames": [{
@@ -3165,7 +3165,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_rx3aq")
 }],
 "loop": true,
-"name": &"tails_spindash",
+"name": &"tails_spin_dash",
 "speed": 60.0
 }, {
 "frames": [{
@@ -3267,7 +3267,9 @@ Behaviour = 4
 
 [node name="Sprite" parent="." instance=ExtResource("2_3rkx6")]
 sprite_frames = SubResource("SpriteFrames_bsp8c")
-animation = &"sonic_drop_dash"
+animation = &"tails_spin_dash"
+offset = Vector2(1, 4)
+AnimationOffset = Vector2(1, 4)
 _frameLoops = {
 "amy_duck": 1,
 "amy_lookup": 1,
@@ -3303,8 +3305,8 @@ _offsets = {
 "amy_run_hammer": Vector2(1, -4),
 "amy_skid": Vector2(-4, 1),
 "amy_spin": Vector2(1, 0),
+"amy_spin_dash": Vector2(4, 4),
 "amy_spin_hammer": Vector2(1, 1),
-"amy_spindash": Vector2(4, 4),
 "amy_transform": Vector2(1, -3),
 "amy_walk": Vector2(2, -1),
 "knuckles_climb": Vector2(-2, 1),
@@ -3321,12 +3323,14 @@ _offsets = {
 "knuckles_push": Vector2(1, 2),
 "knuckles_run": Vector2(-4, 3),
 "knuckles_slide": Vector2(-2, 6),
+"knuckles_spin_dash": Vector2(4, 7),
 "knuckles_transform": Vector2(-2, -1),
 "knuckles_walk": Vector2(-1, 2),
 "sonic_balance_flip": Vector2(4, 2),
 "sonic_balance_panic": Vector2(4, 2),
 "sonic_balance_turn": Vector2(-7, 1),
 "sonic_breathe": Vector2(0, 2),
+"sonic_dash": Vector2(0, 4),
 "sonic_death": Vector2(-1, 0),
 "sonic_drown": Vector2(-1, 1),
 "sonic_duck": Vector2(4, 4),
@@ -3337,6 +3341,7 @@ _offsets = {
 "sonic_push": Vector2(-3, 2),
 "sonic_run": Vector2(1, 2),
 "sonic_skid": Vector2(1, 1),
+"sonic_spin_dash": Vector2(4, 7),
 "super_sonic_balance": Vector2(-7, -4),
 "super_sonic_bounce": Vector2(-3, 0),
 "super_sonic_breathe": Vector2(0, 2),
@@ -3367,6 +3372,7 @@ _offsets = {
 "tails_push": Vector2(1, 1),
 "tails_run": Vector2(-4, 0),
 "tails_skid": Vector2(-1, 0),
+"tails_spin_dash": Vector2(1, 4),
 "tails_swim": Vector2(-2, 0),
 "tails_swim_lift": Vector2(0, -6),
 "tails_swim_tired": Vector2(-1, -3),

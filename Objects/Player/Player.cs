@@ -2981,11 +2981,11 @@ public partial class Player : BaseObject
 	
 		if (SharedData.RotationMode > 0)
 		{
-			RotationDegrees = VisualAngle;
+			RotationDegrees = 360f - VisualAngle;
 		}
 		else
 		{
-			RotationDegrees = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
+			RotationDegrees = 360f - MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
 		}
 	}
 	
