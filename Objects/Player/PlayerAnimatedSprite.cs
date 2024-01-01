@@ -5,6 +5,7 @@ using OrbinautFramework3.Framework.Animations;
 
 namespace OrbinautFramework3.Objects.Player;
 
+[Tool]
 public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	public float AnimationTimer { get; set; }

@@ -48,7 +48,10 @@ public partial class BridgeSpawner : Node2D
     {
         if (LogTexture == null)
         {
+            #if TOOLS
             if (Engine.IsEditorHint()) return;
+            #endif
+            
             QueueFree();
             return;
         }
@@ -60,16 +63,19 @@ public partial class BridgeSpawner : Node2D
 
         UpdateLength();
         
+        #if TOOLS
         if (Engine.IsEditorHint())
         {
             QueueRedraw();
             return;
         }
+        #endif
 
         SpawnBridge();
         QueueFree();
     }
-
+    
+#if TOOLS
     public override void _Process(double delta)
     {
         if (!Engine.IsEditorHint()) return;
@@ -93,7 +99,8 @@ public partial class BridgeSpawner : Node2D
     }
 
     public override string[] _GetConfigurationWarnings() => _logTexture == null ? ["Please set `Log Texture`."] : [];
-
+#endif
+    
     private void UpdateLength()
     {
         _logSize = (Vector2I)LogTexture.GetSize();

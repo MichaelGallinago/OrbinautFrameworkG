@@ -6,6 +6,8 @@ namespace OrbinautFramework3.Framework.Animations;
 [Tool, GlobalClass]
 public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 {
+    public StringName NextAnimation { get; set; }
+    
     [Export] private int FrameLoop
     {
         get => _frameLoop;
@@ -21,27 +23,9 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
             _advancedSpriteFrames?.SetAnimationFrameLoop(Animation, _frameLoop);
         }
     }
-
-    [Export] private Vector2 AnimationOffset
-    {
-        get => Offset;
-        set
-        {
-            Offset = value;
-            if (value == default)
-            {
-                _advancedSpriteFrames?.RemoveAnimationOffset(Animation);
-                return;
-            }
-            
-            _advancedSpriteFrames?.SetAnimationOffset(Animation, value);
-        }
-    }
-
-    public StringName NextAnimation { get; set; }
     
-    private AdvancedSpriteFrames _advancedSpriteFrames;
     private int _frameLoop;
+    private AdvancedSpriteFrames _advancedSpriteFrames;
     
     public override void _Ready()
     {
@@ -50,16 +34,35 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         AnimationLooped += LoopFrame;
         SpriteFramesChanged += UpdateSpriteFrames;
         UpdateSpriteFrames();
+        
+        #if TOOLS
+        if (!Engine.IsEditorHint())
+        {
+            SetProcess(false);
+        }
+        #endif
     }
+    
+#if TOOLS
+    public override void _Process(double delta)
+    {
+        if (_advancedSpriteFrames == null) return;
+        Vector2 lastOffset = _advancedSpriteFrames.GetAnimationOffset(Animation);
+        if (lastOffset == default || lastOffset == Offset) return;
+        _advancedSpriteFrames.SetAnimationOffset(Animation, Offset);
+    }
+#endif
 
     private void UpdateSpriteFrames()
     {
         _advancedSpriteFrames = SpriteFrames as AdvancedSpriteFrames;
-       
+        
+        #if TOOLS
         if (Engine.IsEditorHint() && _advancedSpriteFrames != null)
         {
             AnimationChanged += _advancedSpriteFrames.Refresh;
         }
+        #endif
     }
 
     private void LoopFrame()

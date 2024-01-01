@@ -13,5 +13,8 @@ Sprite = NodePath("AdvancedAnimatedSprite")
 Behaviour = 4
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(5, -8)
 sprite_frames = ExtResource("2_qd5xx")
+animation = &"balance"
+offset = Vector2(-5, 8)
 script = ExtResource("105_mpaxa")
