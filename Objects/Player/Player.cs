@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
@@ -83,45 +82,6 @@ public partial class Player : BaseObject
 	{
 		Normal, Ledge
 	}
-    
-	public enum Animations : byte
-	{
-		None,
-		Idle,
-		Move,
-		Spin,
-		DropDash,
-		SpinDash,
-		Push,
-		Duck,
-		LookUp,
-		Fly,
-		FlyTired,
-		Swim,
-		SwimTired,
-		Hurt,
-		Death,
-		Drown,
-		GlideAir,
-		GlideFall,
-		GlideGround,
-		GlideLand,
-		ClimbWall,
-		ClimbLedge,
-		Skid,
-		Balance,
-		BalanceFlip,
-		BalancePanic,
-		BalanceTurn,
-		Bounce,
-		Transform,
-		Breathe,
-		HammerSpin,
-		HammerRush,
-		FlyLift,
-		SwimLift,
-		Grab
-	}
 
 	public enum RestartStates : byte
 	{
@@ -137,8 +97,7 @@ public partial class Player : BaseObject
 	public static List<Player> Players { get; }
     
 	[Export] public Types Type;
-	[Export] public AdvancedAnimatedSprite Sprite { get; private set; }
-	private bool _isFrameChanged;
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 
 	public int Id { get; private set; }
 	
@@ -177,9 +136,6 @@ public partial class Player : BaseObject
 	public Barrier Barrier { get; set; }
     
 	public Constants.Direction Facing { get; set; }
-	public Animations Animation { get; set; }
-	public Animations AnimationBuffer { get; set; }
-	public float AnimationTimer { get; set; }
 	public float VisualAngle { get; set; }
     
 	public int CameraViewTimer { get; set; }
@@ -278,7 +234,7 @@ public partial class Player : BaseObject
 		ObjectInteraction = true;
 		Barrier = new Barrier(this);
 		Facing = Constants.Direction.Positive;
-		Animation = Animations.Idle;
+		Sprite.AnimationType = Animations.Idle;
 		AirTimer = 1800f;
 		CpuState = CpuStates.Main;
 		RestartState = RestartStates.GameOver;
@@ -333,8 +289,6 @@ public partial class Player : BaseObject
 		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 
 		TouchObjects = [];
-
-		Sprite.FrameChanged += () => _isFrameChanged = true;
 	}
 
 	public override void _EnterTree()
@@ -390,10 +344,8 @@ public partial class Player : BaseObject
 		UpdateCollision();
 		RecordData();
 		ProcessRotation();
-		ProcessAnimate();
+		Sprite.Animate(new AnimationData(Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue));
 		ProcessPalette();
-
-		_isFrameChanged = false;
 	}
 	
 	#region UpdatePhysics
@@ -443,11 +395,11 @@ public partial class Player : BaseObject
 		if (!SharedData.SpinDash || !IsGrounded) return false;
 	
 		// Start Spin Dash (initial charge)
-		if (Action == Actions.None && Animation is Animations.Duck or Animations.GlideLand)
+		if (Action == Actions.None && Sprite.AnimationType is Animations.Duck or Animations.GlideLand)
 		{
 			if (!InputPress.Abc || !InputDown.Down) return false;
 			
-			Animation = Animations.SpinDash;
+			Sprite.AnimationType = Animations.SpinDash;
 			Action = Actions.SpinDash;
 			ActionValue = 0;
 			ActionValue2 = 1;
@@ -498,7 +450,7 @@ public partial class Player : BaseObject
 		
 			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 			Radius = RadiusSpin;
-			Animation = Animations.Spin;
+			Sprite.AnimationType = Animations.Spin;
 			IsSpinning = true;
 			Action = Actions.None;
 			GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2) * (float)Facing;
@@ -525,9 +477,9 @@ public partial class Player : BaseObject
 		if (!SharedData.PeelOut || Type != Types.Sonic || Id > 0 || !IsGrounded) return false;
 	
 		// Start Super Peel Out
-		if (Action == Actions.None && Animation == Animations.LookUp && InputDown.Up && InputPress.Abc)
+		if (Action == Actions.None && Sprite.AnimationType == Animations.LookUp && InputDown.Up && InputPress.Abc)
 		{
-			Animation = Animations.Move;
+			Sprite.AnimationType = Animations.Move;
 			Action = Actions.PeelOut;
 			ActionValue = 0;
 			ActionValue2 = 0;
@@ -590,8 +542,8 @@ public partial class Player : BaseObject
 		
 		if (Type == Types.Amy && Action == Actions.None && Speed.Y >= 0)
 		{
-			Animation = Animations.Spin;
-			SetHitboxExtra(new Vector2I(0, 0));
+			Sprite.AnimationType = Animations.Spin;
+			SetHitboxExtra(Vector2I.Zero);
 		}
 		
 		if (!InputDown.Abc)
@@ -615,8 +567,8 @@ public partial class Player : BaseObject
 			IsSuper = true;
 			Action = Actions.Transform;
 			ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26 : 36;
-			Animation = Animations.Transform;
-			AnimationTimer = Type == Types.Sonic ? 39 : 36;
+			Sprite.AnimationType = Animations.Transform;
+			Sprite.AnimationTimer = Type == Types.Sonic ? 39 : 36;
 			
 			// return player control routine
 			return true;
@@ -737,7 +689,7 @@ public partial class Player : BaseObject
 				IsAirLock = false;
 				IsSpinning = false;
 				IsJumping = false;	
-				Animation = Animations.GlideAir;	
+				Sprite.AnimationType = Animations.GlideAir;	
 				Action = Actions.Glide;
 				ActionState = (int)GlideStates.Air;
 				ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
@@ -756,7 +708,7 @@ public partial class Player : BaseObject
 				
 				Speed.Y = PhysicParams.MinimalJumpVelocity;
 				IsAirLock = false;
-				Animation = Animations.HammerSpin;
+				Sprite.AnimationType = Animations.HammerSpin;
 				Action = Actions.HammerSpin;
 				ActionValue = 0;
 				// TODO: audio
@@ -803,11 +755,11 @@ public partial class Player : BaseObject
 		if (Type == Types.Amy)
 		{
 			SetHitboxExtra(new Vector2I(25, 25));
-			Animation = Animations.HammerSpin;
+			Sprite.AnimationType = Animations.HammerSpin;
 		}
 		else
 		{
-			Animation = Animations.Spin;
+			Sprite.AnimationType = Animations.Spin;
 		}
 		
 		//TODO: audio
@@ -868,9 +820,9 @@ public partial class Player : BaseObject
 				}
 				else 
 				{
-					if (Animation != Animations.DropDash)
+					if (Sprite.AnimationType != Animations.DropDash)
 					{
-						Animation = Animations.DropDash;
+						Sprite.AnimationType = Animations.DropDash;
 						//TODO: audio
 						//audio_play_sfx(sfx_charge);
 					}
@@ -880,7 +832,7 @@ public partial class Player : BaseObject
 			{
 				if (Mathf.IsEqualApprox(ActionValue, maxDropDashCharge))
 				{		
-					Animation = Animations.Spin;
+					Sprite.AnimationType = Animations.Spin;
 					Action = Actions.DropDashCancel;
 				}
 			
@@ -904,7 +856,7 @@ public partial class Player : BaseObject
 				UpdateDropDashGroundSpeed(12f, 8f);
 			}
 		
-			Animation = Animations.Spin;
+			Sprite.AnimationType = Animations.Spin;
 			IsSpinning = true;
 		
 			if (!SharedData.CDCamera)
@@ -949,13 +901,13 @@ public partial class Player : BaseObject
 			{
 				if (!IsUnderwater)
 				{
-					Animation = Animations.FlyTired;
+					Sprite.AnimationType = Animations.FlyTired;
 					//TODO: audio
 					//audio_play_sfx(sfx_flight2, true);
 				}
 				else
 				{
-					Animation = Animations.SwimTired;
+					Sprite.AnimationType = Animations.SwimTired;
 				}
 			
 				Gravity = GravityType.TailsDown;
@@ -966,11 +918,11 @@ public partial class Player : BaseObject
 			{	
 				if (!IsUnderwater)
 				{
-					Animation = CarryTarget == null ? Animations.Fly : Animations.FlyLift;
+					Sprite.AnimationType = CarryTarget == null ? Animations.Fly : Animations.FlyLift;
 				}
 				else
 				{
-					Animation = CarryTarget == null ? Animations.Swim : Animations.SwimLift;
+					Sprite.AnimationType = CarryTarget == null ? Animations.Swim : Animations.SwimLift;
 				}
 			
 				if (!IsUnderwater || CarryTarget == null)
@@ -997,7 +949,7 @@ public partial class Player : BaseObject
 		
 		Camera.Main.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
 		Radius = RadiusSpin;
-		Animation = Animations.Spin;
+		Sprite.AnimationType = Animations.Spin;
 		IsSpinning	= true;
 		Action = Actions.None;
 		
@@ -1020,7 +972,7 @@ public partial class Player : BaseObject
 				switch (ActionValue++)
 				{
 					case 0f: // Frame 0
-						Animation = Animations.ClimbLedge;
+						Sprite.AnimationType = Animations.ClimbLedge;
 						Position += new Vector2(3f * (float)Facing, -2f);
 						break;
 					
@@ -1034,7 +986,7 @@ public partial class Player : BaseObject
 					
 					case 18f: // End
 						Land();
-						Animation = Animations.Idle;
+						Sprite.AnimationType = Animations.Idle;
 						Position += new Vector2(8f * (float)Facing, 4f);
 						break;
 				}
@@ -1073,7 +1025,7 @@ public partial class Player : BaseObject
 			return;
 		}
 		
-		Animation = Animations.Spin;
+		Sprite.AnimationType = Animations.Spin;
 		IsSpinning = true;
 		IsJumping = true;
 		Action = Actions.None;
@@ -1137,7 +1089,7 @@ public partial class Player : BaseObject
 				
 		Land();
 
-		Animation = Animations.Idle;
+		Sprite.AnimationType = Animations.Idle;
 		Speed.Y = 0;
 				
 		return true;
@@ -1171,7 +1123,7 @@ public partial class Player : BaseObject
 
 	private void ReleaseClimb()
 	{
-		Animation = Animations.GlideFall;
+		Sprite.AnimationType = Animations.GlideFall;
 		Action = Actions.Glide;
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 1;
@@ -1237,7 +1189,7 @@ public partial class Player : BaseObject
 
 		if (InputDown.Abc) return;
 		
-		Animation = Animations.GlideFall;
+		Sprite.AnimationType = Animations.GlideFall;
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 0f;
 		Radius = RadiusNormal;
@@ -1255,7 +1207,7 @@ public partial class Player : BaseObject
 			Land();
 			Sprite.Frame = 1;
 
-			Animation = Animations.GlideGround;
+			Sprite.AnimationType = Animations.GlideGround;
 			GroundLockTimer = 16;
 			GroundSpeed = 0;
 
@@ -1329,7 +1281,7 @@ public partial class Player : BaseObject
 			}
 		
 			ActionValue = 0;
-			Animation = Animations.Spin;
+			Sprite.AnimationType = Animations.Spin;
 		
 			return;
 		}
@@ -1339,7 +1291,7 @@ public partial class Player : BaseObject
 			if (ActionValue == 0)
 			{
 				SetHitboxExtra(new Vector2I(25, 25));
-				Animation = Animations.HammerSpin;
+				Sprite.AnimationType = Animations.HammerSpin;
 			}
 			
 			ActionValue++;
@@ -1358,7 +1310,7 @@ public partial class Player : BaseObject
 			return;
 		}
 	
-		Animation = Animations.HammerRush;
+		Sprite.AnimationType = Animations.HammerRush;
 		Action = Actions.HammerRush;
 		ActionValue = 59; // (60)
 			
@@ -1415,7 +1367,7 @@ public partial class Player : BaseObject
 
 	private void CancelHammerRush()
 	{
-		Animation = Animations.Move;
+		Sprite.AnimationType = Animations.Move;
 		Action = Actions.None;
 	}
 
@@ -1451,7 +1403,7 @@ public partial class Player : BaseObject
 		
 		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
 		// control lock. This allows him to Spin Dash
-		if (Animation == Animations.GlideGround && InputDown.Down)
+		if (Sprite.AnimationType == Animations.GlideGround && InputDown.Down)
 		{
 			GroundLockTimer = 0f;
 		}
@@ -1516,7 +1468,7 @@ public partial class Player : BaseObject
 
 		if (Facing == direction) return false;
 		
-		Animation = Animations.Move;
+		Sprite.AnimationType = Animations.Move;
 		Facing = direction;
 		PushingObject = null;
 					
@@ -1529,15 +1481,15 @@ public partial class Player : BaseObject
 	{
 		if (Angles.GetQuadrant(Angle) != 0f)
 		{
-			if (Animation is Animations.Skid or Animations.Push) return;
-			Animation = Animations.Move;
+			if (Sprite.AnimationType is Animations.Skid or Animations.Push) return;
+			Sprite.AnimationType = Animations.Move;
 			return;
 		}
 		
-		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
+		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Sprite.AnimationType != Animations.Skid)
 		{
-			AnimationTimer = Type == Types.Sonic ? 24f : 16f;
-			Animation = Animations.Skid;
+			Sprite.AnimationTimer = Type == Types.Sonic ? 24f : 16f;
+			Sprite.AnimationType = Animations.Skid;
 					
 			//TODO: audio
 			//audio_play_sfx(sfx_skid);
@@ -1546,26 +1498,26 @@ public partial class Player : BaseObject
 		if (GroundSpeed != 0f)
 		{
 			// TODO: This
-			if (Animation is Animations.Skid or Animations.Push) return;
-			Animation = Animations.Move;
+			if (Sprite.AnimationType is Animations.Skid or Animations.Push) return;
+			Sprite.AnimationType = Animations.Move;
 			return;
 		}
 		
 		PushingObject = null;
-		Animation = InputDown.Up ? Animations.LookUp : InputDown.Down ? Animations.Duck : Animations.Idle;
+		Sprite.AnimationType = InputDown.Up ? Animations.LookUp : InputDown.Down ? Animations.Duck : Animations.Idle;
 	}
 
 	private void SetPushAnimation()
 	{
 		if (PushingObject == null)
 		{
-			if (Animation != Animations.Push) return;
-			Animation = Animations.Move;
+			if (Sprite.AnimationType != Animations.Push) return;
+			Sprite.AnimationType = Animations.Move;
 			return;
 		}
 		
-		if (Animation != Animations.Move || !_isFrameChanged) return;
-		Animation = Animations.Push;
+		if (Sprite.AnimationType != Animations.Move || !Sprite.IsFrameChanged) return;
+		Sprite.AnimationType = Animations.Push;
 	}
 
 	private void ProcessMovementGroundRoll()
@@ -1632,7 +1584,7 @@ public partial class Player : BaseObject
 			Radius = RadiusNormal;
 			
 			IsSpinning = false;
-			Animation = Animations.Idle;
+			Sprite.AnimationType = Animations.Idle;
 			return;
 		}
 	
@@ -1781,23 +1733,23 @@ public partial class Player : BaseObject
 	{
 		if (Type != Types.Sonic || IsSuper)
 		{
-			Animation = Animations.Balance;
+			Sprite.AnimationType = Animations.Balance;
 			Facing = direction;
 			return;
 		}
 		
 		if (!isPanic)
 		{
-			Animation = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+			Sprite.AnimationType = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 		}
 		else if (Facing != direction)
 		{
-			Animation = Animations.BalanceTurn;
+			Sprite.AnimationType = Animations.BalanceTurn;
 			Facing = direction;
 		}
-		else if (Animation != Animations.BalanceTurn)
+		else if (Sprite.AnimationType != Animations.BalanceTurn)
 		{
-			Animation = Animations.BalancePanic;
+			Sprite.AnimationType = Animations.BalancePanic;
 		}
 	}
 
@@ -1911,7 +1863,7 @@ public partial class Player : BaseObject
 				}
 				else
 				{
-					Animation = Animations.Duck;
+					Sprite.AnimationType = Animations.Duck;
 				}
 			}
 			else if (Math.Abs(GroundSpeed) >= 0.5f)
@@ -1925,7 +1877,7 @@ public partial class Player : BaseObject
 		Radius.Y = RadiusSpin.Y;
 		Radius.X = RadiusSpin.X;
 		IsSpinning = true;
-		Animation = Animations.Spin;
+		Sprite.AnimationType = Animations.Spin;
 			
 		//TODO: audio
 		//audio_play_sfx(sfx_roll);
@@ -2423,7 +2375,7 @@ public partial class Player : BaseObject
 			switch ((GlideStates)ActionState)
 			{
 				case GlideStates.Air when Angles.GetQuadrant(Angle) == 0:
-					Animation = Animations.GlideGround;
+					Sprite.AnimationType = Animations.GlideGround;
 					ActionState = (int)GlideStates.Ground;
 					ActionValue = 0;
 					Gravity = 0;
@@ -2445,7 +2397,7 @@ public partial class Player : BaseObject
 						break;
 					}
 					
-					Animation = Animations.GlideLand;
+					Sprite.AnimationType = Animations.GlideLand;
 					GroundLockTimer = 16;
 					GroundSpeed = 0;
 					Speed.X = 0;
@@ -2492,7 +2444,7 @@ public partial class Player : BaseObject
 				Position += new Vector2(1f, 0f);
 			}
 			
-			Animation = Animations.ClimbWall;
+			Sprite.AnimationType = Animations.ClimbWall;
 			Action = Actions.Climb;
 			ActionState = (int)ClimbStates.Normal;
 			ActionValue = 0;
@@ -2507,7 +2459,7 @@ public partial class Player : BaseObject
 
 	private void ReleaseGlide()
 	{
-		Animation = Animations.GlideFall;
+		Sprite.AnimationType = Animations.GlideFall;
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 0;
 		Radius.X = RadiusNormal.X;
@@ -2541,7 +2493,7 @@ public partial class Player : BaseObject
 				//TODO: audio
 				//audio_play_sfx(sfx_grab);
 			
-				player.Animation = Animations.Grab;
+				player.Sprite.AnimationType = Animations.Grab;
 				player.Action = Actions.Carried;
 				CarryTarget = player;
 
@@ -2566,7 +2518,7 @@ public partial class Player : BaseObject
 			IsSpinning = true;
 			IsJumping = true;
 			Action = Actions.None;
-			Animation = Animations.Spin;
+			Sprite.AnimationType = Animations.Spin;
 			Radius.X = RadiusSpin.X;
 			Radius.Y = RadiusSpin.Y;
 			Speed.X = 0f;
@@ -2641,8 +2593,8 @@ public partial class Player : BaseObject
 			}
 		}
 	
-		bool doShiftDown = Animation == Animations.Duck;
-		bool doShiftUp = Animation == Animations.LookUp;
+		bool doShiftDown = Sprite.AnimationType == Animations.Duck;
+		bool doShiftUp = Sprite.AnimationType == Animations.LookUp;
 	
 		if (doShiftDown || doShiftUp)
 		{
@@ -2681,7 +2633,7 @@ public partial class Player : BaseObject
 		if (IsDead) return;
 
 		// TODO: find a better place for this (and make obj_dust_skid)
-		if (Animation == Animations.Skid && AnimationTimer % 4 == 0)
+		if (Sprite.AnimationType == Animations.Skid && Sprite.AnimationTimer % 4 == 0)
 		{
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
@@ -2843,7 +2795,7 @@ public partial class Player : BaseObject
 					ResetState();
 
 					ZIndex = 0;
-					Animation = Animations.Drown;
+					Sprite.AnimationType = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
 					Speed.X = 0;
 					Speed.Y = 0;
@@ -2922,7 +2874,7 @@ public partial class Player : BaseObject
 	{
 		if (IsDead) return;
 	
-		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
+		if (Sprite.AnimationType != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
 			SetHitbox(new Vector2I(8, Radius.Y - 3));
 		}
@@ -2932,9 +2884,10 @@ public partial class Player : BaseObject
 		}
 	
 		// Clear extra hitbox
-		if (Animation != Animations.HammerRush && Animation != Animations.HammerSpin && Barrier.State != Barrier.States.DoubleSpin)
+		if (Sprite.AnimationType is not Animations.HammerRush and not Animations.HammerSpin && 
+		    Barrier.State != Barrier.States.DoubleSpin)
 		{
-			SetHitboxExtra(new Vector2I(0, 0));
+			SetHitboxExtra(Vector2I.Zero);
 		}
 
 		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
@@ -2951,7 +2904,7 @@ public partial class Player : BaseObject
 
 	private void ProcessRotation()
 	{
-		if (Animation != Animations.Move)
+		if (Sprite.AnimationType != Animations.Move)
 		{
 			VisualAngle = 360f;
 		}
@@ -3070,335 +3023,6 @@ public partial class Player : BaseObject
 	
 		// Apply palette logic
 		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
-	}
-
-	#endregion
-	
-	#region Animation
-
-	private void ProcessAnimate()
-	{
-		if (FrameworkData.UpdateObjects)
-		{
-			if (AnimationBuffer == Animations.None && AnimationTimer > 0f)
-			{
-				AnimationBuffer = Animation;
-			}
-		
-			if (AnimationTimer < 0)
-			{
-				if (Animation == AnimationBuffer)
-				{
-					Animation = Animations.Move;
-				}
-			
-				AnimationTimer = 0;
-				AnimationBuffer = Animations.None;
-			}
-			else if (AnimationBuffer != Animations.None)
-			{
-				AnimationTimer--;
-			}
-		}
-		
-		if (Animation != Animations.Spin || _isFrameChanged)
-		{
-			Sprite.Scale = new Vector2(Math.Abs(Sprite.Scale.X) * (float)Facing, Sprite.Scale.Y);
-		}
-		
-		switch (Type)
-		{
-			case Types.Sonic when IsSuper: AnimateSuperSonic(); break;
-			case Types.Sonic: AnimateSonic(); break;
-			case Types.Tails: AnimateTails(); break;
-			case Types.Knuckles: AnimateKnuckles(); break;
-			case Types.Amy: AnimateAmy(); break;
-			
-			case Types.None:
-			case Types.Global:
-			case Types.GlobalAI: break;
-		}
-	}
-
-	private void AnimateSuperSonic()
-	{
-		string animationName = GetSuperSonicAnimation();
-
-		if (animationName == null) return;
-
-		float speed = Animation switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-		
-		Sprite.SetAnimation(animationName, speed);
-
-		if (Animation != Animations.Move || animationName != "super_sonic_walk") return;
-
-		if (FrameworkData.Time % 4d > 1d) return;
-		int frameCount = Sprite.SpriteFrames.GetFrameCount(Sprite.Animation);
-		Sprite.SetFrameAndProgress((Sprite.Frame + frameCount / 2) % frameCount, Sprite.FrameProgress);
-	}
-	
-	private string GetSuperSonicAnimation() => Animation switch
-	{
-		// Base animations
-		Animations.Idle => "super_sonic_idle",
-		Animations.Duck => "super_sonic_duck",
-		Animations.LookUp => "super_sonic_lookup",
-		Animations.Move => Math.Abs(GroundSpeed) >= 8 ? "super_sonic_run" : "super_sonic_walk",
-		Animations.Push => "super_sonic_push",
-		Animations.Spin => "super_sonic_spin",
-		Animations.SpinDash => "sonic_spin_dash",
-		Animations.Hurt => "super_sonic_hurt",
-		Animations.Death => "super_sonic_death",
-		Animations.Drown => "super_sonic_drown",
-		Animations.Balance => "super_sonic_balance",
-		Animations.Breathe => "super_sonic_breathe",
-		Animations.Bounce => "super_sonic_bounce",
-		Animations.Skid => "super_sonic_skid",
-		Animations.Grab => "super_sonic_grab",
-
-		// Unique animations
-		Animations.Transform => "super_sonic_transform",
-		Animations.DropDash => "sonic_drop_dash",
-		Animations.BalancePanic => "sonic_balance_panic",
-		Animations.BalanceTurn => "sonic_balance_turn",
-
-		_ => null
-	};
-	
-	private void AnimateSonic()
-	{
-		string animationName = GetSonicAnimation();
-
-		if (animationName == null) return;
-
-		float speed = Animation switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-		
-		Sprite.SetAnimation(animationName, speed);
-	}
-	
-	private string GetSonicAnimation() => Animation switch
-	{
-		// Base animations
-		Animations.Idle => "sonic_idle",
-		Animations.Duck => "sonic_duck",
-		Animations.LookUp => "sonic_lookup",
-		Animations.Move => GetSonicMoveAnimation(),
-		Animations.Push => "sonic_push",
-		Animations.Spin => "sonic_spin",
-		Animations.SpinDash => "sonic_spin_dash",
-		Animations.Hurt => "sonic_hurt",
-		Animations.Death => "sonic_death",
-		Animations.Drown => "sonic_drown",
-		Animations.Balance => "sonic_balance",
-		Animations.Breathe => "sonic_breathe",
-		Animations.Bounce => "sonic_bounce",
-		Animations.Skid => "sonic_skid",
-		Animations.Grab => "sonic_grab",
-
-		// Unique animations
-		Animations.DropDash => "sonic_drop_dash",
-		Animations.BalanceFlip => "sonic_balance_flip",
-		Animations.BalancePanic => "sonic_balance_panic",
-		Animations.BalanceTurn => "sonic_balance_turn",
-
-		_ => null
-	};
-
-	private string GetSonicMoveAnimation()
-	{
-		float speed = Math.Abs(GroundSpeed);
-
-		if (speed < 6f) return "sonic_walk";
-		return SharedData.PeelOut && speed >= 10f ? "sonic_dash" : "sonic_run";
-	}
-
-	private void AnimateTails()
-	{
-		string animationName = GetTailsAnimation();
-
-		if (animationName == null) return;
-
-		float speed = Animation switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Swim => Speed.Y < 0f ? 1f : 0.5f,
-			_ => 1f
-		};
-		
-		Sprite.SetAnimation(animationName, speed);
-		
-		if (Animation != Animations.FlyLift) return;
-		Sprite.Frame = Speed.Y < 0 ? 1 : 0;
-	}
-	
-	private string GetTailsAnimation() => Animation switch
-	{
-		// Base animations
-		Animations.Idle => "tails_idle",
-		Animations.Duck => "tails_duck",
-		Animations.LookUp => "tails_lookup",
-		Animations.Move => GetTailsMoveAnimation(),
-		Animations.Push => "tails_push",
-		Animations.Spin => "tails_spin",
-		Animations.SpinDash => "tails_spin_dash",
-		Animations.Hurt => "tails_hurt",
-		Animations.Death => "tails_death",
-		Animations.Drown => "tails_drown",
-		Animations.Balance => "tails_balance",
-		Animations.Breathe => "tails_breathe",
-		Animations.Bounce => "tails_bounce",
-		Animations.Skid => "tails_skid",
-		Animations.Grab => "tails_grab",
-
-		// Unique animations
-		Animations.Fly => "tails_fly",
-		Animations.FlyLift => "tails_fly_lift",
-		Animations.FlyTired => "tails_fly_tired",
-		Animations.Swim => "tails_swim",
-		Animations.SwimTired => "tails_swim_tired",
-
-		_ => null
-	};
-	
-	private string GetTailsMoveAnimation()
-	{
-		float speed = Math.Abs(GroundSpeed);
-
-		if (speed < 6f) return "tails_walk";
-		return speed >= 10f ? "tails_dash" : "tails_run";
-	}
-	
-	private void AnimateKnuckles()
-	{
-		string animationName = GetKnucklesAnimation();
-
-		if (animationName == null) return;
-
-		float speed = Animation switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-
-		if (Animation != Animations.GlideFall)
-		{
-			Sprite.SetAnimation(animationName, speed);
-			return;
-		}
-		
-		Sprite.SetAnimation(animationName, (int)ActionValue, speed);
-	}
-
-	private string GetKnucklesAnimation() => Animation switch
-	{
-		// Base animations
-		Animations.Idle => "knuckles_idle",
-		Animations.Duck => "knuckles_duck",
-		Animations.LookUp => "knuckles_lookup",
-		Animations.Move => GetKnucklesMoveAnimation(),
-		Animations.Push => "knuckles_push",
-		Animations.Spin => "knuckles_spin",
-		Animations.SpinDash => "knuckles_spin_dash",
-		Animations.Hurt => "knuckles_hurt",
-		Animations.Death => "knuckles_death",
-		Animations.Drown => "knuckles_drown",
-		//TODO : knuckles animations
-		Animations.Balance => null, //"knuckles_balance",
-		Animations.Breathe => "knuckles_breathe",
-		Animations.Bounce => "knuckles_bounce",
-		Animations.Skid => null, //"knuckles_skid",
-		Animations.Grab => "knuckles_grab",
-
-		// Unique animations
-		Animations.GlideAir => "knuckles_glide",
-		Animations.GlideFall => "knuckles_fall",
-		Animations.GlideGround => "knuckles_slide",
-		Animations.GlideLand => "knuckles_land",
-		Animations.ClimbWall => "knuckles_climb",
-		Animations.ClimbLedge => "knuckles_climb_ledge",
-		Animations.BalanceFlip => null, //"knuckles_balance_flip",
-
-		_ => null
-	};
-
-	private string GetKnucklesMoveAnimation() => Math.Abs(GroundSpeed) < 6f ? "knuckles_walk" : "knuckles_run";
-	
-	private void AnimateAmy()
-	{
-		string animationName = GetAmyAnimation();
-
-		if (animationName == null) return;
-
-		float speed = Animation switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			Animations.HammerSpin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-
-		if (Animation != Animations.HammerSpin)
-		{
-			Sprite.SetAnimation(animationName, speed);
-			return;
-		}
-		
-		Sprite.SetAnimation(animationName, Sprite.Frame, speed);
-	}
-	
-	private string GetAmyAnimation() => Animation switch
-	{
-		// Base animations
-		Animations.Idle => "amy_idle",
-		Animations.Duck => "amy_duck",
-		Animations.LookUp => "amy_lookup",
-		Animations.Move => GetAmyMoveAnimation(),
-		Animations.Push => "amy_push",
-		Animations.Spin => "amy_spin",
-		Animations.SpinDash => "amy_spin_dash",
-		Animations.Hurt => "amy_hurt",
-		Animations.Death => "amy_death",
-		Animations.Drown => "amy_drown",
-		Animations.Balance => "amy_balance",
-		Animations.Breathe => "amy_breathe",
-		Animations.Bounce => "amy_bounce",
-		Animations.Skid => "amy_skid",
-		Animations.Grab => "amy_grab",
-
-		// Unique animations
-		Animations.HammerSpin => "amy_spin_hammer",
-		Animations.HammerRush => "amy_run_hammer",
-
-		_ => null
-	};
-
-	private string GetAmyMoveAnimation()
-	{
-		float speed = Math.Abs(GroundSpeed);
-
-		if (speed < 6f) return "amy_walk";
-		return speed >= 10f ? "amy_dash" : "amy_run";
-	}
-	
-	private float GetGroundAnimationSpeed(float maximalDuration)
-	{
-		return 1f / Mathf.Floor(Math.Max(1f, maximalDuration - Math.Abs(GroundSpeed)));
 	}
 
 	#endregion
@@ -3527,7 +3151,7 @@ public partial class Player : BaseObject
 				Speed = new Vector2();
 				GroundSpeed = 0f;
 
-				Animation = Animations.Move;
+				Sprite.AnimationType = Animations.Move;
 				
 				ObjectInteraction = true;
 				IsEditMode = false;
@@ -3802,7 +3426,7 @@ public partial class Player : BaseObject
 	
 		if (OnObject == null)
 		{
-			switch (Animation)
+			switch (Sprite.AnimationType)
 			{
 				case Animations.Idle:
 				case Animations.Duck:
@@ -3811,13 +3435,13 @@ public partial class Player : BaseObject
 					break;
 			
 				default:
-					Animation = Animations.Move;
+					Sprite.AnimationType = Animations.Move;
 					break;
 			}
 		}
 		else
 		{
-			Animation = Animations.Move;
+			Sprite.AnimationType = Animations.Move;
 		}
 	
 		if (IsHurt)
@@ -3865,7 +3489,7 @@ public partial class Player : BaseObject
 		IsGrounded = false;
 		OnObject = null;
 		Barrier.Type = Barrier.Types.None;
-		Animation = Animations.Death;
+		Sprite.AnimationType = Animations.Death;
 		Gravity = GravityType.Default;
 		Speed = new Vector2(0f, -7f);
 		GroundSpeed = 0f;
@@ -3907,9 +3531,9 @@ public partial class Player : BaseObject
 			}
 			else
 			{
-				if (Animation != Animations.DropDash)
+				if (Sprite.AnimationType != Animations.DropDash)
 				{
-					Animation = Animations.DropDash;
+					Sprite.AnimationType = Animations.DropDash;
 					// TODO: audio
 					//audio_play_sfx(sfx_charge);
 				}
@@ -3919,7 +3543,7 @@ public partial class Player : BaseObject
 		{
 			if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge))
 			{
-				Animation = Animations.Spin;
+				Sprite.AnimationType = Animations.Spin;
 				Action = Actions.DropDashCancel;
 			}
 			
@@ -3981,7 +3605,7 @@ public partial class Player : BaseObject
 			}
 		}
 		
-		Animation = Animations.Spin;
+		Sprite.AnimationType = Animations.Spin;
 		IsSpinning = true;
 		
 		if (!FrameworkData.CDCamera)
@@ -4017,7 +3641,7 @@ public partial class Player : BaseObject
 			}
 		
 			ActionValue = 0;
-			Animation = Animations.Spin;
+			Sprite.AnimationType = Animations.Spin;
 		
 			return;
 		}
@@ -4027,7 +3651,7 @@ public partial class Player : BaseObject
 			if (ActionValue == 0)
 			{
 				SetHitboxExtra(new Vector2I(25, 25));
-				Animation = Animations.HammerSpin;
+				Sprite.AnimationType = Animations.HammerSpin;
 			}
 		
 			ActionValue++;
@@ -4040,12 +3664,23 @@ public partial class Player : BaseObject
 		// Called from player_land() function
 		if (!IsGrounded) return;
 		
-		Animation = Animations.HammerRush;
+		Sprite.AnimationType = Animations.HammerRush;
 		Action = Actions.HammerRush;
 		ActionValue = 59; // (60)
 	
 		// TODO: audio
 		//audio_stop_sfx(sfx_charge);
 		//audio_play_sfx(sfx_release);
+	}
+	
+	public void ClearPush()
+	{
+		if (PushingObject != this) return;
+		if (Sprite.AnimationType != Animations.Spin)
+		{
+			Sprite.AnimationType = Animations.Move;
+		}
+				
+		PushingObject = null;
 	}
 }

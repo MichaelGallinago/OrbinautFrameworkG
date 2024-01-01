@@ -32,34 +32,34 @@ public partial class Tail : BaseObject
 			return;
 		}
 		
-		switch (Target.Animation)
+		switch (Target.Sprite.AnimationType)
 		{
-			case Player.Animations.Idle:
-			case Player.Animations.Duck:
-			case Player.Animations.LookUp:
+			case Animations.Idle:
+			case Animations.Duck:
+			case Animations.LookUp:
 				Sprite.SetAnimation("idle", [8]);
 				break;
-			case Player.Animations.FlyLift:
-			case Player.Animations.Fly:
-			case Player.Animations.FlyTired:
-				int speed = Target.Speed.Y >= 0f || Target.Animation == Player.Animations.FlyTired ? 2 : 1;
+			case Animations.FlyLift:
+			case Animations.Fly:
+			case Animations.FlyTired:
+				int speed = Target.Speed.Y >= 0f || Target.Sprite.AnimationType == Animations.FlyTired ? 2 : 1;
 				Sprite.SetAnimation("fly");
 				Sprite.UpdateDuration([speed]);
 				break;
-			case Player.Animations.Push:
-			case Player.Animations.Skid:
-			case Player.Animations.Spin:
-			case Player.Animations.Grab:
-			case Player.Animations.Balance:
-			case Player.Animations.SpinDash:
+			case Animations.Push:
+			case Animations.Skid:
+			case Animations.Spin:
+			case Animations.Grab:
+			case Animations.Balance:
+			case Animations.SpinDash:
 				var offsetX = 36;
 				var offsetY = 24;
 				
-				if (Target.Animation is Player.Animations.SpinDash or Player.Animations.Grab)
+				if (Target.Sprite.AnimationType is Animations.SpinDash or Animations.Grab)
 				{
 					offsetX -= 5;
 				}
-				else if (Target.Animation != Player.Animations.Spin)
+				else if (Target.Sprite.AnimationType != Animations.Spin)
 				{
 					offsetX -= 7;
 					offsetY -= 5;

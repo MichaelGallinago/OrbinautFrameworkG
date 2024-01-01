@@ -1,4 +1,4 @@
-[gd_scene load_steps=441 format=3 uid="uid://ce2tr4eoiv2gs"]
+[gd_scene load_steps=442 format=3 uid="uid://ce2tr4eoiv2gs"]
 
 [ext_resource type="Script" path="res://Objects/Player/Player.cs" id="1_w3650"]
 [ext_resource type="PackedScene" uid="uid://cii7g248focye" path="res://Framework/Animations/advanced_animated_sprite.tscn" id="2_3rkx6"]
@@ -104,6 +104,7 @@
 [ext_resource type="Texture2D" uid="uid://b4npwmprbu70o" path="res://Objects/Player/Sprites/Supersonic/transform.png" id="68_0trra"]
 [ext_resource type="Texture2D" uid="uid://g7kl5gvy6t2" path="res://Objects/Player/Sprites/Supersonic/walk.png" id="69_spatu"]
 [ext_resource type="Texture2D" uid="uid://d0jhkpsyyy2wt" path="res://Objects/Player/Sprites/Tails/tails_walk.png" id="78_htuav"]
+[ext_resource type="Script" path="res://Objects/Player/PlayerAnimatedSprite.cs" id="105_mpaxa"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f3bpm"]
 atlas = ExtResource("3_xirum")
@@ -3267,112 +3268,4 @@ Behaviour = 4
 
 [node name="Sprite" parent="." instance=ExtResource("2_3rkx6")]
 sprite_frames = SubResource("SpriteFrames_bsp8c")
-_frameLoops = {
-"amy_duck": 1,
-"amy_lookup": 1,
-"amy_skid": 3,
-"amy_transform": 2,
-"knuckles_climb_ledge": 2,
-"knuckles_duck": 1,
-"knuckles_glide_fall": 1,
-"knuckles_lookup": 1,
-"knuckles_transform": 1,
-"sonic_duck": 1,
-"sonic_idle": 3,
-"sonic_lookup": 1,
-"sonic_skid": 3,
-"super_sonic_lookup": 1,
-"super_sonic_skid": 3,
-"super_sonic_transform": 3,
-"tails_idle": 7,
-"tails_transform": 1
-}
-_offsets = {
-"amy_balance": Vector2(-5, -2),
-"amy_bounce": Vector2(-1, -1),
-"amy_breathe": Vector2(1, 2),
-"amy_dash": Vector2(-3, 2),
-"amy_death": Vector2(0, -1),
-"amy_duck": Vector2(3, 1),
-"amy_grab": Vector2(5, -6),
-"amy_hurt": Vector2(1, -1),
-"amy_lookup": Vector2(-2, -1),
-"amy_push": Vector2(0, 1),
-"amy_run": Vector2(-1, 1),
-"amy_run_hammer": Vector2(1, -4),
-"amy_skid": Vector2(-4, 1),
-"amy_spin": Vector2(1, 0),
-"amy_spin_dash": Vector2(4, 4),
-"amy_spin_hammer": Vector2(1, 1),
-"amy_transform": Vector2(1, -3),
-"amy_walk": Vector2(2, -1),
-"knuckles_climb": Vector2(-2, 1),
-"knuckles_climb_ledge": Vector2(3, -4),
-"knuckles_death": Vector2(2, 2),
-"knuckles_drown": Vector2(2, 2),
-"knuckles_duck": Vector2(3, 4),
-"knuckles_glide_fall": Vector2(-2, 0),
-"knuckles_glide_land": Vector2(3, 4),
-"knuckles_grab": Vector2(6, -3),
-"knuckles_hurt": Vector2(4, -1),
-"knuckles_idle": Vector2(7, 0),
-"knuckles_lookup": Vector2(0, 1),
-"knuckles_push": Vector2(1, 2),
-"knuckles_run": Vector2(-4, 3),
-"knuckles_slide": Vector2(-2, 6),
-"knuckles_spin_dash": Vector2(4, 7),
-"knuckles_transform": Vector2(-2, -1),
-"knuckles_walk": Vector2(-1, 2),
-"sonic_balance_flip": Vector2(4, 2),
-"sonic_balance_panic": Vector2(4, 2),
-"sonic_balance_turn": Vector2(-7, 1),
-"sonic_breathe": Vector2(0, 2),
-"sonic_dash": Vector2(0, 4),
-"sonic_death": Vector2(-1, 0),
-"sonic_drown": Vector2(-1, 1),
-"sonic_duck": Vector2(4, 4),
-"sonic_grab": Vector2(4, -4),
-"sonic_hurt": Vector2(0, 2),
-"sonic_idle": Vector2(0, 1),
-"sonic_lookup": Vector2(-1, 1),
-"sonic_push": Vector2(-3, 2),
-"sonic_run": Vector2(1, 2),
-"sonic_skid": Vector2(1, 1),
-"sonic_spin_dash": Vector2(4, 7),
-"super_sonic_balance": Vector2(-7, -4),
-"super_sonic_bounce": Vector2(-3, 0),
-"super_sonic_breathe": Vector2(0, 2),
-"super_sonic_death": Vector2(-1, -4),
-"super_sonic_drown": Vector2(-1, 1),
-"super_sonic_duck": Vector2(0, 4),
-"super_sonic_grab": Vector2(3, -4),
-"super_sonic_hurt": Vector2(0, 2),
-"super_sonic_idle": Vector2(-1, -2),
-"super_sonic_lookup": Vector2(-5, 0),
-"super_sonic_push": Vector2(-5, -2),
-"super_sonic_run": Vector2(2, -1),
-"super_sonic_skid": Vector2(1, 0),
-"super_sonic_transform": Vector2(-1, -4),
-"tails_balance": Vector2(-8, 0),
-"tails_bounce": Vector2(-4, 1),
-"tails_dash": Vector2(-4, 0),
-"tails_death": Vector2(1, 1),
-"tails_drown": Vector2(1, 2),
-"tails_duck": Vector2(6, 6),
-"tails_fly": Vector2(1, -1),
-"tails_fly_lift": Vector2(1, -2),
-"tails_fly_tired": Vector2(1, -2),
-"tails_grab": Vector2(3, -8),
-"tails_hurt": Vector2(0, 1),
-"tails_idle": Vector2(1, 1),
-"tails_lookup": Vector2(1, 1),
-"tails_push": Vector2(1, 1),
-"tails_run": Vector2(-4, 0),
-"tails_skid": Vector2(-1, 0),
-"tails_spin_dash": Vector2(1, 4),
-"tails_swim": Vector2(-2, 0),
-"tails_swim_lift": Vector2(0, -6),
-"tails_swim_tired": Vector2(-1, -3),
-"tails_transform": Vector2(-3, 0),
-"tails_walk": Vector2(-7, -2)
-}
+script = ExtResource("105_mpaxa")

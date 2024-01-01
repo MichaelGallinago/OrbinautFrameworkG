@@ -173,7 +173,7 @@ public abstract partial class BaseObject : Node2D
 			if (distance.X < 0 || distance.X > combinedSize.X * 2 || 
 			    distance.Y < 0 || distance.Y > combinedSize.Y * 2 + extraSize.Y)
 			{
-				ClearPush(player);
+				player.ClearPush();
 				return;
 			}
 			
@@ -228,7 +228,7 @@ public abstract partial class BaseObject : Node2D
 						break;
 					// If failed to collide vertically, clear push flag
 					default:
-						ClearPush(player);
+						player.ClearPush();
 						break;
 				}
 				
@@ -239,7 +239,7 @@ public abstract partial class BaseObject : Node2D
 			// HORIZONTAL COLLISION
 			if (!(SharedData.PlayerPhysics == Player.PhysicsTypes.SK || Math.Abs(clip.Y) > 4))
 			{
-				ClearPush(player);
+				player.ClearPush();
 				return;
 			}
 			
@@ -409,16 +409,5 @@ public abstract partial class BaseObject : Node2D
 		player.IsGrounded = true;
 
 		player.Land();
-	}
-    
-	private void ClearPush(Player player)
-	{
-		if (player.PushingObject != this) return;
-		if (player.Animation != Player.Animations.Spin)
-		{
-			player.Animation = Player.Animations.Move;
-		}
-				
-		player.PushingObject = null;
 	}
 }
