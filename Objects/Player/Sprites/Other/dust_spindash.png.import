@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c4ogi5jngk0dl"
-path="res://.godot/imported/star_super.png-0c920f75b9cfe7975170f58eed18fe1c.ctex"
+uid="uid://bpwjsejjn0554"
+path="res://.godot/imported/dust_spindash.png-76b19a9a0a973dd13a6ea101a74569bd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Player/Sprites/star_super.png"
-dest_files=["res://.godot/imported/star_super.png-0c920f75b9cfe7975170f58eed18fe1c.ctex"]
+source_file="res://Objects/Player/Sprites/Other/dust_spindash.png"
+dest_files=["res://.godot/imported/dust_spindash.png-76b19a9a0a973dd13a6ea101a74569bd.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://btmn4u403yfc3"
-path="res://.godot/imported/star_invincibility.png-0f52998a9b7c2aa456bae2d90adb1c69.ctex"
+path="res://.godot/imported/star_invincibility.png-eb805ae47d21995ba5adee69a229074c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Player/Sprites/star_invincibility.png"
-dest_files=["res://.godot/imported/star_invincibility.png-0f52998a9b7c2aa456bae2d90adb1c69.ctex"]
+source_file="res://Objects/Player/Sprites/Other/star_invincibility.png"
+dest_files=["res://.godot/imported/star_invincibility.png-eb805ae47d21995ba5adee69a229074c.ctex"]
 
 [params]
 

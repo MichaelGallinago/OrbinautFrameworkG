@@ -1,0 +1,20 @@
+[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=4 format=3 uid="uid://ives1jru75cc"]
+
+[ext_resource type="Texture2D" uid="uid://dq75qrva0tkb8" path="res://Objects/Player/Sprites/Other/spawner.png" id="1_dx3kt"]
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_rncpm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oj7as"]
+atlas = ExtResource("1_dx3kt")
+region = Rect2(0, 0, 32, 32)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oj7as")
+}],
+"loop": true,
+"name": &"default",
+"speed": 0.0
+}]
+script = ExtResource("1_rncpm")

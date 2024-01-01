@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmulkuhedfjsa"
-path="res://.godot/imported/dust_skid.png-b13189627fbe730af59a4974c0527be4.ctex"
+uid="uid://c4ogi5jngk0dl"
+path="res://.godot/imported/star_super.png-bfa776bee23194417d4d2f644d434386.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Player/Sprites/dust_skid.png"
-dest_files=["res://.godot/imported/dust_skid.png-b13189627fbe730af59a4974c0527be4.ctex"]
+source_file="res://Objects/Player/Sprites/Other/star_super.png"
+dest_files=["res://.godot/imported/star_super.png-bfa776bee23194417d4d2f644d434386.ctex"]
 
 [params]
 

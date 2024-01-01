@@ -1,0 +1,12 @@
+[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=2 format=3 uid="uid://d2maikoa22sg4"]
+
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_l0m7n"]
+
+[resource]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 0.0
+}]
+script = ExtResource("1_l0m7n")

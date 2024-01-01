@@ -1,33 +1,34 @@
-[gd_scene load_steps=8 format=3 uid="uid://b8uvs02jxyk0t"]
+[gd_scene load_steps=9 format=3 uid="uid://b8uvs02jxyk0t"]
 
 [ext_resource type="Script" path="res://Objects/Common/Bumper/Bumper.cs" id="1_ur7uk"]
-[ext_resource type="PackedScene" uid="uid://cii7g248focye" path="res://Framework/Animations/advanced_animated_sprite.tscn" id="2_b3i2j"]
 [ext_resource type="Texture2D" uid="uid://ecpnf5viy4s1" path="res://Objects/Common/Bumper/bumper.png" id="3_3buyg"]
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="4_thiwj"]
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedAnimatedSprite.cs" id="5_wqvxw"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_70md3"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_nbfsr"]
 atlas = ExtResource("3_3buyg")
 region = Rect2(36, 0, 36, 36)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_rsh3c"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_toe1j"]
 atlas = ExtResource("3_3buyg")
 region = Rect2(0, 0, 36, 36)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_qrcfj"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_uwm06"]
 atlas = ExtResource("3_3buyg")
 region = Rect2(0, 0, 36, 36)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_m3upy"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_wtp5n"]
 resource_local_to_scene = true
 animations = [{
 "frames": [{
 "duration": 4.0,
-"texture": SubResource("AtlasTexture_70md3")
+"texture": SubResource("AtlasTexture_nbfsr")
 }, {
 "duration": 4.0,
-"texture": SubResource("AtlasTexture_rsh3c")
+"texture": SubResource("AtlasTexture_toe1j")
 }, {
 "duration": 5.0,
-"texture": SubResource("AtlasTexture_70md3")
+"texture": SubResource("AtlasTexture_nbfsr")
 }],
 "loop": false,
 "name": &"bump",
@@ -35,12 +36,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_qrcfj")
+"texture": SubResource("AtlasTexture_uwm06")
 }],
-"loop": false,
+"loop": true,
 "name": &"default",
 "speed": 0.0
 }]
+script = ExtResource("4_thiwj")
 
 [node name="Bumper" type="Node2D" node_paths=PackedStringArray("_sprite")]
 z_index = -1
@@ -48,5 +50,7 @@ script = ExtResource("1_ur7uk")
 _sprite = NodePath("AdvancedAnimatedSprite")
 Behaviour = 1
 
-[node name="AdvancedAnimatedSprite" parent="." instance=ExtResource("2_b3i2j")]
-sprite_frames = SubResource("SpriteFrames_m3upy")
+[node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wtp5n")
+animation = &"bump"
+script = ExtResource("5_wqvxw")

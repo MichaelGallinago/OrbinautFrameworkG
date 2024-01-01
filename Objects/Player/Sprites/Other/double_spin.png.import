@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dq75qrva0tkb8"
-path="res://.godot/imported/spawner.png-00eff20f8eb574b0739440e660d6763c.ctex"
+uid="uid://d3abkq8gh173j"
+path="res://.godot/imported/double_spin.png-93d8a3a177aace2787587aa4fb25ae30.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Player/Sprites/spawner.png"
-dest_files=["res://.godot/imported/spawner.png-00eff20f8eb574b0739440e660d6763c.ctex"]
+source_file="res://Objects/Player/Sprites/Other/double_spin.png"
+dest_files=["res://.godot/imported/double_spin.png-93d8a3a177aace2787587aa4fb25ae30.ctex"]
 
 [params]
 

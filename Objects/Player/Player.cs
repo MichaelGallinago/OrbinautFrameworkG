@@ -1888,6 +1888,8 @@ public partial class Player : BaseObject
 		if (IsDead) return;
 	
 		Camera camera = Camera.Main;
+		
+		if (camera == null) return;
 	
 		// Note that position here is checked including subpixel
 		if (Position.X + Speed.X < camera.Limit.X + 16f)
@@ -2570,8 +2572,9 @@ public partial class Player : BaseObject
 	{
 		if (IsDead) return;
 		
-		var camera = Camera.Main;
-		if (camera.Target != this) return;
+		Camera camera = Camera.Main;
+		
+		if (camera == null || camera.Target != this) return;
 	
 		if (SharedData.CDCamera)
 		{
