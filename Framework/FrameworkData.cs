@@ -104,7 +104,8 @@ public static class FrameworkData
 		
 		if (LastUpdateObjects != UpdateObjects)
 		{
-			// Whenever update_objects is set from false to true, activate ALL objects (needed to make BEHAVE_NOBOUNDS objects work correctly)
+			// Whenever update_objects is set from false to true, activate ALL objects
+			// (needed to make BEHAVE_NOBOUNDS objects work correctly)
 			if (UpdateObjects)
 			{
 				foreach (BaseObject commonObject in BaseObject.Objects)

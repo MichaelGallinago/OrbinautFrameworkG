@@ -986,13 +986,17 @@ public partial class Player : BaseObject
 				
 					Speed.Y = Math.Max(Speed.Y, -4f);
 				}
+				else
+				{
+					Gravity = GravityType.TailsDown;
+				}
 			}
 		}
 
 		if (!SharedData.FlightCancel || !InputDown.Down || !InputPress.Abc) return;
 		
 		Camera.Main.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
-		Radius= RadiusSpin;
+		Radius = RadiusSpin;
 		Animation = Animations.Spin;
 		IsSpinning	= true;
 		Action = Actions.None;
