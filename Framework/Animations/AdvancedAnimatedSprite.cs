@@ -36,11 +36,15 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         UpdateSpriteFrames();
         
         #if TOOLS
-        if (!Engine.IsEditorHint())
+        if (Engine.IsEditorHint())
         {
-            SetProcess(false);
+            AnimationChanged += () => Position = -Offset;
+            return;
         }
         #endif
+
+        Position = default;
+        SetProcess(false);
     }
     
 #if TOOLS
@@ -48,7 +52,16 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     {
         if (_advancedSpriteFrames == null) return;
         Vector2 lastOffset = _advancedSpriteFrames.GetAnimationOffset(Animation);
-        if (lastOffset == default || lastOffset == Offset) return;
+        if (lastOffset == Offset) return;
+
+        Position = -Offset;
+        
+        if (Offset == default)
+        {
+            _advancedSpriteFrames.RemoveAnimationOffset(Animation);
+            return;
+        }
+        
         _advancedSpriteFrames.SetAnimationOffset(Animation, Offset);
     }
 #endif
