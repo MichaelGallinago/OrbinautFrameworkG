@@ -29,19 +29,10 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     
     public override void _Ready()
     {
-        AnimationChanged += UpdateValues;
         AnimationFinished += SetNextAnimation;
         AnimationLooped += LoopFrame;
         SpriteFramesChanged += UpdateSpriteFrames;
         UpdateSpriteFrames();
-        
-        #if TOOLS
-        if (Engine.IsEditorHint())
-        {
-            AnimationChanged += () => Position = -Offset;
-            return;
-        }
-        #endif
 
         Position = default;
         SetProcess(false);
@@ -52,9 +43,10 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     {
         if (_advancedSpriteFrames == null) return;
         Vector2 lastOffset = _advancedSpriteFrames.GetAnimationOffset(Animation);
-        if (lastOffset == Offset) return;
-
+        
         Position = -Offset;
+        
+        if (lastOffset == Offset) return;
         
         if (Offset == default)
         {
@@ -69,9 +61,13 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     private void UpdateSpriteFrames()
     {
         _advancedSpriteFrames = SpriteFrames as AdvancedSpriteFrames;
-        
+
+        AnimationChanged -= UpdateValues;
+        if (_advancedSpriteFrames == null) return;
+        AnimationChanged += UpdateValues;
+            
         #if TOOLS
-        if (Engine.IsEditorHint() && _advancedSpriteFrames != null)
+        if (Engine.IsEditorHint())
         {
             AnimationChanged += _advancedSpriteFrames.Refresh;
         }
@@ -86,8 +82,8 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 
     private void UpdateValues()
     {
-        _frameLoop = _advancedSpriteFrames?.GetAnimationFrameLoop(Animation) ?? 0;
-        Offset = _advancedSpriteFrames?.GetAnimationOffset(Animation) ?? default;
+        _frameLoop = _advancedSpriteFrames.GetAnimationFrameLoop(Animation);
+        Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
     }
     
     private void SetNextAnimation()
