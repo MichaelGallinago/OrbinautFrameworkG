@@ -1,3 +1,8 @@
+using Meziantou.Framework.Annotations;
+
+[assembly: FastEnumToString(typeof(OrbinautFramework3.Objects.Player.Animations),
+    IsPublic = true, ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Extensions")]
+
 namespace OrbinautFramework3.Objects.Player;
 
 public enum Animations : byte
@@ -5,8 +10,10 @@ public enum Animations : byte
     None,
     Idle,
     Move,
+    Walk,
+    Run,
+    Dash,
     Spin,
-    DropDash,
     SpinDash,
     Push,
     Duck,
@@ -18,23 +25,28 @@ public enum Animations : byte
     Hurt,
     Death,
     Drown,
+    Skid,
+    Grab,
+    Balance,
+    Transform,
+    Bounce,
+    Breathe,
+    
     GlideAir,
     GlideFall,
     GlideGround,
     GlideLand,
     ClimbWall,
     ClimbLedge,
-    Skid,
-    Balance,
+    
+    DropDash,
     BalanceFlip,
     BalancePanic,
     BalanceTurn,
-    Bounce,
-    Transform,
-    Breathe,
+    
     HammerSpin,
     HammerRush,
+    
     FlyLift,
     SwimLift,
-    Grab
 }

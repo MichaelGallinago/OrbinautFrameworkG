@@ -60,9 +60,13 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 
     private void UpdateSpriteFrames()
     {
+        if (_advancedSpriteFrames != null)
+        {
+            AnimationChanged -= UpdateValues;
+        }
+        
         _advancedSpriteFrames = SpriteFrames as AdvancedSpriteFrames;
-
-        AnimationChanged -= UpdateValues;
+        
         if (_advancedSpriteFrames == null) return;
         AnimationChanged += UpdateValues;
             

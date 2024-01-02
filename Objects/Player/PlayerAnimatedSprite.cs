@@ -2,18 +2,21 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Objects.Player.Extensions;
 
 namespace OrbinautFramework3.Objects.Player;
 
 [Tool]
 public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
+	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _array;
+	
 	public float AnimationTimer { get; set; }
 	public Animations AnimationType { get; set; }
-	public Animations AnimationBuffer { get; set; }
 	public bool IsFrameChanged { get; private set; }
 
 	private AnimationData _data;
+	private Animations _animationBuffer;
 
 	public override void _Ready()
 	{
@@ -27,22 +30,22 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		
 		if (FrameworkData.UpdateObjects)
 		{
-			if (AnimationBuffer == Animations.None && AnimationTimer > 0f)
+			if (_animationBuffer == Animations.None && AnimationTimer > 0f)
 			{
-				AnimationBuffer = AnimationType;
+				_animationBuffer = AnimationType;
 			}
 		
 			if (AnimationTimer < 0)
 			{
-				if (AnimationType == AnimationBuffer)
+				if (AnimationType == _animationBuffer)
 				{
 					AnimationType = Animations.Move;
 				}
 			
 				AnimationTimer = 0;
-				AnimationBuffer = Animations.None;
+				_animationBuffer = Animations.None;
 			}
-			else if (AnimationBuffer != Animations.None)
+			else if (_animationBuffer != Animations.None)
 			{
 				AnimationTimer--;
 			}
@@ -58,23 +61,20 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			case Player.Types.Sonic when data.IsSuper: AnimateSuperSonic(); break;
 			case Player.Types.Sonic: AnimateSonic(); break;
 			case Player.Types.Tails: AnimateTails(); break;
-			case Player.Types.Knuckles: AnimateKnuckles(); break;
+			case Player.Types.Knuckles: AnimateTails(); break;
 			case Player.Types.Amy: AnimateAmy(); break;
 			
 			case Player.Types.None:
 			case Player.Types.Global:
-			case Player.Types.GlobalAI: break;
+			case Player.Types.GlobalAI:
+				break;
 		}
 		
 		IsFrameChanged = false;
 	}
-
+	
 	private void AnimateSuperSonic()
 	{
-		string animationName = GetSuperSonicAnimation();
-
-		if (animationName == null) return;
-
 		float speed = AnimationType switch
 		{
 			Animations.Move => GetGroundAnimationSpeed(9f),
@@ -83,49 +83,19 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			_ => 1f
 		};
 		
+		string animationName = GetAnimationName(false, 8f);
+		
 		SetAnimation(animationName, speed);
 
-		if (AnimationType != Animations.Move || animationName != "super_sonic_walk") return;
+		if (AnimationType != Animations.Move || animationName != "Walk") return;
 
 		if (FrameworkData.Time % 4d > 1d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}
 	
-	private string GetSuperSonicAnimation() => AnimationType switch
-	{
-		// Base animations
-		Animations.Idle => "super_sonic_idle",
-		Animations.Duck => "super_sonic_duck",
-		Animations.LookUp => "super_sonic_lookup",
-		Animations.Move => Math.Abs(_data.GroundSpeed) >= 8 ? "super_sonic_run" : "super_sonic_walk",
-		Animations.Push => "super_sonic_push",
-		Animations.Spin => "super_sonic_spin",
-		Animations.SpinDash => "sonic_spin_dash",
-		Animations.Hurt => "super_sonic_hurt",
-		Animations.Death => "super_sonic_death",
-		Animations.Drown => "super_sonic_drown",
-		Animations.Balance => "super_sonic_balance",
-		Animations.Breathe => "super_sonic_breathe",
-		Animations.Bounce => "super_sonic_bounce",
-		Animations.Skid => "super_sonic_skid",
-		Animations.Grab => "super_sonic_grab",
-
-		// Unique animations
-		Animations.Transform => "super_sonic_transform",
-		Animations.DropDash => "sonic_drop_dash",
-		Animations.BalancePanic => "sonic_balance_panic",
-		Animations.BalanceTurn => "sonic_balance_turn",
-
-		_ => null
-	};
-	
 	private void AnimateSonic()
 	{
-		string animationName = GetSonicAnimation();
-
-		if (animationName == null) return;
-
 		float speed = AnimationType switch
 		{
 			Animations.Move => GetGroundAnimationSpeed(9f),
@@ -134,51 +104,13 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			_ => 1f
 		};
 		
+		string animationName = GetAnimationName(SharedData.PeelOut, 6f);
+		
 		SetAnimation(animationName, speed);
-	}
-	
-	private string GetSonicAnimation() => AnimationType switch
-	{
-		// Base animations
-		Animations.Idle => "sonic_idle",
-		Animations.Duck => "sonic_duck",
-		Animations.LookUp => "sonic_lookup",
-		Animations.Move => GetSonicMoveAnimation(),
-		Animations.Push => "sonic_push",
-		Animations.Spin => "sonic_spin",
-		Animations.SpinDash => "sonic_spin_dash",
-		Animations.Hurt => "sonic_hurt",
-		Animations.Death => "sonic_death",
-		Animations.Drown => "sonic_drown",
-		Animations.Balance => "sonic_balance",
-		Animations.Breathe => "sonic_breathe",
-		Animations.Bounce => "sonic_bounce",
-		Animations.Skid => "sonic_skid",
-		Animations.Grab => "sonic_grab",
-
-		// Unique animations
-		Animations.DropDash => "sonic_drop_dash",
-		Animations.BalanceFlip => "sonic_balance_flip",
-		Animations.BalancePanic => "sonic_balance_panic",
-		Animations.BalanceTurn => "sonic_balance_turn",
-
-		_ => null
-	};
-
-	private string GetSonicMoveAnimation()
-	{
-		float speed = Math.Abs(_data.GroundSpeed);
-
-		if (speed < 6f) return "sonic_walk";
-		return SharedData.PeelOut && speed >= 10f ? "sonic_dash" : "sonic_run";
 	}
 
 	private void AnimateTails()
 	{
-		string animationName = GetTailsAnimation();
-
-		if (animationName == null) return;
-
 		float speed = AnimationType switch
 		{
 			Animations.Move => GetGroundAnimationSpeed(9f),
@@ -187,55 +119,16 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			_ => 1f
 		};
 		
+		string animationName = GetAnimationName(true, 6f);
+		
 		SetAnimation(animationName, speed);
 		
 		if (AnimationType != Animations.FlyLift) return;
 		Frame = _data.Speed.Y < 0 ? 1 : 0;
 	}
 	
-	private string GetTailsAnimation() => AnimationType switch
-	{
-		// Base animations
-		Animations.Idle => "tails_idle",
-		Animations.Duck => "tails_duck",
-		Animations.LookUp => "tails_lookup",
-		Animations.Move => GetTailsMoveAnimation(),
-		Animations.Push => "tails_push",
-		Animations.Spin => "tails_spin",
-		Animations.SpinDash => "tails_spin_dash",
-		Animations.Hurt => "tails_hurt",
-		Animations.Death => "tails_death",
-		Animations.Drown => "tails_drown",
-		Animations.Balance => "tails_balance",
-		Animations.Breathe => "tails_breathe",
-		Animations.Bounce => "tails_bounce",
-		Animations.Skid => "tails_skid",
-		Animations.Grab => "tails_grab",
-
-		// Unique animations
-		Animations.Fly => "tails_fly",
-		Animations.FlyLift => "tails_fly_lift",
-		Animations.FlyTired => "tails_fly_tired",
-		Animations.Swim => "tails_swim",
-		Animations.SwimTired => "tails_swim_tired",
-
-		_ => null
-	};
-	
-	private string GetTailsMoveAnimation()
-	{
-		float speed = Math.Abs(_data.GroundSpeed);
-
-		if (speed < 6f) return "tails_walk";
-		return speed >= 10f ? "tails_dash" : "tails_run";
-	}
-	
 	private void AnimateKnuckles()
 	{
-		string animationName = GetKnucklesAnimation();
-
-		if (animationName == null) return;
-
 		float speed = AnimationType switch
 		{
 			Animations.Move => GetGroundAnimationSpeed(9f),
@@ -244,55 +137,19 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			_ => 1f
 		};
 
-		if (AnimationType != Animations.GlideFall)
+		string animationName = GetAnimationName(false, 6f);
+		
+		if (AnimationType == Animations.GlideFall)
 		{
-			SetAnimation(animationName, speed);
+			SetAnimation(animationName, (int)_data.ActionValue, speed);
 			return;
 		}
 		
-		SetAnimation(animationName, (int)_data.ActionValue, speed);
+		SetAnimation(animationName, speed);
 	}
-
-	private string GetKnucklesAnimation() => AnimationType switch
-	{
-		// Base animations
-		Animations.Idle => "knuckles_idle",
-		Animations.Duck => "knuckles_duck",
-		Animations.LookUp => "knuckles_lookup",
-		Animations.Move => GetKnucklesMoveAnimation(),
-		Animations.Push => "knuckles_push",
-		Animations.Spin => "knuckles_spin",
-		Animations.SpinDash => "knuckles_spin_dash",
-		Animations.Hurt => "knuckles_hurt",
-		Animations.Death => "knuckles_death",
-		Animations.Drown => "knuckles_drown",
-		//TODO : knuckles animations
-		Animations.Balance => null, //"knuckles_balance",
-		Animations.Breathe => "knuckles_breathe",
-		Animations.Bounce => "knuckles_bounce",
-		Animations.Skid => null, //"knuckles_skid",
-		Animations.Grab => "knuckles_grab",
-
-		// Unique animations
-		Animations.GlideAir => "knuckles_glide",
-		Animations.GlideFall => "knuckles_fall",
-		Animations.GlideGround => "knuckles_slide",
-		Animations.GlideLand => "knuckles_land",
-		Animations.ClimbWall => "knuckles_climb",
-		Animations.ClimbLedge => "knuckles_climb_ledge",
-		Animations.BalanceFlip => null, //"knuckles_balance_flip",
-
-		_ => null
-	};
-
-	private string GetKnucklesMoveAnimation() => Math.Abs(_data.GroundSpeed) < 6f ? "knuckles_walk" : "knuckles_run";
 	
 	private void AnimateAmy()
 	{
-		string animationName = GetAmyAnimation();
-
-		if (animationName == null) return;
-
 		float speed = AnimationType switch
 		{
 			Animations.Move => GetGroundAnimationSpeed(9f),
@@ -302,51 +159,35 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			_ => 1f
 		};
 
-		if (AnimationType != Animations.HammerSpin)
+		string animationName = GetAnimationName(true, 6f);
+
+		if (AnimationType == Animations.HammerSpin)
 		{
-			SetAnimation(animationName, speed);
+			SetAnimation(animationName, Frame, speed);
 			return;
 		}
 		
-		SetAnimation(animationName, Frame, speed);
+		SetAnimation(animationName, speed);
+	}
+
+	private string GetAnimationName(bool canDash, float runThreshold)
+	{
+		return (AnimationType == Animations.Move ? 
+			GetMoveAnimation(canDash, runThreshold) : AnimationType).ToStringFast();
 	}
 	
-	private string GetAmyAnimation() => AnimationType switch
+	private Animations GetMoveAnimation(bool canDash, float runThreshold)
 	{
-		// Base animations
-		Animations.Idle => "amy_idle",
-		Animations.Duck => "amy_duck",
-		Animations.LookUp => "amy_lookup",
-		Animations.Move => GetAmyMoveAnimation(),
-		Animations.Push => "amy_push",
-		Animations.Spin => "amy_spin",
-		Animations.SpinDash => "amy_spin_dash",
-		Animations.Hurt => "amy_hurt",
-		Animations.Death => "amy_death",
-		Animations.Drown => "amy_drown",
-		Animations.Balance => "amy_balance",
-		Animations.Breathe => "amy_breathe",
-		Animations.Bounce => "amy_bounce",
-		Animations.Skid => "amy_skid",
-		Animations.Grab => "amy_grab",
-
-		// Unique animations
-		Animations.HammerSpin => "amy_spin_hammer",
-		Animations.HammerRush => "amy_run_hammer",
-
-		_ => null
-	};
-
-	private string GetAmyMoveAnimation()
-	{
+		const float dashThreshold = 10f;
+		
 		float speed = Math.Abs(_data.GroundSpeed);
 
-		if (speed < 6f) return "amy_walk";
-		return speed >= 10f ? "amy_dash" : "amy_run";
+		if (speed < runThreshold) return Animations.Walk;
+		return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
 	}
 	
-	private float GetGroundAnimationSpeed(float maximalDuration)
+	private float GetGroundAnimationSpeed(float speedLimit)
 	{
-		return 1f / Mathf.Floor(Math.Max(1f, maximalDuration - Math.Abs(_data.GroundSpeed)));
+		return MathF.Floor(Math.Clamp(Math.Abs(_data.GroundSpeed), 1f, speedLimit));
 	}
 }
