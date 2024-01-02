@@ -35,7 +35,10 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         UpdateSpriteFrames();
 
         Position = default;
-        SetProcess(false);
+#if TOOLS
+        if (Engine.IsEditorHint()) return;
+#endif
+        SetProcess(false);   
     }
     
 #if TOOLS
@@ -70,12 +73,12 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         if (_advancedSpriteFrames == null) return;
         AnimationChanged += UpdateValues;
             
-        #if TOOLS
+#if TOOLS
         if (Engine.IsEditorHint())
         {
             AnimationChanged += _advancedSpriteFrames.Refresh;
         }
-        #endif
+#endif
     }
 
     private void LoopFrame()

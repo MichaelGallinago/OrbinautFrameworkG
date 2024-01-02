@@ -48,9 +48,9 @@ public partial class BridgeSpawner : Node2D
     {
         if (LogTexture == null)
         {
-            #if TOOLS
+#if TOOLS
             if (Engine.IsEditorHint()) return;
-            #endif
+#endif
             
             QueueFree();
             return;
@@ -63,13 +63,13 @@ public partial class BridgeSpawner : Node2D
 
         UpdateLength();
         
-        #if TOOLS
+#if TOOLS
         if (Engine.IsEditorHint())
         {
             QueueRedraw();
             return;
         }
-        #endif
+#endif
 
         SpawnBridge();
         QueueFree();

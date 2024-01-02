@@ -719,3 +719,5 @@ animations = [{
 "speed": 60.0
 }]
 script = ExtResource("1_rncpm")
+_frameLoops = {}
+_offsets = {}

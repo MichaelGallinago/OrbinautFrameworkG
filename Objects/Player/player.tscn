@@ -13,7 +13,9 @@ Sprite = NodePath("AdvancedAnimatedSprite")
 Behaviour = 4
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 5)
 sprite_frames = ExtResource("2_qd5xx")
-animation = &"Bounce"
+animation = &"Balance"
+offset = Vector2(0, -5)
 script = ExtResource("105_mpaxa")
 _array = []

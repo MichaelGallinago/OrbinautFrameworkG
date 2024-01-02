@@ -21,6 +21,7 @@ public partial class AdvancedSpriteFrames : SpriteFrames
         {
             if (HasAnimation(animation)) continue;
             _frameLoops.Remove(animation);
+            GD.Print("haha loh");
         }
     }
 
