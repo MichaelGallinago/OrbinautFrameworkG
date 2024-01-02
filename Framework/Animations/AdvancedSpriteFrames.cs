@@ -21,23 +21,42 @@ public partial class AdvancedSpriteFrames : SpriteFrames
         {
             if (HasAnimation(animation)) continue;
             _frameLoops.Remove(animation);
-            GD.Print("haha loh");
         }
+        
+        ResourceSaver.Save(this, ResourcePath);
     }
 
-    public void RemoveAnimationOffset(StringName animation) => _offsets.Remove(animation);
+    public void RemoveAnimationOffset(StringName animation)
+    {
+        _offsets.Remove(animation);
+        ResourceSaver.Save(this, ResourcePath);
+    }
+
     public Vector2 GetAnimationOffset(StringName animation) => _offsets.GetValueOrDefault(animation);
     public void SetAnimationOffset(StringName animation, Vector2 offset)
     {
-        if (_offsets.TryAdd(animation, offset)) return;
-        _offsets[animation] = offset;
+        if (!_offsets.TryAdd(animation, offset))
+        {
+            _offsets[animation] = offset;
+        }
+        
+        ResourceSaver.Save(this, ResourcePath);
     }
 
-    public void RemoveAnimationFrameLoop(StringName animation) => _frameLoops.Remove(animation);
+    public void RemoveAnimationFrameLoop(StringName animation)
+    {
+        _frameLoops.Remove(animation);
+        ResourceSaver.Save(this, ResourcePath);
+    }
+
     public int GetAnimationFrameLoop(StringName animation) => _frameLoops.GetValueOrDefault(animation);
     public void SetAnimationFrameLoop(StringName animation, int frame)
     {
-        if (_frameLoops.TryAdd(animation, frame)) return;
-        _frameLoops[animation] = frame;
+        if (!_frameLoops.TryAdd(animation, frame))
+        {
+            _frameLoops[animation] = frame;
+        }
+        
+        ResourceSaver.Save(this, ResourcePath);
     }
 }

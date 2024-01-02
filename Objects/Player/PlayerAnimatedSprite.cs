@@ -188,6 +188,6 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private float GetGroundAnimationSpeed(float speedLimit)
 	{
-		return MathF.Floor(Math.Clamp(Math.Abs(_data.GroundSpeed), 1f, speedLimit));
+		return MathF.Floor(Math.Min(Math.Abs(_data.GroundSpeed) + 1f, speedLimit));
 	}
 }

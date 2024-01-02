@@ -6,6 +6,8 @@ namespace OrbinautFramework3.Framework.Animations;
 [Tool, GlobalClass]
 public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 {
+    public static float GlobalSpeedScale { get; set; } = 1f;
+    
     public StringName NextAnimation { get; set; }
     
     [Export] private int FrameLoop
@@ -38,7 +40,7 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 #if TOOLS
         if (Engine.IsEditorHint()) return;
 #endif
-        SetProcess(false);   
+        SetProcess(false);
     }
     
 #if TOOLS
@@ -58,6 +60,8 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         }
         
         _advancedSpriteFrames.SetAnimationOffset(Animation, Offset);
+        
+        NotifyPropertyListChanged();
     }
 #endif
 
@@ -110,14 +114,16 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 
     public void SetAnimation(StringName animation, float customSpeed = 1f)
     {
+        SpeedScale = GlobalSpeedScale * customSpeed;
         if (Animation == animation) return;
-        Play(animation, customSpeed);
+        Play(animation);
     }
     
     public void SetAnimation(StringName animation, int startFrame, float customSpeed = 1f)
     {
+        SpeedScale = GlobalSpeedScale * customSpeed;
         if (Animation == animation) return;
-        Play(animation, customSpeed);
+        Play(animation);
         Frame = startFrame;
     }
 }
