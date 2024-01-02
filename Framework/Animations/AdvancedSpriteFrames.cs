@@ -6,8 +6,8 @@ namespace OrbinautFramework3.Framework.Animations;
 [Tool, GlobalClass]
 public partial class AdvancedSpriteFrames : SpriteFrames
 {
-    private Godot.Collections.Dictionary<StringName, int> _frameLoops = [];
-    private Godot.Collections.Dictionary<StringName, Vector2> _offsets = [];
+    [Export] private Godot.Collections.Dictionary<StringName, int> _frameLoops = [];
+    [Export] private Godot.Collections.Dictionary<StringName, Vector2> _offsets = [];
 
     public void Refresh()
     {
