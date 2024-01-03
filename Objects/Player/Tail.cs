@@ -33,17 +33,17 @@ public partial class Tail : AdvancedAnimatedSprite
 			case Animations.Grab:
 			case Animations.Balance:
 			case Animations.SpinDash:
-				var offset = new Vector2I(23, 0);
+				var offset = new Vector2I(-23, 0);
 				if (data.AnimationType is Animations.SpinDash or Animations.Grab)
 				{
-					offset.X -= 5;
+					offset.X += 5;
 				}
 				else if (data.AnimationType != Animations.Spin)
 				{
-					offset -= new Vector2I(7, 5);
+					offset += new Vector2I(7, 5);
 				}
 				
-				Offset = -offset;
+				Offset = offset;
 				SetAnimation("Move");
 				break;
 			
@@ -81,7 +81,7 @@ public partial class Tail : AdvancedAnimatedSprite
 				
 				if (data.Angle > 22.5 && data.Angle <= 337.5)
 				{
-					angle = data.Angle;
+					angle = 360f - data.Angle;
 					step  = Mathf.Abs(data.GroundSpeed) * 3f / -32f + 2f;
 				}
 				else
