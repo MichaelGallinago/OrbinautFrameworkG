@@ -50,7 +50,7 @@ script = ExtResource("2_b03l2")
 [node name="Player" parent="." instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(168, 848)
-Type = 4
+Type = 2
 
 [node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(11776, 1088)

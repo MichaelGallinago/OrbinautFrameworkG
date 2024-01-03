@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0jhkpsyyy2wt"
-path="res://.godot/imported/tails_walk.png-b2eb68f9c9350f280e54950386f198db.ctex"
+uid="uid://b0ifjv04djr15"
+path="res://.godot/imported/transform.png-df0e78724ed3d3d66c638f9cd8505846.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Player/Sprites/Tails/tails_walk.png"
-dest_files=["res://.godot/imported/tails_walk.png-b2eb68f9c9350f280e54950386f198db.ctex"]
+source_file="res://Objects/Player/Sprites/Tails/transform.png"
+dest_files=["res://.godot/imported/transform.png-df0e78724ed3d3d66c638f9cd8505846.ctex"]
 
 [params]
 

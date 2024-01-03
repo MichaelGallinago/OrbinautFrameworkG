@@ -98,7 +98,7 @@ public partial class Player : BaseObject
     
 	[Export] public Types Type;
 	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
-
+	[Export] public PackedScene PackedTail { get; private set; }
 	public int Id { get; private set; }
 	
 	public PhysicParams PhysicParams { get; set; }
@@ -185,6 +185,9 @@ public partial class Player : BaseObject
 	public float EditModeSpeed { get; private set; }
 	public List<Type> EditModeObjects { get; private set; }
 	
+	
+	private Tail _tail;
+	
 	#endregion
     
 	static Player()
@@ -245,8 +248,8 @@ public partial class Player : BaseObject
 
 		if (Type == Types.Tails)
 		{
-			var tail = new Tail(this);
-			AddChild(tail);
+			_tail = PackedTail.Instantiate<Tail>();
+			AddChild(_tail);
 		}
 		
 		if (FrameworkData.GiantRingData != null)
@@ -344,8 +347,22 @@ public partial class Player : BaseObject
 		UpdateCollision();
 		RecordData();
 		ProcessRotation();
-		Sprite.Animate(new AnimationData(Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue));
+		Sprite.Animate(new PlayerAnimationData(Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue));
+		UpdateTail();
 		ProcessPalette();
+	}
+
+	private void UpdateTail()
+	{
+		if (_tail == null) return;
+		if (Type != Types.Tails)
+		{
+			_tail.QueueFree();
+			return;
+		}
+			
+		_tail.Animate(new TailAnimationData(Sprite.AnimationType, Sprite.Scale, Speed, GroundSpeed, 
+			IsGrounded, IsSpinning, Angle, VisualAngle));
 	}
 	
 	#region UpdatePhysics

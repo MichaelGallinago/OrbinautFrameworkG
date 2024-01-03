@@ -4,3 +4,5 @@
 
 [resource]
 script = ExtResource("1_rsbob")
+_frameLoops = {}
+_offsets = {}

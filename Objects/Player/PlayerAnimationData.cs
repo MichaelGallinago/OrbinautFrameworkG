@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public record AnimationData
+public record PlayerAnimationData
 (
     Player.Types Type, 
     Constants.Direction Facing, 

@@ -9,14 +9,15 @@ namespace OrbinautFramework3.Objects.Player;
 [Tool]
 public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
-	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _array;
+	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
 	
 	public float AnimationTimer { get; set; }
 	public Animations AnimationType { get; set; }
 	public bool IsFrameChanged { get; private set; }
 
-	private AnimationData _data;
+	private PlayerAnimationData _data;
 	private Animations _animationBuffer;
+	private int _spriteFramesIndex;
 
 	public override void _Ready()
 	{
@@ -24,7 +25,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		FrameChanged += () => IsFrameChanged = true;
 	}
 
-	public void Animate(AnimationData data)
+	public void Animate(PlayerAnimationData data)
 	{
 		_data = data;
 		
@@ -55,13 +56,15 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		{
 			Scale = new Vector2(Math.Abs(Scale.X) * (float)data.Facing, Scale.Y);
 		}
+
+		UpdateSpriteFrames();
 		
 		switch (data.Type)
 		{
 			case Player.Types.Sonic when data.IsSuper: AnimateSuperSonic(); break;
 			case Player.Types.Sonic: AnimateSonic(); break;
 			case Player.Types.Tails: AnimateTails(); break;
-			case Player.Types.Knuckles: AnimateTails(); break;
+			case Player.Types.Knuckles: AnimateKnuckles(); break;
 			case Player.Types.Amy: AnimateAmy(); break;
 			
 			case Player.Types.None:
@@ -71,6 +74,13 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		}
 		
 		IsFrameChanged = false;
+	}
+
+	private void UpdateSpriteFrames()
+	{
+		int index = _data.Type == Player.Types.Sonic && _data.IsSuper ? 5 : (int)_data.Type;
+		if (_spriteFramesIndex == index) return;
+		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}
 	
 	private void AnimateSuperSonic()
@@ -188,6 +198,6 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private float GetGroundAnimationSpeed(float speedLimit)
 	{
-		return MathF.Floor(Math.Min(Math.Abs(_data.GroundSpeed) + 1f, speedLimit));
+		return 1f / MathF.Floor(Math.Max(1f, speedLimit - Math.Abs(_data.GroundSpeed)));
 	}
 }
