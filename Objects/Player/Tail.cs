@@ -20,9 +20,9 @@ public partial class Tail : AdvancedAnimatedSprite
 				SetAnimation("Idle");
 				break;
 			
-			case Animations.FlyLift:
 			case Animations.Fly:
 			case Animations.FlyTired:
+			case Animations.FlyCarry:
 				float speed = data.Speed.Y >= 0f || data.AnimationType == Animations.FlyTired ? 0.5f : 1f;
 				SetAnimation("Fly", speed);
 				break;
@@ -67,46 +67,41 @@ public partial class Tail : AdvancedAnimatedSprite
 
 	private void UpdateAngle(TailAnimationData data)
 	{
-		if (!data.IsSpinning)
+		_angle = GetTailAngle(data);
+		RotationDegrees = FrameworkData.RotationMode == 0 ? Mathf.Ceil((_angle - 22.5f) / 45f) * 45f : _angle;
+	}
+
+	private float GetTailAngle(TailAnimationData data)
+	{
+		if (!data.IsSpinning) return data.VisualAngle;
+
+		float angle;
+		if (!data.IsGrounded)
 		{
-			_angle = data.VisualAngle;
+			// TODO: Check Atan2
+			angle = Mathf.RadToDeg(Mathf.Atan2(data.Speed.Y, data.Speed.X));
+			return data.Scale.X >= 0f ? angle : angle + 180f;
 		}
-		else 
+
+		// Smooth rotation code by Nihil
+		angle = 360f;
+		float step = Mathf.Abs(data.GroundSpeed);
+				
+		if (data.Angle > 22.5 && data.Angle <= 337.5)
 		{
-			if (data.IsGrounded)
-			{
-				// Smooth rotation code by Nihil
-				var angle = 360f;
-				float step;
-				
-				if (data.Angle > 22.5 && data.Angle <= 337.5)
-				{
-					angle = 360f - data.Angle;
-					step  = Mathf.Abs(data.GroundSpeed) * 3f / -32f + 2f;
-				}
-				else
-				{
-					step = Mathf.Abs(data.GroundSpeed) / -16f + 2f;
-				}
-				// TODO: Check Atan2 1
-				angle = Mathf.DegToRad(angle);
-				float mainAngle = Mathf.DegToRad(_angle);
-				_angle = Mathf.RadToDeg(MathF.Atan2(
-					MathF.Sin(angle) + MathF.Sin(mainAngle) * step, 
-					MathF.Cos(angle) + MathF.Cos(mainAngle) * step));
-			}
-			else
-			{	
-				//TODO: check Atan2 2
-				_angle = Mathf.RadToDeg(Mathf.Atan2(data.Speed.Y, data.Speed.X));
-				
-				if (data.Scale.X < 0)
-				{
-					_angle += 180f;
-				}
-			}
+			angle -= data.Angle;
+			step = step * 3f / -32f + 2f;
+		}
+		else
+		{
+			step = step / -16f + 2f;
 		}
 		
-		RotationDegrees = FrameworkData.RotationMode == 0 ? Mathf.Ceil((_angle - 22.5f) / 45f) * 45f : _angle;
+		// TODO: Check Atan2
+		angle = Mathf.DegToRad(angle);
+		float mainAngle = Mathf.DegToRad(_angle);
+		return Mathf.RadToDeg(MathF.Atan2(
+			MathF.Sin(angle) + MathF.Sin(mainAngle) * step, 
+			MathF.Cos(angle) + MathF.Cos(mainAngle) * step));
 	}
 }

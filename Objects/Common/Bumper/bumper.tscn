@@ -31,7 +31,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_nbfsr")
 }],
 "loop": false,
-"name": &"bump",
+"name": &"Bump",
 "speed": 60.0
 }, {
 "frames": [{
@@ -39,10 +39,12 @@ animations = [{
 "texture": SubResource("AtlasTexture_uwm06")
 }],
 "loop": true,
-"name": &"default",
+"name": &"Default",
 "speed": 0.0
 }]
 script = ExtResource("4_thiwj")
+_frameLoops = {}
+_offsets = {}
 
 [node name="Bumper" type="Node2D" node_paths=PackedStringArray("_sprite")]
 z_index = -1
@@ -52,5 +54,5 @@ Behaviour = 1
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_wtp5n")
-animation = &"bump"
+animation = &"Default"
 script = ExtResource("5_wqvxw")

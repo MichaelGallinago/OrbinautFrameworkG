@@ -42,8 +42,8 @@ public static class SharedData
     //public static giant_ring_data { get; set; } = [];
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static bool PlayerEditMode { get; set; } = false;
-    public static Player.Types PlayerMain { get; set; } = Player.Types.Sonic;
-    public static Player.Types PlayerCpu { get; set; } = Player.Types.None;
+    public static Player.Types PlayerType { get; set; } = Player.Types.Sonic;
+    public static Player.Types PlayerTypeAI { get; set; } = Player.Types.None;
     public static byte StageId { get; set; } = 0;
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;

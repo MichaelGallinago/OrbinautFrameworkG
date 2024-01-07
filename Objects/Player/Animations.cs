@@ -9,19 +9,11 @@ public enum Animations : byte
 {
     None,
     Idle,
-    Move,
-    Walk,
-    Run,
-    Dash,
     Spin,
     SpinDash,
     Push,
     Duck,
     LookUp,
-    Fly,
-    FlyTired,
-    Swim,
-    SwimTired,
     Hurt,
     Death,
     Drown,
@@ -31,6 +23,11 @@ public enum Animations : byte
     Transform,
     Bounce,
     Breathe,
+    
+    Move,
+    Walk,
+    Run,
+    Dash,
     
     GlideAir,
     GlideFall,
@@ -45,8 +42,15 @@ public enum Animations : byte
     BalanceTurn,
     
     HammerSpin,
-    HammerRush,
+    HammerDash,
     
-    FlyLift,
-    SwimLift,
+    Fly,
+    FlyTired,
+    FlyCarry,
+    FlyCarryTired,
+    
+    Swim,
+    SwimTired,
+    SwimCarry,
+    SwimLift
 }

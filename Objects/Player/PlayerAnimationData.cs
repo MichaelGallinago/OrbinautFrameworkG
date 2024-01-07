@@ -10,5 +10,6 @@ public record PlayerAnimationData
     bool IsSuper, 
     float GroundSpeed, 
     Vector2 Speed,
-    float ActionValue
+    float ActionValue,
+    Player CarryTarget
 );

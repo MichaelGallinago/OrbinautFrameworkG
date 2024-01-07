@@ -24,56 +24,55 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		base._Ready();
 		FrameChanged += () => IsFrameChanged = true;
 	}
-
+	
 	public void Animate(PlayerAnimationData data)
 	{
 		_data = data;
 		
-		if (FrameworkData.UpdateObjects)
-		{
-			if (_animationBuffer == Animations.None && AnimationTimer > 0f)
-			{
-				_animationBuffer = AnimationType;
-			}
-		
-			if (AnimationTimer < 0)
-			{
-				if (AnimationType == _animationBuffer)
-				{
-					AnimationType = Animations.Move;
-				}
-			
-				AnimationTimer = 0;
-				_animationBuffer = Animations.None;
-			}
-			else if (_animationBuffer != Animations.None)
-			{
-				AnimationTimer--;
-			}
-		}
-		
-		if (AnimationType != Animations.Spin || IsFrameChanged)
-		{
-			Scale = new Vector2(Math.Abs(Scale.X) * (float)data.Facing, Scale.Y);
-		}
-
+		UpdateAnimationBuffer();
+		UpdateScale();
 		UpdateSpriteFrames();
-		
+
 		switch (data.Type)
 		{
-			case Player.Types.Sonic when data.IsSuper: AnimateSuperSonic(); break;
-			case Player.Types.Sonic: AnimateSonic(); break;
-			case Player.Types.Tails: AnimateTails(); break;
-			case Player.Types.Knuckles: AnimateKnuckles(); break;
-			case Player.Types.Amy: AnimateAmy(); break;
-			
-			case Player.Types.None:
-			case Player.Types.Global:
-			case Player.Types.GlobalAI:
-				break;
+			case Player.Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
+			case Player.Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
+			case Player.Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
+			case Player.Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
 		
 		IsFrameChanged = false;
+	}
+
+	private void UpdateAnimationBuffer()
+	{
+		if (!FrameworkData.UpdateObjects) return;
+		
+		if (_animationBuffer == Animations.None && AnimationTimer > 0f)
+		{
+			_animationBuffer = AnimationType;
+		}
+		
+		if (AnimationTimer < 0f)
+		{
+			if (AnimationType == _animationBuffer)
+			{
+				AnimationType = Animations.Move;
+			}
+			
+			AnimationTimer = 0f;
+			_animationBuffer = Animations.None;
+		}
+		else if (_animationBuffer != Animations.None)
+		{
+			AnimationTimer--;
+		}
+	}
+
+	private void UpdateScale()
+	{
+		if (AnimationType == Animations.Spin && !IsFrameChanged) return;
+		Scale = new Vector2(Math.Abs(Scale.X) * (float)_data.Facing, Scale.Y);
 	}
 
 	private void UpdateSpriteFrames()
@@ -83,108 +82,107 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}
 	
-	private void AnimateSuperSonic()
+	private void AnimateSonic(Animations type, float speed)
 	{
-		float speed = AnimationType switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-		
-		string animationName = GetAnimationName(false, 8f);
-		
-		SetAnimation(animationName, speed);
+		SetAnimationType(type, speed);
 
-		if (AnimationType != Animations.Move || animationName != "Walk") return;
+		if (!_data.IsSuper || type != Animations.Walk) return;
 
 		if (FrameworkData.Time % 4d > 1d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}
 	
-	private void AnimateSonic()
+	private float SonicSpeed => AnimationType switch
 	{
-		float speed = AnimationType switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-		
-		string animationName = GetAnimationName(SharedData.PeelOut, 6f);
-		
-		SetAnimation(animationName, speed);
-	}
-
-	private void AnimateTails()
+		Animations.Move => GetGroundAnimationSpeed(9f),
+		Animations.Push => GetGroundAnimationSpeed(9f),
+		Animations.Spin => GetGroundAnimationSpeed(5f),
+		_ => 1f
+	};
+	
+	private Animations SonicType => AnimationType switch
 	{
-		float speed = AnimationType switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Swim => _data.Speed.Y < 0f ? 1f : 0.5f,
-			_ => 1f
-		};
+		Animations.Move => _data.IsSuper ? 
+			GetMoveAnimation(false, 8f) :
+			GetMoveAnimation(SharedData.PeelOut, 6f),
+		_ => AnimationType
+	};
+	
+	private void AnimateTails(Animations type, float speed)
+	{
+		SetAnimationType(type, speed);
 		
-		string animationName = GetAnimationName(true, 6f);
-		
-		SetAnimation(animationName, speed);
-		
-		if (AnimationType != Animations.FlyLift) return;
+		if (type != Animations.FlyCarry) return;
 		Frame = _data.Speed.Y < 0 ? 1 : 0;
 	}
 	
-	private void AnimateKnuckles()
+	private float TailsSpeed => AnimationType switch
 	{
-		float speed = AnimationType switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-
-		string animationName = GetAnimationName(false, 6f);
-		
+		Animations.Move => GetGroundAnimationSpeed(9f),
+		Animations.Push => GetGroundAnimationSpeed(9f),
+		Animations.Swim => _data.Speed.Y < 0f ? 1f : 0.5f,
+		_ => 1f
+	};
+	
+	private Animations TailsType => AnimationType switch
+	{
+		Animations.Fly => _data.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
+		Animations.FlyTired => _data.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
+		Animations.Move => GetMoveAnimation(true, 6f),
+		_ => AnimationType
+	};
+	
+	private void AnimateKnuckles(Animations type, float speed)
+	{
 		if (AnimationType == Animations.GlideFall)
 		{
-			SetAnimation(animationName, (int)_data.ActionValue, speed);
+			SetAnimation(type.ToStringFast(), (int)_data.ActionValue, speed);
 			return;
 		}
 		
-		SetAnimation(animationName, speed);
+		SetAnimationType(type, speed);
 	}
 	
-	private void AnimateAmy()
+	private float KnucklesSpeed => AnimationType switch
 	{
-		float speed = AnimationType switch
-		{
-			Animations.Move => GetGroundAnimationSpeed(9f),
-			Animations.Push => GetGroundAnimationSpeed(9f),
-			Animations.Spin => GetGroundAnimationSpeed(5f),
-			Animations.HammerSpin => GetGroundAnimationSpeed(5f),
-			_ => 1f
-		};
-
-		string animationName = GetAnimationName(true, 6f);
-
+		Animations.Move => GetGroundAnimationSpeed(9f),
+		Animations.Push => GetGroundAnimationSpeed(9f),
+		Animations.Spin => GetGroundAnimationSpeed(5f),
+		_ => 1f
+	};
+	
+	private Animations KnucklesType => AnimationType switch
+	{
+		Animations.Move => GetMoveAnimation(false, 6f),
+		_ => AnimationType
+	};
+	
+	private void AnimateAmy(Animations type, float speed)
+	{
 		if (AnimationType == Animations.HammerSpin)
 		{
-			SetAnimation(animationName, Frame, speed);
+			SetAnimation(type.ToStringFast(), Frame, speed);
 			return;
 		}
-		
-		SetAnimation(animationName, speed);
-	}
 
-	private string GetAnimationName(bool canDash, float runThreshold)
-	{
-		return (AnimationType == Animations.Move ? 
-			GetMoveAnimation(canDash, runThreshold) : AnimationType).ToStringFast();
+		SetAnimationType(type, speed);
 	}
+	
+	private float AmySpeed => AnimationType switch
+	{
+		Animations.Move => GetGroundAnimationSpeed(9f),
+		Animations.Push => GetGroundAnimationSpeed(9f),
+		Animations.Spin => GetGroundAnimationSpeed(5f),
+		Animations.HammerSpin => GetGroundAnimationSpeed(5f),
+		_ => 1f
+	};
+
+	private Animations AmyType => AnimationType switch
+	{
+		Animations.Move => GetMoveAnimation(true, 6f),
+		_ => AnimationType
+	};
 	
 	private Animations GetMoveAnimation(bool canDash, float runThreshold)
 	{
@@ -196,8 +194,10 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
 	}
 	
-	private float GetGroundAnimationSpeed(float speedLimit)
+	private float GetGroundAnimationSpeed(float speedBound)
 	{
-		return 1f / MathF.Floor(Math.Max(1f, speedLimit - Math.Abs(_data.GroundSpeed)));
+		return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(_data.GroundSpeed)));
 	}
+
+	private void SetAnimationType(Animations type, float speed) => SetAnimation(type.ToStringFast(), speed);
 }

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtlx4fu2pgj4d"]
+
+[ext_resource type="Script" path="res://Objects/Common/CameraTrigger/CameraTrigger.cs" id="1_gi0so"]
+[ext_resource type="Texture2D" uid="uid://0ggkpwxk0pl2" path="res://Objects/Common/CameraTrigger/camera_trigger.png" id="2_eqk66"]
+
+[node name="CameraTrigger" type="Node2D" node_paths=PackedStringArray("_sprite")]
+modulate = Color(1, 1, 1, 0.501961)
+script = ExtResource("1_gi0so")
+_sprite = NodePath("Sprite2D")
+_direction = 1
+Behaviour = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_eqk66")

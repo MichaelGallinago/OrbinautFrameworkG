@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
-using OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -18,30 +16,21 @@ public partial class Player : BaseObject
 	private const byte EditModeAccelerationMultiplier = 4;
 	private const float EditModeAcceleration = 0.046875f;
 	private const byte EditModeSpeedLimit = 16;
-	private const byte MaxDropDashCharge = 20;
+	private const byte MaxDropDashCharge = 22;
 	private const byte DefaultViewTime = 120;
 	
 	public const byte CpuDelay = 16;
 	
 	public enum Types : byte
 	{
-		None, Sonic, Tails, Knuckles, Amy, Global, GlobalAI
+		None, Sonic, Tails, Knuckles, Amy
 	}
-    
-	public enum States : byte
+	
+	public enum SpawnTypes : byte
 	{
-		Normal,
-		Spin,
-		Jump,
-		SpinDash,
-		PeelOut,
-		DropDash,
-		Flight,
-		HammerRush,
-		HammerSpin,
-		Carried
+		Global, GlobalAI, Unique
 	}
-
+	
 	public enum CpuStates : byte
 	{
 		Main, Fly, Stuck
@@ -66,7 +55,7 @@ public partial class Player : BaseObject
 		TwinAttack,
 		TwinAttackCancel,
 		Transform,
-		HammerRush,
+		HammerDash,
 		HammerSpin,
 		HammerSpinCancel,
 		Carried,
@@ -97,6 +86,7 @@ public partial class Player : BaseObject
 	public static List<Player> Players { get; }
     
 	[Export] public Types Type;
+	[Export] public SpawnTypes SpawnType;
 	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 	[Export] public PackedScene PackedTail { get; private set; }
 	public int Id { get; private set; }
@@ -197,8 +187,20 @@ public partial class Player : BaseObject
 
 	public override void _Ready()
 	{
-		SetBehaviour(BehaviourType.Unique);
+		Type = SpawnType switch
+		{
+			SpawnTypes.Global => SharedData.PlayerType,
+			SpawnTypes.GlobalAI => SharedData.PlayerTypeAI,
+			_ => Type
+		};
 
+		if (Type == Types.None)
+		{
+			QueueFree();
+			return;
+		}
+
+		
 		if (GetOwner<Node>() is CommonScene scene)
 		{
 			TileMap = scene.CollisionTileMap;
@@ -207,7 +209,7 @@ public partial class Player : BaseObject
 				Stage = stage;
 			}
 		}
-
+		
 		TileCollider = new TileCollider();
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
@@ -294,6 +296,16 @@ public partial class Player : BaseObject
 		TouchObjects = [];
 	}
 
+	private new void QueueFree()
+	{
+		Players.Remove(this);
+		for (int i = Id; i < Players.Count; i++)
+		{
+			Players[i].Id--;
+		}
+		base.QueueFree();
+	}
+
 	public override void _EnterTree()
 	{
 		base._EnterTree();
@@ -304,13 +316,10 @@ public partial class Player : BaseObject
 	public override void _ExitTree()
 	{
 		base._ExitTree();
-		Players.Remove(this);
-		for (int i = Id; i < Players.Count; i++)
-		{
-			Players[i].Id--;
-		}
+		
 		if (Players.Count == 0 || !IsCpuRespawn) return;
 		//TODO: check respawn Player cpu
+		/*
 		var newPlayer = new Player
 		{
 			Type = Type,
@@ -318,6 +327,7 @@ public partial class Player : BaseObject
 		};
 
 		newPlayer._Process(FrameworkData.ProcessSpeed / Constants.BaseFramerate);
+		*/
 	}
 
 	public override void _Process(double delta)
@@ -344,12 +354,12 @@ public partial class Player : BaseObject
 		ProcessCamera();
 		UpdateStatus();
 		ProcessWater();
-		UpdateCollision();
 		RecordData();
 		ProcessRotation();
-		Sprite.Animate(new PlayerAnimationData(Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue));
+		Sprite.Animate(new PlayerAnimationData(Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue, CarryTarget));
 		UpdateTail();
 		ProcessPalette();
+		UpdateCollision();
 	}
 
 	private void UpdateTail()
@@ -380,12 +390,12 @@ public partial class Player : BaseObject
 		if (ProcessJump()) return;
 		if (StartJump()) return;
 		
-		ProcessDropDash();
+		ChargeDropDash();
 		ProcessFlight();
 		ProcessClimb();
 		ProcessGlide();
-		ProcessHammerSpin();
-		ProcessHammerRush();
+		ChargeHammerSpin();
+		ProcessHammerDash();
 		
 		// Core player logic
 		ProcessSlopeResist();
@@ -557,12 +567,6 @@ public partial class Player : BaseObject
 	{
 		if (!IsJumping || IsGrounded) return false;
 		
-		if (Type == Types.Amy && Action == Actions.None && Speed.Y >= 0)
-		{
-			Sprite.AnimationType = Animations.Spin;
-			SetHitboxExtra(Vector2I.Zero);
-		}
-		
 		if (!InputDown.Abc)
 		{
 			Speed.Y = Math.Max(Speed.Y, PhysicParams.MinimalJumpVelocity);
@@ -723,8 +727,10 @@ public partial class Player : BaseObject
 			case Types.Amy:
 				if (Action > 0 || !InputPress.Abc) break;
 				
-				Speed.Y = PhysicParams.MinimalJumpVelocity;
-				IsAirLock = false;
+				if (SharedData.NoRollLock)
+				{
+					IsAirLock = false;	
+				}
 				Sprite.AnimationType = Animations.HammerSpin;
 				Action = Actions.HammerSpin;
 				ActionValue = 0;
@@ -769,15 +775,7 @@ public partial class Player : BaseObject
 		StickToConvex = false;
 		GroundMode = 0;
 	
-		if (Type == Types.Amy)
-		{
-			SetHitboxExtra(new Vector2I(25, 25));
-			Sprite.AnimationType = Animations.HammerSpin;
-		}
-		else
-		{
-			Sprite.AnimationType = Animations.Spin;
-		}
+		Sprite.AnimationType = Animations.Spin;
 		
 		//TODO: audio
 		//audio_play_sfx(sfx_jump);
@@ -820,72 +818,39 @@ public partial class Player : BaseObject
 		};
 	}
 
-	private void ProcessDropDash()
+	private void ChargeDropDash()
 	{
-		if (!SharedData.DropDash || Action != Actions.DropDash) return;
-	
-		const float maxDropDashCharge = 20f;
-	
-		if (!IsGrounded)
-		{		
-			if (InputDown.Abc)
-			{
-				IsAirLock = false;		
-				if (ActionValue < maxDropDashCharge)
-				{
-					ActionValue++;
-				}
-				else 
-				{
-					if (Sprite.AnimationType != Animations.DropDash)
-					{
-						Sprite.AnimationType = Animations.DropDash;
-						//TODO: audio
-						//audio_play_sfx(sfx_charge);
-					}
-				}
-			}
-			else if (ActionValue > 0f)
-			{
-				if (Mathf.IsEqualApprox(ActionValue, maxDropDashCharge))
-				{		
-					Sprite.AnimationType = Animations.Spin;
-					Action = Actions.DropDashCancel;
-				}
-			
-				ActionValue = 0f;
-			}
-		}
-	
-		// Called from player_land() function
-		else if (Mathf.IsEqualApprox(ActionValue, maxDropDashCharge))
+		if (!SharedData.DropDash || Action != Actions.DropDash || IsGrounded) return;
+		
+		if (InputDown.Abc)
 		{
-			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-			Radius = RadiusSpin;
-
-			if (IsSuper)
+			IsAirLock = false;		
+			if (ActionValue < MaxDropDashCharge)
 			{
-				UpdateDropDashGroundSpeed(13f, 12f);
-				Camera.Main.ShakeTimer = 6;
+				ActionValue++;
 			}
-			else
+			else 
 			{
-				UpdateDropDashGroundSpeed(12f, 8f);
-			}
-		
-			Sprite.AnimationType = Animations.Spin;
-			IsSpinning = true;
-		
-			if (!SharedData.CDCamera)
-			{
-				Camera.Main.Delay.X = 8;
+				if (Sprite.AnimationType != Animations.DropDash)
+				{
+					Sprite.AnimationType = Animations.DropDash;
+					//TODO: audio
+					//audio_play_sfx(sfx_charge);
+				}
 			}
 			
-			//TODO: audio & obj_dust_dropdash
-			//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-			//audio_stop_sfx(sfx_charge);
-			//audio_play_sfx(sfx_release);
+			return;
 		}
+
+		if (ActionValue <= 0f) return;
+		
+		if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge))
+		{		
+			Sprite.AnimationType = Animations.Spin;
+			Action = Actions.DropDashCancel;
+		}
+			
+		ActionValue = 0f;
 	}
 
 	private void UpdateDropDashGroundSpeed(float limitSpeed, float force)
@@ -933,14 +898,7 @@ public partial class Player : BaseObject
 			}
 			else
 			{	
-				if (!IsUnderwater)
-				{
-					Sprite.AnimationType = CarryTarget == null ? Animations.Fly : Animations.FlyLift;
-				}
-				else
-				{
-					Sprite.AnimationType = CarryTarget == null ? Animations.Swim : Animations.SwimLift;
-				}
+				Sprite.AnimationType = IsUnderwater ? Animations.Swim : Animations.Fly;
 			
 				if (!IsUnderwater || CarryTarget == null)
 				{
@@ -990,7 +948,7 @@ public partial class Player : BaseObject
 				{
 					case 0f: // Frame 0
 						Sprite.AnimationType = Animations.ClimbLedge;
-						Position += new Vector2(3f * (float)Facing, -2f);
+						Position += new Vector2(3f * (float)Facing, -3f);
 						break;
 					
 					case 6f: // Frame 1
@@ -1019,7 +977,6 @@ public partial class Player : BaseObject
 			return;
 		}
 		
-		//TODO: check GetFrameCount
 		const int stepsPerFrame = 4;
 		UpdateSpeedYOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
 		
@@ -1163,32 +1120,44 @@ public partial class Player : BaseObject
 
 	private void GlideAir()
 	{
-		const float glideGravity = 0.125f;
+		UpdateGlideSpeed();
+		GlideAirTurnAround();
+		UpdateGlideGravityAndHorizontalSpeed();
+		UpdateGlideAirAnimationFrame();
+
+		if (InputDown.Abc) return;
 		
-		//TODO: check this
-		// ground vel - glide speed
-		// ActionValue - glide Angle
-				
-		// Update glide speed
-		if (GroundSpeed >= 4f)
-		{
-			if (ActionValue % 180f == 0)
-			{
-				GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide, 24f);
-			}
-		}
-		else
+		Sprite.AnimationType = Animations.GlideFall;
+		ActionState = (int)GlideStates.Fall;
+		ActionValue = 0f;
+		Radius = RadiusNormal;
+		Speed.X *= 0.25f;
+
+		ResetGravity();
+	}
+
+	private void UpdateGlideSpeed()
+	{
+		if (GroundSpeed < 4f)
 		{
 			GroundSpeed += 0.03125f;
+			return;
 		}
 
-		GlideAirTurnAround();
-				
-		// Update horizontal and vertical speed
+		if (ActionValue % 180f != 0) return;
+		GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide, 24f);
+	}
+
+	private void UpdateGlideGravityAndHorizontalSpeed()
+	{
+		const float glideGravity = 0.125f;
+		
 		Speed.X = GroundSpeed * -Mathf.Cos(Mathf.DegToRad(ActionValue));
 		Gravity = Speed.Y < 0.5f ? glideGravity : -glideGravity;
-				
-		// Update Animation frame
+	}
+
+	private void UpdateGlideAirAnimationFrame()
+	{
 		float angle = Math.Abs(ActionValue) % 180f;
 		switch (angle)
 		{
@@ -1203,16 +1172,6 @@ public partial class Player : BaseObject
 				Sprite.Frame = 2;
 				break;
 		}
-
-		if (InputDown.Abc) return;
-		
-		Sprite.AnimationType = Animations.GlideFall;
-		ActionState = (int)GlideStates.Fall;
-		ActionValue = 0f;
-		Radius = RadiusNormal;
-		Speed.X *= 0.25f;
-
-		ResetGravity();
 	}
 
 	private void GlideGround()
@@ -1284,105 +1243,81 @@ public partial class Player : BaseObject
 		ActionValue += angleIncrement;
 	}
 	
-	private void ProcessHammerSpin()
+	private void ChargeHammerSpin()
 	{
-		if (Action != Actions.HammerSpin) return;
-	
-		const int maxHammerSpinCharge = 20;
-	
-		if (!InputDown.Abc)
+		if (Action != Actions.HammerSpin || IsGrounded) return;
+		
+		if (InputDown.Abc)
 		{
-			if (ActionValue >= maxHammerSpinCharge)
+			if (Mathf.IsEqualApprox(++ActionValue, MaxDropDashCharge))
 			{
-				Action = Actions.HammerSpinCancel;
+				//TODO: audio
+				//audio_play_sfx(sfx_charge);
 			}
-		
-			ActionValue = 0;
-			Sprite.AnimationType = Animations.Spin;
-		
+
+			IsAirLock = false;
 			return;
 		}
 
-		if (ActionValue < maxHammerSpinCharge)
+		switch (ActionValue)
 		{
-			if (ActionValue == 0)
-			{
-				SetHitboxExtra(new Vector2I(25, 25));
-				Sprite.AnimationType = Animations.HammerSpin;
-			}
+			case <= 0f: return;
 			
-			ActionValue++;
-			if (!Mathf.IsEqualApprox(ActionValue, maxHammerSpinCharge))
-			{
-				return;
-			}
-			
-			//TODO: audio
-			//audio_play_sfx(sfx_charge);
+			case >= MaxDropDashCharge:
+				Sprite.AnimationType = Animations.Spin;
+				Action = Actions.HammerSpinCancel;
+				break;
 		}
+
+		ActionValue = 0f;
+	}
+
+	private void ReleaseHammerSpin()
+	{
+		if (Action != Actions.HammerSpin) return;
 		
-		// Called from player_land() function
-		if (!IsGrounded)
-		{
-			return;
-		}
-	
-		Sprite.AnimationType = Animations.HammerRush;
-		Action = Actions.HammerRush;
-		ActionValue = 59; // (60)
-			
+		if (ActionValue < MaxDropDashCharge) return;
+
+		Sprite.AnimationType = Animations.HammerDash;
+		Action = Actions.HammerDash;
+		ActionValue = 0f;
+		
 		//TODO: audio
 		//audio_stop_sfx(sfx_charge);
 		//audio_play_sfx(sfx_release);
 	}
 	
-	private void ProcessHammerRush()
+	private void ProcessHammerDash()
 	{
-		if (Action != Actions.HammerRush) return;
-		
-		var sign = (int)Facing;
-		(Vector2I radius, Vector2I offset) = (Sprite.Frame & 3) switch
-		{
-			0 => (new Vector2I(16, 16), new Vector2I(6 * sign, 0)),
-			1 => (new Vector2I(16, 16), new Vector2I(-7 * sign, 0)),
-			2 => (new Vector2I(14, 20), new Vector2I(-4 * sign, -4)),
-			3 => (new Vector2I(17, 21), new Vector2I(7 * sign, -5)),
-			_ => throw new ArgumentOutOfRangeException()
-		};
-		SetHitboxExtra(radius, offset);
+		if (Action != Actions.HammerDash) return;
 
-		if (!IsGrounded)
+		if (!InputDown.Abc)
 		{
-			if (Speed.X != 0f)
-			{
-				Speed.X = 6f * Math.Sign(GroundSpeed);
-				return;
-			}
-		
-			CancelHammerRush();
+			// Note that animation isn't cleared. All checks for Hammer Dash should refer to its animation
+			Action = Actions.None;
 			return;
 		}
-
+		
+		// Air movement isn't overwritten completely, refer to ProcessMovementAir()
+		if (!IsGrounded) return;
+		
 		float radians = Mathf.DegToRad(Angle);
-		if (!InputDown.Abc || ActionValue == 0 || GroundSpeed == 0 || Math.Cos(radians) <= 0)
+		float cosine = MathF.Cos(radians);
+		if (Mathf.IsEqualApprox(++ActionValue, 60f) || GroundSpeed == 0f || cosine <= 0f)
 		{
-			CancelHammerRush();
-			return;
+			Action = Actions.None;
 		}
-	
-		ActionValue--;
-	
-		if (InputDown.Left && GroundSpeed > 0 || InputDown.Right && GroundSpeed < 0)
+
+		if (InputDown.Left && GroundSpeed > 0f || InputDown.Right && GroundSpeed < 0f)
 		{
 			Facing = (Constants.Direction)(-(int)Facing);
 			GroundSpeed *= -1;
 		}
-
-		radians = Mathf.DegToRad(Angle);
-		Speed = GroundSpeed * new Vector2(MathF.Cos(radians), MathF.Sin(radians));
+		
+		Speed = GroundSpeed * new Vector2(cosine, -MathF.Sin(radians));
 	}
 
-	private void CancelHammerRush()
+	private void CancelHammerDash()
 	{
 		Sprite.AnimationType = Animations.Move;
 		Action = Actions.None;
@@ -1392,7 +1327,7 @@ public partial class Player : BaseObject
 	{
 		if (!IsGrounded || IsSpinning || Angle is > 135f and <= 225f) return;
 	
-		if (Action is Actions.HammerRush or Actions.PeelOut) return;
+		if (Action is Actions.HammerDash or Actions.PeelOut) return;
 		
 		float slopeGrv = 0.125f * MathF.Sin(Mathf.DegToRad(Angle));
 		if (GroundSpeed != 0f || SharedData.PlayerPhysics >= PhysicsTypes.S3 && Math.Abs(slopeGrv) > 0.05078125f)
@@ -1416,7 +1351,7 @@ public partial class Player : BaseObject
 		if (!IsGrounded || IsSpinning) return;
 		
 		// Action checks
-		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerRush) return;
+		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerDash) return;
 		
 		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
 		// control lock. This allows him to Spin Dash
@@ -1660,6 +1595,20 @@ public partial class Player : BaseObject
 		{
 			Speed.Y = 16;
 		}
+
+		if (Action == Actions.HammerDash)
+		{
+			if (InputDown.Left)
+			{
+				Facing = Constants.Direction.Negative;
+			}
+			else if (InputDown.Right)
+			{
+				Facing = Constants.Direction.Positive;
+			}
+			
+			return;
+		}
 	
 		if (!IsAirLock)
 		{
@@ -1748,25 +1697,35 @@ public partial class Player : BaseObject
 
 	private void BalanceToDirection(Constants.Direction direction, bool isPanic)
 	{
-		if (Type != Types.Sonic || IsSuper)
+		switch (Type)
 		{
-			Sprite.AnimationType = Animations.Balance;
-			Facing = direction;
-			return;
-		}
-		
-		if (!isPanic)
-		{
-			Sprite.AnimationType = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
-		}
-		else if (Facing != direction)
-		{
-			Sprite.AnimationType = Animations.BalanceTurn;
-			Facing = direction;
-		}
-		else if (Sprite.AnimationType != Animations.BalanceTurn)
-		{
-			Sprite.AnimationType = Animations.BalancePanic;
+			case Types.Amy:
+			case Types.Tails:
+			case Types.Sonic when IsSuper:
+				Sprite.AnimationType = Animations.Balance;
+				Facing = direction;
+				break;
+			
+			case Types.Knuckles:
+				Sprite.AnimationType = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+				Facing = direction;
+				break;
+			
+			case Types.Sonic:
+				if (!isPanic)
+				{
+					Sprite.AnimationType = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+				}
+				else if (Facing != direction)
+				{
+					Sprite.AnimationType = Animations.BalanceTurn;
+					Facing = direction;
+				}
+				else if (Sprite.AnimationType != Animations.BalanceTurn)
+				{
+					Sprite.AnimationType = Animations.BalancePanic;
+				}
+				break;
 		}
 	}
 
@@ -1865,7 +1824,7 @@ public partial class Player : BaseObject
 
 	private void ProcessRollStart()
 	{
-		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerRush) return;
+		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
 		
 		if (!IsForcedRoll && (InputDown.Left || InputDown.Right)) return;
 	
@@ -2070,7 +2029,7 @@ public partial class Player : BaseObject
 
 	private void ProcessSlopeRepel()
 	{
-		if (!IsGrounded || StickToConvex || Action == Actions.HammerRush) return;
+		if (!IsGrounded || StickToConvex || Action == Actions.HammerDash) return;
 	
 		if (GroundLockTimer > 0f)
 		{
@@ -2893,24 +2852,50 @@ public partial class Player : BaseObject
 	private void UpdateCollision()
 	{
 		if (IsDead) return;
-	
+		
+		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
+		SetRegularHitbox();
+		SetExtraHitbox();
+	}
+
+	private void SetRegularHitbox()
+	{
 		if (Sprite.AnimationType != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
 			SetHitbox(new Vector2I(8, Radius.Y - 3));
-		}
-		else if (Type != Types.Tails && Type != Types.Amy)
-		{
-			SetHitbox(new Vector2I(8, 10), new Vector2I(0, 6));
-		}
-	
-		// Clear extra hitbox
-		if (Sprite.AnimationType is not Animations.HammerRush and not Animations.HammerSpin && 
-		    Barrier.State != Barrier.States.DoubleSpin)
-		{
-			SetHitboxExtra(Vector2I.Zero);
+			return;
 		}
 
-		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
+		if (Type is Types.Tails or Types.Amy) return;
+		SetHitbox(new Vector2I(8, 10), new Vector2I(0, 6));
+	}
+
+	private void SetExtraHitbox()
+	{
+		switch (Sprite.AnimationType)
+		{
+			case Animations.HammerSpin:
+				SetHitboxExtra(new Vector2I(25, 25));
+				break;
+			
+			case Animations.HammerDash:
+				//TODO: replace by methods overloading
+				var sign = (int)Facing;
+				(Vector2I radius, Vector2I offset) = (Sprite.Frame & 3) switch
+				{
+					0 => (new Vector2I(16, 16), new Vector2I(6 * sign, 0)),
+					1 => (new Vector2I(16, 16), new Vector2I(-7 * sign, 0)),
+					2 => (new Vector2I(14, 20), new Vector2I(-4 * sign, -4)),
+					3 => (new Vector2I(17, 21), new Vector2I(7 * sign, -5)),
+					_ => throw new ArgumentOutOfRangeException()
+				};
+				SetHitboxExtra(radius, offset);
+				break;
+			
+			default:
+				SetHitboxExtra(Barrier.State == Barrier.States.DoubleSpin ? new Vector2I(24, 24) : Vector2I.Zero);
+				break;
+		}
 	}
 
 	private void RecordData()
@@ -3420,7 +3405,7 @@ public partial class Player : BaseObject
 			{
 				GroundSpeed = ActionValue2;
 			}
-		
+			
 			return;
 		}
 	
@@ -3450,7 +3435,7 @@ public partial class Player : BaseObject
 			{
 				case Animations.Idle:
 				case Animations.Duck:
-				case Animations.HammerRush:
+				case Animations.HammerDash:
 				case Animations.GlideGround: 
 					break;
 			
@@ -3481,10 +3466,10 @@ public partial class Player : BaseObject
 	
 		CpuState = CpuStates.Main;
 
-		DropDash();
-		HammerSpin();
+		ReleaseDropDash();
+		ReleaseHammerSpin();
 	
-		if (Action != Actions.HammerRush)
+		if (Action != Actions.HammerDash)
 		{
 			Action = Actions.None;
 		}
@@ -3525,172 +3510,55 @@ public partial class Player : BaseObject
 		//TODO: Audio
 		//audio_play_sfx(sfx_hurt);
 	}
-
-	private void DropDash()
-	{
-		if (!FrameworkData.DropDash || Action != Actions.DropDash) return;
-	
-		if (!IsGrounded)
-		{
-			ChargeDropDash();
-		}
-		else if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge)) // Called from player_land() function
-		{
-			ReleaseDropDash();
-		}
-	}
-	
-	private void ChargeDropDash()
-	{
-		if (InputDown.Abc)
-		{
-			IsAirLock = false;	
-			if (ActionValue < MaxDropDashCharge)
-			{
-				ActionValue++;
-			}
-			else
-			{
-				if (Sprite.AnimationType != Animations.DropDash)
-				{
-					Sprite.AnimationType = Animations.DropDash;
-					// TODO: audio
-					//audio_play_sfx(sfx_charge);
-				}
-			}
-		}
-		else if (ActionValue > 0)
-		{
-			if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge))
-			{
-				Sprite.AnimationType = Animations.Spin;
-				Action = Actions.DropDashCancel;
-			}
-			
-			ActionValue = 0;
-		}
-	}
 	
 	private void ReleaseDropDash()
 	{
+		if (!SharedData.DropDash || Action != Actions.DropDash) return;
+
+		if (ActionValue < MaxDropDashCharge) return;
+		
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
-		
-		var force = 8f;
-		var maxSpeed = 12f;
-		
+
 		if (IsSuper)
 		{
-			force = 12f;
-			maxSpeed = 13f;
-			Camera.Main.UpdateShakeTimer(6);
-		}
-		
-		if (Facing == Constants.Direction.Negative)
-		{
-			if (Angle <= 0)
-			{
-				GroundSpeed = MathF.Floor(GroundSpeed / 4f) - force;
-				if (GroundSpeed < -maxSpeed)
-				{
-					GroundSpeed = -maxSpeed;
-				}
-			}
-			else if (!Mathf.IsEqualApprox(Angle, 360f))
-			{
-				GroundSpeed = MathF.Floor(GroundSpeed / 2f) - force;
-			}
-			else
-			{
-				GroundSpeed = -force;
-			}
+			UpdateDropDashGroundSpeed(13f, 12f);
+			Camera.Main.ShakeTimer = 6;
 		}
 		else
 		{
-			if (Angle >= 0)
-			{
-				GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
-				if (GroundSpeed > maxSpeed)
-				{
-					GroundSpeed = maxSpeed;
-				}
-			}
-			else if (!Mathf.IsEqualApprox(Angle, 360f))
-			{
-				GroundSpeed = MathF.Floor(GroundSpeed / 2f) + force;
-			}
-			else 
-			{
-				GroundSpeed = force;
-			}
+			UpdateDropDashGroundSpeed(12f, 8f);
 		}
 		
 		Sprite.AnimationType = Animations.Spin;
 		IsSpinning = true;
 		
-		if (!FrameworkData.CDCamera)
+		if (!SharedData.CDCamera)
 		{
-			Camera.Main.UpdateDelay(8);
+			Camera.Main.Delay.X = 8;
 		}
-		
-		Vector2 dustPosition = Position;
-		dustPosition.Y += Radius.Y;
-		
-		AddChild(new DropDashDust
-		{
-			Position = dustPosition,
-			Scale = new Vector2((float)Facing, Scale.Y)
-		});
-		
-		//TODO: audio
+			
+		//TODO: audio & obj_dust_dropdash
+		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
 		//audio_stop_sfx(sfx_charge);
 		//audio_play_sfx(sfx_release);
 	}
 
-	private void HammerSpin()
+	private void SetDropDashGroundSpeed(float force, float maxSpeed, Constants.Direction facing)
 	{
-		if (Action != Actions.HammerSpin) return;
-	
-		const int maxHammerSpinCharge = 20;
-	
-		if (!InputDown.Abc)
+		var sign = (float)facing;
+		force *= sign;
+		maxSpeed *= sign;
+		
+		if (sign * Speed.X >= 0)
 		{
-			if (ActionValue >= maxHammerSpinCharge)
-			{
-				Action = Actions.HammerSpinCancel;
-			}
-		
-			ActionValue = 0;
-			Sprite.AnimationType = Animations.Spin;
-		
+			GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
+			if (sign * GroundSpeed <= maxSpeed) return;
+			GroundSpeed = maxSpeed;
 			return;
 		}
-
-		if (ActionValue < maxHammerSpinCharge)
-		{
-			if (ActionValue == 0)
-			{
-				SetHitboxExtra(new Vector2I(25, 25));
-				Sprite.AnimationType = Animations.HammerSpin;
-			}
 		
-			ActionValue++;
-			if (!Mathf.IsEqualApprox(ActionValue, maxHammerSpinCharge)) return;
-			
-			// TODO: audio
-			//audio_play_sfx(sfx_charge);
-		}
-	
-		// Called from player_land() function
-		if (!IsGrounded) return;
-		
-		Sprite.AnimationType = Animations.HammerRush;
-		Action = Actions.HammerRush;
-		ActionValue = 59; // (60)
-	
-		// TODO: audio
-		//audio_stop_sfx(sfx_charge);
-		//audio_play_sfx(sfx_release);
+		GroundSpeed = (Mathf.IsEqualApprox(Angle, 360f) ? 0f : MathF.Floor(GroundSpeed / 2f)) + force;
 	}
 	
 	public void ClearPush()
@@ -3700,7 +3568,7 @@ public partial class Player : BaseObject
 		{
 			Sprite.AnimationType = Animations.Move;
 		}
-				
+		
 		PushingObject = null;
 	}
 }

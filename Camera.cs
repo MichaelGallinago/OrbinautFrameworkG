@@ -14,8 +14,8 @@ public partial class Camera : Camera2D
 	public static Camera Main { get; set; }
     
 	[Export] public BaseObject Target { get; set; }
-    
-	public Vector4I Bounds { get; private set; }
+
+	public Vector4I Bounds;
 		
 	public readonly Vector2I MaxSpeed;
 	public Vector2 Speed;

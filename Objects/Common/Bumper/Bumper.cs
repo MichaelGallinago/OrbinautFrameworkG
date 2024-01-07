@@ -21,21 +21,16 @@ public partial class Bumper : BaseObject
         SetHitbox(new Vector2I(8, 8));
     }
 
-    public override void _Ready()
-    {
-        _sprite.AnimationFinished += () => _sprite.Animation = "default";
-    }
-
     public override void _Process(double delta)
     {
         foreach (Player player in Player.Players)
         {
             if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.Hitbox)) continue;
 		    
-            if (_sprite.Animation == "default")
+            if (_sprite.Animation == "Default")
             {
-                _sprite.Play("bump");
-                _sprite.NextAnimation = "default";
+                _sprite.Play("Bump");
+                _sprite.NextAnimation = "Default";
             }
 		
             //TODO: audio

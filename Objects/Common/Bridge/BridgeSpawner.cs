@@ -1,4 +1,5 @@
 using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
@@ -38,6 +39,8 @@ public partial class BridgeSpawner : Node2D
     private byte _logAmount = 8;
     private short _logOffset;
     [Export] private Texture2D _stampTexture;
+
+    [Export] private BaseObject.BehaviourType _behaviour = BaseObject.BehaviourType.Pause;
 
     private Texture2D _logTexture;
     private Vector2 _stampSize;
@@ -117,7 +120,8 @@ public partial class BridgeSpawner : Node2D
         {
             Position = Position + new Vector2((_length - _logSize.X) / 2f, 0f),
             ProcessPriority = ProcessPriority,
-            ZIndex = ZIndex
+            Behaviour = _behaviour,
+            ZIndex = ZIndex,
         };
         parent.CallDeferred("add_child", bridge);
         

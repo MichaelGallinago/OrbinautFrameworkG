@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=25 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_18cwq"]
 [ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
@@ -11,7 +11,10 @@
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 [ext_resource type="PackedScene" uid="uid://djgcqtur5n565" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_horizontal.tscn" id="11_1127g"]
 [ext_resource type="PackedScene" uid="uid://cr02pmwqgey42" path="res://Objects/Common/Bridge/tsz_bridge.tscn" id="12_ncrh2"]
+[ext_resource type="PackedScene" uid="uid://dtlx4fu2pgj4d" path="res://Objects/Common/CameraTrigger/camera_trigger.tscn" id="13_7s6he"]
 [ext_resource type="PackedScene" uid="uid://b8uvs02jxyk0t" path="res://Objects/Common/Bumper/bumper.tscn" id="13_qd0sa"]
+[ext_resource type="PackedScene" uid="uid://cps57gwcr3a6o" path="res://Objects/Common/FallingFloor/falling_floor_spawner.tscn" id="14_d1km8"]
+[ext_resource type="Texture2D" uid="uid://b5wsb23sxlkx8" path="res://Objects/Common/FallingFloor/basic.png" id="15_ve5v6"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w0a6u"]
 shader = ExtResource("1_18cwq")
@@ -31,12 +34,45 @@ shader_parameter/u_inclineStep = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_h3f77"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hheeu"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dfrdx"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jfiou"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1g67i"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qo7tc"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w3uju"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ivwl"]
+atlas = ExtResource("15_ve5v6")
+region = Rect2(48, 16, 16, 16)
+
 [node name="StageTSZ" type="Node2D"]
 process_priority = -1
 material = SubResource("ShaderMaterial_w0a6u")
 script = ExtResource("1_hkdi5")
 
 [node name="Camera" parent="." instance=ExtResource("1_yqihk")]
+metadata/_edit_lock_ = true
 
 [node name="CollisionTileMap" type="TileMap" parent="."]
 tile_set = ExtResource("1_tw5fm")
@@ -49,8 +85,13 @@ script = ExtResource("2_b03l2")
 
 [node name="Player" parent="." instance=ExtResource("4_i6eum")]
 use_parent_material = true
-position = Vector2(168, 848)
-Type = 2
+position = Vector2(200, 848)
+
+[node name="Player2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
+use_parent_material = true
+position = Vector2(96, 848)
+SpawnType = 1
+Sprite = NodePath("../Player/AdvancedAnimatedSprite")
 
 [node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(11776, 1088)
@@ -142,3 +183,17 @@ position = Vector2(1280, 904)
 
 [node name="Bumper" parent="." instance=ExtResource("13_qd0sa")]
 position = Vector2(264, 816)
+
+[node name="CameraTrigger" parent="." instance=ExtResource("13_7s6he")]
+position = Vector2(1040, 960)
+scale = Vector2(1, 30)
+_newBoundY = 1490
+
+[node name="CameraTrigger2" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("13_7s6he")]
+position = Vector2(8944, 960)
+scale = Vector2(1, 30)
+_sprite = NodePath("../CameraTrigger/Sprite2D")
+
+[node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
+position = Vector2(816, 840)
+_piecesTextures = [SubResource("AtlasTexture_h3f77"), SubResource("AtlasTexture_hheeu"), SubResource("AtlasTexture_dfrdx"), SubResource("AtlasTexture_jfiou"), SubResource("AtlasTexture_1g67i"), SubResource("AtlasTexture_qo7tc"), SubResource("AtlasTexture_w3uju"), SubResource("AtlasTexture_7ivwl")]

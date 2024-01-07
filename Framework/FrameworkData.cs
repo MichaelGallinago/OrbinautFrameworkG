@@ -30,8 +30,6 @@ public static class FrameworkData
     public static PlayerBackupData PlayerBackupData { get; set; }
     public static CommonScene CurrentScene { get; set; }
     public static Vector2I ViewSize { get; set; }
-    public static Player.Types PlayerType { get; set; }
-    public static Player.Types PlayerAIType { get; set; }
     public static int RotationMode { get; set; }
     public static uint SavedScore { get; set; }
     public static uint SavedRings { get; set; }
@@ -67,9 +65,6 @@ public static class FrameworkData
         TilesData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
         ViewSize = new Vector2I(400, 224);
-
-        PlayerType = Player.Types.Sonic;
-        PlayerAIType = Player.Types.Tails;
         
         RotationMode = 1;
 
@@ -158,6 +153,7 @@ public static class FrameworkData
 			    if (position.X < activeArea.X || position.X > activeArea.Y || 
 			        position.Y < 0 || position.Y > limitBottom)
 			    {
+				    GD.Print(position, " ", activeArea);
 				    commonObject.QueueFree();
 			    }
 			    break;
