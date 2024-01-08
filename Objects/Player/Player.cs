@@ -343,7 +343,7 @@ public partial class Player : BaseObject
 		if (ProcessEditMode(processSpeed)) return;
 	    
 		// Process CPU Player logic (return if flying in or respawning)
-		if (ProcessAI(processSpeed)) return;
+		if (ProcessCpu(processSpeed)) return;
 	    
 		// Process Restart Event
 		ProcessRestart(processSpeed);
@@ -2550,7 +2550,6 @@ public partial class Player : BaseObject
 
 	private void ProcessCamera()
 	{
-		return;
 		if (IsDead) return;
 		
 		Camera camera = Camera.Main;
@@ -2905,10 +2904,10 @@ public partial class Player : BaseObject
 	private void RecordData()
 	{
 		if (IsDead) return;
-	
-		//TODO: record data
-		//ds_list_insert(ds_record_data, 0, [x, y, player_get_input(0), player_get_input(1), PushingObject, Facing]);
-		//ds_list_delete(ds_record_data, 32);
+		
+		RecordedData.Add(new RecordedData(Position, InputPress, InputDown, PushingObject, Facing));
+		if (RecordedData.Count <= CpuDelay * 2) return;
+		RecordedData.RemoveAt(0);
 	}
 
 	private void ProcessRotation()
@@ -3233,12 +3232,14 @@ public partial class Player : BaseObject
 		return true;
 	}
 
-	private bool ProcessAI(float processSpeed)
+	private bool ProcessCpu(float processSpeed)
 	{
-		if (Id == 0 || !FrameworkData.UpdateObjects) return false;
-
+		if (IsHurt || Id == 0) return false;
+		
 		// Find a player to follow
 		CpuTarget ??= Players[Id - 1];
+
+		if (RecordedData.Count < CpuDelay) return false;
 	
 		if (Id < InputUtilities.DeviceCount && (InputDown.A || InputDown.B || InputDown.C || 
 		    InputDown.Abc || InputDown.Up || InputDown.Down || InputDown.Left || InputDown.Right))

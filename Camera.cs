@@ -103,8 +103,6 @@ public partial class Camera : Camera2D
 			finalPosition.X + FrameworkData.ViewSize.X, finalPosition.Y + FrameworkData.ViewSize.Y);
 		
 		ForceUpdateScroll();
-		
-		GD.Print(Position);
 	}
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
