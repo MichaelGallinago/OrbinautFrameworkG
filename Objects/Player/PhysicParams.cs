@@ -19,7 +19,7 @@ public struct PhysicParams(
     public float AccelerationAir { get; private set; }  = accelerationAir;
     public float AccelerationTop { get; private set; }  = accelerationTop;
     public float AccelerationClimb { get; private set; }  = accelerationClimb;
-    public float Deceleration { get; private set; }  = deceleration;
+    public float Deceleration { get; }  = deceleration;
     public float DecelerationRoll { get; private set; }  = decelerationRoll;
     public float Friction { get; private set; }  = friction;
     public float FrictionRoll { get; private set; }  = frictionRoll;
@@ -113,8 +113,7 @@ public struct PhysicParams(
 	    )}
     };
 
-    public static PhysicParams Get(bool isUnderwater, bool isSuper, 
-	    Player.Types playerType, float itemSpeedTimer)
+    public static PhysicParams Get(bool isUnderwater, bool isSuper, Player.Types playerType, float itemSpeedTimer)
     {
 	    PhysicParams physicParams = ParamsMap[GetType(isUnderwater, isSuper, playerType)];
 	    

@@ -91,8 +91,7 @@ Type = 1
 [node name="Player2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(96, 848)
-Type = 2
-SpawnType = 1
+SpawnType = 2
 Sprite = NodePath("../Player/AdvancedAnimatedSprite")
 
 [node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
