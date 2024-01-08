@@ -5,7 +5,6 @@ using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Objects.Common.Bumper;
 
 namespace OrbinautFramework3.Framework;
 
@@ -16,8 +15,6 @@ public static class FrameworkData
     public static List<KeyboardControl> KeyboardControl { get; set; }
     public static bool GamepadVibration { get; set; }
     public static TilesData TilesData { get; }
-    public static bool CDTileFixes { get; set; }
-    public static bool CDCamera { get; set; }
     public static bool UpdateAnimations { get; set; }
     public static bool UpdateEffects { get; set; }
     public static bool UpdateObjects { get; set; }
@@ -59,8 +56,6 @@ public static class FrameworkData
         UpdateObjects = true;
         UpdateTimer = true;
         AllowPause = true;
-        CDTileFixes = true;
-        CDCamera = true;
         DropDash = true;
         TilesData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
@@ -153,7 +148,6 @@ public static class FrameworkData
 			    if (position.X < activeArea.X || position.X > activeArea.Y || 
 			        position.Y < 0 || position.Y > limitBottom)
 			    {
-				    GD.Print(position, " ", activeArea);
 				    commonObject.QueueFree();
 			    }
 			    break;

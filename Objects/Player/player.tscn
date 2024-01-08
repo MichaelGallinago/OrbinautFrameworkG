@@ -19,9 +19,7 @@ PackedTail = ExtResource("2_x8pdm")
 Behaviour = 4
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
-position = Vector2(-1, 1)
-sprite_frames = ExtResource("6_1iqsb")
-animation = &"Fly"
-offset = Vector2(1, -1)
+sprite_frames = ExtResource("4_xjx3q")
+animation = &"None"
 script = ExtResource("105_mpaxa")
 _spriteFrames = [ExtResource("4_xjx3q"), ExtResource("5_lpceh"), ExtResource("6_1iqsb"), ExtResource("7_ywak4"), ExtResource("2_qd5xx"), ExtResource("4_51ln1")]

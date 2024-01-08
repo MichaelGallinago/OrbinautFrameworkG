@@ -116,7 +116,7 @@ public partial class Player : BaseObject
 	public BaseObject OnObject { get; set; }
 	public bool IsSuper { get; set; }
 	public bool IsInvincible { get; set; }
-	public int SuperValue { get; set; }
+	public float SuperValue { get; set; }
 
 	public Actions Action { get; set; }
 	public int ActionState { get; set; }
@@ -128,7 +128,7 @@ public partial class Player : BaseObject
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
     
-	public int CameraViewTimer { get; set; }
+	public float CameraViewTimer { get; set; }
     
 	public bool IsForcedRoll { get; set; }
 	public float GroundLockTimer { get; set; }
@@ -470,7 +470,7 @@ public partial class Player : BaseObject
 		{
 			if (!SharedData.CDCamera && Id == 0)
 			{
-				Camera.Main.Delay.X = 16;
+				Camera.Main.Delay.X = 16f;
 			}
 		
 			int baseSpeed = IsSuper ? 11 : 8;
@@ -543,7 +543,7 @@ public partial class Player : BaseObject
 			{
 				if (!SharedData.CDCamera && Id == 0)
 				{
-					Camera.Main.Delay.X = 16;
+					Camera.Main.Delay.X = 16f;
 				}
 			
 				if (SharedData.FixDashRelease)
@@ -650,7 +650,7 @@ public partial class Player : BaseObject
 					case Barrier.Types.Flame:
 						if (!SharedData.CDCamera)
 						{
-							Camera.Main.Delay.X = 16;
+							Camera.Main.Delay.X = 16f;
 						}
 						
 						IsAirLock = true;
@@ -1890,25 +1890,29 @@ public partial class Player : BaseObject
 			Position = new Vector2(rightBound, Position.Y);
 		}
 	
-		if (Action is Actions.Flight or Actions.Climb)
+		switch (Action)
 		{
-			if (Position.Y + Speed.Y < camera.Limit.Y + 16)
-			{ 	
-				if (Action == Actions.Flight)
-				{
-					Gravity	= GravityType.TailsDown;
-				}
+			case Actions.Flight or Actions.Climb:
+			{
+				if (Position.Y + Speed.Y < camera.Limit.Y + 16f)
+				{ 	
+					if (Action == Actions.Flight)
+					{
+						Gravity	= GravityType.TailsDown;
+					}
 			
-				Speed.Y = 0;
-				Position = new Vector2(Position.X, camera.Limit.Y + 16);
+					Speed.Y = 0f;
+					Position = new Vector2(Position.X, camera.Limit.Y + 16f);
+				}
+
+				break;
 			}
-		}
-		else if (Action == Actions.Glide && Position.Y < camera.Limit.Y + 10)
-		{
-			Speed.X = 0;
+			case Actions.Glide when Position.Y < camera.Limit.Y + 10f:
+				Speed.X = 0f;
+				break;
 		}
 	
-		if (AirTimer > 0 && Position.Y > Math.Max(camera.Limit.W, camera.Bound.Z))
+		if (AirTimer > 0f && Position.Y > Math.Max(camera.Limit.W, camera.Bound.Z))
 		{
 			Kill();
 		}
@@ -2546,6 +2550,7 @@ public partial class Player : BaseObject
 
 	private void ProcessCamera()
 	{
+		return;
 		if (IsDead) return;
 		
 		Camera camera = Camera.Main;
@@ -2559,9 +2564,9 @@ public partial class Player : BaseObject
 
 			int shiftDirectionX = GroundSpeed != 0f ? Math.Sign(GroundSpeed) : (int)Facing;
 
-			if (Math.Abs(GroundSpeed) >= 6 || Action == Actions.SpinDash)
+			if (Math.Abs(GroundSpeed) >= 6f || Action == Actions.SpinDash)
 			{
-				if (camera.Delay.X == 0 && camera.BufferOffset.X != shiftDistanceX * shiftDirectionX)
+				if (camera.Delay.X == 0f && camera.BufferOffset.X != shiftDistanceX * shiftDirectionX)
 				{
 					camera.BufferOffset.X += shiftSpeedX * shiftDirectionX;
 				}
@@ -2577,7 +2582,7 @@ public partial class Player : BaseObject
 	
 		if (doShiftDown || doShiftUp)
 		{
-			if (CameraViewTimer > 0)
+			if (CameraViewTimer > 0f)
 			{
 				CameraViewTimer--;
 			}
@@ -2587,7 +2592,7 @@ public partial class Player : BaseObject
 			CameraViewTimer = DefaultViewTime;
 		}
 	
-		if (CameraViewTimer > 0)
+		if (CameraViewTimer > 0f)
 		{
 			if (camera.BufferOffset.Y != 0)
 			{
@@ -2617,18 +2622,18 @@ public partial class Player : BaseObject
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
 	
-		if (InvincibilityFrames > 0)
+		if (InvincibilityFrames > 0f)
 		{
-			Visible = ((int)InvincibilityFrames-- & 4) >= 1 || InvincibilityFrames == 0;
+			Visible = ((int)InvincibilityFrames-- & 4) >= 1 || InvincibilityFrames == 0f;
 		}
 	
-		if (ItemSpeedTimer > 0 && --ItemSpeedTimer == 0)
+		if (ItemSpeedTimer > 0f && --ItemSpeedTimer == 0f)
 		{
 			//TODO: audio
 			//stage_reset_bgm();	
 		}
 	
-		if (ItemInvincibilityTimer > 0 && --ItemInvincibilityTimer == 0)
+		if (ItemInvincibilityTimer > 0f && --ItemInvincibilityTimer == 0f)
 		{
 			//TODO: audio
 			//stage_reset_bgm();
@@ -2645,7 +2650,7 @@ public partial class Player : BaseObject
 				}
 			}
 		
-			if (SuperValue == 0)
+			if (SuperValue == 0f)
 			{
 				if (--RingCount <= 0)
 				{
@@ -2658,7 +2663,7 @@ public partial class Player : BaseObject
 				}
 				else
 				{
-					SuperValue = 60;
+					SuperValue = 60f;
 				}
 			}
 			else
@@ -2667,8 +2672,8 @@ public partial class Player : BaseObject
 			}
 		}
 	
-		IsInvincible = InvincibilityFrames != 0 || ItemInvincibilityTimer != 0 
-			|| IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
+		IsInvincible = InvincibilityFrames != 0 || ItemInvincibilityTimer != 0 || 
+		               IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
 				 
 		if (Id == 0 && FrameworkData.Time >= 36000d)
 		{
@@ -2776,8 +2781,7 @@ public partial class Player : BaseObject
 					ZIndex = 0;
 					Sprite.AnimationType = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
-					Speed.X = 0;
-					Speed.Y = 0;
+					Speed = Vector2.Zero;
 					Gravity	= 0.0625f;
 					IsAirLock = true;
 					Camera.Main.Target = null;

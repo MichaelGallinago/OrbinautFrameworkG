@@ -106,7 +106,7 @@ public static class CollisionUtilities
 		(int distance1, float angle1) = FindTile(isVertical, position1, direction, type, tileMap, groundMode);
 		(int distance2, float angle2) = FindTile(isVertical, position2, direction, type, tileMap, groundMode);
 		
-		if (isVertical && FrameworkData.CDTileFixes && direction == Direction.Positive 
+		if (isVertical && SharedData.CDTileFixes && direction == Direction.Positive 
 		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
 		{
 			return (distance1, 360f);
@@ -238,7 +238,7 @@ public static class CollisionUtilities
 		}
 		
 		// Run an additional check from CD'96
-		if (!isVertical || !FrameworkData.CDTileFixes || direction != Direction.Positive) return angle;
+		if (!isVertical || !SharedData.CDTileFixes || direction != Direction.Positive) return angle;
 		
 		// If tile angle is in the bottom half, we assume it's bottom is flat, so in case it is flipped
 		// we should treat it as a flat ground

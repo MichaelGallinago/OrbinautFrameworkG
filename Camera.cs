@@ -10,6 +10,7 @@ namespace OrbinautFramework3;
 public partial class Camera : Camera2D
 {
 	private const byte CameraCentreOffset = 16;
+	private const byte SpeedCap = 16;
 
 	public static Camera Main { get; set; }
     
@@ -17,7 +18,7 @@ public partial class Camera : Camera2D
 
 	public Vector4I Bounds;
 		
-	public readonly Vector2I MaxSpeed;
+	public Vector2I MaxSpeed;
 	public Vector2 Speed;
 	public Vector2I BufferPosition;
 	public Vector2 RawPosition;
@@ -36,8 +37,10 @@ public partial class Camera : Camera2D
 		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
 		Limit = Bound;
 		PreviousLimit = Bound;
-		MaxSpeed = new Vector2I(16, 16);
 
+		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
+		MaxSpeed = new Vector2I(maxSpeed, maxSpeed);
+		
 		if (FrameworkData.CheckpointData is not null)
 		{
 			LimitBottom = FrameworkData.CheckpointData.BottomCameraBound;
@@ -100,6 +103,8 @@ public partial class Camera : Camera2D
 			finalPosition.X + FrameworkData.ViewSize.X, finalPosition.Y + FrameworkData.ViewSize.Y);
 		
 		ForceUpdateScroll();
+		
+		GD.Print(Position);
 	}
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
@@ -167,15 +172,16 @@ public partial class Camera : Camera2D
 		Vector2I distance = (Vector2I)Target.Position - (Vector2I)RawPosition - FrameworkData.ViewSize / 2;
 		distance.Y += CameraCentreOffset;
 
-		int extraX = FrameworkData.CDCamera ? 0 : 8;
-			
+		int extraX = SharedData.CDCamera ? 0 : 8;
+		
 		Speed.X = CalculateSpeed(distance.X + extraX, extraX, MaxSpeed.X * processSpeed);
 			
+		//TODO: fix
 		if (Target is Player { IsGrounded: true } playerTarget)
 		{	
 			if (playerTarget.IsSpinning)
 			{
-				distance.Y -= playerTarget.RadiusNormal.Y - playerTarget.InteractData.Radius.Y;
+				distance.Y -= playerTarget.RadiusNormal.Y - playerTarget.Radius.Y;
 			}
 				
 			float limit = Math.Abs(playerTarget.GroundSpeed) < 8f ? 6f : MaxSpeed.Y * processSpeed;
