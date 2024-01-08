@@ -134,6 +134,12 @@ public static class FrameworkData
 			commonObject.InteractData.IsInteract = true;
 		}
     }
+
+    public static bool IsTimePeriodLooped(float period)
+    {
+	    float halfPeriod = period / 2f;
+	    return Time % period < halfPeriod && (Time - ProcessSpeed) % period > halfPeriod;
+    }
     
     private static void DeactivateObjectsByBehaviour(BaseObject commonObject, int limitBottom, ref Vector2I activeArea)
     {		

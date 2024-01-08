@@ -15,6 +15,6 @@ public struct RecordedData(
     public Vector2 Position = position;
     public Buttons InputPress = inputPress;
     public Buttons InputDown = inputDown;
-    public BaseObject PushingObject = pushingObject;
-    public Constants.Direction Direction = facing;
+    public readonly BaseObject PushingObject = pushingObject;
+    public readonly Constants.Direction Facing = facing;
 }

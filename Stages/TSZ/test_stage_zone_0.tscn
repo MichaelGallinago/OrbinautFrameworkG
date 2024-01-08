@@ -34,35 +34,35 @@ shader_parameter/u_inclineStep = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_41em0"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_up1oh"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hqtqt"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_4hlke"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_mt0j8"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_gecdr"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_dhv3p"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_72jt5"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_pxxug"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_6l837"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ofbot"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_vuh3v"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_clksm"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_33ub0"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_iqsnk"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_rq0li"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
@@ -87,11 +87,11 @@ script = ExtResource("2_b03l2")
 use_parent_material = true
 position = Vector2(200, 848)
 Type = 1
-SpawnType = 2
 
 [node name="Player2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(96, 848)
+Type = 2
 SpawnType = 1
 Sprite = NodePath("../Player/AdvancedAnimatedSprite")
 
@@ -198,4 +198,4 @@ _sprite = NodePath("../CameraTrigger/Sprite2D")
 
 [node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
 position = Vector2(816, 840)
-_piecesTextures = [SubResource("AtlasTexture_41em0"), SubResource("AtlasTexture_hqtqt"), SubResource("AtlasTexture_mt0j8"), SubResource("AtlasTexture_dhv3p"), SubResource("AtlasTexture_pxxug"), SubResource("AtlasTexture_ofbot"), SubResource("AtlasTexture_clksm"), SubResource("AtlasTexture_iqsnk")]
+_piecesTextures = [SubResource("AtlasTexture_up1oh"), SubResource("AtlasTexture_4hlke"), SubResource("AtlasTexture_gecdr"), SubResource("AtlasTexture_72jt5"), SubResource("AtlasTexture_6l837"), SubResource("AtlasTexture_vuh3v"), SubResource("AtlasTexture_33ub0"), SubResource("AtlasTexture_rq0li")]
