@@ -10,8 +10,6 @@ namespace OrbinautFramework3.Objects.Player;
 public partial class Player : PlayerData, IEditor
 {
 	private const byte MaxRecordLength = 32;
-	
-	protected readonly PlayerInput Input = new();
 	private readonly EditMode _editMode = new();
 	
 	public override void _Ready()

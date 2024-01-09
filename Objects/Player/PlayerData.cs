@@ -98,6 +98,8 @@ public abstract partial class PlayerData : BaseObject
 	
 	public Tail Tail { get; set; }
 	
+	protected readonly PlayerInput Input = new();
+	
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
 	
 	public virtual void ResetState()
