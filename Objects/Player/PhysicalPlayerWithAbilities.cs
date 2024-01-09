@@ -7,9 +7,15 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player
+public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer
 {
-	private void UpdatePhysics()
+	protected PhysicalPlayerWithAbilities()
+	{
+		LandHandler += ReleaseDropDash;
+		LandHandler += ReleaseHammerSpin;
+	}
+	
+	protected void UpdatePhysics()
 	{
 		if (Action is Actions.ObjectControl or Actions.Transform) return;
 		
@@ -43,7 +49,7 @@ public partial class Player
 		// Start Spin Dash (initial charge)
 		if (Action == Actions.None && Sprite.AnimationType is Animations.Duck or Animations.GlideLand)
 		{
-			if (!InputPress.Abc || !InputDown.Down) return false;
+			if (!Input.Press.Abc || !Input.Down.Down) return false;
 			
 			Sprite.AnimationType = Animations.SpinDash;
 			Action = Actions.SpinDash;
@@ -62,9 +68,9 @@ public partial class Player
 		// Continue if Spin Dash is being performed
 		if (Action != Actions.SpinDash) return false;
 	
-		if (InputDown.Down)
+		if (Input.Down.Down)
 		{
-			if (InputPress.Abc)
+			if (Input.Press.Abc)
 			{
 				ActionValue = Math.Min(ActionValue + 2, 8);
 				
@@ -123,7 +129,7 @@ public partial class Player
 		if (!SharedData.PeelOut || Type != Types.Sonic || Id > 0 || !IsGrounded) return false;
 	
 		// Start Super Peel Out
-		if (Action == Actions.None && Sprite.AnimationType == Animations.LookUp && InputDown.Up && InputPress.Abc)
+		if (Action == Actions.None && Sprite.AnimationType == Animations.LookUp && Input.Down.Up && Input.Press.Abc)
 		{
 			Sprite.AnimationType = Animations.Move;
 			Action = Actions.PeelOut;
@@ -138,7 +144,7 @@ public partial class Player
 		if (Action != Actions.PeelOut) return false;
 	
 		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
-		if (InputDown.Up)
+		if (Input.Down.Up)
 		{
 			if (ActionValue < 30f)
 			{
@@ -186,14 +192,14 @@ public partial class Player
 	{
 		if (!IsJumping || IsGrounded) return false;
 		
-		if (!InputDown.Abc)
+		if (!Input.Down.Abc)
 		{
 			Speed.Y = Math.Max(Speed.Y, PhysicParams.MinimalJumpVelocity);
 		}
 		
 		if (Speed.Y < PhysicParams.MinimalJumpVelocity || Id > 0 && CpuInputTimer == 0) return false;
 		
-		if (InputPress.C && SharedData.EmeraldCount == 7 && !IsSuper && RingCount >= 50)
+		if (Input.Press.C && SharedData.EmeraldCount == 7 && !IsSuper && RingCount >= 50)
 		{
 			ResetState();
 			//TODO: audio
@@ -217,7 +223,7 @@ public partial class Player
 		switch (Type)
 		{
 			case Types.Sonic:
-				if (SharedData.DropDash && Action == Actions.None && !InputDown.Abc)
+				if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
 				{
 					if (Barrier.Type <= Barrier.Types.Normal || IsSuper)
 					{
@@ -227,7 +233,7 @@ public partial class Player
 				}
 				
 				// Barrier abilities
-				if (!InputPress.Abc || IsSuper || Barrier.State != Barrier.States.None || ItemInvincibilityTimer != 0) break;
+				if (!Input.Press.Abc || IsSuper || Barrier.State != Barrier.States.None || ItemInvincibilityTimer != 0) break;
 				
 				Barrier.State = Barrier.States.Active;
 				IsAirLock = false;
@@ -302,7 +308,7 @@ public partial class Player
 				break;
 			
 			case Types.Tails:
-				if (Action > 0 || !InputPress.Abc) break;
+				if (Action > 0 || !Input.Press.Abc) break;
 				
 				IsAirLock = false;
 				IsSpinning = false;
@@ -318,13 +324,13 @@ public partial class Player
 					//TODO: audio
 					//audio_play_sfx(sfx_flight, true);
 				}
-					
-				InputDown.Abc = false;
-				InputPress.Abc = false;
+
+				Input.Down = Input.Down with { Abc = false };
+				Input.Press = Input.Press with { Abc = false };
 				break;
 			
 			case Types.Knuckles:
-				if (Action > 0 || !InputPress.Abc) break;
+				if (Action > 0 || !Input.Press.Abc) break;
 				
 				IsAirLock = false;
 				IsSpinning = false;
@@ -344,7 +350,7 @@ public partial class Player
 				break;
 			
 			case Types.Amy:
-				if (Action > 0 || !InputPress.Abc) break;
+				if (Action > 0 || !Input.Press.Abc) break;
 				
 				if (SharedData.NoRollLock)
 				{
@@ -365,7 +371,7 @@ public partial class Player
 	{
 		if (Action is Actions.SpinDash or Actions.PeelOut || IsForcedRoll || !IsGrounded) return false;
 		
-		if (!InputPress.Abc || !CheckCeilingDistance()) return false;
+		if (!Input.Press.Abc || !CheckCeilingDistance()) return false;
 		
 		if (!SharedData.FixJumpSize)
 		{
@@ -441,7 +447,7 @@ public partial class Player
 	{
 		if (!SharedData.DropDash || Action != Actions.DropDash || IsGrounded) return;
 		
-		if (InputDown.Abc)
+		if (Input.Down.Abc)
 		{
 			IsAirLock = false;		
 			if (ActionValue < MaxDropDashCharge)
@@ -470,6 +476,39 @@ public partial class Player
 		}
 			
 		ActionValue = 0f;
+	}
+	
+	private void ReleaseDropDash()
+	{
+		if (!SharedData.DropDash || Action != Actions.DropDash) return;
+
+		if (ActionValue < MaxDropDashCharge) return;
+		
+		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
+		Radius = RadiusSpin;
+
+		if (IsSuper)
+		{
+			UpdateDropDashGroundSpeed(13f, 12f);
+			Camera.Main?.SetShakeTimer(6);
+		}
+		else
+		{
+			UpdateDropDashGroundSpeed(12f, 8f);
+		}
+		
+		Sprite.AnimationType = Animations.Spin;
+		IsSpinning = true;
+		
+		if (!SharedData.CDCamera && Camera.Main != null)
+		{
+			Camera.Main.Delay.X = 8;
+		}
+			
+		//TODO: audio & obj_dust_dropdash
+		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
+		//audio_stop_sfx(sfx_charge);
+		//audio_play_sfx(sfx_release);
 	}
 
 	private void UpdateDropDashGroundSpeed(float limitSpeed, float force)
@@ -521,7 +560,7 @@ public partial class Player
 			
 				if (!IsUnderwater || CarryTarget == null)
 				{
-					if (InputPress.Abc)
+					if (Input.Press.Abc)
 					{
 						Gravity = GravityType.TailsUp;
 					}
@@ -539,7 +578,7 @@ public partial class Player
 			}
 		}
 
-		if (!SharedData.FlightCancel || !InputDown.Down || !InputPress.Abc) return;
+		if (!SharedData.FlightCancel || !Input.Down.Down || !Input.Press.Abc) return;
 		
 		Camera.Main.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
 		Radius = RadiusSpin;
@@ -609,7 +648,7 @@ public partial class Player
 
 		if (Speed.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
 		
-		if (!InputPress.Abc)
+		if (!Input.Press.Abc)
 		{
 			if (Speed.Y != 0)
 			{
@@ -690,7 +729,7 @@ public partial class Player
 
 	private void UpdateSpeedYOnClimb(int maxValue)
 	{
-		if (InputDown.Up)
+		if (Input.Down.Up)
 		{
 			if (++ActionValue > maxValue)
 			{
@@ -700,7 +739,7 @@ public partial class Player
 			Speed.Y = -PhysicParams.AccelerationClimb;
 			return;
 		}
-		if (InputDown.Down)
+		if (Input.Down.Down)
 		{
 			if (--ActionValue < 0f)
 			{
@@ -744,7 +783,7 @@ public partial class Player
 		UpdateGlideGravityAndHorizontalSpeed();
 		UpdateGlideAirAnimationFrame();
 
-		if (InputDown.Abc) return;
+		if (Input.Down.Abc) return;
 		
 		Sprite.AnimationType = Animations.GlideFall;
 		ActionState = (int)GlideStates.Fall;
@@ -828,7 +867,7 @@ public partial class Player
 	{
 		const float slideFriction = 0.09375f;
 		
-		if (!InputDown.Abc)
+		if (!Input.Down.Abc)
 		{
 			Speed.X = 0f;
 			return;
@@ -846,13 +885,13 @@ public partial class Player
 	{
 		const float angleIncrement = 2.8125f;
 		
-		if (InputDown.Left && !Mathf.IsZeroApprox(ActionValue))
+		if (Input.Down.Left && !Mathf.IsZeroApprox(ActionValue))
 		{
 			ActionValue = (ActionValue > 0f ? -ActionValue : ActionValue) + angleIncrement;
 			return;
 		}
 		
-		if (InputDown.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
+		if (Input.Down.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
 		{
 			ActionValue = (ActionValue < 0f ? -ActionValue : ActionValue) + angleIncrement;
 			return;
@@ -866,7 +905,7 @@ public partial class Player
 	{
 		if (Action != Actions.HammerSpin || IsGrounded) return;
 		
-		if (InputDown.Abc)
+		if (Input.Down.Abc)
 		{
 			if (Mathf.IsEqualApprox(++ActionValue, MaxDropDashCharge))
 			{
@@ -910,7 +949,7 @@ public partial class Player
 	{
 		if (Action != Actions.HammerDash) return;
 
-		if (!InputDown.Abc)
+		if (!Input.Down.Abc)
 		{
 			// Note that animation isn't cleared. All checks for Hammer Dash should refer to its animation
 			Action = Actions.None;
@@ -927,7 +966,7 @@ public partial class Player
 			Action = Actions.None;
 		}
 
-		if (InputDown.Left && GroundSpeed > 0f || InputDown.Right && GroundSpeed < 0f)
+		if (Input.Down.Left && GroundSpeed > 0f || Input.Down.Right && GroundSpeed < 0f)
 		{
 			Facing = (Constants.Direction)(-(int)Facing);
 			GroundSpeed *= -1;
@@ -1097,7 +1136,8 @@ public partial class Player
 		{
 			if ((GlideStates)ActionState != GlideStates.Air) return;
 
-			// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he is either inside the ceiling or above the floor edge
+			// Cast a horizontal sensor just above Knuckles.
+			// If the distance returned is not 0, he is either inside the ceiling or above the floor edge
 			TileCollider.Position.Y = climbY - Radius.Y;
 			int wallDistance = TileCollider.FindDistance(
 				new Vector2I(wallRadius * (int)Facing, 0), false, Facing);
@@ -1190,11 +1230,12 @@ public partial class Player
 		}
 	}
 
-	private void OnPlayerAttached(Player carrier)
+	//TODO: replace by interface
+	private void OnPlayerAttached(PlayerData carrier)
 	{
 		Vector2 previousPosition = carrier.CarryTargetPosition;
 				
-		if (InputPress.Abc)
+		if (Input.Press.Abc)
 		{
 			carrier.CarryTarget = null;
 			carrier.CarryTimer = 18f;
@@ -1208,11 +1249,11 @@ public partial class Player
 			Speed.X = 0f;
 			Speed.Y = PhysicParams.MinimalJumpVelocity;
 					
-			if (InputDown.Left)
+			if (Input.Down.Left)
 			{
 				Speed.X = -2;
 			}
-			else if (InputDown.Right)
+			else if (Input.Down.Right)
 			{
 				Speed.X = 2;
 			}
@@ -1235,7 +1276,8 @@ public partial class Player
 		}
 	}
 
-	private void AttachToPlayer(Player carrier)
+	//TODO: replace by interface
+	private void AttachToPlayer(PlayerData carrier)
 	{
 		Facing = carrier.Facing;
 		Speed.X = carrier.Speed.X;

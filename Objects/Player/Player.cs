@@ -7,7 +7,7 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : PlayerData, IEditor
+public partial class Player : PhysicalPlayerWithAbilities, IEditor
 {
 	private const byte MaxRecordLength = 32;
 	private readonly EditMode _editMode = new();
@@ -776,66 +776,6 @@ public partial class Player : PlayerData, IEditor
 			    //game_restart();
 				break;
 		}
-	}
-
-	public void Kill()
-	{
-		if (IsDead) return;
-
-		Action = Actions.None;
-		IsDead = true;
-		ObjectInteraction = false;
-		IsGrounded = false;
-		OnObject = null;
-		Barrier.Type = Barrier.Types.None;
-		Sprite.AnimationType = Animations.Death;
-		Gravity = GravityType.Default;
-		Speed = new Vector2(0f, -7f);
-		GroundSpeed = 0f;
-		ZIndex = 0;
-		
-		if (Id == 0)
-		{
-			FrameworkData.UpdateObjects = false;
-			FrameworkData.UpdateTimer = false;
-			FrameworkData.AllowPause = false;
-		}
-		
-		//TODO: Audio
-		//audio_play_sfx(sfx_hurt);
-	}
-	
-	private void ReleaseDropDash()
-	{
-		if (!SharedData.DropDash || Action != Actions.DropDash) return;
-
-		if (ActionValue < MaxDropDashCharge) return;
-		
-		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-		Radius = RadiusSpin;
-
-		if (IsSuper)
-		{
-			UpdateDropDashGroundSpeed(13f, 12f);
-			Camera.Main?.SetShakeTimer(6);
-		}
-		else
-		{
-			UpdateDropDashGroundSpeed(12f, 8f);
-		}
-		
-		Sprite.AnimationType = Animations.Spin;
-		IsSpinning = true;
-		
-		if (!SharedData.CDCamera && Camera.Main != null)
-		{
-			Camera.Main.Delay.X = 8;
-		}
-			
-		//TODO: audio & obj_dust_dropdash
-		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-		//audio_stop_sfx(sfx_charge);
-		//audio_play_sfx(sfx_release);
 	}
 
 	private void SetDropDashGroundSpeed(float force, float maxSpeed, Constants.Direction facing)

@@ -390,7 +390,8 @@ public abstract partial class BaseObject : Node2D
 		};
 	}
     
-	private static void LandOnSolid(Player player, BaseObject targetObject, Constants.SolidType type, int distance)
+	private static void LandOnSolid(BasicPhysicalPlayer player, 
+		BaseObject targetObject, Constants.SolidType type, int distance)
 	{
 		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
 		{

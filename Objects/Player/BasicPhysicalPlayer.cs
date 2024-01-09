@@ -6,9 +6,11 @@ using OrbinautFramework3.Objects.Spawnable.Barrier;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player
+public abstract partial class BasicPhysicalPlayer : PlayerData
 {
-	private void ProcessCorePhysics()
+	protected event Action LandHandler;
+	
+	protected void ProcessCorePhysics()
 	{
 		ProcessSlopeResist();
 		ProcessSlopeResistRoll();
@@ -23,6 +25,129 @@ public partial class Player
 		ProcessCollisionGroundFloor();
 		ProcessSlopeRepel();
 		ProcessCollisionAir();
+	}
+	
+	public void Kill()
+	{
+		if (IsDead) return;
+
+		Action = Actions.None;
+		IsDead = true;
+		ObjectInteraction = false;
+		IsGrounded = false;
+		OnObject = null;
+		Barrier.Type = Barrier.Types.None;
+		Sprite.AnimationType = Animations.Death;
+		Gravity = GravityType.Default;
+		Speed = new Vector2(0f, -7f);
+		GroundSpeed = 0f;
+		ZIndex = 0;
+		
+		if (Id == 0)
+		{
+			FrameworkData.UpdateObjects = false;
+			FrameworkData.UpdateTimer = false;
+			FrameworkData.AllowPause = false;
+		}
+		
+		//TODO: Audio
+		//audio_play_sfx(sfx_hurt);
+	}
+	
+	public void Land()
+	{
+		ResetGravity();
+		
+		IsGrounded = true;
+	
+		if (Action == Actions.Flight)
+		{
+			//TODO: audio
+			//audio_stop_sfx(sfx_flight);
+			//audio_stop_sfx(sfx_flight2);
+		}
+		else if (Action is Actions.SpinDash or Actions.PeelOut)
+		{
+			if (Action == Actions.PeelOut)
+			{
+				GroundSpeed = ActionValue2;
+			}
+			
+			return;
+		}
+	
+		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
+		{
+			float force = IsUnderwater ? -4f : -7.5f;
+			float radians = Mathf.DegToRad(Angle);
+			Speed = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
+
+			BarrierFlag = false;
+			OnObject = null;
+			IsGrounded = false;
+		
+			Barrier.UpdateFrame(0, 1, [3, 2]);
+			Barrier.UpdateDuration([7, 12]);
+			Barrier.Timer = 20d;
+			
+			//TODO: audio
+			//audio_play_sfx(sfx_barrier_water2);
+		
+			return;
+		}
+	
+		if (OnObject == null)
+		{
+			switch (Sprite.AnimationType)
+			{
+				case Animations.Idle:
+				case Animations.Duck:
+				case Animations.HammerDash:
+				case Animations.GlideGround: 
+					break;
+			
+				default:
+					Sprite.AnimationType = Animations.Move;
+					break;
+			}
+		}
+		else
+		{
+			Sprite.AnimationType = Animations.Move;
+		}
+	
+		if (IsHurt)
+		{
+			InvincibilityFrames = 120;
+			GroundSpeed = 0;
+		}
+	
+		IsAirLock = false;
+		IsSpinning	= false;
+		IsJumping = false;
+		PushingObject = null;
+		IsHurt = false;
+	
+		BarrierFlag = false;
+		ComboCounter = 0;
+	
+		CpuState = CpuStates.Main;
+
+		LandHandler?.Invoke();
+	
+		if (Action != Actions.HammerDash)
+		{
+			Action = Actions.None;
+		}
+		else
+		{
+			GroundSpeed	= 6 * (int)Facing;
+		}
+
+		if (IsSpinning) return;
+		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
+
+		Radius = RadiusNormal;
 	}
 	
     private void ProcessSlopeResist()
@@ -57,7 +182,7 @@ public partial class Player
 		
 		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
 		// control lock. This allows him to Spin Dash
-		if (Sprite.AnimationType == Animations.GlideGround && InputDown.Down)
+		if (Sprite.AnimationType == Animations.GlideGround && Input.Down.Down)
 		{
 			GroundLockTimer = 0f;
 		}
@@ -67,13 +192,13 @@ public partial class Player
 			var doSkid = false;
 			
 			// Move left
-			if (InputDown.Left)
+			if (Input.Down.Left)
 			{	
 				doSkid = MoveOnGround(Constants.Direction.Negative);
 			}
 			
 			// Move right
-			if (InputDown.Right)
+			if (Input.Down.Right)
 			{
 				doSkid = MoveOnGround(Constants.Direction.Positive);
 			}
@@ -83,7 +208,7 @@ public partial class Player
 		}
 		
 		// Apply friction
-		if (InputDown is { Left: false, Right: false })
+		if (Input.Down is { Left: false, Right: false })
 		{
 			GroundSpeed = GroundSpeed switch
 			{
@@ -158,7 +283,7 @@ public partial class Player
 		}
 		
 		PushingObject = null;
-		Sprite.AnimationType = InputDown.Up ? Animations.LookUp : InputDown.Down ? Animations.Duck : Animations.Idle;
+		Sprite.AnimationType = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
 	}
 
 	private void SetPushAnimation()
@@ -181,12 +306,12 @@ public partial class Player
 
 		if (GroundLockTimer == 0f)
 		{
-			if (InputDown.Left)
+			if (Input.Down.Left)
 			{
 				RollOnGround(Constants.Direction.Negative); // Move left
 			}
 			
-			if (InputDown.Right)
+			if (Input.Down.Right)
 			{
 				RollOnGround(Constants.Direction.Positive); // Move right
 			}
@@ -300,11 +425,11 @@ public partial class Player
 
 		if (Action == Actions.HammerDash)
 		{
-			if (InputDown.Left)
+			if (Input.Down.Left)
 			{
 				Facing = Constants.Direction.Negative;
 			}
-			else if (InputDown.Right)
+			else if (Input.Down.Right)
 			{
 				Facing = Constants.Direction.Positive;
 			}
@@ -315,7 +440,7 @@ public partial class Player
 		if (!IsAirLock)
 		{
 			// Move left
-			if (InputDown.Left)
+			if (Input.Down.Left)
 			{
 				if (Speed.X > 0) 
 				{
@@ -330,7 +455,7 @@ public partial class Player
 			}
 		
 			// Move right
-			if (InputDown.Right)
+			if (Input.Down.Right)
 			{
 				if (Speed.X < 0)
 				{
@@ -358,7 +483,7 @@ public partial class Player
 
 		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.PeelOut) return;
 		
-		if (SharedData.PlayerPhysics == PhysicsTypes.SK && InputDown.Down || InputDown.Up && SharedData.PeelOut) return;
+		if (SharedData.PlayerPhysics == PhysicsTypes.SK && Input.Down.Down || Input.Down.Up && SharedData.PeelOut) return;
 	
 		if (OnObject != null)
 		{
@@ -528,10 +653,10 @@ public partial class Player
 	{
 		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
 		
-		if (!IsForcedRoll && (InputDown.Left || InputDown.Right)) return;
+		if (!IsForcedRoll && (Input.Down.Left || Input.Down.Right)) return;
 	
 		var allowSpin = false;
-		if (InputDown.Down)
+		if (Input.Down.Down)
 		{
 			if (SharedData.PlayerPhysics == PhysicsTypes.SK)
 			{
@@ -940,102 +1065,5 @@ public partial class Player
 		Angle = angle;
 			
 		Land();
-	}
-	
-	public void Land()
-	{
-		ResetGravity();
-		
-		IsGrounded = true;
-	
-		if (Action == Actions.Flight)
-		{
-			//TODO: audio
-			//audio_stop_sfx(sfx_flight);
-			//audio_stop_sfx(sfx_flight2);
-		}
-		else if (Action is Actions.SpinDash or Actions.PeelOut)
-		{
-			if (Action == Actions.PeelOut)
-			{
-				GroundSpeed = ActionValue2;
-			}
-			
-			return;
-		}
-	
-		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
-		{
-			float force = IsUnderwater ? -4f : -7.5f;
-			float radians = Mathf.DegToRad(Angle);
-			Speed = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
-
-			BarrierFlag = false;
-			OnObject = null;
-			IsGrounded = false;
-		
-			Barrier.UpdateFrame(0, 1, [3, 2]);
-			Barrier.UpdateDuration([7, 12]);
-			Barrier.Timer = 20d;
-			
-			//TODO: audio
-			//audio_play_sfx(sfx_barrier_water2);
-		
-			return;
-		}
-	
-		if (OnObject == null)
-		{
-			switch (Sprite.AnimationType)
-			{
-				case Animations.Idle:
-				case Animations.Duck:
-				case Animations.HammerDash:
-				case Animations.GlideGround: 
-					break;
-			
-				default:
-					Sprite.AnimationType = Animations.Move;
-					break;
-			}
-		}
-		else
-		{
-			Sprite.AnimationType = Animations.Move;
-		}
-	
-		if (IsHurt)
-		{
-			InvincibilityFrames = 120;
-			GroundSpeed = 0;
-		}
-	
-		IsAirLock = false;
-		IsSpinning	= false;
-		IsJumping = false;
-		PushingObject = null;
-		IsHurt = false;
-	
-		BarrierFlag = false;
-		ComboCounter = 0;
-	
-		CpuState = CpuStates.Main;
-
-		ReleaseDropDash();
-		ReleaseHammerSpin();
-	
-		if (Action != Actions.HammerDash)
-		{
-			Action = Actions.None;
-		}
-		else
-		{
-			GroundSpeed	= 6 * (int)Facing;
-		}
-
-		if (IsSpinning) return;
-		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
-
-		Radius = RadiusNormal;
 	}
 }
