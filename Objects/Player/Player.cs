@@ -1,21 +1,17 @@
 using System;
-using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Input;
-using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : BaseObject
+public partial class Player : PlayerData
 {
-	[Export] public Types Type;
-	[Export] public SpawnTypes SpawnType;
-	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
-	[Export] public PackedScene PackedTail { get; private set; }
+	private readonly PlayerInput _input = new();
+	private readonly EditMode _editMode = new();
 	
 	public override void _Ready()
 	{
@@ -75,15 +71,13 @@ public partial class Player : BaseObject
 		AirTimer = 1800f;
 		CpuState = CpuStates.Main;
 		RestartState = RestartStates.GameOver;
-		InputPress = new Buttons();
-		InputDown = new Buttons();
-		CameraViewTimer = DefaultViewTime;
+		_input.Clear();
 		RecordedData = [];
 
 		if (Type == Types.Tails)
 		{
-			_tail = PackedTail.Instantiate<Tail>();
-			AddChild(_tail);
+			Tail = PackedTail.Instantiate<Tail>();
+			AddChild(Tail);
 		}
 		
 		if (FrameworkData.GiantRingData != null)
@@ -169,10 +163,10 @@ public partial class Player : BaseObject
 		float processSpeed = FrameworkData.ProcessSpeed;
 		
 		// Process local input
-		UpdateInput();
+		_input.Update(Id);
 
 		// Process Edit Mode
-		if (ProcessEditMode(processSpeed)) return;
+		if (_editMode. ProcessEditMode(processSpeed)) return;
 	    
 		// Process CPU Player logic (return if flying in or respawning)
 		if (ProcessCpu(processSpeed)) return;
@@ -182,8 +176,8 @@ public partial class Player : BaseObject
 	    
 		// Process default player control routine
 		UpdatePhysics();
-		
-		ProcessCamera();
+
+		Camera.Main?.UpdatePlayerCamera(this);
 		UpdateStatus();
 		ProcessWater();
 		RecordData();
@@ -196,81 +190,18 @@ public partial class Player : BaseObject
 
 	private void UpdateTail()
 	{
-		if (_tail == null) return;
+		if (Tail == null) return;
 		if (Type != Types.Tails)
 		{
-			_tail.QueueFree();
+			Tail.QueueFree();
 			return;
 		}
 			
-		_tail.Animate(new TailAnimationData(Sprite.AnimationType, Sprite.Scale, Speed, GroundSpeed, 
+		Tail.Animate(new TailAnimationData(Sprite.AnimationType, Sprite.Scale, Speed, GroundSpeed, 
 			IsGrounded, IsSpinning, Angle, VisualAngle));
 	}
 
 	#region UpdatePlayerSystems
-
-	private void ProcessCamera()
-	{
-		if (IsDead) return;
-		
-		Camera camera = Camera.Main;
-		
-		if (camera == null || camera.Target != this) return;
-	
-		if (SharedData.CDCamera)
-		{
-			const int shiftDistanceX = 64;
-			const int shiftSpeedX = 2;
-
-			int shiftDirectionX = GroundSpeed != 0f ? Math.Sign(GroundSpeed) : (int)Facing;
-
-			if (Math.Abs(GroundSpeed) >= 6f || Action == Actions.SpinDash)
-			{
-				if (camera.Delay.X == 0f && camera.BufferOffset.X != shiftDistanceX * shiftDirectionX)
-				{
-					camera.BufferOffset.X += shiftSpeedX * shiftDirectionX;
-				}
-			}
-			else
-			{
-				camera.BufferOffset.X -= shiftSpeedX * Math.Sign(camera.BufferOffset.X);
-			}
-		}
-	
-		bool doShiftDown = Sprite.AnimationType == Animations.Duck;
-		bool doShiftUp = Sprite.AnimationType == Animations.LookUp;
-	
-		if (doShiftDown || doShiftUp)
-		{
-			if (CameraViewTimer > 0f)
-			{
-				CameraViewTimer--;
-			}
-		}
-		else if (SharedData.SpinDash || SharedData.PeelOut)
-		{
-			CameraViewTimer = DefaultViewTime;
-		}
-	
-		if (CameraViewTimer > 0f)
-		{
-			if (camera.BufferOffset.Y != 0)
-			{
-				camera.BufferOffset.Y -= 2 * Math.Sign(camera.BufferOffset.Y);
-			}
-		}
-		else
-		{
-			if (doShiftDown && camera.BufferOffset.Y < 88) 	
-			{
-				camera.BufferOffset.Y += 2;
-			}
-			else if (doShiftUp && camera.BufferOffset.Y > -104)
-			{
-				camera.BufferOffset.Y -= 2;
-			}
-		}
-	}
 	
 	private void UpdateStatus()
 	{
@@ -444,10 +375,12 @@ public partial class Player : BaseObject
 					Speed = Vector2.Zero;
 					Gravity	= 0.0625f;
 					IsAirLock = true;
+					if (Camera.Main == null) return;
 					Camera.Main.Target = null;
 					return;
 				
 				case -1f:
+					if (Camera.Main == null) return;
 					if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.GameHeight + 276) return;
 					
 					if (Id == 0)
@@ -566,7 +499,7 @@ public partial class Player : BaseObject
 	{
 		if (IsDead) return;
 		
-		RecordedData.Add(new RecordedData(Position, InputPress, InputDown, PushingObject, Facing));
+		RecordedData.Add(new RecordedData(Position, _input.Press, _input.Down, PushingObject, Facing));
 		if (RecordedData.Count <= CpuDelay * 2) return;
 		RecordedData.RemoveAt(0);
 	}
@@ -735,163 +668,6 @@ public partial class Player : BaseObject
 	
 		Radius = RadiusNormal;
 	}
-    
-	private void EditModeInit()
-	{
-		EditModeObjects =
-		[
-			typeof(Common.Ring.Ring), typeof(Common.GiantRing.GiantRing), typeof(Common.ItemBox.ItemBox),
-			typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
-		];
-	    
-		switch (FrameworkData.CurrentScene)
-		{
-			case Stages.TSZ.StageTsz:
-				// TODO: debug objects
-				EditModeObjects.AddRange(new List<Type>
-				{
-					//typeof(obj_platform_swing_tsz), typeof(obj_platform_tsz), typeof(obj_falling_floor_tsz), typeof(obj_block_tsz)
-				});
-				break;
-		}
-	}
-
-	private void UpdateInput()
-	{
-		if (Id >= InputUtilities.DeviceCount)
-		{
-			InputDown = InputPress = new Buttons();
-			return;
-		}
-	    
-		InputPress = InputUtilities.Press[Id];
-		InputDown = InputUtilities.Down[Id];
-	}
-
-	private bool ProcessEditMode(float processSpeed)
-	{
-		if (Id > 0 || !(FrameworkData.PlayerEditMode || FrameworkData.DeveloperMode)) return false;
-
-		bool debugButton;
-		
-		// If in developer mode, remap debug button to SpaceBar
-		if (FrameworkData.DeveloperMode)
-		{
-			debugButton = InputUtilities.DebugButtonPress;
-			
-			if (IsEditMode)
-			{
-				debugButton = debugButton || InputPress.B;
-			}
-		}
-		else
-		{
-			debugButton = InputPress.B;
-		}
-		
-		if (debugButton)
-		{
-			if (!IsEditMode)
-			{
-				if (FrameworkData.CurrentScene.IsStage)
-				{
-					//TODO: audio
-					//stage_reset_bgm();
-				}
-				
-				ResetGravity();
-				ResetState();
-				ResetZIndex();
-
-				FrameworkData.UpdateAnimations = true;
-				FrameworkData.UpdateObjects = true;
-				FrameworkData.UpdateTimer = true;
-				FrameworkData.AllowPause = true;
-				
-				ObjectInteraction = false;
-				
-				EditModeSpeed = 0;
-				IsEditMode = true;
-				
-				Visible = true;
-			}
-			else
-			{
-				Speed = new Vector2();
-				GroundSpeed = 0f;
-
-				Sprite.AnimationType = Animations.Move;
-				
-				ObjectInteraction = true;
-				IsEditMode = false;
-				IsDead = false;
-			}
-		}
-		
-		// Continue if Edit mode is enabled
-		if (!IsEditMode) return false;
-
-		// Update speed and position (move faster if in developer mode)
-		if (InputDown.Up || InputDown.Down || InputDown.Left || InputDown.Right)
-		{
-			EditModeSpeed = MathF.Min(EditModeSpeed + (FrameworkData.DeveloperMode ? 
-				EditModeAcceleration * EditModeAccelerationMultiplier : EditModeAcceleration), EditModeSpeedLimit);
-
-			Vector2 position = Position;
-
-			if (InputDown.Up)
-			{
-				position.Y -= EditModeSpeed * processSpeed;
-			}
-			
-			if (InputDown.Down)
-			{
-				position.Y += EditModeSpeed * processSpeed;
-			}
-			
-			if (InputDown.Left)
-			{
-				position.X -= EditModeSpeed * processSpeed;
-			}
-			
-			if (InputDown.Right)
-			{
-				position.X += EditModeSpeed * processSpeed;
-			}
-
-			Position = position;
-		}
-		else
-		{
-			EditModeSpeed = 0;
-		}
-
-		if (InputDown.A && InputPress.C)
-		{
-			if (--EditModeIndex < 0)
-			{
-				EditModeIndex = EditModeObjects.Count - 1;
-			}
-		}
-		else if (InputPress.A)
-		{
-			if (++EditModeIndex >= EditModeObjects.Count)
-			{
-				EditModeIndex = 0;
-			}
-		}
-		else if (InputPress.C)
-		{
-			if (Activator.CreateInstance(EditModeObjects[EditModeIndex]) 
-			    is not BaseObject newObject) return true;
-			
-			newObject.Scale = new Vector2(newObject.Scale.X * (int)Facing, newObject.Scale.Y);
-			newObject.SetBehaviour(BehaviourType.Delete);
-			FrameworkData.CurrentScene.AddChild(newObject);
-		}
-		
-		return true;
-	}
 
 	private bool ProcessCpu(float processSpeed)
 	{
@@ -1006,9 +782,7 @@ public partial class Player : BaseObject
 		}
 		else
 		{
-			// Cancel any input
-			InputDown = new Buttons();
-			InputPress = new Buttons();
+			_input.Clear();
 		}
 				
 		// Exit the entire player object code
@@ -1130,9 +904,7 @@ public partial class Player : BaseObject
 			IsCpuJumping = true;
 		}
 		
-		// Apply new input
-		InputPress = followData.InputPress;
-		InputDown = followData.InputDown;
+		_input.Set(followData.InputPress, followData.InputDown);
 		return false;
 	}
 
@@ -1148,20 +920,20 @@ public partial class Player : BaseObject
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 				
-		InputDown.Down = true;
+		_input.Down.Down = true;
 				
 		if (!FrameworkData.IsTimePeriodLooped(128f))
 		{
 			if (FrameworkData.IsTimePeriodLooped(32f))
 			{
-				InputPress.Abc = true;
+				_input.Press.Abc = true;
 			}
 
 			return false;
 		}
 
-		InputDown.Down = false;
-		InputPress.Abc = false;
+		_input.Down.Down = false;
+		_input.Press.Abc = false;
 		CpuState = CpuStates.Main;
 		
 		return false;
@@ -1209,14 +981,17 @@ public partial class Player : BaseObject
 			// GameOver
 			case RestartStates.GameOver:
 				var bound = 32f;
-		
-				if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
+
+				if (Camera.Main != null)
 				{
-					bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
-				}
-				else
-				{
-					bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.GameHeight;
+					if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
+					{
+						bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
+					}
+					else
+					{
+						bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.GameHeight;
+					}	
 				}
 		
 				if ((int)Position.Y > bound)
@@ -1299,103 +1074,6 @@ public partial class Player : BaseObject
 				break;
 		}
 	}
-    
-	public void Land()
-	{
-		ResetGravity();
-		
-		IsGrounded = true;
-	
-		if (Action == Actions.Flight)
-		{
-			//TODO: audio
-			//audio_stop_sfx(sfx_flight);
-			//audio_stop_sfx(sfx_flight2);
-		}
-		else if (Action is Actions.SpinDash or Actions.PeelOut)
-		{
-			if (Action == Actions.PeelOut)
-			{
-				GroundSpeed = ActionValue2;
-			}
-			
-			return;
-		}
-	
-		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
-		{
-			float force = IsUnderwater ? -4f : -7.5f;
-			float radians = Mathf.DegToRad(Angle);
-			Speed = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
-
-			BarrierFlag = false;
-			OnObject = null;
-			IsGrounded = false;
-		
-			Barrier.UpdateFrame(0, 1, [3, 2]);
-			Barrier.UpdateDuration([7, 12]);
-			Barrier.Timer = 20d;
-			
-			//TODO: audio
-			//audio_play_sfx(sfx_barrier_water2);
-		
-			return;
-		}
-	
-		if (OnObject == null)
-		{
-			switch (Sprite.AnimationType)
-			{
-				case Animations.Idle:
-				case Animations.Duck:
-				case Animations.HammerDash:
-				case Animations.GlideGround: 
-					break;
-			
-				default:
-					Sprite.AnimationType = Animations.Move;
-					break;
-			}
-		}
-		else
-		{
-			Sprite.AnimationType = Animations.Move;
-		}
-	
-		if (IsHurt)
-		{
-			InvincibilityFrames = 120;
-			GroundSpeed = 0;
-		}
-	
-		IsAirLock = false;
-		IsSpinning	= false;
-		IsJumping = false;
-		PushingObject = null;
-		IsHurt = false;
-	
-		BarrierFlag = false;
-		ComboCounter = 0;
-	
-		CpuState = CpuStates.Main;
-
-		ReleaseDropDash();
-		ReleaseHammerSpin();
-	
-		if (Action != Actions.HammerDash)
-		{
-			Action = Actions.None;
-		}
-		else
-		{
-			GroundSpeed	= 6 * (int)Facing;
-		}
-
-		if (IsSpinning) return;
-		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
-
-		Radius = RadiusNormal;
-	}
 
 	public void Kill()
 	{
@@ -1436,7 +1114,7 @@ public partial class Player : BaseObject
 		if (IsSuper)
 		{
 			UpdateDropDashGroundSpeed(13f, 12f);
-			Camera.Main.ShakeTimer = 6;
+			Camera.Main?.SetShakeTimer(6);
 		}
 		else
 		{
@@ -1446,7 +1124,7 @@ public partial class Player : BaseObject
 		Sprite.AnimationType = Animations.Spin;
 		IsSpinning = true;
 		
-		if (!SharedData.CDCamera)
+		if (!SharedData.CDCamera && Camera.Main != null)
 		{
 			Camera.Main.Delay.X = 8;
 		}
