@@ -3,8 +3,11 @@ using OrbinautFramework3.Framework.Input;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public class PlayerInput : InputContainer
+public class PlayerInput : IInputContainer
 {
+    public Buttons Down { get; set; }
+    public Buttons Press { get; set; }
+    
     public void Update(int playerId)
     {
         if (playerId >= InputUtilities.DeviceCount)

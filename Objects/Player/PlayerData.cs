@@ -97,4 +97,22 @@ public abstract partial class PlayerData : BaseObject
 	public bool IsEditMode { get; set; }
 	
 	public Tail Tail { get; set; }
+	
+	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
+	
+	public virtual void ResetState()
+	{
+		IsHurt = false;
+		IsJumping = false;
+		IsSpinning = false;
+		IsGrounded = false;
+		StickToConvex = false;
+		
+		OnObject = null;
+		PushingObject = null;
+		
+		Radius = RadiusNormal;
+		Action = Actions.None;
+		GroundMode = Constants.GroundMode.Floor;
+	}
 }

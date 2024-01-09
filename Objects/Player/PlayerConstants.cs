@@ -5,8 +5,6 @@ namespace OrbinautFramework3.Objects.Player;
 public static class PlayerConstants
 {
     public const byte MaxDropDashCharge = 22;
-	
-    public const byte CpuDelay = 16;
     
     public static readonly uint[] ComboScoreValues = [10, 100, 200, 500, 1000, 10000];
 }

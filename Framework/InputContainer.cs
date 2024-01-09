@@ -2,8 +2,8 @@ using OrbinautFramework3.Framework.Input;
 
 namespace OrbinautFramework3.Framework;
 
-public class InputContainer
+public interface IInputContainer
 {
-    public Buttons Press;
-    public Buttons Down;
+    public Buttons Press { get; }
+    public Buttons Down { get; }
 }
