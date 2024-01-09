@@ -12,11 +12,7 @@ namespace OrbinautFramework3.Objects.Player;
 public partial class Player
 {
 	public static List<Player> Players { get; } = [];
-    
-	[Export] public Types Type;
-	[Export] public SpawnTypes SpawnType;
-	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
-	[Export] public PackedScene PackedTail { get; private set; }
+	
 	public int Id { get; private set; }
 	
 	public PhysicParams PhysicParams { get; set; }

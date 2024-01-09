@@ -12,6 +12,11 @@ namespace OrbinautFramework3.Objects.Player;
 
 public partial class Player : BaseObject
 {
+	[Export] public Types Type;
+	[Export] public SpawnTypes SpawnType;
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
+	[Export] public PackedScene PackedTail { get; private set; }
+	
 	public override void _Ready()
 	{
 		Type = SpawnType switch
