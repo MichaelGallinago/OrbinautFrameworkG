@@ -2,13 +2,9 @@ using Godot;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class PlayerConstants : Node
+public static class PlayerConstants
 {
-    public const byte EditModeAccelerationMultiplier = 4;
-    public const float EditModeAcceleration = 0.046875f;
-    public const byte EditModeSpeedLimit = 16;
     public const byte MaxDropDashCharge = 22;
-    public const byte DefaultViewTime = 120;
 	
     public const byte CpuDelay = 16;
     

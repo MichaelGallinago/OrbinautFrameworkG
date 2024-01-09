@@ -1,20 +1,24 @@
-using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player
+public abstract partial class PlayerData : BaseObject
 {
+	[Export] public Types Type;
+	[Export] public SpawnTypes SpawnType;
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
+	[Export] public PackedScene PackedTail { get; private set; }
+	
 	public static List<Player> Players { get; } = [];
 	
-	public int Id { get; private set; }
+	public int Id { get; protected set; }
 	
+	public Animations Animation { get; set; }
 	public PhysicParams PhysicParams { get; set; }
 	public Vector2I Radius;
 	public Vector2I RadiusNormal { get; set; }
@@ -51,8 +55,7 @@ public partial class Player
     
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
-    
-	public float CameraViewTimer { get; set; }
+	
     
 	public bool IsForcedRoll { get; set; }
 	public float GroundLockTimer { get; set; }
@@ -82,23 +85,16 @@ public partial class Player
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 
-	public Buttons InputPress;
-	public Buttons InputDown;
-
 	public List<RecordedData> RecordedData { get; set; }
 	
 	public CollisionTileMap TileMap { get; set; }
 	public CommonStage Stage { get; set; }
 	public TileCollider TileCollider { get; set; }
 
-	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; private set; }
+	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; protected set; }
 
 	// Edit mode
-	public bool IsEditMode { get; private set; }
-	public int EditModeIndex { get; private set; }
-	public float EditModeSpeed { get; private set; }
-	public List<Type> EditModeObjects { get; private set; }
+	public bool IsEditMode { get; set; }
 	
-	
-	private Tail _tail;
+	public Tail Tail { get; set; }
 }

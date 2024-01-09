@@ -38,7 +38,7 @@ public partial class Bumper : BaseObject
             
             float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - Position));
 		
-            if (player.Action != Player.Actions.Glide || player.ActionState == (int)Player.GlideStates.Fall)
+            if (player.Action != Actions.Glide || player.ActionState == (int)GlideStates.Fall)
             {
                 float bumpSpeed = 7f * MathF.Sin(radians);
 			

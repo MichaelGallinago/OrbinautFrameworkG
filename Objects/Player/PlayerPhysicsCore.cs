@@ -2,6 +2,7 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Spawnable.Barrier;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -939,5 +940,102 @@ public partial class Player
 		Angle = angle;
 			
 		Land();
+	}
+	
+	public void Land()
+	{
+		ResetGravity();
+		
+		IsGrounded = true;
+	
+		if (Action == Actions.Flight)
+		{
+			//TODO: audio
+			//audio_stop_sfx(sfx_flight);
+			//audio_stop_sfx(sfx_flight2);
+		}
+		else if (Action is Actions.SpinDash or Actions.PeelOut)
+		{
+			if (Action == Actions.PeelOut)
+			{
+				GroundSpeed = ActionValue2;
+			}
+			
+			return;
+		}
+	
+		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
+		{
+			float force = IsUnderwater ? -4f : -7.5f;
+			float radians = Mathf.DegToRad(Angle);
+			Speed = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
+
+			BarrierFlag = false;
+			OnObject = null;
+			IsGrounded = false;
+		
+			Barrier.UpdateFrame(0, 1, [3, 2]);
+			Barrier.UpdateDuration([7, 12]);
+			Barrier.Timer = 20d;
+			
+			//TODO: audio
+			//audio_play_sfx(sfx_barrier_water2);
+		
+			return;
+		}
+	
+		if (OnObject == null)
+		{
+			switch (Sprite.AnimationType)
+			{
+				case Animations.Idle:
+				case Animations.Duck:
+				case Animations.HammerDash:
+				case Animations.GlideGround: 
+					break;
+			
+				default:
+					Sprite.AnimationType = Animations.Move;
+					break;
+			}
+		}
+		else
+		{
+			Sprite.AnimationType = Animations.Move;
+		}
+	
+		if (IsHurt)
+		{
+			InvincibilityFrames = 120;
+			GroundSpeed = 0;
+		}
+	
+		IsAirLock = false;
+		IsSpinning	= false;
+		IsJumping = false;
+		PushingObject = null;
+		IsHurt = false;
+	
+		BarrierFlag = false;
+		ComboCounter = 0;
+	
+		CpuState = CpuStates.Main;
+
+		ReleaseDropDash();
+		ReleaseHammerSpin();
+	
+		if (Action != Actions.HammerDash)
+		{
+			Action = Actions.None;
+		}
+		else
+		{
+			GroundSpeed	= 6 * (int)Facing;
+		}
+
+		if (IsSpinning) return;
+		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
+
+		Radius = RadiusNormal;
 	}
 }
