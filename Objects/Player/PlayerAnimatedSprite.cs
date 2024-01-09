@@ -35,10 +35,10 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 		switch (data.Type)
 		{
-			case Player.Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
-			case Player.Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
-			case Player.Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
-			case Player.Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
+			case Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
+			case Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
+			case Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
+			case Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
 		
 		IsFrameChanged = false;
@@ -77,7 +77,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 	private void UpdateSpriteFrames()
 	{
-		int index = _data.Type == Player.Types.Sonic && _data.IsSuper ? 5 : (int)_data.Type;
+		int index = _data.Type == Types.Sonic && _data.IsSuper ? 5 : (int)_data.Type;
 		if (_spriteFramesIndex == index) return;
 		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}

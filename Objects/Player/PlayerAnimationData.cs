@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Objects.Player;
 
 public record PlayerAnimationData
 (
-    Player.Types Type, 
+    Types Type, 
     Constants.Direction Facing, 
     bool IsSuper, 
     float GroundSpeed, 

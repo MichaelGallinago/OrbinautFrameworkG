@@ -1,6 +1,5 @@
 ﻿using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
-using Player = OrbinautFramework3.Objects.Player.Player;
 
 namespace OrbinautFramework3.Framework;
 
@@ -14,7 +13,7 @@ public static class SharedData
     public static bool ShowSplash { get; set; } = false;
 	
     // Originals differences
-    public static Player.PhysicsTypes PlayerPhysics { get; set; } = Player.PhysicsTypes.S2;
+    public static PhysicsTypes PlayerPhysics { get; set; } = PhysicsTypes.S2;
     public static bool SpinDash { get; set; } = true;
     public static bool PeelOut { get; set; } = true;
     public static bool DropDash { get; set; } = true;
@@ -42,8 +41,8 @@ public static class SharedData
     //public static giant_ring_data { get; set; } = [];
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static bool PlayerEditMode { get; set; } = false;
-    public static Player.Types PlayerType { get; set; } = Player.Types.Sonic;
-    public static Player.Types PlayerTypeCpu { get; set; } = Player.Types.Tails;
+    public static Types PlayerType { get; set; } = Types.Sonic;
+    public static Types PlayerTypeCpu { get; set; } = Types.Tails;
     public static byte StageId { get; set; } = 0;
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;

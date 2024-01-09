@@ -35,7 +35,7 @@ public static class FrameworkData
     public static bool PlayerEditMode { get; set; }
     public static bool DeveloperMode { get; set; }
     public static bool IsPaused { get; set; }
-    public static Player.PhysicsTypes PlayerPhysics { get; set; }
+    public static PhysicsTypes PlayerPhysics { get; set; }
     public static double Time { get; set; }
 
     static FrameworkData()
@@ -65,7 +65,7 @@ public static class FrameworkData
 
         DeveloperMode = true;
         IsPaused = false;
-        PlayerPhysics = Player.PhysicsTypes.S2;
+        PlayerPhysics = PhysicsTypes.S2;
     }
     
     public static void UpdateEarly(float processSpeed)

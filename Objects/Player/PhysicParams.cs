@@ -113,11 +113,11 @@ public struct PhysicParams(
 	    )}
     };
 
-    public static PhysicParams Get(bool isUnderwater, bool isSuper, Player.Types playerType, float itemSpeedTimer)
+    public static PhysicParams Get(bool isUnderwater, bool isSuper, Types playerType, float itemSpeedTimer)
     {
 	    PhysicParams physicParams = ParamsMap[GetType(isUnderwater, isSuper, playerType)];
 	    
-	    if (playerType == Player.Types.Knuckles)
+	    if (playerType == Types.Knuckles)
 	    {
 		    physicParams.JumpVelocity += 0.5f;
 	    }
@@ -131,14 +131,14 @@ public struct PhysicParams(
 		    physicParams.AccelerationTop = 12f;
 	    }
 	    
-	    if (FrameworkData.PlayerPhysics >= Player.PhysicsTypes.SK)
+	    if (FrameworkData.PlayerPhysics >= PhysicsTypes.SK)
 	    {
 		    if (isSuper)
 		    {
 			    physicParams.FrictionRoll = 0.0234375f;
 		    }
 	    }
-	    else if (playerType == Player.Types.Tails)
+	    else if (playerType == Types.Tails)
 	    {
 		    physicParams.DecelerationRoll = physicParams.Deceleration / 4;
 	    }
@@ -146,7 +146,7 @@ public struct PhysicParams(
 	    return physicParams;
     }
 
-    private static Type GetType(bool isUnderwater, bool isSuper, Player.Types playerType)
+    private static Type GetType(bool isUnderwater, bool isSuper, Types playerType)
     {
 	    byte type = 0;
 	    
@@ -157,6 +157,6 @@ public struct PhysicParams(
 
 	    if (!isSuper) return (Type)type;
 
-	    return (Type)(playerType == Player.Types.Sonic ? type + 2 : type + 1);
+	    return (Type)(playerType == Types.Sonic ? type + 2 : type + 1);
     }
 }
