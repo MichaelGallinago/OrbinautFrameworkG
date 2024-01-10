@@ -8,39 +8,19 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 
 public abstract partial class BaseObject : Node2D
 {
-	public enum BehaviourType : byte
-	{
-		NoBounds, Reset, Pause, Delete, Unique
-	}
-    
+	public enum BehaviourType : byte { NoBounds, Reset, Pause, Delete, Unique }
 	[Export] public BehaviourType Behaviour { get; set; }
-    
-	public static List<BaseObject> Objects { get; }
+
+	public static List<BaseObject> Objects { get; } = [];
 	public ObjectRespawnData RespawnData { get; }
-	public SolidData SolidData { get; set; }
+	public SolidData SolidData { get; set; } = new();
 	public Vector2 PreviousPosition { get; set; }
 
-	public InteractData InteractData;
- 
-	static BaseObject()
-	{
-		Objects = [];
-	}
+	public InteractData InteractData = new();
 
-	protected BaseObject()
-	{
-		RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
-		InteractData = new InteractData();
-		SolidData = new SolidData();
-	}
-	
+	protected BaseObject() => RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
 	public virtual void Init() {}
-
-	public override void _EnterTree()
-	{
-		Objects.Add(this);
-	}
-
+	public override void _EnterTree() => Objects.Add(this);
 	public override void _ExitTree() => Objects.Remove(this);
 
 	public void SetBehaviour(BehaviourType behaviour)
@@ -76,7 +56,7 @@ public abstract partial class BaseObject : Node2D
 		Visible = isActive;
 	}
 
-	public void ActSolid(Player player, Constants.SolidType type)
+	public void ActSolid(PhysicalPlayerWithAbilities player, Constants.SolidType type)
 	{
 		// The following is long and replicates the method of colliding
 		// with an object from the original games
@@ -223,7 +203,7 @@ public abstract partial class BaseObject : Node2D
 							player.TouchObjects[this] = Constants.TouchState.Up;
 							
 							// Attach player to the object
-							LandOnSolid(player, this, type, Mathf.FloorToInt(clip.Y - gripY));
+							player.LandOnSolid(this, type, Mathf.FloorToInt(clip.Y - gripY));
 						}
 						break;
 					// If failed to collide vertically, clear push flag
@@ -273,7 +253,7 @@ public abstract partial class BaseObject : Node2D
 			player.TouchObjects[this] = Constants.TouchState.Up;
 			
 			// Attach player to the object
-			LandOnSolid(player, this, type, -((int)yClip + gripY));
+			player.LandOnSolid(this, type, -((int)yClip + gripY));
 		}
 	}
 	
@@ -388,27 +368,5 @@ public abstract partial class BaseObject : Node2D
 			Constants.CollisionSensor.HitboxExtra => false,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
-	}
-    
-	private static void LandOnSolid(BasicPhysicalPlayer player, 
-		BaseObject targetObject, Constants.SolidType type, int distance)
-	{
-		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
-		{
-			player.ResetState();
-		}
-				
-		player.Position = new Vector2(player.Position.X, player.Position.Y - distance + 1);
-				
-		player.GroundSpeed = player.Speed.X;
-		player.Speed = new Vector2(player.Speed.X, 0);
-		player.Angle = 360f;
-				
-		player.OnObject = targetObject;
-
-		if (player.IsGrounded) return;
-		player.IsGrounded = true;
-
-		player.Land();
 	}
 }

@@ -11,10 +11,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private const byte MaxRecordLength = 32;
 	private readonly EditMode _editMode = new();
 	
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
+	[Export] public PackedScene PackedTail { get; private set; }
+	private Tail _tail;
+	
 	public override void _Ready()
 	{
-		if (ApplyType()) return;
-		
 		if (GetOwner<Node>() is CommonScene scene)
 		{
 			TileMap = scene.CollisionTileMap;
@@ -25,22 +27,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		}
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
-		
-		switch (Type)
-		{
-			case Types.Tails:
-				RadiusNormal = new Vector2I(9, 15);
-				RadiusSpin = new Vector2I(7, 14);
-				break;
-			case Types.Amy:
-				RadiusNormal = new Vector2I(9, 16);
-				RadiusSpin = new Vector2I(7, 12);
-				break;
-			default:
-				RadiusNormal = new Vector2I(9, 19);
-				RadiusSpin = new Vector2I(7, 14);
-				break;
-		}
 
 		Radius = RadiusNormal;
 
@@ -59,8 +45,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 		if (Type == Types.Tails)
 		{
-			Tail = PackedTail.Instantiate<Tail>();
-			AddChild(Tail);
+			_tail = PackedTail.Instantiate<Tail>();
+			AddChild(_tail);
 		}
 		
 		if (FrameworkData.GiantRingData != null)
@@ -103,6 +89,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 
 		TouchObjects = [];
+	}
+
+	public override void Init()
+	{
+		base.Init();
+		
 	}
 
 	private new void QueueFree()
@@ -176,30 +168,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	protected virtual bool ProcessCpu(float processSpeed) => false;
 
-	private bool ApplyType()
-	{
-		Type = SpawnType switch
-		{
-			SpawnTypes.Global => SharedData.PlayerType,
-			SpawnTypes.GlobalAI => SharedData.PlayerTypeCpu,
-			_ => Type
-		};
-
-		if (Type != Types.None) return false;
-		QueueFree();
-		return true;
-	}
-
 	private void UpdateTail()
 	{
-		if (Tail == null) return;
+		if (_tail == null) return;
 		if (Type != Types.Tails)
 		{
-			Tail.QueueFree();
+			_tail.QueueFree();
 			return;
 		}
 			
-		Tail.Animate(this);
+		_tail.Animate(this);
 	}
 
 	#region UpdatePlayerSystems
@@ -214,9 +192,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
 	
-		if (InvincibilityFrames > 0f)
+		if (InvincibilityTimer > 0f)
 		{
-			Visible = ((int)InvincibilityFrames-- & 4) >= 1 || InvincibilityFrames == 0f;
+			Visible = ((int)InvincibilityTimer-- & 4) >= 1 || InvincibilityTimer == 0f;
 		}
 	
 		if (ItemSpeedTimer > 0f && --ItemSpeedTimer == 0f)
@@ -247,7 +225,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				if (--RingCount <= 0)
 				{
 					RingCount = 0;
-					InvincibilityFrames = 1;
+					InvincibilityTimer = 1;
 					IsSuper = false;
 					
 					//TODO: audio
@@ -264,7 +242,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			}
 		}
 	
-		IsInvincible = InvincibilityFrames != 0 || ItemInvincibilityTimer != 0 || 
+		IsInvincible = InvincibilityTimer != 0 || ItemInvincibilityTimer != 0 || 
 		               IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
 				 
 		if (Id == 0 && FrameworkData.Time >= 36000d)
@@ -272,7 +250,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			Kill();
 		}
 	
-		if (Id == 0 && LifeRewards.Length > 0)
+		if (Id == 0 && LifeRewards.Count > 0)
 		{
 			if (RingCount >= LifeRewards[0] && LifeRewards[0] <= 200)
 			{
@@ -771,34 +749,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			    //game_restart();
 				break;
 		}
-	}
-
-	private void SetDropDashGroundSpeed(float force, float maxSpeed, Constants.Direction facing)
-	{
-		var sign = (float)facing;
-		force *= sign;
-		maxSpeed *= sign;
-		
-		if (sign * Speed.X >= 0)
-		{
-			GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
-			if (sign * GroundSpeed <= maxSpeed) return;
-			GroundSpeed = maxSpeed;
-			return;
-		}
-		
-		GroundSpeed = (Mathf.IsEqualApprox(Angle, 360f) ? 0f : MathF.Floor(GroundSpeed / 2f)) + force;
-	}
-	
-	public void ClearPush()
-	{
-		if (PushingObject != this) return;
-		if (Sprite.AnimationType != Animations.Spin)
-		{
-			Sprite.AnimationType = Animations.Move;
-		}
-		
-		PushingObject = null;
 	}
 
 	public void OnEnableEditMode()

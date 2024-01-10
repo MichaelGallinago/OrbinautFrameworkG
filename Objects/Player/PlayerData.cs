@@ -9,16 +9,16 @@ namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class PlayerData : BaseObject
 {
-	[Export] public Types Type { get; set; }
-	[Export] public SpawnTypes SpawnType;
-	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
-	[Export] public PackedScene PackedTail { get; private set; }
+	[Export] private Types _uniqueType;
+	[Export] private SpawnTypes _spawnType;
 	
 	public static List<Player> Players { get; } = [];
 	
 	public int Id { get; protected set; }
+	public Types Type { get; set; }
 	
 	public Animations Animation { get; set; }
+	public int? OverrideAnimationFrame { get; set; }
 	public PhysicParams PhysicParams { get; set; }
 	public Vector2I Radius;
 	public Vector2I RadiusNormal { get; set; }
@@ -66,10 +66,10 @@ public abstract partial class PlayerData : BaseObject
 	public uint ScoreCount { get; set; }
 	public uint RingCount { get; set; }
 	public uint LifeCount { get; set; }
-	public float InvincibilityFrames { get; set; }
+	public float InvincibilityTimer { get; set; }
 	public float ItemSpeedTimer { get; set; }
 	public float ItemInvincibilityTimer { get; set; }
-	public uint[] LifeRewards { get; set; }
+	public List<uint> LifeRewards { get; set; }
 
 	public ICarried CarryTarget { get; set; }
 	public float CarryTimer { get; set; }
@@ -96,8 +96,6 @@ public abstract partial class PlayerData : BaseObject
 	// Edit mode
 	public bool IsEditMode { get; set; }
 	
-	public Tail Tail { get; set; }
-	
 	protected readonly PlayerInput Input = new();
 	
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
@@ -120,126 +118,78 @@ public abstract partial class PlayerData : BaseObject
 
 	public override void Init()
 	{
-		/*
-		// This will help to determine if this script is being called again
-		var _is_respawned = variable_instance_exists(id, "player_id");
-		
-		
-		if (SpawnType == SpawnTypes.Unique)
+		if (ApplyType()) return;
+
+		(RadiusNormal, RadiusSpin) = Type switch
 		{
-			PlayerType = _is_respawned || PlayerType == global.player_main ? PlayerType : noone;
-		}
-		
-		if PlayerType == noone
-		{
-			instance_destroy(); exit;
-		}
-		
-		// Assign player_id
-		if !_is_respawned
-		{
-			player_id = c_engine.player_id_count++;
-		}
-			
-		switch PlayerType
-		{
-			default:
-			
-				radius_x_normal = 9;
-				radius_y_normal = 19;
-				radius_x_spin = 7;
-				radius_y_spin = 14;
-				
-			break;
-			
-			case PLAYER_TAILS:
-			
-				radius_x_normal = 9;
-				radius_y_normal = 15;
-				radius_x_spin = 7;
-				radius_y_spin = 14;
-				
-			break;
-			
-			case PLAYER_AMY:
-			
-				radius_x_normal = 9;
-				radius_y_normal = 16;
-				radius_x_spin = 7;
-				radius_y_spin = 12;
-				
-			break;
-		}
-		
-		radius_x = radius_x_normal;
-		radius_y = radius_y_normal;
-		
-		y -= radius_y + 1;
-		
-		grv = GRV_DEFAULT;
-		vel_x = 0;
-		vel_y = 0;
-		vel_ground = 0;
-		angle = 0;
-		
-		tile_layer = TILELAYER_MAIN;
+			Types.Tails => (new Vector2I(9, 15), new Vector2I(7, 14)),
+			Types.Amy => (new Vector2I(9, 16), new Vector2I(7, 12)),
+			_ => (new Vector2I(9, 19), new Vector2I(7, 14))
+		};
+
+		Radius = RadiusNormal;
+		Position = Position with { Y = Position.Y - Radius.Y - 1f };
+		Gravity = GravityType.Default;
+		Speed = Vector2.Zero;
+		GroundSpeed = 0f;
+		Angle = 0f;
+
+		TileLayer = Constants.TileLayers.Main;
 		collision_mode = 0;
-		stick_to_convex = false;
+		StickToConvex = false;
 		
-		pushing_on = noone;
-		on_object = noone;
-		object_interaction = true;
-		is_grounded = true;
-		is_spinning = false;
-		is_jumping = false;
-		is_underwater = false;
-		is_hurt = false;
-		is_dead = false;
-		is_super = false;
-		is_invincible = false;
-		super_value = 0;
+		PushingObject = null;
+		OnObject = null;
+		ObjectInteraction = true;
+		IsGrounded = true;
+		IsSpinning = false;
+		IsJumping = false;
+		IsUnderwater = false;
+		IsHurt = false;
+		IsDead = false;
+		IsSuper = false;
+		IsInvincible = false;
 		
-		action = 0;
-		action_state = 0;
-		action_value = 0;
-		action_value2 = 0;
-		super_value = 0;
+		Action = Actions.None;
+		ActionState = 0;
+		ActionValue = 0f;
+		ActionValue2 = 0f;
+		SuperValue = 0f;
 		
-		barrier_state = BARRIER_STATE_NONE;
-		barrier_type = BARRIER_NONE;
+		Barrier.State = Barrier.States.None;
+		Barrier.Type = Barrier.Types.None;
 		
-		facing = DIR_POSITIVE;
-		animation = ANI_IDLE;
-		visual_angle = 0;
+		Facing = Constants.Direction.Positive;
+		Animation = Animations.Idle;
+		VisualAngle = 0f;
 		
 		camera_view_timer = 120;
 		
-		forced_spin	= false;
-		air_lock_flag = false;
-		ground_lock_timer = 0;
+		IsForcedRoll = false;
+		IsAirLock = false;
+		GroundLockTimer = 0f;
 		
-		air_timer = AIR_VALUE_MAX;
-		combo_counter = 0;
-		score_count	= 0;
-		ring_count = 0;
-		inv_frames = 0;
-		item_speed_timer = 0;
-		item_inv_timer = 0;
-		life_count = 0;
-		life_rewards = [];
+		AirTimer = Constants.AirValueMax;
+		ComboCounter = 0;
+		ScoreCount = 0;
+		RingCount = 0;
+		InvincibilityTimer = 0f;
+		ItemSpeedTimer = 0f;
+		ItemInvincibilityTimer = 0f;
+		LifeCount = 0;
+		LifeRewards = [];
 		
-		carry_target = noone;
-		carry_timer = 0;
-		carry_target_x = 0;
-		carry_target_y = 0;
+		CarryTarget = null;
+		CarryTimer = 0;
+		CarryTargetPosition = Vector2.Zero;
 		
-		cpu_timer = 0;
-		cpu_timer_input = 0;
-		cpu_is_jumping = false;
+		CpuTimer = 0f;
+		CpuInputTimer = 0f;
+		IsCpuJumping = false;
 		
-		if !_is_respawned
+		if (!_is_respawned)
 		{
-			cpu_target = noone;
+			cpu_target = null;
 			cpu_state = CPU_STATE_MAIN;
 		}
 		else
@@ -247,20 +197,15 @@ public abstract partial class PlayerData : BaseObject
 			cpu_state = CPU_STATE_RESPAWN_INIT;
 		}
 		
-		restart_state = 0;
-		restart_timer = 0;
+		//TODO: restart state
+		RestartState =;
+		RestartTimer = 0f;
 		
-		input_press = {};
-		input_down = {};
+		Input.Clear();
 		
-		if _is_respawned && variable_instance_exists(id, "ds_record_data")
-		{
-			ds_list_destroy(ds_record_data);
-		}
+		RecordedData.Clear();
 		
-		ds_record_data = ds_list_create();
-		
-		if player_id != 0
+		if (Id != 0)
 		{
 			var _lead_player = player_get(player_id - 1);
 			
@@ -313,7 +258,7 @@ public abstract partial class PlayerData : BaseObject
 			global.saved_barrier = BARRIER_NONE;
 		}
 		
-		if PlayerType == PLAYER_TAILS
+		if (Type == Types.Tails)
 		{
 			with obj_tail
 			{
@@ -327,7 +272,20 @@ public abstract partial class PlayerData : BaseObject
 		}
 		
 		// Apply initial animation
-		scr_player_animate();\
-		*/
+		scr_player_animate();
+	}
+	
+	private bool ApplyType()
+	{
+		Type = _spawnType switch
+		{
+			SpawnTypes.Global => SharedData.PlayerType,
+			SpawnTypes.GlobalAI => SharedData.PlayerTypeCpu,
+			_ => Type
+		};
+
+		if (Type != Types.None) return false;
+		QueueFree();
+		return true;
 	}
 }

@@ -7,6 +7,23 @@ namespace OrbinautFramework3.Objects.Player;
 
 public partial class PlayerCpu : Player
 {
+	public override void _ExitTree()
+	{
+		base._ExitTree();
+		
+		if (Players.Count == 0 || !IsCpuRespawn) return;
+		//TODO: check respawn Player cpu
+		/*
+		var newPlayer = new Player
+		{
+			Type = Type,
+			Position = Players.First().Position
+		};
+
+		newPlayer._Process(FrameworkData.ProcessSpeed / Constants.BaseFramerate);
+		*/
+	}
+	
     protected override bool ProcessCpu(float processSpeed)
 	{
 		const byte cpuDelay = 16;

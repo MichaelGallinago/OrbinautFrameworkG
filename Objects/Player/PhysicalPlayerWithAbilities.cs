@@ -47,11 +47,11 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		if (!SharedData.SpinDash || !IsGrounded) return false;
 	
 		// Start Spin Dash (initial charge)
-		if (Action == Actions.None && Sprite.AnimationType is Animations.Duck or Animations.GlideLand)
+		if (Action == Actions.None && Animation is Animations.Duck or Animations.GlideLand)
 		{
 			if (!Input.Press.Abc || !Input.Down.Down) return false;
 			
-			Sprite.AnimationType = Animations.SpinDash;
+			Animation = Animations.SpinDash;
 			Action = Actions.SpinDash;
 			ActionValue = 0;
 			ActionValue2 = 1;
@@ -102,7 +102,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		
 			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 			Radius = RadiusSpin;
-			Sprite.AnimationType = Animations.Spin;
+			Animation = Animations.Spin;
 			IsSpinning = true;
 			Action = Actions.None;
 			GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2) * (float)Facing;
@@ -129,9 +129,9 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		if (!SharedData.PeelOut || Type != Types.Sonic || Id > 0 || !IsGrounded) return false;
 	
 		// Start Super Peel Out
-		if (Action == Actions.None && Sprite.AnimationType == Animations.LookUp && Input.Down.Up && Input.Press.Abc)
+		if (Action == Actions.None && Animation == Animations.LookUp && Input.Down.Up && Input.Press.Abc)
 		{
-			Sprite.AnimationType = Animations.Move;
+			Animation = Animations.Move;
 			Action = Actions.PeelOut;
 			ActionValue = 0;
 			ActionValue2 = 0;
@@ -209,11 +209,11 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			//instance_create(x, y, obj_star_super, { TargetPlayer: id });
 				
 			ObjectInteraction = false;			
-			InvincibilityFrames = 0;
+			InvincibilityTimer = 0;
 			IsSuper = true;
 			Action = Actions.Transform;
 			ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26 : 36;
-			Sprite.AnimationType = Animations.Transform;
+			Animation = Animations.Transform;
 			Sprite.AnimationTimer = Type == Types.Sonic ? 39 : 36;
 			
 			// return player control routine
@@ -335,7 +335,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				IsAirLock = false;
 				IsSpinning = false;
 				IsJumping = false;	
-				Sprite.AnimationType = Animations.GlideAir;	
+				Animation = Animations.GlideAir;	
 				Action = Actions.Glide;
 				ActionState = (int)GlideStates.Air;
 				ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
@@ -356,7 +356,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				{
 					IsAirLock = false;	
 				}
-				Sprite.AnimationType = Animations.HammerSpin;
+				Animation = Animations.HammerSpin;
 				Action = Actions.HammerSpin;
 				ActionValue = 0;
 				// TODO: audio
@@ -400,7 +400,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		StickToConvex = false;
 		GroundMode = 0;
 	
-		Sprite.AnimationType = Animations.Spin;
+		Animation = Animations.Spin;
 		
 		//TODO: audio
 		//audio_play_sfx(sfx_jump);
@@ -456,9 +456,9 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			}
 			else 
 			{
-				if (Sprite.AnimationType != Animations.DropDash)
+				if (Animation != Animations.DropDash)
 				{
-					Sprite.AnimationType = Animations.DropDash;
+					Animation = Animations.DropDash;
 					//TODO: audio
 					//audio_play_sfx(sfx_charge);
 				}
@@ -471,7 +471,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		
 		if (Mathf.IsEqualApprox(ActionValue, MaxDropDashCharge))
 		{		
-			Sprite.AnimationType = Animations.Spin;
+			Animation = Animations.Spin;
 			Action = Actions.DropDashCancel;
 		}
 			
@@ -497,7 +497,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			UpdateDropDashGroundSpeed(12f, 8f);
 		}
 		
-		Sprite.AnimationType = Animations.Spin;
+		Animation = Animations.Spin;
 		IsSpinning = true;
 		
 		if (!SharedData.CDCamera && Camera.Main != null)
@@ -520,7 +520,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		if (Speed.X * sign >= 0f)
 		{
 			GroundSpeed = Mathf.Floor(GroundSpeed / 4f) + force;
-			if (GroundSpeed * sign <= limitSpeed) return;
+			if (sign * GroundSpeed <= limitSpeed) return;
 			GroundSpeed = limitSpeed;
 			return;
 		}
@@ -529,6 +529,23 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		if (Mathf.IsEqualApprox(Angle, 360f)) return;
 		
 		GroundSpeed += Mathf.Floor(GroundSpeed / 2f);
+	}
+	
+	private void SetDropDashGroundSpeed(float force, float limitSpeed, Constants.Direction facing)
+	{
+		var sign = (float)facing;
+		limitSpeed *= sign;
+		force *= sign;
+		
+		if (sign * Speed.X >= 0)
+		{
+			GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
+			if (sign * GroundSpeed <= limitSpeed) return;
+			GroundSpeed = limitSpeed;
+			return;
+		}
+		
+		GroundSpeed = (Mathf.IsEqualApprox(Angle, 360f) ? 0f : MathF.Floor(GroundSpeed / 2f)) + force;
 	}
 	
 	private void ProcessFlight()
@@ -541,13 +558,13 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			{
 				if (!IsUnderwater)
 				{
-					Sprite.AnimationType = Animations.FlyTired;
+					Animation = Animations.FlyTired;
 					//TODO: audio
 					//audio_play_sfx(sfx_flight2, true);
 				}
 				else
 				{
-					Sprite.AnimationType = Animations.SwimTired;
+					Animation = Animations.SwimTired;
 				}
 			
 				Gravity = GravityType.TailsDown;
@@ -556,7 +573,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			}
 			else
 			{	
-				Sprite.AnimationType = IsUnderwater ? Animations.Swim : Animations.Fly;
+				Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
 			
 				if (!IsUnderwater || CarryTarget == null)
 				{
@@ -582,7 +599,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		
 		Camera.Main.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
 		Radius = RadiusSpin;
-		Sprite.AnimationType = Animations.Spin;
+		Animation = Animations.Spin;
 		IsSpinning	= true;
 		Action = Actions.None;
 		
@@ -605,7 +622,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				switch (ActionValue++)
 				{
 					case 0f: // Frame 0
-						Sprite.AnimationType = Animations.ClimbLedge;
+						Animation = Animations.ClimbLedge;
 						Position += new Vector2(3f * (float)Facing, -3f);
 						break;
 					
@@ -619,7 +636,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 					
 					case 18f: // End
 						Land();
-						Sprite.AnimationType = Animations.Idle;
+						Animation = Animations.Idle;
 						Position += new Vector2(8f * (float)Facing, 4f);
 						break;
 				}
@@ -636,7 +653,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		}
 		
 		const int stepsPerFrame = 4;
-		UpdateSpeedYOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
+		UpdateVerticalSpeedOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
 		
 		int radiusX = Radius.X;
 		if (Facing == Constants.Direction.Negative)
@@ -652,12 +669,12 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		{
 			if (Speed.Y != 0)
 			{
-				Sprite.Frame = Mathf.FloorToInt(ActionValue / stepsPerFrame);
+				OverrideAnimationFrame = Mathf.FloorToInt(ActionValue / stepsPerFrame);
 			}
 			return;
 		}
 		
-		Sprite.AnimationType = Animations.Spin;
+		Animation = Animations.Spin;
 		IsSpinning = true;
 		IsJumping = true;
 		Action = Actions.None;
@@ -721,13 +738,13 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				
 		Land();
 
-		Sprite.AnimationType = Animations.Idle;
+		Animation = Animations.Idle;
 		Speed = Speed with { Y = 0 };
 				
 		return true;
 	}
 
-	private void UpdateSpeedYOnClimb(int maxValue)
+	private void UpdateVerticalSpeedOnClimb(int maxValue)
 	{
 		if (Input.Down.Up)
 		{
@@ -755,7 +772,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 
 	private void ReleaseClimb()
 	{
-		Sprite.AnimationType = Animations.GlideFall;
+		Animation = Animations.GlideFall;
 		Action = Actions.Glide;
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 1;
@@ -785,7 +802,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 
 		if (Input.Down.Abc) return;
 		
-		Sprite.AnimationType = Animations.GlideFall;
+		Animation = Animations.GlideFall;
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 0f;
 		Radius = RadiusNormal;
@@ -820,14 +837,14 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		switch (angle)
 		{
 			case < 30f or > 150f:
-				Sprite.Frame = 0;
+				OverrideAnimationFrame = 0;
 				break;
 			case < 60f or > 120f:
-				Sprite.Frame = 1;
+				OverrideAnimationFrame = 1;
 				break;
 			default:
 				Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
-				Sprite.Frame = 2;
+				OverrideAnimationFrame = 2;
 				break;
 		}
 	}
@@ -839,9 +856,9 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		if (Speed.X == 0f)
 		{
 			Land();
-			Sprite.Frame = 1;
+			OverrideAnimationFrame = 1;
 
-			Sprite.AnimationType = Animations.GlideGround;
+			Animation = Animations.GlideGround;
 			GroundLockTimer = 16;
 			GroundSpeed = 0;
 
@@ -925,7 +942,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			case <= 0f: return;
 			
 			case >= MaxDropDashCharge:
-				Sprite.AnimationType = Animations.Spin;
+				Animation = Animations.Spin;
 				Action = Actions.HammerSpinCancel;
 				break;
 		}
@@ -939,7 +956,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		
 		if (ActionValue < MaxDropDashCharge) return;
 
-		Sprite.AnimationType = Animations.HammerDash;
+		Animation = Animations.HammerDash;
 		Action = Actions.HammerDash;
 		ActionValue = 0f;
 		
@@ -980,7 +997,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 
 	private void CancelHammerDash()
 	{
-		Sprite.AnimationType = Animations.Move;
+		Animation = Animations.Move;
 		Action = Actions.None;
 	}
 
@@ -1101,7 +1118,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			switch ((GlideStates)ActionState)
 			{
 				case GlideStates.Air when Angles.GetQuadrant(Angle) == 0:
-					Sprite.AnimationType = Animations.GlideGround;
+					Animation = Animations.GlideGround;
 					ActionState = (int)GlideStates.Ground;
 					ActionValue = 0;
 					Gravity = 0;
@@ -1123,7 +1140,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 						break;
 					}
 					
-					Sprite.AnimationType = Animations.GlideLand;
+					Animation = Animations.GlideLand;
 					GroundLockTimer = 16;
 					GroundSpeed = 0;
 					Speed = Speed with { X = 0 };
@@ -1171,7 +1188,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				Position += new Vector2(1f, 0f);
 			}
 			
-			Sprite.AnimationType = Animations.ClimbWall;
+			Animation = Animations.ClimbWall;
 			Action = Actions.Climb;
 			ActionState = (int)ClimbStates.Normal;
 			ActionValue = 0;
@@ -1186,7 +1203,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 
 	private void ReleaseGlide()
 	{
-		Sprite.AnimationType = Animations.GlideFall;
+		Animation = Animations.GlideFall;
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 0;
 		Radius.X = RadiusNormal.X;
@@ -1217,7 +1234,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				//TODO: audio
 				//audio_play_sfx(sfx_grab);
 			
-				player.Sprite.AnimationType = Animations.Grab;
+				player.Animation = Animations.Grab;
 				player.Action = Actions.Carried;
 				CarryTarget = player;
 
@@ -1242,7 +1259,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			IsSpinning = true;
 			IsJumping = true;
 			Action = Actions.None;
-			Sprite.AnimationType = Animations.Spin;
+			Animation = Animations.Spin;
 			Radius = RadiusSpin;
 			Speed = new Vector2(0f, PhysicParams.MinimalJumpVelocity);
 					

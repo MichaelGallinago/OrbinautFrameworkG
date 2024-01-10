@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 
@@ -118,7 +119,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (IsHurt)
 		{
-			InvincibilityFrames = 120;
+			InvincibilityTimer = 120;
 			GroundSpeed = 0;
 		}
 	
@@ -148,6 +149,37 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
 
 		Radius = RadiusNormal;
+	}
+	
+	public void LandOnSolid(BaseObject targetObject, Constants.SolidType type, int distance)
+	{
+		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
+		{
+			ResetState();
+		}
+
+		Position = Position with { Y = Position.Y - distance + 1 };
+		GroundSpeed = Speed.X;
+		Speed = Speed with { X = 0f };
+		Angle = 360f;
+		
+		OnObject = targetObject;
+
+		if (IsGrounded) return;
+		IsGrounded = true;
+
+		Land();
+	}
+	
+	public void ClearPush()
+	{
+		if (PushingObject != this) return;
+		if (Sprite.AnimationType != Animations.Spin)
+		{
+			Sprite.AnimationType = Animations.Move;
+		}
+		
+		PushingObject = null;
 	}
 	
     private void ProcessSlopeResist()
