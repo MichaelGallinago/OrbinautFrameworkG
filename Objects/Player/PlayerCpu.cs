@@ -64,8 +64,7 @@ public partial class PlayerCpu : Player
 			IsGrounded = false;
 					
 			// Run animation script since we exit the entire player object code later
-			Sprite.Animate(new PlayerAnimationData(
-				Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue, CarryTarget));
+			Sprite.Animate(this);
 		}
 				
 		float distanceX = Position.X - followData.Position.X;

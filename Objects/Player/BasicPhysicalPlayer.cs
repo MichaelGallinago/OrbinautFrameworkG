@@ -329,7 +329,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		float radians = Mathf.DegToRad(Angle);
 		Speed = GroundSpeed * new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
-		Speed.X = Math.Clamp(Speed.X, -16f, 16f);
+		Speed = Speed with { X = Math.Clamp(Speed.X, -16f, 16f) };
 	}
 
 	private void RollOnGround(Constants.Direction direction)
@@ -413,14 +413,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			if (Speed.Y < -15.75f)
 			{
-				Speed.Y = -15.75f;
+				Speed = Speed with { Y = -15.75f };
 			}
 		}
 	
 		// Limit downward speed
 		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Speed.Y > 16)
 		{
-			Speed.Y = 16;
+			Speed = Speed with { Y = 16 };
 		}
 
 		if (Action == Actions.HammerDash)
@@ -444,11 +444,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				if (Speed.X > 0) 
 				{
-					Speed.X -= PhysicParams.AccelerationAir;
+					Speed = Speed with { X = Speed.X - PhysicParams.AccelerationAir };
 				}
 				else if (!SharedData.NoSpeedCap || Speed.X > -PhysicParams.AccelerationTop)
 				{
-					Speed.X = Math.Max(Speed.X - PhysicParams.AccelerationAir, -PhysicParams.AccelerationTop);
+					Speed = Speed with
+					{
+						X = Math.Max(Speed.X - PhysicParams.AccelerationAir, -PhysicParams.AccelerationTop)
+					};
 				}
 			
 				Facing = Constants.Direction.Negative;
@@ -459,11 +462,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				if (Speed.X < 0)
 				{
-					Speed.X += PhysicParams.AccelerationAir;
+					Speed = Speed with { X = Speed.X + PhysicParams.AccelerationAir };
 				} 
 				else if (!SharedData.NoSpeedCap || Speed.X < PhysicParams.AccelerationTop)
 				{
-					Speed.X = Math.Min(Speed.X + PhysicParams.AccelerationAir, PhysicParams.AccelerationTop);
+					Speed = Speed with
+					{
+						X = Math.Min(Speed.X + PhysicParams.AccelerationAir, PhysicParams.AccelerationTop)
+					};
 				}
 			
 				Facing = Constants.Direction.Positive;
@@ -473,7 +479,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		// Apply air drag
 		if (!IsHurt && Speed.Y is < 0f and > -4f)
 		{
-			Speed.X -= Mathf.Floor(Speed.X * 8f) / 256f;
+			Speed = Speed with { X = Speed.X - Mathf.Floor(Speed.X * 8f) / 256f };
 		}
 	}
 
@@ -620,7 +626,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Angles.GetQuadrant(Angle))
 		{
 			case 0:
-				Speed.X -= wallDist;
+				Speed = Speed with { X = Speed.X - wallDist };
 				GroundSpeed = 0f;
 					
 				if (Facing == firstDirection && !IsSpinning)
@@ -630,11 +636,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case 1:
-				Speed.Y += wallDist;
+				Speed = Speed with { Y = Speed.Y + wallDist };
 				break;
 				
 			case 2:
-				Speed.X += wallDist;
+				Speed = Speed with { X = Speed.X + wallDist };
 				GroundSpeed = 0;
 					
 				if (Facing == firstDirection && !IsSpinning)
@@ -644,7 +650,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case 3:
-				Speed.Y -= wallDist;
+				Speed = Speed with { Y = Speed.Y - wallDist };
 				break;
 		}
 	}
@@ -698,7 +704,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (Position.X + Speed.X < camera.Limit.X + 16f)
 		{
 			GroundSpeed = 0;
-			Speed.X = 0;
+			Speed = Speed with { X = 0 };
 			Position = new Vector2(camera.Limit.X + 16f, Position.Y);
 		}
 	
@@ -713,7 +719,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (Position.X + Speed.X > rightBound)
 		{
 			GroundSpeed = 0;
-			Speed.X = 0;
+			Speed = Speed with { X = 0 };
 			Position = new Vector2(rightBound, Position.Y);
 		}
 	
@@ -727,15 +733,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 					{
 						Gravity	= GravityType.TailsDown;
 					}
-			
-					Speed.Y = 0f;
+
+					Speed = Speed with { Y = 0f };
 					Position = new Vector2(Position.X, camera.Limit.Y + 16f);
 				}
 
 				break;
 			}
 			case Actions.Glide when Position.Y < camera.Limit.Y + 10f:
-				Speed.X = 0f;
+				Speed = Speed with { X = 0f };
 				break;
 		}
 	
@@ -758,7 +764,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (!IsGrounded && Action != Actions.Carried)
 		{
-			Speed.Y += Gravity;
+			Speed = Speed with { Y = Speed.Y + Gravity };
 		}
 	}
 
@@ -915,7 +921,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				Position -= new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
-				Speed.X = 0;
+				Speed = Speed with { X = 0 };
 				
 				if (moveQuadrant == 3)
 				{
@@ -935,7 +941,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				Position += new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
-				Speed.X = 0f;
+				Speed = Speed with { X = 0f };
 				
 				if (moveQuadrant == 1)
 				{
@@ -962,7 +968,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				if (wallDist < 0)
 				{
 					Position += new Vector2(wallDist, 0f);
-					Speed.X = 0;
+					Speed = Speed with { X = 0 };
 					
 					return;
 				}
@@ -974,7 +980,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				{
 					Angle = roofAngle;
 					GroundSpeed = roofAngle < 180 ? -Speed.Y : Speed.Y;
-					Speed.Y = 0;
+					Speed = Speed with { Y = 0 };
 					
 					Land();
 				}
@@ -982,7 +988,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				{
 					if (Speed.Y < 0f)
 					{
-						Speed.Y = 0f;
+						Speed = Speed with { Y = 0f };
 					}
 						
 					if (Action == Actions.Flight)
@@ -1027,11 +1033,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				if (Speed.Y > 15.75f)
 				{
-					Speed.Y = 15.75f;
+					Speed = Speed with { Y = 15.75f };
 				}
 						
 				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
-				Speed.X = 0f;
+				Speed = Speed with { X = 0f };
 			}
 			else if (angle is > 22.5f and <= 337.5f)
 			{
@@ -1041,7 +1047,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			else 
 			{
 				GroundSpeed = Speed.X;
-				Speed.Y = 0f;
+				Speed = Speed with { Y = 0f };
 			}
 		}
 		else if (Speed.Y >= 0)
@@ -1054,7 +1060,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			if (distance >= 0) return;
 				
 			GroundSpeed = Speed.X;
-			Speed.Y = 0;
+			Speed = Speed with { Y = 0 };
 		}
 		else
 		{

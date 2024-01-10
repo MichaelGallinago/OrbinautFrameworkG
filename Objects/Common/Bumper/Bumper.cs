@@ -11,16 +11,16 @@ using Player;
 
 public partial class Bumper : BaseObject
 {
-    // There is no limit in Sonic 2. Set to 10 to match S1 behaviour
-    [Export] private int _hitsLeft = -1;
+    private enum HitsLimit { Sonic1 = 10, Sonic2 = -1 }
+    
+    [Export] private HitsLimit _hitsLimit = HitsLimit.Sonic2;
     [Export] private AdvancedAnimatedSprite _sprite;
     private int _state;
+    private int _hitsLeft;
 
-    public Bumper()
-    {
-        SetHitbox(new Vector2I(8, 8));
-    }
-
+    public Bumper() => SetHitbox(new Vector2I(8, 8));
+    public override void _Ready() => _hitsLeft = (int)_hitsLimit;
+    
     public override void _Process(double delta)
     {
         foreach (Player player in Player.Players)
@@ -48,11 +48,11 @@ public partial class Bumper : BaseObject
                 }
                 else
                 {
-                    player.Speed.X = bumpSpeed;
+                    player.Speed = player.Speed with { X = bumpSpeed };
                 }
             }
-            
-            player.Speed.Y = 7f * MathF.Cos(radians);
+
+            player.Speed = player.Speed with { Y = 7f * MathF.Cos(radians) };
             player.IsJumping = false;
             player.IsAirLock = false;
             

@@ -1,32 +1,19 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : PhysicalPlayerWithAbilities, IEditor
+public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed
 {
 	private const byte MaxRecordLength = 32;
 	private readonly EditMode _editMode = new();
 	
 	public override void _Ready()
 	{
-		Type = SpawnType switch
-		{
-			SpawnTypes.Global => SharedData.PlayerType,
-			SpawnTypes.GlobalAI => SharedData.PlayerTypeCpu,
-			_ => Type
-		};
-
-		if (Type == Types.None)
-		{
-			QueueFree();
-			return;
-		}
-
+		if (ApplyType()) return;
 		
 		if (GetOwner<Node>() is CommonScene scene)
 		{
@@ -37,7 +24,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor
 			}
 		}
 		
-		TileCollider = new TileCollider();
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
 		switch (Type)
@@ -64,14 +50,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor
 		TileLayer = Constants.TileLayers.Main;
 		GroundMode = Constants.GroundMode.Floor;
 		ObjectInteraction = true;
-		Barrier = new Barrier(this);
 		Facing = Constants.Direction.Positive;
 		Sprite.AnimationType = Animations.Idle;
 		AirTimer = 1800f;
 		CpuState = CpuStates.Main;
 		RestartState = RestartStates.GameOver;
 		Input.Clear();
-		RecordedData = [];
 
 		if (Type == Types.Tails)
 		{
@@ -184,13 +168,27 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor
 		ProcessWater();
 		RecordData();
 		ProcessRotation();
-		Sprite.Animate(new PlayerAnimationData(Type, Facing, IsSuper, GroundSpeed, Speed, ActionValue, CarryTarget));
+		Sprite.Animate(this);
 		UpdateTail();
 		ProcessPalette();
 		UpdateCollision();
 	}
 	
 	protected virtual bool ProcessCpu(float processSpeed) => false;
+
+	private bool ApplyType()
+	{
+		Type = SpawnType switch
+		{
+			SpawnTypes.Global => SharedData.PlayerType,
+			SpawnTypes.GlobalAI => SharedData.PlayerTypeCpu,
+			_ => Type
+		};
+
+		if (Type != Types.None) return false;
+		QueueFree();
+		return true;
+	}
 
 	private void UpdateTail()
 	{
@@ -201,8 +199,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor
 			return;
 		}
 			
-		Tail.Animate(new TailAnimationData(Sprite.AnimationType, Sprite.Scale, Speed, GroundSpeed, 
-			IsGrounded, IsSpinning, Angle, VisualAngle));
+		Tail.Animate(this);
 	}
 
 	#region UpdatePlayerSystems
@@ -405,12 +402,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor
 		{
 			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4f)
 			{
-				Speed.Y *= 2f;
+				Speed = Speed with { Y = Speed.Y * 2f };
 			}
 					
 			if (Speed.Y < -16f)
 			{
-				Speed.Y = -16f;
+				Speed = Speed with { Y = -16f };
 			}
 					
 			if (Action != Actions.Flight)
@@ -661,23 +658,21 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor
 
 		if (StickToConvex)
 		{
-			Speed = new Vector2(
-				Math.Clamp(Speed.X, -16f, 16f), 
-				Math.Clamp(Speed.Y, -16f, 16f));
+			Speed.Clamp(-16 * Vector2.One, 16 * Vector2.One);
 		}
 
 		Position += Speed * processSpeed;
 
 		if (!IsGrounded)
 		{
-			Speed = new Vector2(Speed.X, Speed.Y + Gravity * processSpeed);
+			Speed = Speed with { Y = Speed.Y + Gravity * processSpeed };
 		}
 	}
 
 	private void ProcessRestart(float processSpeed)
 	{
 		if (!IsDead || Id > 0) return;
-
+		
 		bool isTimeOver = FrameworkData.Time >= 36000d; // TODO: add constant
 		switch (RestartState)
 		{

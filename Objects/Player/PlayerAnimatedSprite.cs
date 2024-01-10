@@ -15,7 +15,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	public Animations AnimationType { get; set; }
 	public bool IsFrameChanged { get; private set; }
 
-	private PlayerAnimationData _data;
+	private IAnimatedPlayer _player;
 	private Animations _animationBuffer;
 	private int _spriteFramesIndex;
 
@@ -25,15 +25,15 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		FrameChanged += () => IsFrameChanged = true;
 	}
 	
-	public void Animate(PlayerAnimationData data)
+	public void Animate(IAnimatedPlayer player)
 	{
-		_data = data;
+		_player = player;
 		
 		UpdateAnimationBuffer();
 		UpdateScale();
 		UpdateSpriteFrames();
 
-		switch (data.Type)
+		switch (player.Type)
 		{
 			case Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
 			case Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
@@ -72,12 +72,12 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	private void UpdateScale()
 	{
 		if (AnimationType == Animations.Spin && !IsFrameChanged) return;
-		Scale = new Vector2(Math.Abs(Scale.X) * (float)_data.Facing, Scale.Y);
+		Scale = new Vector2(Math.Abs(Scale.X) * (float)_player.Facing, Scale.Y);
 	}
 
 	private void UpdateSpriteFrames()
 	{
-		int index = _data.Type == Types.Sonic && _data.IsSuper ? 5 : (int)_data.Type;
+		int index = _player.Type == Types.Sonic && _player.IsSuper ? 5 : (int)_player.Type;
 		if (_spriteFramesIndex == index) return;
 		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}
@@ -86,7 +86,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		SetAnimationType(type, speed);
 
-		if (!_data.IsSuper || type != Animations.Walk) return;
+		if (!_player.IsSuper || type != Animations.Walk) return;
 
 		if (FrameworkData.Time % 4d > 1d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
@@ -103,7 +103,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private Animations SonicType => AnimationType switch
 	{
-		Animations.Move => _data.IsSuper ? 
+		Animations.Move => _player.IsSuper ? 
 			GetMoveAnimation(false, 8f) :
 			GetMoveAnimation(SharedData.PeelOut, 6f),
 		_ => AnimationType
@@ -114,21 +114,21 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 		
 		if (type != Animations.FlyCarry) return;
-		Frame = _data.Speed.Y < 0 ? 1 : 0;
+		Frame = _player.Speed.Y < 0 ? 1 : 0;
 	}
 	
 	private float TailsSpeed => AnimationType switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
-		Animations.Swim => _data.Speed.Y < 0f ? 1f : 0.5f,
+		Animations.Swim => _player.Speed.Y < 0f ? 1f : 0.5f,
 		_ => 1f
 	};
 	
 	private Animations TailsType => AnimationType switch
 	{
-		Animations.Fly => _data.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
-		Animations.FlyTired => _data.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
+		Animations.Fly => _player.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
+		Animations.FlyTired => _player.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
 		Animations.Move => GetMoveAnimation(true, 6f),
 		_ => AnimationType
 	};
@@ -137,7 +137,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		if (AnimationType == Animations.GlideFall)
 		{
-			SetAnimation(type.ToStringFast(), (int)_data.ActionValue, speed);
+			SetAnimation(type.ToStringFast(), (int)_player.ActionValue, speed);
 			return;
 		}
 		
@@ -188,7 +188,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		const float dashThreshold = 10f;
 		
-		float speed = Math.Abs(_data.GroundSpeed);
+		float speed = Math.Abs(_player.GroundSpeed);
 
 		if (speed < runThreshold) return Animations.Walk;
 		return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
@@ -196,7 +196,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private float GetGroundAnimationSpeed(float speedBound)
 	{
-		return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(_data.GroundSpeed)));
+		return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(_player.GroundSpeed)));
 	}
 
 	private void SetAnimationType(Animations type, float speed) => SetAnimation(type.ToStringFast(), speed);
