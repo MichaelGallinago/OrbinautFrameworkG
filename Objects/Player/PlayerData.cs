@@ -118,6 +118,7 @@ public abstract partial class PlayerData : BaseObject
 
 	public override void Init()
 	{
+		/*
 		if (ApplyType()) return;
 
 		(RadiusNormal, RadiusSpin) = Type switch
@@ -207,20 +208,18 @@ public abstract partial class PlayerData : BaseObject
 		
 		if (Id != 0)
 		{
-			var _lead_player = player_get(player_id - 1);
+			Player leadPlayer = Players[Id - 1];
 			
-			if _is_respawned
+			if (_is_respawned)
 			{
-				x = c_engine.camera.view_x + 127;
-				y = _lead_player.y - 192;
+				Position = new Vector2(Camera.Main.BufferPosition.X + 127, leadPlayer.Position.Y - 192);
 			}
 			else
 			{
-				x = _lead_player.x - 16;
-				y = _lead_player.y + _lead_player.radius_y - radius_y;
+				Position = leadPlayer.Position - new Vector2(16, Radius.Y - leadPlayer.Radius.Y);
 			}
 		}
-		else if !_is_respawned
+		else if (!_is_respawned)
 		{
 			if array_length(global.giant_ring_data) > 0
 			{
@@ -273,6 +272,7 @@ public abstract partial class PlayerData : BaseObject
 		
 		// Apply initial animation
 		scr_player_animate();
+		*/
 	}
 	
 	private bool ApplyType()

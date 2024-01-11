@@ -84,7 +84,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 				var sound = audio_play_sfx(sfx_charge);
 				audio_sound_pitch(sound, ActionValue2);
 				*/
-				Sprite.Frame = 0;
+				OverrideAnimationFrame = 0;
 			}
 			else
 			{
@@ -214,7 +214,6 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 			Action = Actions.Transform;
 			ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26 : 36;
 			Animation = Animations.Transform;
-			Sprite.AnimationTimer = Type == Types.Sonic ? 39 : 36;
 			
 			// return player control routine
 			return true;

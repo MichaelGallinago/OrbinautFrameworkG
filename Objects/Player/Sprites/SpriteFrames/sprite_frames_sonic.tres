@@ -303,10 +303,10 @@ animations = [{
 "speed": 0.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 48.0,
 "texture": ExtResource("5_44lgp")
 }],
-"loop": true,
+"loop": false,
 "name": &"Bounce",
 "speed": 0.0
 }, {

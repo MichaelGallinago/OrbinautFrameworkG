@@ -8,8 +8,6 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 {
     public static float GlobalSpeedScale { get; set; } = 1f;
     
-    public StringName NextAnimation { get; set; }
-    
     [Export] private int FrameLoop
     {
         get => _frameLoop;
@@ -25,13 +23,13 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
             _advancedSpriteFrames?.SetAnimationFrameLoop(Animation, _frameLoop);
         }
     }
-    
+
+    private StringName _nextAnimation;
     private int _frameLoop;
     private AdvancedSpriteFrames _advancedSpriteFrames;
     
     public override void _Ready()
     {
-        AnimationFinished += SetNextAnimation;
         AnimationLooped += LoopFrame;
         SpriteFramesChanged += UpdateSpriteFrames;
         UpdateSpriteFrames();
@@ -102,12 +100,6 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     {
         _frameLoop = _advancedSpriteFrames.GetAnimationFrameLoop(Animation);
         Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
-    }
-    
-    private void SetNextAnimation()
-    {
-        if (NextAnimation == null) return;
-        Animation = NextAnimation;
     }
     
     public bool CheckInView()

@@ -34,35 +34,35 @@ shader_parameter/u_inclineStep = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_aig0h"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_5blrn"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_g7gdn"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_vv6k6"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_bqb6b"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2b4p"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_88cbv"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_kwkq1"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_4nf6k"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_7wbg2"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_mgjop"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_2y0a4"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_fy8l8"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_lybcm"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_bt1d3"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_xlbej"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
@@ -86,25 +86,26 @@ script = ExtResource("2_b03l2")
 [node name="Player" parent="." instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(200, 848)
-Type = 1
 
-[node name="Player2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
+[node name="Player2" parent="." node_paths=PackedStringArray("Sprite", "Sprite") instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(96, 848)
-SpawnType = 2
+Sprite = NodePath("../Player/AdvancedAnimatedSprite")
 Sprite = NodePath("../Player/AdvancedAnimatedSprite")
 
-[node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite", "Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(11776, 1088)
 _layerLeft = 1
 _layerRight = 0
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
-[node name="PathSwapTriggerHorizontal4" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal4" parent="." node_paths=PackedStringArray("Sprite", "Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(11888, 1152)
 scale = Vector2(1, 3)
 _layerLeft = 1
 _layerRight = 0
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
 [node name="PathSwapTriggerHorizontal" parent="." instance=ExtResource("11_1127g")]
@@ -112,24 +113,27 @@ position = Vector2(2432, 960)
 _layerLeft = 1
 _layerRight = 0
 
-[node name="PathSwapTriggerHorizontal2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal2" parent="." node_paths=PackedStringArray("Sprite", "Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(2544, 1024)
 scale = Vector2(1, 3)
 _layerLeft = 1
 _layerRight = 0
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
-[node name="PathSwapTriggerHorizontal5" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal5" parent="." node_paths=PackedStringArray("Sprite", "Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(4224, 976)
 scale = Vector2(1, 4.5)
 _layerLeft = 1
 _layerRight = 0
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
-[node name="PathSwapTriggerHorizontal6" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal6" parent="." node_paths=PackedStringArray("Sprite", "Sprite") instance=ExtResource("11_1127g")]
 position = Vector2(4096, 832)
 _layerLeft = 1
 _layerRight = 0
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
 [node name="Background" type="ParallaxBackground" parent="."]
@@ -197,4 +201,4 @@ _sprite = NodePath("../CameraTrigger/Sprite2D")
 
 [node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
 position = Vector2(816, 840)
-_piecesTextures = [SubResource("AtlasTexture_aig0h"), SubResource("AtlasTexture_g7gdn"), SubResource("AtlasTexture_bqb6b"), SubResource("AtlasTexture_88cbv"), SubResource("AtlasTexture_4nf6k"), SubResource("AtlasTexture_mgjop"), SubResource("AtlasTexture_fy8l8"), SubResource("AtlasTexture_bt1d3")]
+_piecesTextures = [SubResource("AtlasTexture_5blrn"), SubResource("AtlasTexture_vv6k6"), SubResource("AtlasTexture_g2b4p"), SubResource("AtlasTexture_kwkq1"), SubResource("AtlasTexture_7wbg2"), SubResource("AtlasTexture_2y0a4"), SubResource("AtlasTexture_lybcm"), SubResource("AtlasTexture_xlbej")]

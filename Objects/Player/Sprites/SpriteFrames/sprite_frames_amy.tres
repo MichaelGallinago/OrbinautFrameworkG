@@ -356,8 +356,38 @@ animations = [{
 }, {
 "duration": 4.0,
 "texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
 }],
-"loop": true,
+"loop": false,
 "name": &"Bounce",
 "speed": 60.0
 }, {
@@ -1034,7 +1064,6 @@ _offsets = {
 "Duck": Vector2(3, 1),
 "Grab": Vector2(5, -6),
 "HammerDash": Vector2(1, -4),
-"HammerRush": Vector2(1, -4),
 "HammerSpin": Vector2(1, 1),
 "Hurt": Vector2(1, -1),
 "LookUp": Vector2(-2, -1),
@@ -1045,4 +1074,7 @@ _offsets = {
 "SpinDash": Vector2(4, 4),
 "Transform": Vector2(1, -3),
 "Walk": Vector2(2, -1)
+}
+_nextAnimations = {
+"Bounce": &"Move"
 }

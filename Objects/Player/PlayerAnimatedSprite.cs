@@ -11,10 +11,9 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
 	
-	public float AnimationTimer { get; set; }
-	public Animations AnimationType { get; set; }
 	public bool IsFrameChanged { get; private set; }
-
+	public Animations AnimationType { get; set; }
+	
 	private IAnimatedPlayer _player;
 	private Animations _animationBuffer;
 	private int _spriteFramesIndex;
@@ -23,13 +22,13 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		base._Ready();
 		FrameChanged += () => IsFrameChanged = true;
+		AnimationFinished += OnAnimationFinished;
 	}
 	
 	public void Animate(IAnimatedPlayer player)
 	{
 		_player = player;
 		
-		UpdateAnimationBuffer();
 		UpdateScale();
 		UpdateSpriteFrames();
 
@@ -43,30 +42,14 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		
 		IsFrameChanged = false;
 	}
-
-	private void UpdateAnimationBuffer()
+	
+	private void OnAnimationFinished()
 	{
-		if (!FrameworkData.UpdateObjects) return;
-		
-		if (_animationBuffer == Animations.None && AnimationTimer > 0f)
+		AnimationType = AnimationType switch
 		{
-			_animationBuffer = AnimationType;
-		}
-		
-		if (AnimationTimer < 0f)
-		{
-			if (AnimationType == _animationBuffer)
-			{
-				AnimationType = Animations.Move;
-			}
-			
-			AnimationTimer = 0f;
-			_animationBuffer = Animations.None;
-		}
-		else if (_animationBuffer != Animations.None)
-		{
-			AnimationTimer--;
-		}
+			Animations.Bounce or Animations.Breathe or Animations.Transform or Animations.Skid => Animations.Move,
+			_ => AnimationType
+		};
 	}
 
 	private void UpdateScale()
@@ -88,7 +71,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 		if (!_player.IsSuper || type != Animations.Walk) return;
 
-		if (FrameworkData.Time % 4d > 1d) return;
+		if (FrameworkData.Time % 4d >= 2d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}

@@ -68,6 +68,8 @@ public static class FrameworkData
         PlayerPhysics = PhysicsTypes.S2;
     }
     
+    public static bool IsTimePeriodLooped(float period) => Time % period - ProcessSpeed < 0f;
+    
     public static void UpdateEarly(float processSpeed)
     {
         if (AllowPause && InputUtilities.Press[0].Start)
@@ -133,12 +135,6 @@ public static class FrameworkData
 			commonObject.SetActivity(true);
 			commonObject.InteractData.IsInteract = true;
 		}
-    }
-
-    public static bool IsTimePeriodLooped(float period)
-    {
-	    float halfPeriod = period / 2f;
-	    return Time % period < halfPeriod && (Time - ProcessSpeed) % period > halfPeriod;
     }
     
     private static void DeactivateObjectsByBehaviour(BaseObject commonObject, int limitBottom, ref Vector2I activeArea)

@@ -38,7 +38,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		IsGrounded = false;
 		OnObject = null;
 		Barrier.Type = Barrier.Types.None;
-		Sprite.AnimationType = Animations.Death;
+		Animation = Animations.Death;
 		Gravity = GravityType.Default;
 		Speed = new Vector2(0f, -7f);
 		GroundSpeed = 0f;
@@ -99,7 +99,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (OnObject == null)
 		{
-			switch (Sprite.AnimationType)
+			switch (Animation)
 			{
 				case Animations.Idle:
 				case Animations.Duck:
@@ -108,13 +108,13 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 					break;
 			
 				default:
-					Sprite.AnimationType = Animations.Move;
+					Animation = Animations.Move;
 					break;
 			}
 		}
 		else
 		{
-			Sprite.AnimationType = Animations.Move;
+			Animation = Animations.Move;
 		}
 	
 		if (IsHurt)
@@ -174,9 +174,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	public void ClearPush()
 	{
 		if (PushingObject != this) return;
-		if (Sprite.AnimationType != Animations.Spin)
+		if (Animation != Animations.Spin)
 		{
-			Sprite.AnimationType = Animations.Move;
+			Animation = Animations.Move;
 		}
 		
 		PushingObject = null;
@@ -214,7 +214,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
 		// control lock. This allows him to Spin Dash
-		if (Sprite.AnimationType == Animations.GlideGround && Input.Down.Down)
+		if (Animation == Animations.GlideGround && Input.Down.Down)
 		{
 			GroundLockTimer = 0f;
 		}
@@ -279,11 +279,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (Facing == direction) return false;
 		
-		Sprite.AnimationType = Animations.Move;
+		Animation = Animations.Move;
 		Facing = direction;
 		PushingObject = null;
 					
-		Sprite.Frame = 0;
+		OverrideAnimationFrame = 0;
 
 		return false;
 	}
@@ -292,15 +292,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (Angles.GetQuadrant(Angle) != 0f)
 		{
-			if (Sprite.AnimationType is Animations.Skid or Animations.Push) return;
-			Sprite.AnimationType = Animations.Move;
+			if (Animation is Animations.Skid or Animations.Push) return;
+			Animation = Animations.Move;
 			return;
 		}
 		
-		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Sprite.AnimationType != Animations.Skid)
+		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
 		{
-			Sprite.AnimationTimer = Type == Types.Sonic ? 24f : 16f;
-			Sprite.AnimationType = Animations.Skid;
+			Animation = Animations.Skid;
 					
 			//TODO: audio
 			//audio_play_sfx(sfx_skid);
@@ -309,26 +308,26 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (GroundSpeed != 0f)
 		{
 			// TODO: This
-			if (Sprite.AnimationType is Animations.Skid or Animations.Push) return;
-			Sprite.AnimationType = Animations.Move;
+			if (Animation is Animations.Skid or Animations.Push) return;
+			Animation = Animations.Move;
 			return;
 		}
 		
 		PushingObject = null;
-		Sprite.AnimationType = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
+		Animation = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
 	}
 
 	private void SetPushAnimation()
 	{
 		if (PushingObject == null)
 		{
-			if (Sprite.AnimationType != Animations.Push) return;
-			Sprite.AnimationType = Animations.Move;
+			if (Animation != Animations.Push) return;
+			Animation = Animations.Move;
 			return;
 		}
 		
-		if (Sprite.AnimationType != Animations.Move || !Sprite.IsFrameChanged) return;
-		Sprite.AnimationType = Animations.Push;
+		if (Animation != Animations.Move || !Sprite.IsFrameChanged) return;
+		Animation = Animations.Push;
 	}
 
 	private void ProcessMovementGroundRoll()
@@ -395,7 +394,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Radius = RadiusNormal;
 			
 			IsSpinning = false;
-			Sprite.AnimationType = Animations.Idle;
+			Animation = Animations.Idle;
 			return;
 		}
 	
@@ -567,28 +566,28 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			case Types.Amy:
 			case Types.Tails:
 			case Types.Sonic when IsSuper:
-				Sprite.AnimationType = Animations.Balance;
+				Animation = Animations.Balance;
 				Facing = direction;
 				break;
 			
 			case Types.Knuckles:
-				Sprite.AnimationType = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+				Animation = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 				Facing = direction;
 				break;
 			
 			case Types.Sonic:
 				if (!isPanic)
 				{
-					Sprite.AnimationType = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+					Animation = Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 				}
 				else if (Facing != direction)
 				{
-					Sprite.AnimationType = Animations.BalanceTurn;
+					Animation = Animations.BalanceTurn;
 					Facing = direction;
 				}
-				else if (Sprite.AnimationType != Animations.BalanceTurn)
+				else if (Animation != Animations.BalanceTurn)
 				{
-					Sprite.AnimationType = Animations.BalancePanic;
+					Animation = Animations.BalancePanic;
 				}
 				break;
 		}
@@ -704,7 +703,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				}
 				else
 				{
-					Sprite.AnimationType = Animations.Duck;
+					Animation = Animations.Duck;
 				}
 			}
 			else if (Math.Abs(GroundSpeed) >= 0.5f)
@@ -718,7 +717,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Radius.Y = RadiusSpin.Y;
 		Radius.X = RadiusSpin.X;
 		IsSpinning = true;
-		Sprite.AnimationType = Animations.Spin;
+		Animation = Animations.Spin;
 			
 		//TODO: audio
 		//audio_play_sfx(sfx_roll);
@@ -862,7 +861,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				PushingObject = null;
 				IsGrounded = false;
 						
-				Sprite.Frame = 0;
+				OverrideAnimationFrame = 0;
 				return;
 			}
 		}

@@ -1,5 +1,3 @@
-using Godot;
-
 namespace OrbinautFramework3.Objects.Player;
 
 public static class PlayerConstants

@@ -11,8 +11,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private const byte MaxRecordLength = 32;
 	private readonly EditMode _editMode = new();
 	
-	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 	[Export] public PackedScene PackedTail { get; private set; }
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 	private Tail _tail;
 	
 	public override void _Ready()
@@ -37,7 +37,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		GroundMode = Constants.GroundMode.Floor;
 		ObjectInteraction = true;
 		Facing = Constants.Direction.Positive;
-		Sprite.AnimationType = Animations.Idle;
 		AirTimer = 1800f;
 		CpuState = CpuStates.Main;
 		RestartState = RestartStates.GameOver;
@@ -186,12 +185,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsDead) return;
 
-		// TODO: find a better place for this (and make obj_dust_skid)
-		if (Sprite.AnimationType == Animations.Skid && Sprite.AnimationTimer % 4 == 0)
+		// TODO: make obj_dust_skid & check ProcessSpeed
+		if (Sprite.AnimationType == Animations.Skid && ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
 		{
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
-	
+		ActionValue2 += FrameworkData.ProcessSpeed;
+		
 		if (InvincibilityTimer > 0f)
 		{
 			Visible = ((int)InvincibilityTimer-- & 4) >= 1 || InvincibilityTimer == 0f;

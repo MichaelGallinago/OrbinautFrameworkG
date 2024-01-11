@@ -10,6 +10,7 @@ public abstract partial class BaseObject : Node2D
 {
 	public enum BehaviourType : byte { NoBounds, Reset, Pause, Delete, Unique }
 	[Export] public BehaviourType Behaviour { get; set; }
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 
 	public static List<BaseObject> Objects { get; } = [];
 	public ObjectRespawnData RespawnData { get; }
