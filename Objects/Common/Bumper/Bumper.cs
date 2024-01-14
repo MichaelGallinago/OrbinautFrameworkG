@@ -19,18 +19,21 @@ public partial class Bumper : BaseObject
     private int _hitsLeft;
 
     public Bumper() => SetHitbox(new Vector2I(8, 8));
-    public override void _Ready() => _hitsLeft = (int)_hitsLimit;
-    
+    public override void _Ready()
+    {
+        _hitsLeft = (int)_hitsLimit;
+        _sprite.AnimationFinished += OnAnimationFinished;
+    }
+
     public override void _Process(double delta)
     {
-        foreach (Player player in Player.Players)
+        foreach (Player player in PlayerData.Players)
         {
             if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.Hitbox)) continue;
 		    
             if (_sprite.Animation == "Default")
             {
                 _sprite.Play("Bump");
-                _sprite.NextAnimation = "Default";
             }
 		
             //TODO: audio
@@ -66,5 +69,11 @@ public partial class Bumper : BaseObject
 		
             break;
         }
+    }
+
+    private void OnAnimationFinished()
+    {
+        if (_sprite.Animation != "Bump") return; 
+        _sprite.Play("Default");
     }
 }

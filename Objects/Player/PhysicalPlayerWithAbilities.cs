@@ -7,22 +7,22 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer, ICarrier, ICarried
+public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePlayer, ICarrier, ICarried
 {
+	protected int ClimbAnimationFrameNumber;
+	
 	protected PhysicalPlayerWithAbilities()
 	{
 		LandHandler += ReleaseDropDash;
 		LandHandler += ReleaseHammerSpin;
 	}
-	
-	protected void UpdatePhysics()
+
+	public override void _Process(double delta)
 	{
 		if (Action is Actions.ObjectControl or Actions.Transform) return;
+
+		UpdatePhysicParams();
 		
-		// Define physics for this step
-		PhysicParams = PhysicParams.Get(IsUnderwater, IsSuper, Type, ItemSpeedTimer);
-		
-		// Abilities logic
 		if (ProcessSpinDash()) return;
 		if (ProcessPeelOut()) return;
 		if (ProcessJump()) return;
@@ -34,14 +34,54 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		ProcessGlide();
 		ChargeHammerSpin();
 		ProcessHammerDash();
-
+		
 		ProcessCorePhysics();
 		
-		// Late abilities logic
 		ProcessGlideCollision();
 		Carry();
 	}
-
+	
+	public void OnAttached(ICarrier carrier)
+	{
+		Vector2 previousPosition = carrier.CarryTargetPosition;
+				
+		if (Input.Press.Abc)
+		{
+			carrier.CarryTarget = null;
+			carrier.CarryTimer = 18f;
+				
+			IsSpinning = true;
+			IsJumping = true;
+			Action = Actions.None;
+			Animation = Animations.Spin;
+			Radius = RadiusSpin;
+			Speed = new Vector2(0f, PhysicParams.MinimalJumpVelocity);
+					
+			if (Input.Down.Left)
+			{
+				Speed = Speed with { X = -2 };
+			}
+			else if (Input.Down.Right)
+			{
+				Speed = Speed with { X = 2 };
+			}
+					
+			//TODO: audio
+			//audio_play_sfx(sfx_jump);
+			
+		}
+		else if (carrier.Action != Actions.Flight || !Position.IsEqualApprox(previousPosition))
+		{
+			carrier.CarryTarget = null;
+			carrier.CarryTimer = 60f;
+			Action = Actions.None;
+		}
+		else
+		{
+			AttachToPlayer(carrier);
+		}
+	}
+	
 	private bool ProcessSpinDash()
 	{
 		if (!SharedData.SpinDash || !IsGrounded) return false;
@@ -221,149 +261,167 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		
 		switch (Type)
 		{
-			case Types.Sonic:
-				if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
-				{
-					if (Barrier.Type <= Barrier.Types.Normal || IsSuper)
-					{
-						Action = Actions.DropDash;
-						ActionValue = 0;
-					}
-				}
-				
-				// Barrier abilities
-				if (!Input.Press.Abc || IsSuper || Barrier.State != Barrier.States.None || ItemInvincibilityTimer != 0) break;
-				
-				Barrier.State = Barrier.States.Active;
-				IsAirLock = false;
-				
-				switch (Barrier.Type)
-				{
-					case Barrier.Types.None:
-						if (!SharedData.DoubleSpin) break;
-						
-						//TODO: obj_double_spin
-						/*
-						with obj_double_spin
-						{
-							if TargetPlayer == other.id
-							{
-								instance_destroy();
-							}
-						}
-						*/
-						
-						Barrier.State = Barrier.States.DoubleSpin;
-						
-						//TODO: audio & obj_double_spin
-						//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
-						//audio_play_sfx(sfx_double_spin);
-						break;
-					
-					case Barrier.Types.Water:
-						Speed = new Vector2(0, 8);
-						
-						Barrier.UpdateFrame(0, 1, [1, 2]);
-						Barrier.UpdateDuration([6, 18]);
-						Barrier.AnimationTimer = 25f;
-						
-						//TODO: audio
-						//audio_play_sfx(sfx_barrier_water2);
-						break;
-					
-					case Barrier.Types.Flame:
-						if (!SharedData.CDCamera)
-						{
-							Camera.Main.Delay.X = 16f;
-						}
-						
-						IsAirLock = true;
-						Speed = new Vector2(8f * (float)Facing, 0f);
-							
+			case Types.Sonic: JumpSonic(); break;
+			case Types.Tails: JumpTails(); break;
+			case Types.Knuckles: JumpKnuckles(); break;
+			case Types.Amy: JumpAmy(); break;
+		}
+		
+		return false;
+	}
 
-						// TODO: SetAnimation
-						//Barrier.SetAnimation(, [2]);
-						ZIndex = -1;
-						
-						Barrier.AnimationTimer = 24f;
-						
-						//TODO: audio
-						//audio_play_sfx(sfx_barrier_flame2);
-						break;
-					
-					case Barrier.Types.Thunder:
-						Barrier.State = Barrier.States.Disabled;
-						Speed = Speed with { Y = -5.5f };
-						
-						for (var i = 0; i < 4; i++)
-						{
-							//TODO: obj_barrier_sparkle
-							//instance_create(x, y, obj_barrier_sparkle, { Sparkle_ID: i });
-						}
-						//TODO: audio
-						//audio_play_sfx(sfx_barrier_thunder2);
-						break;
-				}
-				break;
-			
-			case Types.Tails:
-				if (Action > 0 || !Input.Press.Abc) break;
-				
-				IsAirLock = false;
-				IsSpinning = false;
-				IsJumping = false;
-				Gravity	= GravityType.TailsDown;
-				Action = Actions.Flight;
-				ActionValue = 480;
-				
-				Radius = RadiusNormal;
-				
-				if (!IsUnderwater)
-				{
-					//TODO: audio
-					//audio_play_sfx(sfx_flight, true);
-				}
-
-				Input.Down = Input.Down with { Abc = false };
-				Input.Press = Input.Press with { Abc = false };
-				break;
-			
-			case Types.Knuckles:
-				if (Action > 0 || !Input.Press.Abc) break;
-				
-				IsAirLock = false;
-				IsSpinning = false;
-				IsJumping = false;	
-				Animation = Animations.GlideAir;	
-				Action = Actions.Glide;
-				ActionState = (int)GlideStates.Air;
-				ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
-				Radius = new Vector2I(10, 10);
-				GroundSpeed = 4f;
-				Speed = new Vector2(0f, Speed.Y + 2f);
-				
-				if (Speed.Y < 0)
-				{
-					Speed = Speed with { Y = 0 };
-				}
-				break;
-			
-			case Types.Amy:
-				if (Action > 0 || !Input.Press.Abc) break;
-				
-				if (SharedData.NoRollLock)
-				{
-					IsAirLock = false;	
-				}
-				Animation = Animations.HammerSpin;
-				Action = Actions.HammerSpin;
+	private void JumpSonic()
+	{
+		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
+		{
+			if (Barrier.Type <= Barrier.Types.Normal || IsSuper)
+			{
+				Action = Actions.DropDash;
 				ActionValue = 0;
-				// TODO: audio
-				//audio_play_sfx(sfx_hammer_spin);
-				break;
+			}
+		}
+		
+		// Barrier abilities
+		if (!Input.Press.Abc || IsSuper || Barrier.State != Barrier.States.None || ItemInvincibilityTimer != 0) return;
+		
+		Barrier.State = Barrier.States.Active;
+		IsAirLock = false;
+		
+		switch (Barrier.Type)
+		{
+			case Barrier.Types.None: JumpDoubleSpin(); break;
+			case Barrier.Types.Water: JumpWaterBarrier(); break;
+			case Barrier.Types.Flame: JumpFlameBarrier(); break;
+			case Barrier.Types.Thunder: JumpThunderBarrier(); break;
+		}
+	}
+
+	private void JumpDoubleSpin()
+	{
+		if (!SharedData.DoubleSpin) return;
+				
+		//TODO: obj_double_spin
+		/*
+		with obj_double_spin
+		{
+			if TargetPlayer == other.id
+			{
+				instance_destroy();
+			}
+		}
+		*/
+				
+		Barrier.State = Barrier.States.DoubleSpin;
+				
+		//TODO: audio & obj_double_spin
+		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
+		//audio_play_sfx(sfx_double_spin);
+	}
+
+	private void JumpWaterBarrier()
+	{
+		Speed = new Vector2(0, 8);
+				
+		Barrier.UpdateFrame(0, 1, [1, 2]);
+		Barrier.UpdateDuration([6, 18]);
+		Barrier.AnimationTimer = 25f;
+				
+		//TODO: audio
+		//audio_play_sfx(sfx_barrier_water2);
+	}
+	
+	private void JumpFlameBarrier()
+	{
+		if (!SharedData.CDCamera)
+		{
+			Camera.Main.Delay.X = 16f;
+		}
+				
+		IsAirLock = true;
+		Speed = new Vector2(8f * (float)Facing, 0f);
+					
+
+		// TODO: SetAnimation
+		//Barrier.SetAnimation(, [2]);
+		ZIndex = -1;
+				
+		Barrier.AnimationTimer = 24f;
+				
+		//TODO: audio
+		//audio_play_sfx(sfx_barrier_flame2);
+	}
+
+	private void JumpThunderBarrier()
+	{
+		Barrier.State = Barrier.States.Disabled;
+		Speed = Speed with { Y = -5.5f };
+				
+		for (var i = 0; i < 4; i++)
+		{
+			//TODO: obj_barrier_sparkle
+			//instance_create(x, y, obj_barrier_sparkle, { Sparkle_ID: i });
+		}
+		//TODO: audio
+		//audio_play_sfx(sfx_barrier_thunder2);
+	}
+
+	private void JumpTails()
+	{
+		if (Action > 0 || !Input.Press.Abc) return;
+				
+		IsAirLock = false;
+		IsSpinning = false;
+		IsJumping = false;
+		Gravity	= GravityType.TailsDown;
+		Action = Actions.Flight;
+		ActionValue = 480;
+				
+		Radius = RadiusNormal;
+				
+		if (!IsUnderwater)
+		{
+			//TODO: audio
+			//audio_play_sfx(sfx_flight, true);
 		}
 
-		return false;
+		Input.Down = Input.Down with { Abc = false };
+		Input.Press = Input.Press with { Abc = false };
+	}
+
+	private void JumpKnuckles()
+	{
+		if (Action > 0 || !Input.Press.Abc) return;
+				
+		IsAirLock = false;
+		IsSpinning = false;
+		IsJumping = false;	
+		Animation = Animations.GlideAir;	
+		Action = Actions.Glide;
+		ActionState = (int)GlideStates.Air;
+		ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
+		Radius = new Vector2I(10, 10);
+		GroundSpeed = 4f;
+		Speed = new Vector2(0f, Speed.Y + 2f);
+				
+		if (Speed.Y < 0)
+		{
+			Speed = Speed with { Y = 0 };
+		}
+	}
+
+	private void JumpAmy()
+	{
+		if (Action > 0 || !Input.Press.Abc) return;
+				
+		if (SharedData.NoRollLock)
+		{
+			IsAirLock = false;	
+		}
+		Animation = Animations.HammerSpin;
+		Action = Actions.HammerSpin;
+		ActionValue = 0;
+		// TODO: audio
+		//audio_play_sfx(sfx_hammer_spin);
 	}
 
 	private bool StartJump()
@@ -652,7 +710,7 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		}
 		
 		const int stepsPerFrame = 4;
-		UpdateVerticalSpeedOnClimb(Sprite.SpriteFrames.GetFrameCount(Sprite.Animation) * stepsPerFrame);
+		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerFrame);
 		
 		int radiusX = Radius.X;
 		if (Facing == Constants.Direction.Negative)
@@ -1243,49 +1301,6 @@ public abstract partial class PhysicalPlayerWithAbilities : BasicPhysicalPlayer,
 		else
 		{
 			CarryTarget.OnAttached(this);
-		}
-	}
-	
-	public void OnAttached(ICarrier carrier)
-	{
-		Vector2 previousPosition = carrier.CarryTargetPosition;
-				
-		if (Input.Press.Abc)
-		{
-			carrier.CarryTarget = null;
-			carrier.CarryTimer = 18f;
-				
-			IsSpinning = true;
-			IsJumping = true;
-			Action = Actions.None;
-			Animation = Animations.Spin;
-			Radius = RadiusSpin;
-			Speed = new Vector2(0f, PhysicParams.MinimalJumpVelocity);
-					
-			if (Input.Down.Left)
-			{
-				Speed = Speed with { X = -2 };
-			}
-			else if (Input.Down.Right)
-			{
-				Speed = Speed with { X = 2 };
-			}
-					
-			//TODO: audio
-			//audio_play_sfx(sfx_jump);
-			
-		}
-		else if (carrier.Action != Actions.Flight 
-		    || !Mathf.IsEqualApprox(Position.X, previousPosition.X) 
-		    || !Mathf.IsEqualApprox(Position.Y, previousPosition.Y))
-		{
-			carrier.CarryTarget = null;
-			carrier.CarryTimer = 60f;
-			Action = Actions.None;
-		}
-		else
-		{
-			AttachToPlayer(carrier);
 		}
 	}
 	

@@ -12,4 +12,6 @@ public interface IAnimatedPlayer
     float ActionValue { get; }
     ICarried CarryTarget { get; }
     Constants.Direction Facing { get; }
+    Animations Animation { get; set; }
+    bool IsAnimationFrameChanged { get; set; }
 }

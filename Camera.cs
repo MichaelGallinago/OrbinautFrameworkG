@@ -12,7 +12,8 @@ public partial class Camera : Camera2D
 	private const byte CameraCentreOffset = 16;
 	private const byte DefaultViewTime = 120;
 	private const byte SpeedCap = 16;
-
+	
+	//TODO: Replace to interface
 	public static Camera Main { get; set; }
     
 	[Export] public BaseObject Target
@@ -21,7 +22,7 @@ public partial class Camera : Camera2D
 		set
 		{
 			_target = value;
-			ViewTimer = DefaultViewTime;
+			_viewTimer = DefaultViewTime;
 		}
 	}
 	private BaseObject _target;
@@ -41,10 +42,12 @@ public partial class Camera : Camera2D
 
 	private Vector2I _shakeOffset;
 	private float _shakeTimer;
-	private float ViewTimer { get; set; }
+	private float _viewTimer;
 
 	public Camera()
 	{
+		Main ??= this;
+		
 		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
 		Limit = Bound;
 		_previousLimit = Bound;
@@ -52,31 +55,27 @@ public partial class Camera : Camera2D
 		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
 		_maxSpeed = new Vector2I(maxSpeed, maxSpeed);
 		
-		if (FrameworkData.CheckpointData is not null)
+		if (SharedData.CheckpointData is not null)
 		{
-			LimitBottom = FrameworkData.CheckpointData.BottomCameraBound;
+			LimitBottom = SharedData.CheckpointData.bottomCameraBound;
 		}
 	}
 
 	public override void _Ready()
 	{
-		if (Target != null || Player.Players.Count == 0) return;
-		Player playerTarget = Player.Players.First();
+		if (Target != null || PlayerData.Players.Count == 0) return;
+		Player playerTarget = PlayerData.Players.First();
 		Target = playerTarget;
-		BufferPosition = (Vector2I)playerTarget.Position - FrameworkData.ViewSize;
+		BufferPosition = (Vector2I)playerTarget.Position - SharedData.ViewSize;
 		BufferPosition.Y += 16;
 		
 		_rawPosition = BufferPosition;
 	}
-	
-	public override void _EnterTree() => Main ??= this;
 
 	public override void _ExitTree()
 	{
-		if (Main == this)
-		{
-			Main = null;
-		}
+		if (Main != this) return;
+		Main = null;
 	}
 	
 	public override void _Process(double delta)
@@ -96,7 +95,7 @@ public partial class Camera : Camera2D
 		}
 		
 		// Update boundaries
-		Vector2I farBounds = BufferPosition + FrameworkData.ViewSize;
+		Vector2I farBounds = BufferPosition + SharedData.ViewSize;
 		Limit.X = MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed); // Left
 		Limit.Y = MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed); // Top
 		Limit.Z = MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed); // Right
@@ -105,13 +104,13 @@ public partial class Camera : Camera2D
 		_previousLimit = Limit;
 
 		BufferPosition = _shakeOffset + (Vector2I)(_rawPosition + _bufferOffset).Clamp(
-			new Vector2(Limit.X, Limit.Y), new Vector2(Limit.Z, Limit.W) - FrameworkData.ViewSize);
+			new Vector2(Limit.X, Limit.Y), new Vector2(Limit.Z, Limit.W) - SharedData.ViewSize);
 
 		var finalPosition = new Vector2I(BufferPosition.X - Constants.RenderBuffer, BufferPosition.Y);
 		
 		Position = finalPosition;
 		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
-			finalPosition.X + FrameworkData.ViewSize.X, finalPosition.Y + FrameworkData.ViewSize.Y);
+			finalPosition.X + SharedData.ViewSize.X, finalPosition.Y + SharedData.ViewSize.Y);
 		
 		ForceUpdateScroll();
 	}
@@ -135,7 +134,7 @@ public partial class Camera : Camera2D
 
 		position &= sbyte.MinValue;
 		
-		return new Vector2I(position + sbyte.MinValue, position + FrameworkData.ViewSize.X + 320);
+		return new Vector2I(position + sbyte.MinValue, position + SharedData.ViewSize.X + 320);
 	}
 
 	public void UpdatePlayerCamera(PlayerData player)
@@ -167,17 +166,17 @@ public partial class Camera : Camera2D
 
 		if (doShiftDown || doShiftUp)
 		{
-			if (ViewTimer > 0f)
+			if (_viewTimer > 0f)
 			{
-				ViewTimer--;
+				_viewTimer--;
 			}
 		}
 		else if (SharedData.SpinDash || SharedData.PeelOut)
 		{
-			ViewTimer = DefaultViewTime;
+			_viewTimer = DefaultViewTime;
 		}
 
-		if (ViewTimer > 0f)
+		if (_viewTimer > 0f)
 		{
 			if (_bufferOffset.Y != 0)
 			{
@@ -239,7 +238,7 @@ public partial class Camera : Camera2D
 			return;
 		}
 		
-		Vector2I distance = (Vector2I)Target.Position - (Vector2I)_rawPosition - FrameworkData.ViewSize / 2;
+		Vector2I distance = (Vector2I)Target.Position - (Vector2I)_rawPosition - SharedData.ViewSize / 2;
 		distance.Y += CameraCentreOffset;
 
 		int extraX = SharedData.CDCamera ? 0 : 8;

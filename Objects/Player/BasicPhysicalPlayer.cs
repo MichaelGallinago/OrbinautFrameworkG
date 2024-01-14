@@ -10,6 +10,15 @@ namespace OrbinautFramework3.Objects.Player;
 public abstract partial class BasicPhysicalPlayer : PlayerData
 {
 	protected event Action LandHandler;
+	protected PhysicParams PhysicParams;
+	
+	public override void _Process(double delta)
+	{
+		UpdatePhysicParams();
+		ProcessCorePhysics();
+	}
+
+	protected void UpdatePhysicParams() => PhysicParams = PhysicParams.Get(IsUnderwater, IsSuper, Type, ItemSpeedTimer);
 	
 	protected void ProcessCorePhysics()
 	{
@@ -77,13 +86,13 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			return;
 		}
 	
-		if (BarrierFlag && Barrier.Type == Barrier.Types.Water)
+		if (Barrier.State == Barrier.States.Active && Barrier.Type == Barrier.Types.Water)
 		{
 			float force = IsUnderwater ? -4f : -7.5f;
 			float radians = Mathf.DegToRad(Angle);
 			Speed = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
 
-			BarrierFlag = false;
+			Barrier.State = Barrier.States.None;
 			OnObject = null;
 			IsGrounded = false;
 		
@@ -129,7 +138,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		PushingObject = null;
 		IsHurt = false;
 	
-		BarrierFlag = false;
+		Barrier.State = Barrier.States.None;
 		ComboCounter = 0;
 	
 		CpuState = CpuStates.Main;
@@ -326,7 +335,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			return;
 		}
 		
-		if (Animation != Animations.Move || !Sprite.IsFrameChanged) return;
+		if (Animation != Animations.Move || !IsAnimationFrameChanged) return;
 		Animation = Animations.Push;
 	}
 
@@ -418,7 +427,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (IsGrounded || IsDead) return;
 	
 		// Action checks
-		if (Action is Actions.Carried or Actions.Climb or Actions.Glide
+		if (Action is Actions.Carried or Actions.Climb or Actions.Glide 
 		    && (GlideStates)ActionState != GlideStates.Fall) return;
 	
 		// Update Angle (rotate player)
@@ -440,18 +449,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 	
 		// Limit upward speed
-		if (!IsJumping && Action != Actions.SpinDash && !IsForcedRoll)
+		if (!IsJumping && Action != Actions.SpinDash && !IsForcedRoll && Speed.Y < -15.75f)
 		{
-			if (Speed.Y < -15.75f)
-			{
-				Speed = Speed with { Y = -15.75f };
-			}
+			Speed = Speed with { Y = -15.75f };
 		}
 	
 		// Limit downward speed
-		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Speed.Y > 16)
+		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Speed.Y > 16f)
 		{
-			Speed = Speed with { Y = 16 };
+			Speed = Speed with { Y = 16f };
 		}
 
 		if (Action == Actions.HammerDash)

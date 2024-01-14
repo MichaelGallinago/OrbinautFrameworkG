@@ -22,11 +22,8 @@ public static class FrameworkData
     public static bool UpdateTimer { get; set; }
     public static bool AllowPause { get; set; }
     public static bool DropDash { get; set; }
-    public static CheckpointData CheckpointData { get; set; }
-    public static Vector2I? GiantRingData { get; set; }
     public static PlayerBackupData PlayerBackupData { get; set; }
     public static CommonScene CurrentScene { get; set; }
-    public static Vector2I ViewSize { get; set; }
     public static int RotationMode { get; set; }
     public static uint SavedScore { get; set; }
     public static uint SavedRings { get; set; }
@@ -40,8 +37,6 @@ public static class FrameworkData
 
     static FrameworkData()
     {
-        GD.Randomize();
-
         KeyboardControl =
         [
             new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
@@ -59,7 +54,6 @@ public static class FrameworkData
         DropDash = true;
         TilesData = CollisionUtilities.LoadTileDataBinary(
             "angles_tsz", "heights_tsz", "widths_tsz");
-        ViewSize = new Vector2I(400, 224);
         
         RotationMode = 1;
 
@@ -165,19 +159,8 @@ public static class FrameworkData
 						
 				    break;
 			    }
-
-			    // Reset properties and re-initialise all variables
-			    commonObject.Position = commonObject.RespawnData.Position;
-			    commonObject.Scale = commonObject.RespawnData.Scale;
-			    //TODO: respawn sprite
-			    //image_index = data_respawn.img_index;
-			    //sprite_index = data_respawn.spr_index;
-			    commonObject.Visible = commonObject.RespawnData.IsVisible;
-			    commonObject.ZIndex = commonObject.RespawnData.ZIndex;
-					
-			    //TODO: replace to "Init"?
-			    commonObject.Init();
-					
+			    
+			    commonObject.Reset();
 			    commonObject.SetActivity(false);
 			    break;
 				

@@ -311,10 +311,10 @@ animations = [{
 "speed": 0.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 24.0,
 "texture": ExtResource("6_v3nwj")
 }],
-"loop": true,
+"loop": false,
 "name": &"Breathe",
 "speed": 0.0
 }, {
@@ -493,7 +493,7 @@ animations = [{
 "duration": 6.0,
 "texture": SubResource("AtlasTexture_pc4ly")
 }],
-"loop": true,
+"loop": false,
 "name": &"Skid",
 "speed": 60.0
 }, {
@@ -594,8 +594,7 @@ script = ExtResource("1_muhhk")
 _frameLoops = {
 "Duck": 1,
 "Idle": 3,
-"LookUp": 1,
-"Skid": 3
+"LookUp": 1
 }
 _offsets = {
 "Balance": Vector2(-3, 1),
@@ -614,6 +613,5 @@ _offsets = {
 "Push": Vector2(-3, 2),
 "Run": Vector2(1, 2),
 "Skid": Vector2(1, 1),
-"SpinDash": Vector2(4, 7),
-"new_animation": Vector2(0, 2)
+"SpinDash": Vector2(4, 7)
 }

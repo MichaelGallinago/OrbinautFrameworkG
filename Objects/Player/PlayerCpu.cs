@@ -74,7 +74,7 @@ public partial class PlayerCpu : Player
 		{
 			if (Type == Types.Tails)
 			{
-				Sprite.AnimationType = Animations.Fly;
+				Animation = Animations.Fly;
 			}
 					
 			OnObject = null;
@@ -127,12 +127,12 @@ public partial class PlayerCpu : Player
 		if (!CpuTarget.IsDead && followData.Position.Y >= 0 && distanceX == 0 && distanceY == 0)
 		{
 			CpuState = CpuStates.Main;
-			Sprite.AnimationType = Animations.Move;
+			Animation = Animations.Move;
 			Speed = Vector2.Zero;
 			GroundSpeed = 0f;
 			GroundLockTimer = 0f;
 			ObjectInteraction = true;
-			ZIndex = RespawnData.ZIndex;
+			ResetZIndex();
 			ResetGravity();
 			ResetState();
 		}
@@ -253,7 +253,7 @@ public partial class PlayerCpu : Player
 			}
 		}
 		
-		if (doJump && Sprite.AnimationType != Animations.Duck && FrameworkData.IsTimePeriodLooped(64f))
+		if (doJump && Animation != Animations.Duck && FrameworkData.IsTimePeriodLooped(64f))
 		{
 			followData.InputPress.Abc = true;
 			followData.InputDown.Abc = true;
@@ -270,7 +270,7 @@ public partial class PlayerCpu : Player
 				
 		if (GroundLockTimer != 0f || CpuInputTimer != 0f || GroundSpeed != 0f) return false;
 				
-		if (Sprite.AnimationType == Animations.Idle)
+		if (Animation == Animations.Idle)
 		{
 			Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
@@ -301,7 +301,7 @@ public partial class PlayerCpu : Player
 		}
 
 		if (++CpuTimer < 300f) return false;
-		Init();
+		Reset();
 		return true;
 	}
 }

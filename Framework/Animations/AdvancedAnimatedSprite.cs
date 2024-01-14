@@ -81,12 +81,12 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         
         Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
         AnimationChanged += UpdateValues;
+        UpdateValues();
             
 #if TOOLS
-        if (Engine.IsEditorHint())
-        {
-            AnimationChanged += _advancedSpriteFrames.Refresh;
-        }
+        if (!Engine.IsEditorHint()) return;
+        AnimationChanged += _advancedSpriteFrames.Refresh;
+        _advancedSpriteFrames.Refresh();
 #endif
     }
 

@@ -14,6 +14,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	[Export] public PackedScene PackedTail { get; private set; }
 	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 	private Tail _tail;
+
+	public Player() => TypeChanged += OnTypeChanged;
 	
 	public override void _Ready()
 	{
@@ -29,9 +31,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 
 		Radius = RadiusNormal;
-
+		
 		Position += new Vector2(0f, 1f - Radius.Y);
-
+		
 		Gravity = GravityType.Default;
 		TileLayer = Constants.TileLayers.Main;
 		GroundMode = Constants.GroundMode.Floor;
@@ -41,24 +43,18 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		CpuState = CpuStates.Main;
 		RestartState = RestartStates.GameOver;
 		Input.Clear();
-
-		if (Type == Types.Tails)
-		{
-			_tail = PackedTail.Instantiate<Tail>();
-			AddChild(_tail);
-		}
 		
-		if (FrameworkData.GiantRingData != null)
+		if (SharedData.GiantRingData != null)
 		{
-			Position = (Vector2)FrameworkData.GiantRingData;
+			Position = SharedData.GiantRingData.position;
 		}
 		else if (Id == 0)
 		{
 			// TODO: Respawn CPU on the checkpoint
 			
-			if (FrameworkData.CheckpointData != null)
+			if (SharedData.CheckpointData != null)
 			{
-				Vector2I position = FrameworkData.CheckpointData.Position;
+				Vector2I position = SharedData.CheckpointData.position;
 				position.Y -= Radius.Y;
 				Position = position;
 			}
@@ -88,14 +84,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 
 		TouchObjects = [];
-	}
-
-	public override void Init()
-	{
-		base.Init();
 		
+		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
 
+	public override void Reset()
+	{
+		base.Reset();
+		Sprite.Animate(this);
+	}
+	
 	private new void QueueFree()
 	{
 		Players.Remove(this);
@@ -152,7 +150,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ProcessRestart(processSpeed);
 	    
 		// Process default player control routine
-		UpdatePhysics();
+		base._Process(delta);
 
 		Camera.Main?.UpdatePlayerCamera(this);
 		UpdateStatus();
@@ -160,25 +158,33 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		RecordData();
 		ProcessRotation();
 		Sprite.Animate(this);
-		UpdateTail();
+		_tail?.Animate(this);
 		ProcessPalette();
 		UpdateCollision();
 	}
 	
 	protected virtual bool ProcessCpu(float processSpeed) => false;
 
-	private void UpdateTail()
+	private void OnTypeChanged(Types newType)
 	{
-		if (_tail == null) return;
-		if (Type != Types.Tails)
+		switch (newType)
 		{
-			_tail.QueueFree();
-			return;
-		}
+			case Types.Knuckles:
+				ClimbAnimationFrameNumber = Sprite.GetAnimationFrameCount(Animations.ClimbWall, newType);
+				break;
 			
-		_tail.Animate(this);
+			case not Types.Tails when Type == Types.Tails:
+				_tail.QueueFree();
+				_tail = null;
+				break;
+			
+			case Types.Tails when Type != Types.Tails:
+				_tail = PackedTail.Instantiate<Tail>();
+				AddChild(_tail);
+				break;
+		}
 	}
-
+	
 	#region UpdatePlayerSystems
 	
 	private void UpdateStatus()
@@ -186,7 +192,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (IsDead) return;
 
 		// TODO: make obj_dust_skid & check ProcessSpeed
-		if (Sprite.AnimationType == Animations.Skid && ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
+		if (Animation == Animations.Skid && ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
 		{
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
@@ -219,7 +225,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					Action = Actions.None;
 				}
 			}
-		
+			
 			if (SuperValue == 0f)
 			{
 				if (--RingCount <= 0)
@@ -241,15 +247,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				SuperValue--;
 			}
 		}
-	
+		
 		IsInvincible = InvincibilityTimer != 0 || ItemInvincibilityTimer != 0 || 
 		               IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
-				 
+		
 		if (Id == 0 && FrameworkData.Time >= 36000d)
 		{
 			Kill();
 		}
-	
+		
 		if (Id == 0 && LifeRewards.Count > 0)
 		{
 			if (RingCount >= LifeRewards[0] && LifeRewards[0] <= 200)
@@ -260,7 +266,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				//TODO: audio
 				//audio_play_sfx(sfx_extra_life);
 			}
-
+			
 			if (ScoreCount < LifeRewards[1]) return;
 			LifeCount++;
 			LifeRewards[1] += 50000;
@@ -349,7 +355,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					ResetState();
 
 					ZIndex = 0;
-					Sprite.AnimationType = Animations.Drown;
+					Animation = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
 					Speed = Vector2.Zero;
 					Gravity	= 0.0625f;
@@ -360,7 +366,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				
 				case -1f:
 					if (Camera.Main == null) return;
-					if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.GameHeight + 276) return;
+					if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.ViewSize.Y + 276) return;
 					
 					if (Id == 0)
 					{
@@ -436,7 +442,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void SetRegularHitbox()
 	{
-		if (Sprite.AnimationType != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
+		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
 			SetHitbox(new Vector2I(8, Radius.Y - 3));
 			return;
@@ -448,7 +454,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void SetExtraHitbox()
 	{
-		switch (Sprite.AnimationType)
+		switch (Animation)
 		{
 			case Animations.HammerSpin:
 				SetHitboxExtra(new Vector2I(25, 25));
@@ -485,7 +491,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void ProcessRotation()
 	{
-		if (Sprite.AnimationType != Animations.Move)
+		if (Animation != Animations.Move)
 		{
 			VisualAngle = 360f;
 		}
@@ -666,7 +672,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					}
 					else
 					{
-						bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.GameHeight;
+						bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.ViewSize.Y;
 					}	
 				}
 		
@@ -765,7 +771,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		Speed = new Vector2();
 		GroundSpeed = 0f;
-		Sprite.AnimationType = Animations.Move;
+		Animation = Animations.Move;
 		ObjectInteraction = true;
 		IsDead = false;
 	}

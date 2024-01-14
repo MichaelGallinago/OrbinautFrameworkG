@@ -33,7 +33,7 @@ public abstract partial class CommonScene : Node2D
             objects.PreviousPosition = objects.Position;
         }
 
-        foreach (Player player in Player.Players)
+        foreach (Player player in PlayerData.Players)
         {
             player.TouchObjects.Clear();
         }

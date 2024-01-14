@@ -27,7 +27,7 @@ public abstract partial class PathSwapTrigger : BaseObject
     {
         Visible = SharedData.DebugCollision > 0;
 
-        foreach (Player player in Player.Players)
+        foreach (Player player in PlayerData.Players)
         {
             if (IsGroundOnly && !player.IsGrounded || player.IsEditMode) continue;
             UpdatePlayerTileLayer(player);

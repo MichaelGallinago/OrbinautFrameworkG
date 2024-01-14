@@ -10,20 +10,15 @@
 [ext_resource type="SpriteFrames" uid="uid://dqsm7lf3darvq" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_knuckles.tres" id="7_ywak4"]
 [ext_resource type="Script" path="res://Objects/Player/PlayerAnimatedSprite.cs" id="105_mpaxa"]
 
-[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite", "Sprite")]
+[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite")]
 process_priority = -1
 z_index = -2
 script = ExtResource("1_cv4v1")
 PackedTail = ExtResource("2_x8pdm")
 Sprite = NodePath("AdvancedAnimatedSprite")
-Behaviour = 4
-Sprite = NodePath("AdvancedAnimatedSprite")
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
-position = Vector2(3, -2)
-sprite_frames = ExtResource("2_qd5xx")
-animation = &"Dash"
-offset = Vector2(-3, 2)
+sprite_frames = ExtResource("4_xjx3q")
+animation = &"None"
 script = ExtResource("105_mpaxa")
 _spriteFrames = [ExtResource("4_xjx3q"), ExtResource("5_lpceh"), ExtResource("6_1iqsb"), ExtResource("7_ywak4"), ExtResource("2_qd5xx"), ExtResource("4_51ln1")]
-NextAnimation = &""

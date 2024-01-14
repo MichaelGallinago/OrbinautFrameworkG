@@ -11,17 +11,16 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
 	
-	public bool IsFrameChanged { get; private set; }
-	public Animations AnimationType { get; set; }
 	
 	private IAnimatedPlayer _player;
-	private Animations _animationBuffer;
 	private int _spriteFramesIndex;
 
 	public override void _Ready()
 	{
 		base._Ready();
-		FrameChanged += () => IsFrameChanged = true;
+#if TOOLS
+		if (Engine.IsEditorHint()) return;
+#endif
 		AnimationFinished += OnAnimationFinished;
 	}
 	
@@ -39,22 +38,27 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			case Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
 			case Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
-		
-		IsFrameChanged = false;
+
+		player.IsAnimationFrameChanged = false;
 	}
-	
+
+	public int GetAnimationFrameCount(Animations animation, Types playerType)
+	{
+		return _spriteFrames[(int)playerType].GetFrameCount(animation.ToStringFast());
+	}
+
 	private void OnAnimationFinished()
 	{
-		AnimationType = AnimationType switch
+		_player.Animation = _player.Animation switch
 		{
 			Animations.Bounce or Animations.Breathe or Animations.Transform or Animations.Skid => Animations.Move,
-			_ => AnimationType
+			_ => _player.Animation
 		};
 	}
 
 	private void UpdateScale()
 	{
-		if (AnimationType == Animations.Spin && !IsFrameChanged) return;
+		if (_player.Animation == Animations.Spin && !_player.IsAnimationFrameChanged) return;
 		Scale = new Vector2(Math.Abs(Scale.X) * (float)_player.Facing, Scale.Y);
 	}
 
@@ -76,7 +80,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}
 	
-	private float SonicSpeed => AnimationType switch
+	private float SonicSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -84,12 +88,12 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 	
-	private Animations SonicType => AnimationType switch
+	private Animations SonicType => _player.Animation switch
 	{
 		Animations.Move => _player.IsSuper ? 
 			GetMoveAnimation(false, 8f) :
 			GetMoveAnimation(SharedData.PeelOut, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private void AnimateTails(Animations type, float speed)
@@ -97,10 +101,10 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 		
 		if (type != Animations.FlyCarry) return;
-		Frame = _player.Speed.Y < 0 ? 1 : 0;
+		Frame = _player.Speed.Y < 0f ? 1 : 0;
 	}
 	
-	private float TailsSpeed => AnimationType switch
+	private float TailsSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -108,17 +112,17 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 	
-	private Animations TailsType => AnimationType switch
+	private Animations TailsType => _player.Animation switch
 	{
 		Animations.Fly => _player.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
 		Animations.FlyTired => _player.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
 		Animations.Move => GetMoveAnimation(true, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private void AnimateKnuckles(Animations type, float speed)
 	{
-		if (AnimationType == Animations.GlideFall)
+		if (_player.Animation == Animations.GlideFall)
 		{
 			SetAnimation(type.ToStringFast(), (int)_player.ActionValue, speed);
 			return;
@@ -127,7 +131,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 	}
 	
-	private float KnucklesSpeed => AnimationType switch
+	private float KnucklesSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -135,15 +139,15 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 	
-	private Animations KnucklesType => AnimationType switch
+	private Animations KnucklesType => _player.Animation switch
 	{
 		Animations.Move => GetMoveAnimation(false, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private void AnimateAmy(Animations type, float speed)
 	{
-		if (AnimationType == Animations.HammerSpin)
+		if (_player.Animation == Animations.HammerSpin)
 		{
 			SetAnimation(type.ToStringFast(), Frame, speed);
 			return;
@@ -152,7 +156,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 	}
 	
-	private float AmySpeed => AnimationType switch
+	private float AmySpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -161,10 +165,10 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 
-	private Animations AmyType => AnimationType switch
+	private Animations AmyType => _player.Animation switch
 	{
 		Animations.Move => GetMoveAnimation(true, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private Animations GetMoveAnimation(bool canDash, float runThreshold)

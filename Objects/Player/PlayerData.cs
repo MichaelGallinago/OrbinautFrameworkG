@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
@@ -7,19 +8,30 @@ using OrbinautFramework3.Objects.Spawnable.Barrier;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PlayerData : BaseObject
+public abstract partial class PlayerData : BaseObject, ICpuTarget
 {
 	[Export] private Types _uniqueType;
 	[Export] private SpawnTypes _spawnType;
+
+	public event Action<Types> TypeChanged;
 	
 	public static List<Player> Players { get; } = [];
+
+	public Types Type
+	{
+		get => _type;
+		set
+		{
+			TypeChanged?.Invoke(value);
+			_type = value;
+		}
+	}
+	private Types _type;
 	
 	public int Id { get; protected set; }
-	public Types Type { get; set; }
-	
 	public Animations Animation { get; set; }
+	public bool IsAnimationFrameChanged { get; set; }
 	public int? OverrideAnimationFrame { get; set; }
-	public PhysicParams PhysicParams { get; set; }
 	public Vector2I Radius;
 	public Vector2I RadiusNormal { get; set; }
 	public Vector2I RadiusSpin { get; set; }
@@ -50,8 +62,7 @@ public abstract partial class PlayerData : BaseObject
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }
-	public bool BarrierFlag { get; set; }
-	public Barrier Barrier { get; set; } //= new Barrier(this);
+	public Barrier Barrier { get; set; }
     
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
@@ -75,12 +86,12 @@ public abstract partial class PlayerData : BaseObject
 	public float CarryTimer { get; set; }
 	public Vector2 CarryTargetPosition { get; set; }
     
-	public CpuStates CpuState { get; set; }
+	public CpuStates CpuState { get; set; } = CpuStates.Main;
 	public float CpuTimer { get; set; }
 	public float CpuInputTimer { get; set; }
 	public bool IsCpuJumping { get; set; }
 	public bool IsCpuRespawn { get; set; }
-	public Player CpuTarget { get; set; }
+	public ICpuTarget CpuTarget { get; set; }
     
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
@@ -92,12 +103,19 @@ public abstract partial class PlayerData : BaseObject
 	public TileCollider TileCollider { get; set; } = new();
 
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; protected set; }
-
-	// Edit mode
+	
 	public bool IsEditMode { get; set; }
 	
 	protected readonly PlayerInput Input = new();
-	
+
+	private bool _isInit = true;
+
+	public override void _Ready()
+	{
+		base._Ready();
+		Reset();
+	}
+
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
 	
 	public virtual void ResetState()
@@ -106,37 +124,41 @@ public abstract partial class PlayerData : BaseObject
 		IsJumping = false;
 		IsSpinning = false;
 		IsGrounded = false;
-		StickToConvex = false;
 		
 		OnObject = null;
 		PushingObject = null;
 		
 		Radius = RadiusNormal;
 		Action = Actions.None;
-		GroundMode = Constants.GroundMode.Floor;
 	}
-
-	public override void Init()
+	
+	public override void Reset()
 	{
-		/*
 		if (ApplyType()) return;
+		
+		base.Reset();
 
+		if (_isInit)
+		{
+			Barrier = new Barrier(this);
+		}
+		
 		(RadiusNormal, RadiusSpin) = Type switch
 		{
 			Types.Tails => (new Vector2I(9, 15), new Vector2I(7, 14)),
 			Types.Amy => (new Vector2I(9, 16), new Vector2I(7, 12)),
 			_ => (new Vector2I(9, 19), new Vector2I(7, 14))
 		};
-
+		
 		Radius = RadiusNormal;
 		Position = Position with { Y = Position.Y - Radius.Y - 1f };
 		Gravity = GravityType.Default;
 		Speed = Vector2.Zero;
 		GroundSpeed = 0f;
 		Angle = 0f;
-
+		
 		TileLayer = Constants.TileLayers.Main;
-		collision_mode = 0;
+		GroundMode = Constants.GroundMode.Floor;
 		StickToConvex = false;
 		
 		PushingObject = null;
@@ -164,7 +186,10 @@ public abstract partial class PlayerData : BaseObject
 		Animation = Animations.Idle;
 		VisualAngle = 0f;
 		
-		camera_view_timer = 120;
+		if (Camera.Main != null && Camera.Main.Target == this)
+		{
+			Camera.Main.Target = this;
+		}
 		
 		IsForcedRoll = false;
 		IsAirLock = false;
@@ -188,91 +213,61 @@ public abstract partial class PlayerData : BaseObject
 		CpuInputTimer = 0f;
 		IsCpuJumping = false;
 		
-		if (!_is_respawned)
-		{
-			cpu_target = null;
-			cpu_state = CPU_STATE_MAIN;
-		}
-		else
-		{
-			cpu_state = CPU_STATE_RESPAWN_INIT;
-		}
+		CpuState = _isInit ? CpuStates.Main : CpuStates.RespawnInit;
 		
-		//TODO: restart state
-		RestartState =;
+		RestartState = RestartStates.GameOver;
 		RestartTimer = 0f;
 		
 		Input.Clear();
-		
 		RecordedData.Clear();
 		
 		if (Id != 0)
 		{
 			Player leadPlayer = Players[Id - 1];
 			
-			if (_is_respawned)
+			if (_isInit)
 			{
-				Position = new Vector2(Camera.Main.BufferPosition.X + 127, leadPlayer.Position.Y - 192);
+				Position = leadPlayer.Position - new Vector2(16, Radius.Y - leadPlayer.Radius.Y);
+				_isInit = false;
 			}
 			else
 			{
-				Position = leadPlayer.Position - new Vector2(16, Radius.Y - leadPlayer.Radius.Y);
+				Position = new Vector2(Camera.Main.BufferPosition.X + sbyte.MaxValue, leadPlayer.Position.Y - 192);
 			}
+			return;
 		}
-		else if (!_is_respawned)
-		{
-			if array_length(global.giant_ring_data) > 0
-			{
-				x = global.giant_ring_data[0];
-				y = global.giant_ring_data[1];
-				
-				global.giant_ring_data = [];
-			}
-			else if array_length(global.checkpoint_data) > 0
-			{
-				x = global.checkpoint_data[0];
-				y = global.checkpoint_data[1] - radius_y - 1;
-			}
-			
-			c_engine.camera.target = id;
-			c_engine.camera.pos_x = x - global.game_width / 2;
-			c_engine.camera.pos_y = y - global.game_height / 2 + 16;
 
-			if global.saved_rings != 0
-			{
-				ring_count = global.saved_rings;
-			}
+		if (!_isInit) return;
+		_isInit = false;
 		
-			if global.saved_barrier != BARRIER_NONE
-			{
-				barrier_type = global.saved_barrier;
-				
-				instance_create(x, y, obj_barrier, { TargetPlayer: id });
-			}
-			
-			score_count = global.saved_score;
-			life_count = global.saved_lives;
-			
-			global.saved_rings = 0;
-			global.saved_barrier = BARRIER_NONE;
-		}
-		
-		if (Type == Types.Tails)
+		if (SharedData.GiantRingData != null)
 		{
-			with obj_tail
-			{
-				if TargetPlayer == other.id
-				{
-					instance_destroy();
-				}
-			}
-			
-			instance_create(x, y, obj_tail, { TargetPlayer: id, depth: depth + 1 });
+			Position = SharedData.GiantRingData.position;
+			SharedData.GiantRingData = null;
+		}
+		else if (SharedData.CheckpointData != null)
+		{
+			Position = SharedData.CheckpointData.position - new Vector2I(0, Radius.Y + 1);
+		}
+
+		Camera.Main.Target = this;
+		Camera.Main.Position = Position - SharedData.ViewSize / 2 - new Vector2(0, 16);
+
+		if (SharedData.SavedRings != 0)
+		{
+			RingCount = SharedData.SavedRings;
 		}
 		
-		// Apply initial animation
-		scr_player_animate();
-		*/
+		if (SharedData.SavedBarrier != Barrier.Types.None)
+		{
+			Barrier.Type = SharedData.SavedBarrier;
+		}
+			
+		ScoreCount = SharedData.SavedScore;
+		LifeCount = SharedData.SavedLives;
+
+		SharedData.SavedRings = 0;
+		SharedData.SavedBarrier = Barrier.Types.None;
 	}
 	
 	private bool ApplyType()

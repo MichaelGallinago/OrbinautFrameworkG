@@ -29,7 +29,7 @@ public partial class CameraTrigger : BaseObject
         _height = (int)(_sprite.Texture.GetSize().Y * Scale.Y) / 2;
         
         _previousBound = Camera.Main.LimitBottom;
-        _cameraSide = Camera.Main.BufferPosition.X + SharedData.GameWidth / 2f < Position.X ? 
+        _cameraSide = Camera.Main.BufferPosition.X + SharedData.ViewSize.X / 2f < Position.X ? 
             Direction.Positive : Direction.Negative;
     }
 
@@ -38,7 +38,7 @@ public partial class CameraTrigger : BaseObject
         Visible = SharedData.DebugCollision > 0;
         
         Camera camera = Camera.Main;
-        Vector2I position = camera.BufferPosition + new Vector2I(SharedData.GameWidth, SharedData.GameHeight) / 2;
+        Vector2I position = camera.BufferPosition + SharedData.ViewSize / 2;
 	
         if (position.Y < Position.Y - _height || position.Y >= Position.Y + _height) return;
         
