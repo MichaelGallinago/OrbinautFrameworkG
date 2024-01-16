@@ -11,73 +11,60 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
 	
-	public float AnimationTimer { get; set; }
-	public Animations AnimationType { get; set; }
-	public bool IsFrameChanged { get; private set; }
-
-	private PlayerAnimationData _data;
-	private Animations _animationBuffer;
+	
+	private IAnimatedPlayer _player;
 	private int _spriteFramesIndex;
 
 	public override void _Ready()
 	{
 		base._Ready();
-		FrameChanged += () => IsFrameChanged = true;
+#if TOOLS
+		if (Engine.IsEditorHint()) return;
+#endif
+		AnimationFinished += OnAnimationFinished;
 	}
 	
-	public void Animate(PlayerAnimationData data)
+	public void Animate(IAnimatedPlayer player)
 	{
-		_data = data;
+		_player = player;
 		
-		UpdateAnimationBuffer();
 		UpdateScale();
 		UpdateSpriteFrames();
 
-		switch (data.Type)
+		switch (player.Type)
 		{
-			case Player.Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
-			case Player.Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
-			case Player.Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
-			case Player.Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
+			case Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
+			case Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
+			case Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
+			case Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
-		
-		IsFrameChanged = false;
+
+		player.IsAnimationFrameChanged = false;
 	}
 
-	private void UpdateAnimationBuffer()
+	public int GetAnimationFrameCount(Animations animation, Types playerType)
 	{
-		if (!FrameworkData.UpdateObjects) return;
-		
-		if (_animationBuffer == Animations.None && AnimationTimer > 0f)
+		return _spriteFrames[(int)playerType].GetFrameCount(animation.ToStringFast());
+	}
+
+	private void OnAnimationFinished()
+	{
+		_player.Animation = _player.Animation switch
 		{
-			_animationBuffer = AnimationType;
-		}
-		
-		if (AnimationTimer < 0f)
-		{
-			if (AnimationType == _animationBuffer)
-			{
-				AnimationType = Animations.Move;
-			}
-			
-			AnimationTimer = 0f;
-			_animationBuffer = Animations.None;
-		}
-		else if (_animationBuffer != Animations.None)
-		{
-			AnimationTimer--;
-		}
+			Animations.Bounce or Animations.Breathe or Animations.Transform or Animations.Skid => Animations.Move,
+			_ => _player.Animation
+		};
 	}
 
 	private void UpdateScale()
 	{
-		if (AnimationType == Animations.Spin && !IsFrameChanged) return;
-		Scale = new Vector2(Math.Abs(Scale.X) * (float)_data.Facing, Scale.Y);
+		if (_player.Animation == Animations.Spin && !_player.IsAnimationFrameChanged) return;
+		Scale = new Vector2(Math.Abs(Scale.X) * (float)_player.Facing, Scale.Y);
 	}
 
 	private void UpdateSpriteFrames()
 	{
-		int index = _data.Type == Player.Types.Sonic && _data.IsSuper ? 5 : (int)_data.Type;
+		int index = _player.Type == Types.Sonic && _player.IsSuper ? 5 : (int)_player.Type;
 		if (_spriteFramesIndex == index) return;
 		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}
@@ -86,14 +73,14 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		SetAnimationType(type, speed);
 
-		if (!_data.IsSuper || type != Animations.Walk) return;
+		if (!_player.IsSuper || type != Animations.Walk) return;
 
-		if (FrameworkData.Time % 4d > 1d) return;
+		if (FrameworkData.Time % 4d >= 2d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}
 	
-	private float SonicSpeed => AnimationType switch
+	private float SonicSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -101,12 +88,12 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 	
-	private Animations SonicType => AnimationType switch
+	private Animations SonicType => _player.Animation switch
 	{
-		Animations.Move => _data.IsSuper ? 
+		Animations.Move => _player.IsSuper ? 
 			GetMoveAnimation(false, 8f) :
 			GetMoveAnimation(SharedData.PeelOut, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private void AnimateTails(Animations type, float speed)
@@ -114,37 +101,37 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 		
 		if (type != Animations.FlyCarry) return;
-		Frame = _data.Speed.Y < 0 ? 1 : 0;
+		Frame = _player.Speed.Y < 0f ? 1 : 0;
 	}
 	
-	private float TailsSpeed => AnimationType switch
+	private float TailsSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
-		Animations.Swim => _data.Speed.Y < 0f ? 1f : 0.5f,
+		Animations.Swim => _player.Speed.Y < 0f ? 1f : 0.5f,
 		_ => 1f
 	};
 	
-	private Animations TailsType => AnimationType switch
+	private Animations TailsType => _player.Animation switch
 	{
-		Animations.Fly => _data.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
-		Animations.FlyTired => _data.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
+		Animations.Fly => _player.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
+		Animations.FlyTired => _player.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
 		Animations.Move => GetMoveAnimation(true, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private void AnimateKnuckles(Animations type, float speed)
 	{
-		if (AnimationType == Animations.GlideFall)
+		if (_player.Animation == Animations.GlideFall)
 		{
-			SetAnimation(type.ToStringFast(), (int)_data.ActionValue, speed);
+			SetAnimation(type.ToStringFast(), (int)_player.ActionValue, speed);
 			return;
 		}
 		
 		SetAnimationType(type, speed);
 	}
 	
-	private float KnucklesSpeed => AnimationType switch
+	private float KnucklesSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -152,15 +139,15 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 	
-	private Animations KnucklesType => AnimationType switch
+	private Animations KnucklesType => _player.Animation switch
 	{
 		Animations.Move => GetMoveAnimation(false, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private void AnimateAmy(Animations type, float speed)
 	{
-		if (AnimationType == Animations.HammerSpin)
+		if (_player.Animation == Animations.HammerSpin)
 		{
 			SetAnimation(type.ToStringFast(), Frame, speed);
 			return;
@@ -169,7 +156,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 	}
 	
-	private float AmySpeed => AnimationType switch
+	private float AmySpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
@@ -178,17 +165,17 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		_ => 1f
 	};
 
-	private Animations AmyType => AnimationType switch
+	private Animations AmyType => _player.Animation switch
 	{
 		Animations.Move => GetMoveAnimation(true, 6f),
-		_ => AnimationType
+		_ => _player.Animation
 	};
 	
 	private Animations GetMoveAnimation(bool canDash, float runThreshold)
 	{
 		const float dashThreshold = 10f;
 		
-		float speed = Math.Abs(_data.GroundSpeed);
+		float speed = Math.Abs(_player.GroundSpeed);
 
 		if (speed < runThreshold) return Animations.Walk;
 		return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
@@ -196,7 +183,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private float GetGroundAnimationSpeed(float speedBound)
 	{
-		return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(_data.GroundSpeed)));
+		return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(_player.GroundSpeed)));
 	}
 
 	private void SetAnimationType(Animations type, float speed) => SetAnimation(type.ToStringFast(), speed);

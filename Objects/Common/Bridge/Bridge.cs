@@ -1,7 +1,6 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
@@ -46,9 +45,9 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
 		
-	    foreach (Player player in Player.Players)
+	    foreach (Player player in PlayerData.Players)
 	    {
-		    ActSolid(player, Constants.SolidType.Top);
+		    player.ActSolid(this, Constants.SolidType.Top);
 		    
 		    if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
 			

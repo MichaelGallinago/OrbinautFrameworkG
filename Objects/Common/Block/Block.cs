@@ -1,6 +1,5 @@
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.Block;
@@ -16,13 +15,13 @@ public partial class Block : BaseObject
 
     public override void _Process(double delta)
     {
-        foreach (Player player in Player.Players)
+        foreach (Player player in PlayerData.Players)
         {
             // Combo counter and spin flag are cleared when player lands, so back them up
             bool isSpinning = player.IsSpinning;
             uint comboCount = player.ComboCounter;
 		    
-            ActSolid(player, Constants.SolidType.AllReset);
+            player.ActSolid(this, Constants.SolidType.AllReset);
             /*
             if (!isSpinning || !obj_check_collision(_player, COL_SOLID_U)) continue;
             

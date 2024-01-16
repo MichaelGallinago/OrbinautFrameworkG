@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Framework.Animations;
 
@@ -7,8 +8,6 @@ namespace OrbinautFramework3.Framework.Animations;
 public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 {
     public static float GlobalSpeedScale { get; set; } = 1f;
-    
-    public StringName NextAnimation { get; set; }
     
     [Export] private int FrameLoop
     {
@@ -25,20 +24,20 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
             _advancedSpriteFrames?.SetAnimationFrameLoop(Animation, _frameLoop);
         }
     }
-    
+
+    private StringName _nextAnimation;
     private int _frameLoop;
     private AdvancedSpriteFrames _advancedSpriteFrames;
     
     public override void _Ready()
     {
-        AnimationFinished += SetNextAnimation;
         AnimationLooped += LoopFrame;
         SpriteFramesChanged += UpdateSpriteFrames;
         UpdateSpriteFrames();
 
         Position = default;
 #if TOOLS
-        if (Engine.IsEditorHint()) return;
+        if (Engine.IsEditorHint() && Owner.Owner == null) return;
 #endif
         SetProcess(false);
     }
@@ -83,12 +82,12 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         
         Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
         AnimationChanged += UpdateValues;
+        UpdateValues();
             
 #if TOOLS
-        if (Engine.IsEditorHint())
-        {
-            AnimationChanged += _advancedSpriteFrames.Refresh;
-        }
+        if (!Engine.IsEditorHint()) return;
+        AnimationChanged += _advancedSpriteFrames.Refresh;
+        _advancedSpriteFrames.Refresh();
 #endif
     }
 
@@ -102,12 +101,6 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     {
         _frameLoop = _advancedSpriteFrames.GetAnimationFrameLoop(Animation);
         Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
-    }
-    
-    private void SetNextAnimation()
-    {
-        if (NextAnimation == null) return;
-        Animation = NextAnimation;
     }
     
     public bool CheckInView()

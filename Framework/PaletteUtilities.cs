@@ -31,7 +31,7 @@ public static class PaletteUtilities
             Enumerable.Repeat(1, PaletteLimit).ToArray(), 
             Enumerable.Repeat(1, PaletteLimit).ToArray()
         ];
-        SplitBound = FrameworkData.ViewSize.Y;
+        SplitBound = SharedData.ViewSize.Y;
         UpdateFlag = true;
     }
 

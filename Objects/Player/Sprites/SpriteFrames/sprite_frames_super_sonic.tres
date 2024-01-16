@@ -315,18 +315,18 @@ animations = [{
 "speed": 0.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 48.0,
 "texture": ExtResource("2_ciah2")
 }],
-"loop": true,
+"loop": false,
 "name": &"Bounce",
 "speed": 0.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 24.0,
 "texture": ExtResource("3_dcg4x")
 }],
-"loop": true,
+"loop": false,
 "name": &"Breathe",
 "speed": 0.0
 }, {
@@ -455,7 +455,7 @@ animations = [{
 "duration": 6.0,
 "texture": SubResource("AtlasTexture_kbnv2")
 }],
-"loop": true,
+"loop": false,
 "name": &"Skid",
 "speed": 60.0
 }, {
@@ -538,8 +538,26 @@ animations = [{
 }, {
 "duration": 3.0,
 "texture": SubResource("AtlasTexture_m3ksi")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_533rf")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_m3ksi")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_533rf")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_m3ksi")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_533rf")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_m3ksi")
 }],
-"loop": true,
+"loop": false,
 "name": &"Transform",
 "speed": 60.0
 }, {
@@ -598,9 +616,7 @@ animations = [{
 }]
 script = ExtResource("1_l0m7n")
 _frameLoops = {
-"LookUp": 1,
-"Skid": 3,
-"Transform": 3
+"LookUp": 1
 }
 _offsets = {
 "Balance": Vector2(-7, -4),
@@ -619,6 +635,5 @@ _offsets = {
 "Run": Vector2(2, -1),
 "Skid": Vector2(1, 0),
 "SpinDash": Vector2(4, 7),
-"Transform": Vector2(-1, -4),
-"new_animation": Vector2(2, -1)
+"Transform": Vector2(-1, -4)
 }

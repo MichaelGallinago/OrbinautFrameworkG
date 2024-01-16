@@ -356,16 +356,46 @@ animations = [{
 }, {
 "duration": 4.0,
 "texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_r2k1i")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ypwvk")
 }],
-"loop": true,
+"loop": false,
 "name": &"Bounce",
 "speed": 60.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 24.0,
 "texture": ExtResource("3_enl2k")
 }],
-"loop": true,
+"loop": false,
 "name": &"Breathe",
 "speed": 0.0
 }, {
@@ -903,7 +933,7 @@ animations = [{
 "duration": 6.0,
 "texture": SubResource("AtlasTexture_8bg6o")
 }],
-"loop": true,
+"loop": false,
 "name": &"Skid",
 "speed": 60.0
 }, {
@@ -983,8 +1013,26 @@ animations = [{
 }, {
 "duration": 3.0,
 "texture": SubResource("AtlasTexture_tqjgm")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_txbhe")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_tqjgm")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_txbhe")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_tqjgm")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_txbhe")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_tqjgm")
 }],
-"loop": true,
+"loop": false,
 "name": &"Transform",
 "speed": 60.0
 }, {
@@ -1021,9 +1069,7 @@ script = ExtResource("1_rncpm")
 _frameLoops = {
 "Duck": 1,
 "Idle": 71,
-"LookUp": 1,
-"Skid": 3,
-"Transform": 2
+"LookUp": 1
 }
 _offsets = {
 "Balance": Vector2(-5, -2),
@@ -1034,7 +1080,6 @@ _offsets = {
 "Duck": Vector2(3, 1),
 "Grab": Vector2(5, -6),
 "HammerDash": Vector2(1, -4),
-"HammerRush": Vector2(1, -4),
 "HammerSpin": Vector2(1, 1),
 "Hurt": Vector2(1, -1),
 "LookUp": Vector2(-2, -1),

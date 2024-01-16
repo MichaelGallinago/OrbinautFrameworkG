@@ -1,10 +1,9 @@
+using Godot;
 using OrbinautFramework3.Framework.Animations;
-using OrbinautFramework3.Framework.CommonObject;
-using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Spawnable.Barrier;
 
-public partial class Barrier(BaseObject target) : AnimatedSprite
+public partial class Barrier(Node2D target) : AnimatedSprite
 {
     public enum Types : byte
     {
@@ -18,7 +17,7 @@ public partial class Barrier(BaseObject target) : AnimatedSprite
     
     public float Angle { get; set; }
     public States State { get; set; }
-    public BaseObject Target { get; set; } = target;
+    public Node2D Target { get; set; } = target;
     public float AnimationTimer { get; set; } = -1f;
     
     private Types _type;

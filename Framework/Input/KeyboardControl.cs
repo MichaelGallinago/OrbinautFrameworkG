@@ -2,28 +2,15 @@ using Godot;
 
 namespace OrbinautFramework3.Framework.Input;
 
-public struct KeyboardControl
+public struct KeyboardControl(Key up, Key down, Key left, Key right, Key a, Key b, Key c, Key start, Key debug)
 {
-    public readonly Key Up;
-    public readonly Key Down;
-    public readonly Key Left;
-    public readonly Key Right;
-    public readonly Key A;
-    public readonly Key B;
-    public readonly Key C;
-    public readonly Key Start;
-    public readonly Key Debug;
-
-    public KeyboardControl(Key up, Key down, Key left, Key right, Key a, Key b, Key c, Key start, Key debug)
-    {
-        Up = up;
-        Down = down;
-        Left = left;
-        Right = right;
-        A = a;
-        B = b;
-        C = c;
-        Start = start;
-        Debug = debug;
-    }
+    public readonly Key Up = up;
+    public readonly Key Down = down;
+    public readonly Key Left = left;
+    public readonly Key Right = right;
+    public readonly Key A = a;
+    public readonly Key B = b;
+    public readonly Key C = c;
+    public readonly Key Start = start;
+    public readonly Key Debug = debug;
 }

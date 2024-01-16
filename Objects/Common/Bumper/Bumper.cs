@@ -11,26 +11,29 @@ using Player;
 
 public partial class Bumper : BaseObject
 {
-    // There is no limit in Sonic 2. Set to 10 to match S1 behaviour
-    [Export] private int _hitsLeft = -1;
+    private enum HitsLimit { Sonic1 = 10, Sonic2 = -1 }
+    
+    [Export] private HitsLimit _hitsLimit = HitsLimit.Sonic2;
     [Export] private AdvancedAnimatedSprite _sprite;
     private int _state;
+    private int _hitsLeft;
 
-    public Bumper()
+    public Bumper() => SetHitbox(new Vector2I(8, 8));
+    public override void _Ready()
     {
-        SetHitbox(new Vector2I(8, 8));
+        _hitsLeft = (int)_hitsLimit;
+        _sprite.AnimationFinished += OnAnimationFinished;
     }
 
     public override void _Process(double delta)
     {
-        foreach (Player player in Player.Players)
+        foreach (Player player in PlayerData.Players)
         {
             if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.Hitbox)) continue;
 		    
             if (_sprite.Animation == "Default")
             {
                 _sprite.Play("Bump");
-                _sprite.NextAnimation = "Default";
             }
 		
             //TODO: audio
@@ -38,7 +41,7 @@ public partial class Bumper : BaseObject
             
             float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - Position));
 		
-            if (player.Action != Player.Actions.Glide || player.ActionState == (int)Player.GlideStates.Fall)
+            if (player.Action != Actions.Glide || player.ActionState == (int)GlideStates.Fall)
             {
                 float bumpSpeed = 7f * MathF.Sin(radians);
 			
@@ -48,11 +51,11 @@ public partial class Bumper : BaseObject
                 }
                 else
                 {
-                    player.Speed.X = bumpSpeed;
+                    player.Speed = player.Speed with { X = bumpSpeed };
                 }
             }
-            
-            player.Speed.Y = 7f * MathF.Cos(radians);
+
+            player.Speed = player.Speed with { Y = 7f * MathF.Cos(radians) };
             player.IsJumping = false;
             player.IsAirLock = false;
             
@@ -66,5 +69,11 @@ public partial class Bumper : BaseObject
 		
             break;
         }
+    }
+
+    private void OnAnimationFinished()
+    {
+        if (_sprite.Animation != "Bump") return; 
+        _sprite.Play("Default");
     }
 }

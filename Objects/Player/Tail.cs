@@ -10,9 +10,9 @@ public partial class Tail : AdvancedAnimatedSprite
 {
 	private float _angle;
 
-	public void Animate(TailAnimationData data)
+	public void Animate(ITailed data)
 	{
-		switch (data.AnimationType)
+		switch (data.Animation)
 		{
 			case Animations.Idle:
 			case Animations.Duck:
@@ -23,7 +23,7 @@ public partial class Tail : AdvancedAnimatedSprite
 			case Animations.Fly:
 			case Animations.FlyTired:
 			case Animations.FlyCarry:
-				float speed = data.Speed.Y >= 0f || data.AnimationType == Animations.FlyTired ? 0.5f : 1f;
+				float speed = data.Speed.Y >= 0f || data.Animation == Animations.FlyTired ? 0.5f : 1f;
 				SetAnimation("Fly", speed);
 				break;
 			
@@ -34,11 +34,11 @@ public partial class Tail : AdvancedAnimatedSprite
 			case Animations.Balance:
 			case Animations.SpinDash:
 				var offset = new Vector2I(-23, 0);
-				if (data.AnimationType is Animations.SpinDash or Animations.Grab)
+				if (data.Animation is Animations.SpinDash or Animations.Grab)
 				{
 					offset.X += 5;
 				}
-				else if (data.AnimationType != Animations.Spin)
+				else if (data.Animation != Animations.Spin)
 				{
 					offset += new Vector2I(7, 5);
 				}
@@ -56,7 +56,7 @@ public partial class Tail : AdvancedAnimatedSprite
 		ChangeDirection(data);
 	}
 
-	private void ChangeDirection(TailAnimationData data)
+	private void ChangeDirection(ITailed data)
 	{
 		float scaleX = data.IsSpinning && data.IsGrounded
 			? (data.GroundSpeed >= 0f ? 1f : -1f) * Mathf.Abs(data.Scale.X)
@@ -65,13 +65,13 @@ public partial class Tail : AdvancedAnimatedSprite
 		Scale = new Vector2(scaleX, Scale.Y);
 	}
 
-	private void UpdateAngle(TailAnimationData data)
+	private void UpdateAngle(ITailed data)
 	{
 		_angle = GetTailAngle(data);
 		RotationDegrees = FrameworkData.RotationMode == 0 ? Mathf.Ceil((_angle - 22.5f) / 45f) * 45f : _angle;
 	}
 
-	private float GetTailAngle(TailAnimationData data)
+	private float GetTailAngle(ITailed data)
 	{
 		if (!data.IsSpinning) return data.VisualAngle;
 
@@ -87,7 +87,7 @@ public partial class Tail : AdvancedAnimatedSprite
 		angle = 360f;
 		float step = Mathf.Abs(data.GroundSpeed);
 				
-		if (data.Angle > 22.5 && data.Angle <= 337.5)
+		if (data.Angle is > 22.5f and <= 337.5f)
 		{
 			angle -= data.Angle;
 			step = step * 3f / -32f + 2f;

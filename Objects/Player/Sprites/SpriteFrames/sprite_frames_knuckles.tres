@@ -302,18 +302,18 @@ region = Rect2(280, 0, 40, 37)
 [resource]
 animations = [{
 "frames": [{
-"duration": 1.0,
+"duration": 48.0,
 "texture": ExtResource("2_hn5y8")
 }],
-"loop": true,
+"loop": false,
 "name": &"Bounce",
 "speed": 0.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 24.0,
 "texture": ExtResource("2_wigh6")
 }],
-"loop": true,
+"loop": false,
 "name": &"Breathe",
 "speed": 0.0
 }, {
@@ -689,10 +689,10 @@ animations = [{
 "duration": 8.0,
 "texture": SubResource("AtlasTexture_3wvsq")
 }, {
-"duration": 8.0,
+"duration": 4.0,
 "texture": SubResource("AtlasTexture_l8jgv")
 }],
-"loop": true,
+"loop": false,
 "name": &"Skid",
 "speed": 60.0
 }, {
@@ -769,8 +769,32 @@ animations = [{
 }, {
 "duration": 3.0,
 "texture": SubResource("AtlasTexture_4fc0o")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_rqvnj")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_4fc0o")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_rqvnj")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_4fc0o")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_rqvnj")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_4fc0o")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_rqvnj")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_4fc0o")
 }],
-"loop": true,
+"loop": false,
 "name": &"Transform",
 "speed": 60.0
 }, {
@@ -808,13 +832,10 @@ _frameLoops = {
 "ClimbLedge": 2,
 "Duck": 1,
 "GlideFall": 1,
-"LookUp": 1,
-"Skid": 2,
-"Transform": 1
+"LookUp": 1
 }
 _offsets = {
 "Bounce": Vector2(3, 1),
-"Climb": Vector2(-2, 1),
 "ClimbLedge": Vector2(3, -4),
 "Death": Vector2(2, 2),
 "Drown": Vector2(2, 2),
@@ -828,7 +849,6 @@ _offsets = {
 "LookUp": Vector2(0, 1),
 "Push": Vector2(1, 2),
 "Run": Vector2(-4, 3),
-"Slide": Vector2(-2, 6),
 "SpinDash": Vector2(4, 7),
 "Transform": Vector2(-2, -1),
 "Walk": Vector2(-1, 2)

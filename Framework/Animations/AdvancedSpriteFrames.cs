@@ -14,13 +14,13 @@ public partial class AdvancedSpriteFrames : SpriteFrames
         foreach (StringName animation in _frameLoops.Keys)
         {
             if (HasAnimation(animation)) continue;
-            _offsets.Remove(animation);
+            _frameLoops.Remove(animation);
         }
-            
+        
         foreach (StringName animation in _offsets.Keys)
         {
             if (HasAnimation(animation)) continue;
-            _frameLoops.Remove(animation);
+            _offsets.Remove(animation);
         }
         
         ResourceSaver.Save(this, ResourcePath);

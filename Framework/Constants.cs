@@ -12,6 +12,7 @@ public static class Constants
 	public const float AngleIncrement = 1.40625f;
 	public const ushort TileLimit = 256;
 	public const byte TileSize = 16;
+	public const byte DoubleTileSize = TileSize * 2;
 	public const float AirValueMax = 1800f;
 
 	public enum EnemyType : byte

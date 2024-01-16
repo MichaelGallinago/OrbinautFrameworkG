@@ -269,16 +269,46 @@ animations = [{
 }, {
 "duration": 4.0,
 "texture": SubResource("AtlasTexture_goqhk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ikqrg")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_goqhk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ikqrg")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_goqhk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ikqrg")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_goqhk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ikqrg")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_goqhk")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_ikqrg")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_goqhk")
 }],
-"loop": true,
+"loop": false,
 "name": &"Bounce",
 "speed": 60.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 24.0,
 "texture": ExtResource("3_oltlp")
 }],
-"loop": true,
+"loop": false,
 "name": &"Breathe",
 "speed": 0.0
 }, {
@@ -485,7 +515,7 @@ animations = [{
 "duration": 8.0,
 "texture": SubResource("AtlasTexture_q50ma")
 }],
-"loop": true,
+"loop": false,
 "name": &"Skid",
 "speed": 60.0
 }, {
@@ -571,8 +601,32 @@ animations = [{
 }, {
 "duration": 3.0,
 "texture": SubResource("AtlasTexture_np2yh")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_eqquy")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_np2yh")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_eqquy")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_np2yh")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_eqquy")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_np2yh")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_eqquy")
+}, {
+"duration": 3.0,
+"texture": SubResource("AtlasTexture_np2yh")
 }],
-"loop": true,
+"loop": false,
 "name": &"Transform",
 "speed": 60.0
 }, {
@@ -607,8 +661,7 @@ animations = [{
 }]
 script = ExtResource("1_p3xy2")
 _frameLoops = {
-"Idle": 7,
-"Transform": 1
+"Idle": 7
 }
 _offsets = {
 "Balance": Vector2(-8, 0),
@@ -618,7 +671,6 @@ _offsets = {
 "Drown": Vector2(1, 2),
 "Duck": Vector2(6, 6),
 "Fly": Vector2(1, -1),
-"FlyDefault": Vector2(1, -1),
 "FlyLift": Vector2(1, -2),
 "FlyTired": Vector2(1, -1),
 "Grab": Vector2(3, -8),
@@ -631,10 +683,7 @@ _offsets = {
 "SpinDash": Vector2(1, 4),
 "Swim": Vector2(-2, 0),
 "SwimCarry": Vector2(0, -6),
-"SwimDefault": Vector2(-2, 0),
-"SwimLift": Vector2(0, -6),
 "SwimTired": Vector2(-1, -3),
 "Transform": Vector2(-3, 0),
-"Walk": Vector2(-7, -2),
-"new_animation": Vector2(0, -6)
+"Walk": Vector2(-7, -2)
 }
