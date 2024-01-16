@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Framework.Animations;
 
@@ -36,7 +37,7 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 
         Position = default;
 #if TOOLS
-        if (Engine.IsEditorHint()) return;
+        if (Engine.IsEditorHint() && Owner.Owner == null) return;
 #endif
         SetProcess(false);
     }

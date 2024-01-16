@@ -1,6 +1,6 @@
 using Godot;
 
-namespace OrbinautFramework3.Framework.CommonObject;
+namespace OrbinautFramework3.Framework.ObjectBase;
 
 public struct InteractData()
 {

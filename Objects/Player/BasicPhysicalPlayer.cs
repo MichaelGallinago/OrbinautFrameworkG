@@ -40,7 +40,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	public void Kill()
 	{
 		if (IsDead) return;
-
+		
 		Action = Actions.None;
 		IsDead = true;
 		ObjectInteraction = false;
@@ -824,9 +824,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			>= 135 and <= 225 => Constants.GroundMode.Ceiling,
 			_ => Constants.GroundMode.LeftWall
 		};
-
-		const int minTolerance = 4;
-		const int maxTolerance = 14;
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
 
@@ -855,14 +852,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
+		const int minTolerance = 4;
+		const int maxTolerance = 14;
+		
 		if (!StickToConvex)
 		{
 			float toleranceCheckSpeed = GroundMode switch
 			{
-				Constants.GroundMode.Floor => Speed.X,
-				Constants.GroundMode.RightWall => Speed.Y,
-				Constants.GroundMode.Ceiling => Speed.X,
-				Constants.GroundMode.LeftWall => Speed.Y,
+				Constants.GroundMode.Floor or Constants.GroundMode.Ceiling => Speed.X,
+				Constants.GroundMode.RightWall or Constants.GroundMode.LeftWall => Speed.Y,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 			
@@ -889,7 +887,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Constants.GroundMode.LeftWall => new Vector2(-distance, 0f),
 			_ => throw new ArgumentOutOfRangeException()
 		};
-
+		
 		Angle = SharedData.PlayerPhysics >= PhysicsTypes.S2 ? SnapFloorAngle(angle) : angle;
 	}
 
@@ -904,7 +902,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			floorAngle = 360f;
 		}
-
+		
 		return floorAngle;
 	}
 

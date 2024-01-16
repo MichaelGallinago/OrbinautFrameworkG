@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OrbinautFramework3.Framework.CommonObject;
+namespace OrbinautFramework3.Framework.ObjectBase;
 
 public struct AnimationData(int index)
 {

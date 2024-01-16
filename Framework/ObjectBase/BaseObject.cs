@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using OrbinautFramework3.Framework.CommonObject;
 using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
@@ -12,15 +11,18 @@ public abstract partial class BaseObject : Node2D
 	[Export] public BehaviourType Behaviour { get; set; }
 
 	public static List<BaseObject> Objects { get; } = [];
-	public ObjectRespawnData RespawnData { get; }
-	public SolidData SolidData { get; set; } = new();
+	public ObjectRespawnData RespawnData { get; private set; }
+	public SolidData SolidData { get; } = new();
 	public Vector2 PreviousPosition { get; set; }
 
 	public InteractData InteractData = new();
-
-	protected BaseObject() => RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
 	
-	public override void _EnterTree() => Objects.Add(this);
+	public override void _EnterTree()
+	{
+		Objects.Add(this);
+		RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
+	}
+
 	public override void _ExitTree() => Objects.Remove(this);
 	
 	public void ResetZIndex() => ZIndex = RespawnData.ZIndex;

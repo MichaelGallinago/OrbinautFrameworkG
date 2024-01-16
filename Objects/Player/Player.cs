@@ -47,7 +47,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		}
 		base.QueueFree();
 	}
-
+	
 	public override void _EnterTree()
 	{
 		base._EnterTree();

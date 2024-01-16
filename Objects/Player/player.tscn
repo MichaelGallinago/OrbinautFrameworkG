@@ -21,5 +21,6 @@ Behaviour = 4
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = ExtResource("4_xjx3q")
 animation = &"None"
+offset = Vector2(0, -16)
 script = ExtResource("105_mpaxa")
 _spriteFrames = [ExtResource("4_xjx3q"), ExtResource("5_lpceh"), ExtResource("6_1iqsb"), ExtResource("7_ywak4"), ExtResource("2_qd5xx"), ExtResource("4_51ln1")]

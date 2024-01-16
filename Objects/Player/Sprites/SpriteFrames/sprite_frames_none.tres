@@ -15,4 +15,6 @@ animations = [{
 }]
 script = ExtResource("1_cbi7b")
 _frameLoops = {}
-_offsets = {}
+_offsets = {
+"None": Vector2(0, -16)
+}
