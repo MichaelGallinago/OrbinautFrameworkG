@@ -16,6 +16,7 @@ z_index = -2
 script = ExtResource("1_cv4v1")
 PackedTail = ExtResource("2_x8pdm")
 Sprite = NodePath("AdvancedAnimatedSprite")
+Behaviour = 4
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = ExtResource("4_xjx3q")

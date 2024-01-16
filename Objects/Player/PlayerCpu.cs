@@ -32,7 +32,7 @@ public partial class PlayerCpu : Player
 		
 		// Find a player to follow
 		CpuTarget ??= Players[Id - 1];
-
+		
 		if (RecordedData.Count < cpuDelay) return false;
 		
 		// Read actual player input and disable AI for 10 seconds if detected it

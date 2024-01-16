@@ -102,7 +102,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public CommonStage Stage { get; set; }
 	public TileCollider TileCollider { get; set; } = new();
 
-	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; protected set; }
+	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; protected set; } = [];
 	
 	public bool IsEditMode { get; set; }
 	
@@ -110,10 +110,17 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 
 	private bool _isInit = true;
 
+	protected PlayerData()
+	{
+		Barrier = new Barrier(this);
+	}
+
 	public override void _Ready()
 	{
-		base._Ready();
 		Reset();
+		
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 	}
 
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
@@ -137,11 +144,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		if (ApplyType()) return;
 		
 		base.Reset();
-
-		if (_isInit)
-		{
-			Barrier = new Barrier(this);
-		}
 		
 		(RadiusNormal, RadiusSpin) = Type switch
 		{

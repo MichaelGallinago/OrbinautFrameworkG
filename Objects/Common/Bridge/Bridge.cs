@@ -48,7 +48,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 		
 	    foreach (Player player in PlayerData.Players)
 	    {
-		    player.ActSolid(player, Constants.SolidType.Top);
+		    player.ActSolid(this, Constants.SolidType.Top);
 		    
 		    if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
 			

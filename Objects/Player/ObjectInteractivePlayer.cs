@@ -12,7 +12,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
     public void ActSolid(BaseObject baseObject, Constants.SolidType type)
 	{
 		// Initialise touch flags for the player collision
-		TouchObjects.Add(baseObject, Constants.TouchState.None);
+		TouchObjects.TryAdd(baseObject, Constants.TouchState.None);
 		
 		if (!ObjectInteraction) return;
 		

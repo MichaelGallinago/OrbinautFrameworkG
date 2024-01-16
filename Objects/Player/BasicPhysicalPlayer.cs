@@ -523,46 +523,53 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessBalance()
 	{
 		if (!IsGrounded || IsSpinning) return;
-
 		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.PeelOut) return;
+		if (SharedData.PlayerPhysics == PhysicsTypes.SK && Input.Down.Down) return;
+		if (Input.Down.Up && SharedData.PeelOut) return;
 		
-		if (SharedData.PlayerPhysics == PhysicsTypes.SK && Input.Down.Down || Input.Down.Up && SharedData.PeelOut) return;
+		if (BalanceOnObject()) return;
+		BalanceOnTiles();
+	}
+
+	private bool BalanceOnObject()
+	{
+		if (OnObject == null) return false;
+		// TODO: check IsInstanceValid == instance_exist
+		if (!IsInstanceValid(OnObject) || OnObject.SolidData.NoBalance) return true;
 	
-		if (OnObject != null)
+		const int leftEdge = 2;
+		int rightEdge = OnObject.SolidData.Radius.X * 2 - leftEdge;
+		int playerX = Mathf.FloorToInt(OnObject.SolidData.Radius.X - OnObject.Position.X + Position.X);
+		
+		if (playerX < leftEdge)
 		{
-			// TODO: check IsInstanceValid == instance_exist
-			if (!IsInstanceValid(OnObject) || OnObject.SolidData.NoBalance) return;
-	
-			const int leftEdge = 2;
-			int rightEdge = OnObject.SolidData.Radius.X * 2 - leftEdge;
-			int playerX = Mathf.FloorToInt(OnObject.SolidData.Radius.X - OnObject.Position.X + Position.X);
-		
-			if (playerX < leftEdge)
-			{
-				BalanceToDirection(Constants.Direction.Negative, playerX < leftEdge - 4);
-			}
-			else if (playerX > rightEdge)
-			{
-				BalanceToDirection(Constants.Direction.Positive, playerX > rightEdge + 4);
-			}
+			BalanceToDirection(Constants.Direction.Negative, playerX < leftEdge - 4);
 		}
+		else if (playerX > rightEdge)
+		{
+			BalanceToDirection(Constants.Direction.Positive, playerX > rightEdge + 4);
+		}
+
+		return true;
+	}
+
+	private void BalanceOnTiles()
+	{
+		const Constants.Direction direction = Constants.Direction.Positive;	
 		
 		if (Angles.GetQuadrant(Angle) > 0) return;
-			
 		TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
-		int floorDist = TileCollider.FindDistance(new Vector2I(), true, Constants.Direction.Positive);	
-		if (floorDist < 12) return;
-
-		const Constants.Direction direction = Constants.Direction.Positive;
-			
-		int distanceLeft = TileCollider.FindDistance(new Vector2I(-Radius.X, 0), true, direction);
-		int distanceRight = TileCollider.FindDistance(new Vector2I(Radius.X, 0), true, direction);
 		
-		if (distanceLeft != Constants.TileSize * 2 && distanceRight != Constants.TileSize * 2) return;
-
-		int offsetX = distanceLeft == Constants.TileSize * 2 ? 6 : -6;
-		bool isPanic = TileCollider.FindDistance(new Vector2I(offsetX, 0), true, direction) >= 12;
-		BalanceToDirection(Constants.Direction.Negative, isPanic);
+		if (TileCollider.FindDistance(new Vector2I(), true, direction) < 12) return;
+			
+		(_, float angleLeft) = TileCollider.FindTile(new Vector2I(-Radius.X, 0), true, direction);
+		(_, float angleRight) = TileCollider.FindTile(new Vector2I(Radius.X, 0), true, direction);
+		
+		if (!float.IsNaN(angleLeft) && !float.IsNaN(angleRight)) return;
+		
+		int sign = float.IsNaN(angleLeft) ? -1 : 1;
+		bool isPanic = TileCollider.FindDistance(new Vector2I(-6 * sign, 0), true, direction) >= 12;
+		BalanceToDirection((Constants.Direction)sign, isPanic);
 	}
 
 	private void BalanceToDirection(Constants.Direction direction, bool isPanic)

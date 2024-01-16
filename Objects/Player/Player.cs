@@ -19,6 +19,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	public override void _Ready()
 	{
+		base._Ready();
 		if (GetOwner<Node>() is CommonScene scene)
 		{
 			TileMap = scene.CollisionTileMap;
@@ -27,63 +28,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				Stage = stage;
 			}
 		}
-		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
-
-		Radius = RadiusNormal;
-		
-		Position += new Vector2(0f, 1f - Radius.Y);
-		
-		Gravity = GravityType.Default;
-		TileLayer = Constants.TileLayers.Main;
-		GroundMode = Constants.GroundMode.Floor;
-		ObjectInteraction = true;
-		Facing = Constants.Direction.Positive;
-		AirTimer = 1800f;
-		CpuState = CpuStates.Main;
-		RestartState = RestartStates.GameOver;
-		Input.Clear();
-		
-		if (SharedData.GiantRingData != null)
-		{
-			Position = SharedData.GiantRingData.position;
-		}
-		else if (Id == 0)
-		{
-			// TODO: Respawn CPU on the checkpoint
-			
-			if (SharedData.CheckpointData != null)
-			{
-				Vector2I position = SharedData.CheckpointData.position;
-				position.Y -= Radius.Y;
-				Position = position;
-			}
-			
-			if (FrameworkData.PlayerBackupData != null)
-			{
-				RingCount = FrameworkData.PlayerBackupData.RingCount;
-				Barrier.Type = FrameworkData.PlayerBackupData.BarrierType;
-			}
-		}
-		
-		if (Id == 0)
-		{
-			if (FrameworkData.SavedBarrier != Barrier.Types.None)
-			{
-				Barrier.Type = FrameworkData.SavedBarrier;
-			}
-		
-			FrameworkData.SavedBarrier = 0;
-			FrameworkData.SavedRings = 0;
-		}
-		
-		ScoreCount = FrameworkData.SavedScore;
-		RingCount = FrameworkData.SavedRings;
-		LifeCount = FrameworkData.SavedLives;
-		
-		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
-
-		TouchObjects = [];
 		
 		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
@@ -192,11 +136,14 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (IsDead) return;
 
 		// TODO: make obj_dust_skid & check ProcessSpeed
-		if (Animation == Animations.Skid && ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
+		if (Animation == Animations.Skid) 
 		{
-			//instance_create(x, y + Radius.Y, obj_dust_skid);
+			if (ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
+			{
+				//instance_create(x, y + Radius.Y, obj_dust_skid);
+			}
+			ActionValue2 += FrameworkData.ProcessSpeed;
 		}
-		ActionValue2 += FrameworkData.ProcessSpeed;
 		
 		if (InvincibilityTimer > 0f)
 		{

@@ -18,7 +18,7 @@ public static class CollisionUtilities
 
 	public static float GetRawTileAngle(int index)
 	{
-		return index > 0 ? FrameworkData.TilesData.Angles[index % TileLimit] : 360f;
+		return index > 0 ? FrameworkData.TilesData.Angles[index % TileLimit] : float.NaN;
 	}
 
 	public static TilesData LoadTileDataBinary(string anglesFileName, string heightsFileName, string widthsFileName)
@@ -149,7 +149,7 @@ public static class CollisionUtilities
 		// Return empty data if no tile data was found
 		if (type == TileLayers.None || tileMap == null || tileMap.GetLayersCount() < tileLayerId)
 		{
-			return (TileSize * 2, null);
+			return (DoubleTileSize, null);
 		}
 
 		// If above the room, use topmost valid level collision
@@ -184,7 +184,7 @@ public static class CollisionUtilities
 
 			if (!tileData.IsValid)
 			{
-				return (TileSize * 2, null);
+				return (DoubleTileSize, null);
 			}
 		}
 		else if (tileData.Size == TileSize)
@@ -220,11 +220,13 @@ public static class CollisionUtilities
 
 	private static float GetTileAngle(FoundTileData tileData, bool isVertical, Direction direction)
 	{
-		if (tileData == null) return 0f;
+		if (tileData == null) return float.NaN;
+		float rawAngle = GetRawTileAngle(tileData.Index);
+
+		if (float.IsNaN(rawAngle)) return rawAngle;
 		
 		float angle;
-		float rawAngle = GetRawTileAngle(tileData.Index);
-		if (rawAngle is not (float)Circle.Full)
+		if (!Mathf.IsEqualApprox(rawAngle, (float)Circle.Full))
 		{
 			angle = TransformTileAngle(rawAngle, tileData.Transforms);
 		}
@@ -237,16 +239,12 @@ public static class CollisionUtilities
 			angle = (float)(direction == Direction.Positive ? Circle.Quarter : Circle.ThreeQuarters);
 		}
 		
-		// Run an additional check from CD'96
+		// A fix from Sonic CD 1996's PC release. If tile angle is in the lower half, we assume its bottom is flat, 
+		// so in case it is flipped, we should treat it as a flat ground
 		if (!isVertical || !SharedData.CDTileFixes || direction != Direction.Positive) return angle;
-		
-		// If tile angle is in the bottom half, we assume it's bottom is flat, so in case it is flipped
-		// we should treat it as a flat ground
 		if (rawAngle is > 90f and <= 270f || !tileData.Transforms.IsFlipped) return angle;
 		tileData.Size = TileSize;
-		angle = 360f;
-
-		return angle;
+		return 360f;
 	}
 
 	private static void LoadCollisionArrays(IList<byte[]> collisions, IReadOnlyList<byte> fileData)
