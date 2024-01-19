@@ -27,7 +27,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		}
 	}
 	private Types _type;
-	public Speed Speed { get; set; } = new();
+	public Speed Speed { get; } = new();
 	public float GroundSpeed { get; set; }
 	
 	public int Id { get; protected set; }

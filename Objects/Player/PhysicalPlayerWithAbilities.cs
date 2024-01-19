@@ -1281,7 +1281,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private void AttachToPlayer(ICarrier carrier)
 	{
 		Facing = carrier.Facing;
-		Speed = carrier.Speed;
+		Speed.Vector = carrier.Speed.Vector;
 		Position = carrier.Position + new Vector2(0f, 28f);
 		Scale = new Vector2(Math.Abs(Scale.X) * (float)carrier.Facing, Scale.Y);
 		

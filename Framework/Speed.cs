@@ -63,8 +63,8 @@ public class Speed
 
     public Vector2 CalculateNewPosition(Vector2 position)
     {
-        return position + ((FrameworkData.ProcessSpeed - Constants.BaseFramerate) * _instantVector + 
-                           (FrameworkData.ProcessSpeed + Constants.BaseFramerate) * _speed) * 0.5f;
+        return position + ((FrameworkData.ProcessSpeed - 1f) * _instantVector + 
+                           (FrameworkData.ProcessSpeed + 1f) * _speed) * 0.5f;
     }
 
     public void ClampX(float min, float max) => ClampAxis(ref _speed.X, ref _instantVector.X, min, max);

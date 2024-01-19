@@ -189,7 +189,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		if (Speed.Y < 0) return;
 		
 		float relX = MathF.Floor(Position.X - objectData.Position.X) + objectData.Radius.X;
-		if (!(relX >= -extraSizeX) || !(relX <= objectData.Radius.X * 2 + extraSizeX)) return;
+		if (relX < -extraSizeX || relX > objectData.Radius.X * 2 + extraSizeX) return;
 		
 		TouchObjects[baseObject] = Constants.TouchState.Up;
 		LandOnSolid(baseObject, objectData.Type, Mathf.FloorToInt(clipY - GripY));
