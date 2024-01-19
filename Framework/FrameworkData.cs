@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.Input;
@@ -11,7 +12,6 @@ namespace OrbinautFramework3.Framework;
 public static class FrameworkData
 {
     public static float ProcessSpeed { get; set; }
-    
     public static List<KeyboardControl> KeyboardControl { get; set; }
     public static bool GamepadVibration { get; set; }
     public static TilesData TilesData { get; }

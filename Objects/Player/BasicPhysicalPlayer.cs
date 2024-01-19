@@ -629,7 +629,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				return;
 		}
 		
-		var position = (Vector2I)Speed.CalculateNewPosition(Position);
+		//var position = (Vector2I)Speed.CalculateNewPosition(Position);
+		GD.Print(Speed.Vector);
+		var position = (Vector2I)(Position + Speed.Vector * FrameworkData.ProcessSpeed);
 		TileCollider.SetData(position, TileLayer, TileMap, GroundMode);
 		
 		int castQuadrant = Angle switch
@@ -649,8 +651,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
-		//GD.Print(wallDistance);
-		
 		if (wallDistance >= 0) return;
 		byte quadrant = Angles.GetQuadrant(Angle);
 		wallDistance *= quadrant > 1 ? -sign : sign;
@@ -658,9 +658,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (quadrant & 1)
 		{
 			case 0:
-				//Position = Position with { X = Position.X - wallDistance };
+				GD.Print(Speed.X, " ", wallDistance);
 				Speed.X -= wallDistance;
-				GD.Print(-wallDistance);
 				GroundSpeed = 0f;
 					
 				if (Facing == firstDirection && !IsSpinning)

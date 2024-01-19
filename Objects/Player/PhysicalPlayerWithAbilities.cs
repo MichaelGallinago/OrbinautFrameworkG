@@ -170,8 +170,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		{
 			Animation = Animations.Move;
 			Action = Actions.PeelOut;
-			ActionValue = 0;
-			ActionValue2 = 0;
+			ActionValue = 0f;
+			ActionValue2 = 0f;
 			
 			//TODO: audio
 			//audio_play_sfx(sfx_charge2, [1.00, 2.30]);
@@ -185,40 +185,38 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		{
 			if (ActionValue < 30f)
 			{
-				ActionValue++;
+				ActionValue += FrameworkData.ProcessSpeed;
 			}
-			
-			ActionValue2 = Math.Clamp(ActionValue2 + 0.390625f * (float)Facing, -launchSpeed, launchSpeed);
+
+			float acceleration = 0.390625f * (float)Facing * FrameworkData.ProcessSpeed;
+			ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
 			GroundSpeed = ActionValue2;
+			return false;
 		}
-		else 
-		{
-			//TODO: audio
-			//audio_stop_sfx(sfx_charge2);
-			Action = Actions.None;
+
+		//TODO: audio
+		//audio_stop_sfx(sfx_charge2);
+		Action = Actions.None;
 		
-			if (!Mathf.IsEqualApprox(ActionValue, 30f))
-			{
-				GroundSpeed = 0f;
-				return false;
-			}
+		if (ActionValue < 30f)
+		{
+			GroundSpeed = 0f;
+			return false;
+		}
 			
-			if (!SharedData.CDCamera && Id == 0)
-			{
-				Camera.Main.Delay.X = 16f;
-			}
-
-			//TODO: audio
-			//audio_play_sfx(sfx_release2);
-			
-			if (!SharedData.FixDashRelease) return true;
-			
-			float radians = Mathf.DegToRad(Angle);
-			Speed.Acceleration = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians)) - Speed.Vector;
-			return true;
+		if (!SharedData.CDCamera && Id == 0)
+		{
+			Camera.Main.Delay.X = 16f;
 		}
 
-		return false;
+		//TODO: audio
+		//audio_play_sfx(sfx_release2);
+			
+		if (!SharedData.FixDashRelease) return true;
+			
+		float radians = Mathf.DegToRad(Angle);
+		Speed.Acceleration = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians)) - Speed.Vector;
+		return true;
 	}
 
 	private bool ProcessJump()
