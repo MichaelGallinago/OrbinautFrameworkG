@@ -34,35 +34,35 @@ shader_parameter/u_inclineStep = null
 shader_parameter/u_overlapActive = null
 shader_parameter/u_mapSizeSurf = null
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_6gglh"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_jhhwb"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_5sgyq"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ogx8o"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_x4b61"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_bwtw7"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_jic4u"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_8snth"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hlpjr"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_82jds"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hmv7t"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_cijry"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_he7fg"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_fh4b8"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_fjext"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_41ifa"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
@@ -191,4 +191,4 @@ _sprite = NodePath("../CameraTrigger/Sprite2D")
 
 [node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
 position = Vector2(816, 840)
-_piecesTextures = [SubResource("AtlasTexture_6gglh"), SubResource("AtlasTexture_5sgyq"), SubResource("AtlasTexture_x4b61"), SubResource("AtlasTexture_jic4u"), SubResource("AtlasTexture_hlpjr"), SubResource("AtlasTexture_hmv7t"), SubResource("AtlasTexture_he7fg"), SubResource("AtlasTexture_fjext")]
+_piecesTextures = [SubResource("AtlasTexture_jhhwb"), SubResource("AtlasTexture_ogx8o"), SubResource("AtlasTexture_bwtw7"), SubResource("AtlasTexture_8snth"), SubResource("AtlasTexture_82jds"), SubResource("AtlasTexture_cijry"), SubResource("AtlasTexture_fh4b8"), SubResource("AtlasTexture_41ifa")]

@@ -55,15 +55,15 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Action = Actions.None;
 			Animation = Animations.Spin;
 			Radius = RadiusSpin;
-			Speed = new Vector2(0f, PhysicParams.MinimalJumpVelocity);
+			Speed.Vector = new Vector2(0f, PhysicParams.MinimalJumpVelocity);
 					
 			if (Input.Down.Left)
 			{
-				Speed = Speed with { X = -2 };
+				Speed.X = -2f;
 			}
 			else if (Input.Down.Right)
 			{
-				Speed = Speed with { X = 2 };
+				Speed.X = 2f;
 			}
 					
 			//TODO: audio
@@ -93,9 +93,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			
 			Animation = Animations.SpinDash;
 			Action = Actions.SpinDash;
-			ActionValue = 0;
-			ActionValue2 = 1;
-			Speed = new Vector2();
+			ActionValue = 0f;
+			ActionValue2 = 1f;
+			Speed.Vector = Vector2.Zero;
 			
 			// TODO: audio & SpinDash dust 
 			//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });
@@ -145,19 +145,16 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Animation = Animations.Spin;
 			IsSpinning = true;
 			Action = Actions.None;
-			GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2) * (float)Facing;
-				
-			if (SharedData.FixDashRelease)
-			{
-				float radians = Mathf.DegToRad(Angle);
-				Speed = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians));
-			}
+			GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2f) * (float)Facing;
 			
 			//TODO: audio
 			//audio_stop_sfx(sfx_charge);
 			//audio_play_sfx(sfx_release);
+
+			if (!SharedData.FixDashRelease) return true;
 			
-			// return player control routine
+			float radians = Mathf.DegToRad(Angle);
+			Speed.Acceleration = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians)) - Speed.Vector;
 			return true;
 		}
 		
@@ -203,26 +200,22 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			if (!Mathf.IsEqualApprox(ActionValue, 30f))
 			{
 				GroundSpeed = 0f;
+				return false;
 			}
-			else
+			
+			if (!SharedData.CDCamera && Id == 0)
 			{
-				if (!SharedData.CDCamera && Id == 0)
-				{
-					Camera.Main.Delay.X = 16f;
-				}
-			
-				if (SharedData.FixDashRelease)
-				{
-					float radians = Mathf.DegToRad(Angle);
-					Speed = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians));
-				}
-			
-				//TODO: audio
-				//audio_play_sfx(sfx_release2);
-			
-				// return player control routine
-				return true;
+				Camera.Main.Delay.X = 16f;
 			}
+
+			//TODO: audio
+			//audio_play_sfx(sfx_release2);
+			
+			if (!SharedData.FixDashRelease) return true;
+			
+			float radians = Mathf.DegToRad(Angle);
+			Speed.Acceleration = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians)) - Speed.Vector;
+			return true;
 		}
 
 		return false;
@@ -234,7 +227,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (!Input.Down.Abc)
 		{
-			Speed = Speed with { Y = Math.Max(Speed.Y, PhysicParams.MinimalJumpVelocity) };
+			Speed.MaxY(PhysicParams.MinimalJumpVelocity);
 		}
 		
 		if (Speed.Y < PhysicParams.MinimalJumpVelocity || Id > 0 && CpuInputTimer == 0) return false;
@@ -320,7 +313,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void JumpWaterBarrier()
 	{
-		Speed = new Vector2(0, 8);
+		Speed.Vector = new Vector2(0, 8);
 				
 		Barrier.UpdateFrame(0, 1, [1, 2]);
 		Barrier.UpdateDuration([6, 18]);
@@ -338,7 +331,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 				
 		IsAirLock = true;
-		Speed = new Vector2(8f * (float)Facing, 0f);
+		Speed.Vector = new Vector2(8f * (float)Facing, 0f);
 					
 
 		// TODO: SetAnimation
@@ -354,7 +347,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private void JumpThunderBarrier()
 	{
 		Barrier.State = Barrier.States.Disabled;
-		Speed = Speed with { Y = -5.5f };
+		Speed.Y = -5.5f;
 				
 		for (var i = 0; i < 4; i++)
 		{
@@ -401,11 +394,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
 		Radius = new Vector2I(10, 10);
 		GroundSpeed = 4f;
-		Speed = new Vector2(0f, Speed.Y + 2f);
+		Speed.X = 0f;
+		Speed.Y += 2f; 
 				
-		if (Speed.Y < 0)
+		if (Speed.Y < 0f)
 		{
-			Speed = Speed with { Y = 0 };
+			Speed.Y = 0f;
 		}
 	}
 
@@ -447,7 +441,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 
 		float radians = Mathf.DegToRad(Angle);
-		Speed += PhysicParams.JumpVelocity * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+		Speed.Vector += PhysicParams.JumpVelocity * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
 		
 		IsSpinning = true;	
 		IsJumping = true;
@@ -538,12 +532,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private void ReleaseDropDash()
 	{
 		if (!SharedData.DropDash || Action != Actions.DropDash) return;
-
+		
 		if (ActionValue < MaxDropDashCharge) return;
 		
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
-
+		
 		if (IsSuper)
 		{
 			UpdateDropDashGroundSpeed(13f, 12f);
@@ -576,7 +570,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Speed.X * sign >= 0f)
 		{
-			GroundSpeed = Mathf.Floor(GroundSpeed / 4f) + force;
+			GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
 			if (sign * GroundSpeed <= limitSpeed) return;
 			GroundSpeed = limitSpeed;
 			return;
@@ -585,24 +579,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		GroundSpeed = force;
 		if (Mathf.IsEqualApprox(Angle, 360f)) return;
 		
-		GroundSpeed += Mathf.Floor(GroundSpeed / 2f);
-	}
-	
-	private void SetDropDashGroundSpeed(float force, float limitSpeed, Constants.Direction facing)
-	{
-		var sign = (float)facing;
-		limitSpeed *= sign;
-		force *= sign;
-		
-		if (sign * Speed.X >= 0)
-		{
-			GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
-			if (sign * GroundSpeed <= limitSpeed) return;
-			GroundSpeed = limitSpeed;
-			return;
-		}
-		
-		GroundSpeed = (Mathf.IsEqualApprox(Angle, 360f) ? 0f : MathF.Floor(GroundSpeed / 2f)) + force;
+		GroundSpeed += MathF.Floor(GroundSpeed / 2f);
 	}
 	
 	private void ProcessFlight()
@@ -643,7 +620,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 						Gravity = GravityType.TailsDown;
 					}
 
-					Speed = Speed with { Y = Math.Max(Speed.Y, -4f) };
+					Speed.MaxY(-4f);
 				}
 				else
 				{
@@ -736,7 +713,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsJumping = true;
 		Action = Actions.None;
 		Facing = (Constants.Direction)(-(int)Facing);
-		Speed = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
+		Speed.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
 			
 		//TODO: audio
 		//audio_play_sfx(sfx_jump);
@@ -752,15 +729,15 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (wallDistance >= 4)
 		{
 			ActionState = (int)ClimbStates.Ledge;
-			ActionValue = 0;
-			Speed = Speed with { Y = 0 };
+			ActionValue = 0f;
+			Speed.Y = 0f;
 			return true;
 		}
 
 		// If Knuckles has encountered a small dip in the wall, cancel climb movement
 		if (wallDistance != 0)
 		{
-			Speed = Speed with { Y = 0 };
+			Speed.Y = 0f;
 		}
 
 		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
@@ -769,7 +746,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (ceilDistance >= 0) return false;
 		Position -= new Vector2(0f, ceilDistance);
-		Speed = Speed with { Y = 0 };
+		Speed.Y = 0f;
 		return false;
 	}
 
@@ -796,7 +773,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Land();
 
 		Animation = Animations.Idle;
-		Speed = Speed with { Y = 0 };
+		Speed.Y = 0f;
 				
 		return true;
 	}
@@ -810,9 +787,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				ActionValue = 0f;
 			}
 
-			Speed = Speed with { Y = -PhysicParams.AccelerationClimb };
+			Speed.Y = -PhysicParams.AccelerationClimb;
 			return;
 		}
+		
 		if (Input.Down.Down)
 		{
 			if (--ActionValue < 0f)
@@ -820,11 +798,11 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				ActionValue = maxValue;
 			}
 
-			Speed = Speed with { Y = PhysicParams.AccelerationClimb };
+			Speed.Y = PhysicParams.AccelerationClimb;
 			return;
 		}
 
-		Speed = Speed with { Y = 0 };
+		Speed.Y = 0f;
 	}
 
 	private void ReleaseClimb()
@@ -863,28 +841,29 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		ActionState = (int)GlideStates.Fall;
 		ActionValue = 0f;
 		Radius = RadiusNormal;
-		Speed = Speed with { X = Speed.X * 0.25f };
+		Speed.X *= 0.25f;
 
 		ResetGravity();
 	}
 
 	private void UpdateGlideSpeed()
 	{
+		const float glideAcceleration = 0.03125f;
 		if (GroundSpeed < 4f)
 		{
-			GroundSpeed += 0.03125f;
+			GroundSpeed += glideAcceleration * FrameworkData.ProcessSpeed;
 			return;
 		}
 
-		if (ActionValue % 180f != 0) return;
-		GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide, 24f);
+		if (ActionValue % 180f != 0f) return;
+		GroundSpeed = Math.Min(GroundSpeed + PhysicParams.AccelerationGlide * FrameworkData.ProcessSpeed, 24f);
 	}
 
 	private void UpdateGlideGravityAndHorizontalSpeed()
 	{
 		const float glideGravity = 0.125f;
 
-		Speed = Speed with { X = GroundSpeed * -Mathf.Cos(Mathf.DegToRad(ActionValue)) };
+		Speed.AccelerationX = GroundSpeed * -Mathf.Cos(Mathf.DegToRad(ActionValue)) - Speed.X;
 		Gravity = Speed.Y < 0.5f ? glideGravity : -glideGravity;
 	}
 
@@ -916,13 +895,13 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			OverrideAnimationFrame = 1;
 
 			Animation = Animations.GlideGround;
-			GroundLockTimer = 16;
-			GroundSpeed = 0;
+			GroundLockTimer = 16f;
+			GroundSpeed = 0f;
 
 			return;
 		}
 
-		if (ActionValue % 4 == 0)
+		if (ActionValue % 4f == 0f)
 		{
 			//TODO: obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
@@ -939,43 +918,39 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void GlideGroundUpdateSpeedX()
 	{
-		const float slideFriction = 0.09375f;
+		const float slideFriction = -0.09375f;
 		
 		if (!Input.Down.Abc)
 		{
-			Speed = Speed with { X = 0f };
+			Speed.X = 0f;
 			return;
 		}
-
-		Speed = Speed with
+		
+		float speedX = Speed.X;
+		Speed.AccelerationX = Math.Sign(Speed.X) * slideFriction;
+		switch (speedX)
 		{
-			X = Speed.X switch
-			{
-				> 0f => Math.Max(0f, Speed.X - slideFriction),
-				< 0f => Math.Min(0f, Speed.X + slideFriction),
-				_ => Speed.X
-			}
-		};
+			case > 0f: Speed.MaxX(0f); break;
+			case < 0f: Speed.MinX(0f); break;
+		}
 	}
 
 	private void GlideAirTurnAround()
 	{
-		const float angleIncrement = 2.8125f;
-		
 		if (Input.Down.Left && !Mathf.IsZeroApprox(ActionValue))
 		{
-			ActionValue = (ActionValue > 0f ? -ActionValue : ActionValue) + angleIncrement;
+			ActionValue = (ActionValue > 0f ? -ActionValue : ActionValue) + Angles.ByteAngleStep;
 			return;
 		}
 		
 		if (Input.Down.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
 		{
-			ActionValue = (ActionValue < 0f ? -ActionValue : ActionValue) + angleIncrement;
+			ActionValue = (ActionValue < 0f ? -ActionValue : ActionValue) + Angles.ByteAngleStep;
 			return;
 		}
 		
 		if (Mathf.IsZeroApprox(ActionValue % 180f)) return;
-		ActionValue += angleIncrement;
+		ActionValue += Angles.ByteAngleStep;
 	}
 	
 	private void ChargeHammerSpin()
@@ -1046,10 +1021,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Input.Down.Left && GroundSpeed > 0f || Input.Down.Right && GroundSpeed < 0f)
 		{
 			Facing = (Constants.Direction)(-(int)Facing);
-			GroundSpeed *= -1;
+			GroundSpeed *= -1f;
 		}
 		
-		Speed = GroundSpeed * new Vector2(cosine, -MathF.Sin(radians));
+		Speed.Acceleration = GroundSpeed * new Vector2(cosine, -MathF.Sin(radians)) - Speed.Vector;
 	}
 
 	private void CancelHammerDash()
@@ -1083,7 +1058,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			{
 				Position -= new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
-				Speed = Speed with { X = 0 };
+				Speed.X = 0f;
 				collisionFlagWall = true;
 			}
 		}
@@ -1098,7 +1073,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			{
 				Position += new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
-				Speed = Speed with { X = 0 };
+				Speed.X = 0f;
 				collisionFlagWall = true;
 			}
 		}
@@ -1121,7 +1096,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				{
 					Position += new Vector2(findDistance, 0f);
 					TileCollider.Position = (Vector2I)Position;
-					Speed = Speed with { X = 0 };
+					Speed.X = 0f;
 					collisionFlagWall = true;
 				}
 			}
@@ -1129,9 +1104,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			{
 				Position -= new Vector2(0f, roofDistance);
 				TileCollider.Position = (Vector2I)Position;
-				if (Speed.Y < 0 || moveQuad == 2)
+				if (Speed.Y < 0f || moveQuad == 2)
 				{
-					Speed = Speed with { Y = 0 };
+					Speed.Y = 0f;
 				}
 			}
 		}
@@ -1164,7 +1139,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				Position += new Vector2(0f, floorDistance);
 				TileCollider.Position = (Vector2I)Position;
 				Angle = floorAngle;
-				Speed = Speed with { Y = 0 };
+				Speed.Y = 0f;
 				collisionFlagFloor = true;
 			}
 		}
@@ -1198,9 +1173,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 					}
 					
 					Animation = Animations.GlideLand;
-					GroundLockTimer = 16;
-					GroundSpeed = 0;
-					Speed = Speed with { X = 0 };
+					GroundLockTimer = 16f;
+					GroundSpeed = 0f;
+					Speed.X = 0f;
 					break;
 				
 				case GlideStates.Ground:
@@ -1248,10 +1223,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Animation = Animations.ClimbWall;
 			Action = Actions.Climb;
 			ActionState = (int)ClimbStates.Normal;
-			ActionValue = 0;
-			GroundSpeed = 0;
-			Speed = Speed with { Y = 0 };
-			Gravity	= 0;
+			ActionValue = 0f;
+			GroundSpeed = 0f;
+			Speed.Y = 0f;
+			Gravity	= 0f;
 			
 			//TODO: audio
 			//audio_play_sfx(sfx_grab);
@@ -1262,9 +1237,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		Animation = Animations.GlideFall;
 		ActionState = (int)GlideStates.Fall;
-		ActionValue = 0;
-		Radius.X = RadiusNormal.X;
-		Radius.Y = RadiusNormal.Y;
+		ActionValue = 0f;
+		Radius = RadiusNormal;
 		
 		ResetGravity();
 	}

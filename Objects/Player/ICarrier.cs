@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface ICarrier
 {
-    Vector2 Speed { get; }
+    Speed Speed { get; }
     Actions Action { get; }
     Vector2 Position { get; }
     Constants.Direction Facing { get; }

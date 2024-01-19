@@ -11,7 +11,6 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
 	
-	
 	private IAnimatedPlayer _player;
 	private int _spriteFramesIndex;
 
@@ -38,13 +37,21 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			case Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
 			case Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
-
+		
 		player.IsAnimationFrameChanged = false;
+		OverrideFrame();
 	}
 
 	public int GetAnimationFrameCount(Animations animation, Types playerType)
 	{
 		return _spriteFrames[(int)playerType].GetFrameCount(animation.ToStringFast());
+	}
+
+	private void OverrideFrame()
+	{
+		if (_player.OverrideAnimationFrame == null) return;
+		Frame = (int)_player.OverrideAnimationFrame;
+		_player.OverrideAnimationFrame = null;
 	}
 
 	private void OnAnimationFinished()

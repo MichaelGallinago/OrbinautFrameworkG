@@ -140,8 +140,8 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		
 		if (clip.X != 0 && Math.Sign(clip.X) == Math.Sign(Speed.X))
 		{
-			GroundSpeed = 0;
-			Speed = new Vector2(0, Speed.Y);
+			GroundSpeed = 0f;
+			Speed.X = 0f;
 		}
 
 		Position = new Vector2(Position.X - clip.X, Position.Y);
@@ -176,11 +176,11 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 	{
 		if (SharedData.PlayerPhysics >= PhysicsTypes.S3 && !IsGrounded)
 		{
-			GroundSpeed = 0;
+			GroundSpeed = 0f;
 		}
 
 		Position = new Vector2(Position.X, Position.Y - clipY);
-		Speed = new Vector2(Speed.X, 0);
+		Speed.Y = 0f;
 		TouchObjects[baseObject] = Constants.TouchState.Down;
 	}
 

@@ -128,7 +128,7 @@ public partial class PlayerCpu : Player
 		{
 			CpuState = CpuStates.Main;
 			Animation = Animations.Move;
-			Speed = Vector2.Zero;
+			Speed.Vector = Vector2.Zero;
 			GroundSpeed = 0f;
 			GroundLockTimer = 0f;
 			ObjectInteraction = true;

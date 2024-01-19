@@ -6,6 +6,7 @@ namespace OrbinautFramework3.Framework.Tiles;
 public static class Angles
 {
     public const short ByteAngleLimit = 256;
+    public const float ByteAngleStep = 2.8125f;
     
     public enum Circle : ushort
     {

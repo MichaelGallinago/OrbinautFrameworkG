@@ -1,11 +1,12 @@
 using Godot;
+using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public interface ITailed
 {
     Vector2 Scale { get; }
-    Vector2 Speed { get; }
+    Speed Speed { get; }
     float GroundSpeed { get; }
     bool IsGrounded { get; }
     bool IsSpinning { get; }

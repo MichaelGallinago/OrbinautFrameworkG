@@ -27,6 +27,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		}
 	}
 	private Types _type;
+	public Speed Speed { get; set; } = new();
+	public float GroundSpeed { get; set; }
 	
 	public int Id { get; protected set; }
 	public Animations Animation { get; set; }
@@ -36,8 +38,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Vector2I RadiusNormal { get; set; }
 	public Vector2I RadiusSpin { get; set; }
 	public float Gravity { get; set; }
-	public Vector2 Speed { get; set; }
-	public float GroundSpeed { get; set; }
 	public float Angle { get; set; }
 	public float SlopeGravity { get; set; }
 
@@ -95,18 +95,16 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
     
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
-
-	public List<RecordedData> RecordedData { get; set; } = [];
-	
-	public CollisionTileMap TileMap { get; set; }
 	public CommonStage Stage { get; set; }
-	public TileCollider TileCollider { get; set; } = new();
 
-	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; protected set; } = [];
+	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	
 	public bool IsEditMode { get; set; }
 	
+	protected CollisionTileMap TileMap;
 	protected readonly PlayerInput Input = new();
+	protected readonly TileCollider TileCollider = new();
+	protected readonly List<RecordedData> RecordedData = [];
 
 	private bool _isInit = true;
 
@@ -155,7 +153,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Radius = RadiusNormal;
 		Position = Position with { Y = Position.Y - Radius.Y - 1f };
 		Gravity = GravityType.Default;
-		Speed = Vector2.Zero;
+		Speed.Vector = Vector2.Zero;
 		GroundSpeed = 0f;
 		Angle = 0f;
 		

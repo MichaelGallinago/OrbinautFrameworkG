@@ -249,7 +249,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					Gravity = GravityType.Underwater;
 				}
 				
-				Speed *= new Vector2(0.5f, 0.25f);
+				Speed.Acceleration = Speed.Vector * new Vector2(0.5f, 0.25f) - Speed.Vector;
 			}
 			
 			if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
@@ -304,7 +304,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					ZIndex = 0;
 					Animation = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
-					Speed = Vector2.Zero;
+					Speed.Vector = Vector2.Zero;
 					Gravity	= 0.0625f;
 					IsAirLock = true;
 					if (Camera.Main == null) return;
@@ -333,12 +333,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4f)
 			{
-				Speed = Speed with { Y = Speed.Y * 2f };
+				Speed.Y *= 2f;
 			}
 					
 			if (Speed.Y < -16f)
 			{
-				Speed = Speed with { Y = -16f };
+				Speed.Y = -16f;
 			}
 					
 			if (Action != Actions.Flight)
@@ -583,23 +583,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		base.ResetState();
 	}
 
-	private void ProcessPosition(float processSpeed)
-	{
-		if (Action == Actions.Carried) return;
-
-		if (StickToConvex)
-		{
-			Speed.Clamp(-16 * Vector2.One, 16 * Vector2.One);
-		}
-
-		Position += Speed * processSpeed;
-
-		if (!IsGrounded)
-		{
-			Speed = Speed with { Y = Speed.Y + Gravity * processSpeed };
-		}
-	}
-
 	private void ProcessRestart(float processSpeed)
 	{
 		if (!IsDead || Id > 0) return;
@@ -716,7 +699,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	public void OnDisableEditMode()
 	{
-		Speed = new Vector2();
+		Speed.Vector = Vector2.Zero;
 		GroundSpeed = 0f;
 		Animation = Animations.Move;
 		ObjectInteraction = true;
