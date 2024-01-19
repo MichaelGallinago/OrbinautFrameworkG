@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.Input;
@@ -23,7 +24,7 @@ public abstract partial class CommonScene : Node2D
 
     public override void _Process(double deltaTime)
     {
-        FrameworkData.ProcessSpeed = (float)(deltaTime * Constants.BaseFramerate);
+        FrameworkData.ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
         
         InputUtilities.Process();
         FrameworkData.UpdateEarly(FrameworkData.ProcessSpeed);
