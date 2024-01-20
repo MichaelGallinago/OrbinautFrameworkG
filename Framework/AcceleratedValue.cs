@@ -2,7 +2,7 @@ using System;
 
 namespace OrbinautFramework3.Framework;
 
-public struct AcceleratedValue
+public class AcceleratedValue
 {
     public float Value
     {
@@ -14,6 +14,7 @@ public struct AcceleratedValue
     private float _instantValue;
     
     public static implicit operator float(AcceleratedValue value) => value.Value;
+    public static implicit operator AcceleratedValue(float value) => new() { Value = value };
     
     public float Acceleration
     {
@@ -33,7 +34,7 @@ public struct AcceleratedValue
         return result;
     }
     
-    private void Clamp(float min, float max)
+    public void Clamp(float min, float max)
     {
         if (min > max)
         {
@@ -50,13 +51,13 @@ public struct AcceleratedValue
         }
     }
     
-    private void Max(float value)
+    public void Max(float value)
     {
         if (_value >= value) return;
         Value = value;
     }
     
-    private void Min(float value)
+    public void Min(float value)
     {
         if (_value <= value) return;
         Value = value;

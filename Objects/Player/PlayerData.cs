@@ -28,7 +28,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	}
 	private Types _type;
 	public Speed Speed { get; } = new();
-	public float GroundSpeed { get; set; }
+	public AcceleratedValue GroundSpeed { get; set; }
 	
 	public int Id { get; protected set; }
 	public Animations Animation { get; set; }
@@ -206,7 +206,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		LifeRewards = [];
 		
 		CarryTarget = null;
-		CarryTimer = 0;
+		CarryTimer = 0f;
 		CarryTargetPosition = Vector2.Zero;
 		
 		CpuTimer = 0f;

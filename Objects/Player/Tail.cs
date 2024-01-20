@@ -59,7 +59,7 @@ public partial class Tail : AdvancedAnimatedSprite
 	private void ChangeDirection(ITailed data)
 	{
 		float scaleX = data.IsSpinning && data.IsGrounded
-			? (data.GroundSpeed >= 0f ? 1f : -1f) * Mathf.Abs(data.Scale.X)
+			? (data.GroundSpeed >= 0f ? 1f : -1f) * Math.Abs(data.Scale.X)
 			: data.Scale.X;
 
 		Scale = new Vector2(scaleX, Scale.Y);
@@ -68,7 +68,7 @@ public partial class Tail : AdvancedAnimatedSprite
 	private void UpdateAngle(ITailed data)
 	{
 		_angle = GetTailAngle(data);
-		RotationDegrees = FrameworkData.RotationMode == 0 ? Mathf.Ceil((_angle - 22.5f) / 45f) * 45f : _angle;
+		RotationDegrees = FrameworkData.RotationMode == 0 ? MathF.Ceiling((_angle - 22.5f) / 45f) * 45f : _angle;
 	}
 
 	private float GetTailAngle(ITailed data)
@@ -79,13 +79,13 @@ public partial class Tail : AdvancedAnimatedSprite
 		if (!data.IsGrounded)
 		{
 			// TODO: Check Atan2
-			angle = Mathf.RadToDeg(Mathf.Atan2(data.Speed.Y, data.Speed.X));
+			angle = Mathf.RadToDeg(MathF.Atan2(data.Speed.Y, data.Speed.X));
 			return data.Scale.X >= 0f ? angle : angle + 180f;
 		}
 
 		// Smooth rotation code by Nihil
 		angle = 360f;
-		float step = Mathf.Abs(data.GroundSpeed);
+		float step = Math.Abs(data.GroundSpeed);
 				
 		if (data.Angle is > 22.5f and <= 337.5f)
 		{

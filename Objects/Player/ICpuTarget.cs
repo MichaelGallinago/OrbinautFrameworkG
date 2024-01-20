@@ -11,7 +11,7 @@ public interface ICpuTarget
     Speed Speed { get; }
     Actions Action { get; }
     Vector2 Position { get; }
-    float GroundSpeed { get; }
+    AcceleratedValue GroundSpeed { get; }
     BaseObject OnObject { get; }
     bool ObjectInteraction { get; }
 }

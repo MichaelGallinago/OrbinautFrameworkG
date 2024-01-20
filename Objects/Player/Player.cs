@@ -138,7 +138,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		// TODO: make obj_dust_skid & check ProcessSpeed
 		if (Animation == Animations.Skid) 
 		{
-			if (ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
+			if (ActionValue2 % 4f < FrameworkData.ProcessSpeed)
 			{
 				//instance_create(x, y + Radius.Y, obj_dust_skid);
 			}
@@ -166,14 +166,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			if (Action == Actions.Transform)
 			{
-				if (--ActionValue == 0)
+				ActionValue -= FrameworkData.ProcessSpeed;
+				if (ActionValue <= 0f)
 				{
 					ObjectInteraction = true;
 					Action = Actions.None;
 				}
 			}
 			
-			if (SuperValue == 0f)
+			if (SuperValue <= 0f)
 			{
 				if (--RingCount <= 0)
 				{
@@ -191,7 +192,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			}
 			else
 			{
-				SuperValue--;
+				SuperValue -= FrameworkData.ProcessSpeed;
 			}
 		}
 		
@@ -249,7 +250,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					Gravity = GravityType.Underwater;
 				}
 				
-				Speed.Acceleration = Speed.Vector * new Vector2(0.5f, 0.25f) - Speed.Vector;
+				Speed.Vector *= new Vector2(0.5f, 0.25f);
 			}
 			
 			if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)

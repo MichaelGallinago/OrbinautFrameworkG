@@ -7,10 +7,10 @@ public interface ITailed
 {
     Vector2 Scale { get; }
     Speed Speed { get; }
-    float GroundSpeed { get; }
     bool IsGrounded { get; }
     bool IsSpinning { get; }
     float Angle { get; }
     float VisualAngle { get; }
     Animations Animation { get; }
+    AcceleratedValue GroundSpeed { get; }
 }
