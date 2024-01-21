@@ -27,7 +27,7 @@ public class Speed
         set => _speed = _instantVector = value;
         get => _speed;
     }
-
+    
     public float AccelerationX
     {
         set => _speed.X += value * FrameworkData.ProcessSpeed;
@@ -67,13 +67,21 @@ public class Speed
                            (FrameworkData.ProcessSpeed + 1f) * _speed) * 0.5f;
     }
 
+    public void SetDirectionalValue(AcceleratedValue value, float angle)
+    {
+        float radians = Mathf.DegToRad(angle);
+        _speed = value * new Vector2(MathF.Cos(radians), -Mathf.Sin(radians));
+        //TODO: check IsAccelerated
+        //if (value.IsAccelerated) return;
+        _instantVector = _speed;
+    }
+
     public void ClampX(float min, float max) => ClampAxis(ref _speed.X, ref _instantVector.X, min, max);
     public void ClampY(float min, float max) => ClampAxis(ref _speed.Y, ref _instantVector.Y, min, max);
     public void MinX(float value) => MinAxis(ref _speed.Y, ref _instantVector.Y, value);
     public void MaxX(float value) => MaxAxis(ref _speed.X, ref _instantVector.X, value);
     public void MinY(float value) => MinAxis(ref _speed.Y, ref _instantVector.Y, value);
     public void MaxY(float value) => MaxAxis(ref _speed.Y, ref _instantVector.Y, value);
-    public Vector2 InstantVector => _instantVector;
 
     private static void ClampAxis(ref float axis, ref float instantValue, float min, float max)
     {

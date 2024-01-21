@@ -159,7 +159,7 @@ public partial class PlayerCpu : Player
 		
 		if (CarryTarget != null || Action == Actions.Carried) return false;
 
-		if (GroundLockTimer != 0f && GroundSpeed == 0f)
+		if (GroundLockTimer > 0f && GroundSpeed == 0f)
 		{
 			CpuState = CpuStates.Stuck;
 		}
@@ -267,8 +267,8 @@ public partial class PlayerCpu : Player
 	private bool ProcessStuckCpu()
 	{
 		if (RespawnCpu()) return true;
-				
-		if (GroundLockTimer != 0f || CpuInputTimer != 0f || GroundSpeed != 0f) return false;
+		
+		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return false;
 				
 		if (Animation == Animations.Idle)
 		{

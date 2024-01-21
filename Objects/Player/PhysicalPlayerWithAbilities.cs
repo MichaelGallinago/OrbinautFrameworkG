@@ -154,8 +154,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (!SharedData.FixDashRelease) return true;
 			
-		float radians = Mathf.DegToRad(Angle);
-		Speed.Vector = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians));
+		Speed.SetDirectionalValue(GroundSpeed, Angle);
 		return true;
 	}
 	
@@ -212,8 +211,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			
 		if (!SharedData.FixDashRelease) return true;
 			
-		float radians = Mathf.DegToRad(Angle);
-		Speed.Vector = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians));
+		Speed.SetDirectionalValue(GroundSpeed, Angle);
 		return true;
 	}
 
@@ -1019,10 +1017,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// Air movement isn't overwritten completely, refer to ProcessMovementAir()
 		if (!IsGrounded) return;
 		
-		float radians = Mathf.DegToRad(Angle);
-		float cosine = MathF.Cos(radians);
 		ActionValue += FrameworkData.ProcessSpeed;
-		if (ActionValue >= 60f || GroundSpeed == 0f || cosine <= 0f)
+		if (ActionValue >= 60f || GroundSpeed == 0f || MathF.Cos(Mathf.DegToRad(Angle)) <= 0f)
 		{
 			Action = Actions.None;
 		}
@@ -1033,7 +1029,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			GroundSpeed *= -1f;
 		}
 		
-		Speed.Vector = GroundSpeed * new Vector2(cosine, -MathF.Sin(radians));
+		Speed.SetDirectionalValue(GroundSpeed, Angle);
 	}
 
 	private void CancelHammerDash()

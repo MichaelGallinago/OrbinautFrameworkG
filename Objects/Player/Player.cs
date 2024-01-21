@@ -597,6 +597,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 				if (Camera.Main != null)
 				{
+					//TODO: check processSpeed
 					if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
 					{
 						bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
@@ -604,7 +605,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					else
 					{
 						bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.ViewSize.Y;
-					}	
+					}
 				}
 		
 				if ((int)Position.Y > bound)

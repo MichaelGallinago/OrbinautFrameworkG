@@ -225,7 +225,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			GroundLockTimer = 0f;
 		}
 		
-		if (Mathf.IsZeroApprox(GroundLockTimer))
+		if (GroundLockTimer <= 0f)
 		{
 			var doSkid = false;
 			
@@ -249,9 +249,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			ApplyGroundFriction(PhysicParams.Friction);
 		}
 		
-		// Convert ground velocity into directional velocity
-		float radians = Mathf.DegToRad(Angle);
-		Speed.Vector = GroundSpeed * new Vector2(MathF.Cos(radians), -Mathf.Sin(radians));
+		Speed.SetDirectionalValue(GroundSpeed, Angle);
 	}
 	
 	private void ApplyGroundFriction(float friction)
@@ -283,7 +281,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (!SharedData.NoSpeedCap || GroundSpeed * sign < PhysicParams.AccelerationTop)
 		{
-			float acceleration = PhysicParams.Acceleration * FrameworkData.ProcessSpeed;
+			float acceleration = PhysicParams.Acceleration;
 			GroundSpeed.Acceleration = acceleration * (float)direction;
 			
 			switch (direction)
@@ -306,7 +304,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void UpdateMovementGroundAnimation(bool doSkid)
 	{
-		if (Angles.GetQuadrant(Angle) != 0f)
+		if (Angles.GetQuadrant(Angle) != 0)
 		{
 			if (Animation is Animations.Skid or Animations.Push) return;
 			Animation = Animations.Move;
@@ -321,7 +319,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			//audio_play_sfx(sfx_skid);
 		}
 				
-		if (GroundSpeed != 0f)
+		if (!Mathf.IsZeroApprox(GroundSpeed))
 		{
 			// TODO: This
 			if (Animation is Animations.Skid or Animations.Push) return;
@@ -350,7 +348,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		// Control routine checks
 		if (!IsGrounded || !IsSpinning) return;
-
+		
 		if (GroundLockTimer <= 0f)
 		{
 			if (Input.Down.Left)
@@ -367,8 +365,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		ApplyGroundFriction(PhysicParams.FrictionRoll);
 		UpdateSpinningOnGround();
 	
-		float radians = Mathf.DegToRad(Angle);
-		Speed.Vector = GroundSpeed * new Vector2(MathF.Cos(radians), -MathF.Sin(radians));
+		Speed.SetDirectionalValue(GroundSpeed, Angle);
 		Speed.ClampX(-16f, 16f);
 	}
 	
@@ -660,7 +657,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (quadrant & 1)
 		{
 			case 0:
-				GD.Print(Speed.X, " ", wallDistance / FrameworkData.ProcessSpeed);
 				Speed.X -= wallDistance / FrameworkData.ProcessSpeed;
 				GroundSpeed = 0f;
 					
@@ -679,7 +675,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessRollStart()
 	{
 		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
-		
 		if (!IsForcedRoll && (Input.Down.Left || Input.Down.Right)) return;
 		
 		var allowSpin = false;
@@ -791,7 +786,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessCollisionGroundFloor()
 	{
-		// Control routine checks
 		if (!IsGrounded || OnObject != null) return;
 
 		GroundMode = Angle switch
@@ -912,7 +906,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 					GroundSpeed.Acceleration = Angle < 180f ? -0.5f : 0.5f;
 				}
 		
-				GroundLockTimer = 30;
+				GroundLockTimer = 30f;
 			}
 		}
 	}

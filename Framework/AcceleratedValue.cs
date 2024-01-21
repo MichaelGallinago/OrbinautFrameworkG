@@ -1,4 +1,5 @@
 using System;
+using Godot;
 
 namespace OrbinautFramework3.Framework;
 
@@ -20,6 +21,8 @@ public class AcceleratedValue
     {
         set => _value += value * FrameworkData.ProcessSpeed;
     }
+
+    public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
     public float Sum(float value)
     {
