@@ -27,7 +27,9 @@ public class Speed
         set => _speed = _instantVector = value;
         get => _speed;
     }
-    
+
+    public void UpdateInstantVector() => _instantVector = _speed;
+
     public float AccelerationX
     {
         set => _speed.X += value * FrameworkData.ProcessSpeed;
@@ -37,7 +39,7 @@ public class Speed
     {
         set => _speed.Y += value * FrameworkData.ProcessSpeed;
     }
-    
+
     public Vector2 Acceleration
     {
         set => _speed += value * FrameworkData.ProcessSpeed;
@@ -54,7 +56,7 @@ public class Speed
         MinX(value.X);
         MinY(value.Y);
     }
-    
+
     public void Max(Vector2 value)
     {
         MaxX(value.X);
@@ -78,11 +80,11 @@ public class Speed
 
     public void ClampX(float min, float max) => ClampAxis(ref _speed.X, ref _instantVector.X, min, max);
     public void ClampY(float min, float max) => ClampAxis(ref _speed.Y, ref _instantVector.Y, min, max);
-    public void MinX(float value) => MinAxis(ref _speed.Y, ref _instantVector.Y, value);
+    public void MinX(float value) => MinAxis(ref _speed.X, ref _instantVector.X, value);
     public void MaxX(float value) => MaxAxis(ref _speed.X, ref _instantVector.X, value);
     public void MinY(float value) => MinAxis(ref _speed.Y, ref _instantVector.Y, value);
     public void MaxY(float value) => MaxAxis(ref _speed.Y, ref _instantVector.Y, value);
-
+    
     private static void ClampAxis(ref float axis, ref float instantValue, float min, float max)
     {
         if (min > max)

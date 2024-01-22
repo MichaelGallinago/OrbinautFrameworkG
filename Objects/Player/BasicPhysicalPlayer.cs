@@ -194,7 +194,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
     private void ProcessSlopeResist()
 	{
 		if (!IsGrounded || IsSpinning || Angle is > 135f and <= 225f) return;
-	
 		if (Action is Actions.HammerDash or Actions.PeelOut) return;
 		
 		float slopeGrv = 0.125f * MathF.Sin(Mathf.DegToRad(Angle));
@@ -782,9 +781,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		Position = Speed.CalculateNewPosition(Position);
-		Speed.Vector = Speed.Vector;
+		//TODO: this
+		//Speed.Vector = Speed.Vector;
+		Speed.UpdateInstantVector();
 		
-		GD.Print(Speed.Y);
+		//GD.Print(Speed.Y);
 		if (!IsGrounded && Action != Actions.Carried)
 		{
 			Speed.AccelerationY = Gravity;
