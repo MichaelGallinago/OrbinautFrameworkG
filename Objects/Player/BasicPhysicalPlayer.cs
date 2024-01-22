@@ -781,11 +781,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		Position = Speed.CalculateNewPosition(Position);
-		//TODO: this
-		//Speed.Vector = Speed.Vector;
-		Speed.UpdateInstantVector();
+		Speed.Vector = Speed.Vector;
 		
-		//GD.Print(Speed.Y);
 		if (!IsGrounded && Action != Actions.Carried)
 		{
 			Speed.AccelerationY = Gravity;

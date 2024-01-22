@@ -28,8 +28,6 @@ public class Speed
         get => _speed;
     }
 
-    public void UpdateInstantVector() => _instantVector = _speed;
-
     public float AccelerationX
     {
         set => _speed.X += value * FrameworkData.ProcessSpeed;
