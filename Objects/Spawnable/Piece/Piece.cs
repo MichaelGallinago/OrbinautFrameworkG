@@ -15,6 +15,7 @@ public partial class Piece(Texture2D texture, float waitTimer, float gravity, Ve
         waitTimer -= FrameworkData.ProcessSpeed;
         if (waitTimer > 0f) return;
         
+        //TODO: fix this
         float halfAcceleration = gravity * FrameworkData.ProcessSpeed * 0.5f;
         speed.Y += halfAcceleration;
         Position += speed * FrameworkData.ProcessSpeed;

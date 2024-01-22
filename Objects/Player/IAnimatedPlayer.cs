@@ -7,11 +7,12 @@ public interface IAnimatedPlayer
 {
     Types Type { get; }
     bool IsSuper { get; }
-    Vector2 Speed { get; }
-    float GroundSpeed { get; }
+    Speed Speed { get; }
     float ActionValue { get; }
     ICarried CarryTarget { get; }
     Constants.Direction Facing { get; }
+    AcceleratedValue GroundSpeed { get; }
     Animations Animation { get; set; }
+    int? OverrideAnimationFrame { get; set; }
     bool IsAnimationFrameChanged { get; set; }
 }

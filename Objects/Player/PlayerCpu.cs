@@ -91,7 +91,7 @@ public partial class PlayerCpu : Player
 					
 			if (distanceX >= 0f)
 			{
-				Facing = Constants.Direction.Negative;
+				//Facing = Constants.Direction.Negative;
 						
 				if (velocityX >= distanceX)
 				{
@@ -105,7 +105,7 @@ public partial class PlayerCpu : Player
 			}
 			else
 			{
-				Facing = Constants.Direction.Positive;
+				//Facing = Constants.Direction.Positive;
 				distanceX = -distanceX;
 						
 				if (velocityX >= distanceX)
@@ -128,7 +128,7 @@ public partial class PlayerCpu : Player
 		{
 			CpuState = CpuStates.Main;
 			Animation = Animations.Move;
-			Speed = Vector2.Zero;
+			Speed.Vector = Vector2.Zero;
 			GroundSpeed = 0f;
 			GroundLockTimer = 0f;
 			ObjectInteraction = true;
@@ -159,7 +159,7 @@ public partial class PlayerCpu : Player
 		
 		if (CarryTarget != null || Action == Actions.Carried) return false;
 
-		if (GroundLockTimer != 0f && GroundSpeed == 0f)
+		if (GroundLockTimer > 0f && GroundSpeed == 0f)
 		{
 			CpuState = CpuStates.Stuck;
 		}
@@ -221,7 +221,7 @@ public partial class PlayerCpu : Player
 			}
 			else
 			{
-				Facing = followData.Facing;
+				//Facing = followData.Facing;
 			}
 				
 			if (!IsCpuJumping)
@@ -267,13 +267,13 @@ public partial class PlayerCpu : Player
 	private bool ProcessStuckCpu()
 	{
 		if (RespawnCpu()) return true;
-				
-		if (GroundLockTimer != 0f || CpuInputTimer != 0f || GroundSpeed != 0f) return false;
+		
+		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return false;
 				
 		if (Animation == Animations.Idle)
 		{
-			Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
-				Constants.Direction.Positive : Constants.Direction.Negative;
+			//Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
+			//	Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 				
 		if (!FrameworkData.IsTimePeriodLooped(128f))

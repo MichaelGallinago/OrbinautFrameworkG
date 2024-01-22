@@ -138,7 +138,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		// TODO: make obj_dust_skid & check ProcessSpeed
 		if (Animation == Animations.Skid) 
 		{
-			if (ActionValue2 % 4 - FrameworkData.ProcessSpeed < 0f)
+			if (ActionValue2 % 4f < FrameworkData.ProcessSpeed)
 			{
 				//instance_create(x, y + Radius.Y, obj_dust_skid);
 			}
@@ -166,14 +166,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			if (Action == Actions.Transform)
 			{
-				if (--ActionValue == 0)
+				ActionValue -= FrameworkData.ProcessSpeed;
+				if (ActionValue <= 0f)
 				{
 					ObjectInteraction = true;
 					Action = Actions.None;
 				}
 			}
 			
-			if (SuperValue == 0f)
+			if (SuperValue <= 0f)
 			{
 				if (--RingCount <= 0)
 				{
@@ -191,7 +192,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			}
 			else
 			{
-				SuperValue--;
+				SuperValue -= FrameworkData.ProcessSpeed;
 			}
 		}
 		
@@ -249,7 +250,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					Gravity = GravityType.Underwater;
 				}
 				
-				Speed *= new Vector2(0.5f, 0.25f);
+				Speed.Vector *= new Vector2(0.5f, 0.25f);
 			}
 			
 			if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
@@ -304,7 +305,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					ZIndex = 0;
 					Animation = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
-					Speed = Vector2.Zero;
+					Speed.Vector = Vector2.Zero;
 					Gravity	= 0.0625f;
 					IsAirLock = true;
 					if (Camera.Main == null) return;
@@ -333,12 +334,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4f)
 			{
-				Speed = Speed with { Y = Speed.Y * 2f };
+				Speed.Y *= 2f;
 			}
 					
 			if (Speed.Y < -16f)
 			{
-				Speed = Speed with { Y = -16f };
+				Speed.Y = -16f;
 			}
 					
 			if (Action != Actions.Flight)
@@ -583,23 +584,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		base.ResetState();
 	}
 
-	private void ProcessPosition(float processSpeed)
-	{
-		if (Action == Actions.Carried) return;
-
-		if (StickToConvex)
-		{
-			Speed.Clamp(-16 * Vector2.One, 16 * Vector2.One);
-		}
-
-		Position += Speed * processSpeed;
-
-		if (!IsGrounded)
-		{
-			Speed = Speed with { Y = Speed.Y + Gravity * processSpeed };
-		}
-	}
-
 	private void ProcessRestart(float processSpeed)
 	{
 		if (!IsDead || Id > 0) return;
@@ -613,6 +597,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 				if (Camera.Main != null)
 				{
+					//TODO: check processSpeed
 					if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
 					{
 						bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
@@ -620,7 +605,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					else
 					{
 						bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.ViewSize.Y;
-					}	
+					}
 				}
 		
 				if ((int)Position.Y > bound)
@@ -716,7 +701,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	public void OnDisableEditMode()
 	{
-		Speed = new Vector2();
+		Speed.Vector = Vector2.Zero;
 		GroundSpeed = 0f;
 		Animation = Animations.Move;
 		ObjectInteraction = true;

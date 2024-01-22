@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.Input;
@@ -11,7 +12,6 @@ namespace OrbinautFramework3.Framework;
 public static class FrameworkData
 {
     public static float ProcessSpeed { get; set; }
-    
     public static List<KeyboardControl> KeyboardControl { get; set; }
     public static bool GamepadVibration { get; set; }
     public static TilesData TilesData { get; }
@@ -66,23 +66,6 @@ public static class FrameworkData
     
     public static void UpdateEarly(float processSpeed)
     {
-        if (AllowPause && InputUtilities.Press[0].Start)
-		{
-			IsPaused = !IsPaused;
-			
-			//TODO: audio
-			/*
-			if (FrameworkData.IsPaused)
-			{	
-				audio_pause_all();
-			}
-			else
-			{
-				audio_resume_all();
-			}
-			*/
-		}
-		
 		if (UpdateTimer && !IsPaused)
 		{
 			Time += processSpeed;
