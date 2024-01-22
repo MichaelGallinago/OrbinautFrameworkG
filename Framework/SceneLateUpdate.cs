@@ -7,6 +7,7 @@ namespace OrbinautFramework3.Framework;
 public partial class SceneLateUpdate : Node
 {
     public event Action Update;
+    public SceneLateUpdate() => ProcessPriority = int.MaxValue;
      
     public override void _Process(double delta)
     {

@@ -66,23 +66,6 @@ public static class FrameworkData
     
     public static void UpdateEarly(float processSpeed)
     {
-        if (AllowPause && InputUtilities.Press[0].Start)
-		{
-			IsPaused = !IsPaused;
-			
-			//TODO: audio
-			/*
-			if (FrameworkData.IsPaused)
-			{	
-				audio_pause_all();
-			}
-			else
-			{
-				audio_resume_all();
-			}
-			*/
-		}
-		
 		if (UpdateTimer && !IsPaused)
 		{
 			Time += processSpeed;

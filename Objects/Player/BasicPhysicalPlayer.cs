@@ -230,7 +230,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			var doSkid = false;
 			
 			if (Input.Down.Left)
-			{	
+			{
 				doSkid = MoveOnGround(Constants.Direction.Negative);
 			}
 			
@@ -275,7 +275,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				GroundSpeed = 0.5f * sign;
 			}
-					
+			
 			return true;
 		}
 
@@ -289,6 +289,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				case Constants.Direction.Positive: GroundSpeed.Min( PhysicParams.AccelerationTop); break;
 				case Constants.Direction.Negative: GroundSpeed.Max(-PhysicParams.AccelerationTop); break;
 			}
+		}
+		
+		if (Animation == Animations.Skid)
+		{
+			Animation = Animations.Move;
 		}
 		
 		if (Facing == direction) return false;
@@ -427,7 +432,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessMovementAir()
 	{
 		if (IsGrounded || IsDead) return;
-	
+		
 		// Action checks
 		if (Action is Actions.Carried or Actions.Climb or Actions.Glide 
 		    && (GlideStates)ActionState != GlideStates.Fall) return;
@@ -435,13 +440,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		// Update Angle (rotate player)
 		if (!Mathf.IsEqualApprox(Angle, 360f))
 		{
+			float speed = Angles.ByteAngleStep * FrameworkData.ProcessSpeed;
 			if (Angle >= 180f)
 			{
-				Angle += Angles.ByteAngleStep;
+				Angle += speed;
 			}
 			else
 			{
-				Angle -= Angles.ByteAngleStep;
+				Angle -= speed;
 			}
 		
 			if (Angle is <= 0f or > 360f)
@@ -486,7 +492,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			if (Input.Down.Right)
 			{
 				MoveInAir(Constants.Direction.Positive, () => Speed.MinX(PhysicParams.AccelerationTop));
-			}	
+			}
 		}
 	
 		// Apply air drag
@@ -778,6 +784,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Position = Speed.CalculateNewPosition(Position);
 		Speed.Vector = Speed.Vector;
 		
+		GD.Print(Speed.Y);
 		if (!IsGrounded && Action != Actions.Carried)
 		{
 			Speed.AccelerationY = Gravity;

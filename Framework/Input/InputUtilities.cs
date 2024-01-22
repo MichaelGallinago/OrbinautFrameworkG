@@ -32,7 +32,7 @@ public static class InputUtilities
         DeviceCount = BaseDeviceCount;
     }
 
-    public static void Process()
+    public static void Update()
     {
         _gamepads = Godot.Input.GetConnectedJoypads();
         for (var device = 0; device < DeviceCount; device++)
@@ -101,10 +101,20 @@ public static class InputUtilities
         press.Start = !press.Start && down.Start;
         press.Abc = press.A || press.B || press.C;
         
+        if (down is { Left: true, Right: true })
+        {
+            down.Left = down.Right = press.Left = press.Right = false;
+        }
+        
+        if (down is { Up: true, Down: true })
+        {
+            down.Up = down.Down = press.Up = press.Down = false;
+        }
+        
         Down[KeyboardId] = down;
         Press[KeyboardId] = press;
     }
-
+    
     private static void KeyboardProcess(ref Buttons down)
     {
         bool previousDebugButtonDownState = DebugButtonDown;

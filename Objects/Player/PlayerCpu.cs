@@ -91,7 +91,7 @@ public partial class PlayerCpu : Player
 					
 			if (distanceX >= 0f)
 			{
-				Facing = Constants.Direction.Negative;
+				//Facing = Constants.Direction.Negative;
 						
 				if (velocityX >= distanceX)
 				{
@@ -105,7 +105,7 @@ public partial class PlayerCpu : Player
 			}
 			else
 			{
-				Facing = Constants.Direction.Positive;
+				//Facing = Constants.Direction.Positive;
 				distanceX = -distanceX;
 						
 				if (velocityX >= distanceX)
@@ -221,7 +221,7 @@ public partial class PlayerCpu : Player
 			}
 			else
 			{
-				Facing = followData.Facing;
+				//Facing = followData.Facing;
 			}
 				
 			if (!IsCpuJumping)
@@ -272,8 +272,8 @@ public partial class PlayerCpu : Player
 				
 		if (Animation == Animations.Idle)
 		{
-			Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
-				Constants.Direction.Positive : Constants.Direction.Negative;
+			//Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
+			//	Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 				
 		if (!FrameworkData.IsTimePeriodLooped(128f))

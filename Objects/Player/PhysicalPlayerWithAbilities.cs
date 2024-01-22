@@ -307,7 +307,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void JumpWaterBarrier()
 	{
-		Speed.Vector = new Vector2(0, 8);
+		Speed.Vector = new Vector2(0f, 8f);
 				
 		Barrier.UpdateFrame(0, 1, [1, 2]);
 		Barrier.UpdateDuration([6, 18]);
@@ -712,7 +712,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsSpinning = true;
 		IsJumping = true;
 		Action = Actions.None;
-		Facing = (Constants.Direction)(-(int)Facing);
+		//Facing = (Constants.Direction)(-(int)Facing);
 		Speed.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
 			
 		//TODO: audio
@@ -883,7 +883,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				OverrideAnimationFrame = 1;
 				break;
 			default:
-				Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
+				//Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
 				OverrideAnimationFrame = 2;
 				break;
 		}
@@ -1025,7 +1025,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (Input.Down.Left && GroundSpeed > 0f || Input.Down.Right && GroundSpeed < 0f)
 		{
-			Facing = (Constants.Direction)(-(int)Facing);
+			//Facing = (Constants.Direction)(-(int)Facing);
 			GroundSpeed *= -1f;
 		}
 		
@@ -1291,7 +1291,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void AttachToPlayer(ICarrier carrier)
 	{
-		Facing = carrier.Facing;
+		//Facing = carrier.Facing;
 		Speed.Vector = carrier.Speed.Vector;
 		Position = carrier.Position + new Vector2(0f, 28f);
 		Scale = new Vector2(Math.Abs(Scale.X) * (float)carrier.Facing, Scale.Y);
