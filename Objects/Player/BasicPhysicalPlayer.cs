@@ -51,17 +51,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Gravity = GravityType.Default;
 		Speed.Vector = new Vector2(0f, -7f);
 		GroundSpeed = 0f;
-		ZIndex = 0;
-		
-		if (Id == 0)
-		{
-			FrameworkData.UpdateObjects = false;
-			FrameworkData.UpdateTimer = false;
-			FrameworkData.AllowPause = false;
-		}
+		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
 		//TODO: Audio
 		//audio_play_sfx(sfx_hurt);
+
+		if (Id != 0) return;
+		FrameworkData.UpdateObjects = false;
+		FrameworkData.UpdateTimer = false;
+		FrameworkData.AllowPause = false;
 	}
 	
 	public void Land()
@@ -519,7 +517,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (!IsGrounded || IsSpinning) return;
 		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.PeelOut) return;
 		if (SharedData.PlayerPhysics == PhysicsTypes.SK && Input.Down.Down) return;
-		if (Input.Down.Up && SharedData.PeelOut) return;
 		
 		if (BalanceOnObject()) return;
 		BalanceOnTiles();

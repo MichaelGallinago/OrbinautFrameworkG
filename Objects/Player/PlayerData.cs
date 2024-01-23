@@ -67,7 +67,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
 	
-    
 	public bool IsForcedRoll { get; set; }
 	public float GroundLockTimer { get; set; }
 	public bool IsAirLock { get; set; }
@@ -96,15 +95,13 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 	public CommonStage Stage { get; set; }
-
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
-	
 	public bool IsEditMode { get; set; }
+	public List<RecordedData> RecordedData { get; init; } = [];
 	
 	protected CollisionTileMap TileMap;
 	protected readonly PlayerInput Input = new();
 	protected readonly TileCollider TileCollider = new();
-	protected readonly List<RecordedData> RecordedData = [];
 
 	private bool _isInit = true;
 
@@ -195,7 +192,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		IsAirLock = false;
 		GroundLockTimer = 0f;
 		
-		AirTimer = Constants.AirValueMax;
+		AirTimer = Constants.MaxAirValue;
 		ComboCounter = 0;
 		ScoreCount = 0;
 		RingCount = 0;
@@ -219,6 +216,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		RestartTimer = 0f;
 		
 		Input.Clear();
+		Input.NoControl = false;
 		RecordedData.Clear();
 		
 		if (Id != 0)

@@ -54,24 +54,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Id = Players.Count;
 		Players.Add(this);
 	}
-
-	public override void _ExitTree()
-	{
-		base._ExitTree();
-		
-		if (Players.Count == 0 || !IsCpuRespawn) return;
-		//TODO: check respawn Player cpu
-		/*
-		var newPlayer = new Player
-		{
-			Type = Type,
-			Position = Players.First().Position
-		};
-
-		newPlayer._Process(FrameworkData.ProcessSpeed / Constants.BaseFramerate);
-		*/
-	}
-
+	
 	public override void _Process(double delta)
 	{
 		if (FrameworkData.IsPaused || !FrameworkData.UpdateObjects && !IsDead) return;
@@ -362,7 +345,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			*/
 				
 		IsUnderwater = false;	
-		AirTimer = Constants.AirValueMax;
+		AirTimer = Constants.MaxAirValue;
 			
 		ProcessWaterSplash();
 	}

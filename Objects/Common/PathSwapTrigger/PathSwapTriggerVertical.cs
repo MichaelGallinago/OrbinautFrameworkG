@@ -13,7 +13,6 @@ public partial class PathSwapTriggerVertical : PathSwapTrigger
     public override void _Ready()
     {
         base._Ready();
-        Rotation = 0f;
         Borders += new Vector2(Position.X, Position.X);
     }
 

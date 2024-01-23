@@ -1,3 +1,5 @@
+using Godot;
+
 namespace OrbinautFramework3.Framework;
 
 public static class Constants
@@ -13,7 +15,12 @@ public static class Constants
 	public const ushort TileLimit = 256;
 	public const byte TileSize = 16;
 	public const byte DoubleTileSize = TileSize * 2;
-	public const float AirValueMax = 1800f;
+	public const float MaxAirValue = 1800f;
+	
+	public enum ZIndexes
+	{
+		AboveForeground = 1024
+	}
 
 	public enum EnemyType : byte
 	{

@@ -9,8 +9,8 @@ namespace OrbinautFramework3;
 
 public partial class Camera : Camera2D
 {
-	private const byte CameraCentreOffset = 16;
-	private const byte DefaultViewTime = 120;
+	private const byte CentreOffset = 16;
+	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
 	
 	//TODO: Replace to interface
@@ -22,7 +22,7 @@ public partial class Camera : Camera2D
 		set
 		{
 			_target = value;
-			_viewTimer = DefaultViewTime;
+			_viewTimer = MaxViewTime;
 		}
 	}
 	private BaseObject _target;
@@ -173,7 +173,7 @@ public partial class Camera : Camera2D
 		}
 		else if (SharedData.SpinDash || SharedData.PeelOut)
 		{
-			_viewTimer = DefaultViewTime;
+			_viewTimer = MaxViewTime;
 		}
 
 		if (_viewTimer > 0f)
@@ -239,7 +239,7 @@ public partial class Camera : Camera2D
 		}
 		
 		Vector2I distance = (Vector2I)Target.Position - (Vector2I)_rawPosition - SharedData.ViewSize / 2;
-		distance.Y += CameraCentreOffset;
+		distance.Y += CentreOffset;
 
 		int extraX = SharedData.CDCamera ? 0 : 8;
 		

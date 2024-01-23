@@ -11,4 +11,6 @@ Behaviour = 2
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 1, 1, 0.501961)
+z_index = 4096
+z_as_relative = false
 texture = ExtResource("2_ff3q3")
