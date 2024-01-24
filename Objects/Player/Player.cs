@@ -233,7 +233,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					Gravity = GravityType.Underwater;
 				}
 				
-				Speed.Vector *= new Vector2(0.5f, 0.25f);
+				Velocity.Vector *= new Vector2(0.5f, 0.25f);
 			}
 			
 			if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
@@ -288,7 +288,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					ZIndex = 0;
 					Animation = Animations.Drown;
 					TileLayer = Constants.TileLayers.None;
-					Speed.Vector = Vector2.Zero;
+					Velocity.Vector = Vector2.Zero;
 					Gravity	= 0.0625f;
 					IsAirLock = true;
 					if (Camera.Main == null) return;
@@ -315,14 +315,14 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		
 		if (!IsHurt && Action != Actions.Glide)
 		{
-			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Speed.Y >= -4f)
+			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
 			{
-				Speed.Y *= 2f;
+				Velocity.Y *= 2f;
 			}
 					
-			if (Speed.Y < -16f)
+			if (Velocity.Y < -16f)
 			{
-				Speed.Y = -16f;
+				Velocity.Y = -16f;
 			}
 					
 			if (Action != Actions.Flight)
@@ -684,7 +684,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	public void OnDisableEditMode()
 	{
-		Speed.Vector = Vector2.Zero;
+		Velocity.Vector = Vector2.Zero;
 		GroundSpeed = 0f;
 		Animation = Animations.Move;
 		ObjectInteraction = true;

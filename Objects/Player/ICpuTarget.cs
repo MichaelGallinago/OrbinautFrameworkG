@@ -9,9 +9,8 @@ public interface ICpuTarget
 {
     public const int CpuDelay = 16;
     
-    int ZIndex { get; }
     bool IsDead { get; }
-    Speed Speed { get; }
+    Velocity Velocity { get; }
     Actions Action { get; }
     Vector2 Position { get; }
     AcceleratedValue GroundSpeed { get; }

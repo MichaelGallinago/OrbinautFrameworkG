@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Objects.Player;
+using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
@@ -65,46 +66,47 @@ public abstract partial class BaseObject : Node2D
 		Visible = isActive;
 	}
 	
-	public bool CheckCollision(BaseObject target, Constants.CollisionSensor type)
+	public bool CheckCollision(BaseObject target, CollisionSensor type)
 	{
 		if (target is Player { ObjectInteraction: false }) return false;
 
 		return type switch
 		{
-			Constants.CollisionSensor.Hitbox => CheckHitboxCollision(target, type),
-			Constants.CollisionSensor.HitboxExtra => CheckHitboxCollision(target, type),
+			CollisionSensor.SolidPush => CheckPushCollision(target),
+			CollisionSensor.Hitbox => CheckHitboxCollision(target, type),
+			CollisionSensor.HitboxExtra => CheckHitboxCollision(target, type),
 			_ => CheckSolidCollision(target, type)
 		};
 	}
 	
-	private bool CheckHitboxCollision(BaseObject target, Constants.CollisionSensor type)
+	private bool CheckHitboxCollision(BaseObject target, CollisionSensor type)
 	{
 		if (!InteractData.IsInteract || !target.InteractData.IsInteract) return false;
-		var debugColor = new Color();
+		var hitboxColor = new Color();
 
 		var targetOffset = new Vector2I();
 		var targetRadius = new Vector2I();
-		if (type == Constants.CollisionSensor.HitboxExtra)
+		if (type == CollisionSensor.HitboxExtra)
 		{
 			targetRadius = target.InteractData.RadiusExtra;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0)
 			{
-				type = Constants.CollisionSensor.Hitbox;	
+				type = CollisionSensor.Hitbox;	
 			}	
 			else
 			{
 				targetOffset = target.InteractData.OffsetExtra;
-				debugColor = Color.Color8(0, 0, 220);
+				hitboxColor = Color.Color8(0, 0, 220);
 			}
 		}
 
-		if (type == Constants.CollisionSensor.Hitbox)
+		if (type == CollisionSensor.Hitbox)
 		{
 			targetRadius = target.InteractData.Radius;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0) return false;
 			
 			targetOffset = target.InteractData.Offset;
-			debugColor = Color.Color8(255, 0, 220);
+			hitboxColor = Color.Color8(255, 0, 220);
 		}
 		
 		// Calculate bounding boxes for both objects
@@ -121,16 +123,9 @@ public abstract partial class BaseObject : Node2D
 		/*if (SharedData.DebugCollision == 2)
 		{
 			var _ds_list = c_engine.collision.ds_interact;
-				
-			if ds_list_find_index(_ds_list, _target.id) == -1 || ds_list_find_index(_ds_list, _target_col) == -1
-			{
-				ds_list_add(_ds_list, _target_l, _target_t, _target_r, _target_b, _target_col, _target.id);
-			}
-				
-			if ds_list_find_index(_ds_list, id) == -1 || ds_list_find_index(_ds_list, _target_col) == -1
-			{
-				ds_list_add(_ds_list, _this_l, _this_t, _this_r, _this_b, _target_col, id);
-			}
+			
+			ds_list_add(_ds_list, _target_l, _target_t, _target_r, _target_b, _hitbox_colour);
+			ds_list_add(_ds_list, _this_l, _this_t, _this_r, _this_b, _hitbox_colour);
 		}*/
 		
 		// Check for collision in the x-axis
@@ -146,12 +141,12 @@ public abstract partial class BaseObject : Node2D
 		return true;
 	}
 
-	private bool CheckSolidCollision(BaseObject target, Constants.CollisionSensor type)
+	private bool CheckSolidCollision(BaseObject target, CollisionSensor type)
 	{
 		if (target is not Player player) return false;
 
 		// No solid collision data, exit collision check
-		if (!player.TouchObjects.TryGetValue(this, out Constants.TouchState touchState)) return false;
+		if (!player.TouchObjects.TryGetValue(this, out TouchState touchState)) return false;
 		
 		// Register collision check if debugging
 		//TODO: debug collision
@@ -167,13 +162,18 @@ public abstract partial class BaseObject : Node2D
 		
 		return type switch
 		{
-			Constants.CollisionSensor.SolidU => touchState == Constants.TouchState.Up,
-			Constants.CollisionSensor.SolidD => touchState == Constants.TouchState.Down,
-			Constants.CollisionSensor.SolidL => touchState == Constants.TouchState.Left,
-			Constants.CollisionSensor.SolidR => touchState == Constants.TouchState.Right,
-			Constants.CollisionSensor.SolidAny => touchState != Constants.TouchState.None,
-			Constants.CollisionSensor.Hitbox or Constants.CollisionSensor.HitboxExtra => false,
+			CollisionSensor.SolidU => touchState == TouchState.Up,
+			CollisionSensor.SolidD => touchState == TouchState.Down,
+			CollisionSensor.SolidL => touchState == TouchState.Left,
+			CollisionSensor.SolidR => touchState == TouchState.Right,
+			CollisionSensor.SolidAny => touchState != TouchState.None,
+			CollisionSensor.Hitbox or CollisionSensor.HitboxExtra or CollisionSensor.SolidPush => false,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
+	}
+
+	private bool CheckPushCollision(BaseObject target)
+	{
+		return target is Player player && player.PushObjects.Contains(this);
 	}
 }

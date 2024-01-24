@@ -27,7 +27,6 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		_player = player;
 		
-		UpdateScale();
 		UpdateSpriteFrames();
 
 		switch (player.Type)
@@ -38,6 +37,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			case Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
 		
+		UpdateScale();
 		player.IsAnimationFrameChanged = false;
 		OverrideFrame();
 	}
@@ -108,14 +108,14 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 		
 		if (type != Animations.FlyCarry) return;
-		Frame = _player.Speed.Y < 0f ? 1 : 0;
+		Frame = _player.Velocity.Y < 0f ? 1 : 0;
 	}
 	
 	private float TailsSpeed => _player.Animation switch
 	{
 		Animations.Move => GetGroundAnimationSpeed(9f),
 		Animations.Push => GetGroundAnimationSpeed(9f),
-		Animations.Swim => _player.Speed.Y < 0f ? 1f : 0.5f,
+		Animations.Swim => _player.Velocity.Y < 0f ? 1f : 0.5f,
 		_ => 1f
 	};
 	

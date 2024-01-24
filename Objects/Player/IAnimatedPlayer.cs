@@ -7,7 +7,7 @@ public interface IAnimatedPlayer
 {
     Types Type { get; }
     bool IsSuper { get; }
-    Speed Speed { get; }
+    Velocity Velocity { get; }
     float ActionValue { get; }
     ICarried CarryTarget { get; }
     Constants.Direction Facing { get; }

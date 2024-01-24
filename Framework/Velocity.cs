@@ -3,44 +3,44 @@ using Godot;
 
 namespace OrbinautFramework3.Framework;
 
-public class Speed
+public class Velocity
 {
-    private Vector2 _speed;
+    private Vector2 _velocity;
     private Vector2 _instantVector;
     
-    public static implicit operator Vector2(Speed speed) => speed._speed;
+    public static implicit operator Vector2(Velocity velocity) => velocity._velocity;
 
     public float X
     {
-        set => _speed.X = _instantVector.X = value;
-        get => _speed.X;
+        set => _velocity.X = _instantVector.X = value;
+        get => _velocity.X;
     }
 
     public float Y
     {
-        set => _speed.Y = _instantVector.Y = value;
-        get => _speed.Y;
+        set => _velocity.Y = _instantVector.Y = value;
+        get => _velocity.Y;
     }
 
     public Vector2 Vector
     {
-        set => _speed = _instantVector = value;
-        get => _speed;
+        set => _velocity = _instantVector = value;
+        get => _velocity;
     }
 
     public float AccelerationX
     {
-        set => _speed.X += value * FrameworkData.ProcessSpeed;
+        set => _velocity.X += value * FrameworkData.ProcessSpeed;
     }
     
     public float AccelerationY
     {
-        set => _speed.Y += value * FrameworkData.ProcessSpeed;
+        set => _velocity.Y += value * FrameworkData.ProcessSpeed;
     }
 
     public Vector2 Acceleration
     {
-        set => _speed += value * FrameworkData.ProcessSpeed;
+        set => _velocity += value * FrameworkData.ProcessSpeed;
     }
 
     public void Clamp(Vector2 min, Vector2 max)
@@ -64,24 +64,24 @@ public class Speed
     public Vector2 CalculateNewPosition(Vector2 position)
     {
         return position + ((FrameworkData.ProcessSpeed - 1f) * _instantVector + 
-                           (FrameworkData.ProcessSpeed + 1f) * _speed) * 0.5f;
+                           (FrameworkData.ProcessSpeed + 1f) * _velocity) * 0.5f;
     }
 
     public void SetDirectionalValue(AcceleratedValue value, float angle)
     {
         float radians = Mathf.DegToRad(angle);
-        _speed = value * new Vector2(MathF.Cos(radians), -Mathf.Sin(radians));
+        _velocity = value * new Vector2(MathF.Cos(radians), -Mathf.Sin(radians));
         //TODO: check IsAccelerated
         //if (value.IsAccelerated) return;
-        _instantVector = _speed;
+        _instantVector = _velocity;
     }
 
-    public void ClampX(float min, float max) => ClampAxis(ref _speed.X, ref _instantVector.X, min, max);
-    public void ClampY(float min, float max) => ClampAxis(ref _speed.Y, ref _instantVector.Y, min, max);
-    public void MinX(float value) => MinAxis(ref _speed.X, ref _instantVector.X, value);
-    public void MaxX(float value) => MaxAxis(ref _speed.X, ref _instantVector.X, value);
-    public void MinY(float value) => MinAxis(ref _speed.Y, ref _instantVector.Y, value);
-    public void MaxY(float value) => MaxAxis(ref _speed.Y, ref _instantVector.Y, value);
+    public void ClampX(float min, float max) => ClampAxis(ref _velocity.X, ref _instantVector.X, min, max);
+    public void ClampY(float min, float max) => ClampAxis(ref _velocity.Y, ref _instantVector.Y, min, max);
+    public void MinX(float value) => MinAxis(ref _velocity.X, ref _instantVector.X, value);
+    public void MaxX(float value) => MaxAxis(ref _velocity.X, ref _instantVector.X, value);
+    public void MinY(float value) => MinAxis(ref _velocity.Y, ref _instantVector.Y, value);
+    public void MaxY(float value) => MaxAxis(ref _velocity.Y, ref _instantVector.Y, value);
     
     private static void ClampAxis(ref float axis, ref float instantValue, float min, float max)
     {

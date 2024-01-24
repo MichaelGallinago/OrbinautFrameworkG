@@ -23,7 +23,7 @@ public partial class Tail : AdvancedAnimatedSprite
 			case Animations.Fly:
 			case Animations.FlyTired:
 			case Animations.FlyCarry:
-				float speed = data.Speed.Y >= 0f || data.Animation == Animations.FlyTired ? 0.5f : 1f;
+				float speed = data.Velocity.Y >= 0f || data.Animation == Animations.FlyTired ? 0.5f : 1f;
 				SetAnimation("Fly", speed);
 				break;
 			
@@ -79,7 +79,7 @@ public partial class Tail : AdvancedAnimatedSprite
 		if (!data.IsGrounded)
 		{
 			// TODO: Check Atan2
-			angle = Mathf.RadToDeg(MathF.Atan2(data.Speed.Y, data.Speed.X));
+			angle = Mathf.RadToDeg(MathF.Atan2(data.Velocity.Y, data.Velocity.X));
 			return data.Scale.X >= 0f ? angle : angle + 180f;
 		}
 

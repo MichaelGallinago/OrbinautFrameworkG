@@ -102,7 +102,7 @@ public partial class PlayerCpu : Player
 		
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
-		Speed.Vector = Vector2.Zero;
+		Velocity.Vector = Vector2.Zero;
 		GroundSpeed = 0f;
 		GroundLockTimer = 0f;
 		ObjectInteraction = true;
@@ -117,7 +117,7 @@ public partial class PlayerCpu : Player
 	{
 		if (distanceX == 0f) return 0f;
 		
-		float velocityX = Math.Abs(CpuTarget.Speed.X) + Math.Min(MathF.Floor(Math.Abs(distanceX) / 16f), 12f) + 1f;
+		float velocityX = Math.Abs(CpuTarget.Velocity.X) + Math.Min(MathF.Floor(Math.Abs(distanceX) / 16f), 12f) + 1f;
 	
 		Facing = distanceX >= 0f ? Constants.Direction.Negative : Constants.Direction.Positive;
 		var sign = (int)Facing;

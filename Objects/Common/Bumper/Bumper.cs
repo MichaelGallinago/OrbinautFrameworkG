@@ -51,11 +51,11 @@ public partial class Bumper : BaseObject
                 }
                 else
                 {
-                    player.Speed.X = bumpSpeed;
+                    player.Velocity.X = bumpSpeed;
                 }
             }
 
-            player.Speed.Y = 7f * MathF.Cos(radians);
+            player.Velocity.Y = 7f * MathF.Cos(radians);
             player.IsJumping = false;
             player.IsAirLock = false;
             

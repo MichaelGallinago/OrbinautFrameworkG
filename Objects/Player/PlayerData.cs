@@ -27,7 +27,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		}
 	}
 	private Types _type;
-	public Speed Speed { get; } = new();
+	public Velocity Velocity { get; } = new();
 	public AcceleratedValue GroundSpeed { get; set; }
 	
 	public int Id { get; protected set; }
@@ -96,6 +96,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public float RestartTimer { get; set; }
 	public CommonStage Stage { get; set; }
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
+	public HashSet<BaseObject> PushObjects { get; } = [];
 	public bool IsEditMode { get; set; }
 	public List<RecordedData> RecordedData { get; init; } = [];
 	
@@ -150,7 +151,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Radius = RadiusNormal;
 		Position = Position with { Y = Position.Y - Radius.Y - 1f };
 		Gravity = GravityType.Default;
-		Speed.Vector = Vector2.Zero;
+		Velocity.Vector = Vector2.Zero;
 		GroundSpeed = 0f;
 		Angle = 0f;
 		

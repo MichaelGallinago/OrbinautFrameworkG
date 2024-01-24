@@ -49,7 +49,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Barrier.Type = Barrier.Types.None;
 		Animation = Animations.Death;
 		Gravity = GravityType.Default;
-		Speed.Vector = new Vector2(0f, -7f);
+		Velocity.Vector = new Vector2(0f, -7f);
 		GroundSpeed = 0f;
 		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
@@ -88,7 +88,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			float force = IsUnderwater ? -4f : -7.5f;
 			float radians = Mathf.DegToRad(Angle);
-			Speed.Vector = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
+			Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
 
 			Barrier.State = Barrier.States.None;
 			OnObject = null;
@@ -166,8 +166,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 
 		Position = Position with { Y = Position.Y - distance + 1 };
-		GroundSpeed = Speed.X;
-		Speed.X = 0f;
+		GroundSpeed = Velocity.X;
+		Velocity.X = 0f;
 		Angle = 360f;
 		
 		OnObject = targetObject;
@@ -181,7 +181,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	public void ClearPush()
 	{
 		if (PushingObject != this) return;
-		if (Animation != Animations.Spin)
+		if (Animation is not Animations.Spin and not Animations.SpinDash)
 		{
 			Animation = Animations.Move;
 		}
@@ -246,7 +246,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			ApplyGroundFriction(PhysicParams.Friction);
 		}
 		
-		Speed.SetDirectionalValue(GroundSpeed, Angle);
+		Velocity.SetDirectionalValue(GroundSpeed, Angle);
 	}
 	
 	private void ApplyGroundFriction(float friction)
@@ -306,7 +306,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void UpdateMovementGroundAnimation(bool doSkid)
 	{
-		if (Angles.GetQuadrant(Angle) != 0)
+		//TODO: FIX THIS AFTER TRIANGLY; Commit: Addressed some TODOs
+		if (Angles.GetQuadrant(Angle) != 0 || GroundSpeed != 0f)
 		{
 			if (Animation is Animations.Skid or Animations.Push) return;
 			Animation = Animations.Move;
@@ -316,7 +317,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
 		{
 			Animation = Animations.Skid;
-					
+			
 			//TODO: audio
 			//audio_play_sfx(sfx_skid);
 		}
@@ -342,7 +343,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			return;
 		}
 		
-		if (Animation != Animations.Move || !IsAnimationFrameChanged) return;
+		if (!IsAnimationFrameChanged) return;
 		Animation = Animations.Push;
 	}
 	
@@ -367,8 +368,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		ApplyGroundFriction(PhysicParams.FrictionRoll);
 		UpdateSpinningOnGround();
 	
-		Speed.SetDirectionalValue(GroundSpeed, Angle);
-		Speed.ClampX(-16f, 16f);
+		Velocity.SetDirectionalValue(GroundSpeed, Angle);
+		Velocity.ClampX(-16f, 16f);
 	}
 	
 	private void RollOnGround(Constants.Direction direction)
@@ -454,15 +455,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 	
 		// Limit upward speed
-		if (!IsJumping && Action != Actions.SpinDash && !IsForcedRoll && Speed.Y < -15.75f)
+		if (!IsJumping && Action != Actions.SpinDash && !IsForcedRoll && Velocity.Y < -15.75f)
 		{
-			Speed.Y = -15.75f;
+			Velocity.Y = -15.75f;
 		}
 	
 		// Limit downward speed
-		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Speed.Y > 16f)
+		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Velocity.Y > 16f)
 		{
-			Speed.Y = 16f;
+			Velocity.Y = 16f;
 		}
 
 		if (Action == Actions.HammerDash)
@@ -483,19 +484,19 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			if (Input.Down.Left)
 			{
-				MoveInAir(Constants.Direction.Negative, () => Speed.MaxX(-PhysicParams.AccelerationTop));
+				MoveInAir(Constants.Direction.Negative, () => Velocity.MaxX(-PhysicParams.AccelerationTop));
 			}
 			
 			if (Input.Down.Right)
 			{
-				MoveInAir(Constants.Direction.Positive, () => Speed.MinX(PhysicParams.AccelerationTop));
+				MoveInAir(Constants.Direction.Positive, () => Velocity.MinX(PhysicParams.AccelerationTop));
 			}
 		}
 	
 		// Apply air drag
-		if (!IsHurt && Speed.Y is < 0f and > -4f)
+		if (!IsHurt && Velocity.Y is < 0f and > -4f)
 		{
-			Speed.AccelerationX = MathF.Floor(Speed.X * 8f) / -256f;
+			Velocity.AccelerationX = MathF.Floor(Velocity.X * 8f) / -256f;
 		}
 	}
 
@@ -503,8 +504,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		var sign = (float)direction;
 		
-		Speed.AccelerationX = sign * PhysicParams.AccelerationAir;
-		if (!SharedData.NoSpeedCap || sign * Speed.X < PhysicParams.AccelerationTop)
+		Velocity.AccelerationX = sign * PhysicParams.AccelerationAir;
+		if (!SharedData.NoSpeedCap || sign * Velocity.X < PhysicParams.AccelerationTop)
 		{
 			action();
 		}
@@ -633,7 +634,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				return;
 		}
 		
-		TileCollider.SetData((Vector2I)Speed.CalculateNewPosition(Position), TileLayer, TileMap, GroundMode);
+		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileMap, GroundMode);
 		
 		int castQuadrant = Angle switch
 		{
@@ -659,7 +660,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (quadrant & 1)
 		{
 			case 0:
-				Speed.X -= wallDistance / FrameworkData.ProcessSpeed;
+				Velocity.X -= wallDistance / FrameworkData.ProcessSpeed;
 				GroundSpeed = 0f;
 					
 				if (Facing == firstDirection && !IsSpinning)
@@ -669,7 +670,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case 1:
-				Speed.Y += wallDistance / FrameworkData.ProcessSpeed;
+				Velocity.Y += wallDistance / FrameworkData.ProcessSpeed;
 				break;
 		}
 	}
@@ -718,10 +719,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (camera == null) return;
 		
 		// Note that position here is checked including subpixel
-		if (Position.X + Speed.X < camera.Limit.X + 16f)
+		if (Position.X + Velocity.X < camera.Limit.X + 16f)
 		{
 			GroundSpeed = 0f;
-			Speed.X = 0f;
+			Velocity.X = 0f;
 			Position = new Vector2(camera.Limit.X + 16f, Position.Y);
 		}
 		
@@ -733,10 +734,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			rightBound += 64;
 		}*/
 		
-		if (Position.X + Speed.X > rightBound)
+		if (Position.X + Velocity.X > rightBound)
 		{
 			GroundSpeed = 0f;
-			Speed.X = 0f;
+			Velocity.X = 0f;
 			Position = new Vector2(rightBound, Position.Y);
 		}
 		
@@ -744,21 +745,21 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			case Actions.Flight or Actions.Climb:
 			{
-				if (Position.Y + Speed.Y < camera.Limit.Y + 16f)
+				if (Position.Y + Velocity.Y < camera.Limit.Y + 16f)
 				{ 	
 					if (Action == Actions.Flight)
 					{
 						Gravity	= GravityType.TailsDown;
 					}
 
-					Speed.Y = 0f;
+					Velocity.Y = 0f;
 					Position = new Vector2(Position.X, camera.Limit.Y + 16f);
 				}
 
 				break;
 			}
 			case Actions.Glide when Position.Y < camera.Limit.Y + 10f:
-				Speed.X = 0f;
+				Velocity.X = 0f;
 				break;
 		}
 	
@@ -774,15 +775,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		if (StickToConvex)
 		{
-			Speed.Clamp(-16f * Vector2.One, 16f * Vector2.One);
+			Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
 		}
 		
-		Position = Speed.CalculateNewPosition(Position);
-		Speed.Vector = Speed.Vector;
+		Position = Velocity.CalculateNewPosition(Position);
+		Velocity.Vector = Velocity.Vector;
 		
 		if (!IsGrounded && Action != Actions.Carried)
 		{
-			Speed.AccelerationY = Gravity;
+			Velocity.AccelerationY = Gravity;
 		}
 	}
 	
@@ -832,8 +833,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			float toleranceCheckSpeed = GroundMode switch
 			{
-				Constants.GroundMode.Floor or Constants.GroundMode.Ceiling => Speed.X,
-				Constants.GroundMode.RightWall or Constants.GroundMode.LeftWall => Speed.Y,
+				Constants.GroundMode.Floor or Constants.GroundMode.Ceiling => Velocity.X,
+				Constants.GroundMode.RightWall or Constants.GroundMode.LeftWall => Velocity.Y,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 			
@@ -922,7 +923,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (Action is Actions.Glide or Actions.Climb) return;
 		
 		int wallRadius = RadiusNormal.X + 1;
-		byte moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Speed));
+		byte moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		
@@ -936,11 +937,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				Position -= new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
-				Speed.X = 0f;
+				Velocity.X = 0f;
 				
 				if (moveQuadrant == 3)
 				{
-					GroundSpeed = Speed.Y;
+					GroundSpeed = Velocity.Y;
 					return;
 				}
 			}
@@ -956,11 +957,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			{
 				Position += new Vector2(wallDistance, 0f);
 				TileCollider.Position = (Vector2I)Position;
-				Speed.X = 0f;
+				Velocity.X = 0f;
 				
 				if (moveQuadrant == 1)
 				{
-					GroundSpeed = Speed.Y;
+					GroundSpeed = Velocity.Y;
 					return;
 				}
 			}
@@ -983,7 +984,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				if (wallDist < 0)
 				{
 					Position += new Vector2(wallDist, 0f);
-					Speed.X = 0f;
+					Velocity.X = 0f;
 					
 					return;
 				}
@@ -994,16 +995,16 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				if (moveQuadrant == 2 && Angles.GetQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
 				{
 					Angle = roofAngle;
-					GroundSpeed = roofAngle < 180f ? -Speed.Y : Speed.Y;
-					Speed.Y = 0f;
+					GroundSpeed = roofAngle < 180f ? -Velocity.Y : Velocity.Y;
+					Velocity.Y = 0f;
 					
 					Land();
 				}
 				else
 				{
-					if (Speed.Y < 0f)
+					if (Velocity.Y < 0f)
 					{
-						Speed.Y = 0f;
+						Velocity.Y = 0f;
 					}
 						
 					if (Action == Actions.Flight)
@@ -1041,31 +1042,31 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				angle = angleL;
 			}
 					
-			float minClip = -(Speed.Y + 8f);		
+			float minClip = -(Velocity.Y + 8f);		
 			if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return;
 					
 			if (Angles.GetQuadrant(angle) > 0)
 			{
-				if (Speed.Y > 15.75f)
+				if (Velocity.Y > 15.75f)
 				{
-					Speed.Y = 15.75f;
+					Velocity.Y = 15.75f;
 				}
 						
-				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
-				Speed.X = 0f;
+				GroundSpeed = angle < 180f ? -Velocity.Y : Velocity.Y;
+				Velocity.X = 0f;
 			}
 			else if (angle is > 22.5f and <= 337.5f)
 			{
-				GroundSpeed = angle < 180f ? -Speed.Y : Speed.Y;
+				GroundSpeed = angle < 180f ? -Velocity.Y : Velocity.Y;
 				GroundSpeed /= 2f;
 			}
 			else 
 			{
-				GroundSpeed = Speed.X;
-				Speed.Y = 0f;
+				GroundSpeed = Velocity.X;
+				Velocity.Y = 0f;
 			}
 		}
-		else if (Speed.Y >= 0)
+		else if (Velocity.Y >= 0)
 		{
 			(distance, angle) = TileCollider.FindClosestTile(
 				Radius.Shuffle(-1, 1), 
@@ -1074,8 +1075,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			
 			if (distance >= 0) return;
 				
-			GroundSpeed = Speed.X;
-			Speed.Y = 0f;
+			GroundSpeed = Velocity.X;
+			Velocity.Y = 0f;
 		}
 		else
 		{

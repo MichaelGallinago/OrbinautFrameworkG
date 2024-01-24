@@ -38,6 +38,7 @@ public abstract partial class CommonScene : Node2D
         foreach (Player player in PlayerData.Players)
         {
             player.TouchObjects.Clear();
+            player.PushObjects.Clear();
         }
     }
 }

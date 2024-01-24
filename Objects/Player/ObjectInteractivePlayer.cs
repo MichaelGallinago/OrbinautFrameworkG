@@ -11,11 +11,11 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 	
     public void ActSolid(BaseObject baseObject, Constants.SolidType type)
 	{
-		// Initialise touch flags for the player collision
+		// Initialise flags for the player collision
 		TouchObjects.TryAdd(baseObject, Constants.TouchState.None);
+		PushObjects.Add(baseObject);
 		
 		if (!ObjectInteraction) return;
-		
 		if (SolidData.Radius.X <= 0 || SolidData.Radius.Y <= 0) return;
 		if (baseObject.SolidData.Radius.X <= 0 || baseObject.SolidData.Radius.Y <= 0) return;
 		
@@ -32,7 +32,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		{
 			CollideWithRegularObject(baseObject, ref objectData, extraSize);
 		}
-		else if (Speed.Y >= 0f)
+		else if (Velocity.Y >= 0f)
 		{
 			CollideWithPlatformObject(baseObject, ref objectData, extraSize);
 		}
@@ -138,13 +138,18 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		TouchObjects[baseObject] = flooredPlayerPosition.X < flooredObjectPosition.X ? 
 			Constants.TouchState.Left : Constants.TouchState.Right;
 		
-		if (clip.X != 0 && Math.Sign(clip.X) == Math.Sign(Speed.X))
+		if (clip.X != 0 && Math.Sign(clip.X) == Math.Sign(Velocity.X))
 		{
 			GroundSpeed = 0f;
-			Speed.X = 0f;
+			Velocity.X = 0f;
+
+			if (PushingObject == baseObject)
+			{
+				PushObjects.Add(baseObject);
+			}
 		}
 
-		Position = new Vector2(Position.X - clip.X, Position.Y);
+		Position -= new Vector2(clip.X, 0f);
 	}
 
 	private void CollideVertical(BaseObject baseObject, ref SolidObjectData objectData, int extraSizeX, int clipY)
@@ -159,7 +164,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 
 	private void CollideFromBelow(BaseObject baseObject, int clipY)
 	{
-		switch (Speed.Y)
+		switch (Velocity.Y)
 		{
 			case 0: CrushPlayer(MathF.Abs(clipY) < 16); break;
 			case < 0: HandleUpwardCollision(baseObject, clipY); break;
@@ -180,13 +185,13 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		}
 
 		Position = new Vector2(Position.X, Position.Y - clipY);
-		Speed.Y = 0f;
+		Velocity.Y = 0f;
 		TouchObjects[baseObject] = Constants.TouchState.Down;
 	}
 
 	private void CollideDownward(BaseObject baseObject, ref SolidObjectData objectData, int extraSizeX, int clipY)
 	{
-		if (Speed.Y < 0) return;
+		if (Velocity.Y < 0) return;
 		
 		float relX = MathF.Floor(Position.X - objectData.Position.X) + objectData.Radius.X;
 		if (relX < -extraSizeX || relX > objectData.Radius.X * 2 + extraSizeX) return;
