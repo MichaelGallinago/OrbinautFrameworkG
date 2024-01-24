@@ -57,7 +57,7 @@ public partial class Camera : Camera2D
 		
 		if (SharedData.CheckpointData is not null)
 		{
-			LimitBottom = SharedData.CheckpointData.bottomCameraBound;
+			LimitBottom = SharedData.CheckpointData.BottomCameraBound;
 		}
 	}
 
@@ -168,7 +168,7 @@ public partial class Camera : Camera2D
 		{
 			if (_viewTimer > 0f)
 			{
-				_viewTimer--;
+				_viewTimer -= FrameworkData.ProcessSpeed;
 			}
 		}
 		else if (SharedData.SpinDash || SharedData.PeelOut)

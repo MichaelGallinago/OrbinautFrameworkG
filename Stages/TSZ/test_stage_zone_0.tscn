@@ -87,8 +87,8 @@ _layerLeft = 1
 _layerRight = 0
 
 [node name="PathSwapTriggerHorizontal2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
-position = Vector2(2544, 1024)
-scale = Vector2(1, 3)
+position = Vector2(2560, 1032)
+scale = Vector2(1, 2.75)
 _layerLeft = 1
 _layerRight = 0
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
@@ -171,5 +171,4 @@ _sprite = NodePath("../CameraTrigger/Sprite2D")
 
 [node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
 position = Vector2(816, 840)
-scale = Vector2(-1, 1)
 _piecesTextures = [SubResource("AtlasTexture_g4tdm"), SubResource("AtlasTexture_iybf7"), SubResource("AtlasTexture_bodq8"), SubResource("AtlasTexture_qkuql"), SubResource("AtlasTexture_uskk6"), SubResource("AtlasTexture_7sro2"), SubResource("AtlasTexture_ncvd5"), SubResource("AtlasTexture_nv4q2")]
