@@ -176,7 +176,7 @@ public partial class PlayerCpu : Player
 		var doJump = true;
 		
 		// TODO: AI is pushing weirdly rn
-		if (PushingObject == null || followData.PushingObject != null)
+		if (SetPushAnimationBy == null || followData.SetPushAnimationBy != null)
 		{
 			int distanceX = Mathf.FloorToInt(followData.Position.X - Position.X);
 			PushCpu(distanceX, ref followData);

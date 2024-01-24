@@ -439,7 +439,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		IsSpinning = true;	
 		IsJumping = true;
-		PushingObject = null;
+		SetPushAnimationBy = null;
 		IsGrounded = false;
 		OnObject = null;
 		StickToConvex = false;
@@ -1029,7 +1029,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (!IsGrounded) return;
 		
 		ActionValue += FrameworkData.ProcessSpeed;
-		if (ActionValue >= 60f || GroundSpeed == 0f || PushingObject != null || 
+		if (ActionValue >= 60f || GroundSpeed == 0f || SetPushAnimationBy != null || 
 		    MathF.Cos(Mathf.DegToRad(Angle)) <= 0f)
 		{
 			Action = Actions.None;

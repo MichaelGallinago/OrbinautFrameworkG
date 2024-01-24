@@ -415,7 +415,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsDead) return;
 		
-		RecordedData.Add(new RecordedData(Position, Input.Press, Input.Down, PushingObject, Facing));
+		RecordedData.Add(new RecordedData(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
 		if (RecordedData.Count <= MaxRecordLength) return;
 		RecordedData.RemoveAt(0);
 	}

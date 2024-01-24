@@ -133,7 +133,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		IsAirLock = false;
 		IsSpinning	= false;
 		IsJumping = false;
-		PushingObject = null;
+		SetPushAnimationBy = null;
 		IsHurt = false;
 	
 		Barrier.State = Barrier.States.None;
@@ -180,13 +180,13 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	public void ClearPush()
 	{
-		if (PushingObject != this) return;
+		if (SetPushAnimationBy != this) return;
 		if (Animation is not Animations.Spin and not Animations.SpinDash)
 		{
 			Animation = Animations.Move;
 		}
 		
-		PushingObject = null;
+		SetPushAnimationBy = null;
 	}
 	
     private void ProcessSlopeResist()
@@ -240,7 +240,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			SetPushAnimation();
 		}
 		
-		// Apply friction
 		if (Input.Down is { Left: false, Right: false })
 		{
 			ApplyGroundFriction(PhysicParams.Friction);
@@ -297,7 +296,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		Animation = Animations.Move;
 		Facing = direction;
-		PushingObject = null;
+		SetPushAnimationBy = null;
 					
 		OverrideAnimationFrame = 0;
 		
@@ -306,37 +305,37 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void UpdateMovementGroundAnimation(bool doSkid)
 	{
-		//TODO: FIX THIS AFTER TRIANGLY; Commit: Addressed some TODOs
-		if (Angles.GetQuadrant(Angle) != 0 || GroundSpeed != 0f)
+		// Set push animation once animation frame changes
+		if (SetPushAnimationBy != null && IsAnimationFrameChanged)
 		{
-			if (Animation is Animations.Skid or Animations.Push) return;
-			Animation = Animations.Move;
-			return;
+			Animation = Animations.Push;
 		}
 		
-		if (doSkid && Math.Abs(GroundSpeed) >= 4f && Animation != Animations.Skid)
+		byte quadrant = Angles.GetQuadrant(Angle);
+		if (quadrant == 0 && GroundSpeed == 0f || Animation == Animations.Skid)
 		{
-			Animation = Animations.Skid;
+			Animation = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
+			SetPushAnimationBy = null;
+			return;
+		}
 			
-			//TODO: audio
-			//audio_play_sfx(sfx_skid);
-		}
-				
-		if (!Mathf.IsZeroApprox(GroundSpeed))
+		if (Animation != Animations.Push)
 		{
-			// TODO: This
-			if (Animation is Animations.Skid or Animations.Push) return;
 			Animation = Animations.Move;
-			return;
 		}
+
+		if (quadrant != 0 || !doSkid || !(Math.Abs(GroundSpeed) >= 4f)) return;
 		
-		PushingObject = null;
-		Animation = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
+		ActionValue2 = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
+		Animation = Animations.Skid;
+		
+		//TODO: audio
+		//audio_play_sfx(sfx_skid);
 	}
 	
 	private void SetPushAnimation()
 	{
-		if (PushingObject == null)
+		if (SetPushAnimationBy == null)
 		{
 			if (Animation != Animations.Push) return;
 			Animation = Animations.Move;
@@ -379,7 +378,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (absoluteSpeed >= 0f || Mathf.IsZeroApprox(absoluteSpeed))
 		{
 			Facing = direction;
-			PushingObject = null;
+			SetPushAnimationBy = null;
 			return;
 		}
 
@@ -665,7 +664,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 					
 				if (Facing == firstDirection && !IsSpinning)
 				{
-					PushingObject = this;
+					SetPushAnimationBy = this;
 				}
 				break;
 				
@@ -843,7 +842,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			
 			if (distance > tolerance)
 			{
-				PushingObject = null;
+				SetPushAnimationBy = null;
 				IsGrounded = false;
 						
 				OverrideAnimationFrame = 0;

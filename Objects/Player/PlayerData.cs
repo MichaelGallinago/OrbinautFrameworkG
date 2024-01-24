@@ -49,7 +49,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
-	public BaseObject PushingObject { get; set; }
+	public BaseObject SetPushAnimationBy { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
@@ -129,7 +129,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		IsGrounded = false;
 		
 		OnObject = null;
-		PushingObject = null;
+		SetPushAnimationBy = null;
 		
 		Radius = RadiusNormal;
 		Action = Actions.None;
@@ -159,7 +159,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		GroundMode = Constants.GroundMode.Floor;
 		StickToConvex = false;
 		
-		PushingObject = null;
+		SetPushAnimationBy = null;
 		OnObject = null;
 		ObjectInteraction = true;
 		IsGrounded = true;
@@ -246,7 +246,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		}
 		else if (SharedData.CheckpointData != null)
 		{
-			Position = SharedData.CheckpointData.position - new Vector2I(0, Radius.Y + 1);
+			Position = SharedData.CheckpointData.Position - new Vector2I(0, Radius.Y + 1);
 		}
 
 		Camera.Main.Target = this;

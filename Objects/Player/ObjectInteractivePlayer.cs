@@ -131,7 +131,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		}
 		
 		// Update player's pushing status if grounded
-		PushingObject = IsGrounded && 
+		SetPushAnimationBy = IsGrounded && 
 		    Math.Sign((int)Facing) == Math.Sign(flooredObjectPosition.X - flooredPlayerPosition.X) ?
 			baseObject : null;
 		
@@ -143,7 +143,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 			GroundSpeed = 0f;
 			Velocity.X = 0f;
 
-			if (PushingObject == baseObject)
+			if (IsGrounded)
 			{
 				PushObjects.Add(baseObject);
 			}
