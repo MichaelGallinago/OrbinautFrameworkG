@@ -312,19 +312,21 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		byte quadrant = Angles.GetQuadrant(Angle);
-		if (quadrant == 0 && GroundSpeed == 0f || Animation == Animations.Skid)
+		if (quadrant == 0 && GroundSpeed == 0f)
 		{
 			Animation = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
 			SetPushAnimationBy = null;
 			return;
 		}
 			
+		if (Animation == Animations.Skid) return;
+		
 		if (Animation != Animations.Push)
 		{
 			Animation = Animations.Move;
 		}
 
-		if (quadrant != 0 || !doSkid || !(Math.Abs(GroundSpeed) >= 4f)) return;
+		if (quadrant != 0 || !doSkid || Math.Abs(GroundSpeed) < 4f) return;
 		
 		ActionValue2 = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
 		Animation = Animations.Skid;

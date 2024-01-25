@@ -57,7 +57,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public bool IsSuper { get; set; }
 	public bool IsInvincible { get; set; }
 	public float SuperValue { get; set; }
-
+	
 	public Actions Action { get; set; }
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
@@ -103,14 +103,14 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	protected CollisionTileMap TileMap;
 	protected readonly PlayerInput Input = new();
 	protected readonly TileCollider TileCollider = new();
-
+	
 	private bool _isInit = true;
-
+	
 	protected PlayerData()
 	{
 		Barrier = new Barrier(this);
 	}
-
+	
 	public override void _Ready()
 	{
 		Reset();
@@ -118,7 +118,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
 	}
-
+	
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
 	
 	public virtual void ResetState()

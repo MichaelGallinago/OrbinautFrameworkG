@@ -135,7 +135,7 @@ public partial class PlayerCpu : Player
 
 		return velocityX;
 	}
-
+	
 	private bool ProcessMainCpu()
 	{
 		if (RespawnCpu()) return true;
@@ -216,7 +216,7 @@ public partial class PlayerCpu : Player
 			Position += Vector2.Right * sign;
 		}
 	}
-
+	
 	private bool CheckCpuJump(float distanceX, ref RecordedData followData)
 	{
 		if (IsCpuJumping)
@@ -238,7 +238,7 @@ public partial class PlayerCpu : Player
 		if (RespawnCpu()) return true;
 		
 		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return false;
-				
+		
 		if (Animation == Animations.Idle)
 		{
 			Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
@@ -253,14 +253,14 @@ public partial class PlayerCpu : Player
 			
 			return false;
 		}
-
+		
 		Input.Down = Input.Down with { Down = false };
 		Input.Press = Input.Press with { Abc = false };
 		CpuState = CpuStates.Main;
 		
 		return false;
 	}
-
+	
 	private bool RespawnCpu()
 	{
 		if (Sprite != null && Sprite.CheckInView())
@@ -268,7 +268,7 @@ public partial class PlayerCpu : Player
 			CpuTimer = 0f;
 			return false;
 		}
-
+		
 		CpuTimer += FrameworkData.ProcessSpeed;
 		if (CpuTimer < 300f) return false;
 		Reset();
