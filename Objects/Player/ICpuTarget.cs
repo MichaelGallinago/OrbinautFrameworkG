@@ -18,5 +18,5 @@ public interface ICpuTarget
     bool ObjectInteraction { get; }
     
     List<RecordedData> RecordedData { protected get; init; }
-    RecordedData FollowData => RecordedData[^CpuDelay];
+    RecordedData FollowData => RecordedData.Count >= CpuDelay ? RecordedData[^CpuDelay] : default;
 }

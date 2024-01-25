@@ -110,7 +110,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	{
 		Barrier = new Barrier(this);
 	}
-	
+
 	public override void _Ready()
 	{
 		Reset();

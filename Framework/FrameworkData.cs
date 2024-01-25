@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.Input;
@@ -94,18 +93,20 @@ public static class FrameworkData
 				if (commonObject.Behaviour == BaseObject.BehaviourType.Unique) return;
 				commonObject.SetActivity(false);
 			}
-
+			
 			return;
 		}
 		
 		// Deactivate or reset objects outside the new active area
+		if (Camera.Main == null) return;
+
 		Vector2I activeArea = Camera.Main.GetActiveArea();
 		int limitBottom = Camera.Main.LimitBottom;
 		
 		foreach (BaseObject commonObject in BaseObject.Objects)
 		{
 			DeactivateObjectsByBehaviour(commonObject, limitBottom, ref activeArea);
-			
+		
 			// Activate objects within the new active area and reset interaction flag for all active objects
 			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
 			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) continue;

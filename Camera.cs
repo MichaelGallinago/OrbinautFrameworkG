@@ -46,7 +46,7 @@ public partial class Camera : Camera2D
 
 	public Camera()
 	{
-		Main ??= this;
+		Main = this;
 		
 		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
 		Limit = Bound;

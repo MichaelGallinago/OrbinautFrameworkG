@@ -47,7 +47,17 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		}
 		base.QueueFree();
 	}
-	
+
+	public override void _ExitTree()
+	{
+		Players.Remove(this);
+		for (int i = Id; i < Players.Count; i++)
+		{
+			Players[i].Id--;
+		}
+		base._ExitTree();
+	}
+
 	public override void _EnterTree()
 	{
 		base._EnterTree();
@@ -88,6 +98,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		_tail?.Animate(this);
 		ProcessPalette();
 		UpdateCollision();
+
+		if (Input.Press.C)
+		{
+			GetTree().ReloadCurrentScene();
+		}
 	}
 	
 	protected virtual bool ProcessCpu(float processSpeed) => false;
