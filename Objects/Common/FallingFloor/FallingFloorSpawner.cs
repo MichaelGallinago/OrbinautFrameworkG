@@ -31,6 +31,7 @@ public partial class FallingFloorSpawner : Sprite2D
         if (Engine.IsEditorHint())
         {
             TextureChanged += CreatePiecesTextures;
+            if (_piecesTextures != null) return;
             CreatePiecesTextures();
             return;
         }

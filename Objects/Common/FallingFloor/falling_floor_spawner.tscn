@@ -3,35 +3,35 @@
 [ext_resource type="Texture2D" uid="uid://b5wsb23sxlkx8" path="res://Objects/Common/FallingFloor/basic.png" id="1_2kuss"]
 [ext_resource type="Script" path="res://Objects/Common/FallingFloor/FallingFloorSpawner.cs" id="2_dwu72"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_mnm83"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_la00d"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(0, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_tb804"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_pvb6v"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(0, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_b64a0"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_pls5g"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(16, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_e71fp"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_0rp6y"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(16, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_toheo"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ikgil"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(32, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_wd6b8"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_17ex6"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(32, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_m1gti"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3tq4"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_rxxit"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_io8fr"]
 atlas = ExtResource("1_2kuss")
 region = Rect2(48, 16, 16, 16)
 
@@ -41,4 +41,5 @@ texture = ExtResource("1_2kuss")
 offset = Vector2(0, 8)
 script = ExtResource("2_dwu72")
 CollisionRadius = Vector2i(32, 8)
-_piecesTextures = [SubResource("AtlasTexture_mnm83"), SubResource("AtlasTexture_tb804"), SubResource("AtlasTexture_b64a0"), SubResource("AtlasTexture_e71fp"), SubResource("AtlasTexture_toheo"), SubResource("AtlasTexture_wd6b8"), SubResource("AtlasTexture_m1gti"), SubResource("AtlasTexture_rxxit")]
+_piecesTextures = [SubResource("AtlasTexture_la00d"), SubResource("AtlasTexture_pvb6v"), SubResource("AtlasTexture_pls5g"), SubResource("AtlasTexture_0rp6y"), SubResource("AtlasTexture_ikgil"), SubResource("AtlasTexture_17ex6"), SubResource("AtlasTexture_m3tq4"), SubResource("AtlasTexture_io8fr")]
+metadata/_edit_pinned_properties_ = [&"_piecesTextures"]
