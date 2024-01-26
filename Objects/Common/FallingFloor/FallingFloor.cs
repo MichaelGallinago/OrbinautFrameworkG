@@ -10,7 +10,7 @@ using Player;
 
 public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : BaseObject
 {
-    private enum States
+    private enum States : byte
     {
         Solid, Collapse, Fallen
     }
@@ -27,43 +27,48 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
     {
         switch (_state)
         {
-            case States.Solid:
-                CheckTarget();
-                
-                if (!_isTouched || _stateTimer > 0)
-                {
-                    _stateTimer -= FrameworkData.ProcessSpeed;
-                    break;
-                }
-                
-                Collapse();
-                break;
-		
-            case States.Collapse:
-                // When falling apart, act as solid only for the players already standing on the object
-                foreach (Player player in PlayerData.Players)
-                {
-                    if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
-                    player.ActSolid(this, Constants.SolidType.Top);
-                }
-			
-                if (_stateTimer > 0f)
-                {
-                    _stateTimer -= FrameworkData.ProcessSpeed;
-                    break;
-                }
-			
-                // Release all players from this object
-                foreach (Player player in PlayerData.Players)
-                {
-                    if (player.OnObject != this) continue;
-                    player.OnObject = null;
-                    player.IsGrounded = false;
-                }
-
-                _state = States.Fallen;
-                break;
+            case States.Solid: ActSolid(); break;
+            case States.Collapse: HandlePlayerOnCollapse(); break;
         }
+    }
+
+    private void ActSolid()
+    {
+        CheckTarget();
+                
+        if (!_isTouched || _stateTimer > 0f)
+        {
+            _stateTimer -= FrameworkData.ProcessSpeed;
+            return;
+        }
+        
+        Collapse();
+    }
+
+    private void HandlePlayerOnCollapse()
+    {
+        // When falling apart, act as solid only for the players already standing on the object
+        foreach (Player player in PlayerData.Players)
+        {
+            if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
+            player.ActSolid(this, Constants.SolidType.Top);
+        }
+			
+        if (_stateTimer > 0f)
+        {
+            _stateTimer -= FrameworkData.ProcessSpeed;
+            return;
+        }
+			
+        // Release all players from this object
+        foreach (Player player in PlayerData.Players)
+        {
+            if (player.OnObject != this) continue;
+            player.OnObject = null;
+            player.IsGrounded = false;
+        }
+
+        _state = States.Fallen;
     }
 
     private void CheckTarget()

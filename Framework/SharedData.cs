@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 using OrbinautFramework3.Objects.Common.GiantRing;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
@@ -37,7 +38,6 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = 0;
     public static float MusicVolume { get; set; } = 0.5f;
     public static float SoundVolume { get; set; } = 0.5f;
-    public static byte DebugCollision { get; set; } = 0;
 	public static CheckpointData CheckpointData { get; set; }
     public static GiantRingData GiantRingData { get; set; }
     // TODO: ds_giant_rings
@@ -49,7 +49,25 @@ public static class SharedData
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;
     public static byte SavedLives { get; set; } = 3;
-    public static uint SavedScore { get; set; } = 0;
-    public static byte SavedRings { get; set; } = 0;
+    public static uint SavedScore { get; set; }
+    public static byte SavedRings { get; set; }
     public static Barrier.Types SavedBarrier { get; set; } = Barrier.Types.None;
+
+    public static event Action<SensorDebugTypes> SensorDebugToggled;
+    public static SensorDebugTypes SensorDebugType 
+    { 
+	    get => _sensorDebugType;
+	    set
+	    {
+		    if ((value == SensorDebugTypes.None) ^ (_sensorDebugType == SensorDebugTypes.None)) return;
+		    SensorDebugToggled?.Invoke(value);
+		    _sensorDebugType = value;
+	    }
+    }
+    private static SensorDebugTypes _sensorDebugType = SensorDebugTypes.None;
+
+    public enum SensorDebugTypes : byte
+    {
+	    None, Collision, Hitbox, SolidBox
+    }
 }

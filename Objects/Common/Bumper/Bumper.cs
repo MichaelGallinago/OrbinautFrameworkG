@@ -11,7 +11,10 @@ using Player;
 
 public partial class Bumper : BaseObject
 {
-    private enum HitsLimit { Sonic1 = 10, Sonic2 = -1 }
+    private enum HitsLimit : sbyte
+    {
+        Sonic1 = 10, Sonic2 = -1
+    }
     
     [Export] private HitsLimit _hitsLimit = HitsLimit.Sonic2;
     [Export] private AdvancedAnimatedSprite _sprite;

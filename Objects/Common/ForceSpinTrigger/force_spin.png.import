@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://r8x7cv3l3k8p"
-path="res://.godot/imported/force_spin_vertical.png-9258b17a1066d844503d3e2c7a688499.ctex"
+uid="uid://dibm2p3l0mhvh"
+path="res://.godot/imported/force_spin.png-467130033385d7ac75ddfcfae91a7fbf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Common/ForceSpinTrigger/force_spin_vertical.png"
-dest_files=["res://.godot/imported/force_spin_vertical.png-9258b17a1066d844503d3e2c7a688499.ctex"]
+source_file="res://Objects/Common/ForceSpinTrigger/force_spin.png"
+dest_files=["res://.godot/imported/force_spin.png-467130033385d7ac75ddfcfae91a7fbf.ctex"]
 
 [params]
 

@@ -397,7 +397,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private bool StopSpinning()
 	{
-		if (IsForcedRoll) return false;
+		if (IsForcedSpin) return false;
 		
 		if (GroundSpeed != 0f)
 		{
@@ -456,7 +456,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 	
 		// Limit upward speed
-		if (!IsJumping && Action != Actions.SpinDash && !IsForcedRoll && Velocity.Y < -15.75f)
+		if (!IsJumping && Action != Actions.SpinDash && !IsForcedSpin && Velocity.Y < -15.75f)
 		{
 			Velocity.Y = -15.75f;
 		}
@@ -679,7 +679,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessRollStart()
 	{
 		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
-		if (!IsForcedRoll && (Input.Down.Left || Input.Down.Right)) return;
+		if (!IsForcedSpin && (Input.Down.Left || Input.Down.Right)) return;
 		
 		var allowSpin = false;
 		if (Input.Down.Down)
@@ -701,7 +701,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			}
 		}
 
-		if (!allowSpin && !IsForcedRoll) return;
+		if (!allowSpin && !IsForcedSpin) return;
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
 		IsSpinning = true;

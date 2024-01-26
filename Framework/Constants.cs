@@ -17,7 +17,7 @@ public static class Constants
 	public const byte DoubleTileSize = TileSize * 2;
 	public const float MaxAirValue = 1800f;
 	
-	public enum ZIndexes
+	public enum ZIndexes : ushort
 	{
 		AboveForeground = 1024
 	}

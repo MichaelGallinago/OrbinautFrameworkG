@@ -8,8 +8,8 @@ namespace OrbinautFramework3.Objects.Player;
 public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 {
 	private const int GripY = 4;
-	
-    public void ActSolid(BaseObject baseObject, Constants.SolidType type)
+
+	public void ActSolid(BaseObject baseObject, Constants.SolidType type)
 	{
 		// Initialise flags for the player collision
 		TouchObjects.TryAdd(baseObject, Constants.TouchState.None);
@@ -58,7 +58,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 
 	private void RegisterCollisionCheck()
 	{
-		if (SharedData.DebugCollision != 3) return;
+		if (SharedData.SensorDebugType != SharedData.SensorDebugTypes.SolidBox) return;
 		// TODO: debug
 		/*
 		var dsList = c_engine.collision.ds_solids;

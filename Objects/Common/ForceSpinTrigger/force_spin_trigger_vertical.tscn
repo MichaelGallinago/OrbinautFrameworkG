@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bfux0gt6mdql"]
+
+[ext_resource type="Script" path="res://Objects/Common/ForceSpinTrigger/ForceSpinTriggerVertical.cs" id="1_vfaal"]
+[ext_resource type="Texture2D" uid="uid://dibm2p3l0mhvh" path="res://Objects/Common/ForceSpinTrigger/force_spin.png" id="2_0wt62"]
+
+[node name="ForceSpinTriggerVertical" type="Node2D"]
+rotation = 1.5708
+script = ExtResource("1_vfaal")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.501961)
+z_index = 4096
+z_as_relative = false
+texture = ExtResource("2_0wt62")

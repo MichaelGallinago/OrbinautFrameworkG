@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyio7cp6j0jmo"
-path="res://.godot/imported/path_swap_vertical.png-74650b27c52a7e6c123cb6ab4b99cc4d.ctex"
+uid="uid://k1ir016cixbt"
+path="res://.godot/imported/path_swap.png-79827bea070f01e524f7edab2a1c89c6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Common/PathSwapTrigger/path_swap_vertical.png"
-dest_files=["res://.godot/imported/path_swap_vertical.png-74650b27c52a7e6c123cb6ab4b99cc4d.ctex"]
+source_file="res://Objects/Common/PathSwapTrigger/path_swap.png"
+dest_files=["res://.godot/imported/path_swap.png-79827bea070f01e524f7edab2a1c89c6.ctex"]
 
 [params]
 

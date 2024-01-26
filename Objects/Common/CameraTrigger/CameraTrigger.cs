@@ -20,8 +20,6 @@ public partial class CameraTrigger : BaseObject
     private int _height;
     private int _previousBound;
     private Direction _cameraSide;
-    
-    public CameraTrigger() => Visible = false;
 
     public override void _Ready()
     {
@@ -35,8 +33,6 @@ public partial class CameraTrigger : BaseObject
 
     public override void _Process(double delta)
     {
-        Visible = SharedData.DebugCollision > 0;
-        
         Camera camera = Camera.Main;
         Vector2I position = camera.BufferPosition + SharedData.ViewSize / 2;
 	

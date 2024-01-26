@@ -6,22 +6,24 @@ namespace OrbinautFramework3.Objects.Common.FallingFloor;
 [Tool]
 public partial class FallingFloorSpawner : Sprite2D
 {
-    [Export] private Vector2I CollisionRadius
+    [Export] private Vector2I _collisionRadius;
+    [Export] private Vector2I _piecesSize = new(16, 16);
+    
+#if TOOLS
+    [Export] public bool FlipHorizontally
     {
-        get => _collisionRadius;
+        get => false;
         set
         {
-            _collisionRadius = value;
-#if TOOLS
-            QueueRedraw();
-#endif
+            if (value)
+            {
+                Scale = Scale with { X = -Scale.X };
+            }
         }
     }
-
-    [Export] private Vector2I _piecesSize = new(16, 16);
-    [Export] private Array<AtlasTexture> _piecesTextures;
-
-    private Vector2I _collisionRadius;
+#endif
+    
+    [ExportGroup("Metadata"), Export] private Array<AtlasTexture> _piecesTextures;
     
     public FallingFloorSpawner() => TextureChanged += UpdateConfigurationWarnings;
 
@@ -41,12 +43,6 @@ public partial class FallingFloorSpawner : Sprite2D
     }
 
 #if TOOLS
-    public override void _Draw()
-    {
-        base._Draw();
-        DrawRect(new Rect2(-_collisionRadius, _collisionRadius * 2), 
-            new Color(Colors.Yellow, 0.5f), false, 1f);
-    }
 
     public override bool _Set(StringName property, Variant value)
     {
@@ -101,7 +97,7 @@ public partial class FallingFloorSpawner : Sprite2D
         };
         
         floor.AddChild(sprite);
-        floor.SetSolid(CollisionRadius);
+        floor.SetSolid(_collisionRadius);
         
         parent.CallDeferred("add_child", floor);
     }

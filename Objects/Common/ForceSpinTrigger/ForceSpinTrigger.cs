@@ -2,17 +2,16 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 
-namespace OrbinautFramework3.Objects.Common.PathSwapTrigger;
+namespace OrbinautFramework3.Objects.Common.ForceSpinTrigger;
 
 using Player;
 
-public abstract partial class PathSwapTrigger : Trigger
+public abstract partial class ForceSpinTrigger : Trigger
 {
     [Export] protected Sprite2D Sprite;
-    [Export] protected bool IsGroundOnly;
 
     protected Vector2 Borders;
-
+    
     public override void _Ready()
     {
         if (Sprite == null) return;
@@ -24,10 +23,14 @@ public abstract partial class PathSwapTrigger : Trigger
     {
         foreach (Player player in PlayerData.Players)
         {
-            if (IsGroundOnly && !player.IsGrounded || player.IsEditMode) continue;
-            UpdatePlayerTileLayer(player);
+            if (player.IsEditMode || !CheckForcePlayerSpin(player)) continue;
+            
+            player.IsForcedSpin = !player.IsForcedSpin;
+            player.Action = Actions.None;
+				
+            player.ResetGravity();
         }
     }
     
-    protected abstract void UpdatePlayerTileLayer(Player player);
+    protected abstract bool CheckForcePlayerSpin(Player player);
 }

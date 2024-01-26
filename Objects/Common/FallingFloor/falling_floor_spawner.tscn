@@ -40,6 +40,6 @@ z_index = -5
 texture = ExtResource("1_2kuss")
 offset = Vector2(0, 8)
 script = ExtResource("2_dwu72")
-CollisionRadius = Vector2i(32, 8)
+_collisionRadius = Vector2i(32, 8)
 _piecesTextures = [SubResource("AtlasTexture_la00d"), SubResource("AtlasTexture_pvb6v"), SubResource("AtlasTexture_pls5g"), SubResource("AtlasTexture_0rp6y"), SubResource("AtlasTexture_ikgil"), SubResource("AtlasTexture_17ex6"), SubResource("AtlasTexture_m3tq4"), SubResource("AtlasTexture_io8fr")]
 metadata/_edit_pinned_properties_ = [&"_piecesTextures"]

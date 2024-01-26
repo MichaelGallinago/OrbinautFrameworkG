@@ -67,7 +67,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
 	
-	public bool IsForcedRoll { get; set; }
+	public bool IsForcedSpin { get; set; }
 	public float GroundLockTimer { get; set; }
 	public bool IsAirLock { get; set; }
     
@@ -189,7 +189,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 			Camera.Main.Target = this;
 		}
 		
-		IsForcedRoll = false;
+		IsForcedSpin = false;
 		IsAirLock = false;
 		GroundLockTimer = 0f;
 		

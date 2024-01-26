@@ -414,7 +414,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool StartJump()
 	{
-		if (Action is Actions.SpinDash or Actions.PeelOut || IsForcedRoll || !IsGrounded) return false;
+		if (Action is Actions.SpinDash or Actions.PeelOut || IsForcedSpin || !IsGrounded) return false;
 		
 		if (!Input.Press.Abc || !CheckCeilingDistance()) return false;
 		

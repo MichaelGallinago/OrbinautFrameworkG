@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=26 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_pey0e"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://b8uvs02jxyk0t" path="res://Objects/Common/Bumper/bumper.tscn" id="13_qd0sa"]
 [ext_resource type="PackedScene" uid="uid://cps57gwcr3a6o" path="res://Objects/Common/FallingFloor/falling_floor_spawner.tscn" id="14_d1km8"]
 [ext_resource type="Texture2D" uid="uid://b5wsb23sxlkx8" path="res://Objects/Common/FallingFloor/basic.png" id="15_ve5v6"]
+[ext_resource type="PackedScene" uid="uid://c77b22svl3edt" path="res://Objects/Common/ForceSpinTrigger/force_spin_trigger_horizontal.tscn" id="16_p2jm1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rqx3"]
 shader = ExtResource("1_pey0e")
@@ -190,5 +191,20 @@ scale = Vector2(1, 30)
 _sprite = NodePath("../CameraTrigger/Sprite2D")
 
 [node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
-position = Vector2(816, 840)
+position = Vector2(800, 840)
 _piecesTextures = [SubResource("AtlasTexture_0gqu0"), SubResource("AtlasTexture_tlei8"), SubResource("AtlasTexture_udt1h"), SubResource("AtlasTexture_gl3et"), SubResource("AtlasTexture_eqew6"), SubResource("AtlasTexture_2ggey"), SubResource("AtlasTexture_irqyr"), SubResource("AtlasTexture_ibw10")]
+
+[node name="ForceSpinTriggerHorizontal" parent="." instance=ExtResource("16_p2jm1")]
+position = Vector2(7296, 1008)
+
+[node name="ForceSpinTriggerHorizontal2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+position = Vector2(7552, 1264)
+Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
+
+[node name="ForceSpinTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+position = Vector2(11136, 1392)
+Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
+
+[node name="ForceSpinTriggerHorizontal4" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+position = Vector2(11392, 1648)
+Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
