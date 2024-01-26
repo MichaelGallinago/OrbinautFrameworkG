@@ -23,7 +23,6 @@ boot_splash/use_filter=false
 window/size/viewport_width=400
 window/size/viewport_height=224
 window/stretch/mode="viewport"
-window/vsync/vsync_mode=0
 
 [dotnet]
 

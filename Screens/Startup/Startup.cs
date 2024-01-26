@@ -1,4 +1,3 @@
-using System.Threading;
 using Godot;
 
 namespace OrbinautFramework3.Screens.Startup;
@@ -6,15 +5,25 @@ namespace OrbinautFramework3.Screens.Startup;
 public partial class Startup : Framework.CommonScene
 {
     [Export] private ResourcePreloader _preloader;
+
+    private int _time;
     
     public override void _Ready()
     {
         PhysicsServer2D.SetActive(false);
         PhysicsServer3D.SetActive(false);
+    }
 
-        SceneTree sceneTree = GetTree();
+    public override void _Process(double deltaTime)
+    {
+        _time++;
+
+        if (_time < 100)
+        {
+            return;
+        }
         
-        Thread.Sleep(1000);
+        SceneTree sceneTree = GetTree();
         
         if (_preloader == null)
         {

@@ -1,6 +1,7 @@
-[gd_scene load_steps=23 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=25 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
+[ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_pey0e"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/camera.tscn" id="1_yqihk"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="2_b03l2"]
@@ -15,40 +16,59 @@
 [ext_resource type="PackedScene" uid="uid://cps57gwcr3a6o" path="res://Objects/Common/FallingFloor/falling_floor_spawner.tscn" id="14_d1km8"]
 [ext_resource type="Texture2D" uid="uid://b5wsb23sxlkx8" path="res://Objects/Common/FallingFloor/basic.png" id="15_ve5v6"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_sv1x8"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6rqx3"]
+shader = ExtResource("1_pey0e")
+shader_parameter/u_bound = null
+shader_parameter/u_UVs1 = null
+shader_parameter/u_texelSize1 = null
+shader_parameter/u_index1 = null
+shader_parameter/u_UVs2 = null
+shader_parameter/u_texelSize2 = null
+shader_parameter/u_index2 = null
+shader_parameter/u_parallaxActive = null
+shader_parameter/u_offset = null
+shader_parameter/u_size = null
+shader_parameter/u_scaling = null
+shader_parameter/u_inclineHeight = null
+shader_parameter/u_inclineStep = null
+shader_parameter/u_overlapActive = null
+shader_parameter/u_mapSizeSurf = null
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_50b3u"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_777je"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_o4cgr"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(0, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hc73c"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_jnc5d"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hl6pk"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_yevvg"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(16, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_0dwcr"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_k6s5j"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_tgfe4"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_adi4a"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(32, 16, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_qyr1d"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_t1i3b"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ju528"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_qhv8n"]
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
 [node name="StageTSZ" type="Node2D"]
 process_priority = -1
+material = SubResource("ShaderMaterial_6rqx3")
 script = ExtResource("1_hkdi5")
 
 [node name="Camera" parent="." instance=ExtResource("1_yqihk")]
@@ -171,4 +191,4 @@ _sprite = NodePath("../CameraTrigger/Sprite2D")
 
 [node name="FallingFloorSpawner" parent="." instance=ExtResource("14_d1km8")]
 position = Vector2(816, 840)
-_piecesTextures = [SubResource("AtlasTexture_sv1x8"), SubResource("AtlasTexture_777je"), SubResource("AtlasTexture_hc73c"), SubResource("AtlasTexture_hl6pk"), SubResource("AtlasTexture_0dwcr"), SubResource("AtlasTexture_tgfe4"), SubResource("AtlasTexture_qyr1d"), SubResource("AtlasTexture_ju528")]
+_piecesTextures = [SubResource("AtlasTexture_50b3u"), SubResource("AtlasTexture_o4cgr"), SubResource("AtlasTexture_jnc5d"), SubResource("AtlasTexture_yevvg"), SubResource("AtlasTexture_k6s5j"), SubResource("AtlasTexture_adi4a"), SubResource("AtlasTexture_t1i3b"), SubResource("AtlasTexture_qhv8n")]

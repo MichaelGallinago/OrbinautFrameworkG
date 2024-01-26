@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqjxknl3sdpj"]
+
+[ext_resource type="Texture2D" uid="uid://de2qli7eilsyh" path="res://Objects/GUI/Continue/sonic.png" id="1_yee1l"]
+[ext_resource type="Script" path="res://Screens/LoadTestSprite.cs" id="2_7q5ik"]
+
+[node name="LoadTest" type="Node2D"]
+
+[node name="LoadTestSprite" type="Sprite2D" parent="."]
+position = Vector2(39, 42)
+texture = ExtResource("1_yee1l")
+script = ExtResource("2_7q5ik")
