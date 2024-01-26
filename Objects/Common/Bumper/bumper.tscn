@@ -5,30 +5,29 @@
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="4_thiwj"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedAnimatedSprite.cs" id="5_wqvxw"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_nbfsr"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_q0eh2"]
 atlas = ExtResource("3_3buyg")
 region = Rect2(36, 0, 36, 36)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_toe1j"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_eogub"]
 atlas = ExtResource("3_3buyg")
 region = Rect2(0, 0, 36, 36)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_uwm06"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_hj5c3"]
 atlas = ExtResource("3_3buyg")
 region = Rect2(0, 0, 36, 36)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_wtp5n"]
-resource_local_to_scene = true
+[sub_resource type="SpriteFrames" id="SpriteFrames_mun1y"]
 animations = [{
 "frames": [{
 "duration": 4.0,
-"texture": SubResource("AtlasTexture_nbfsr")
+"texture": SubResource("AtlasTexture_q0eh2")
 }, {
 "duration": 4.0,
-"texture": SubResource("AtlasTexture_toe1j")
+"texture": SubResource("AtlasTexture_eogub")
 }, {
 "duration": 5.0,
-"texture": SubResource("AtlasTexture_nbfsr")
+"texture": SubResource("AtlasTexture_q0eh2")
 }],
 "loop": false,
 "name": &"Bump",
@@ -36,7 +35,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_uwm06")
+"texture": SubResource("AtlasTexture_hj5c3")
 }],
 "loop": true,
 "name": &"Default",
@@ -53,6 +52,6 @@ _sprite = NodePath("AdvancedAnimatedSprite")
 Behaviour = 1
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
-sprite_frames = SubResource("SpriteFrames_wtp5n")
+sprite_frames = SubResource("SpriteFrames_mun1y")
 animation = &"Default"
 script = ExtResource("5_wqvxw")
