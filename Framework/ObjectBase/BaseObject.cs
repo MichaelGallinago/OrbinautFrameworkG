@@ -59,12 +59,6 @@ public abstract partial class BaseObject : Node2D
 		InteractData.RadiusExtra = radius;
 		InteractData.OffsetExtra = offset;
 	}
-
-	public void SetActivity(bool isActive)
-	{
-		SetProcess(isActive);
-		Visible = isActive;
-	}
 	
 	public bool CheckCollision(BaseObject target, CollisionSensor type)
 	{

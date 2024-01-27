@@ -8,17 +8,23 @@ namespace OrbinautFramework3.Framework;
 
 public abstract partial class CommonScene : Node2D
 {
+    public SceneTree Tree { get; private set; }
     public bool IsStage { get; protected set; }
     public CollisionTileMap CollisionTileMap { get; set; }
-    public SceneLateUpdate LateUpdate = new();
+    
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
+    private SceneLateUpdate _lateUpdate = new();
+    private Debug _debug = new();
 
-    public CommonScene() => ProcessPriority = int.MinValue;
+    protected CommonScene() => ProcessPriority = int.MinValue;
 
     public override void _Ready()
     {
         AddChild(_sceneContinuousUpdate);
-        AddChild(LateUpdate);
+        AddChild(_lateUpdate);
+        AddChild(_debug);
+
+        Tree = GetTree();
         Animator.Reset();
     }
 
@@ -28,6 +34,7 @@ public abstract partial class CommonScene : Node2D
     public override void _Process(double deltaTime)
     {
         FrameworkData.ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
+        
         FrameworkData.UpdateEarly(FrameworkData.ProcessSpeed);
         
         foreach (BaseObject objects in BaseObject.Objects)

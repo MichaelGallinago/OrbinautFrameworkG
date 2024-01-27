@@ -1,11 +1,10 @@
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Common.CameraTrigger;
 
-public partial class CameraTrigger : BaseObject
+public partial class CameraTrigger : Trigger
 {
     private enum BoundSpeeds : byte
     {
@@ -35,14 +34,14 @@ public partial class CameraTrigger : BaseObject
     {
         Camera camera = Camera.Main;
         Vector2I position = camera.BufferPosition + SharedData.ViewSize / 2;
-	
+	    
         if (position.Y < Position.Y - _height || position.Y >= Position.Y + _height) return;
         
         if (_cameraSide == Direction.Positive == position.X < Position.X) return;
         
         _cameraSide = (Direction)(-(int)_cameraSide);
         camera.BoundSpeed.Y = (int)_boundSpeed;
-	
+	    
         if (_direction == Direction.Negative && position.X < Position.X || 
             _direction == Direction.Positive && position.X >= Position.X)
         {

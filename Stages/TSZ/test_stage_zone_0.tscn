@@ -208,3 +208,21 @@ Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 [node name="ForceSpinTriggerHorizontal4" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
 position = Vector2(11392, 1648)
 Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
+
+[node name="PathSwapTriggerHorizontal7" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+position = Vector2(9856, 1216)
+_layerLeft = 1
+_layerRight = 0
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+IsGroundOnly = true
+
+[node name="PathSwapTriggerHorizontal8" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+position = Vector2(10112, 1296)
+scale = Vector2(1, 3.5)
+_layerLeft = 1
+_layerRight = 0
+Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+
+[node name="ForceSpinTriggerHorizontal5" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+position = Vector2(452, 876)
+Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")

@@ -14,7 +14,7 @@ public enum Types : byte
 	
 public enum SpawnTypes : byte
 {
-    Global, GlobalAI, Unique
+    Global, GlobalAI, Unique, None
 }
 	
 public enum CpuStates : byte

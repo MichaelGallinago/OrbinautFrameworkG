@@ -275,9 +275,11 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		{
 			SpawnTypes.Global => SharedData.PlayerType,
 			SpawnTypes.GlobalAI => SharedData.PlayerTypeCpu,
+			SpawnTypes.Unique => _uniqueType,
 			_ => Type
 		};
-
+		_spawnType = SpawnTypes.None;
+		
 		if (Type != Types.None) return false;
 		QueueFree();
 		return true;

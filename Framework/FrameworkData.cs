@@ -78,7 +78,7 @@ public static class FrameworkData
 			{
 				foreach (BaseObject commonObject in BaseObject.Objects)
 				{
-					commonObject.SetActivity(true);
+					commonObject.SetProcess(true);
 				}
 			}
 		
@@ -91,7 +91,7 @@ public static class FrameworkData
 			foreach (BaseObject commonObject in BaseObject.Objects)
 			{
 				if (commonObject.Behaviour == BaseObject.BehaviourType.Unique) return;
-				commonObject.SetActivity(false);
+				commonObject.SetProcess(false);
 			}
 			
 			return;
@@ -110,7 +110,7 @@ public static class FrameworkData
 			// Activate objects within the new active area and reset interaction flag for all active objects
 			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
 			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) continue;
-			commonObject.SetActivity(true);
+			commonObject.SetProcess(true);
 			commonObject.InteractData.IsInteract = true;
 		}
     }
@@ -145,7 +145,7 @@ public static class FrameworkData
 			    }
 			    
 			    commonObject.Reset();
-			    commonObject.SetActivity(false);
+			    commonObject.SetProcess(false);
 			    break;
 				
 		    default: 
@@ -153,7 +153,7 @@ public static class FrameworkData
 					
 			    float respawnX = commonObject.RespawnData.Position.X;
 			    if (respawnX >= activeArea.X && respawnX <= activeArea.Y) break;
-			    commonObject.SetActivity(false);
+			    commonObject.SetProcess(false);
 			    break;
 	    }
     }

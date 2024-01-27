@@ -13,6 +13,7 @@ public static class SharedData
     //public static Room StartRoom { get; set; } = rm_devmenu; // TODO: add StartRoom
     public static bool DevMode { get; set; } = true;
     public static bool ShowSplash { get; set; } = false;
+    public static int TargetFps { get; set; } = 165;
 	
     // Originals differences
     public static PhysicsTypes PlayerPhysics { get; set; } = PhysicsTypes.S2;
