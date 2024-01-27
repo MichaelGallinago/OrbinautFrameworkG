@@ -121,8 +121,8 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private Animations TailsType => _player.Animation switch
 	{
-		Animations.Fly => _player.CarryTarget == null ? Animations.FlyCarry : Animations.Fly,
-		Animations.FlyTired => _player.CarryTarget == null ? Animations.FlyCarryTired : Animations.FlyTired,
+		Animations.Fly => _player.CarryTarget == null ? Animations.Fly : Animations.FlyCarry,
+		Animations.FlyTired => _player.CarryTarget == null ? Animations.FlyTired : Animations.FlyCarryTired,
 		Animations.Move => GetMoveAnimation(true, 6f),
 		_ => _player.Animation
 	};

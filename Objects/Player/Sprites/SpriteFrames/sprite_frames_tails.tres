@@ -363,7 +363,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_j1dk3")
 }],
 "loop": true,
-"name": &"FlyLift",
+"name": &"FlyCarry",
 "speed": 0.0
 }, {
 "frames": [{
@@ -671,7 +671,7 @@ _offsets = {
 "Drown": Vector2(1, 2),
 "Duck": Vector2(6, 6),
 "Fly": Vector2(1, -1),
-"FlyLift": Vector2(1, -2),
+"FlyCarry": Vector2(1, -2),
 "FlyTired": Vector2(1, -1),
 "Grab": Vector2(3, -8),
 "Hurt": Vector2(0, 1),

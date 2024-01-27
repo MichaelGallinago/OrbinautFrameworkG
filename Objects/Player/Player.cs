@@ -111,23 +111,29 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		switch (newType)
 		{
-			case Types.Knuckles:
-				ClimbAnimationFrameNumber = Sprite.GetAnimationFrameCount(Animations.ClimbWall, newType);
-				break;
-			
-			case not Types.Tails when Type == Types.Tails:
-				_tail.QueueFree();
-				_tail = null;
-				break;
-			
-			case Types.Tails when Type != Types.Tails:
+			case Types.Tails:
+				if (_tail != null) return;
 				_tail = PackedTail.Instantiate<Tail>();
 				AddChild(_tail);
 				break;
+			
+			case Types.Knuckles:
+				ClimbAnimationFrameNumber = Sprite.GetAnimationFrameCount(Animations.ClimbWall, newType);
+				RemoveTail();
+				break;
+			
+			default:
+				RemoveTail();
+				break;
 		}
 	}
-	
-	#region UpdatePlayerSystems
+
+	private void RemoveTail()
+	{
+		if (_tail == null) return;
+		_tail.QueueFree();
+		_tail = null;
+	}
 	
 	private void UpdateStatus()
 	{
@@ -557,8 +563,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		// Apply palette logic
 		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
 	}
-
-	#endregion
 
 	public void IncreaseComboScore(int comboCounter = 0)
 	{
