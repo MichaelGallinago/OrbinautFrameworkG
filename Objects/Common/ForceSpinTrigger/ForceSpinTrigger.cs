@@ -23,9 +23,7 @@ public abstract partial class ForceSpinTrigger : Trigger
     {
         foreach (Player player in PlayerData.Players)
         {
-            var a = CheckForcePlayerSpin(player);
-            //GD.Print(a);
-            if (player.IsEditMode || !a) continue;
+            if (player.IsEditMode || !CheckForcePlayerSpin(player)) continue;
             
             player.IsForcedSpin = !player.IsForcedSpin;
             player.Action = Actions.None;

@@ -15,8 +15,8 @@ public partial class ForceSpinTriggerHorizontal : ForceSpinTrigger
     protected override bool CheckForcePlayerSpin(Player player)
     {
         var playerPosition = (Vector2I)player.Position;
-		
-        if (playerPosition.X < Borders.X || playerPosition.X >= Borders.Y) return false;
-        return (int)player.PreviousPosition.Y >= Position.Y != playerPosition.Y >= Position.Y;
+        
+        if (playerPosition.Y < Borders.X || playerPosition.Y >= Borders.Y) return false;
+        return (int)player.PreviousPosition.X >= Position.X != playerPosition.X >= Position.X;
     }
 }
