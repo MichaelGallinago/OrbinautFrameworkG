@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface ITailed
 {
-    Vector2 Scale { get; }
+    Constants.Direction Facing { get; }
     Velocity Velocity { get; }
     bool IsGrounded { get; }
     bool IsSpinning { get; }

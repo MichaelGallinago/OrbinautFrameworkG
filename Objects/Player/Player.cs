@@ -98,11 +98,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		_tail?.Animate(this);
 		ProcessPalette();
 		UpdateCollision();
-
-		if (Input.Press.C)
-		{
-			GetTree().ReloadCurrentScene();
-		}
 	}
 	
 	protected virtual bool ProcessCpu(float processSpeed) => false;
