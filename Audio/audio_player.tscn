@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpxu1jp0bnk05"]
+
+[ext_resource type="Script" path="res://Audio/AudioPlayer.cs" id="1_3urlq"]
+
+[node name="AudioPlayer" type="Node2D" node_paths=PackedStringArray("_bgmPlayer", "_sfxPlayers")]
+script = ExtResource("1_3urlq")
+_bgmPlayer = NodePath("BgmPlayer")
+_sfxPlayers = [NodePath("SfxPlayer1"), NodePath("SfxPlayer2"), NodePath("SfxPlayer3"), NodePath("SfxPlayer4")]
+
+[node name="BgmPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer1" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer2" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer3" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer4" type="AudioStreamPlayer" parent="."]

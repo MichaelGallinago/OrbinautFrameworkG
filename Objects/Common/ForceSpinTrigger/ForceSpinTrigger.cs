@@ -27,7 +27,7 @@ public abstract partial class ForceSpinTrigger : Trigger
             
             player.IsForcedSpin = !player.IsForcedSpin;
             player.Action = Actions.None;
-				
+            
             player.ResetGravity();
         }
     }
