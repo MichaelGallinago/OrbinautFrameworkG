@@ -4,8 +4,8 @@
 
 [node name="AudioPlayer" type="Node2D" node_paths=PackedStringArray("_bgmPlayer", "_sfxPlayers")]
 script = ExtResource("1_3urlq")
-_bgmPlayer = NodePath("BgmPlayer")
-_sfxPlayers = [NodePath("SfxPlayer1"), NodePath("SfxPlayer2"), NodePath("SfxPlayer3"), NodePath("SfxPlayer4")]
+_bgmPlayer = NodePath("")
+_sfxPlayers = []
 
 [node name="BgmPlayer" type="AudioStreamPlayer" parent="."]
 
@@ -16,3 +16,11 @@ _sfxPlayers = [NodePath("SfxPlayer1"), NodePath("SfxPlayer2"), NodePath("SfxPlay
 [node name="SfxPlayer3" type="AudioStreamPlayer" parent="."]
 
 [node name="SfxPlayer4" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer5" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer6" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer7" type="AudioStreamPlayer" parent="."]
+
+[node name="SfxPlayer8" type="AudioStreamPlayer" parent="."]

@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=81 format=3 uid="uid://d2maikoa22sg4"]
+[gd_resource type="SpriteFrames" load_steps=81 format=3 uid="uid://d2maikoa22sg4"]
 
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_l0m7n"]
 [ext_resource type="Texture2D" uid="uid://cne6p3y7rb4n5" path="res://Objects/Player/Sprites/Supersonic/balance.png" id="1_south"]

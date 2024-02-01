@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=17 format=3 uid="uid://dw5n2gxkoi7nl"]
+[gd_resource type="SpriteFrames" load_steps=17 format=3 uid="uid://dw5n2gxkoi7nl"]
 
 [ext_resource type="Texture2D" uid="uid://nfpjjd6fseq0" path="res://Objects/Player/Sprites/Tail/fly.png" id="1_413n0"]
 [ext_resource type="Texture2D" uid="uid://c58qwbo6jrab6" path="res://Objects/Player/Sprites/Tail/void.png" id="2_24jdq"]

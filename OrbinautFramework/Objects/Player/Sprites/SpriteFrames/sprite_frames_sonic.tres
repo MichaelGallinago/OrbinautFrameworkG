@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=79 format=3 uid="uid://b0sykgqai1k4o"]
+[gd_resource type="SpriteFrames" load_steps=79 format=3 uid="uid://b0sykgqai1k4o"]
 
 [ext_resource type="Texture2D" uid="uid://f2ljxnxouy3s" path="res://Objects/Player/Sprites/Sonic/balance.png" id="1_abx2v"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_muhhk"]

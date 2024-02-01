@@ -2,14 +2,21 @@
 .godot/
 
 # Godot-specific ignores
-.import/
-export.cfg
-export_presets.cfg
+OrbinautFramework/.import/
+OrbinautFramework/export.cfg
+OrbinautFramework/export_presets.cfg
 
 # Imported translations (automatically generated from CSV files)
-*.translation
+OrbinautFramework/*.translation
 
 # Mono-specific ignores
-.mono/
-data_*/
-mono_crash.*.json
+OrbinautFramework/.mono/
+OrbinautFramework/data_*/
+OrbinautFramework/mono_crash.*.json
+
+# Source generations
+Generated/
+
+# AudioStorageSourceGenerator compilations ignores
+AudioStorageSourceGenerator/bin/
+AudioStorageSourceGenerator/obj/

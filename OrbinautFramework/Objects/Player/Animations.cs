@@ -1,7 +1,7 @@
 using Meziantou.Framework.Annotations;
 
 [assembly: FastEnumToString(typeof(OrbinautFramework3.Objects.Player.Animations),
-    IsPublic = true, ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Extensions")]
+    ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Extensions")]
 
 namespace OrbinautFramework3.Objects.Player;
 

@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=92 format=3 uid="uid://dqsm7lf3darvq"]
+[gd_resource type="SpriteFrames" load_steps=92 format=3 uid="uid://dqsm7lf3darvq"]
 
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_2uvdl"]
 [ext_resource type="Texture2D" uid="uid://lbm7kgy35d4t" path="res://Objects/Player/Sprites/Knuckles/bounce.png" id="2_hn5y8"]
