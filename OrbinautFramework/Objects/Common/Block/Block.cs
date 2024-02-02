@@ -46,7 +46,7 @@ public partial class Block : BaseObject
                 Combo_Counter: _player.combo_counter
             });
 			
-            audio_play_sfx(sfx_break);
+            AudioPlayer.PlaySound(SoundStorage.Break);
 			
             for (var i = 0; i < 2; i++)
             {

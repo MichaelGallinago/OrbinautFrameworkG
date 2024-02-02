@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
@@ -209,17 +210,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			{
 				LifeCount++;
 				LifeRewards[0] += 100;
-					
-				//TODO: audio
-				//audio_play_sfx(sfx_extra_life);
+				
+				AudioPlayer.PlaySound(SoundStorage.ExtraLife);
 			}
 			
 			if (ScoreCount < LifeRewards[1]) return;
 			LifeCount++;
 			LifeRewards[1] += 50000;
 				
-			//TODO: audio
-			//audio_play_sfx(sfx_extra_life);
+			AudioPlayer.PlaySound(SoundStorage.ExtraLife);
 		}
 		else
 		{
@@ -276,7 +275,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			if (AirTimer > -1f)
 			{
-				AirTimer--;
+				AirTimer -= FrameworkData.ProcessSpeed;
 			}
 			
 			//TODO: fix float comparison
@@ -286,8 +285,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				case 1200f:
 				case 900f:
 					if (Id != 0) break;
-					//TODO: audio
-					//audio_play_sfx(sfx_air_alert);
+					AudioPlayer.PlaySound(SoundStorage.AirAlert);
 					break;
 					
 				case 720f:
@@ -297,8 +295,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					break;
 					
 				case 0f:
-					//TODO: audio
-					//audio_play_sfx(sfx_drown);
+					AudioPlayer.PlaySound(SoundStorage.Drown);
 					ResetState();
 
 					ZIndex = 0;
@@ -374,8 +371,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			//instance_create(x, c_stage.water_level, obj_water_splash);
 		}
 		
-		//TODO: audio
-		//audio_play_sfx(sfx_water_splash);
+		AudioPlayer.PlaySound(SoundStorage.WaterSplash);
 	}
 
 	private void UpdateCollision()
