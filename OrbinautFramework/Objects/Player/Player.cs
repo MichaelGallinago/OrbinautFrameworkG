@@ -264,9 +264,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			
 			if (Action == Actions.Flight)
 			{
-				//TODO: audio
-				//audio_stop_sfx(sfx_flight);
-				//audio_stop_sfx(sfx_flight2);
+				AudioPlayer.StopSound(SoundStorage.Flight);
+				AudioPlayer.StopSound(SoundStorage.Flight2);
 			}
 		}
 		
@@ -564,14 +563,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		switch (Action)
 		{
-			//TODO: audio
 			case Actions.PeelOut:
-				//audio_stop_sfx(sfx_charge2);
+				AudioPlayer.StopSound(SoundStorage.Charge2);
 				break;
 		
 			case Actions.Flight:
-				//audio_stop_sfx(sfx_flight);
-				//audio_stop_sfx(sfx_flight2);
+				AudioPlayer.StopSound(SoundStorage.Flight);
+				AudioPlayer.StopSound(SoundStorage.Flight2);
 				break;
 		}
 		base.ResetState();

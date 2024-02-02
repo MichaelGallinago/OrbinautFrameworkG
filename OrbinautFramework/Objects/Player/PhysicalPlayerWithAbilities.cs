@@ -146,9 +146,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsSpinning = true;
 		Action = Actions.None;
 		GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2f) * (float)Facing;
-			
-		//TODO: audio
-		//audio_stop_sfx(sfx_charge);
+		
+		AudioPlayer.StopSound(SoundStorage.Charge);
 		AudioPlayer.PlaySound(SoundStorage.Release);
 		
 		if (!SharedData.FixDashRelease) return true;
@@ -190,8 +189,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			return false;
 		}
 
-		//TODO: audio
-		//audio_stop_sfx(sfx_charge2);
+		AudioPlayer.StopSound(SoundStorage.Charge2);
 		Action = Actions.None;
 		
 		if (ActionValue < 30f)
@@ -547,9 +545,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Camera.Main.Delay.X = 8;
 		}
 			
-		//TODO: audio & obj_dust_dropdash
+		//TODO: obj_dust_dropdash
 		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-		//audio_stop_sfx(sfx_charge);
+		AudioPlayer.StopSound(SoundStorage.Charge);
 		AudioPlayer.PlaySound(SoundStorage.Release);
 	}
 
@@ -605,8 +603,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				}
 			
 				Gravity = GravityType.TailsDown;
-				//TODO: audio
-				//audio_stop_sfx(sfx_flight);
+				AudioPlayer.StopSound(SoundStorage.Flight);
 			}
 			else
 			{	
@@ -640,8 +637,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsSpinning	= true;
 		Action = Actions.None;
 		
-		//audio_stop_sfx(sfx_flight);
-		//audio_stop_sfx(sfx_flight2);
+		AudioPlayer.StopSound(SoundStorage.Flight);
+		AudioPlayer.StopSound(SoundStorage.Flight2);
 		ResetGravity();
 	}
 	
@@ -1000,8 +997,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Action = Actions.HammerDash;
 		ActionValue = 0f;
 		
-		//TODO: audio
-		//audio_stop_sfx(sfx_charge);
+		AudioPlayer.StopSound(SoundStorage.Charge);
 		AudioPlayer.PlaySound(SoundStorage.Release);
 	}
 	

@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using Godot;
-using Godot.Collections;
 using OrbinautFramework3.Framework;
 
-[assembly: AudioStorageSourceGenerator.AudioStorage("SoundStorage", "OrbinautFramework3.Audio.Player", "res://Audio/SFX/")]
+[assembly: AudioStorageSourceGenerator.AudioStorage("SoundStorage", "OrbinautFramework3.Audio.Player", "res://Audio/Sounds/")]
+[assembly: AudioStorageSourceGenerator.AudioStorage("MusicStorage", "OrbinautFramework3.Audio.Player", "res://Audio/Music/")]
 
 namespace OrbinautFramework3.Audio.Player;
 
 public partial class AudioPlayer : Node2D
 {
-    public enum States : byte
+    public enum MusicStates : byte
     {
         Default, Mute, Stop
     }
@@ -19,24 +19,26 @@ public partial class AudioPlayer : Node2D
     
     [ExportGroup("AudioStreamPlayers")]
     [Export] private AudioStreamPlayer _musicPlayer;
-    [Export] private Array<AudioStreamPlayer> _soundPlayers;
+    [Export] private Godot.Collections.Array<AudioStreamPlayer> _soundPlayers;
     
     private static float _muteSpeed;
     private static AudioPlayer _player;
     private static Stack<AudioStreamPlayer> _freePlayers;
+    private static Dictionary<AudioStream, AudioStreamPlayer> _activePlayers;
 
     public override void _Ready()
     {
         _player = this;
         _muteSpeed = 0f;
         _freePlayers = new Stack<AudioStreamPlayer>(_soundPlayers);
+        _activePlayers = new Dictionary<AudioStream, AudioStreamPlayer>(_soundPlayers.Count);
         
         foreach (AudioStreamPlayer soundPlayer in _soundPlayers)
         {
-            soundPlayer.Finished += () => _freePlayers.Push(soundPlayer);
+            soundPlayer.Finished += () => FreeSoundPlayer(soundPlayer);
         }
     }
-
+    
     public override void _Process(double delta)
     {
         if (_muteSpeed == 0f) return;
@@ -56,15 +58,31 @@ public partial class AudioPlayer : Node2D
         }
     }
 
-    public static void PlaySound(AudioStream audioStream)
+    public static void PlaySound(AudioStream sound)
     {
+        if (_activePlayers.TryGetValue(sound, out AudioStreamPlayer existingSoundPlayer))
+        {
+            existingSoundPlayer.Play();
+            return;
+        }
+        
         if (!_freePlayers.TryPop(out AudioStreamPlayer soundPlayer))
         {
             soundPlayer = CreateSoundPlayer();
         }
         
-        soundPlayer.Stream = audioStream;
+        _activePlayers.Add(sound, soundPlayer);
+        soundPlayer.Stream = sound;
         soundPlayer.Play();
+    }
+
+
+    public static void StopSound(AudioStream sound)
+    {
+        if (_activePlayers.TryGetValue(sound, out AudioStreamPlayer existingSoundPlayer))
+        {
+            FreeSoundPlayer(existingSoundPlayer);
+        }
     }
     
     public static void PlayMusic(AudioStream audioStream)
@@ -74,7 +92,7 @@ public partial class AudioPlayer : Node2D
         musicPlayer.Stream = audioStream;
         musicPlayer.VolumeDb = 0f;
     }
-
+    
     public static void MuteMusic(float time) => SetMuteSpeed(time, MinimalVolume);
     public static void UnmuteMusic(float time) => SetMuteSpeed(time, 0f);
 
@@ -86,8 +104,15 @@ public partial class AudioPlayer : Node2D
     private static AudioStreamPlayer CreateSoundPlayer()
     {
         var soundPlayer = new AudioStreamPlayer();
-        soundPlayer.Finished += () => _freePlayers.Push(soundPlayer);
+        soundPlayer.Finished += () => FreeSoundPlayer(soundPlayer);
         _player._soundPlayers.Add(soundPlayer);
         return soundPlayer;
+    }
+
+    private static void FreeSoundPlayer(AudioStreamPlayer soundPlayer)
+    {
+        _activePlayers.Remove(soundPlayer.Stream);
+        soundPlayer.Stream = null;
+        _freePlayers.Push(soundPlayer);
     }
 }
