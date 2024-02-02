@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework;
@@ -56,9 +57,8 @@ public partial class Debug : Node
 	private static void OnSwapPressed()
 	{
 		Player player = PlayerData.Players.First();
-			
-		//TODO: audio
-		//audio_play_sfx(sfx_beep);
+		
+		AudioPlayer.PlaySound(SoundStorage.Beep);
 		player.ResetState(); // We call this to stop action-specific sounds
 
 		var resetData = new ResetData(player.Position, player.Velocity, player.GroundSpeed, player.Facing, 

@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
@@ -53,8 +54,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		GroundSpeed = 0f;
 		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
-		//TODO: Audio
-		//audio_play_sfx(sfx_hurt);
+		AudioPlayer.PlaySound(SoundStorage.Hurt);
 
 		if (Id != 0) return;
 		FrameworkData.UpdateObjects = false;
@@ -68,20 +68,20 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		IsGrounded = true;
 	
-		if (Action == Actions.Flight)
+		switch (Action)
 		{
-			//TODO: audio
-			//audio_stop_sfx(sfx_flight);
-			//audio_stop_sfx(sfx_flight2);
-		}
-		else if (Action is Actions.SpinDash or Actions.PeelOut)
-		{
-			if (Action == Actions.PeelOut)
-			{
-				GroundSpeed = ActionValue2;
-			}
+			case Actions.Flight:
+				//TODO: audio STOP!!! SOUND!!!
+				//AudioPlayer.PlaySound(SoundStorage.Flight);
+				//AudioPlayer.PlaySound(SoundStorage.Flight2);
+				break;
 			
-			return;
+			case Actions.SpinDash or Actions.PeelOut:
+				if (Action == Actions.PeelOut)
+				{
+					GroundSpeed = ActionValue2;
+				}
+				return;
 		}
 	
 		if (Barrier.State == Barrier.States.Active && Barrier.Type == Barrier.Types.Water)
@@ -98,8 +98,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Barrier.UpdateDuration([7, 12]);
 			Barrier.Timer = 20d;
 			
-			//TODO: audio
-			//audio_play_sfx(sfx_barrier_water2);
+			AudioPlayer.PlaySound(SoundStorage.BarrierWater2);
 		
 			return;
 		}
@@ -331,8 +330,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		ActionValue2 = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
 		Animation = Animations.Skid;
 		
-		//TODO: audio
-		//audio_play_sfx(sfx_skid);
+		AudioPlayer.PlaySound(SoundStorage.Skid);
 	}
 	
 	private void SetPushAnimation()
@@ -707,8 +705,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		IsSpinning = true;
 		Animation = Animations.Spin;
 		
-		//TODO: audio
-		//audio_play_sfx(sfx_roll);
+		AudioPlayer.PlaySound(SoundStorage.Roll);
 	}
 	
 	private void ProcessLevelBound()

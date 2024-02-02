@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.ObjectBase;
@@ -38,9 +39,8 @@ public partial class Bumper : BaseObject
             {
                 _sprite.Play("Bump");
             }
-		
-            //TODO: audio
-            //audio_play_sfx(sfx_bumper);
+            
+            AudioPlayer.PlaySound(SoundStorage.Bumper);
             
             float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - Position));
 		

@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Spawnable.Piece;
@@ -106,8 +107,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
         }
         
         SetBehaviour(BehaviourType.Reset);
-        //TODO: audio
-        //audio_play_sfx(sfx_break);
+        AudioPlayer.PlaySound(SoundStorage.Break);
 		
         Visible = false;
         sprite.Visible = false;
