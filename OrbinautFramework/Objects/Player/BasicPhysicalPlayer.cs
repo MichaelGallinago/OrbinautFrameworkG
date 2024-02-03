@@ -309,8 +309,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Animation = Animations.Push;
 		}
 		
-		byte quadrant = Angles.GetQuadrant(Angle);
-		if (quadrant == 0 && GroundSpeed == 0f)
+		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
+		if (quadrant == Angles.Quadrant.Down && GroundSpeed == 0f)
 		{
 			Animation = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
 			SetPushAnimationBy = null;
@@ -324,7 +324,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Animation = Animations.Move;
 		}
 
-		if (quadrant != 0 || !doSkid || Math.Abs(GroundSpeed) < 4f) return;
+		if (quadrant != Angles.Quadrant.Down || !doSkid || Math.Abs(GroundSpeed) < 4f) return;
 		
 		ActionValue2 = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
 		Animation = Animations.Skid;
@@ -652,12 +652,13 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		};
 		
 		if (wallDistance >= 0) return;
-		byte quadrant = Angles.GetQuadrant(Angle);
-		wallDistance *= quadrant > 1 ? -sign : sign;
+		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
+		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
 		
-		switch (quadrant & 1)
+		//TODO: check "/"
+		switch (quadrant)
 		{
-			case 0:
+			case Angles.Quadrant.Down or Angles.Quadrant.Up:
 				Velocity.X -= wallDistance / FrameworkData.ProcessSpeed;
 				GroundSpeed = 0f;
 					
@@ -667,7 +668,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				}
 				break;
 				
-			case 1:
+			case Angles.Quadrant.Right or Angles.Quadrant.Left:
 				Velocity.Y += wallDistance / FrameworkData.ProcessSpeed;
 				break;
 		}
@@ -884,141 +885,130 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (GroundLockTimer > 0f)
 		{
 			GroundLockTimer -= FrameworkData.ProcessSpeed;
+			return;
 		}
-		else if (Math.Abs(GroundSpeed) < 2.5f)
+
+		if (Math.Abs(GroundSpeed) >= 2.5f) return;
+
+		if (SharedData.PlayerPhysics < PhysicsTypes.S3)
 		{
-			if (SharedData.PlayerPhysics < PhysicsTypes.S3)
-			{
-				if (Angles.GetQuadrant(Angle) == 0) return;
+			if (Angles.GetQuadrant(Angle) == Angles.Quadrant.Down) return;
 				
-				GroundSpeed = 0f;	
-				GroundLockTimer = 30f;
-				IsGrounded = false;
-			}
-			else if (Angle is > 33.75f and <= 326.25f)
-			{
-				if (Angle is > 67.5f and <= 292.5f)
-				{
-					IsGrounded = false;
-				}
-				else
-				{
-					GroundSpeed.Acceleration = Angle < 180f ? -0.5f : 0.5f;
-				}
-		
-				GroundLockTimer = 30f;
-			}
+			GroundSpeed = 0f;	
+			GroundLockTimer = 30f;
+			IsGrounded = false;
+			return;
 		}
+
+		switch (Angle)
+		{
+			case <= 33.75f or > 326.25f:
+				return;
+			
+			case > 67.5f and <= 292.5f:
+				IsGrounded = false;
+				break;
+			
+			default:
+				GroundSpeed.Acceleration = Angle < 180f ? -0.5f : 0.5f;
+				break;
+		}
+
+		GroundLockTimer = 30f;
 	}
 
 	private void ProcessCollisionAir()
 	{
-		// Control routine checks
 		if (IsGrounded || IsDead) return;
-		
-		// Action checks
 		if (Action is Actions.Glide or Actions.Climb) return;
 		
 		int wallRadius = RadiusNormal.X + 1;
-		byte moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+
+		var moveQuadrantValue = (int)moveQuadrant;
+		CollideWallsInAir(wallRadius, moveQuadrantValue, Constants.Direction.Negative);
+		CollideWallsInAir(wallRadius, moveQuadrantValue, Constants.Direction.Positive);
 		
-		// Perform left wall collision if not moving mostly right
-		if (moveQuadrant != 1)
-		{
-			int wallDistance = TileCollider.FindDistance(
-				new Vector2I(-wallRadius, 0), false, Constants.Direction.Negative);
+		if (CollideWithCeilingInAir(wallRadius, moveQuadrant)) return;
+
+		CollideWithFloorInAir(moveQuadrant);
+	}
+
+	private void CollideWallsInAir(int wallRadius, int moveQuadrantValue, Constants.Direction direction)
+	{
+		var sign = (int)direction;
+		
+		if (moveQuadrantValue == (int)Angles.Quadrant.Up - sign) return;
+		
+		int wallDistance = TileCollider.FindDistance(
+			new Vector2I(sign * wallRadius, 0), false, direction);
+		
+		if (wallDistance >= 0f) return;
+		Position += new Vector2(sign * wallDistance, 0f);
+		TileCollider.Position = (Vector2I)Position;
+		Velocity.X = 0f;
+		
+		if (moveQuadrantValue != (int)Angles.Quadrant.Up + sign) return;
+		GroundSpeed = Velocity.Y;
+	}
+
+	private bool CollideWithCeilingInAir(int wallRadius, Angles.Quadrant moveQuadrant)
+	{
+		if (moveQuadrant == Angles.Quadrant.Down) return false;
+		
+		(int roofDistance, float roofAngle) = TileCollider.FindClosestTile(
+			Radius.Shuffle(-1, -1),
+			Radius.Shuffle(1, -1),
+			true, Constants.Direction.Negative);
 			
-			if (wallDistance < 0f)
-			{
-				Position -= new Vector2(wallDistance, 0f);
-				TileCollider.Position = (Vector2I)Position;
-				Velocity.X = 0f;
-				
-				if (moveQuadrant == 3)
-				{
-					GroundSpeed = Velocity.Y;
-					return;
-				}
-			}
-		}
-		
-		// Perform right wall collision if not moving mostly left
-		if (moveQuadrant != 3)
+		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
 		{
-			int wallDistance = TileCollider.FindDistance(
+			// Perform right wall collision if moving mostly left and too far into the ceiling
+			int wallDist = TileCollider.FindDistance(
 				new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
+
+			if (wallDist >= 0) return false;
 			
-			if (wallDistance < 0f)
-			{
-				Position += new Vector2(wallDistance, 0f);
-				TileCollider.Position = (Vector2I)Position;
-				Velocity.X = 0f;
-				
-				if (moveQuadrant == 1)
-				{
-					GroundSpeed = Velocity.Y;
-					return;
-				}
-			}
+			Position += new Vector2(wallDist, 0f);
+			Velocity.X = 0f;
+			return true;
 		}
 		
-		// Perform ceiling collision if not moving mostly down
-		if (moveQuadrant != 0)
+		if (roofDistance >= 0) return false;
+		
+		Position -= new Vector2(0f, roofDistance);
+		if (moveQuadrant == Angles.Quadrant.Up && Action != Actions.Flight && 
+		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
-			(int roofDistance, float roofAngle) = TileCollider.FindClosestTile(
-				Radius.Shuffle(-1, -1), 
-				Radius.Shuffle(1, -1),
-				true, Constants.Direction.Negative);
-			
-			if (moveQuadrant == 3 && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
-			{
-				// Perform right wall collision if moving mostly left and too far into the ceiling
-				int wallDist = TileCollider.FindDistance(
-					new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
-				
-				if (wallDist < 0)
-				{
-					Position += new Vector2(wallDist, 0f);
-					Velocity.X = 0f;
+			Angle = roofAngle;
+			GroundSpeed = roofAngle < 180f ? -Velocity.Y : Velocity.Y;
+			Velocity.Y = 0f;
 					
-					return;
-				}
-			}
-			else if (roofDistance < 0)
-			{
-				Position -= new Vector2(0f, roofDistance);
-				if (moveQuadrant == 2 && Angles.GetQuadrant(roofAngle) % 2 > 0 && Action != Actions.Flight)
-				{
-					Angle = roofAngle;
-					GroundSpeed = roofAngle < 180f ? -Velocity.Y : Velocity.Y;
-					Velocity.Y = 0f;
-					
-					Land();
-				}
-				else
-				{
-					if (Velocity.Y < 0f)
-					{
-						Velocity.Y = 0f;
-					}
-						
-					if (Action == Actions.Flight)
-					{
-						Gravity	= GravityType.TailsDown;
-					}
-				}
-				
-				return;
-			}
+			Land();
+			return true;
 		}
 		
-		// Perform floor collision if not moving mostly up
+		if (Velocity.Y < 0f)
+		{
+			Velocity.Y = 0f;
+		}
+		
+		if (Action == Actions.Flight)
+		{
+			Gravity	= GravityType.TailsDown;
+		}
+		
+		return true;
+	}
+	
+	private void CollideWithFloorInAir(Angles.Quadrant moveQuadrant)
+	{
 		int distance;
 		float angle;
 
-		if (moveQuadrant == 0)
+		if (moveQuadrant == Angles.Quadrant.Down)
 		{
 			(int distanceL, float angleL) = TileCollider.FindTile(
 				Radius.Shuffle(-1, 1), 

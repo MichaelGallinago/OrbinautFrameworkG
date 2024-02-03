@@ -155,63 +155,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsDead) return;
 
-		// TODO: make obj_dust_skid & check ProcessSpeed
-		if (Animation == Animations.Skid) 
-		{
-			if (ActionValue2 % 4f < FrameworkData.ProcessSpeed)
-			{
-				//instance_create(x, y + Radius.Y, obj_dust_skid);
-			}
-			ActionValue2 += FrameworkData.ProcessSpeed;
-		}
-		
-		if (InvincibilityTimer > 0f)
-		{
-			Visible = ((int)InvincibilityTimer-- & 4) >= 1 || InvincibilityTimer == 0f;
-		}
-	
-		if (ItemSpeedTimer > 0f && --ItemSpeedTimer == 0f)
-		{
-			Players[0].ResetMusic();
-		}
-	
-		if (ItemInvincibilityTimer > 0f && --ItemInvincibilityTimer == 0f)
-		{
-			Players[0].ResetMusic();
-		}
-	
-		if (IsSuper)
-		{
-			if (Action == Actions.Transform)
-			{
-				ActionValue -= FrameworkData.ProcessSpeed;
-				if (ActionValue <= 0f)
-				{
-					ObjectInteraction = true;
-					Action = Actions.None;
-				}
-			}
-			
-			if (SuperValue <= 0f)
-			{
-				if (--RingCount <= 0)
-				{
-					RingCount = 0;
-					InvincibilityTimer = 1;
-					IsSuper = false;
-					
-					Players[0].ResetMusic();
-				}
-				else
-				{
-					SuperValue = 60f;
-				}
-			}
-			else
-			{
-				SuperValue -= FrameworkData.ProcessSpeed;
-			}
-		}
+		CreateSkidDust();
+		UpdateInvincibilityFlashes();
+
+		ItemSpeedTimer = UpdateItemTimer(ItemSpeedTimer);
+		ItemInvincibilityTimer = UpdateItemTimer(ItemInvincibilityTimer);
+
+		UpdateSuperStatus();
 		
 		IsInvincible = InvincibilityTimer != 0 || ItemInvincibilityTimer != 0 || 
 		               IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
@@ -221,144 +171,212 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			Kill();
 		}
 		
-		if (Id == 0 && LifeRewards.Count > 0)
+		UpdateLiveRewards();
+	}
+
+	private void UpdateInvincibilityFlashes()
+	{
+		if (InvincibilityTimer <= 0f) return;
+		Visible = ((int)InvincibilityTimer & 4) >= 1 || InvincibilityTimer == 0f;
+		InvincibilityTimer -= FrameworkData.ProcessSpeed;
+	}
+
+	private void CreateSkidDust()
+	{
+		if (Animation != Animations.Skid) return;
+		
+		if (ActionValue2 % 4f < FrameworkData.ProcessSpeed)
 		{
-			if (RingCount >= LifeRewards[0] && LifeRewards[0] <= 200)
-			{
-				LifeCount++;
-				LifeRewards[0] += 100;
-				
-				AudioPlayer.PlaySound(SoundStorage.ExtraLife);
-			}
-			
-			if (ScoreCount < LifeRewards[1]) return;
-			LifeCount++;
-			LifeRewards[1] += 50000;
-				
-			AudioPlayer.PlaySound(SoundStorage.ExtraLife);
+			// TODO: make obj_dust_skid
+			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
-		else
+		ActionValue2 += FrameworkData.ProcessSpeed;
+	}
+
+	private static float UpdateItemTimer(float timer)
+	{
+		if (timer <= 0f) return timer;
+		timer -= FrameworkData.ProcessSpeed;
+		if (timer <= 0f)
+		{
+			Players[0].ResetMusic();
+		}
+
+		return timer;
+	}
+
+	private void UpdateSuperStatus()
+	{
+		if (!IsSuper) return;
+		
+		if (Action == Actions.Transform)
+		{
+			ActionValue -= FrameworkData.ProcessSpeed;
+			if (ActionValue <= 0f)
+			{
+				ObjectInteraction = true;
+				Action = Actions.None;
+			}
+		}
+
+		if (SuperValue > 0f)
+		{
+			SuperValue -= FrameworkData.ProcessSpeed;
+			return;
+		}
+
+		if (--RingCount > 0)
+		{
+			SuperValue = 60f;
+			return;
+		}
+		
+		RingCount = 0;
+		InvincibilityTimer = 1;
+		IsSuper = false;
+				
+		Players[0].ResetMusic();
+	}
+
+	private void UpdateLiveRewards()
+	{
+		if (Id != 0 || LifeRewards.Count <= 0)
 		{
 			LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
+			return;
 		}
+		
+		if (RingCount >= LifeRewards[0] && LifeRewards[0] <= 200)
+		{
+			LifeCount++;
+			LifeRewards[0] += 100;
+
+			AudioPlayer.PlaySound(SoundStorage.ExtraLife);
+		}
+
+		if (ScoreCount < LifeRewards[1]) return;
+		LifeCount++;
+		LifeRewards[1] += 50000;
+
+		AudioPlayer.PlaySound(SoundStorage.ExtraLife);
 	}
 
 	private void ProcessWater()
 	{
 		if (IsDead || Stage is not { IsWaterEnabled: true }) return;
 		
-		// On surface
-		if (!IsUnderwater)
-		{
-			if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return;
-			
-			IsUnderwater = true;
-			
-			//TODO: obj_bubbles_player
-			//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
-			ProcessWaterSplash();
-			
-			if (!IsHurt)
-			{
-				if (Action != Actions.Flight && !(Action == Actions.Glide && (GlideStates)ActionState != GlideStates.Fall))
-				{
-					Gravity = GravityType.Underwater;
-				}
-				
-				Velocity.Vector *= new Vector2(0.5f, 0.25f);
-			}
-			
-			if (Barrier.Type is Barrier.Types.Flame or Barrier.Types.Thunder)
-			{	
-				if (Barrier.Type == Barrier.Types.Thunder)
-				{
-					//TODO: obj_water_flash
-					//instance_create(x, y, obj_water_flash);
-				}
-				
-				Barrier.Type = Barrier.Types.None;			
-			}
-			
-			if (Action == Actions.Flight)
-			{
-				AudioPlayer.StopSound(SoundStorage.Flight);
-				AudioPlayer.StopSound(SoundStorage.Flight2);
-			}
-		}
-		
-		// Underwater
-		if (Barrier.Type != Barrier.Types.Water)
-		{
-			if (AirTimer > -1f)
-			{
-				AirTimer -= FrameworkData.ProcessSpeed;
-			}
-			
-			//TODO: fix float comparison
-			switch (AirTimer)
-			{
-				case 1500f: 
-				case 1200f:
-				case 900f:
-					if (Id != 0) break;
-					AudioPlayer.PlaySound(SoundStorage.AirAlert);
-					break;
-					
-				case 720f:
-					if (Id != 0) break;
-					AudioPlayer.PlayMusic(MusicStorage.Drowning);
-					break;
-					
-				case 0f:
-					AudioPlayer.PlaySound(SoundStorage.Drown);
-					ResetState();
+		if (DiveIntoWater()) return;
+		if (UpdateAirTimer()) return;
+		LeaveWater();
+	}
 
-					ZIndex = 0;
-					Animation = Animations.Drown;
-					TileLayer = Constants.TileLayers.None;
-					Velocity.Vector = Vector2.Zero;
-					Gravity	= 0.0625f;
-					IsAirLock = true;
-					if (Camera.Main == null) return;
-					Camera.Main.Target = null;
-					return;
-				
-				case -1f:
-					if (Camera.Main == null) return;
-					if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.ViewSize.Y + 276) return;
+	private bool DiveIntoWater()
+	{
+		if (IsUnderwater) return false;
+		
+		if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return true;
+		
+		IsUnderwater = true;
+		
+		//TODO: obj_bubbles_player
+		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
+		ProcessWaterSplash();
+		SlowDownOnDive();
+		RemoveBarrierUnderwater();
+
+		if (Action != Actions.Flight) return true;
+		AudioPlayer.StopSound(SoundStorage.Flight);
+		AudioPlayer.StopSound(SoundStorage.Flight2);
+
+		return true;
+	}
+
+	private void SlowDownOnDive()
+	{
+		if (IsHurt) return;
+		
+		if (Action != Actions.Flight && (Action != Actions.Glide || (GlideStates)ActionState == GlideStates.Fall))
+		{
+			Gravity = GravityType.Underwater;
+		}
+			
+		Velocity.Vector *= new Vector2(0.5f, 0.25f);
+	}
+
+	private void RemoveBarrierUnderwater()
+	{
+		if (Barrier.Type is not (Barrier.Types.Flame or Barrier.Types.Thunder)) return;
+		
+		if (Barrier.Type == Barrier.Types.Thunder)
+		{
+			//TODO: obj_water_flash
+			//instance_create(x, y, obj_water_flash);
+		}
+			
+		Barrier.Type = Barrier.Types.None;
+	}
+
+	private bool UpdateAirTimer()
+	{
+		if (Barrier.Type == Barrier.Types.Water) return false;
+		
+		if (AirTimer > -1f)
+		{
+			AirTimer -= FrameworkData.ProcessSpeed;
+		}
+			
+		//TODO: fix float comparison
+		switch (AirTimer)
+		{
+			case 1500f:
+			case 1200f:
+			case 900f:
+				if (Id != 0) break;
+				AudioPlayer.PlaySound(SoundStorage.AirAlert);
+				break;
 					
-					if (Id == 0)
-					{
-						FrameworkData.UpdateEffects = false;
-						FrameworkData.UpdateObjects = false;
-						FrameworkData.AllowPause = false;
-					}
+			case 720f:
+				if (Id != 0) break;
+				AudioPlayer.PlayMusic(MusicStorage.Drowning);
+				break;
+					
+			case 0f:
+				AudioPlayer.PlaySound(SoundStorage.Drown);
+				ResetState();
+
+				ZIndex = 0;
+				Animation = Animations.Drown;
+				TileLayer = Constants.TileLayers.None;
+				Velocity.Vector = Vector2.Zero;
+				Gravity	= 0.0625f;
+				IsAirLock = true;
+				if (Camera.Main == null) return true;
+				Camera.Main.Target = null;
+				return true;
+				
+			case -1f:
+				if (Camera.Main == null) return true;
+				if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.ViewSize.Y + 276) return true;
+					
+				if (Id == 0)
+				{
+					FrameworkData.UpdateEffects = false;
+					FrameworkData.UpdateObjects = false;
+					FrameworkData.AllowPause = false;
+				}
 						
-					IsDead = true;
-					return;
-			}
+				IsDead = true;
+				return true;
 		}
 
+		return false;
+	}
+
+	private void LeaveWater()
+	{
 		if (MathF.Floor(Position.Y) >= Stage.WaterLevel) return;
-		
-		if (!IsHurt && Action != Actions.Glide)
-		{
-			if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
-			{
-				Velocity.Y *= 2f;
-			}
-					
-			if (Velocity.Y < -16f)
-			{
-				Velocity.Y = -16f;
-			}
-					
-			if (Action != Actions.Flight)
-			{
-				Gravity = GravityType.Default;
-			}
-		}
-			
+
+		AccelerateOnLeavingWater();
 		
 		if (Action == Actions.Flight)
 		{
@@ -374,6 +392,26 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		AirTimer = Constants.MaxAirValue;
 			
 		ProcessWaterSplash();
+	}
+
+	private void AccelerateOnLeavingWater()
+	{
+		if (IsHurt || Action == Actions.Glide) return;
+		
+		if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
+		{
+			Velocity.Y *= 2f;
+		}
+					
+		if (Velocity.Y < -16f)
+		{
+			Velocity.Y = -16f;
+		}
+					
+		if (Action != Actions.Flight)
+		{
+			Gravity = GravityType.Default;
+		}
 	}
 
 	private void ProcessWaterSplash()

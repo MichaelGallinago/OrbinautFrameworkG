@@ -1054,18 +1054,18 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		var collisionFlagWall = false;
 		var climbY = (int)Position.Y;
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
-
+		
 		if (moveQuadrant != Angles.Quadrant.Right)
 		{
-			collisionFlagWall |= CollideHorizontalOnGlide(wallRadius, Constants.Direction.Negative);
+			collisionFlagWall |= CollideWallsOnGlide(wallRadius, Constants.Direction.Negative);
 		}
 		
 		if (moveQuadrant != Angles.Quadrant.Left)
 		{
-			collisionFlagWall |= CollideHorizontalOnGlide(wallRadius, Constants.Direction.Positive);
+			collisionFlagWall |= CollideWallsOnGlide(wallRadius, Constants.Direction.Positive);
 		}
 		
-		CollideWithCeilingOnGlide(wallRadius, moveQuadrant, ref collisionFlagWall);
+		collisionFlagWall |= CollideWithCeilingOnGlide(wallRadius, moveQuadrant);
 		
 		if (moveQuadrant != Angles.Quadrant.Up && CollideWithFloorOnGlide())
 		{
@@ -1077,7 +1077,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 	}
 
-	private bool CollideHorizontalOnGlide(int wallRadius, Constants.Direction direction)
+	private bool CollideWallsOnGlide(int wallRadius, Constants.Direction direction)
 	{
 		var sing = (int)direction;
 		int wallDistance = TileCollider.FindDistance(
@@ -1091,9 +1091,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		return true;
 	}
 
-	private void CollideWithCeilingOnGlide(int wallRadius, Angles.Quadrant moveQuadrant, ref bool collisionFlagWall)
+	private bool CollideWithCeilingOnGlide(int wallRadius, Angles.Quadrant moveQuadrant)
 	{
-		if (moveQuadrant == Angles.Quadrant.Down) return;
+		if (moveQuadrant == Angles.Quadrant.Down) return false;
 		
 		int roofDistance = TileCollider.FindClosestDistance(
 			Radius.Shuffle(-1, -1),
@@ -1103,17 +1103,18 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
 			// Perform right wall collision instead if moving mostly left and too far into the ceiling
-			collisionFlagWall |= CollideHorizontalOnGlide(wallRadius, Constants.Direction.Positive);
-			return;
+			return CollideWallsOnGlide(wallRadius, Constants.Direction.Positive);
 		}
 
-		if (roofDistance >= 0) return;
+		if (roofDistance >= 0) return false;
+		
 		Position -= new Vector2(0f, roofDistance);
 		TileCollider.Position = (Vector2I)Position;
 		if (Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
 		{
 			Velocity.Y = 0f;
 		}
+		return false;
 	}
 
 	private bool CollideWithFloorOnGlide()
