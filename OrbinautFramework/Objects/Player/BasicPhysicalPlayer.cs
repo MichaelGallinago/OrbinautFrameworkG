@@ -179,7 +179,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	public void ClearPush()
 	{
 		if (SetPushAnimationBy != this) return;
-		if (Animation is not Animations.Spin and not Animations.SpinDash)
+		if (Animation is not (Animations.Spin or Animations.SpinDash))
 		{
 			Animation = Animations.Move;
 		}

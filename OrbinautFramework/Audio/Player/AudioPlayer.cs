@@ -60,21 +60,12 @@ public partial class AudioPlayer : Node2D
         }
     }
     
-    public static void PlaySound(AudioStream sound)
+    public static void PlaySound(AudioStream sound) => GetSoundPlayer(sound).Play();
+    
+    public static void PlaySoundPitch(AudioStream sound, float pitch)
     {
-        if (_activePlayers.TryGetValue(sound, out AudioStreamPlayer existingSoundPlayer))
-        {
-            existingSoundPlayer.Play();
-            return;
-        }
-        
-        if (!_freePlayers.TryPop(out AudioStreamPlayer soundPlayer))
-        {
-            soundPlayer = CreateSoundPlayer();
-        }
-        
-        _activePlayers.Add(sound, soundPlayer);
-        soundPlayer.Stream = sound;
+        AudioStreamPlayer soundPlayer = GetSoundPlayer(sound);
+        soundPlayer.PitchScale = pitch;
         soundPlayer.Play();
     }
     
@@ -86,14 +77,6 @@ public partial class AudioPlayer : Node2D
         }
     }
     
-    public static void PlayMusic(AudioStream audioStream)
-    {
-        AudioStreamPlayer musicPlayer = _player._musicPlayer;
-        if (musicPlayer.Stream == audioStream) return;
-        musicPlayer.Stream = audioStream;
-        musicPlayer.VolumeDb = 0f;
-    }
-
     public static void SetPauseState(bool isPaused)
     {
         foreach (AudioStreamPlayer soundPlayers in _player._soundPlayers)
@@ -101,6 +84,16 @@ public partial class AudioPlayer : Node2D
             soundPlayers.StreamPaused = isPaused;
         }
         _player._musicPlayer.StreamPaused = isPaused;
+    }
+
+    public static bool IsSoundPlaying(AudioStream sound) => _activePlayers.ContainsKey(sound);
+    
+    public static void PlayMusic(AudioStream music)
+    {
+        AudioStreamPlayer musicPlayer = _player._musicPlayer;
+        if (musicPlayer.Stream == music) return;
+        musicPlayer.Stream = music;
+        musicPlayer.VolumeDb = 0f;
     }
     
     public static void StopMusic(float time)
@@ -125,6 +118,21 @@ public partial class AudioPlayer : Node2D
     {
         _muteSpeed = (value - _player._musicPlayer.VolumeDb) / (time * Constants.BaseFramerate);
     }
+
+    private static AudioStreamPlayer GetSoundPlayer(AudioStream sound)
+    {
+        if (_activePlayers.TryGetValue(sound, out AudioStreamPlayer soundPlayer)) return soundPlayer;
+        
+        if (!_freePlayers.TryPop(out soundPlayer))
+        {
+            soundPlayer = CreateSoundPlayer();
+        }
+        
+        _activePlayers.Add(sound, soundPlayer);
+        soundPlayer.Stream = sound;
+
+        return soundPlayer;
+    }
     
     private static AudioStreamPlayer CreateSoundPlayer()
     {
@@ -138,6 +146,7 @@ public partial class AudioPlayer : Node2D
     {
         _activePlayers.Remove(soundPlayer.Stream);
         soundPlayer.Stream = null;
+        soundPlayer.PitchScale = 1f;
         _freePlayers.Push(soundPlayer);
     }
 }

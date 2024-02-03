@@ -16,6 +16,14 @@ public static class Angles
         Full = 360,
         OneAndAHalf = 540
     }
+
+    public enum Quadrant : byte
+    {
+        Down,
+        Right,
+        Up,
+        Left
+    }
     
     public static float TransformTileAngle(float angle, TileTransforms tileTransforms)
     {
@@ -35,9 +43,9 @@ public static class Angles
         return angle;
     }
     
-    public static byte GetQuadrant(float angle)
+    public static Quadrant GetQuadrant(float angle)
     {
-        return (byte)(Mathf.FloorToInt(angle % 360f + 45f - Constants.AngleIncrement) / 90 & 3);
+        return (Quadrant)(Mathf.FloorToInt(angle % 360f + 45f - Constants.AngleIncrement) / 90 & 3);
     }
     
     public static float GetVector256(Vector2 distance)

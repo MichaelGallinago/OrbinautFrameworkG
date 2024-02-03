@@ -84,54 +84,13 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool ProcessSpinDash()
 	{
 		if (!SharedData.SpinDash || !IsGrounded) return false;
-	
-		// Start Spin Dash (initial charge)
-		if (Action == Actions.None && Animation is Animations.Duck or Animations.GlideLand)
-		{
-			if (!Input.Press.Abc || !Input.Down.Down) return false;
-			
-			Animation = Animations.SpinDash;
-			Action = Actions.SpinDash;
-			ActionValue = 0f;
-			ActionValue2 = 1f;
-			Velocity.Vector = Vector2.Zero;
-			
-			// TODO: SpinDash dust 
-			//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });
-			AudioPlayer.PlaySound(SoundStorage.Charge);
 		
-			// Register next charge next frame
-			return false;
-		}
+		if (StartSpinDash()) return false;
 	
 		// Continue if Spin Dash is being performed
 		if (Action != Actions.SpinDash) return false;
-	
-		if (Input.Down.Down)
-		{
-			if (Input.Press.Abc)
-			{
-				ActionValue = Math.Min(ActionValue + 2f, 8f);
-				
-				// TODO: audio
-				/*
-				ActionValue2 = audio_is_playing(sfx_charge) && ActionValue > 0
-					? Math.Min(ActionValue2 + 0.1f, 1.5f)
-					: 1;
-				
-				
-				var sound = audio_play_sfx(sfx_charge);
-				audio_sound_pitch(sound, ActionValue2);
-				*/
-				OverrideAnimationFrame = 0;
-			}
-			else
-			{
-				ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * FrameworkData.ProcessSpeed;
-			}
 
-			return false;
-		}
+		if (ChargeSpinDash()) return false;
 
 		if (!SharedData.CDCamera && Id == 0)
 		{
@@ -140,12 +99,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		int baseSpeed = IsSuper ? 11 : 8;
 		
-		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-		Radius = RadiusSpin;
-		Animation = Animations.Spin;
-		IsSpinning = true;
-		Action = Actions.None;
 		GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2f) * (float)Facing;
+		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
+		Animation = Animations.Spin;
+		Action = Actions.None;
+		Radius = RadiusSpin;
+		IsSpinning = true;
 		
 		AudioPlayer.StopSound(SoundStorage.Charge);
 		AudioPlayer.PlaySound(SoundStorage.Release);
@@ -155,38 +114,57 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Velocity.SetDirectionalValue(GroundSpeed, Angle);
 		return true;
 	}
+
+	private bool StartSpinDash()
+	{
+		if (Action != Actions.None || Animation is not (Animations.Duck or Animations.GlideLand)) return false;
+		if (!Input.Press.Abc || !Input.Down.Down) return true;
+			
+		Animation = Animations.SpinDash;
+		Action = Actions.SpinDash;
+		ActionValue = 0f;
+		ActionValue2 = 1f;
+		Velocity.Vector = Vector2.Zero;
+			
+		// TODO: SpinDash dust 
+		//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });
+		AudioPlayer.PlaySound(SoundStorage.Charge);
+		
+		// Register next charge next frame
+		return true;
+	}
+
+	private bool ChargeSpinDash()
+	{
+		if (!Input.Down.Down) return false;
+		
+		if (!Input.Press.Abc)
+		{
+			ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * FrameworkData.ProcessSpeed;
+			return true;
+		}
+		
+		ActionValue = Math.Min(ActionValue + 2f, 8f);
+				
+		ActionValue2 = AudioPlayer.IsSoundPlaying(SoundStorage.Charge) && ActionValue > 0f
+			? Math.Min(ActionValue2 + 0.1f, 1.5f) : 1f;
+				
+		AudioPlayer.PlaySoundPitch(SoundStorage.Charge, ActionValue2);
+		OverrideAnimationFrame = 0;
+		return true;
+	}
 	
 	private bool ProcessPeelOut()
 	{
 		if (!SharedData.PeelOut || Type != Types.Sonic || Id > 0 || !IsGrounded) return false;
 	
 		// Start Super Peel Out
-		if (Action == Actions.None && Animation == Animations.LookUp && Input.Down.Up && Input.Press.Abc)
-		{
-			Animation = Animations.Move;
-			Action = Actions.PeelOut;
-			ActionValue = 0f;
-			ActionValue2 = 0f;
-			
-			AudioPlayer.PlaySound(SoundStorage.Charge2);
-		}
+		StartSuperPeelOut();
 	
 		// Continue if Super Peel Out is being performed
 		if (Action != Actions.PeelOut) return false;
-	
-		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
-		if (Input.Down.Up)
-		{
-			if (ActionValue < 30f)
-			{
-				ActionValue += FrameworkData.ProcessSpeed;
-			}
 
-			float acceleration = 0.390625f * (float)Facing * FrameworkData.ProcessSpeed;
-			ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
-			GroundSpeed = ActionValue2;
-			return false;
-		}
+		if (ChargeSuperPeelOut()) return false;
 
 		AudioPlayer.StopSound(SoundStorage.Charge2);
 		Action = Actions.None;
@@ -207,6 +185,34 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (!SharedData.FixDashRelease) return true;
 			
 		Velocity.SetDirectionalValue(GroundSpeed, Angle);
+		return true;
+	}
+
+	private void StartSuperPeelOut()
+	{
+		if (Action != Actions.None || Animation != Animations.LookUp || !Input.Down.Up || !Input.Press.Abc) return;
+		
+		Animation = Animations.Move;
+		Action = Actions.PeelOut;
+		ActionValue = 0f;
+		ActionValue2 = 0f;
+			
+		AudioPlayer.PlaySound(SoundStorage.Charge2);
+	}
+
+	private bool ChargeSuperPeelOut()
+	{
+		if (!Input.Down.Up) return false;
+		
+		if (ActionValue < 30f)
+		{
+			ActionValue += FrameworkData.ProcessSpeed;
+		}
+
+		float acceleration = 0.390625f * (float)Facing * FrameworkData.ProcessSpeed;
+		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
+		ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
+		GroundSpeed = ActionValue2;
 		return true;
 	}
 
@@ -447,7 +453,6 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool CheckCeilingDistance()
 	{
 		if (GroundMode == Constants.GroundMode.Ceiling) return true;
-		
 		return CalculateCellDistance() >= 6; // Target ceiling distance
 	}
 
@@ -489,18 +494,15 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			{
 				ActionValue += FrameworkData.ProcessSpeed;
 			}
-			else 
+			else if (Animation != Animations.DropDash)
 			{
-				if (Animation != Animations.DropDash)
-				{
-					Animation = Animations.DropDash;
-					AudioPlayer.PlaySound(SoundStorage.Charge);
-				}
+				Animation = Animations.DropDash;
+				AudioPlayer.PlaySound(SoundStorage.Charge);
 			}
 			
 			return;
 		}
-
+		
 		switch (ActionValue)
 		{
 			case <= 0f:
@@ -511,7 +513,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				Action = Actions.DropDashCancel;
 				break;
 		}
-
+		
 		ActionValue = 0f;
 	}
 	
@@ -588,40 +590,11 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			ActionValue -= FrameworkData.ProcessSpeed;
 			if (ActionValue <= 0f)
 			{
-				if (!IsUnderwater)
-				{
-					Animation = Animations.FlyTired;
-					AudioPlayer.PlaySound(SoundStorage.Flight2);
-				}
-				else
-				{
-					Animation = Animations.SwimTired;
-				}
-			
-				Gravity = GravityType.TailsDown;
-				AudioPlayer.StopSound(SoundStorage.Flight);
+				FlyTired();
 			}
 			else
-			{	
-				Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
-			
-				if (!IsUnderwater || CarryTarget == null)
-				{
-					if (Input.Press.Abc)
-					{
-						Gravity = GravityType.TailsUp;
-					}
-					else if (Velocity.Y < -1f)
-					{
-						Gravity = GravityType.TailsDown;
-					}
-
-					Velocity.MaxY(-4f);
-				}
-				else
-				{
-					Gravity = GravityType.TailsDown;
-				}
+			{
+				FlyDefault();
 			}
 		}
 
@@ -636,6 +609,44 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		AudioPlayer.StopSound(SoundStorage.Flight);
 		AudioPlayer.StopSound(SoundStorage.Flight2);
 		ResetGravity();
+	}
+
+	private void FlyDefault()
+	{
+		Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
+			
+		if (IsUnderwater && CarryTarget != null)
+		{
+			Gravity = GravityType.TailsDown;
+			return;
+		}
+		
+		if (Input.Press.Abc)
+		{
+			Gravity = GravityType.TailsUp;
+		}
+		else if (Velocity.Y < -1f)
+		{
+			Gravity = GravityType.TailsDown;
+		}
+
+		Velocity.MaxY(-4f);
+	}
+	
+	private void FlyTired()
+	{
+		if (!IsUnderwater)
+		{
+			Animation = Animations.FlyTired;
+			AudioPlayer.PlaySound(SoundStorage.Flight2);
+		}
+		else
+		{
+			Animation = Animations.SwimTired;
+		}
+			
+		Gravity = GravityType.TailsDown;
+		AudioPlayer.StopSound(SoundStorage.Flight);
 	}
 	
 	private void ProcessClimb()
@@ -751,16 +762,16 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		// If Knuckles is no longer against the wall, make him let go
 		var offset = new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
-		int wallDistance = TileCollider.FindDistance(offset, false, Facing);
-			
-		if (wallDistance != 0)
-		{
-			ReleaseClimb();
-			return true;
-		}
-			
-		// If Knuckles has reached the floor, make him land
-		offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
+
+		if (TileCollider.FindDistance(offset, false, Facing) == 0) return LandAfterClimbing(radiusX);
+		
+		ReleaseClimb();
+		return true;
+	}
+
+	private bool LandAfterClimbing(int radiusX)
+	{
+		var offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
 		(int distance, float angle) = TileCollider.FindTile(offset, true, Constants.Direction.Positive);
 
 		if (distance >= 0) return false;
@@ -1035,200 +1046,195 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void ProcessGlideCollision()
 	{
-		// This script is a modified copy of scr_player_collision_air()
-		
 		if (Action != Actions.Glide) return;
 		
 		int wallRadius = RadiusNormal.X + 1;
-		byte moveQuad = Angles.GetQuadrant(Angles.GetVector256(Velocity));
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
 		
 		var collisionFlagWall = false;
-		var collisionFlagFloor = false;
 		var climbY = (int)Position.Y;
-		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
-		
-		// Perform left wall collision if not moving mostly right
-		if (moveQuad != 1)
-		{
-			int wallDistance = TileCollider.FindDistance(
-				new Vector2I(-wallRadius, 0), false, Constants.Direction.Negative);
 
-			if (wallDistance < 0)
-			{
-				Position -= new Vector2(wallDistance, 0f);
-				TileCollider.Position = (Vector2I)Position;
-				Velocity.X = 0f;
-				collisionFlagWall = true;
-			}
-		}
-		
-		// Perform right wall collision if not moving mostly left
-		if (moveQuad != 3)
+		if (moveQuadrant != Angles.Quadrant.Right)
 		{
-			int wallDistance = TileCollider.FindDistance(
-				new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
-			
-			if (wallDistance < 0)
-			{
-				Position += new Vector2(wallDistance, 0f);
-				TileCollider.Position = (Vector2I)Position;
-				Velocity.X = 0f;
-				collisionFlagWall = true;
-			}
+			collisionFlagWall |= CollideHorizontalOnGlide(wallRadius, Constants.Direction.Negative);
 		}
 		
-		// Perform ceiling collision if not moving mostly down
-		if (moveQuad != 0)
+		if (moveQuadrant != Angles.Quadrant.Left)
 		{
-			int roofDistance = TileCollider.FindClosestDistance(
-				Radius.Shuffle(-1, -1),
-				Radius.Shuffle(1, -1),
-				true, Constants.Direction.Negative);
-
-			if (moveQuad == 3 && roofDistance <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3)
-			{
-				// Perform right wall collision instead if moving mostly left and too far into the ceiling
-				int findDistance = TileCollider.FindDistance(
-					new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
-				
-				if (findDistance < 0)
-				{
-					Position += new Vector2(findDistance, 0f);
-					TileCollider.Position = (Vector2I)Position;
-					Velocity.X = 0f;
-					collisionFlagWall = true;
-				}
-			}
-			else if (roofDistance < 0)
-			{
-				Position -= new Vector2(0f, roofDistance);
-				TileCollider.Position = (Vector2I)Position;
-				if (Velocity.Y < 0f || moveQuad == 2)
-				{
-					Velocity.Y = 0f;
-				}
-			}
+			collisionFlagWall |= CollideHorizontalOnGlide(wallRadius, Constants.Direction.Positive);
 		}
 		
-		// Perform floor collision if not moving mostly up
-		if (moveQuad != 2)
+		CollideWithCeilingOnGlide(wallRadius, moveQuadrant, ref collisionFlagWall);
+		
+		if (moveQuadrant != Angles.Quadrant.Up && CollideWithFloorOnGlide())
 		{
-			(int floorDistance, float floorAngle) = TileCollider.FindClosestTile(
-				Radius.Shuffle(-1, 1), 
-				Radius.Shuffle(1, 1),
-				true, Constants.Direction.Positive);
-		
-			if ((GlideStates)ActionState == GlideStates.Ground)
-			{
-				if (floorDistance > 14f)
-				{
-					ReleaseGlide();
-				}
-				else
-				{
-					Position += new Vector2(0f, floorDistance);
-					Angle = floorAngle;
-				}
-				
-				return;
-			}
-
-			if (floorDistance < 0f)
-			{
-				Position += new Vector2(0f, floorDistance);
-				TileCollider.Position = (Vector2I)Position;
-				Angle = floorAngle;
-				Velocity.Y = 0f;
-				collisionFlagFloor = true;
-			}
+			LandWhenGlide();
 		}
-		
-		// Land logic
-		if (collisionFlagFloor)
-		{
-			switch ((GlideStates)ActionState)
-			{
-				case GlideStates.Air when Angles.GetQuadrant(Angle) == 0:
-					Animation = Animations.GlideGround;
-					ActionState = (int)GlideStates.Ground;
-					ActionValue = 0f;
-					Gravity = 0f;
-					break;
-				
-				case GlideStates.Air:
-					GroundSpeed = Angle < 180 ? Velocity.X : -Velocity.X;
-					Land();
-					break;
-				
-				case GlideStates.Fall:
-					Land();
-					AudioPlayer.PlaySound(SoundStorage.Land);
-				
-					if (Angles.GetQuadrant(Angle) != 0)
-					{
-						GroundSpeed = Velocity.X;
-						break;
-					}
-					
-					Animation = Animations.GlideLand;
-					GroundLockTimer = 16f;
-					GroundSpeed = 0f;
-					Velocity.X = 0f;
-					break;
-				
-				case GlideStates.Ground:
-					break;
-			}
-		}
-		
-		// Wall attach logic
 		else if (collisionFlagWall)
 		{
-			if ((GlideStates)ActionState != GlideStates.Air) return;
-
-			// Cast a horizontal sensor just above Knuckles.
-			// If the distance returned is not 0, he is either inside the ceiling or above the floor edge
-			TileCollider.Position.Y = climbY - Radius.Y;
-			int wallDistance = TileCollider.FindDistance(
-				new Vector2I(wallRadius * (int)Facing, 0), false, Facing);
-			
-			if (wallDistance != 0)
-			{
-				// Cast a vertical sensor now. If the distance returned is negative, Knuckles is inside
-				// the ceiling, else he is above the edge
-				
-				// Note: _find_mode is set to 2. LBR tiles are not ignored in this case
-				TileCollider.GroundMode = Constants.GroundMode.Ceiling;
-				int floorDistance = TileCollider.FindDistance(
-					new Vector2I((wallRadius + 1) * (int)Facing, -1), 
-					true, Constants.Direction.Positive);
-				
-				if (floorDistance is < 0 or >= 12)
-				{
-					ReleaseGlide();
-					return;
-				}
-				
-				// Adjust Knuckles' Y position to place him just below the edge
-				Position += new Vector2(0f, floorDistance);
-			}
-			
-			if (Facing == Constants.Direction.Negative)
-			{
-				Position += new Vector2(1f, 0f);
-			}
-			
-			Animation = Animations.ClimbWall;
-			Action = Actions.Climb;
-			ActionState = (int)ClimbStates.Normal;
-			ActionValue = 0f;
-			GroundSpeed = 0f;
-			Velocity.Y = 0f;
-			Gravity	= 0f;
-			
-			AudioPlayer.PlaySound(SoundStorage.Grab);
+			AttachToWallWhenGlide(wallRadius, climbY);
 		}
+	}
+
+	private bool CollideHorizontalOnGlide(int wallRadius, Constants.Direction direction)
+	{
+		var sing = (int)direction;
+		int wallDistance = TileCollider.FindDistance(
+			new Vector2I(sing * wallRadius, 0), false, direction);
+
+		if (wallDistance >= 0) return false;
+		
+		Position += new Vector2(sing * wallDistance, 0f);
+		TileCollider.Position = (Vector2I)Position;
+		Velocity.X = 0f;
+		return true;
+	}
+
+	private void CollideWithCeilingOnGlide(int wallRadius, Angles.Quadrant moveQuadrant, ref bool collisionFlagWall)
+	{
+		if (moveQuadrant == Angles.Quadrant.Down) return;
+		
+		int roofDistance = TileCollider.FindClosestDistance(
+			Radius.Shuffle(-1, -1),
+			Radius.Shuffle(1, -1),
+			true, Constants.Direction.Negative);
+			
+		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3)
+		{
+			// Perform right wall collision instead if moving mostly left and too far into the ceiling
+			collisionFlagWall |= CollideHorizontalOnGlide(wallRadius, Constants.Direction.Positive);
+			return;
+		}
+
+		if (roofDistance >= 0) return;
+		Position -= new Vector2(0f, roofDistance);
+		TileCollider.Position = (Vector2I)Position;
+		if (Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
+		{
+			Velocity.Y = 0f;
+		}
+	}
+
+	private bool CollideWithFloorOnGlide()
+	{
+		(int floorDistance, float floorAngle) = TileCollider.FindClosestTile(
+			Radius.Shuffle(-1, 1), 
+			Radius.Shuffle(1, 1),
+			true, Constants.Direction.Positive);
+	
+		if ((GlideStates)ActionState == GlideStates.Ground)
+		{
+			if (floorDistance > 14)
+			{
+				ReleaseGlide();
+				return false;
+			}
+			
+			Position += new Vector2(0f, floorDistance);
+			Angle = floorAngle;
+			return false;
+		}
+
+		if (floorDistance >= 0) return false;
+		
+		Position += new Vector2(0f, floorDistance);
+		TileCollider.Position = (Vector2I)Position;
+		Angle = floorAngle;
+		Velocity.Y = 0f;
+		return true;
+	}
+
+	private void LandWhenGlide()
+	{
+		switch ((GlideStates)ActionState)
+		{
+			case GlideStates.Air: LandWhenGlideAir(); break;
+			case GlideStates.Fall: LandWhenGlideAir(); break;
+		}
+	}
+
+	private void LandWhenGlideAir()
+	{
+		if (Angles.GetQuadrant(Angle) != 0)
+		{
+			GroundSpeed = Angle < 180 ? Velocity.X : -Velocity.X;
+			Land();
+			return;
+		}
+				
+		Animation = Animations.GlideGround;
+		ActionState = (int)GlideStates.Ground;
+		ActionValue = 0f;
+		Gravity = 0f;
+	}
+
+	private void LandWhenGlideFall()
+	{
+		AudioPlayer.PlaySound(SoundStorage.Land);
+		Land();		
+		
+		if (Angles.GetQuadrant(Angle) != 0)
+		{
+			GroundSpeed = Velocity.X;
+			return;
+		}
+					
+		Animation = Animations.GlideLand;
+		GroundLockTimer = 16f;
+		GroundSpeed = 0f;
+		Velocity.X = 0f;
+	}
+
+	private void AttachToWallWhenGlide(int wallRadius, int climbY)
+	{
+		if ((GlideStates)ActionState != GlideStates.Air) return;
+
+		CheckCollisionOnAttaching(wallRadius, climbY);
+			
+		if (Facing == Constants.Direction.Negative)
+		{
+			Position += new Vector2(1f, 0f);
+		}
+			
+		Animation = Animations.ClimbWall;
+		Action = Actions.Climb;
+		ActionState = (int)ClimbStates.Normal;
+		ActionValue = 0f;
+		GroundSpeed = 0f;
+		Velocity.Y = 0f;
+		Gravity	= 0f;
+			
+		AudioPlayer.PlaySound(SoundStorage.Grab);
+	}
+
+	private void CheckCollisionOnAttaching(int wallRadius, int climbY)
+	{
+		// Cast a horizontal sensor just above Knuckles.
+		// If the distance returned is not 0, he is either inside the ceiling or above the floor edge
+		TileCollider.Position.Y = climbY - Radius.Y;
+		if (TileCollider.FindDistance(new Vector2I(wallRadius * (int)Facing, 0), false, Facing) == 0)
+		{
+			return;
+		}
+		
+		// Cast a vertical sensor now. If the distance returned is negative, Knuckles is inside
+		// the ceiling, else he is above the edge
+			
+		// Note: tile behaviour here is set to TILE_BEHAVIOUR_ROTATE_180. LBR tiles are not ignored in this case
+		TileCollider.GroundMode = Constants.GroundMode.Ceiling;
+		int floorDistance = TileCollider.FindDistance(
+			new Vector2I((wallRadius + 1) * (int)Facing, -1), 
+			true, Constants.Direction.Positive);
+				
+		if (floorDistance is < 0 or >= 12)
+		{
+			ReleaseGlide();
+			return;
+		}
+				
+		// Adjust Knuckles' Y position to place him just below the edge
+		Position += new Vector2(0f, floorDistance);
 	}
 
 	private void ReleaseGlide()
@@ -1251,33 +1257,36 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			if (CarryTimer > 0f) return;
 		}
 	
-		if (CarryTarget == null)
-		{
-			if (Action != Actions.Flight) return;
-		
-			// Try to grab another player
-			foreach (Player player in Players)
-			{
-				if (player == this) continue;
-
-				if (player.Action is Actions.SpinDash or Actions.Carried) continue;
-				
-				if (MathF.Floor(player.Position.X - Position.X) is < -16f or >= 16f) continue;
-				if (MathF.Floor(player.Position.Y - Position.Y) is < 32f or >= 48f) continue;
-				
-				player.ResetState();
-				AudioPlayer.PlaySound(SoundStorage.Grab);
-				
-				player.Animation = Animations.Grab;
-				player.Action = Actions.Carried;
-				CarryTarget = player;
-
-				player.AttachToPlayer(this);
-			}
-		}
-		else
+		if (CarryTarget != null)
 		{
 			CarryTarget.OnAttached(this);
+			return;
+		}
+		
+		if (Action != Actions.Flight) return;
+
+		GrabAnotherPlayer();
+	}
+
+	private void GrabAnotherPlayer()
+	{
+		foreach (Player player in Players)
+		{
+			if (player == this) continue;
+
+			if (player.Action is Actions.SpinDash or Actions.Carried) continue;
+				
+			if (MathF.Floor(player.Position.X - Position.X) is < -16f or >= 16f) continue;
+			if (MathF.Floor(player.Position.Y - Position.Y) is < 32f or >= 48f) continue;
+				
+			player.ResetState();
+			AudioPlayer.PlaySound(SoundStorage.Grab);
+				
+			player.Animation = Animations.Grab;
+			player.Action = Actions.Carried;
+			CarryTarget = player;
+
+			player.AttachToPlayer(this);
 		}
 	}
 	
