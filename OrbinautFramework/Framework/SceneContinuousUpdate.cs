@@ -1,4 +1,5 @@
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework.Input;
 
 namespace OrbinautFramework3.Framework;
@@ -25,17 +26,6 @@ public partial class SceneContinuousUpdate : Node
     {
         if (!FrameworkData.AllowPause || !InputUtilities.Press[0].Start) return;
         _sceneTree.Paused = FrameworkData.IsPaused = !FrameworkData.IsPaused;
-
-        //TODO: audio
-        /*
-        if (FrameworkData.IsPaused)
-        {
-            audio_pause_all();
-        }
-        else
-        {
-            audio_resume_all();
-        }
-        */
+        AudioPlayer.SetPauseState(FrameworkData.IsPaused);
     }
 }

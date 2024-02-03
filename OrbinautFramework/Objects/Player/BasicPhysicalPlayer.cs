@@ -71,9 +71,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Action)
 		{
 			case Actions.Flight:
-				//TODO: audio STOP!!! SOUND!!!
-				//AudioPlayer.PlaySound(SoundStorage.Flight);
-				//AudioPlayer.PlaySound(SoundStorage.Flight2);
+				AudioPlayer.StopSound(SoundStorage.Flight);
+				AudioPlayer.StopSound(SoundStorage.Flight2);
 				break;
 			
 			case Actions.SpinDash or Actions.PeelOut:

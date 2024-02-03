@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
 
-[assembly: AudioStorageSourceGenerator.AudioStorage("SoundStorage", "OrbinautFramework3.Audio.Player", "res://Audio/Sounds/")]
-[assembly: AudioStorageSourceGenerator.AudioStorage("MusicStorage", "OrbinautFramework3.Audio.Player", "res://Audio/Music/")]
-
 namespace OrbinautFramework3.Audio.Player;
 
 public partial class AudioPlayer : Node2D
@@ -13,7 +10,7 @@ public partial class AudioPlayer : Node2D
     {
         Default, Mute, Stop
     }
-
+    
     private const float MinimalVolume = -80f;
     private const float DefaultVolume = 0f;
     
@@ -21,15 +18,20 @@ public partial class AudioPlayer : Node2D
     [Export] private AudioStreamPlayer _musicPlayer;
     [Export] private Godot.Collections.Array<AudioStreamPlayer> _soundPlayers;
     
+    public static MusicStates MusicState { get; private set; }
+    
     private static float _muteSpeed;
     private static AudioPlayer _player;
     private static Stack<AudioStreamPlayer> _freePlayers;
     private static Dictionary<AudioStream, AudioStreamPlayer> _activePlayers;
 
+    public static bool CheckMusicPlaying(AudioStream music) => _player._musicPlayer.Stream == music;
+    
     public override void _Ready()
     {
         _player = this;
         _muteSpeed = 0f;
+        MusicState = MusicStates.Default;
         _freePlayers = new Stack<AudioStreamPlayer>(_soundPlayers);
         _activePlayers = new Dictionary<AudioStream, AudioStreamPlayer>(_soundPlayers.Count);
         
@@ -57,7 +59,7 @@ public partial class AudioPlayer : Node2D
                 break;
         }
     }
-
+    
     public static void PlaySound(AudioStream sound)
     {
         if (_activePlayers.TryGetValue(sound, out AudioStreamPlayer existingSoundPlayer))
@@ -75,8 +77,7 @@ public partial class AudioPlayer : Node2D
         soundPlayer.Stream = sound;
         soundPlayer.Play();
     }
-
-
+    
     public static void StopSound(AudioStream sound)
     {
         if (_activePlayers.TryGetValue(sound, out AudioStreamPlayer existingSoundPlayer))
@@ -92,15 +93,39 @@ public partial class AudioPlayer : Node2D
         musicPlayer.Stream = audioStream;
         musicPlayer.VolumeDb = 0f;
     }
-    
-    public static void MuteMusic(float time) => SetMuteSpeed(time, MinimalVolume);
-    public static void UnmuteMusic(float time) => SetMuteSpeed(time, 0f);
 
+    public static void SetPauseState(bool isPaused)
+    {
+        foreach (AudioStreamPlayer soundPlayers in _player._soundPlayers)
+        {
+            soundPlayers.StreamPaused = isPaused;
+        }
+        _player._musicPlayer.StreamPaused = isPaused;
+    }
+    
+    public static void StopMusic(float time)
+    {
+        MusicState = MusicStates.Stop;
+        SetMuteSpeed(time, MinimalVolume);
+    }
+    
+    public static void MuteMusic(float time)
+    {
+        MusicState = MusicStates.Mute;
+        SetMuteSpeed(time, MinimalVolume);
+    }
+    
+    public static void UnmuteMusic(float time)
+    {
+        MusicState = MusicStates.Default;
+        SetMuteSpeed(time, 0f);
+    }
+    
     private static void SetMuteSpeed(float time, float value)
     {
         _muteSpeed = (value - _player._musicPlayer.VolumeDb) / (time * Constants.BaseFramerate);
     }
-
+    
     private static AudioStreamPlayer CreateSoundPlayer()
     {
         var soundPlayer = new AudioStreamPlayer();
@@ -108,7 +133,7 @@ public partial class AudioPlayer : Node2D
         _player._soundPlayers.Add(soundPlayer);
         return soundPlayer;
     }
-
+    
     private static void FreeSoundPlayer(AudioStreamPlayer soundPlayer)
     {
         _activePlayers.Remove(soundPlayer.Stream);

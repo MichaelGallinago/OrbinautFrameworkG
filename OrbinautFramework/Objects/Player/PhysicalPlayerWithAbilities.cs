@@ -168,8 +168,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			ActionValue = 0f;
 			ActionValue2 = 0f;
 			
-			//TODO: audio
-			//audio_play_sfx(sfx_charge2, [1.00, 2.30]);
+			AudioPlayer.PlaySound(SoundStorage.Charge2);
 		}
 	
 		// Continue if Super Peel Out is being performed
@@ -226,8 +225,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		{
 			ResetState();
 			AudioPlayer.PlaySound(SoundStorage.Transform);
-			//TODO: audio
-			//audio_play_bgm(bgm_super);
+			AudioPlayer.PlayMusic(MusicStorage.Super);
 			//TODO: instance_create obj_star_super
 			//instance_create(x, y, obj_star_super, { TargetPlayer: id });
 				
@@ -361,8 +359,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				
 		if (!IsUnderwater)
 		{
-			//TODO: audio
-			//audio_play_sfx(sfx_flight, true);
+			AudioPlayer.PlaySound(SoundStorage.Flight);
 		}
 
 		Input.Down = Input.Down with { Abc = false };
@@ -594,8 +591,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				if (!IsUnderwater)
 				{
 					Animation = Animations.FlyTired;
-					//TODO: audio
-					//audio_play_sfx(sfx_flight2, true);
+					AudioPlayer.PlaySound(SoundStorage.Flight2);
 				}
 				else
 				{

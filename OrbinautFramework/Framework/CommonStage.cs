@@ -1,3 +1,5 @@
+using Godot;
+
 namespace OrbinautFramework3.Framework;
 
 public abstract partial class CommonStage : CommonScene
@@ -7,8 +9,9 @@ public abstract partial class CommonStage : CommonScene
     public int WaterLevel { get; set; }
     public bool IsWaterEnabled { get; set; }
     public int InitialWaterLevel { get; set; }
+    public AudioStream Music { get; set; }
+    
         /*
-    BgmTrack        =  noone;
     animal_set       =  [];
     water_enabled    = -1;
     water_level_init =  0;

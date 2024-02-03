@@ -51,8 +51,7 @@ public class EditMode
 			{
 				if (FrameworkData.CurrentScene.IsStage)
 				{
-					//TODO: audio
-					//stage_reset_bgm();
+					PlayerData.Players[0].ResetMusic();
 				}
 				
 				_speed = 0;

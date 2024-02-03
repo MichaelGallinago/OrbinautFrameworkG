@@ -15,9 +15,9 @@ public abstract partial class CommonScene : Node2D
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
     private SceneLateUpdate _lateUpdate = new();
     private Debug _debug = new();
-
+    
     protected CommonScene() => ProcessPriority = int.MinValue;
-
+    
     public override void _Ready()
     {
         AddChild(_sceneContinuousUpdate);

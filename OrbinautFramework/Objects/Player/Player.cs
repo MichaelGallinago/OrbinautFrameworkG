@@ -101,6 +101,26 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		UpdateCollision();
 	}
 	
+	public void ResetMusic()
+	{
+		if (IsSuper)
+		{
+			AudioPlayer.PlayMusic(MusicStorage.Super);
+		}
+		else if (ItemInvincibilityTimer > 0f)
+		{
+			AudioPlayer.PlayMusic(MusicStorage.Invincibility);
+		}
+		else if (ItemSpeedTimer > 0f)
+		{
+			AudioPlayer.PlayMusic(MusicStorage.HighSpeed);
+		}
+		else if (Stage.Music != null)
+		{
+			AudioPlayer.PlayMusic(Stage.Music);
+		}
+	}
+	
 	protected virtual bool ProcessCpu(float processSpeed) => false;
 
 	private void OnTypeChanged(Types newType)
@@ -152,14 +172,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 		if (ItemSpeedTimer > 0f && --ItemSpeedTimer == 0f)
 		{
-			//TODO: audio
-			//stage_reset_bgm();	
+			Players[0].ResetMusic();
 		}
 	
 		if (ItemInvincibilityTimer > 0f && --ItemInvincibilityTimer == 0f)
 		{
-			//TODO: audio
-			//stage_reset_bgm();
+			Players[0].ResetMusic();
 		}
 	
 		if (IsSuper)
@@ -182,8 +200,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					InvincibilityTimer = 1;
 					IsSuper = false;
 					
-					//TODO: audio
-					//stage_reset_bgm();
+					Players[0].ResetMusic();
 				}
 				else
 				{
@@ -289,8 +306,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					
 				case 720f:
 					if (Id != 0) break;
-					//TODO: audio
-					//audio_play_bgm(bgm_drowning);
+					AudioPlayer.PlayMusic(MusicStorage.Drowning);
 					break;
 					
 				case 0f:
@@ -343,18 +359,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			}
 		}
 			
-		//TODO: audio
-		/*
-			if (Action == Actions.Flight)
-			{
-				audio_play_sfx(sfx_flight, true);
-			}
-				
-			if (audio_is_playing(bgm_drowning))
-			{
-				stage_reset_bgm();
-			}
-			*/
+		
+		if (Action == Actions.Flight)
+		{
+			AudioPlayer.PlaySound(SoundStorage.Flight);
+		}
+			
+		if (AudioPlayer.CheckMusicPlaying(MusicStorage.Drowning))
+		{
+			Players[0].ResetMusic();
+		}
 				
 		IsUnderwater = false;	
 		AirTimer = Constants.MaxAirValue;
@@ -613,9 +627,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 						break;
 					}
 					
-					// TODO: audio + gameOver
-					//instance_create_depth(0, 0, 0, obj_gui_gameover);				
-					//audio_play_bgm(bgm_gameover);
+					// TODO: gameOver
+					//instance_create_depth(0, 0, 0, obj_gui_gameover);		
+					AudioPlayer.PlayMusic(MusicStorage.GameOver);
 				}
 				break;
 		
@@ -626,13 +640,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					if (--RestartTimer != 0) break;
 					RestartState = RestartStates.RestartStage;
 				}
-				// TODO: audio_bgm_is_playing
-				// If restart_timer wasn't set (Game Over or Time Over)
-				//else if (audio_bgm_is_playing()) break;
-				RestartState = RestartStates.RestartGame;	
+				else if (!AudioPlayer.CheckMusicPlaying(null))
+				{
+					break;
+				}
 				
-				// TODO: audio + fade
-				//audio_stop_bgm(0.5);
+				// If restart_timer wasn't set (Game Over or Time Over)
+				RestartState = RestartStates.RestartGame;	
+				AudioPlayer.StopMusic(0.5f);
+				
+				// TODO: fade
 				//fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);
 				break;
 		
