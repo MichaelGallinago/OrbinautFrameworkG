@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/invincibility.ogg-b9276d1040bc63e8deace9f3048
 
 [params]
 
-loop=false
+loop=true
 loop_offset=0
 bpm=0
 beat_count=0
