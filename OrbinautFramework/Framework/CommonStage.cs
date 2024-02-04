@@ -11,7 +11,7 @@ public abstract partial class CommonStage : CommonScene
     public int InitialWaterLevel { get; set; }
     public AudioStream Music { get; set; }
     
-        /*
+    /*
     animal_set       =  [];
     water_enabled    = -1;
     water_level_init =  0;
@@ -22,11 +22,13 @@ public abstract partial class CommonStage : CommonScene
     public CommonStage()
     {
         IsStage = true;
-        ZoneName = "UNKNOWN";
+    }
+
+    public override void _Ready()
+    {
         ActId = 0;
+        ZoneName = "UNKNOWN";
         WaterLevel = InitialWaterLevel = ushort.MaxValue;
         IsWaterEnabled = false;
     }
-
-    protected abstract void StageSetup();
 }

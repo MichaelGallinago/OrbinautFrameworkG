@@ -34,7 +34,6 @@ public abstract partial class CommonScene : Node2D
     public override void _Process(double deltaTime)
     {
         FrameworkData.ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
-        
         FrameworkData.UpdateEarly(FrameworkData.ProcessSpeed);
         
         foreach (BaseObject objects in BaseObject.Objects)
