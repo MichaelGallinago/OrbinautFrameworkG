@@ -58,10 +58,10 @@ public partial class Tail : AdvancedAnimatedSprite
 
 	private void ChangeDirection(ITailed data)
 	{
-		float scaleX = (data.IsSpinning && data.IsGrounded 
-			? (data.GroundSpeed >= 0f ? 1f : -1f) * Math.Abs(Scale.X) : 1f) * (float)data.Facing;
-
-		Scale = Scale with { X = scaleX };
+		float scaleX = data.IsSpinning && data.IsGrounded ? 
+			data.GroundSpeed.Value >= 0f ? 1f : -1f : 
+			(float)data.Facing;
+		Scale = Scale with { X = scaleX * Math.Abs(Scale.X) };
 	}
 
 	private void UpdateAngle(ITailed data)

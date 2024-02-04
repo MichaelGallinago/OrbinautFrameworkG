@@ -99,7 +99,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		int baseSpeed = IsSuper ? 11 : 8;
 		
-		GroundSpeed = (baseSpeed + MathF.Round(ActionValue) / 2f) * (float)Facing;
+		GroundSpeed.Value = (baseSpeed + MathF.Round(ActionValue) / 2f) * (float)Facing;
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Animation = Animations.Spin;
 		Action = Actions.None;
@@ -171,7 +171,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (ActionValue < 30f)
 		{
-			GroundSpeed = 0f;
+			GroundSpeed.Value = 0f;
 			return false;
 		}
 			
@@ -212,7 +212,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		float acceleration = 0.390625f * (float)Facing * FrameworkData.ProcessSpeed;
 		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
 		ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
-		GroundSpeed = ActionValue2;
+		GroundSpeed.Value = ActionValue2;
 		return true;
 	}
 
@@ -384,7 +384,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		ActionState = (int)GlideStates.Air;
 		ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
 		Radius = new Vector2I(10, 10);
-		GroundSpeed = 4f;
+		GroundSpeed.Value = 4f;
 		Velocity.X = 0f;
 		Velocity.Y += 2f; 
 				
@@ -569,16 +569,16 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Velocity.X * sign >= 0f)
 		{
-			GroundSpeed = MathF.Floor(GroundSpeed / 4f) + force;
+			GroundSpeed.Value = MathF.Floor(GroundSpeed / 4f) + force;
 			if (sign * GroundSpeed <= limitSpeed) return;
-			GroundSpeed = limitSpeed;
+			GroundSpeed.Value = limitSpeed;
 			return;
 		}
 
-		GroundSpeed = force;
+		GroundSpeed.Value = force;
 		if (Mathf.IsEqualApprox(Angle, 360f)) return;
 		
-		GroundSpeed += MathF.Floor(GroundSpeed / 2f);
+		GroundSpeed.Value += MathF.Floor(GroundSpeed / 2f);
 	}
 	
 	private void ProcessFlight()
@@ -908,7 +908,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 			Animation = Animations.GlideGround;
 			GroundLockTimer = 16f;
-			GroundSpeed = 0f;
+			GroundSpeed.Value = 0f;
 
 			return;
 		}
@@ -1032,7 +1032,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Input.Press.Left && GroundSpeed > 0f || Input.Press.Right && GroundSpeed < 0f)
 		{
 			Facing = (Constants.Direction)(-(int)Facing);
-			GroundSpeed *= -1f;
+			GroundSpeed.Value *= -1f;
 		}
 		
 		Velocity.SetDirectionalValue(GroundSpeed, Angle);
@@ -1159,7 +1159,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (Angles.GetQuadrant(Angle) != 0)
 		{
-			GroundSpeed = Angle < 180 ? Velocity.X : -Velocity.X;
+			GroundSpeed.Value = Angle < 180 ? Velocity.X : -Velocity.X;
 			Land();
 			return;
 		}
@@ -1177,13 +1177,13 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Angles.GetQuadrant(Angle) != 0)
 		{
-			GroundSpeed = Velocity.X;
+			GroundSpeed.Value = Velocity.X;
 			return;
 		}
 					
 		Animation = Animations.GlideLand;
 		GroundLockTimer = 16f;
-		GroundSpeed = 0f;
+		GroundSpeed.Value = 0f;
 		Velocity.X = 0f;
 	}
 
@@ -1202,7 +1202,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Action = Actions.Climb;
 		ActionState = (int)ClimbStates.Normal;
 		ActionValue = 0f;
-		GroundSpeed = 0f;
+		GroundSpeed.Value = 0f;
 		Velocity.Y = 0f;
 		Gravity	= 0f;
 			

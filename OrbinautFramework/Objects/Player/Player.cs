@@ -748,7 +748,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	public void OnDisableEditMode()
 	{
 		Velocity.Vector = Vector2.Zero;
-		GroundSpeed = 0f;
+		GroundSpeed.Value = 0f;
 		Animation = Animations.Move;
 		ObjectInteraction = true;
 		IsDead = false;

@@ -51,7 +51,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Animation = Animations.Death;
 		Gravity = GravityType.Default;
 		Velocity.Vector = new Vector2(0f, -7f);
-		GroundSpeed = 0f;
+		GroundSpeed.Value = 0f;
 		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
 		AudioPlayer.PlaySound(SoundStorage.Hurt);
@@ -78,7 +78,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			case Actions.SpinDash or Actions.PeelOut:
 				if (Action == Actions.PeelOut)
 				{
-					GroundSpeed = ActionValue2;
+					GroundSpeed.Value = ActionValue2;
 				}
 				return;
 		}
@@ -124,8 +124,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (IsHurt)
 		{
-			InvincibilityTimer = 120;
-			GroundSpeed = 0f;
+			InvincibilityTimer = 120f;
+			GroundSpeed.Value = 0f;
 		}
 	
 		IsAirLock = false;
@@ -147,7 +147,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		else
 		{
-			GroundSpeed	= 6 * (int)Facing;
+			GroundSpeed.Value = 6 * (int)Facing;
 		}
 
 		if (IsSpinning) return;
@@ -164,7 +164,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 
 		Position = Position with { Y = Position.Y - distance + 1 };
-		GroundSpeed = Velocity.X;
+		GroundSpeed.Value = Velocity.X;
 		Velocity.X = 0f;
 		Angle = 360f;
 		
@@ -267,7 +267,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			GroundSpeed.Acceleration = sign * PhysicParams.Deceleration;
 			if (GroundSpeed * sign >= 0f)
 			{
-				GroundSpeed = 0.5f * sign;
+				GroundSpeed.Value = 0.5f * sign;
 			}
 			
 			return true;
@@ -383,7 +383,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		GroundSpeed.Acceleration = sign * PhysicParams.DecelerationRoll;
 		if (sign * GroundSpeed < 0f) return;
-		GroundSpeed = sign * 0.5f;
+		GroundSpeed.Value = sign * 0.5f;
 	}
 	
 	private void UpdateSpinningOnGround()
@@ -416,13 +416,13 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			if ((float)GroundSpeed is >= 0f and < 2f)
 			{
-				GroundSpeed = 2f;
+				GroundSpeed.Value = 2f;
 			}
 			return;
 		}
 		
 		if (GroundSpeed != 0f) return;
-		GroundSpeed = (SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f) * (float)Facing;
+		GroundSpeed.Value = (SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f) * (float)Facing;
 	}
 	
 	private void ProcessMovementAir()
@@ -660,7 +660,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
 				Velocity.X -= wallDistance / FrameworkData.ProcessSpeed;
-				GroundSpeed = 0f;
+				GroundSpeed.Value = 0f;
 					
 				if (Facing == firstDirection && !IsSpinning)
 				{
@@ -719,7 +719,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		// Note that position here is checked including subpixel
 		if (Position.X + Velocity.X < camera.Limit.X + 16f)
 		{
-			GroundSpeed = 0f;
+			GroundSpeed.Value = 0f;
 			Velocity.X = 0f;
 			Position = new Vector2(camera.Limit.X + 16f, Position.Y);
 		}
@@ -734,7 +734,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		if (Position.X + Velocity.X > rightBound)
 		{
-			GroundSpeed = 0f;
+			GroundSpeed.Value = 0f;
 			Velocity.X = 0f;
 			Position = new Vector2(rightBound, Position.Y);
 		}
@@ -894,7 +894,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		{
 			if (Angles.GetQuadrant(Angle) == Angles.Quadrant.Down) return;
 				
-			GroundSpeed = 0f;	
+			GroundSpeed.Value = 0f;	
 			GroundLockTimer = 30f;
 			IsGrounded = false;
 			return;
@@ -951,7 +951,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up + sign) return;
-		GroundSpeed = Velocity.Y;
+		GroundSpeed.Value = Velocity.Y;
 	}
 
 	private bool CollideWithCeilingInAir(int wallRadius, Angles.Quadrant moveQuadrant)
@@ -983,7 +983,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
 			Angle = roofAngle;
-			GroundSpeed = roofAngle < 180f ? -Velocity.Y : Velocity.Y;
+			GroundSpeed.Value = roofAngle < 180f ? -Velocity.Y : Velocity.Y;
 			Velocity.Y = 0f;
 					
 			Land();
@@ -1039,17 +1039,17 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 					Velocity.Y = 15.75f;
 				}
 						
-				GroundSpeed = angle < 180f ? -Velocity.Y : Velocity.Y;
+				GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
 				Velocity.X = 0f;
 			}
 			else if (angle is > 22.5f and <= 337.5f)
 			{
-				GroundSpeed = angle < 180f ? -Velocity.Y : Velocity.Y;
-				GroundSpeed /= 2f;
+				GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
+				GroundSpeed.Value /= 2f;
 			}
 			else 
 			{
-				GroundSpeed = Velocity.X;
+				GroundSpeed.Value = Velocity.X;
 				Velocity.Y = 0f;
 			}
 		}
@@ -1062,7 +1062,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			
 			if (distance >= 0) return;
 				
-			GroundSpeed = Velocity.X;
+			GroundSpeed.Value = Velocity.X;
 			Velocity.Y = 0f;
 		}
 		else

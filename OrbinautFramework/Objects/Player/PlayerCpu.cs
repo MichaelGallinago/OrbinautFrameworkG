@@ -103,7 +103,7 @@ public partial class PlayerCpu : Player
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
 		Velocity.Vector = Vector2.Zero;
-		GroundSpeed = 0f;
+		GroundSpeed.Value = 0f;
 		GroundLockTimer = 0f;
 		ObjectInteraction = true;
 		

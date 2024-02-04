@@ -140,7 +140,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		
 		if (clip.X != 0 && Math.Sign(clip.X) == Math.Sign(Velocity.X))
 		{
-			GroundSpeed = 0f;
+			GroundSpeed.Value = 0f;
 			Velocity.X = 0f;
 
 			if (IsGrounded)
@@ -181,7 +181,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 	{
 		if (SharedData.PlayerPhysics >= PhysicsTypes.S3 && !IsGrounded)
 		{
-			GroundSpeed = 0f;
+			GroundSpeed.Value = 0f;
 		}
 
 		Position = new Vector2(Position.X, Position.Y - clipY);

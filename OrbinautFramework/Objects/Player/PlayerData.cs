@@ -28,7 +28,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	}
 	private Types _type;
 	public Velocity Velocity { get; } = new();
-	public AcceleratedValue GroundSpeed { get; set; }
+	public AcceleratedValue GroundSpeed { get; set; } = new();
 	
 	public int Id { get; protected set; }
 	public Animations Animation { get; set; }
@@ -152,7 +152,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Position = Position with { Y = Position.Y - Radius.Y - 1f };
 		Gravity = GravityType.Default;
 		Velocity.Vector = Vector2.Zero;
-		GroundSpeed = 0f;
+		GroundSpeed.Value = 0f;
 		Angle = 0f;
 		
 		TileLayer = Constants.TileLayers.Main;

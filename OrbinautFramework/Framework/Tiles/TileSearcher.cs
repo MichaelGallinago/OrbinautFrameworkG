@@ -47,31 +47,21 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
     {
         return (index / TileLimit) switch
         {
-            2 when isVertical => groundMode switch
-            {
-                GroundMode.Floor => direction == Direction.Negative,
-                GroundMode.Ceiling => direction == Direction.Positive,
-                _ => true
-            },
-            1 when isVertical => groundMode switch
-            {
-                GroundMode.Floor => direction == Direction.Positive,
-                GroundMode.Ceiling => direction == Direction.Negative,
-                _ => false
-            },
-            2 => groundMode switch
-            {
-                GroundMode.RightWall => direction == Direction.Negative,
-                GroundMode.LeftWall => direction == Direction.Positive,
-                _ => true
-            },
-            1 => groundMode switch
-            {
-                GroundMode.RightWall => direction == Direction.Positive,
-                GroundMode.LeftWall => direction == Direction.Negative,
-                _ => false
-            },
+            2 => !CheckTileValidity(isVertical, direction, groundMode),
+            1 => CheckTileValidity(isVertical, direction, groundMode),
             _ => true
+        };
+    }
+
+    private static bool CheckTileValidity(bool isVertical, Direction direction, GroundMode groundMode)
+    {
+        return groundMode switch
+        {
+            GroundMode.Floor => isVertical && direction == Direction.Positive,
+            GroundMode.Ceiling => isVertical && direction == Direction.Negative,
+            GroundMode.RightWall => !isVertical && direction == Direction.Positive,
+            GroundMode.LeftWall => !isVertical && direction == Direction.Negative,
+            _ => false
         };
     }
 }

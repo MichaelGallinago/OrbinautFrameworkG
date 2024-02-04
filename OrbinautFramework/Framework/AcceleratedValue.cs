@@ -15,7 +15,6 @@ public class AcceleratedValue
     private float _instantValue;
     
     public static implicit operator float(AcceleratedValue value) => value.Value;
-    public static implicit operator AcceleratedValue(float value) => new() { Value = value };
     
     public float Acceleration
     {

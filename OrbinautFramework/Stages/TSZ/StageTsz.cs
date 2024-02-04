@@ -4,10 +4,9 @@ namespace OrbinautFramework3.Stages.TSZ;
 
 public partial class StageTsz : Framework.CommonStage
 {
-    public override void _Ready()
+    public StageTsz()
     {
-        //TODO: StageSetup in StageTsz
-        base._Ready();
+        //TODO: test stage init
         Music = MusicStorage.TestStage;
     }
 }

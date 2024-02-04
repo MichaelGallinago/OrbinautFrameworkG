@@ -94,6 +94,7 @@ public partial class AudioPlayer : Node2D
         if (musicPlayer.Stream == music) return;
         musicPlayer.Stream = music;
         musicPlayer.VolumeDb = 0f;
+        musicPlayer.Play();
     }
     
     public static void StopMusic(float time)

@@ -74,7 +74,7 @@ public partial class Debug : Node
 		
 		player.Position = resetData.Position;
 		player.Velocity.Vector = resetData.Velocity;
-		player.GroundSpeed = resetData.GroundSpeed;
+		player.GroundSpeed.Value = resetData.GroundSpeed;
 		player.Facing = resetData.Facing;
 		player.ScoreCount = resetData.ScoreCount;
 		player.RingCount = resetData.RingCount;

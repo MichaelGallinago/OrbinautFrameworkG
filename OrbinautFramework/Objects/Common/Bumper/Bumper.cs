@@ -50,7 +50,7 @@ public partial class Bumper : BaseObject
 			
                 if (player.IsGrounded)
                 {
-                    player.GroundSpeed = bumpSpeed;
+                    player.GroundSpeed.Value = bumpSpeed;
                 }
                 else
                 {
