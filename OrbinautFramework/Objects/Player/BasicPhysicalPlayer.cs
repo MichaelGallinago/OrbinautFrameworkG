@@ -83,44 +83,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				return;
 		}
 	
-		if (Barrier.State == Barrier.States.Active && Barrier.Type == Barrier.Types.Water)
-		{
-			float force = IsUnderwater ? -4f : -7.5f;
-			float radians = Mathf.DegToRad(Angle);
-			Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
-
-			Barrier.State = Barrier.States.None;
-			OnObject = null;
-			IsGrounded = false;
-		
-			Barrier.UpdateFrame(0, 1, [3, 2]);
-			Barrier.UpdateDuration([7, 12]);
-			Barrier.Timer = 20d;
-			
-			AudioPlayer.PlaySound(SoundStorage.BarrierWater2);
-		
-			return;
-		}
-	
-		if (OnObject == null)
-		{
-			switch (Animation)
-			{
-				case Animations.Idle:
-				case Animations.Duck:
-				case Animations.HammerDash:
-				case Animations.GlideGround: 
-					break;
-			
-				default:
-					Animation = Animations.Move;
-					break;
-			}
-		}
-		else
-		{
-			Animation = Animations.Move;
-		}
+		if (WaterBarrierBounce()) return;
+		SetLandAnimation();
 	
 		if (IsHurt)
 		{
@@ -185,6 +149,39 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		SetPushAnimationBy = null;
+	}
+
+	private bool WaterBarrierBounce()
+	{
+		if (Barrier.State != Barrier.States.Active || Barrier.Type != Barrier.Types.Water) return false;
+		
+		float force = IsUnderwater ? -4f : -7.5f;
+		float radians = Mathf.DegToRad(Angle);
+		Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
+
+		Barrier.State = Barrier.States.None;
+		OnObject = null;
+		IsGrounded = false;
+		
+		Barrier.UpdateFrame(0, 1, [3, 2]);
+		Barrier.UpdateDuration([7, 12]);
+		Barrier.Timer = 20d;
+			
+		AudioPlayer.PlaySound(SoundStorage.BarrierWater2);
+		
+		return true;
+	}
+
+	private void SetLandAnimation()
+	{
+		if (OnObject != null)
+		{
+			Animation = Animations.Move;
+			return;
+		}
+		
+		if (Animation is Animations.Idle or Animations.Duck or Animations.HammerDash or Animations.GlideGround) return;
+		Animation = Animations.Move;
 	}
 	
     private void ProcessSlopeResist()
@@ -347,19 +344,18 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessMovementGroundRoll()
 	{
-		// Control routine checks
 		if (!IsGrounded || !IsSpinning) return;
 		
 		if (GroundLockTimer <= 0f)
 		{
 			if (Input.Down.Left)
 			{
-				RollOnGround(Constants.Direction.Negative); // Move left
+				RollOnGround(Constants.Direction.Negative);
 			}
 			
 			if (Input.Down.Right)
 			{
-				RollOnGround(Constants.Direction.Positive); // Move right
+				RollOnGround(Constants.Direction.Positive);
 			}
 		}
 
@@ -429,72 +425,76 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (IsGrounded || IsDead) return;
 		
-		// Action checks
 		if (Action is Actions.Carried or Actions.Climb or Actions.Glide 
 		    && (GlideStates)ActionState != GlideStates.Fall) return;
-	
-		// Update Angle (rotate player)
-		if (!Mathf.IsEqualApprox(Angle, 360f))
-		{
-			float speed = Angles.ByteAngleStep * FrameworkData.ProcessSpeed;
-			if (Angle >= 180f)
-			{
-				Angle += speed;
-			}
-			else
-			{
-				Angle -= speed;
-			}
+
+		RotateInAir();
+		LimitVerticalVelocity();
+		if (ChangeHammerDashFacingInAir()) return;
+		MoveInAirHorizontally();
+		ApplyAirDrag();
+	}
+
+	private void RotateInAir()
+	{
+		if (Mathf.IsEqualApprox(Angle, 360f)) return;
 		
-			if (Angle is <= 0f or > 360f)
-			{
-				Angle = 360f;
-			}
+		float speed = Angles.ByteAngleStep * FrameworkData.ProcessSpeed;
+		if (Angle >= 180f)
+		{
+			Angle += speed;
 		}
-	
-		// Limit upward speed
+		else
+		{
+			Angle -= speed;
+		}
+		
+		if (Angle is <= 0f or > 360f)
+		{
+			Angle = 360f;
+		}
+	}
+
+	private void LimitVerticalVelocity()
+	{
 		if (!IsJumping && Action != Actions.SpinDash && !IsForcedSpin && Velocity.Y < -15.75f)
 		{
 			Velocity.Y = -15.75f;
 		}
-	
-		// Limit downward speed
-		if (SharedData.PlayerPhysics == PhysicsTypes.CD && Velocity.Y > 16f)
+		else if (SharedData.PlayerPhysics == PhysicsTypes.CD && Velocity.Y > 16f)
 		{
 			Velocity.Y = 16f;
 		}
+	}
 
-		if (Action == Actions.HammerDash)
+	private bool ChangeHammerDashFacingInAir()
+	{
+		if (Action != Actions.HammerDash) return false;
+		
+		if (Input.Down.Left)
 		{
-			if (Input.Down.Left)
-			{
-				Facing = Constants.Direction.Negative;
-			}
-			else if (Input.Down.Right)
-			{
-				Facing = Constants.Direction.Positive;
-			}
-			
-			return;
+			Facing = Constants.Direction.Negative;
 		}
-	
-		if (!IsAirLock)
+		else if (Input.Down.Right)
 		{
-			if (Input.Down.Left)
-			{
-				MoveInAir(Constants.Direction.Negative, () => Velocity.MaxX(-PhysicParams.AccelerationTop));
-			}
-			
-			if (Input.Down.Right)
-			{
-				MoveInAir(Constants.Direction.Positive, () => Velocity.MinX(PhysicParams.AccelerationTop));
-			}
+			Facing = Constants.Direction.Positive;
 		}
-	
-		// Apply air drag
-		if (!IsHurt && Velocity.Y is < 0f and > -4f)
+		
+		return true;
+	}
+
+	private void MoveInAirHorizontally()
+	{
+		if (IsAirLock) return;
+		
+		if (Input.Down.Left)
 		{
-			Velocity.AccelerationX = MathF.Floor(Velocity.X * 8f) / -256f;
+			MoveInAir(Constants.Direction.Negative, () => Velocity.MaxX(-PhysicParams.AccelerationTop));
+		}
+			
+		if (Input.Down.Right)
+		{
+			MoveInAir(Constants.Direction.Positive, () => Velocity.MinX(PhysicParams.AccelerationTop));
 		}
 	}
 
@@ -509,6 +509,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 			
 		Facing = direction;
+	}
+
+	private void ApplyAirDrag()
+	{
+		if (!IsHurt && Velocity.Y is < 0f and > -4f)
+		{
+			Velocity.AccelerationX = MathF.Floor(Velocity.X * 8f) / -256f;
+		}
 	}
 	
 	private void ProcessBalance()
@@ -678,34 +686,29 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
 		if (!IsForcedSpin && (Input.Down.Left || Input.Down.Right)) return;
-		
-		var allowSpin = false;
-		if (Input.Down.Down)
-		{
-			if (SharedData.PlayerPhysics == PhysicsTypes.SK)
-			{
-				if (Math.Abs(GroundSpeed) >= 1f)
-				{
-					allowSpin = true;
-				}
-				else
-				{
-					Animation = Animations.Duck;
-				}
-			}
-			else if (Math.Abs(GroundSpeed) >= 0.5f)
-			{
-				allowSpin = true;
-			}
-		}
 
-		if (!allowSpin && !IsForcedSpin) return;
+		if (!CheckSpinPossibility() && !IsForcedSpin) return;
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
 		IsSpinning = true;
 		Animation = Animations.Spin;
 		
 		AudioPlayer.PlaySound(SoundStorage.Roll);
+	}
+
+	private bool CheckSpinPossibility()
+	{
+		if (!Input.Down.Down) return false;
+		
+		if (SharedData.PlayerPhysics != PhysicsTypes.SK)
+		{
+			return Math.Abs(GroundSpeed) >= 0.5f;
+		}
+
+		if (Math.Abs(GroundSpeed) >= 1f) return true;
+
+		Animation = Animations.Duck;
+		return false;
 	}
 	
 	private void ProcessLevelBound()
@@ -742,20 +745,17 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Action)
 		{
 			case Actions.Flight or Actions.Climb:
-			{
-				if (Position.Y + Velocity.Y < camera.Limit.Y + 16f)
-				{ 	
-					if (Action == Actions.Flight)
-					{
-						Gravity	= GravityType.TailsDown;
-					}
-
-					Velocity.Y = 0f;
-					Position = new Vector2(Position.X, camera.Limit.Y + 16f);
+				if (Position.Y + Velocity.Y >= camera.Limit.Y + 16f) break;
+	
+				if (Action == Actions.Flight)
+				{
+					Gravity	= GravityType.TailsDown;
 				}
 
+				Velocity.Y = 0f;
+				Position = new Vector2(Position.X, camera.Limit.Y + 16f);
 				break;
-			}
+			
 			case Actions.Glide when Position.Y < camera.Limit.Y + 10f:
 				Velocity.X = 0f;
 				break;
@@ -928,9 +928,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
 
 		var moveQuadrantValue = (int)moveQuadrant;
+
 		CollideWallsInAir(wallRadius, moveQuadrantValue, Constants.Direction.Negative);
 		CollideWallsInAir(wallRadius, moveQuadrantValue, Constants.Direction.Positive);
-		
+
 		if (CollideWithCeilingInAir(wallRadius, moveQuadrant)) return;
 
 		CollideWithFloorInAir(moveQuadrant);
@@ -940,7 +941,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		var sign = (int)direction;
 		
-		if (moveQuadrantValue == (int)Angles.Quadrant.Up - sign) return;
+		if (moveQuadrantValue == (int)Angles.Quadrant.Up + sign) return;
 		
 		int wallDistance = TileCollider.FindDistance(
 			new Vector2I(sign * wallRadius, 0), false, direction);
@@ -950,7 +951,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		TileCollider.Position = (Vector2I)Position;
 		Velocity.X = 0f;
 		
-		if (moveQuadrantValue != (int)Angles.Quadrant.Up + sign) return;
+		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return;
 		GroundSpeed.Value = Velocity.Y;
 	}
 
@@ -1010,69 +1011,83 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (moveQuadrant == Angles.Quadrant.Down)
 		{
-			(int distanceL, float angleL) = TileCollider.FindTile(
-				Radius.Shuffle(-1, 1), 
-				true, Constants.Direction.Positive);
-			
-			(int distanceR, float angleR) = TileCollider.FindTile(
-				Radius.Shuffle(1, 1), 
-				true, Constants.Direction.Positive);
-
-			if (distanceL > distanceR)
-			{
-				distance = distanceR;
-				angle = angleR;
-			}
-			else
-			{
-				distance = distanceL;
-				angle = angleL;
-			}
-					
-			float minClip = -(Velocity.Y + 8f);		
-			if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return;
-					
-			if (Angles.GetQuadrant(angle) > 0)
-			{
-				if (Velocity.Y > 15.75f)
-				{
-					Velocity.Y = 15.75f;
-				}
-						
-				GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
-				Velocity.X = 0f;
-			}
-			else if (angle is > 22.5f and <= 337.5f)
-			{
-				GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
-				GroundSpeed.Value /= 2f;
-			}
-			else 
-			{
-				GroundSpeed.Value = Velocity.X;
-				Velocity.Y = 0f;
-			}
+			if (LandOnFeet(out distance, out angle)) return;
 		}
 		else if (Velocity.Y >= 0)
 		{
-			(distance, angle) = TileCollider.FindClosestTile(
-				Radius.Shuffle(-1, 1), 
-				Radius.Shuffle(1, 1),
-				true, Constants.Direction.Positive);
-			
-			if (distance >= 0) return;
-				
-			GroundSpeed.Value = Velocity.X;
-			Velocity.Y = 0f;
+			if (FallOnGround(out distance, out angle)) return;
 		}
 		else
 		{
 			return;
 		}
-
+		
 		Position += new Vector2(0f, distance);
 		Angle = angle;
-			
+		
 		Land();
+	}
+
+	private bool LandOnFeet(out int distance, out float angle)
+	{
+		(int distanceL, float angleL) = TileCollider.FindTile(
+			Radius.Shuffle(-1, 1), 
+			true, Constants.Direction.Positive);
+			
+		(int distanceR, float angleR) = TileCollider.FindTile(
+			Radius.Shuffle(1, 1), 
+			true, Constants.Direction.Positive);
+
+		if (distanceL > distanceR)
+		{
+			distance = distanceR;
+			angle = angleR;
+		}
+		else
+		{
+			distance = distanceL;
+			angle = angleL;
+		}
+		
+		float minClip = -(Velocity.Y + 8f);		
+		if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return false;
+		
+		if (Angles.GetQuadrant(angle) > 0)
+		{
+			if (Velocity.Y > 15.75f)
+			{
+				Velocity.Y = 15.75f;
+			}
+			
+			GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
+			Velocity.X = 0f;
+		}
+		else if (angle is > 22.5f and <= 337.5f)
+		{
+			GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
+			GroundSpeed.Value /= 2f;
+		}
+		else 
+		{
+			GroundSpeed.Value = Velocity.X;
+			Velocity.Y = 0f;
+		}
+		
+		return true;
+	}
+
+	private bool FallOnGround(out int distance, out float angle)
+	{
+		(distance, angle) = TileCollider.FindClosestTile(
+			Radius.Shuffle(-1, 1), 
+			Radius.Shuffle(1, 1),
+			true, Constants.Direction.Positive);
+		
+		if (distance >= 0) return true;
+		
+		GroundSpeed.Value = Velocity.X;
+		Velocity.Y = 0f;
+		
+		return false;
 	}
 }
