@@ -210,9 +210,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (!IsGrounded || IsSpinning) return;
 		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerDash) return;
 		
-		// If Knuckles is standing up from a slide and DOWN button is pressed, cancel
-		// control lock. This allows him to Spin Dash
-		if (Animation == Animations.GlideGround && Input.Down.Down)
+		// Cancel Knuckles' glide-landing animation
+		
+		if (Animation == Animations.GlideGround && Input.Down.Down || GroundSpeed != 0)
 		{
 			GroundLockTimer = 0f;
 		}
@@ -563,7 +563,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		(_, float angleLeft) = TileCollider.FindTile(new Vector2I(-Radius.X, 0), true, direction);
 		(_, float angleRight) = TileCollider.FindTile(new Vector2I(Radius.X, 0), true, direction);
 		
-		if (!float.IsNaN(angleLeft) && !float.IsNaN(angleRight)) return;
+		if (!float.IsNaN(angleLeft) && !float.IsNaN(angleRight) || float.isNaN(angleLeft) && float.isNaN(angleRight)) return;
 		
 		int sign = float.IsNaN(angleLeft) ? -1 : 1;
 		bool isPanic = TileCollider.FindDistance(new Vector2I(-6 * sign, 0), true, direction) >= 12;
