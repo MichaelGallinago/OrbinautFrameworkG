@@ -212,7 +212,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		// Cancel Knuckles' glide-landing animation
 		
-		if (Animation == Animations.GlideGround && Input.Down.Down || GroundSpeed != 0)
+		if (Animation == Animations.GlideGround && (Input.Down.Down || GroundSpeed != 0))
 		{
 			GroundLockTimer = 0f;
 		}
