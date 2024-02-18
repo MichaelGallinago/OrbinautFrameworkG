@@ -161,6 +161,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ItemSpeedTimer = UpdateItemTimer(ItemSpeedTimer);
 		ItemInvincibilityTimer = UpdateItemTimer(ItemInvincibilityTimer);
 
+		UpdateLiveRewards();
 		UpdateSuperStatus();
 		
 		IsInvincible = InvincibilityTimer != 0 || ItemInvincibilityTimer != 0 || 
@@ -171,12 +172,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			Kill();
 		}
 		
-		UpdateLiveRewards();
+		
 	}
 
 	private void UpdateInvincibilityFlashes()
 	{
-		if (InvincibilityTimer <= 0f) return;
+		if (InvincibilityTimer <= 0f || IsHurt) return;
+		
 		Visible = ((int)InvincibilityTimer & 4) >= 1 || InvincibilityTimer == 0f;
 		InvincibilityTimer -= FrameworkData.ProcessSpeed;
 	}
@@ -277,6 +279,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return true;
 		
 		IsUnderwater = true;
+		AirTimer = Constants.MaxAirValue;
 		
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
@@ -375,7 +378,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private void LeaveWater()
 	{
 		if (MathF.Floor(Position.Y) >= Stage.WaterLevel) return;
-
+		if (MathF.Floor(PreviousPosition.Y) >= Stage.WaterLevel)
+		{
+			ProcessWaterSplash();
+		}
+		
 		AccelerateOnLeavingWater();
 		
 		if (Action == Actions.Flight)
@@ -388,10 +395,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			Players[0].ResetMusic();
 		}
 				
-		IsUnderwater = false;	
-		AirTimer = Constants.MaxAirValue;
-			
-		ProcessWaterSplash();
+		IsUnderwater = false;
 	}
 
 	private void AccelerateOnLeavingWater()
@@ -737,10 +741,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	public void OnEnableEditMode()
 	{
-		ResetGravity();
-		ResetState();
 		ResetZIndex();
-				
+		
 		ObjectInteraction = false;
 		Visible = true;
 	}
@@ -752,5 +754,10 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Animation = Animations.Move;
 		ObjectInteraction = true;
 		IsDead = false;
+		IsAirLock = false;
+		IsUnderwater = false;
+
+		ResetGravity();
+		ResetState();
 	}
 }

@@ -681,6 +681,14 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 						Land();
 						Animation = Animations.Idle;
 						Position += new Vector2(8f * (float)Facing, 4f);
+
+						// Undo that 1px offset applied when attached to the wall
+						if (Facing == Constants.Direction.Negative)
+						{
+							// TODO: Miha sdelai normalno
+							Position -= new Vector2(1f, 0f);
+						}
+
 						break;
 				}
 				break;
@@ -689,7 +697,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void ClimbNormal()
 	{
-		if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X))
+		if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X) || Velocity.X != 0)
 		{
 			ReleaseClimb();
 			return;

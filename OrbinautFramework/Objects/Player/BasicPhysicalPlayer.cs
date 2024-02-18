@@ -88,7 +88,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (IsHurt)
 		{
-			InvincibilityTimer = 120f;
 			GroundSpeed.Value = 0f;
 		}
 	
