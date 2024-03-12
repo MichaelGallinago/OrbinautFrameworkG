@@ -251,14 +251,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			LifeCount++;
 			LifeRewards[0] += 100;
 
-			AudioPlayer.PlaySound(SoundStorage.ExtraLife);
+			//TODO: audio
+			//AudioPlayer.PlaySound(SoundStorage.ExtraLife);
 		}
 
 		if (ScoreCount < LifeRewards[1]) return;
 		LifeCount++;
 		LifeRewards[1] += 50000;
 
-		AudioPlayer.PlaySound(SoundStorage.ExtraLife);
+		//TODO: audio
+		//AudioPlayer.PlaySound(SoundStorage.ExtraLife);
 	}
 
 	private void ProcessWater()
@@ -332,7 +334,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			case 1200f:
 			case 900f:
 				if (Id != 0) break;
-				AudioPlayer.PlaySound(SoundStorage.AirAlert);
+				//TODO: audio
+				//AudioPlayer.PlaySound(SoundStorage.AirAlert);
 				break;
 					
 			case 720f:
@@ -422,7 +425,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			//instance_create(x, c_stage.water_level, obj_water_splash);
 		}
 		
-		AudioPlayer.PlaySound(SoundStorage.WaterSplash);
+		//TODO: audio
+		//AudioPlayer.PlaySound(SoundStorage.WaterSplash);
 	}
 
 	private void UpdateCollision()

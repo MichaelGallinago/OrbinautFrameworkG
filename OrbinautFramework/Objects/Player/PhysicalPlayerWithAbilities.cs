@@ -406,7 +406,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Action = Actions.HammerSpin;
 		ActionValue = 0f;
 		
-		AudioPlayer.PlaySound(SoundStorage.HammerSpin);
+		//TODO: audio
+		//AudioPlayer.PlaySound(SoundStorage.HammerSpin);
 	}
 
 	private bool StartJump()

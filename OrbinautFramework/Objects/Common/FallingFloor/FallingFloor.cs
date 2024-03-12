@@ -107,7 +107,8 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
         }
         
         SetBehaviour(BehaviourType.Reset);
-        AudioPlayer.PlaySound(SoundStorage.Break);
+        //TODO: audio
+        //AudioPlayer.PlaySound(SoundStorage.Break);
 		
         Visible = false;
         sprite.Visible = false;
