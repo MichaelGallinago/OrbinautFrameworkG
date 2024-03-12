@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/act_clear.ogg-f4020a582da7a71c1e984158946ed10
 [params]
 
 loop=false
-loop_offset=0
+loop_offset=0.0
 bpm=0
 beat_count=0
 bar_beats=4
