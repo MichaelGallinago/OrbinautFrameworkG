@@ -22,12 +22,17 @@ public partial class TileMapFillerTool : TileMap
         }
     }
 
+    public override void _Process(double delta)
+    {
+        GD.Print(GetCellAlternativeTile(_layerId, (Vector2I)GetGlobalMousePosition() / 16));
+    }
+
     private void FillTileMap()
     {
         var reader = new StreamReader(_filePath);
-        
+    
         string size = reader.ReadLine();
-        
+    
         if (size == null)
         {
             reader.Close();
@@ -37,22 +42,26 @@ public partial class TileMapFillerTool : TileMap
         int width = int.Parse(size);
         Vector2I position = Vector2I.Zero;
         int columnCount = ((TileSetAtlasSource)TileSet.GetSource(_sourceId)).GetAtlasGridSize().X;
-        
+    
         while (true)
         {
             string indexLine = reader.ReadLine();
             string flipLine = reader.ReadLine();
             string mirrorLine = reader.ReadLine();
-            
+        
             if (indexLine == null || flipLine == null || mirrorLine == null) break;
 
             int index = int.Parse(indexLine);
             var atlasCoords = new Vector2I(index % columnCount, index / columnCount);
-            index += int.Parse(flipLine) * 16384 + int.Parse(mirrorLine) * 8192;
-            SetCell(_layerId, position, 0, atlasCoords, index);
-            position.X = (position.X + 1) % width;
+            atlasCoords = atlasCoords == Vector2I.Zero ? -Vector2I.One : atlasCoords;
+            index = int.Parse(flipLine) * 8192 + int.Parse(mirrorLine) * 4096;
+            SetCell(_layerId, position, _sourceId, atlasCoords, index);
+            
+            position.X++;
+            position.Y += position.X / width;
+            position.X %= width;
         }
-        
+    
         reader.Close();
     }
 }
