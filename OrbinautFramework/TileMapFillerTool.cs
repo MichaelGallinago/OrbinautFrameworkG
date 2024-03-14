@@ -22,11 +22,6 @@ public partial class TileMapFillerTool : TileMap
         }
     }
 
-    public override void _Process(double delta)
-    {
-        GD.Print(GetCellAlternativeTile(_layerId, (Vector2I)GetGlobalMousePosition() / 128));
-    }
-
     private void FillTileMap()
     {
         var reader = new StreamReader(_filePath);
@@ -58,7 +53,7 @@ public partial class TileMapFillerTool : TileMap
             int rotate = int.Parse(rotateLine);
             int mirror = int.Parse(mirrorLine);
             int flip = int.Parse(flipLine);
-            index = rotate == 0 ? flip * 8192 + mirror * 4096 : (1 - flip) * 4096 + mirror * 8192 + rotate * 16384;
+            index = rotate == 0 ? flip * 8192 + mirror * 4096 : (1 - flip) * 4096 + mirror * 8192 + 16384;
             SetCell(_layerId, position, _sourceId, atlasCoords, index);
             
             position.X++;

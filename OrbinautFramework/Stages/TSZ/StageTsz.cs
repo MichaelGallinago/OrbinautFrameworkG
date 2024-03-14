@@ -7,6 +7,6 @@ public partial class StageTsz : Framework.CommonStage
     public StageTsz()
     {
         //TODO: test stage init
-        Music = MusicStorage.TestStage;
+        Music = MusicStorage.Woofle;
     }
 }
