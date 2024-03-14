@@ -1050,7 +1050,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		float minClip = -(Velocity.Y + 8f);		
-		if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return false;
+		if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return true;
 		
 		if (Angles.GetQuadrant(angle) > 0)
 		{
@@ -1073,7 +1073,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Velocity.Y = 0f;
 		}
 		
-		return true;
+		return false;
 	}
 
 	private bool FallOnGround(out int distance, out float angle)
