@@ -8,9 +8,10 @@ namespace OrbinautFramework3.Framework;
 
 public abstract partial class CommonScene : Node2D
 {
+    [Export] public CollisionTileMap CollisionTileMap { get; set; }
+    
     public SceneTree Tree { get; private set; }
     public bool IsStage { get; protected set; }
-    public CollisionTileMap CollisionTileMap { get; set; }
     
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
     private SceneLateUpdate _lateUpdate = new();

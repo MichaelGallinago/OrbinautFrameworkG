@@ -6,6 +6,11 @@ namespace OrbinautFramework3;
 public partial class CollisionTileMap : TileMap
 {
     private int _columnCount;
+
+    public CollisionTileMap()
+    {
+        _columnCount = GetTileSetColumnCount(0);
+    }
     
     public override void _Ready()
     {
@@ -13,8 +18,6 @@ public partial class CollisionTileMap : TileMap
         {
             scene.CollisionTileMap = this;
         }
-        
-        _columnCount = GetTileSetColumnCount(0);
     }
     
     public override void _Process(double delta)
