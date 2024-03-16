@@ -101,10 +101,10 @@ public static class CollisionUtilities
 
 	public static (int, float) FindClosestTile(bool isVertical, 
 		Vector2I position1, Vector2I position2, Direction direction, TileLayers type, 
-		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
+		CollisionTileMap tileMap, TileLayerBehaviours tileLayerBehaviours = TileLayerBehaviours.Floor)
 	{
-		(int distance1, float angle1) = FindTile(isVertical, position1, direction, type, tileMap, groundMode);
-		(int distance2, float angle2) = FindTile(isVertical, position2, direction, type, tileMap, groundMode);
+		(int distance1, float angle1) = FindTile(isVertical, position1, direction, type, tileMap, tileLayerBehaviours);
+		(int distance2, float angle2) = FindTile(isVertical, position2, direction, type, tileMap, tileLayerBehaviours);
 		
 		if (isVertical && SharedData.CDTileFixes && direction == Direction.Positive 
 		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
@@ -117,31 +117,31 @@ public static class CollisionUtilities
 	
 	public static int FindClosestDistance(bool isVertical, 
 		Vector2I position1, Vector2I position2, Direction direction, TileLayers type, 
-		CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
+		CollisionTileMap tileMap, TileLayerBehaviours tileLayerBehaviours = TileLayerBehaviours.Floor)
 	{
-		int distance1 = FindTileData(isVertical, position1, direction, type, tileMap, groundMode).Item1;
-		int distance2 = FindTileData(isVertical, position2, direction, type, tileMap, groundMode).Item1;
+		int distance1 = FindTileData(isVertical, position1, direction, type, tileMap, tileLayerBehaviours).Item1;
+		int distance2 = FindTileData(isVertical, position2, direction, type, tileMap, tileLayerBehaviours).Item1;
 		return distance1 <= distance2 ? distance1 : distance2;
 	}
 	
 	public static (int, float) FindTile(bool isVertical, Vector2I position, Direction direction, 
-		TileLayers type, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
+		TileLayers type, CollisionTileMap tileMap, TileLayerBehaviours tileLayerBehaviours = TileLayerBehaviours.Floor)
 	{
 		(int distance, FoundTileData tileData) = 
-			FindTileData(isVertical, position, direction, type, tileMap, groundMode);
+			FindTileData(isVertical, position, direction, type, tileMap, tileLayerBehaviours);
 		
 		// Return both the distance and the angle
 		return (distance, GetTileAngle(tileData, isVertical, direction));
 	}
 	
 	public static int FindDistance(bool isVertical, Vector2I position, Direction direction, 
-		TileLayers type, CollisionTileMap tileMap, GroundMode groundMode = GroundMode.Floor)
+		TileLayers type, CollisionTileMap tileMap, TileLayerBehaviours tileLayerBehaviours = TileLayerBehaviours.Floor)
 	{
-		return FindTileData(isVertical, position, direction, type, tileMap, groundMode).Item1;
+		return FindTileData(isVertical, position, direction, type, tileMap, tileLayerBehaviours).Item1;
 	}
 
 	private static (int, FoundTileData) FindTileData(bool isVertical, Vector2I position, Direction direction, 
-		TileLayers type, CollisionTileMap tileMap, GroundMode groundMode)
+		TileLayers type, CollisionTileMap tileMap, TileLayerBehaviours tileLayerBehaviours)
 	{
 		// Get tile layer id
 		var tileLayerId = (ushort)type;
@@ -173,7 +173,7 @@ public static class CollisionUtilities
 		
 		// Get tile at position
 		int shift;
-		var tileSearcher = new TileSearcher(isVertical, position, tileMap, tileLayerId, direction, groundMode);
+		var tileSearcher = new TileSearcher(isVertical, position, tileMap, tileLayerId, direction, tileLayerBehaviours);
 		FoundTileData tileData = tileSearcher.Search(shift = 0);
 
 		if (tileData.Size == 0 || !tileData.IsValid)

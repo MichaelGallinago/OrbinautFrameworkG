@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Objects.Player;
 public struct PhysicParams(
     float acceleration, float accelerationGlide, float accelerationAir, float accelerationTop, float accelerationClimb,
     float deceleration, float decelerationRoll, float friction, float frictionRoll, 
-    float minimalJumpVelocity, float jumpVelocity)
+    float minimalJumpSpeed, float jumpSpeed)
 {
 	private enum Type : byte
     {
@@ -22,8 +22,8 @@ public struct PhysicParams(
     public float DecelerationRoll { get; private set; }  = decelerationRoll;
     public float Friction { get; private set; }  = friction;
     public float FrictionRoll { get; private set; }  = frictionRoll;
-    public float MinimalJumpVelocity { get; private set; }  = minimalJumpVelocity;
-    public float JumpVelocity { get; private set; }  = jumpVelocity;
+    public float MinimalJumpSpeed { get; private set; }  = minimalJumpSpeed;
+    public float JumpSpeed { get; private set; }  = jumpSpeed;
 
     private static readonly Dictionary<Type, PhysicParams> ParamsMap = new()
     {
@@ -118,7 +118,7 @@ public struct PhysicParams(
 	    
 	    if (playerType == Types.Knuckles)
 	    {
-		    physicParams.JumpVelocity += 0.5f;
+		    physicParams.JumpSpeed += 0.5f;
 	    }
 	    
 	    if (itemSpeedTimer > 0 && !isUnderwater)

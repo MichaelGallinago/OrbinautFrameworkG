@@ -33,7 +33,7 @@ public partial class Bumper : BaseObject
     {
         foreach (Player player in PlayerData.Players)
         {
-            if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.Hitbox)) continue;
+            if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.HitBox)) continue;
 		    
             if (_sprite.Animation == "Default")
             {

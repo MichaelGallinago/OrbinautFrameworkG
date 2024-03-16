@@ -4,7 +4,7 @@ using static OrbinautFramework3.Framework.Constants;
 namespace OrbinautFramework3.Framework.Tiles;
 
 public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap tileMap, 
-    ushort tileLayerId, Direction direction, GroundMode groundMode)
+    ushort tileLayerId, Direction direction, TileLayerBehaviours tileLayerBehaviours)
 {
     public FoundTileData Search(int shift)
     {
@@ -22,7 +22,7 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         int index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, mapPosition));
         var transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
         byte size = GetTileCollision(isVertical, shiftedPosition, index, transforms);
-        bool isValid = GetTileValidity(index, isVertical, direction, groundMode);
+        bool isValid = GetTileValidity(index, isVertical, direction, tileLayerBehaviours);
 
         return new FoundTileData(index, transforms, isValid, size);
     }
@@ -43,24 +43,24 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
             FrameworkData.TilesData.Widths[index][collisionIndex];
     }
     
-    private static bool GetTileValidity(int index, bool isVertical, Direction direction, GroundMode groundMode)
+    private static bool GetTileValidity(int index, bool isVertical, Direction direction, TileLayerBehaviours tileLayerBehaviours)
     {
         return (index / TileLimit) switch
         {
-            2 => !CheckTileValidity(isVertical, direction, groundMode),
-            1 => CheckTileValidity(isVertical, direction, groundMode),
+            2 => !CheckTileValidity(isVertical, direction, tileLayerBehaviours),
+            1 => CheckTileValidity(isVertical, direction, tileLayerBehaviours),
             _ => true
         };
     }
 
-    private static bool CheckTileValidity(bool isVertical, Direction direction, GroundMode groundMode)
+    private static bool CheckTileValidity(bool isVertical, Direction direction, TileLayerBehaviours tileLayerBehaviours)
     {
-        return groundMode switch
+        return tileLayerBehaviours switch
         {
-            GroundMode.Floor => isVertical && direction == Direction.Positive,
-            GroundMode.Ceiling => isVertical && direction == Direction.Negative,
-            GroundMode.RightWall => !isVertical && direction == Direction.Positive,
-            GroundMode.LeftWall => !isVertical && direction == Direction.Negative,
+            TileLayerBehaviours.Floor => isVertical && direction == Direction.Positive,
+            TileLayerBehaviours.Ceiling => isVertical && direction == Direction.Negative,
+            TileLayerBehaviours.RightWall => !isVertical && direction == Direction.Positive,
+            TileLayerBehaviours.LeftWall => !isVertical && direction == Direction.Negative,
             _ => false
         };
     }

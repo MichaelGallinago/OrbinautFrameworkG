@@ -19,10 +19,7 @@ public static class Angles
 
     public enum Quadrant : byte
     {
-        Down,
-        Right,
-        Up,
-        Left
+        Down, Right, Up, Left
     }
     
     public static float TransformTileAngle(float angle, TileTransforms tileTransforms)

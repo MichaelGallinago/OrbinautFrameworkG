@@ -7,8 +7,7 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_da42i"]
 shader = ExtResource("1_v4hqx")
 shader_parameter/u_step = null
-shader_parameter/u_mode = null
-shader_parameter/u_colour = null
+shader_parameter/u_type = null
 
 [node name="Startup" type="Node2D" node_paths=PackedStringArray("_preloader")]
 material = SubResource("ShaderMaterial_da42i")

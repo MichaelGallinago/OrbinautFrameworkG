@@ -67,8 +67,8 @@ public abstract partial class BaseObject : Node2D
 		return type switch
 		{
 			CollisionSensor.SolidPush => CheckPushCollision(target),
-			CollisionSensor.Hitbox => CheckHitboxCollision(target, type),
-			CollisionSensor.HitboxExtra => CheckHitboxCollision(target, type),
+			CollisionSensor.HitBox => CheckHitboxCollision(target, type),
+			CollisionSensor.HitBoxExtra => CheckHitboxCollision(target, type),
 			_ => CheckSolidCollision(target, type)
 		};
 	}
@@ -80,12 +80,12 @@ public abstract partial class BaseObject : Node2D
 
 		var targetOffset = new Vector2I();
 		var targetRadius = new Vector2I();
-		if (type == CollisionSensor.HitboxExtra)
+		if (type == CollisionSensor.HitBoxExtra)
 		{
 			targetRadius = target.InteractData.RadiusExtra;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0)
 			{
-				type = CollisionSensor.Hitbox;	
+				type = CollisionSensor.HitBox;	
 			}	
 			else
 			{
@@ -94,7 +94,7 @@ public abstract partial class BaseObject : Node2D
 			}
 		}
 
-		if (type == CollisionSensor.Hitbox)
+		if (type == CollisionSensor.HitBox)
 		{
 			targetRadius = target.InteractData.Radius;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0) return false;
@@ -161,7 +161,7 @@ public abstract partial class BaseObject : Node2D
 			CollisionSensor.SolidL => touchState == TouchState.Left,
 			CollisionSensor.SolidR => touchState == TouchState.Right,
 			CollisionSensor.SolidAny => touchState != TouchState.None,
-			CollisionSensor.Hitbox or CollisionSensor.HitboxExtra or CollisionSensor.SolidPush => false,
+			CollisionSensor.HitBox or CollisionSensor.HitBoxExtra or CollisionSensor.SolidPush => false,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}

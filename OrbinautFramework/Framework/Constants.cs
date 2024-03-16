@@ -32,14 +32,14 @@ public static class Constants
 		Negative = -1, Positive = 1
 	}
 	
-	public enum GroundMode : byte
+	public enum TileLayerBehaviours : byte
 	{
 		Floor, RightWall, Ceiling, LeftWall
 	}
 
 	public enum CollisionSensor : byte
 	{
-		Hitbox, HitboxExtra, SolidPush, SolidU, SolidD, SolidL, SolidR, SolidAny
+		HitBox, HitBoxExtra, SolidPush, SolidU, SolidD, SolidL, SolidR, SolidAny
 	}
 
 	public enum SolidType : byte

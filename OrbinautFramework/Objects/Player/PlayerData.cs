@@ -42,7 +42,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public float SlopeGravity { get; set; }
 
 	public Constants.TileLayers TileLayer { get; set; }
-	public Constants.GroundMode GroundMode { get; set; }
+	public Constants.TileLayerBehaviours TileLayerBehaviour { get; set; }
 	public bool StickToConvex { get; set; }
     
 	public bool ObjectInteraction { get; set; }
@@ -156,7 +156,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Angle = 0f;
 		
 		TileLayer = Constants.TileLayers.Main;
-		GroundMode = Constants.GroundMode.Floor;
+		TileLayerBehaviour = Constants.TileLayerBehaviours.Floor;
 		StickToConvex = false;
 		
 		SetPushAnimationBy = null;

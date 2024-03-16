@@ -61,6 +61,12 @@ public class Velocity
         MaxY(value.Y);
     }
 
+    public static Vector2 GetFromSpeedWithAngle(float speed, float angle)
+    {
+        (float sine, float cosine) = MathF.SinCos(Mathf.DegToRad(angle));
+        return speed * new Vector2(sine, cosine);
+    }
+
     public Vector2 CalculateNewPosition(Vector2 position)
     {
         return position + ((FrameworkData.ProcessSpeed - 1f) * _instantVector + 

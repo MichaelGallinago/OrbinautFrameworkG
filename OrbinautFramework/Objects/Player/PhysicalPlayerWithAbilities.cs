@@ -56,7 +56,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Action = Actions.None;
 			Animation = Animations.Spin;
 			Radius = RadiusSpin;
-			Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpVelocity);
+			Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpSpeed);
 					
 			if (Input.Down.Left)
 			{
@@ -222,10 +222,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (!Input.Down.Abc)
 		{
-			Velocity.MaxY(PhysicParams.MinimalJumpVelocity);
+			Velocity.MaxY(PhysicParams.MinimalJumpSpeed);
 		}
 		
-		if (Velocity.Y < PhysicParams.MinimalJumpVelocity || Id > 0 && CpuInputTimer == 0) return false;
+		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || Id > 0 && CpuInputTimer == 0) return false;
 		
 		if (Input.Press.C && SharedData.EmeraldCount == 7 && !IsSuper && RingCount >= 50)
 		{
@@ -431,18 +431,16 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		{
 			IsAirLock = true;
 		}
-
+		
 		float radians = Mathf.DegToRad(Angle);
-		Velocity.Vector += PhysicParams.JumpVelocity * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+		Velocity.Vector += PhysicParams.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
 		
 		IsSpinning = true;	
 		IsJumping = true;
-		SetPushAnimationBy = null;
 		IsGrounded = false;
 		OnObject = null;
+		SetPushAnimationBy = null;
 		StickToConvex = false;
-		GroundMode = 0;
-	
 		Animation = Animations.Spin;
 		
 		AudioPlayer.PlaySound(SoundStorage.Jump);
@@ -453,32 +451,32 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool CheckCeilingDistance()
 	{
-		if (GroundMode == Constants.GroundMode.Ceiling) return true;
+		if (TileLayerBehaviour == Constants.TileLayerBehaviours.Ceiling) return true;
 		return CalculateCellDistance() >= 6; // Target ceiling distance
 	}
 
 	private int CalculateCellDistance()
 	{
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileLayerBehaviour);
 		
-		return GroundMode switch
+		return TileLayerBehaviour switch
 		{
-			Constants.GroundMode.Floor => TileCollider.FindClosestDistance(
+			Constants.TileLayerBehaviours.Floor => TileCollider.FindClosestDistance(
 				Radius.Shuffle(-1, -1),
 				Radius.Shuffle( 1, -1),
 				true, Constants.Direction.Negative),
 			
-			Constants.GroundMode.RightWall => TileCollider.FindClosestDistance(
+			Constants.TileLayerBehaviours.RightWall => TileCollider.FindClosestDistance(
 				Radius.Shuffle(-1, -1, true),
 				Radius.Shuffle(1, -1, true),
 				false, Constants.Direction.Negative),
 			
-			Constants.GroundMode.LeftWall => TileCollider.FindClosestDistance(
+			Constants.TileLayerBehaviours.LeftWall => TileCollider.FindClosestDistance(
 				Radius.Shuffle(-1, 1, true),
 				Radius.Shuffle(1, 1, true),
 				false, Constants.Direction.Positive),
 			
-			Constants.GroundMode.Ceiling => throw new ArgumentOutOfRangeException(),
+			Constants.TileLayerBehaviours.Ceiling => throw new ArgumentOutOfRangeException(),
 			
 			_ => throw new ArgumentOutOfRangeException()
 		};
@@ -731,7 +729,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsJumping = true;
 		Action = Actions.None;
 		Facing = (Constants.Direction)(-(int)Facing);
-		Velocity.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpVelocity);
+		Velocity.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpSpeed);
 			
 		AudioPlayer.PlaySound(SoundStorage.Jump);
 		ResetGravity();
@@ -1232,7 +1230,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// the ceiling, else he is above the edge
 			
 		// Note: tile behaviour here is set to TILE_BEHAVIOUR_ROTATE_180. LBR tiles are not ignored in this case
-		TileCollider.GroundMode = Constants.GroundMode.Ceiling;
+		TileCollider.TileLayerBehaviours = Constants.TileLayerBehaviours.Ceiling;
 		int floorDistance = TileCollider.FindDistance(
 			new Vector2I((wallRadius + 1) * (int)Facing, -1), 
 			true, Constants.Direction.Positive);

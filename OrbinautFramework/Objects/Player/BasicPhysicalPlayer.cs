@@ -99,7 +99,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		Barrier.State = Barrier.States.None;
 		ComboCounter = 0;
-		GroundMode = Constants.GroundMode.Floor;
+		TileLayerBehaviour = Constants.TileLayerBehaviours.Floor;
 	
 		CpuState = CpuStates.Main;
 
@@ -536,16 +536,18 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (!IsInstanceValid(OnObject) || OnObject.SolidData.NoBalance) return true;
 		
 		const int leftEdge = 2;
+		const int panicOffset = 4;
+		
 		int rightEdge = OnObject.SolidData.Radius.X * 2 - leftEdge;
 		int playerX = Mathf.FloorToInt(OnObject.SolidData.Radius.X - OnObject.Position.X + Position.X);
 		
 		if (playerX < leftEdge)
 		{
-			BalanceToDirection(Constants.Direction.Negative, playerX < leftEdge - 4);
+			BalanceToDirection(Constants.Direction.Negative, playerX < leftEdge - panicOffset);
 		}
 		else if (playerX > rightEdge)
 		{
-			BalanceToDirection(Constants.Direction.Positive, playerX > rightEdge + 4);
+			BalanceToDirection(Constants.Direction.Positive, playerX > rightEdge + panicOffset);
 		}
 
 		return true;
@@ -555,15 +557,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		const Constants.Direction direction = Constants.Direction.Positive;	
 		
-		if (Angles.GetQuadrant(Angle) > 0) return;
+		if (Angles.GetQuadrant(Angle) > Angles.Quadrant.Down) return;
 		TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
 		
 		if (TileCollider.FindDistance(new Vector2I(), true, direction) < 12) return;
-			
+		
 		(_, float angleLeft) = TileCollider.FindTile(new Vector2I(-Radius.X, 0), true, direction);
 		(_, float angleRight) = TileCollider.FindTile(new Vector2I(Radius.X, 0), true, direction);
 		
-		if (!float.IsNaN(angleLeft) && !float.IsNaN(angleRight) || float.IsNaN(angleLeft) && float.IsNaN(angleRight)) return;
+		if (float.IsNaN(angleLeft) ^ float.IsNaN(angleRight)) return;
 		
 		int sign = float.IsNaN(angleLeft) ? -1 : 1;
 		bool isPanic = TileCollider.FindDistance(new Vector2I(-6 * sign, 0), true, direction) >= 12;
@@ -606,15 +608,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessCollisionGroundWalls()
 	{
 		if (!IsGrounded) return;
-		
-		if (SharedData.PlayerPhysics < PhysicsTypes.SK)
-		{
-			if (Angle is > 90f and <= 270f) return;
-		}
-		else if (Angle is >= 90f and <= 270f && Angle % 90f != 0f)
-		{
-			return;
-		}
+		if (Angle is > 90f and <= 270f && (SharedData.PlayerPhysics < PhysicsTypes.SK || Angle % 90f != 0f)) return;
 
 		int wallRadius = RadiusNormal.X + 1;
 		int offsetY = 8 * (Mathf.IsEqualApprox(Angle, 360f) ? 1 : 0);
@@ -640,7 +634,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				return;
 		}
 		
-		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileMap, GroundMode);
+		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileMap, TileLayerBehaviour);
 		
 		int castQuadrant = Angle switch
 		{
@@ -789,34 +783,34 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (!IsGrounded || OnObject != null) return;
 
-		GroundMode = Angle switch
+		TileLayerBehaviour = Angle switch
 		{
-			<= 45 or >= 315 => Constants.GroundMode.Floor,
-			> 45 and < 135 => Constants.GroundMode.RightWall,
-			>= 135 and <= 225 => Constants.GroundMode.Ceiling,
-			_ => Constants.GroundMode.LeftWall
+			<= 45 or >= 315 => Constants.TileLayerBehaviours.Floor,
+			> 45 and < 135 => Constants.TileLayerBehaviours.RightWall,
+			>= 135 and <= 225 => Constants.TileLayerBehaviours.Ceiling,
+			_ => Constants.TileLayerBehaviours.LeftWall
 		};
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, GroundMode);
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileLayerBehaviour);
 
-		(int distance, float angle) = GroundMode switch
+		(int distance, float angle) = TileLayerBehaviour switch
 		{
-			Constants.GroundMode.Floor => TileCollider.FindClosestTile(
+			Constants.TileLayerBehaviours.Floor => TileCollider.FindClosestTile(
 				new Vector2I(-Radius.X, Radius.Y),
 				new Vector2I(Radius.X, Radius.Y), 
 				true, Constants.Direction.Positive),
 			
-			Constants.GroundMode.RightWall => TileCollider.FindClosestTile(
+			Constants.TileLayerBehaviours.RightWall => TileCollider.FindClosestTile(
 				new Vector2I(Radius.Y, Radius.X),
 				new Vector2I(Radius.Y, -Radius.X), 
 				false, Constants.Direction.Positive),
 			
-			Constants.GroundMode.Ceiling => TileCollider.FindClosestTile(
+			Constants.TileLayerBehaviours.Ceiling => TileCollider.FindClosestTile(
 				new Vector2I(Radius.X, -Radius.Y),
 				new Vector2I(-Radius.X, -Radius.Y), 
 				true, Constants.Direction.Negative),
 			
-			Constants.GroundMode.LeftWall => TileCollider.FindClosestTile(
+			Constants.TileLayerBehaviours.LeftWall => TileCollider.FindClosestTile(
 				new Vector2I(-Radius.Y, -Radius.X), 
 				new Vector2I(-Radius.Y, Radius.X), 
 				false, Constants.Direction.Negative),
@@ -829,10 +823,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		if (!StickToConvex)
 		{
-			float toleranceCheckSpeed = GroundMode switch
+			float toleranceCheckSpeed = TileLayerBehaviour switch
 			{
-				Constants.GroundMode.Floor or Constants.GroundMode.Ceiling => Velocity.X,
-				Constants.GroundMode.RightWall or Constants.GroundMode.LeftWall => Velocity.Y,
+				Constants.TileLayerBehaviours.Floor or Constants.TileLayerBehaviours.Ceiling => Velocity.X,
+				Constants.TileLayerBehaviours.RightWall or Constants.TileLayerBehaviours.LeftWall => Velocity.Y,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 			
@@ -851,12 +845,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (distance < -maxTolerance) return;
 		
-		Position += GroundMode switch
+		Position += TileLayerBehaviour switch
 		{
-			Constants.GroundMode.Floor => new Vector2(0f, distance),
-			Constants.GroundMode.RightWall => new Vector2(distance, 0f),
-			Constants.GroundMode.Ceiling => new Vector2(0f, -distance),
-			Constants.GroundMode.LeftWall => new Vector2(-distance, 0f),
+			Constants.TileLayerBehaviours.Floor => new Vector2(0f, distance),
+			Constants.TileLayerBehaviours.RightWall => new Vector2(distance, 0f),
+			Constants.TileLayerBehaviours.Ceiling => new Vector2(0f, -distance),
+			Constants.TileLayerBehaviours.LeftWall => new Vector2(-distance, 0f),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
