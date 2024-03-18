@@ -40,7 +40,7 @@ public partial class Bumper : BaseObject
                 _sprite.Play("Bump");
             }
             
-            AudioPlayer.PlaySound(SoundStorage.Bumper);
+            AudioPlayer.Sound.Play(SoundStorage.Bumper);
             
             float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - Position));
 		

@@ -58,7 +58,7 @@ public partial class Debug : Node
 	{
 		Player player = PlayerData.Players.First();
 		
-		AudioPlayer.PlaySound(SoundStorage.Beep);
+		AudioPlayer.Sound.Play(SoundStorage.Beep);
 		player.ResetState(); // We call this to stop action-specific sounds
 
 		var resetData = new ResetData(player.Position, player.Velocity, player.GroundSpeed, player.Facing, 

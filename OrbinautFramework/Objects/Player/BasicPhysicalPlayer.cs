@@ -54,7 +54,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		GroundSpeed.Value = 0f;
 		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
-		AudioPlayer.PlaySound(SoundStorage.Hurt);
+		AudioPlayer.Sound.Play(SoundStorage.Hurt);
 
 		if (Id != 0) return;
 		FrameworkData.UpdateObjects = false;
@@ -71,8 +71,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Action)
 		{
 			case Actions.Flight:
-				AudioPlayer.StopSound(SoundStorage.Flight);
-				AudioPlayer.StopSound(SoundStorage.Flight2);
+				AudioPlayer.Sound.Stop(SoundStorage.Flight);
+				AudioPlayer.Sound.Stop(SoundStorage.Flight2);
 				break;
 			
 			case Actions.SpinDash or Actions.PeelOut:
@@ -167,7 +167,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Barrier.UpdateDuration([7, 12]);
 		Barrier.Timer = 20d;
 			
-		AudioPlayer.PlaySound(SoundStorage.BarrierWater2);
+		AudioPlayer.Sound.Play(SoundStorage.BarrierWater2);
 		
 		return true;
 	}
@@ -326,7 +326,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		ActionValue2 = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
 		Animation = Animations.Skid;
 		
-		AudioPlayer.PlaySound(SoundStorage.Skid);
+		AudioPlayer.Sound.Play(SoundStorage.Skid);
 	}
 	
 	private void SetPushAnimation()
@@ -687,7 +687,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		IsSpinning = true;
 		Animation = Animations.Spin;
 		
-		AudioPlayer.PlaySound(SoundStorage.Roll);
+		AudioPlayer.Sound.Play(SoundStorage.Roll);
 	}
 
 	private bool CheckSpinPossibility()

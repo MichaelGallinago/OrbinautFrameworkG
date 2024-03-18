@@ -29,7 +29,7 @@ public abstract partial class CommonStage : CommonScene
         base._Ready();
         if (Music != null)
         {
-            AudioPlayer.PlayMusic(Music);
+            AudioPlayer.Music.Play(Music);
         }
     }
 }

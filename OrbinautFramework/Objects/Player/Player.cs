@@ -105,19 +105,19 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsSuper)
 		{
-			AudioPlayer.PlayMusic(MusicStorage.Super);
+			AudioPlayer.Music.Play(MusicStorage.Super);
 		}
 		else if (ItemInvincibilityTimer > 0f)
 		{
-			AudioPlayer.PlayMusic(MusicStorage.Invincibility);
+			AudioPlayer.Music.Play(MusicStorage.Invincibility);
 		}
 		else if (ItemSpeedTimer > 0f)
 		{
-			AudioPlayer.PlayMusic(MusicStorage.HighSpeed);
+			AudioPlayer.Music.Play(MusicStorage.HighSpeed);
 		}
 		else if (Stage.Music != null)
 		{
-			AudioPlayer.PlayMusic(Stage.Music);
+			AudioPlayer.Music.Play(Stage.Music);
 		}
 	}
 	
@@ -250,17 +250,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			LifeCount++;
 			LifeRewards[0] += 100;
-
-			//TODO: audio
-			//AudioPlayer.PlaySound(SoundStorage.ExtraLife);
+			
+			AudioPlayer.Music.Play(MusicStorage.ExtraLife, 3);
 		}
 
 		if (ScoreCount < LifeRewards[1]) return;
 		LifeCount++;
 		LifeRewards[1] += 50000;
 
-		//TODO: audio
-		//AudioPlayer.PlaySound(SoundStorage.ExtraLife);
+		AudioPlayer.Music.Play(MusicStorage.ExtraLife, 3);
 	}
 
 	private void ProcessWater()
@@ -287,8 +285,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		RemoveBarrierUnderwater();
 
 		if (Action != Actions.Flight) return true;
-		AudioPlayer.StopSound(SoundStorage.Flight);
-		AudioPlayer.StopSound(SoundStorage.Flight2);
+		AudioPlayer.Sound.Stop(SoundStorage.Flight);
+		AudioPlayer.Sound.Stop(SoundStorage.Flight2);
 
 		return true;
 	}
@@ -340,11 +338,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					
 			case 720f:
 				if (Id != 0) break;
-				AudioPlayer.PlayMusic(MusicStorage.Drowning);
+				AudioPlayer.Music.Play(MusicStorage.Drowning);
 				break;
 					
 			case 0f:
-				AudioPlayer.PlaySound(SoundStorage.Drown);
+				AudioPlayer.Sound.Play(SoundStorage.Drown);
 				ResetState();
 
 				ZIndex = 0;
@@ -383,10 +381,10 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		
 		if (Action == Actions.Flight)
 		{
-			AudioPlayer.PlaySound(SoundStorage.Flight);
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 			
-		if (AudioPlayer.CheckMusicPlaying(MusicStorage.Drowning))
+		if (AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
 		{
 			Players[0].ResetMusic();
 		}
@@ -620,12 +618,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		switch (Action)
 		{
 			case Actions.PeelOut:
-				AudioPlayer.StopSound(SoundStorage.Charge2);
+				AudioPlayer.Sound.Stop(SoundStorage.Charge2);
 				break;
 		
 			case Actions.Flight:
-				AudioPlayer.StopSound(SoundStorage.Flight);
-				AudioPlayer.StopSound(SoundStorage.Flight2);
+				AudioPlayer.Sound.Stop(SoundStorage.Flight);
+				AudioPlayer.Sound.Stop(SoundStorage.Flight2);
 				break;
 		}
 		base.ResetState();
@@ -671,7 +669,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					
 					// TODO: gameOver
 					//instance_create_depth(0, 0, 0, obj_gui_gameover);		
-					AudioPlayer.PlayMusic(MusicStorage.GameOver);
+					AudioPlayer.Music.Play(MusicStorage.GameOver);
 				}
 				break;
 		
@@ -682,14 +680,14 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					if (--RestartTimer != 0) break;
 					RestartState = RestartStates.RestartStage;
 				}
-				else if (!AudioPlayer.CheckMusicPlaying(null))
+				else if (AudioPlayer.Music.IsAnyPlaying())
 				{
 					break;
 				}
 				
 				// If restart_timer wasn't set (Game Over or Time Over)
 				RestartState = RestartStates.RestartGame;	
-				AudioPlayer.StopMusic(0.5f);
+				AudioPlayer.Music.StopAllWithMute(0.5f);
 				
 				// TODO: fade
 				//fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);

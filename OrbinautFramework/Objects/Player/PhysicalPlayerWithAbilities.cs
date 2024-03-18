@@ -67,7 +67,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				Velocity.X = 2f;
 			}
 					
-			AudioPlayer.PlaySound(SoundStorage.Jump);
+			AudioPlayer.Sound.Play(SoundStorage.Jump);
 		}
 		else if (carrier.Action != Actions.Flight || !Position.IsEqualApprox(previousPosition))
 		{
@@ -106,8 +106,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Radius = RadiusSpin;
 		IsSpinning = true;
 		
-		AudioPlayer.StopSound(SoundStorage.Charge);
-		AudioPlayer.PlaySound(SoundStorage.Release);
+		AudioPlayer.Sound.Stop(SoundStorage.Charge);
+		AudioPlayer.Sound.Play(SoundStorage.Release);
 		
 		if (!SharedData.FixDashRelease) return true;
 			
@@ -128,7 +128,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			
 		// TODO: SpinDash dust 
 		//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });
-		AudioPlayer.PlaySound(SoundStorage.Charge);
+		AudioPlayer.Sound.Play(SoundStorage.Charge);
 		
 		// Register next charge next frame
 		return true;
@@ -146,10 +146,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		ActionValue = Math.Min(ActionValue + 2f, 8f);
 				
-		ActionValue2 = AudioPlayer.IsSoundPlaying(SoundStorage.Charge) && ActionValue > 0f
+		ActionValue2 = AudioPlayer.Sound.IsPlaying(SoundStorage.Charge) && ActionValue > 0f
 			? Math.Min(ActionValue2 + 0.1f, 1.5f) : 1f;
 				
-		AudioPlayer.PlaySoundPitch(SoundStorage.Charge, ActionValue2);
+		AudioPlayer.Sound.PlayPitched(SoundStorage.Charge, ActionValue2);
 		OverrideAnimationFrame = 0;
 		return true;
 	}
@@ -166,7 +166,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (ChargeSuperPeelOut()) return false;
 
-		AudioPlayer.StopSound(SoundStorage.Charge2);
+		AudioPlayer.Sound.Stop(SoundStorage.Charge2);
 		Action = Actions.None;
 		
 		if (ActionValue < 30f)
@@ -180,7 +180,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Camera.Main.Delay.X = 16f;
 		}
 		
-		AudioPlayer.PlaySound(SoundStorage.Release2);	
+		AudioPlayer.Sound.Play(SoundStorage.Release2);	
 		
 		if (!SharedData.FixDashRelease) return true;
 			
@@ -197,7 +197,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		ActionValue = 0f;
 		ActionValue2 = 0f;
 			
-		AudioPlayer.PlaySound(SoundStorage.Charge2);
+		AudioPlayer.Sound.Play(SoundStorage.Charge2);
 	}
 
 	private bool ChargeSuperPeelOut()
@@ -230,8 +230,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Input.Press.C && SharedData.EmeraldCount == 7 && !IsSuper && RingCount >= 50)
 		{
 			ResetState();
-			AudioPlayer.PlaySound(SoundStorage.Transform);
-			AudioPlayer.PlayMusic(MusicStorage.Super);
+			AudioPlayer.Sound.Play(SoundStorage.Transform);
+			AudioPlayer.Music.Play(MusicStorage.Super);
 			//TODO: instance_create obj_star_super
 			//instance_create(x, y, obj_star_super, { TargetPlayer: id });
 				
@@ -302,7 +302,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				
 		//TODO: obj_double_spin
 		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
-		AudioPlayer.PlaySound(SoundStorage.DoubleSpin);
+		AudioPlayer.Sound.Play(SoundStorage.DoubleSpin);
 	}
 
 	private void JumpWaterBarrier()
@@ -313,7 +313,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Barrier.UpdateDuration([6, 18]);
 		Barrier.AnimationTimer = 25f;
 		
-		AudioPlayer.PlaySound(SoundStorage.BarrierWater2);
+		AudioPlayer.Sound.Play(SoundStorage.BarrierWater2);
 	}
 	
 	private void JumpFlameBarrier()
@@ -333,7 +333,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				
 		Barrier.AnimationTimer = 24f;
 		
-		AudioPlayer.PlaySound(SoundStorage.BarrierFlame2);
+		AudioPlayer.Sound.Play(SoundStorage.BarrierFlame2);
 	}
 
 	private void JumpThunderBarrier()
@@ -347,7 +347,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			//instance_create(x, y, obj_barrier_sparkle, { Sparkle_ID: i });
 		}
 		
-		AudioPlayer.PlaySound(SoundStorage.BarrierThunder2);
+		AudioPlayer.Sound.Play(SoundStorage.BarrierThunder2);
 	}
 
 	private void JumpTails()
@@ -365,7 +365,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				
 		if (!IsUnderwater)
 		{
-			AudioPlayer.PlaySound(SoundStorage.Flight);
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 
 		Input.Down = Input.Down with { Abc = false };
@@ -407,7 +407,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		ActionValue = 0f;
 		
 		//TODO: audio
-		//AudioPlayer.PlaySound(SoundStorage.HammerSpin);
+		//AudioPlayer.Sound.Play(SoundStorage.HammerSpin);
 	}
 
 	private bool StartJump()
@@ -443,7 +443,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		StickToConvex = false;
 		Animation = Animations.Spin;
 		
-		AudioPlayer.PlaySound(SoundStorage.Jump);
+		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	
 		// return player control routine
 		return true;
@@ -496,7 +496,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			else if (Animation != Animations.DropDash)
 			{
 				Animation = Animations.DropDash;
-				AudioPlayer.PlaySound(SoundStorage.Charge);
+				AudioPlayer.Sound.Play(SoundStorage.Charge);
 			}
 			
 			return;
@@ -545,8 +545,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			
 		//TODO: obj_dust_dropdash
 		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-		AudioPlayer.StopSound(SoundStorage.Charge);
-		AudioPlayer.PlaySound(SoundStorage.Release);
+		AudioPlayer.Sound.Stop(SoundStorage.Charge);
+		AudioPlayer.Sound.Play(SoundStorage.Release);
 	}
 
 	private bool CancelDropDash()
@@ -605,8 +605,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsSpinning	= true;
 		Action = Actions.None;
 		
-		AudioPlayer.StopSound(SoundStorage.Flight);
-		AudioPlayer.StopSound(SoundStorage.Flight2);
+		AudioPlayer.Sound.Stop(SoundStorage.Flight);
+		AudioPlayer.Sound.Stop(SoundStorage.Flight2);
 		ResetGravity();
 	}
 
@@ -637,7 +637,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (!IsUnderwater)
 		{
 			Animation = Animations.FlyTired;
-			AudioPlayer.PlaySound(SoundStorage.Flight2);
+			AudioPlayer.Sound.Play(SoundStorage.Flight2);
 		}
 		else
 		{
@@ -645,7 +645,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 			
 		Gravity = GravityType.TailsDown;
-		AudioPlayer.StopSound(SoundStorage.Flight);
+		AudioPlayer.Sound.Stop(SoundStorage.Flight);
 	}
 	
 	private void ProcessClimb()
@@ -731,7 +731,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Facing = (Constants.Direction)(-(int)Facing);
 		Velocity.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpSpeed);
 			
-		AudioPlayer.PlaySound(SoundStorage.Jump);
+		AudioPlayer.Sound.Play(SoundStorage.Jump);
 		ResetGravity();
 	}
 
@@ -928,7 +928,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				
 		if (ActionValue > 0f && ActionValue % 8f < FrameworkData.ProcessSpeed)
 		{
-			AudioPlayer.PlaySound(SoundStorage.Slide);
+			AudioPlayer.Sound.Play(SoundStorage.Slide);
 		}
 					
 		ActionValue += FrameworkData.ProcessSpeed;
@@ -981,7 +981,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			ActionValue += FrameworkData.ProcessSpeed;
 			if (ActionValue >= MaxDropDashCharge)
 			{
-				AudioPlayer.PlaySound(SoundStorage.Charge);
+				AudioPlayer.Sound.Play(SoundStorage.Charge);
 			}
 
 			IsAirLock = false;
@@ -1011,8 +1011,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Action = Actions.HammerDash;
 		ActionValue = 0f;
 		
-		AudioPlayer.StopSound(SoundStorage.Charge);
-		AudioPlayer.PlaySound(SoundStorage.Release);
+		AudioPlayer.Sound.Stop(SoundStorage.Charge);
+		AudioPlayer.Sound.Play(SoundStorage.Release);
 	}
 	
 	private void ProcessHammerDash()
@@ -1179,7 +1179,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void LandWhenGlideFall()
 	{
-		AudioPlayer.PlaySound(SoundStorage.Land);
+		AudioPlayer.Sound.Play(SoundStorage.Land);
 		Land();		
 		
 		if (Angles.GetQuadrant(Angle) != 0)
@@ -1213,7 +1213,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Velocity.Y = 0f;
 		Gravity	= 0f;
 			
-		AudioPlayer.PlaySound(SoundStorage.Grab);
+		AudioPlayer.Sound.Play(SoundStorage.Grab);
 	}
 
 	private void CheckCollisionOnAttaching(int wallRadius, int climbY)
@@ -1288,7 +1288,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			if (MathF.Floor(player.Position.Y - Position.Y) is < 32f or >= 48f) continue;
 				
 			player.ResetState();
-			AudioPlayer.PlaySound(SoundStorage.Grab);
+			AudioPlayer.Sound.Play(SoundStorage.Grab);
 				
 			player.Animation = Animations.Grab;
 			player.Action = Actions.Carried;

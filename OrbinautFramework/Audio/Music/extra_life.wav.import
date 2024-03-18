@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://bc6cu3l18l8db"
-path="res://.godot/imported/extralife.wav-5f7819648a843916b0e21f1d746b0bb8.sample"
+path="res://.godot/imported/extra_life.wav-ac2ae657a79bf95ef291deee671a853f.sample"
 
 [deps]
 
-source_file="res://Audio/Music/extralife.wav"
-dest_files=["res://.godot/imported/extralife.wav-5f7819648a843916b0e21f1d746b0bb8.sample"]
+source_file="res://Audio/Music/extra_life.wav"
+dest_files=["res://.godot/imported/extra_life.wav-ac2ae657a79bf95ef291deee671a853f.sample"]
 
 [params]
 
