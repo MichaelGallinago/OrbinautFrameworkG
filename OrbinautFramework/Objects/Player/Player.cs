@@ -251,14 +251,14 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			LifeCount++;
 			LifeRewards[0] += 100;
 			
-			AudioPlayer.Music.Play(MusicStorage.ExtraLife, 3);
+			AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
 		}
 
 		if (ScoreCount < LifeRewards[1]) return;
 		LifeCount++;
 		LifeRewards[1] += 50000;
 
-		AudioPlayer.Music.Play(MusicStorage.ExtraLife, 3);
+		AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
 	}
 
 	private void ProcessWater()

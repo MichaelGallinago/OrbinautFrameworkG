@@ -2,9 +2,10 @@
 
 [ext_resource type="Script" path="res://Audio/Player/AudioPlayer.cs" id="1_3urlq"]
 
-[node name="AudioPlayer" type="Node2D" node_paths=PackedStringArray("_musicPlayer", "_soundPlayers")]
+[node name="AudioPlayer" type="Node2D" node_paths=PackedStringArray("_jinglePlayer", "_musicPlayers", "_soundPlayers")]
 script = ExtResource("1_3urlq")
-_musicPlayer = NodePath("MusicPlayer1")
+_jinglePlayer = NodePath("JinglePlayer")
+_musicPlayers = [NodePath("MusicPlayer1"), NodePath("MusicPlayer2"), NodePath("MusicPlayer3")]
 _soundPlayers = [NodePath("SoundPlayer1"), NodePath("SoundPlayer2"), NodePath("SoundPlayer3"), NodePath("SoundPlayer4"), NodePath("SoundPlayer5"), NodePath("SoundPlayer6"), NodePath("SoundPlayer7"), NodePath("SoundPlayer8")]
 
 [node name="MusicPlayer1" type="AudioStreamPlayer" parent="."]
@@ -16,8 +17,8 @@ bus = &"Music"
 [node name="MusicPlayer3" type="AudioStreamPlayer" parent="."]
 bus = &"Music"
 
-[node name="MusicPlayer4" type="AudioStreamPlayer" parent="."]
-bus = &"Music"
+[node name="JinglePlayer" type="AudioStreamPlayer" parent="."]
+bus = &"Jingle"
 
 [node name="SoundPlayer1" type="AudioStreamPlayer" parent="."]
 bus = &"Sounds"
