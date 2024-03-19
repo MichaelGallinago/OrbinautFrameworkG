@@ -193,7 +193,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		IsAirLock = false;
 		GroundLockTimer = 0f;
 		
-		AirTimer = Constants.MaxAirValue;
+		AirTimer = Constants.DefaultAirValue;
 		ComboCounter = 0;
 		ScoreCount = 0;
 		RingCount = 0;

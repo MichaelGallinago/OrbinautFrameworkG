@@ -1,5 +1,5 @@
-﻿using Godot;
-using Godot.Collections;
+﻿using System.Collections.Generic;
+using Godot;
 
 namespace OrbinautFramework3.Audio.Player;
 
@@ -7,12 +7,14 @@ public class MusicPlayerContainer : PlayerContainer
 {
     private readonly AudioStreamPlayer _jinglePlayer;
     
-    public MusicPlayerContainer(ref Array<AudioStreamPlayer> players, 
-        byte playersLimit, AudioStreamPlayer jinglePlayer) : base(ref players, playersLimit)
+    public MusicPlayerContainer(ICollection<AudioStreamPlayer> players, 
+        byte playersLimit, AudioStreamPlayer jinglePlayer) : base(players, playersLimit)
     {
         _jinglePlayer = jinglePlayer;
         _jinglePlayer.Finished += StopJingle;
     }
+    
+    public bool IsJinglePlaying() => _jinglePlayer.Stream != null;
 
     public void PlayJingle(AudioStream audio)
     {

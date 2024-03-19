@@ -250,20 +250,20 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			LifeCount++;
 			LifeRewards[0] += 100;
-			
-			AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
 		}
-
-		if (ScoreCount < LifeRewards[1]) return;
-		LifeCount++;
-		LifeRewards[1] += 50000;
+		else
+		{
+			if (ScoreCount < LifeRewards[1]) return;
+			LifeCount++;
+			LifeRewards[1] += 50000;
+		}
 
 		AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
 	}
 
 	private void ProcessWater()
 	{
-		if (IsDead || Stage is not { IsWaterEnabled: true }) return;
+		if (IsHurt || Stage is not { IsWaterEnabled: true }) return;
 		
 		if (DiveIntoWater()) return;
 		if (UpdateAirTimer()) return;
@@ -277,10 +277,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return true;
 		
 		IsUnderwater = true;
+		AirTimer = Constants.DefaultAirValue;
 		
+		ProcessWaterSplash();
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
-		ProcessWaterSplash();
 		SlowDownOnDive();
 		RemoveBarrierUnderwater();
 
@@ -293,9 +294,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void SlowDownOnDive()
 	{
-		if (IsHurt) return;
-		
-		if (Action != Actions.Flight && (Action != Actions.Glide || (GlideStates)ActionState == GlideStates.Fall))
+		if (Action != Actions.Flight && (Action != Actions.Glide || ActionState == (int)GlideStates.Fall))
 		{
 			Gravity = GravityType.Underwater;
 		}
@@ -390,7 +389,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		}
 				
 		IsUnderwater = false;	
-		AirTimer = Constants.MaxAirValue;
+		AirTimer = Constants.DefaultAirValue;
 			
 		ProcessWaterSplash();
 	}
@@ -417,14 +416,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void ProcessWaterSplash()
 	{
-		if (Action != Actions.Climb && Action != Actions.Glide)
-		{
-			//TODO: obj_water_splash
-			//instance_create(x, c_stage.water_level, obj_water_splash);
-		}
+		if (Action is Actions.Climb or Actions.Glide || CpuState == CpuStates.Respawn) return;
 		
-		//TODO: audio
-		//AudioPlayer.PlaySound(SoundStorage.WaterSplash);
+		//TODO: obj_water_splash
+		//instance_create(x, c_stage.water_level, obj_water_splash);
+		AudioPlayer.Sound.Play(SoundStorage.Splash);
 	}
 
 	private void UpdateCollision()
@@ -432,11 +428,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (IsDead) return;
 		
 		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
-		SetRegularHitbox();
-		SetExtraHitbox();
+		SetRegularHitBox();
+		SetExtraHitBox();
 	}
 
-	private void SetRegularHitbox()
+	private void SetRegularHitBox()
 	{
 		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
@@ -448,7 +444,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		SetHitbox(new Vector2I(8, 10), new Vector2I(0, 6));
 	}
 
-	private void SetExtraHitbox()
+	private void SetExtraHitBox()
 	{
 		switch (Animation)
 		{

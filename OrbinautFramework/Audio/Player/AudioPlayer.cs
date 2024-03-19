@@ -14,8 +14,12 @@ public partial class AudioPlayer : Node2D
 
     public override void _Ready()
     {
-        Music = new MusicPlayerContainer(ref _musicPlayers, 3, _jinglePlayer);
-        Sound = new PlayerContainer(ref _soundPlayers, 16);
+        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer);
+        Sound = new PlayerContainer(_soundPlayers, 16);
+
+        _jinglePlayer = null;
+        _musicPlayers = null;
+        _soundPlayers = null;
     }
     
     public override void _Process(double delta)

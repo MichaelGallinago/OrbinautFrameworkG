@@ -18,7 +18,7 @@ public partial class Camera : Camera2D
     
 	[Export] public BaseObject Target
 	{
-		get =>_target;
+		get => _target;
 		set
 		{
 			_target = value;

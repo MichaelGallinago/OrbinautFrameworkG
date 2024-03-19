@@ -15,7 +15,7 @@ public static class Constants
 	public const ushort TileLimit = 256;
 	public const byte TileSize = 16;
 	public const byte DoubleTileSize = TileSize * 2;
-	public const float MaxAirValue = 1800f;
+	public const float DefaultAirValue = 1800f;
 	
 	public enum ZIndexes : ushort
 	{

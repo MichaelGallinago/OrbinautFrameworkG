@@ -17,13 +17,12 @@ public class PlayerContainer
     private readonly int _busIndex;
     private float _busMuteSpeed = 0f;
 
-    public PlayerContainer(ref Godot.Collections.Array<AudioStreamPlayer> players, byte playersLimit)
+    public PlayerContainer(ICollection<AudioStreamPlayer> players, byte playersLimit)
     {
         _freePlayers = new Stack<AudioStreamPlayer>(players);
         _volumeChangeList = new Dictionary<AudioStreamPlayer, (float speed, bool stop)>(_freePlayers.Count);
         _activePlayers = new Dictionary<AudioStream, AudioStreamPlayer>(_freePlayers.Count);
         players.Clear();
-        players = null;
         
         foreach (AudioStreamPlayer soundPlayer in _freePlayers)
         {
