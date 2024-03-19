@@ -141,7 +141,7 @@ public partial class Camera : Camera2D
 	{
 		if (Target != player || player.IsDead) return;
 
-		if (SharedData.CDCamera)
+		if (SharedData.CdCamera)
 		{
 			const int shiftDistanceX = 64;
 			const int shiftSpeedX = 2;
@@ -241,7 +241,7 @@ public partial class Camera : Camera2D
 		Vector2I distance = (Vector2I)Target.Position - (Vector2I)_rawPosition - SharedData.ViewSize / 2;
 		distance.Y += CentreOffset;
 
-		int extraX = SharedData.CDCamera ? 0 : 8;
+		int extraX = SharedData.CdCamera ? 0 : 8;
 		
 		_speed.X = CalculateSpeed(distance.X + extraX, extraX, _maxSpeed.X * processSpeed);
 		

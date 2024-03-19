@@ -106,7 +106,7 @@ public static class CollisionUtilities
 		(int distance1, float angle1) = FindTile(isVertical, position1, direction, type, tileMap, tileLayerBehaviours);
 		(int distance2, float angle2) = FindTile(isVertical, position2, direction, type, tileMap, tileLayerBehaviours);
 		
-		if (isVertical && SharedData.CDTileFixes && direction == Direction.Positive 
+		if (isVertical && SharedData.CdTileFixes && direction == Direction.Positive 
 		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
 		{
 			return (distance1, 360f);
@@ -241,7 +241,7 @@ public static class CollisionUtilities
 		
 		// A fix from Sonic CD 1996's PC release. If tile angle is in the lower half, we assume its bottom is flat, 
 		// so in case it is flipped, we should treat it as a flat ground
-		if (!isVertical || !SharedData.CDTileFixes || direction != Direction.Positive) return angle;
+		if (!isVertical || !SharedData.CdTileFixes || direction != Direction.Positive) return angle;
 		if (rawAngle is > 90f and <= 270f || !tileData.Transforms.IsFlipped) return angle;
 		tileData.Size = TileSize;
 		return 360f;

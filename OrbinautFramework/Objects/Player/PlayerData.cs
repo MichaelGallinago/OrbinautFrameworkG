@@ -46,6 +46,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public bool StickToConvex { get; set; }
     
 	public bool ObjectInteraction { get; set; }
+	public bool IsRunControlRoutine { get; set; }
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
@@ -162,6 +163,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		SetPushAnimationBy = null;
 		OnObject = null;
 		ObjectInteraction = true;
+		IsRunControlRoutine = true;
 		IsGrounded = true;
 		IsSpinning = false;
 		IsJumping = false;

@@ -68,21 +68,17 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	public override void _Process(double delta)
 	{
-		if (FrameworkData.IsPaused || !FrameworkData.UpdateObjects && !IsDead) return;
+		if (FrameworkData.IsPaused || !FrameworkData.UpdateTimer && !IsDead) return;
 		
 		float processSpeed = FrameworkData.ProcessSpeed;
 		
-		// Process local input
 		Input.Update(Id);
 
-		// Process Edit Mode
-		if (Id == 0)
-		{
-			if (_editMode.Update(processSpeed, this, Input)) return;
-		}
+		// EDIT MODE PLAYER ROUTINE
+		if (_editMode.Update(processSpeed, this, Input)) return;
 	    
-		// Process CPU Player logic (return if flying in or respawning)
-		if (ProcessCpu(processSpeed)) return;
+		// Process CPU Player logic
+		ProcessCpu(processSpeed);
 	    
 		// Process Restart Event
 		ProcessRestart(processSpeed);
@@ -121,7 +117,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		}
 	}
 	
-	protected virtual bool ProcessCpu(float processSpeed) => false;
+	protected virtual void ProcessCpu(float processSpeed) {}
 
 	private void OnTypeChanged(Types newType)
 	{
@@ -639,7 +635,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				if (Camera.Main != null)
 				{
 					//TODO: check processSpeed
-					if (FrameworkData.PlayerPhysics < PhysicsTypes.S3)
+					if (SharedData.PlayerPhysics < PhysicsTypes.S3)
 					{
 						bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
 					}

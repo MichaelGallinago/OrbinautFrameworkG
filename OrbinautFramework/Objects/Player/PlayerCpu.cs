@@ -7,8 +7,11 @@ namespace OrbinautFramework3.Objects.Player;
 
 public partial class PlayerCpu : Player
 {
+	private const int DelayStep = 16;
+	
 	private bool _canReceiveInput;
-	private ICpuTarget _mainPlayer;
+	private ICpuTarget _leadPlayer;
+	private int _delay;
 	
 	public override void _ExitTree()
 	{
@@ -27,70 +30,65 @@ public partial class PlayerCpu : Player
 		*/
 	}
 	
-    protected override bool ProcessCpu(float processSpeed)
+    protected override void ProcessCpu(float processSpeed)
 	{
-		if (IsHurt || Id == 0) return false;
+		if (IsHurt || IsDead || Id == 0) return;
 		
-		// Always have a reference to player 1
-		_mainPlayer = Players[0];
+		_leadPlayer = Players[0];
+		_delay = 16 * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
 		_canReceiveInput = Id < Constants.MaxInputDevices;
-		
-		//if (RecordedData.Count < cpuDelay) return false;
-		
-		// Read actual player input and enable manual control for 10 seconds if detected it
 		if (_canReceiveInput && Input.Down is not { Abc: false, Up: false, Down: false, Left: false, Right: false })
 		{
 			CpuInputTimer = 600f;
 		}
 
-		return CpuState switch
+		switch (CpuState)
 		{
-			CpuStates.RespawnInit => InitRespawnCpu(),
-			CpuStates.Respawn => ProcessRespawnCpu(),
-			CpuStates.Main => ProcessMainCpu(),
-			CpuStates.Stuck => ProcessStuckCpu(),
-			_ => false
-		};
+			case CpuStates.RespawnInit: InitRespawnCpu(); break;
+			case CpuStates.Respawn: ProcessRespawnCpu(); break;
+			case CpuStates.Main: ProcessMainCpu(); break;
+			case CpuStates.Stuck: ProcessStuckCpu(); break;
+		}
 	}
 
 	private bool InitRespawnCpu()
 	{
 		// This forces player to respawn instantly if they're holding any button
-		if (_canReceiveInput)
+		if (_canReceiveInput && Input.Down is { Abc: false, Start: false })
 		{
-			if (Input.Down is { Abc: false, Start: false })
-			{
-				if (!FrameworkData.IsTimePeriodLooped(64f) || !CpuTarget.ObjectInteraction) return false;
-			}
+			if (!FrameworkData.IsTimePeriodLooped(64f) || !CpuTarget.ObjectInteraction) return false;
 		}
 		
-		Position = _mainPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
+		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
-		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		CpuState = CpuStates.Respawn;
-		ObjectInteraction = false;
 		return false;
 	}
 
 	private bool ProcessRespawnCpu()
 	{
-		if (!RespawnCpu())
+		if (CheckIfCpuOffscreen()) return false;
+		
+		// Force animation & play sound
+		switch (Type)
 		{
-			if (Type == Types.Tails)
-			{
-				Animation = Animations.Fly;
-			}
-					
-			OnObject = null;
-			IsGrounded = false;
-					
-			// Run animation script since we exit the entire player object code later
-			Sprite.Animate(this);
+			case Types.Sonic or Types.Amy: 
+				Animation = Animations.Spin; 
+				break;
+			
+			case Types.Tails: 
+				Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
+				m_player_play_tails_sound();
+				break;
+			
+			case Types.Knuckles:
+				Animation = Animations.GlideAir;
+				break;
 		}
 		
-		RecordedData followData = _mainPlayer.FollowData;
+		RecordedData followData = _leadPlayer.FollowData;
 
 		Vector2 distance = Position - followData.Position;
 		distance.Y *= -1f;
@@ -98,7 +96,7 @@ public partial class PlayerCpu : Player
 		
 		Position += new Vector2(GetRespawnVelocityX(ref distance.X), Math.Sign(distance.Y));
 
-		if (_mainPlayer.IsDead || followData.Position.Y < 0f || distance == Vector2.Zero) return true;
+		if (_leadPlayer.IsDead || followData.Position.Y < 0f || distance == Vector2.Zero) return true;
 		
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
@@ -106,9 +104,6 @@ public partial class PlayerCpu : Player
 		GroundSpeed.Value = 0f;
 		GroundLockTimer = 0f;
 		ObjectInteraction = true;
-		
-		ResetGravity();
-		ResetState();
 		
 		return true;
 	}
@@ -138,7 +133,7 @@ public partial class PlayerCpu : Player
 	
 	private bool ProcessMainCpu()
 	{
-		if (RespawnCpu()) return true;
+		if (CheckIfCpuOffscreen()) return true;
 
 		CpuTarget ??= Players[Id - 1];
 		
@@ -235,7 +230,7 @@ public partial class PlayerCpu : Player
 	
 	private bool ProcessStuckCpu()
 	{
-		if (RespawnCpu()) return true;
+		if (CheckIfCpuOffscreen()) return true;
 		
 		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return false;
 		
@@ -261,17 +256,33 @@ public partial class PlayerCpu : Player
 		return false;
 	}
 	
-	private bool RespawnCpu()
+	private bool CheckIfCpuOffscreen()
 	{
-		if (Sprite != null && Sprite.CheckInView())
+		//TODO: check "camera_get(0).bound_right - x < 0" == "Camera.Main.Bounds.Z < Position.X"
+		if (Sprite != null && Sprite.CheckInView() || Camera.Main.Bounds.Z < Position.X)
 		{
 			CpuTimer = 0f;
 			return false;
 		}
 		
 		CpuTimer += FrameworkData.ProcessSpeed;
-		if (CpuTimer < 300f) return false;
-		Reset();
+		//TODO: check IsInstanceValid == instance_exists
+		if (CpuTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
+		Respawn();
 		return true;
+	}
+
+	private void Respawn()
+	{
+		Reset();
+		
+		Position = new Vector2(sbyte.MaxValue, 0);
+		
+		CpuState = CpuStates.RespawnInit;
+		IsRunControlRoutine = false;
+		ObjectInteraction = false;
+		IsGrounded = false;
+		
+		ZIndex = (int)Constants.ZIndexes.AboveForeground; 
 	}
 }

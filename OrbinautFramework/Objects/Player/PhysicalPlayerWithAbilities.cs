@@ -92,7 +92,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (ChargeSpinDash()) return false;
 
-		if (!SharedData.CDCamera && Id == 0)
+		if (!SharedData.CdCamera && Id == 0)
 		{
 			Camera.Main.Delay.X = 16f;
 		}
@@ -175,7 +175,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			return false;
 		}
 			
-		if (!SharedData.CDCamera && Id == 0)
+		if (!SharedData.CdCamera && Id == 0)
 		{
 			Camera.Main.Delay.X = 16f;
 		}
@@ -318,7 +318,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void JumpFlameBarrier()
 	{
-		if (!SharedData.CDCamera)
+		if (!SharedData.CdCamera)
 		{
 			Camera.Main.Delay.X = 16f;
 		}
@@ -538,7 +538,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Animation = Animations.Spin;
 		IsSpinning = true;
 		
-		if (!SharedData.CDCamera && Camera.Main != null)
+		if (!SharedData.CdCamera && Camera.Main != null)
 		{
 			Camera.Main.Delay.X = 8;
 		}

@@ -26,6 +26,11 @@ public enum PhysicsTypes : byte
 {
     S1, CD, S2, S3, SK
 }
+
+public enum CpuBehaviours : byte
+{
+    S2, S3
+}
     
 public enum Actions : byte
 {
@@ -44,8 +49,7 @@ public enum Actions : byte
     HammerDash,
     HammerSpin,
     HammerSpinCancel,
-    Carried,
-    ObjectControl
+    Carried
 }
 
 public enum GlideStates : byte

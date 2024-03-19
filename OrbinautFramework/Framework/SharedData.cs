@@ -17,13 +17,14 @@ public static class SharedData
 	
     // Originals differences
     public static PhysicsTypes PlayerPhysics { get; set; } = PhysicsTypes.S2;
+    public static CpuBehaviours CpuBehaviour { get; set; } = CpuBehaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool PeelOut { get; set; } = true;
     public static bool DropDash { get; set; } = true;
     public static bool DoubleSpin { get; set; } = true;
-    public static bool CDTimer { get; set; } = false;
-    public static bool CDCamera { get; set; } = false;
-    public static bool CDTileFixes { get; set; } = true;
+    public static bool CdTimer { get; set; } = false;
+    public static bool CdCamera { get; set; } = false;
+    public static bool CdTileFixes { get; set; } = true;
 	
     // Orbinaut improvements
     public static byte RotationMode { get; set; } = 0;
