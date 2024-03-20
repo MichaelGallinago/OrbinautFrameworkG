@@ -8,7 +8,7 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 
 public abstract partial class BaseObject : Node2D
 {
-	public enum BehaviourType : byte { NoBounds, Reset, Pause, Delete, Unique }
+	public enum BehaviourType : byte { NoBounds, Reset, ResetOnlyX, Pause, PauseOnlyX, Delete, DeleteOnlyX, None }
 	[Export] public BehaviourType Behaviour { get; set; }
 
 	public static List<BaseObject> Objects { get; } = [];

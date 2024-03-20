@@ -41,21 +41,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	private new void QueueFree()
 	{
-		Players.Remove(this);
-		for (int i = Id; i < Players.Count; i++)
-		{
-			Players[i].Id--;
-		}
+		RemovePlayer();
 		base.QueueFree();
 	}
 
 	public override void _ExitTree()
 	{
-		Players.Remove(this);
-		for (int i = Id; i < Players.Count; i++)
-		{
-			Players[i].Id--;
-		}
+		RemovePlayer();
 		base._ExitTree();
 	}
 
@@ -77,10 +69,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		// EDIT MODE PLAYER ROUTINE
 		if (_editMode.Update(processSpeed, this, Input)) return;
 	    
-		// Process CPU Player logic
+		// DEFAULT PLAYER ROUTINE
 		ProcessCpu(processSpeed);
-	    
-		// Process Restart Event
 		ProcessRestart(processSpeed);
 	    
 		// Process default player control routine
@@ -118,6 +108,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	}
 	
 	protected virtual void ProcessCpu(float processSpeed) {}
+	
+	private void RemovePlayer()
+	{
+		Players.Remove(this);
+		for (int i = Id; i < Players.Count; i++)
+		{
+			Players[i].Id--;
+		}
+	}
 
 	private void OnTypeChanged(Types newType)
 	{
@@ -623,12 +622,26 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void ProcessRestart(float processSpeed)
 	{
-		if (!IsDead || Id > 0) return;
+		if (!IsDead) return;
+
+		var positionY = (int)Position.Y;
+		
+		// If drowned, wait until we're far enough off-screen
+		const int drownScreenOffset = 276;
+		
+		if (AirTimer == 0)
+		{
+			if ((int)Position.Y <= Camera.Main.Po .view_y + SharedData.ViewSize.Y + drownScreenOffset) return;
+			
+			if (Id == 0)
+			{
+				FrameworkData.UpdateObjects = false;	
+			}
+		}
 		
 		bool isTimeOver = FrameworkData.Time >= 36000d; // TODO: add constant
 		switch (RestartState)
 		{
-			// GameOver
 			case RestartStates.GameOver:
 				var bound = 32f;
 
@@ -664,8 +677,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					AudioPlayer.Music.Play(MusicStorage.GameOver);
 				}
 				break;
-		
-			// If RestartTimer was set
+			
 			case RestartStates.ResetLevel:
 				if (RestartTimer > 0)
 				{
@@ -684,8 +696,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				// TODO: fade
 				//fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);
 				break;
-		
-			// Restart Stage
+			
 			case RestartStates.RestartStage:
 				// TODO: Fade
 				//if (FrameworkData.fade.state != Constants.FadeState.Max) break;
@@ -693,8 +704,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			    FrameworkData.SavedLives = LifeCount;
 			    GetTree().ReloadCurrentScene();
 				break;
-		
-			// Restart Game
+			
 			case RestartStates.RestartGame:
 				// TODO: Game restart & fade
 			    //if (FrameworkData.fade.state != Constants.FadeState.Max) break;
