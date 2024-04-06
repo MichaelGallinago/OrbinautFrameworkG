@@ -30,9 +30,9 @@ ivec3 getColour(ivec3 colour)
 void fragment() {
 	// Get the color value from the texture and multiply it by 255
 	ivec3 Colour = ivec3(texture(TEXTURE, UV).rgb * CHANNEL_LIMIT);
-	
+
 	// Set the final color value for the fragment and divide it by 255
-	COLOR.rgb = u_step > 0 ? 
-		vec3(getColour(Colour)) / CHANNEL_LIMIT : 
+	COLOR.rgb = u_step > 0 ?
+		vec3(getColour(Colour)) / CHANNEL_LIMIT :
 		(u_type < 4 ? ZERO : ONE);
 }

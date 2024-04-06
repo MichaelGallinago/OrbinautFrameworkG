@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Objects.Spawnable.Piece;
 
 public partial class Piece(Texture2D texture, float waitTimer, float gravity, Vector2 speed = default) : BaseObject
 {
-    public override void _Ready() => SetBehaviour(BehaviourType.Delete);
+    public override void _Ready() => SetBehaviour(CullingType.Delete);
     
     public override void _Draw() => DrawTexture(texture, default);
 

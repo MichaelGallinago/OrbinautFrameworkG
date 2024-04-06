@@ -709,7 +709,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (IsDead) return;
 		
-		Camera camera = Camera.Main;
+		Framework.Camera camera = Framework.Camera.Main;
 		
 		if (camera == null) return;
 		

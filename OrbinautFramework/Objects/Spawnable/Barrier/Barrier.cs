@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework.Animations;
 
 namespace OrbinautFramework3.Objects.Spawnable.Barrier;
 
-public partial class Barrier(Node2D target) : AnimatedSprite
+public partial class Barrier(Node2D target) : AdvancedAnimatedSprite
 {
     public enum Types : byte
     {

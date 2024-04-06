@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -114,7 +115,7 @@ public class EditMode
 			if (Activator.CreateInstance(_objects[_index]) is not BaseObject newObject) return true;
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
-			newObject.SetBehaviour(BaseObject.BehaviourType.Delete);
+			newObject.SetBehaviour(BaseObject.CullingType.Delete);
 			FrameworkData.CurrentScene.AddChild(newObject);
 		}
 		

@@ -1,7 +1,9 @@
 using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Framework.InputModule;
+using Camera = OrbinautFramework3.Framework.View.Camera;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -35,7 +37,7 @@ public partial class PlayerCpu : Player
 		if (IsHurt || IsDead || Id == 0) return;
 		
 		_leadPlayer = Players[0];
-		_delay = 16 * Id;
+		_delay = DelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
 		_canReceiveInput = Id < Constants.MaxInputDevices;
@@ -80,7 +82,7 @@ public partial class PlayerCpu : Player
 			
 			case Types.Tails: 
 				Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
-				m_player_play_tails_sound();
+				PlayTailsSound();
 				break;
 			
 			case Types.Knuckles:
@@ -106,6 +108,25 @@ public partial class PlayerCpu : Player
 		ObjectInteraction = true;
 		
 		return true;
+	}
+
+	private void PlayTailsSound()
+	{
+		if (!FrameworkData.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCamera() || IsUnderwater) return;
+
+		if (CpuState == CpuStates.Respawn)
+		{
+			if (SharedData.CpuBehaviour != CpuBehaviours.S3) return;
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
+		}
+		
+		if (ActionValue > 0f)
+		{
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
+			return;
+		}
+		
+		AudioPlayer.Sound.Play(SoundStorage.Flight2);
 	}
 
 	private float GetRespawnVelocityX(ref float distanceX)
@@ -259,7 +280,7 @@ public partial class PlayerCpu : Player
 	private bool CheckIfCpuOffscreen()
 	{
 		//TODO: check "camera_get(0).bound_right - x < 0" == "Camera.Main.Bounds.Z < Position.X"
-		if (Sprite != null && Sprite.CheckInView() || Camera.Main.Bounds.Z < Position.X)
+		if (Sprite != null && Sprite.CheckInCamera() || Camera.Main.Bounds.Z < Position.X)
 		{
 			CpuTimer = 0f;
 			return false;

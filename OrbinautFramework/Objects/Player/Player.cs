@@ -2,8 +2,10 @@ using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Camera;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
+using Camera = OrbinautFramework3.Framework.View.Camera;
 
 namespace OrbinautFramework3.Objects.Player;
 

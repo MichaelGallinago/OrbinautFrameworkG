@@ -8,8 +8,8 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 
 public abstract partial class BaseObject : Node2D
 {
-	public enum BehaviourType : byte { NoBounds, Reset, ResetOnlyX, Pause, PauseOnlyX, Delete, DeleteOnlyX, None }
-	[Export] public BehaviourType Behaviour { get; set; }
+	public enum CullingType : byte { None, Active, Reset, Pause, Delete }
+	[Export] public CullingType Culling { get; set; }
 
 	public static List<BaseObject> Objects { get; } = [];
 	public ObjectRespawnData RespawnData { get; private set; }
@@ -27,10 +27,10 @@ public abstract partial class BaseObject : Node2D
 	public override void _ExitTree() => Objects.Remove(this);
 	
 	public void ResetZIndex() => ZIndex = RespawnData.ZIndex;
-	public void SetBehaviour(BehaviourType behaviour)
+	public void SetBehaviour(CullingType culling)
 	{
-		if (Behaviour == BehaviourType.Delete) return;
-		Behaviour = behaviour;
+		if (Culling == CullingType.Delete) return;
+		Culling = culling;
 	}
 	
 	public virtual void Reset()

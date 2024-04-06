@@ -18,7 +18,7 @@ void fragment()
 		float Offset = g_Bound.y > FRAGCOORD.y ?
 			g_WaveData1[int(mod(g_WaveY.x + FRAGCOORD.y, g_WaveHeight.x))] :
 			g_WaveData2[int(mod(g_WaveY.y + FRAGCOORD.y, g_WaveHeight.y))];
-		
+
 		OutPos.x -= Offset / g_ScreenWid;
 	}
 	COLOR = texture(TEXTURE, OutPos);

@@ -1,6 +1,6 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
-using OrbinautFramework3.Framework.Input;
+using OrbinautFramework3.Framework.InputModule;
 
 namespace OrbinautFramework3.Framework;
 

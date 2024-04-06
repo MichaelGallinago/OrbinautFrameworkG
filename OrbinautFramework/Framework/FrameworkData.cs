@@ -1,23 +1,16 @@
-using System.Collections.Generic;
-using Godot;
-using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Spawnable.Barrier;
-using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Framework;
 
 public static class FrameworkData
 {
     public static float ProcessSpeed { get; set; }
-    public static List<KeyboardControl> KeyboardControl { get; set; }
-    public static bool GamepadVibration { get; set; }
     public static TilesData TilesData { get; }
     public static bool UpdateAnimations { get; set; }
     public static bool UpdateEffects { get; set; }
     public static bool UpdateObjects { get; set; }
-    public static bool LastUpdateObjects { get; set; }
     public static bool UpdateTimer { get; set; }
     public static bool AllowPause { get; set; }
     public static bool DropDash { get; set; }
@@ -32,18 +25,10 @@ public static class FrameworkData
     public static bool DeveloperMode { get; set; }
     public static bool IsPaused { get; set; }
     public static double Time { get; set; }
+    public static ObjectCuller Culler { get; } = new();
 
     static FrameworkData()
     {
-        KeyboardControl =
-        [
-            new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
-                Key.A, Key.S, Key.D, Key.Enter, Key.Space),
-
-            new KeyboardControl(Key.None, Key.None, Key.None, Key.None,
-                Key.Z, Key.X, Key.C, Key.None, Key.None)
-        ];
-        GamepadVibration = true;
         UpdateAnimations = true;
         UpdateEffects = true;
         UpdateObjects = true;
@@ -60,6 +45,7 @@ public static class FrameworkData
     }
     
     public static bool IsTimePeriodLooped(float period) => Time % period - ProcessSpeed < 0f;
+    public static bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - ProcessSpeed < 0f;
     
     public static void UpdateEarly(float processSpeed)
     {
@@ -68,91 +54,6 @@ public static class FrameworkData
 			Time += processSpeed;
 		}
 		
-		if (LastUpdateObjects != UpdateObjects)
-		{
-			// Whenever update_objects is set from false to true, activate ALL objects
-			// (needed to make BEHAVE_NOBOUNDS objects work correctly)
-			if (UpdateObjects)
-			{
-				foreach (BaseObject commonObject in BaseObject.Objects)
-				{
-					commonObject.SetProcess(true);
-				}
-			}
-		
-			LastUpdateObjects = UpdateObjects;
-		}
-	
-		if (!UpdateObjects || IsPaused)
-		{
-			// Deactivate objects
-			foreach (BaseObject commonObject in BaseObject.Objects)
-			{
-				if (commonObject.Behaviour == BaseObject.BehaviourType.Unique) return;
-				commonObject.SetProcess(false);
-			}
-			
-			return;
-		}
-		
-		// Deactivate or reset objects outside the new active area
-		if (Camera.Main == null) return;
-
-		Vector2I activeArea = Camera.Main.GetActiveArea();
-		int limitBottom = Camera.Main.LimitBottom;
-		
-		foreach (BaseObject commonObject in BaseObject.Objects)
-		{
-			DeactivateObjectsByBehaviour(commonObject, limitBottom, ref activeArea);
-		
-			// Activate objects within the new active area and reset interaction flag for all active objects
-			if (commonObject.Position.X < activeArea.X  || commonObject.Position.Y < 0f || 
-			    commonObject.Position.X >= activeArea.Y || commonObject.Position.Y >= limitBottom) continue;
-			commonObject.SetProcess(true);
-			commonObject.InteractData.IsInteract = true;
-		}
-    }
-    
-    private static void DeactivateObjectsByBehaviour(BaseObject commonObject, int limitBottom, ref Vector2I activeArea)
-    {		
-	    switch (commonObject.Behaviour)
-	    {
-		    case BaseObject.BehaviourType.NoBounds:
-		    case BaseObject.BehaviourType.Unique:
-			    break;
-					
-		    case BaseObject.BehaviourType.Delete:
-			    Vector2 position = commonObject.Position;
-			    if (position.X < activeArea.X || position.X > activeArea.Y || 
-			        position.Y < 0 || position.Y > limitBottom)
-			    {
-				    commonObject.QueueFree();
-			    }
-			    break;
-					
-		    case BaseObject.BehaviourType.Reset:
-			    if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) break;
-			    
-			    float resetX = commonObject.RespawnData.Position.X;
-			    if (resetX >= activeArea.X && resetX <= activeArea.Y)
-			    {
-				    commonObject.Position = new Vector2(sbyte.MinValue, sbyte.MinValue);
-				    commonObject.Hide();
-						
-				    break;
-			    }
-			    
-			    commonObject.Reset();
-			    commonObject.SetProcess(false);
-			    break;
-				
-		    default: 
-			    if (commonObject.Position.X >= activeArea.X && commonObject.Position.X <= activeArea.Y) break;
-					
-			    float respawnX = commonObject.RespawnData.Position.X;
-			    if (respawnX >= activeArea.X && respawnX <= activeArea.Y) break;
-			    commonObject.SetProcess(false);
-			    break;
-	    }
+		Culler.Cull();
     }
 }

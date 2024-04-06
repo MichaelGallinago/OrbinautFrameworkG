@@ -1,40 +1,46 @@
 using System.Collections.Generic;
 using Godot;
 
-namespace OrbinautFramework3.Framework.Input;
+namespace OrbinautFramework3.Framework.InputModule;
 
 public static class InputUtilities
 {
     private const byte KeyboardId = 0;
     private const byte BaseDeviceCount = 4;
     
-    public static List<Buttons> Down { get; }
-    public static List<Buttons> Press { get; }
-    public static List<bool> BlockInput { get; }
-    public static int DeviceCount { get; private set; }
+    public static List<Buttons> Down { get; } = [];
+    public static List<Buttons> Press { get; } = [];
+    public static List<bool> BlockInput { get; } = [];
+    public static int DeviceCount { get; private set; } = BaseDeviceCount;
+    public static bool GamepadVibration { get; set; } = true;
     
     public static bool DebugButtonDown { get; private set; }
     public static bool DebugButtonPress { get; private set; }
 
     private static Godot.Collections.Array<int> _gamepads;
 
+    private static List<KeyboardControl> KeyboardControl { get; set; }  =
+    [
+        new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
+            Key.A, Key.S, Key.D, Key.Enter, Key.Space),
+
+        new KeyboardControl(Key.None, Key.None, Key.None, Key.None,
+            Key.Z, Key.X, Key.C, Key.None, Key.None)
+    ];
+
     static InputUtilities()
     {
-        Down = [];
-        Press = [];
-        BlockInput = [];
         for (var i = 0; i < BaseDeviceCount; i++)
         {
             Down.Add(new Buttons());
             Press.Add(new Buttons());
             BlockInput.Add(false);
         }
-        DeviceCount = BaseDeviceCount;
     }
 
     public static void Update()
     {
-        _gamepads = Godot.Input.GetConnectedJoypads();
+        _gamepads = Input.GetConnectedJoypads();
         for (var device = 0; device < DeviceCount; device++)
         {
             if (device == KeyboardId || _gamepads.Contains(device)) continue;
@@ -71,8 +77,8 @@ public static class InputUtilities
 
     public static void SetVibration(int device, float weakMagnitude, float strongMagnitude, float duration)
     {
-        if (!FrameworkData.GamepadVibration || device > Constants.MaxInputDevices || _gamepads.Contains(device)) return;
-        Godot.Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
+        if (!GamepadVibration || device > Constants.MaxInputDevices || _gamepads.Contains(device)) return;
+        Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
     }
 
     private static void DeviceProcess(int device, bool isKeyboardOnly)
@@ -84,10 +90,12 @@ public static class InputUtilities
         {
             GamepadProcess(device, ref down);
         }
+        
         if (device == KeyboardId)
         {
             KeyboardProcess(ref down);
         }
+        
         down.Abc = down.A || down.B || down.C;
 
         Buttons press = Down[KeyboardId];
@@ -118,17 +126,17 @@ public static class InputUtilities
     private static void KeyboardProcess(ref Buttons down)
     {
         bool previousDebugButtonDownState = DebugButtonDown;
-        foreach (KeyboardControl control in FrameworkData.KeyboardControl)
+        foreach (KeyboardControl control in KeyboardControl)
         {
-            down.Up = down.Up || Godot.Input.IsPhysicalKeyPressed(control.Up);
-            down.Down = down.Down || Godot.Input.IsPhysicalKeyPressed(control.Down);
-            down.Left = down.Left || Godot.Input.IsPhysicalKeyPressed(control.Left);
-            down.Right = down.Right || Godot.Input.IsPhysicalKeyPressed(control.Right);
-            down.A = down.A || Godot.Input.IsPhysicalKeyPressed(control.A);
-            down.B = down.B || Godot.Input.IsPhysicalKeyPressed(control.B);
-            down.C = down.C || Godot.Input.IsPhysicalKeyPressed(control.C);
-            down.Start = down.Start || Godot.Input.IsPhysicalKeyPressed(control.Start);
-            DebugButtonDown = Godot.Input.IsPhysicalKeyPressed(control.Debug);
+            down.Up = down.Up || Input.IsPhysicalKeyPressed(control.Up);
+            down.Down = down.Down || Input.IsPhysicalKeyPressed(control.Down);
+            down.Left = down.Left || Input.IsPhysicalKeyPressed(control.Left);
+            down.Right = down.Right || Input.IsPhysicalKeyPressed(control.Right);
+            down.A = down.A || Input.IsPhysicalKeyPressed(control.A);
+            down.B = down.B || Input.IsPhysicalKeyPressed(control.B);
+            down.C = down.C || Input.IsPhysicalKeyPressed(control.C);
+            down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
+            DebugButtonDown = Input.IsPhysicalKeyPressed(control.Debug);
         }
 
         DebugButtonPress = !previousDebugButtonDownState && DebugButtonDown;
@@ -136,13 +144,13 @@ public static class InputUtilities
 
     private static void GamepadProcess(int device, ref Buttons down)
     {
-        down.Up = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
-        down.Down = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
-        down.Left = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
-        down.Right = Godot.Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
-        down.A = Godot.Input.IsJoyButtonPressed(device, JoyButton.A);
-        down.B = Godot.Input.IsJoyButtonPressed(device, JoyButton.B);
-        down.C = Godot.Input.IsJoyButtonPressed(device, JoyButton.Y);
-        down.Start = Godot.Input.IsJoyButtonPressed(device, JoyButton.Start);
+        down.Up = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
+        down.Down = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
+        down.Left = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
+        down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
+        down.A = Input.IsJoyButtonPressed(device, JoyButton.A);
+        down.B = Input.IsJoyButtonPressed(device, JoyButton.B);
+        down.C = Input.IsJoyButtonPressed(device, JoyButton.Y);
+        down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
     }
 }

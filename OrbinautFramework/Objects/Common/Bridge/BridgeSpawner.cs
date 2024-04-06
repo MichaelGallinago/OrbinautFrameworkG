@@ -40,7 +40,7 @@ public partial class BridgeSpawner : Node2D
     private short _logOffset;
     [Export] private Texture2D _stampTexture;
 
-    [Export] private BaseObject.BehaviourType _behaviour = BaseObject.BehaviourType.Pause;
+    [Export] private BaseObject.CullingType _culling = BaseObject.CullingType.Pause;
 
     private Texture2D _logTexture;
     private Vector2 _stampSize;
@@ -120,7 +120,7 @@ public partial class BridgeSpawner : Node2D
         {
             Position = Position + new Vector2((_length - _logSize.X) / 2f, 0f),
             ProcessPriority = ProcessPriority,
-            Behaviour = _behaviour,
+            Culling = _culling,
             ZIndex = ZIndex,
         };
         parent.CallDeferred("add_child", bridge);

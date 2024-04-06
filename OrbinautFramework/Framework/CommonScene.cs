@@ -3,12 +3,14 @@ using Godot;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Framework;
 
 public abstract partial class CommonScene : Node2D
 {
-    [Export] public CollisionTileMap CollisionTileMap { get; set; }
+    [Export] public CollisionTileMap CollisionTileMap { get; }
+    [Export] public ViewStorage ViewStorage { get; }
     
     public SceneTree Tree { get; private set; }
     public bool IsStage { get; protected set; }
@@ -26,7 +28,6 @@ public abstract partial class CommonScene : Node2D
         AddChild(_debug);
 
         Tree = GetTree();
-        Animator.Reset();
     }
 
     public override void _EnterTree() => FrameworkData.CurrentScene = this;

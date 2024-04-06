@@ -2,7 +2,7 @@
 
 namespace OrbinautFramework3.Framework.Animations;
 
-public class SynchronizedAnimatedSprite : AnimatedSprite2D
+public partial class SynchronizedAnimatedSprite : AnimatedSprite2D
 {
     public float Duration { get; set; } = 1f;
         

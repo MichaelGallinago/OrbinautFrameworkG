@@ -106,7 +106,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
             }
         }
         
-        SetBehaviour(BehaviourType.Reset);
+        SetBehaviour(CullingType.Reset);
         //TODO: audio
         //AudioPlayer.PlaySound(SoundStorage.Break);
 		

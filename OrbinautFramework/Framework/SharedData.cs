@@ -9,7 +9,7 @@ namespace OrbinautFramework3.Framework;
 public static class SharedData
 {
     // Game settings
-    public static Vector2I ViewSize { get; set; } = new(400, 224);
+    private static Vector2I _viewSize = new(400, 224);
     //public static Room StartRoom { get; set; } = rm_devmenu; // TODO: add StartRoom
     public static bool DevMode { get; set; } = true;
     public static bool ShowSplash { get; set; } = false;
@@ -55,6 +55,18 @@ public static class SharedData
     public static byte SavedRings { get; set; }
     public static Barrier.Types SavedBarrier { get; set; } = Barrier.Types.None;
 
+    public static event Action<Vector2I> ViewSizeChanged;
+    public static Vector2I ViewSize
+    {
+	    get => _viewSize;
+	    set
+	    {
+		    ViewSizeChanged?.Invoke(value);
+		    _viewSize = value;
+	    }
+    }
+    
+    private static SensorDebugTypes _sensorDebugType = SensorDebugTypes.None;
     public static event Action<SensorDebugTypes> SensorDebugToggled;
     public static SensorDebugTypes SensorDebugType 
     { 
@@ -66,10 +78,9 @@ public static class SharedData
 		    _sensorDebugType = value;
 	    }
     }
-    private static SensorDebugTypes _sensorDebugType = SensorDebugTypes.None;
 
     public enum SensorDebugTypes : byte
     {
-	    None, Collision, Hitbox, SolidBox
+	    None, Collision, HitBox, SolidBox
     }
 }

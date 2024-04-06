@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://cbcy2gu14bwg6"]
+
+[ext_resource type="Script" path="res://Framework/View/CameraView.cs" id="1_0c7fu"]
+[ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/View/camera.tscn" id="2_jdcn3"]
+
+[node name="CameraView" type="SubViewport"]
+script = ExtResource("1_0c7fu")
+
+[node name="Camera" parent="." instance=ExtResource("2_jdcn3")]

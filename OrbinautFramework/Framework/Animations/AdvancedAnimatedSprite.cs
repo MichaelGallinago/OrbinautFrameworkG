@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Framework.Animations;
 
@@ -63,6 +64,44 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     }
 #endif
 
+        
+    public bool CheckInCamera(int index)
+    {
+        Vector4I bounds = Camera.Main.Bounds;
+        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
+
+        FrameworkData.CurrentScene.ViewStorage.CheckRectInCamera();
+        
+        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
+               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
+    }
+    
+    public bool CheckInCameras()
+    {
+        Vector4I bounds = Camera.Main.Bounds;
+        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
+
+        FrameworkData.CurrentScene.ViewStorage.CheckRectInCamera();
+        
+        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
+               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
+    }
+
+    public void SetAnimation(StringName animation, float customSpeed = 1f)
+    {
+        SpeedScale = GlobalSpeedScale * customSpeed;
+        if (Animation == animation) return;
+        Play(animation);
+    }
+    
+    public void SetAnimation(StringName animation, int startFrame, float customSpeed = 1f)
+    {
+        SpeedScale = GlobalSpeedScale * customSpeed;
+        if (Animation == animation) return;
+        Play(animation);
+        Frame = startFrame;
+    }
+    
     private void UpdateSpriteFrames()
     {
         if (_advancedSpriteFrames != null)
@@ -101,28 +140,9 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         _frameLoop = _advancedSpriteFrames.GetAnimationFrameLoop(Animation);
         Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
     }
-    
-    public bool CheckInView()
-    {
-        Vector4I bounds = Camera.Main.Bounds;
-        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
-        
-        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
-               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
-    }
 
-    public void SetAnimation(StringName animation, float customSpeed = 1f)
+    private Rect2 GetRect()
     {
-        SpeedScale = GlobalSpeedScale * customSpeed;
-        if (Animation == animation) return;
-        Play(animation);
-    }
-    
-    public void SetAnimation(StringName animation, int startFrame, float customSpeed = 1f)
-    {
-        SpeedScale = GlobalSpeedScale * customSpeed;
-        if (Animation == animation) return;
-        Play(animation);
-        Frame = startFrame;
+        return new Rect2(Position, SpriteFrames.GetFrameTexture(Animation, Frame).GetSize());
     }
 }

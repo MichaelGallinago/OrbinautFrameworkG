@@ -1,11 +1,10 @@
 using System;
 using System.Linq;
 using Godot;
-using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 
-namespace OrbinautFramework3;
+namespace OrbinautFramework3.Framework.View;
 
 public partial class Camera : Camera2D
 {
@@ -13,8 +12,17 @@ public partial class Camera : Camera2D
 	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
 	
-	//TODO: Replace to interface
-	public static Camera Main { get; set; }
+	public Vector2I ActiveArea
+	{
+		get => _activeArea;
+		private set
+		{
+			ActiveAreaChanged?.Invoke(value);
+			_activeArea = value;
+		}
+	}
+	private Vector2I _activeArea;
+	public event Action<Vector2I> ActiveAreaChanged;
     
 	[Export] public BaseObject Target
 	{
@@ -46,8 +54,6 @@ public partial class Camera : Camera2D
 
 	public Camera()
 	{
-		Main = this;
-		
 		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
 		Limit = Bound;
 		_previousLimit = Bound;
@@ -71,17 +77,9 @@ public partial class Camera : Camera2D
 		
 		_rawPosition = BufferPosition;
 	}
-
-	public override void _ExitTree()
-	{
-		if (Main != this) return;
-		Main = null;
-	}
 	
 	public override void _Process(double delta)
 	{
-		if (Main != this) return;
-		
 		var boundSpeed = 0f;
 		
 		if (FrameworkData.UpdateObjects)
@@ -96,11 +94,13 @@ public partial class Camera : Camera2D
 		
 		// Update boundaries
 		Vector2I farBounds = BufferPosition + SharedData.ViewSize;
-		Limit.X = MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed); // Left
-		Limit.Y = MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed); // Top
-		Limit.Z = MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed); // Right
-		Limit.W = MoveBoundaryBackward(Limit.W, Bound.W, farBounds.Y, boundSpeed); // Bottom
-
+		Limit = new Vector4(
+			MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed), // Left
+			MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed), // Top
+			MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed), // Right
+			MoveBoundaryBackward(Limit.W, Bound.W, farBounds.Y, boundSpeed) // Bottom
+		);
+		
 		_previousLimit = Limit;
 
 		BufferPosition = _shakeOffset + (Vector2I)(_rawPosition + _bufferOffset).Clamp(
@@ -113,6 +113,43 @@ public partial class Camera : Camera2D
 			finalPosition.X + SharedData.ViewSize.X, finalPosition.Y + SharedData.ViewSize.Y);
 		
 		ForceUpdateScroll();
+		UpdateActiveArea();
+	}
+
+	public void Delete()
+	{
+		/*
+		var _surface = camera_get_surface(_index);
+	
+		var _camera = c_framework.camera;
+		if _camera.view_count > 0
+		{
+			_camera.view_count--;
+		}
+	
+		// Clear the camera
+		camera_destroy(_view.instance);
+	
+		if surface_exists(_surface.instance)
+		{
+			surface_free(_surface.instance);
+		}
+	
+		if surface_exists(_surface.instance_overlay)
+		{
+			surface_free(_surface.instance_overlay);
+		}
+	
+		delete _view;
+		delete _surface;
+	
+		_camera.view_array[_index] = noone;
+		_camera.surface_array[_index] = noone;
+
+		view_visible[_index] = false;
+		view_camera[_index] = -1;
+		view_surface_id[_index] = -1;
+		*/
 	}
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
@@ -121,21 +158,6 @@ public partial class Camera : Camera2D
 	}
 
 	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
-
-	public Vector2I GetActiveArea()
-	{
-		var position = (int)Position.X;
-		
-		// Adjust the position based on whether the camera is the main camera
-		if (Main == this)
-		{
-			position += Constants.RenderBuffer;
-		}
-
-		position &= sbyte.MinValue;
-		
-		return new Vector2I(position + sbyte.MinValue, position + SharedData.ViewSize.X + 320);
-	}
 
 	public void UpdatePlayerCamera(PlayerData player)
 	{
@@ -161,8 +183,8 @@ public partial class Camera : Camera2D
 			}
 		}
 
-		bool doShiftDown = player.Animation == Animations.Duck;
-		bool doShiftUp = player.Animation == Animations.LookUp;
+		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
+		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
 
 		if (doShiftDown || doShiftUp)
 		{
@@ -198,6 +220,32 @@ public partial class Camera : Camera2D
 
 	public void SetShakeTimer(float shakeTimer) => _shakeTimer = shakeTimer;
 
+	public bool CheckRectInside(Vector4I rect)
+	{
+		var cameraRect = new Rect2(Position, SharedData.ViewSize);
+		Vector2 position = Position;
+	
+		return rect.X >= cameraRect.Position.X && rect.Z < position.X + _game_width + _width
+		        && y >= _draw_y - _height && y < _draw_y + _game_height + _height);
+		
+		/*
+		var _draw_x = _view.draw_x;
+		var _draw_y = _view.draw_y;
+	
+		if x + width >= _draw_x && x - _width < _draw_x + _game_width
+		                         && y >= _draw_y - _height && y < _draw_y + _game_height + _height
+		{
+			return true;
+		}
+		*/
+	}
+
+	private void UpdateActiveArea()
+	{
+		Vector2I position = (Vector2I)Position + sbyte.MinValue * Vector2I.One;
+		ActiveArea = new Vector2I(position.X & sbyte.MinValue, position.Y & sbyte.MinValue);
+	}
+	
 	private static float MoveBoundaryForward(float limit, float bound, float position, float boundSpeed)
 	{
 		if (limit < bound)

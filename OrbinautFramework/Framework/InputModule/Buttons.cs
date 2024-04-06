@@ -1,4 +1,4 @@
-namespace OrbinautFramework3.Framework.Input;
+namespace OrbinautFramework3.Framework.InputModule;
 
 public struct Buttons
 {

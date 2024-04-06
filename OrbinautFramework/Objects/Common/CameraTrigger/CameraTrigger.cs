@@ -25,14 +25,14 @@ public partial class CameraTrigger : Trigger
         if (_sprite?.Texture == null) return;
         _height = (int)(_sprite.Texture.GetSize().Y * Scale.Y) / 2;
         
-        _previousBound = Camera.Main.LimitBottom;
-        _cameraSide = Camera.Main.BufferPosition.X + SharedData.ViewSize.X / 2f < Position.X ? 
+        _previousBound = Framework.Camera.Main.LimitBottom;
+        _cameraSide = Framework.Camera.Main.BufferPosition.X + SharedData.ViewSize.X / 2f < Position.X ? 
             Direction.Positive : Direction.Negative;
     }
 
     public override void _Process(double delta)
     {
-        Camera camera = Camera.Main;
+        Framework.Camera camera = Framework.Camera.Main;
         Vector2I position = camera.BufferPosition + SharedData.ViewSize / 2;
 	    
         if (position.Y < Position.Y - _height || position.Y >= Position.Y + _height) return;
