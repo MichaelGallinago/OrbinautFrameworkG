@@ -115,7 +115,7 @@ public class EditMode
 			if (Activator.CreateInstance(_objects[_index]) is not BaseObject newObject) return true;
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
-			newObject.SetBehaviour(BaseObject.CullingType.Delete);
+			newObject.SetCullingType(BaseObject.CullingType.Delete);
 			FrameworkData.CurrentScene.AddChild(newObject);
 		}
 		

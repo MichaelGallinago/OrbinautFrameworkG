@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
@@ -38,7 +37,7 @@ public abstract partial class CommonScene : Node2D
         FrameworkData.ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
         FrameworkData.UpdateEarly(FrameworkData.ProcessSpeed);
         
-        foreach (BaseObject objects in BaseObject.Objects)
+        foreach (BaseObject objects in BaseObject.ActiveObjects.Keys)
         {
             objects.PreviousPosition = objects.Position;
         }

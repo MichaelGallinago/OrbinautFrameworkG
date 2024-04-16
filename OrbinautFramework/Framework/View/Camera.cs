@@ -12,17 +12,17 @@ public partial class Camera : Camera2D
 	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
 	
-	public Vector2I ActiveArea
+	public Vector2I ActiveRegion
 	{
-		get => _activeArea;
+		get => _activeRegion;
 		private set
 		{
-			ActiveAreaChanged?.Invoke(value);
-			_activeArea = value;
+			IsActiveRegionChanged = true;
+			_activeRegion = value;
 		}
 	}
-	private Vector2I _activeArea;
-	public event Action<Vector2I> ActiveAreaChanged;
+	private Vector2I _activeRegion;
+	public bool IsActiveRegionChanged { get; private set; }
     
 	[Export] public BaseObject Target
 	{
@@ -80,6 +80,8 @@ public partial class Camera : Camera2D
 	
 	public override void _Process(double delta)
 	{
+		IsActiveRegionChanged = false;
+		
 		var boundSpeed = 0f;
 		
 		if (FrameworkData.UpdateObjects)
@@ -163,25 +165,7 @@ public partial class Camera : Camera2D
 	{
 		if (Target != player || player.IsDead) return;
 
-		if (SharedData.CdCamera)
-		{
-			const int shiftDistanceX = 64;
-			const int shiftSpeedX = 2;
-
-			int shiftDirectionX = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
-
-			if (Math.Abs(player.GroundSpeed) >= 6f || player.Action == Actions.SpinDash)
-			{
-				if (Delay.X == 0f && _bufferOffset.X != shiftDistanceX * shiftDirectionX)
-				{
-					_bufferOffset.X += shiftSpeedX * shiftDirectionX;
-				}
-			}
-			else
-			{
-				_bufferOffset.X -= shiftSpeedX * Math.Sign(_bufferOffset.X);
-			}
-		}
+		UpdateCdCamera(player);
 
 		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
 		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
@@ -220,30 +204,50 @@ public partial class Camera : Camera2D
 
 	public void SetShakeTimer(float shakeTimer) => _shakeTimer = shakeTimer;
 
-	public bool CheckRectInside(Vector4I rect)
+	public bool CheckRectInside(Rect2 rect)
 	{
 		var cameraRect = new Rect2(Position, SharedData.ViewSize);
-		Vector2 position = Position;
 	
-		return rect.X >= cameraRect.Position.X && rect.Z < position.X + _game_width + _width
-		        && y >= _draw_y - _height && y < _draw_y + _game_height + _height);
+		return rect.End.X >= cameraRect.Position.X && rect.Position.X < cameraRect.End.X
+		    && rect.End.Y >= cameraRect.Position.Y && rect.Position.Y < cameraRect.End.Y;
+	}
+
+	public bool CheckPositionInActiveRegion(Vector2 position)
+	{
+		const int cullBufferX = 320;
+		const int cullBufferY = 288;
 		
-		/*
-		var _draw_x = _view.draw_x;
-		var _draw_y = _view.draw_y;
-	
-		if x + width >= _draw_x && x - _width < _draw_x + _game_width
-		                         && y >= _draw_y - _height && y < _draw_y + _game_height + _height
+		return position.X >= _activeRegion.X && 
+		       position.Y >= _activeRegion.Y && 
+		       position.X < _activeRegion.X + SharedData.ViewSize.X + cullBufferX &&
+		       position.Y < _activeRegion.Y + SharedData.ViewSize.Y + cullBufferY;
+	}
+
+	private void UpdateCdCamera(PlayerData player)
+	{
+		if (!SharedData.CdCamera) return;
+		
+		const int shiftSpeedX = 2;
+
+		int shiftDirectionX = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
+
+		if (Math.Abs(player.GroundSpeed) < 6f && player.Action != Actions.SpinDash)
 		{
-			return true;
+			_bufferOffset.X -= shiftSpeedX * Math.Sign(_bufferOffset.X);
+			return;
 		}
-		*/
+
+		const int shiftDistanceX = 64;
+		if (Delay.X == 0f && _bufferOffset.X != shiftDistanceX * shiftDirectionX)
+		{
+			_bufferOffset.X += shiftSpeedX * shiftDirectionX;
+		}
 	}
 
 	private void UpdateActiveArea()
 	{
 		Vector2I position = (Vector2I)Position + sbyte.MinValue * Vector2I.One;
-		ActiveArea = new Vector2I(position.X & sbyte.MinValue, position.Y & sbyte.MinValue);
+		ActiveRegion = new Vector2I(position.X & sbyte.MinValue, position.Y & sbyte.MinValue);
 	}
 	
 	private static float MoveBoundaryForward(float limit, float bound, float position, float boundSpeed)

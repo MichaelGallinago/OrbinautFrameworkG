@@ -1,8 +1,9 @@
 using Godot;
+using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Screens.Startup;
 
-public partial class Startup : Framework.CommonScene
+public partial class Startup : CommonScene
 {
     [Export] private ResourcePreloader _preloader;
 

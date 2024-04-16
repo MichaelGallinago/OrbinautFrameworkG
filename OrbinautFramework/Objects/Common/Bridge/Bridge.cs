@@ -37,7 +37,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
         // Properties
         SetSolid(new Vector2I(logAmount * _logSizeHalf, _logSizeHalf));
-        SetBehaviour(CullingType.Pause);
+        SetCullingType(CullingType.Pause);
     }
     
     public override void _Process(double delta)

@@ -63,29 +63,9 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         NotifyPropertyListChanged();
     }
 #endif
-
-        
-    public bool CheckInCamera(int index)
-    {
-        Vector4I bounds = Camera.Main.Bounds;
-        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
-
-        FrameworkData.CurrentScene.ViewStorage.CheckRectInCamera();
-        
-        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
-               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
-    }
     
-    public bool CheckInCameras()
-    {
-        Vector4I bounds = Camera.Main.Bounds;
-        Vector2 size = SpriteFrames.GetFrameTexture(Animation, Frame).GetSize();
-
-        FrameworkData.CurrentScene.ViewStorage.CheckRectInCamera();
-        
-        return Position.X >= bounds.X - size.X && Position.X <= bounds.Z + size.X &&
-               Position.Y >= bounds.Y - size.Y && Position.Y <= bounds.W + size.Y;
-    }
+    public bool CheckInCamera(int index) => FrameworkData.CurrentScene.ViewStorage.CheckRectInCamera(CullRect, index);
+    public bool CheckInCameras() => FrameworkData.CurrentScene.ViewStorage.CheckRectInCameras(CullRect);
 
     public void SetAnimation(StringName animation, float customSpeed = 1f)
     {
@@ -141,8 +121,5 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
     }
 
-    private Rect2 GetRect()
-    {
-        return new Rect2(Position, SpriteFrames.GetFrameTexture(Animation, Frame).GetSize());
-    }
+    private Rect2 CullRect => new(Position + Offset, _advancedSpriteFrames.CullSize * Scale);
 }

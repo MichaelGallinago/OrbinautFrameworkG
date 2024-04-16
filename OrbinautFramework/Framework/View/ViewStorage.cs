@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
 namespace OrbinautFramework3.Framework.View;
 
 public partial class ViewStorage : Control
 {
+    public static ViewStorage Local => FrameworkData.CurrentScene.ViewStorage;
+    
     [Export] private PackedScene _packedView;
     [Export] private byte _number;
 
@@ -20,14 +22,35 @@ public partial class ViewStorage : Control
         }
     }
 
-    public bool CheckRectInCamera(int index)
+    public bool CheckRectInCamera(Rect2 rect, int index)
     {
-        return index < _cameras.Count && _cameras[index].CheckRectInside();
+        return index < _cameras.Count && _cameras[index].CheckRectInside(rect);
     }
     
-    public bool CheckRectInCameras()
+    public bool CheckRectInCameras(Rect2 rect)
     {
-        return _cameras.Any(camera => camera.CheckRectInside());
+        foreach (Camera camera in _cameras)
+        {
+            if (camera.CheckRectInside(rect)) return true;
+        }
+
+        return false;
+    }
+
+    public void FillStackOfWithResumingRegions(Stack<Camera> stack)
+    {
+        foreach (Camera camera in _cameras)
+        {
+            stack.Push(camera);
+        }
+    }
+    
+    public void InvokeInCameras(Action<Camera> action)
+    {
+        foreach (Camera camera in _cameras)
+        {
+            action(camera);
+        }
     }
 
     private void CreateView()

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Godot;
 using OrbinautFramework3.Objects.Player;
 using static OrbinautFramework3.Framework.Constants;
@@ -10,8 +10,10 @@ public abstract partial class BaseObject : Node2D
 {
 	public enum CullingType : byte { None, Active, Reset, Pause, Delete }
 	[Export] public CullingType Culling { get; set; }
+	
+	public static ConcurrentDictionary<BaseObject, byte> StoppedObjects { get; set; } = [];
+	public static ConcurrentDictionary<BaseObject, byte> ActiveObjects { get; set; } = [];
 
-	public static List<BaseObject> Objects { get; } = [];
 	public ObjectRespawnData RespawnData { get; private set; }
 	public SolidData SolidData { get; } = new();
 	public Vector2 PreviousPosition { get; set; }
@@ -20,17 +22,21 @@ public abstract partial class BaseObject : Node2D
 	
 	public override void _EnterTree()
 	{
-		Objects.Add(this);
+		ActiveObjects.TryAdd(this, 0);
 		RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
 	}
 
-	public override void _ExitTree() => Objects.Remove(this);
-	
+	public override void _ExitTree()
+	{
+		ActiveObjects.TryRemove(this, out _);
+		StoppedObjects.TryRemove(this, out _);
+	}
+
 	public void ResetZIndex() => ZIndex = RespawnData.ZIndex;
-	public void SetBehaviour(CullingType culling)
+	public void SetCullingType(CullingType cullingType)
 	{
 		if (Culling == CullingType.Delete) return;
-		Culling = culling;
+		Culling = cullingType;
 	}
 	
 	public virtual void Reset()
