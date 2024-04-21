@@ -9,7 +9,7 @@ namespace OrbinautFramework3.Framework;
 public abstract partial class CommonScene : Node2D
 {
     [Export] public CollisionTileMap CollisionTileMap { get; }
-    [Export] public ViewStorage ViewStorage { get; }
+    [Export] public Views Views { get; }
     
     public SceneTree Tree { get; private set; }
     public bool IsStage { get; protected set; }
@@ -37,7 +37,7 @@ public abstract partial class CommonScene : Node2D
         FrameworkData.ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
         FrameworkData.UpdateEarly(FrameworkData.ProcessSpeed);
         
-        foreach (BaseObject objects in BaseObject.ActiveObjects.Keys)
+        foreach (BaseObject objects in BaseObject.ActiveObjects)
         {
             objects.PreviousPosition = objects.Position;
         }

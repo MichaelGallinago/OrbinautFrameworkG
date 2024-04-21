@@ -22,7 +22,7 @@ public partial class Bumper : BaseObject
     private int _state;
     private int _hitsLeft;
 
-    public Bumper() => SetHitbox(new Vector2I(8, 8));
+    public Bumper() => SetHitBox(new Vector2I(8, 8));
     public override void _Ready()
     {
         _hitsLeft = (int)_hitsLimit;

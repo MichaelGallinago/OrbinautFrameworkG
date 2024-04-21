@@ -105,8 +105,8 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
                 CreatePiece(parent, x, y, index++, x / 4f + (_size.Y - y) / 8f);
             }
         }
-        
-        SetCullingType(CullingType.Reset);
+
+        Culling = CullingType.Reset;
         //TODO: audio
         //AudioPlayer.PlaySound(SoundStorage.Break);
 		

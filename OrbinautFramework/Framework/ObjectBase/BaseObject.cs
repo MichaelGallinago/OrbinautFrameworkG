@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Objects.Player;
 using static OrbinautFramework3.Framework.Constants;
@@ -8,13 +9,35 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 
 public abstract partial class BaseObject : Node2D
 {
-	public enum CullingType : byte { None, Active, Reset, Pause, Delete }
-	[Export] public CullingType Culling { get; set; }
+	public enum CullingType : byte { None, NoBounds, Reset, ResetX, ResetY, Delete }
 	
-	public static ConcurrentDictionary<BaseObject, byte> StoppedObjects { get; set; } = [];
-	public static ConcurrentDictionary<BaseObject, byte> ActiveObjects { get; set; } = [];
+	[Export] public CullingType Culling
+	{
+		get => _culling;
+		set
+		{ 
+			switch (_culling)
+			{
+				case CullingType.Delete:
+					return;
+				case CullingType.None:
+					ActiveObjects.Add(this);
+					break;
+				default:
+					if (value != CullingType.None) break;
+					RemoveFromCulling();
+					break;
+			}
 
-	public ObjectRespawnData RespawnData { get; private set; }
+			_culling = value;
+		}
+	}
+	private CullingType _culling;
+	
+	public static HashSet<BaseObject> StoppedObjects { get; } = [];
+	public static HashSet<BaseObject> ActiveObjects { get; } = [];
+
+	public CullingData CullingData { get; private set; }
 	public SolidData SolidData { get; } = new();
 	public Vector2 PreviousPosition { get; set; }
 
@@ -22,29 +45,23 @@ public abstract partial class BaseObject : Node2D
 	
 	public override void _EnterTree()
 	{
-		ActiveObjects.TryAdd(this, 0);
-		RespawnData = new ObjectRespawnData(Position, Scale, Visible, ZIndex);
+		if (Culling != CullingType.None)
+		{
+			ActiveObjects.Add(this);	
+		}
+		CullingData = new CullingData(Position, Scale, Visible, ZIndex);
 	}
 
-	public override void _ExitTree()
-	{
-		ActiveObjects.TryRemove(this, out _);
-		StoppedObjects.TryRemove(this, out _);
-	}
+	public override void _ExitTree() => RemoveFromCulling();
 
-	public void ResetZIndex() => ZIndex = RespawnData.ZIndex;
-	public void SetCullingType(CullingType cullingType)
-	{
-		if (Culling == CullingType.Delete) return;
-		Culling = cullingType;
-	}
+	public void ResetZIndex() => ZIndex = CullingData.ZIndex;
 	
 	public virtual void Reset()
 	{
-		Position = RespawnData.Position;
-		Scale = RespawnData.Scale;
-		Visible = RespawnData.IsVisible;
-		ZIndex = RespawnData.ZIndex;
+		Position = CullingData.Position;
+		Scale = CullingData.Scale;
+		Visible = CullingData.IsVisible;
+		ZIndex = CullingData.ZIndex;
 	}
     
 	public void SetSolid(Vector2I radius, Vector2I offset = default)
@@ -54,13 +71,13 @@ public abstract partial class BaseObject : Node2D
 		SolidData.HeightMap = null;
 	}
 
-	public void SetHitbox(Vector2I radius, Vector2I offset = default)
+	public void SetHitBox(Vector2I radius, Vector2I offset = default)
 	{
 		InteractData.Radius = radius;
 		InteractData.Offset = offset;
 	}
 
-	public void SetHitboxExtra(Vector2I radius, Vector2I offset = default)
+	public void SetHitBoxExtra(Vector2I radius, Vector2I offset = default)
 	{
 		InteractData.RadiusExtra = radius;
 		InteractData.OffsetExtra = offset;
@@ -73,13 +90,13 @@ public abstract partial class BaseObject : Node2D
 		return type switch
 		{
 			CollisionSensor.SolidPush => CheckPushCollision(target),
-			CollisionSensor.HitBox => CheckHitboxCollision(target, type),
-			CollisionSensor.HitBoxExtra => CheckHitboxCollision(target, type),
+			CollisionSensor.HitBox => CheckHitBoxCollision(target, type),
+			CollisionSensor.HitBoxExtra => CheckHitBoxCollision(target, type),
 			_ => CheckSolidCollision(target, type)
 		};
 	}
 	
-	private bool CheckHitboxCollision(BaseObject target, CollisionSensor type)
+	private bool CheckHitBoxCollision(BaseObject target, CollisionSensor type)
 	{
 		if (!InteractData.IsInteract || !target.InteractData.IsInteract) return false;
 		var hitboxColor = new Color();
@@ -175,5 +192,16 @@ public abstract partial class BaseObject : Node2D
 	private bool CheckPushCollision(BaseObject target)
 	{
 		return target is Player player && player.PushObjects.Contains(this);
+	}
+
+	private void RemoveFromCulling()
+	{
+		if (ActiveObjects.Contains(this))
+		{
+			ActiveObjects.Remove(this);
+			return;
+		}
+
+		StoppedObjects.Remove(this);
 	}
 }

@@ -1,9 +1,19 @@
 [gd_scene load_steps=3 format=3 uid="uid://cbcy2gu14bwg6"]
 
-[ext_resource type="Script" path="res://Framework/View/CameraView.cs" id="1_0c7fu"]
+[ext_resource type="Script" path="res://Framework/View/ViewContainer.cs" id="1_evknx"]
 [ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/View/camera.tscn" id="2_jdcn3"]
 
-[node name="CameraView" type="SubViewport"]
-script = ExtResource("1_0c7fu")
+[node name="ViewContainer" type="SubViewportContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_evknx")
 
-[node name="Camera" parent="." instance=ExtResource("2_jdcn3")]
+[node name="CameraView" type="SubViewport" parent="."]
+handle_input_locally = false
+size = Vector2i(400, 224)
+render_target_update_mode = 4
+
+[node name="Camera" parent="CameraView" instance=ExtResource("2_jdcn3")]

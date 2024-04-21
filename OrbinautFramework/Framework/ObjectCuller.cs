@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
@@ -8,140 +7,143 @@ namespace OrbinautFramework3.Framework;
 
 public class ObjectCuller
 {
-	private static readonly Stack<Camera> CamerasWithResumingRegions = [];
-	
 	private bool _isCullToggled;
 	
 	public void EarlyCull()
 	{
 		if (StopAllObjets()) return;
-		if (ResumeAllObjects()) return;
-        ResumeRegions();
+		
+		StopObjectsByBehaviour();
+		
+		if (_isCullToggled)
+		{
+			ResumeRegions(Views.Local.Cameras);
+			_isCullToggled = false;
+			return;
+		}
+
+		ResumeRegions(Views.Local.GetCamerasWithUpdatedRegions());
 	}
-	
-    public void LateCull()
-    {
-	    if (FrameworkData.IsPaused) return;
-	    
-	    Parallel.ForEach(BaseObject.StoppedObjects.Keys, baseObject =>
-	    {
-		    baseObject.InteractData.IsInteract = true;
-		    
-		    ViewStorage.Local.InvokeInCameras(camera =>
-		    {
-			    //DeactivateObjectsByBehaviour();
-		    });
-	    });
-    }
 
     private bool StopAllObjets()
     {
 	    if (!FrameworkData.IsPaused && FrameworkData.UpdateObjects) return false;
 
-	    Parallel.ForEach(BaseObject.ActiveObjects.Keys, baseObject =>
+	    foreach (BaseObject baseObject in BaseObject.ActiveObjects)
 	    {
-		    if (baseObject.Culling == BaseObject.CullingType.None) return;
-		    BaseObject.ActiveObjects.Remove(baseObject, out _);
-		    BaseObject.StoppedObjects.TryAdd(baseObject, 0);
+		    BaseObject.StoppedObjects.Add(baseObject);
 		    baseObject.SetProcess(false);
-	    });
+	    }
+
+	    BaseObject.ActiveObjects.Clear();
 
 	    _isCullToggled = true;
 	    return true;
     }
-
-    private bool ResumeAllObjects()
-    {
-	    if (!_isCullToggled) return false;
-	    
-	    Parallel.ForEach(BaseObject.StoppedObjects.Keys, baseObject =>
-	    {
-		    baseObject.SetProcess(true);
-		    BaseObject.ActiveObjects.TryAdd(baseObject, 0);
-	    });
-	    BaseObject.StoppedObjects.Clear();
-	    
-	    _isCullToggled = false;
-	    return true;
-    }
     
-    private static void ResumeRegions()
+    private static void ResumeRegions(ReadOnlySpan<ICamera> cameras)
     {
-	    ViewStorage.Local.FillStackOfWithResumingRegions(CamerasWithResumingRegions);
-	    
-	    if (CamerasWithResumingRegions.Count == 0) return;
-	    
-	    Parallel.ForEach(BaseObject.StoppedObjects.Keys, baseObject =>
+	    if (cameras.Length == 0) return;
+
+	    foreach (BaseObject baseObject in BaseObject.StoppedObjects)
 	    {
-		    foreach (Camera camera in CamerasWithResumingRegions)
+		    var position = (Vector2I)baseObject.Position;
+		    foreach (ICamera camera in cameras)
 		    {
-			    if (!camera.CheckPositionInActiveRegion(baseObject.Position)) continue;
-			    BaseObject.StoppedObjects.Remove(baseObject, out _);
-			    BaseObject.ActiveObjects.TryAdd(baseObject, 0);
+			    if (!camera.CheckPositionInActiveRegion(position)) continue;
+			    BaseObject.StoppedObjects.Remove(baseObject);
+			    BaseObject.ActiveObjects.Add(baseObject);
 			    baseObject.SetProcess(true);
 			    break;
 		    }
-	    });
-	    
-	    CamerasWithResumingRegions.Clear();
+	    }
     }
     
-    private void DeactivateObjectsByBehaviour(BaseObject commonObject, int limitBottom)
-    {		
+    private static void StopObjectsByBehaviour()
+    {
+	    foreach (BaseObject baseObject in BaseObject.ActiveObjects)
+	    {
+		    baseObject.InteractData.IsInteract = true;
+		    StopObjectByBehaviour(baseObject);
+	    }
+    }
+    
+    private static void StopObjectByBehaviour(BaseObject commonObject)
+    {
 	    switch (commonObject.Culling)
 	    {
-		    case BaseObject.CullingType.Reset: ResetObject(commonObject); break;
 		    case BaseObject.CullingType.Delete: DeleteObject(commonObject); break;
-		    case BaseObject.CullingType.Pause:
-			    if (commonObject.Position.X >= _activeArea.X && commonObject.Position.X <= _activeArea.Y) break;
-					
-			    float respawnX = commonObject.RespawnData.Position.X;
-			    if (respawnX >= _activeArea.X && respawnX <= _activeArea.Y) break;
-			    commonObject.SetProcess(false);
-			    break;
+		    case BaseObject.CullingType.Reset: ResetObject(commonObject); break;
+		    case BaseObject.CullingType.ResetX: ResetXObject(commonObject); break;
+		    case BaseObject.CullingType.ResetY: ResetYObject(commonObject); break;
 	    }
     }
 
-    private void ResetObject(BaseObject commonObject)
+    private static void DeleteObject(Node2D commonObject)
     {
-	    int distanceX = (int)(commonObject.Position.X - _activeArea.X) & -128;
-					
-	    // We're not too far away, do not check next camera
-	    if (distanceX >= 0 && distanceX <= _cull_width) return;
-					
-	    distanceX = (xstart - _view.coarse_x) & -128;
-					
-	    // If initial x-position is still in the same horizontal area, "vanish"
-	    if distanceX >= 0 && distanceX <= _cull_width
+	    var position = (Vector2I)commonObject.Position;
+	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
-		    _action_flag = 2; continue;
+		    if (camera.CheckPositionInSafeRegion(position) && commonObject.Position.Y < camera.Bound.W) return;
 	    }
-					
-	    _action_flag = 1; continue;
-	    /*
-	    if (commonObject.Position.X >= _activeArea.X && commonObject.Position.X <= _activeArea.Y) return;
-			    
-	    float resetX = commonObject.RespawnData.Position.X;
-	    if (resetX >= _activeArea.X && resetX <= _activeArea.Y)
+	    
+	    commonObject.QueueFree();
+    }
+
+    private static void ResetObject(BaseObject commonObject)
+    {
+	    var position = (Vector2I)commonObject.Position;
+	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
-		    commonObject.Position = new Vector2(sbyte.MinValue, sbyte.MinValue);
-		    commonObject.Hide();
-						
-		    return;
+		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }
-			    
+
+	    var respawnPosition = (Vector2I)commonObject.CullingData.Position;
+	    foreach (ICamera camera in Views.Local.Cameras)
+	    {
+		    if (!camera.CheckPositionInActiveRegion(respawnPosition)) continue;
+		    commonObject.Position = Vector2.One * sbyte.MinValue;
+		    commonObject.Visible = false;
+	    }
+	    
 	    commonObject.Reset();
-	    commonObject.SetProcess(false);
-	    */
     }
-
-    private void DeleteObject(BaseObject commonObject)
+    
+    private static void ResetXObject(BaseObject commonObject)
     {
-	    Vector2 position = commonObject.Position;
-	    if (position.X < _activeArea.X || position.X > _activeArea.Y || 
-	        position.Y < 0f || position.Y > limitBottom)
+	    var position = (int)commonObject.Position.X;
+	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
-		    commonObject.QueueFree();
+		    if (camera.CheckXInActiveRegion(position)) return;
 	    }
+
+	    var respawnPosition = (int)commonObject.CullingData.Position.X;
+	    foreach (ICamera camera in Views.Local.Cameras)
+	    {
+		    if (!camera.CheckXInActiveRegion(respawnPosition)) continue;
+		    commonObject.Position = Vector2.One * sbyte.MinValue;
+		    commonObject.Visible = false;
+	    }
+	    
+	    commonObject.Reset();
+    }
+    
+    private static void ResetYObject(BaseObject commonObject)
+    {
+	    var position = (int)commonObject.Position.Y;
+	    foreach (ICamera camera in Views.Local.Cameras)
+	    {
+		    if (camera.CheckYInActiveRegion(position)) return;
+	    }
+
+	    var respawnPosition = (int)commonObject.CullingData.Position.Y;
+	    foreach (ICamera camera in Views.Local.Cameras)
+	    {
+		    if (!camera.CheckYInActiveRegion(respawnPosition)) continue;
+		    commonObject.Position = Vector2.One * sbyte.MinValue;
+		    commonObject.Visible = false;
+	    }
+	    
+	    commonObject.Reset();
     }
 }

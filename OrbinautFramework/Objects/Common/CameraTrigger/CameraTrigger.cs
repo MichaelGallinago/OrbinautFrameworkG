@@ -1,5 +1,6 @@
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.View;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Common.CameraTrigger;
@@ -32,6 +33,10 @@ public partial class CameraTrigger : Trigger
 
     public override void _Process(double delta)
     {
+        foreach (var VARIABLE in Views.Local.Cameras)
+        {
+            
+        }
         Framework.Camera camera = Framework.Camera.Main;
         Vector2I position = camera.BufferPosition + SharedData.ViewSize / 2;
 	    

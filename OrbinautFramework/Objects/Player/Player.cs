@@ -433,12 +433,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
-			SetHitbox(new Vector2I(8, Radius.Y - 3));
+			SetHitBox(new Vector2I(8, Radius.Y - 3));
 			return;
 		}
 
 		if (Type is Types.Tails or Types.Amy) return;
-		SetHitbox(new Vector2I(8, 10), new Vector2I(0, 6));
+		SetHitBox(new Vector2I(8, 10), new Vector2I(0, 6));
 	}
 
 	private void SetExtraHitBox()
@@ -446,7 +446,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		switch (Animation)
 		{
 			case Animations.HammerSpin:
-				SetHitboxExtra(new Vector2I(25, 25));
+				SetHitBoxExtra(new Vector2I(25, 25));
 				break;
 			
 			case Animations.HammerDash:
@@ -460,11 +460,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					3 => (new Vector2I(17, 21), new Vector2I(7 * sign, -5)),
 					_ => throw new ArgumentOutOfRangeException()
 				};
-				SetHitboxExtra(radius, offset);
+				SetHitBoxExtra(radius, offset);
 				break;
 			
 			default:
-				SetHitboxExtra(Barrier.State == Barrier.States.DoubleSpin ? new Vector2I(24, 24) : Vector2I.Zero);
+				SetHitBoxExtra(Barrier.State == Barrier.States.DoubleSpin ? new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}
 	}

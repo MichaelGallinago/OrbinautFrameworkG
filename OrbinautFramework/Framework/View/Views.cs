@@ -1,0 +1,105 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Godot;
+
+namespace OrbinautFramework3.Framework.View;
+
+public partial class Views : Control
+{
+    public byte Number
+    { 
+        get => _number;
+        set
+        {
+            _number = value;
+            CreateViews();
+        }
+    }
+    private byte _number;
+    
+    public static Views Local => FrameworkData.CurrentScene.Views;
+    
+    [Export] private PackedScene _packedViewContainer;
+    [Export] private VBoxContainer _boxContainer;
+
+    private ViewContainer[] _containers;
+    private Camera[] _cameras;
+    private readonly List<ICamera> _camerasWithUpdatedRegions = [];
+    public ReadOnlySpan<ICamera> Cameras => _cameras;
+
+    public override void _Ready() => CreateViews();
+
+    public bool CheckRectInCamera(Rect2 rect, int index)
+    {
+        return index < _cameras.Length && _cameras[index].CheckRectInside(rect);
+    }
+    
+    public bool CheckRectInCameras(Rect2 rect)
+    {
+        foreach (Camera camera in _cameras)
+        {
+            if (camera.CheckRectInside(rect)) return true;
+        }
+
+        return false;
+    }
+
+    public ReadOnlySpan<ICamera> GetCamerasWithUpdatedRegions()
+    {
+        _camerasWithUpdatedRegions.Clear();
+        
+        foreach (Camera camera in _cameras)
+        {
+            if (camera.IsActiveRegionChanged)
+            {
+                _camerasWithUpdatedRegions.Add(camera);
+            }
+        }
+        
+        return CollectionsMarshal.AsSpan(_camerasWithUpdatedRegions);
+    }
+
+    private void RemoveViews()
+    {
+        _boxContainer.QueueFree();
+        AddChild(_boxContainer = new VBoxContainer());
+    }
+
+    private void CreateViews()
+    {
+        if (_number == 0) return;
+        int columnsCount = GetColumnsCount(_number);
+        
+        var boxContainer = new HBoxContainer();
+        _boxContainer.AddChild(boxContainer);
+
+        _cameras = new Camera[_number];
+        _containers = new ViewContainer[_number];
+        
+        var column = 0;
+        for (var i = 0; i < _number; i++)
+        {
+            if (++column > columnsCount)
+            {
+                column = 0;
+                _boxContainer.AddChild(boxContainer = new HBoxContainer());
+            }
+            
+            var viewContainer = _packedViewContainer.Instantiate<ViewContainer>();
+            _cameras[i] = viewContainer.Camera;
+            _containers[i] = viewContainer;
+            boxContainer.AddChild(viewContainer);
+        }
+    }
+    
+    private static int GetRowsCount(int viewNumber)
+    {
+        return Mathf.CeilToInt((MathF.Sqrt(1 + 4 * viewNumber) - 1f) / 2f);
+    }
+
+    private static int GetColumnsCount(int viewNumber)
+    {
+        return Mathf.CeilToInt(viewNumber / (float)GetRowsCount(viewNumber));
+    }
+}

@@ -6,13 +6,15 @@ using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework.View;
 
-public partial class Camera : Camera2D
+public partial class Camera : Camera2D, ICamera
 {
+	private static readonly Vector2I CullBuffer = new(320, 288);
+	
 	private const byte CentreOffset = 16;
 	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
 	
-	public Vector2I ActiveRegion
+	public Rect2I ActiveRegion
 	{
 		get => _activeRegion;
 		private set
@@ -21,7 +23,7 @@ public partial class Camera : Camera2D
 			_activeRegion = value;
 		}
 	}
-	private Vector2I _activeRegion;
+	private Rect2I _activeRegion;
 	public bool IsActiveRegionChanged { get; private set; }
     
 	[Export] public BaseObject Target
@@ -42,11 +44,11 @@ public partial class Camera : Camera2D
 	private Vector2I _bufferOffset;
 	private Vector2I _maxSpeed;
 	private Vector2 _speed;
-	public Vector2I BufferPosition;
-	public Vector2 Delay;
-	public Vector2I BoundSpeed;
-	public Vector4 Bound;
-	public Vector4 Limit;
+	public Vector2I BufferPosition { get; private set; }
+	public Vector2 Delay { get; private set; }
+	public Vector2I BoundSpeed { get; private set; }
+	public Vector4 Bound { get; private set; }
+	public Vector4 Limit { get; private set; }
 
 	private Vector2I _shakeOffset;
 	private float _shakeTimer;
@@ -72,8 +74,7 @@ public partial class Camera : Camera2D
 		if (Target != null || PlayerData.Players.Count == 0) return;
 		Player playerTarget = PlayerData.Players.First();
 		Target = playerTarget;
-		BufferPosition = (Vector2I)playerTarget.Position - SharedData.ViewSize;
-		BufferPosition.Y += 16;
+		BufferPosition = (Vector2I)playerTarget.Position - SharedData.ViewSize + 16 * Vector2I.Down;
 		
 		_rawPosition = BufferPosition;
 	}
@@ -115,43 +116,7 @@ public partial class Camera : Camera2D
 			finalPosition.X + SharedData.ViewSize.X, finalPosition.Y + SharedData.ViewSize.Y);
 		
 		ForceUpdateScroll();
-		UpdateActiveArea();
-	}
-
-	public void Delete()
-	{
-		/*
-		var _surface = camera_get_surface(_index);
-	
-		var _camera = c_framework.camera;
-		if _camera.view_count > 0
-		{
-			_camera.view_count--;
-		}
-	
-		// Clear the camera
-		camera_destroy(_view.instance);
-	
-		if surface_exists(_surface.instance)
-		{
-			surface_free(_surface.instance);
-		}
-	
-		if surface_exists(_surface.instance_overlay)
-		{
-			surface_free(_surface.instance_overlay);
-		}
-	
-		delete _view;
-		delete _surface;
-	
-		_camera.view_array[_index] = noone;
-		_camera.surface_array[_index] = noone;
-
-		view_visible[_index] = false;
-		view_camera[_index] = -1;
-		view_surface_id[_index] = -1;
-		*/
+		UpdateActiveRegion();
 	}
 
 	public void UpdateDelay(int? delayX = null, int? delayY = null)
@@ -211,16 +176,19 @@ public partial class Camera : Camera2D
 		return rect.End.X >= cameraRect.Position.X && rect.Position.X < cameraRect.End.X
 		    && rect.End.Y >= cameraRect.Position.Y && rect.Position.Y < cameraRect.End.Y;
 	}
+	
+	public bool CheckPositionInSafeRegion(Vector2I position) => 
 
-	public bool CheckPositionInActiveRegion(Vector2 position)
+	public bool CheckPositionInActiveRegion(Vector2I position) => ActiveRegion.HasPoint(position);
+	
+	public bool CheckXInActiveRegion(int position)
 	{
-		const int cullBufferX = 320;
-		const int cullBufferY = 288;
-		
-		return position.X >= _activeRegion.X && 
-		       position.Y >= _activeRegion.Y && 
-		       position.X < _activeRegion.X + SharedData.ViewSize.X + cullBufferX &&
-		       position.Y < _activeRegion.Y + SharedData.ViewSize.Y + cullBufferY;
+		return position >= ActiveRegion.Position.X && position < ActiveRegion.Position.X + ActiveRegion.Size.X;
+	}
+
+	public bool CheckYInActiveRegion(int position)
+	{
+		return position >= ActiveRegion.Position.Y && position < ActiveRegion.Position.Y + ActiveRegion.Size.Y;
 	}
 
 	private void UpdateCdCamera(PlayerData player)
@@ -244,10 +212,12 @@ public partial class Camera : Camera2D
 		}
 	}
 
-	private void UpdateActiveArea()
+	private void UpdateActiveRegion()
 	{
-		Vector2I position = (Vector2I)Position + sbyte.MinValue * Vector2I.One;
-		ActiveRegion = new Vector2I(position.X & sbyte.MinValue, position.Y & sbyte.MinValue);
+		Vector2I position = BufferPosition + sbyte.MinValue * Vector2I.One;
+		position.X &= sbyte.MinValue;
+		position.Y &= sbyte.MinValue;
+		ActiveRegion = new Rect2I(position, SharedData.ViewSize + CullBuffer);
 	}
 	
 	private static float MoveBoundaryForward(float limit, float bound, float position, float boundSpeed)
@@ -327,16 +297,19 @@ public partial class Camera : Camera2D
 
 	private void UpdateRawPosition(float processSpeed)
 	{
+		Vector2 delay = Delay;
 		for (var i = 0; i < 2; i++)
 		{
-			if (Delay[i] > 0f)
+			if (delay[i] > 0f)
 			{
-				Delay[i] -= processSpeed;
+				delay[i] -= processSpeed;
 				continue;
 			}
 			
 			_rawPosition[i] += _speed[i];
 		}
+
+		Delay = delay;
 	}
 
 	private static float CalculateSpeed(int difference, int threshold, float maxSpeed)
@@ -344,7 +317,6 @@ public partial class Camera : Camera2D
 		int distance = Math.Abs(difference) - threshold;
 		return distance <= 0 ? 0 : Math.Clamp(distance * Math.Sign(difference), -maxSpeed, maxSpeed);
 	}
-	
 	
 	private static int CalculateShakeOffset(float shakeTimer, int shakeOffset) => shakeOffset switch
 	{

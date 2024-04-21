@@ -54,6 +54,6 @@ public static class FrameworkData
 			Time += processSpeed;
 		}
 		
-		Culler.Cull();
+		Culler.EarlyCull();
     }
 }
