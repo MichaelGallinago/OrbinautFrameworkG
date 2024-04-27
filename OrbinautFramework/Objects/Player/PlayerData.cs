@@ -4,19 +4,22 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
-using OrbinautFramework3.Objects.Spawnable.Barrier;
-using Camera = OrbinautFramework3.Framework.View.Camera;
+using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class PlayerData : BaseObject, ICpuTarget
 {
+	public const byte MaxRecordLength = 32;
+	
 	[Export] private Types _uniqueType;
 	[Export] private SpawnTypes _spawnType;
 
 	public event Action<Types> TypeChanged;
-	
+
 	public static List<Player> Players { get; } = [];
+	private static int _playerCount;
 
 	public Types Type
 	{
@@ -64,7 +67,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }
-	public Barrier Barrier { get; set; }
+	public ShieldContainer Shield { get; set; }
     
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
@@ -75,13 +78,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
     
 	public float AirTimer { get; set; }
 	public uint ComboCounter { get; set; }
-	public uint ScoreCount { get; set; }
-	public uint RingCount { get; set; }
-	public uint LifeCount { get; set; }
 	public float InvincibilityTimer { get; set; }
 	public float ItemSpeedTimer { get; set; }
 	public float ItemInvincibilityTimer { get; set; }
-	public List<uint> LifeRewards { get; set; }
 
 	public ICarried CarryTarget { get; set; }
 	public float CarryTimer { get; set; }
@@ -100,7 +99,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	public HashSet<BaseObject> PushObjects { get; } = [];
 	public bool IsEditMode { get; set; }
-	public List<RecordedData> RecordedData { get; init; } = [];
+	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
+	private DataRecord[] _recordedData;
 	
 	protected CollisionTileMap TileMap;
 	protected readonly PlayerInput Input = new();
@@ -110,15 +110,22 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	
 	protected PlayerData()
 	{
-		Barrier = new Barrier(this);
+		Id = _playerCount++;
+		Shield = new ShieldContainer(this);
 	}
 
 	public override void _Ready()
 	{
 		Reset();
+		Initialize();
 		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
-		LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
+	}
+
+	public static void ResetStatic()
+	{
+		_playerCount = 0;
+		Players.Clear();
 	}
 	
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
@@ -180,17 +187,12 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		ActionValue2 = 0f;
 		SuperValue = 0f;
 		
-		Barrier.State = Barrier.States.None;
-		Barrier.Type = Barrier.Types.None;
+		Shield.State = ShieldContainer.States.None;
+		Shield.Type = ShieldContainer.Types.None;
 		
 		Facing = Constants.Direction.Positive;
 		Animation = Animations.Idle;
 		VisualAngle = 0f;
-		
-		if (Camera.Main != null && Camera.Main.Target == this)
-		{
-			Camera.Main.Target = this;
-		}
 		
 		IsForcedSpin = false;
 		IsAirLock = false;
@@ -198,13 +200,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		
 		AirTimer = Constants.DefaultAirValue;
 		ComboCounter = 0;
-		ScoreCount = 0;
-		RingCount = 0;
 		InvincibilityTimer = 0f;
 		ItemSpeedTimer = 0f;
 		ItemInvincibilityTimer = 0f;
-		LifeCount = 0;
-		LifeRewards = [];
 		
 		CarryTarget = null;
 		CarryTimer = 0f;
@@ -221,7 +219,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		
 		Input.Clear();
 		Input.NoControl = false;
-		RecordedData.Clear();
 		
 		if (Id != 0)
 		{
@@ -238,38 +235,83 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 			}
 			return;
 		}
+		
+		_recordedData = new DataRecord[MaxRecordLength * Players.Count];
+		var record = new DataRecord(
+			Position, Input.Press, Input.Down, IsGrounded, IsJumping, Action, Facing, SetPushAnimationBy);
+		
+		Array.Fill(_recordedData, record);
 
 		if (!_isInit) return;
 		_isInit = false;
+	}
+
+	private void Initialize()
+	{
+		// Spawn on position and load saved data (if exists)
+		if (Id == 0)
+		{
+			var _ring_data = global.giant_ring_data;
+			var _checkpoint_data = global.checkpoint_data;
+			
+			if array_length(_ring_data) > 0
+			{
+				x = _ring_data[0];
+				y = _ring_data[1];
+			}
+			else if array_length(global.checkpoint_data) > 0
+			{
+				x = _checkpoint_data[0];
+				y = _checkpoint_data[1] - radius_y - 1;
+			}
+			else
+			{
+				y -= radius_y + 1;
+			}
+		
+			if global.player_shield != SHIELD_NONE
+			{
+				instance_create(x, y, obj_shield, { TargetPlayer: id });
+			}
+		}
+	
+		// Spawn behind the previous player
+		else
+		{
+			var _previous_player = player_get(player_index - 1);
+			
+			x = _previous_player.x - 16;
+			y = _previous_player.y + _previous_player.radius_y - radius_y;
+		}
 		
 		if (SharedData.GiantRingData != null)
 		{
-			Position = SharedData.GiantRingData.position;
-			SharedData.GiantRingData = null;
+			Position = SharedData.GiantRingData.Position;
 		}
 		else if (SharedData.CheckpointData != null)
 		{
 			Position = SharedData.CheckpointData.Position - new Vector2I(0, Radius.Y + 1);
 		}
-
-		Camera.Main.Target = this;
-		Camera.Main.Position = Position - SharedData.ViewSize / 2 - new Vector2(0, 16);
-
-		if (SharedData.SavedRings != 0)
+		else
 		{
-			RingCount = SharedData.SavedRings;
+			Position = Position with { Y = Position.Y - Radius.Y - 1 };
 		}
 		
-		if (SharedData.SavedBarrier != Barrier.Types.None)
+		
+		if (SharedData.PlayerShield != ShieldContainer.Types.None)
 		{
-			Barrier.Type = SharedData.SavedBarrier;
+			Shield.Type = SharedData.PlayerShield;
 		}
-			
-		ScoreCount = SharedData.SavedScore;
-		LifeCount = SharedData.SavedLives;
+		
+		InitializeCamera();
+	}
 
-		SharedData.SavedRings = 0;
-		SharedData.SavedBarrier = Barrier.Types.None;
+	private void InitializeCamera()
+	{
+		ReadOnlySpan<ICamera> cameras = FrameworkData.CurrentScene.Views.Cameras;
+		if (cameras.Length <= Id) return;
+		cameras[Id].Target = this;
+		cameras[Id].Position = Position - SharedData.ViewSize / 2 + Vector2.Down * 16;
 	}
 	
 	private bool ApplyType()

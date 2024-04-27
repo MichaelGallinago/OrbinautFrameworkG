@@ -4,7 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
-using OrbinautFramework3.Objects.Spawnable.Barrier;
+using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -47,7 +47,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		ObjectInteraction = false;
 		IsGrounded = false;
 		OnObject = null;
-		Barrier.Type = Barrier.Types.None;
+		Shield.Type = ShieldContainer.Types.None;
 		Animation = Animations.Death;
 		Gravity = GravityType.Default;
 		Velocity.Vector = new Vector2(0f, -7f);
@@ -97,7 +97,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		SetPushAnimationBy = null;
 		IsHurt = false;
 	
-		Barrier.State = Barrier.States.None;
+		Shield.State = ShieldContainer.States.None;
 		ComboCounter = 0;
 		TileLayerBehaviour = Constants.TileLayerBehaviours.Floor;
 	
@@ -153,19 +153,19 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private bool WaterBarrierBounce()
 	{
-		if (Barrier.State != Barrier.States.Active || Barrier.Type != Barrier.Types.Water) return false;
+		if (Shield.State != ShieldContainer.States.Active || Shield.Type != ShieldContainer.Types.Water) return false;
 		
 		float force = IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(Angle);
 		Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
 
-		Barrier.State = Barrier.States.None;
+		Shield.State = ShieldContainer.States.None;
 		OnObject = null;
 		IsGrounded = false;
 		
-		Barrier.UpdateFrame(0, 1, [3, 2]);
-		Barrier.UpdateDuration([7, 12]);
-		Barrier.Timer = 20d;
+		Shield.UpdateFrame(0, 1, [3, 2]);
+		Shield.UpdateDuration([7, 12]);
+		Shield.Timer = 20d;
 			
 		AudioPlayer.Sound.Play(SoundStorage.BarrierWater2);
 		

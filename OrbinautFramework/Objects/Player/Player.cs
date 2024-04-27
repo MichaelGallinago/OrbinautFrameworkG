@@ -2,16 +2,13 @@ using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Camera;
-using OrbinautFramework3.Objects.Spawnable.Barrier;
+using OrbinautFramework3.Framework.View;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
-using Camera = OrbinautFramework3.Framework.View.Camera;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed
 {
-	private const byte MaxRecordLength = 32;
 	private readonly EditMode _editMode = new();
 	
 	[Export] public PackedScene PackedTail { get; private set; }
@@ -40,12 +37,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		base.Reset();
 		Sprite.Animate(this);
 	}
-	
-	private new void QueueFree()
-	{
-		RemovePlayer();
-		base.QueueFree();
-	}
 
 	public override void _ExitTree()
 	{
@@ -56,7 +47,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	public override void _EnterTree()
 	{
 		base._EnterTree();
-		Id = Players.Count;
 		Players.Add(this);
 	}
 	
@@ -161,7 +151,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		UpdateSuperStatus();
 		
 		IsInvincible = InvincibilityTimer != 0 || ItemInvincibilityTimer != 0 || 
-		               IsHurt || IsSuper || Barrier.State == Barrier.States.DoubleSpin;
+		               IsHurt || IsSuper || Shield.State == Shield.States.DoubleSpin;
 		
 		if (Id == 0 && FrameworkData.Time >= 36000d)
 		{
@@ -301,20 +291,20 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void RemoveBarrierUnderwater()
 	{
-		if (Barrier.Type is not (Barrier.Types.Flame or Barrier.Types.Thunder)) return;
+		if (Shield.Type is not (Shield.Types.Flame or Shield.Types.Thunder)) return;
 		
-		if (Barrier.Type == Barrier.Types.Thunder)
+		if (Shield.Type == Shield.Types.Thunder)
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
 		}
 			
-		Barrier.Type = Barrier.Types.None;
+		Shield.Type = Shield.Types.None;
 	}
 
 	private bool UpdateAirTimer()
 	{
-		if (Barrier.Type == Barrier.Types.Water) return false;
+		if (Shield.Type == Shield.Types.Water) return false;
 		
 		if (AirTimer > -1f)
 		{
@@ -464,7 +454,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				break;
 			
 			default:
-				SetHitBoxExtra(Barrier.State == Barrier.States.DoubleSpin ? new Vector2I(24, 24) : Vector2I.Zero);
+				SetHitBoxExtra(Shield.State == Shield.States.DoubleSpin ? new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}
 	}
@@ -473,7 +463,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsDead) return;
 		
-		RecordedData.Add(new RecordedData(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
+		RecordedData.Add(new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
 		if (RecordedData.Count <= MaxRecordLength) return;
 		RecordedData.RemoveAt(0);
 	}
@@ -703,7 +693,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				// TODO: Fade
 				//if (FrameworkData.fade.state != Constants.FadeState.Max) break;
 
-			    FrameworkData.SavedLives = LifeCount;
+			    SharedData.LifeCount = LifeCount;
 			    GetTree().ReloadCurrentScene();
 				break;
 			

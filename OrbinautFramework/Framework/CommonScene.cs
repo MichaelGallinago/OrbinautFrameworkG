@@ -13,6 +13,7 @@ public abstract partial class CommonScene : Node2D
     
     public SceneTree Tree { get; private set; }
     public bool IsStage { get; protected set; }
+    public ObjectCuller Culler { get; } = new();
     
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
     private SceneLateUpdate _lateUpdate = new();
@@ -36,12 +37,13 @@ public abstract partial class CommonScene : Node2D
     {
         FrameworkData.ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
         FrameworkData.UpdateEarly(FrameworkData.ProcessSpeed);
+        Culler.EarlyCull();
         
-        foreach (BaseObject objects in BaseObject.ActiveObjects)
+        foreach (BaseObject objects in Culler.ActiveObjects)
         {
             objects.PreviousPosition = objects.Position;
         }
-
+        
         foreach (Player player in PlayerData.Players)
         {
             player.TouchObjects.Clear();

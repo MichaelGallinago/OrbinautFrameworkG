@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Objects.Player;
 using static OrbinautFramework3.Framework.Constants;
@@ -21,11 +19,11 @@ public abstract partial class BaseObject : Node2D
 				case CullingType.Delete:
 					return;
 				case CullingType.None:
-					ActiveObjects.Add(this);
+					FrameworkData.CurrentScene.Culler.AddToCulling(this);
 					break;
 				default:
 					if (value != CullingType.None) break;
-					RemoveFromCulling();
+					FrameworkData.CurrentScene.Culler.RemoveFromCulling(this);
 					break;
 			}
 
@@ -33,54 +31,62 @@ public abstract partial class BaseObject : Node2D
 		}
 	}
 	private CullingType _culling;
-	
-	public static HashSet<BaseObject> StoppedObjects { get; } = [];
-	public static HashSet<BaseObject> ActiveObjects { get; } = [];
 
-	public CullingData CullingData { get; private set; }
-	public SolidData SolidData { get; } = new();
+	public ResetData ResetData { get; private set; }
 	public Vector2 PreviousPosition { get; set; }
-
-	public InteractData InteractData = new();
+	public InteractData InteractData;
+	public SolidData SolidData;
 	
 	public override void _EnterTree()
 	{
 		if (Culling != CullingType.None)
 		{
-			ActiveObjects.Add(this);	
+			FrameworkData.CurrentScene.Culler.AddToCulling(this);
 		}
-		CullingData = new CullingData(Position, Scale, Visible, ZIndex);
 	}
-
-	public override void _ExitTree() => RemoveFromCulling();
-
-	public void ResetZIndex() => ZIndex = CullingData.ZIndex;
 	
 	public virtual void Reset()
 	{
-		Position = CullingData.Position;
-		Scale = CullingData.Scale;
-		Visible = CullingData.IsVisible;
-		ZIndex = CullingData.ZIndex;
+		Position = ResetData.Position;
+		Scale = ResetData.Scale;
+		Visible = ResetData.IsVisible;
+		ZIndex = ResetData.ZIndex;
 	}
+
+	public override void _ExitTree() => FrameworkData.CurrentScene.Culler.RemoveFromCulling(this);
     
-	public void SetSolid(Vector2I radius, Vector2I offset = default)
+	public void SetSolid(Vector2I radius, Vector2I offset)
+	{
+		SolidData.Offset = offset;
+		SetSolid(radius);
+	}
+	
+	public void SetSolid(Vector2I radius)
 	{
 		SolidData.Radius = radius;
-		SolidData.Offset = offset;
 		SolidData.HeightMap = null;
 	}
-
-	public void SetHitBox(Vector2I radius, Vector2I offset = default)
+	
+	public void SetHitBox(Vector2I radius, Vector2I offset)
+	{
+		InteractData.Offset = offset;
+		SetHitBox(radius);
+	}
+	
+	public void SetHitBox(Vector2I radius)
 	{
 		InteractData.Radius = radius;
-		InteractData.Offset = offset;
 	}
 
-	public void SetHitBoxExtra(Vector2I radius, Vector2I offset = default)
+	public void SetHitBoxExtra(Vector2I radius, Vector2I offset)
+	{
+		InteractData.OffsetExtra = offset;
+		SetHitBoxExtra(radius);
+	}
+	
+	public void SetHitBoxExtra(Vector2I radius)
 	{
 		InteractData.RadiusExtra = radius;
-		InteractData.OffsetExtra = offset;
 	}
 	
 	public bool CheckCollision(BaseObject target, CollisionSensor type)
@@ -194,14 +200,6 @@ public abstract partial class BaseObject : Node2D
 		return target is Player player && player.PushObjects.Contains(this);
 	}
 
-	private void RemoveFromCulling()
-	{
-		if (ActiveObjects.Contains(this))
-		{
-			ActiveObjects.Remove(this);
-			return;
-		}
-
-		StoppedObjects.Remove(this);
-	}
+	private void RemoveFromCulling() => FrameworkData.CurrentScene.Culler.RemoveFromCulling(this);
+	private void AddToCulling() => FrameworkData.CurrentScene.Culler.AddToCulling(this);
 }

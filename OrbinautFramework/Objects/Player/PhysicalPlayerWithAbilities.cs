@@ -3,9 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
-using OrbinautFramework3.Objects.Spawnable.Barrier;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
-using Camera = OrbinautFramework3.Framework.View.Camera;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -262,7 +260,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
 		{
-			if (Barrier.Type <= Barrier.Types.Normal || IsSuper)
+			if (Shield.Type <= Shield.Types.Normal || IsSuper)
 			{
 				Action = Actions.DropDash;
 				ActionValue = 0f;
@@ -270,17 +268,17 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		// Barrier abilities
-		if (!Input.Press.Abc || IsSuper || Barrier.State != Barrier.States.None || ItemInvincibilityTimer != 0) return;
+		if (!Input.Press.Abc || IsSuper || Shield.State != Shield.States.None || ItemInvincibilityTimer != 0) return;
 		
-		Barrier.State = Barrier.States.Active;
+		Shield.State = Shield.States.Active;
 		IsAirLock = false;
 		
-		switch (Barrier.Type)
+		switch (Shield.Type)
 		{
-			case Barrier.Types.None: JumpDoubleSpin(); break;
-			case Barrier.Types.Water: JumpWaterBarrier(); break;
-			case Barrier.Types.Flame: JumpFlameBarrier(); break;
-			case Barrier.Types.Thunder: JumpThunderBarrier(); break;
+			case Shield.Types.None: JumpDoubleSpin(); break;
+			case Shield.Types.Water: JumpWaterBarrier(); break;
+			case Shield.Types.Flame: JumpFlameBarrier(); break;
+			case Shield.Types.Thunder: JumpThunderBarrier(); break;
 		}
 	}
 
@@ -299,7 +297,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		*/
 				
-		Barrier.State = Barrier.States.DoubleSpin;
+		Shield.State = Shield.States.DoubleSpin;
 				
 		//TODO: obj_double_spin
 		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
@@ -310,9 +308,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		Velocity.Vector = new Vector2(0f, 8f);
 				
-		Barrier.UpdateFrame(0, 1, [1, 2]);
-		Barrier.UpdateDuration([6, 18]);
-		Barrier.AnimationTimer = 25f;
+		Shield.UpdateFrame(0, 1, [1, 2]);
+		Shield.UpdateDuration([6, 18]);
+		Shield.AnimationTimer = 25f;
 		
 		AudioPlayer.Sound.Play(SoundStorage.BarrierWater2);
 	}
@@ -332,14 +330,14 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		//Barrier.SetAnimation(, [2]);
 		ZIndex = -1;
 				
-		Barrier.AnimationTimer = 24f;
+		Shield.AnimationTimer = 24f;
 		
 		AudioPlayer.Sound.Play(SoundStorage.BarrierFlame2);
 	}
 
 	private void JumpThunderBarrier()
 	{
-		Barrier.State = Barrier.States.Disabled;
+		Shield.State = Shield.States.Disabled;
 		Velocity.Y = -5.5f;
 				
 		for (var i = 0; i < 4; i++)
@@ -554,7 +552,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (!SharedData.DropDash || Action != Actions.DropDash) return true;
 
-		if (Barrier.Type <= Barrier.Types.Normal || IsSuper) return false;
+		if (Shield.Type <= Shield.Types.Normal || IsSuper) return false;
 		
 		Animation = Animations.Spin;
 		Action = Actions.None;

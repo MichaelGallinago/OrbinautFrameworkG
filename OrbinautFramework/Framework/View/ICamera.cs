@@ -1,4 +1,5 @@
 ﻿using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -10,7 +11,8 @@ public interface ICamera
     public Vector2I BoundSpeed { get; }
     public Vector4 Bound { get; }
     public Vector4 Limit { get; }
-    public Vector2 Position { get; }
+    public BaseObject Target { set; }
+    public Vector2 Position { get; set; }
     
     public bool CheckRectInside(Rect2 rect);
     public bool CheckPositionInSafeRegion(Vector2I position);

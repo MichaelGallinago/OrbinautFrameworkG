@@ -67,7 +67,7 @@ public partial class Tail : AdvancedAnimatedSprite
 	private void UpdateAngle(ITailed data)
 	{
 		_angle = GetTailAngle(data);
-		RotationDegrees = FrameworkData.RotationMode == 0 ? MathF.Ceiling((_angle - 22.5f) / 45f) * 45f : _angle;
+		RotationDegrees = SharedData.RotationMode == 0 ? MathF.Ceiling((_angle - 22.5f) / 45f) * 45f : _angle;
 	}
 
 	private float GetTailAngle(ITailed data)

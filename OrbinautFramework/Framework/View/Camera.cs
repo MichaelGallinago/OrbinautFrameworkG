@@ -176,8 +176,16 @@ public partial class Camera : Camera2D, ICamera
 		return rect.End.X >= cameraRect.Position.X && rect.Position.X < cameraRect.End.X
 		    && rect.End.Y >= cameraRect.Position.Y && rect.Position.Y < cameraRect.End.Y;
 	}
-	
-	public bool CheckPositionInSafeRegion(Vector2I position) => 
+
+	public bool CheckPositionInSafeRegion(Vector2I position)
+	{
+		int distanceY = position.Y - BufferPosition.Y + 128;
+		position.X -= ActiveRegion.Position.X;
+
+		return position.X >= 0 && position.X < ActiveRegion.Size.X && 
+		       distanceY  >= 0 && distanceY  < ActiveRegion.Size.Y && 
+		       position.Y < Limit.W;
+	}
 
 	public bool CheckPositionInActiveRegion(Vector2I position) => ActiveRegion.HasPoint(position);
 	

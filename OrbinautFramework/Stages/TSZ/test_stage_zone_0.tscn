@@ -1,10 +1,9 @@
-[gd_scene load_steps=28 format=3 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=27 format=3 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_pey0e"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
-[ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/view_storage.tscn" id="3_ujeyh"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="4_i6eum"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="5_movty"]
@@ -74,8 +73,6 @@ process_priority = -1
 material = SubResource("ShaderMaterial_6rqx3")
 script = ExtResource("1_hkdi5")
 CollisionTileMap = NodePath("CollisionTileMap")
-
-[node name="ViewStorage" parent="." instance=ExtResource("3_ujeyh")]
 
 [node name="GraphicsTileMapA" type="TileMap" parent="."]
 z_index = -11

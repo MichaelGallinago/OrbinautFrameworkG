@@ -1,9 +1,9 @@
 using Godot;
 using OrbinautFramework3.Framework.Animations;
 
-namespace OrbinautFramework3.Objects.Spawnable.Barrier;
+namespace OrbinautFramework3.Objects.Spawnable.Shield;
 
-public partial class Barrier(Node2D target) : AdvancedAnimatedSprite
+public partial class ShieldContainer(Node2D target) : AdvancedAnimatedSprite
 {
     public enum Types : byte
     {

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvv8fxsacmpdv"
-path="res://.godot/imported/flame.png-212d2eccea4ed2039804935c92dfc8d1.ctex"
+path="res://.godot/imported/flame.png-cfd822b7a5f31af2d6d9ce1c9d325557.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Spawnable/Barrier/flame.png"
-dest_files=["res://.godot/imported/flame.png-212d2eccea4ed2039804935c92dfc8d1.ctex"]
+source_file="res://Objects/Spawnable/Shield/flame.png"
+dest_files=["res://.godot/imported/flame.png-cfd822b7a5f31af2d6d9ce1c9d325557.ctex"]
 
 [params]
 

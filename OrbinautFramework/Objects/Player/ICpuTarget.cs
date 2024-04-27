@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
@@ -7,8 +8,6 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface ICpuTarget
 {
-    public const int CpuDelay = 16;
-    
     bool IsDead { get; }
     Velocity Velocity { get; }
     Actions Action { get; }
@@ -17,6 +16,6 @@ public interface ICpuTarget
     BaseObject OnObject { get; }
     bool ObjectInteraction { get; }
     
-    List<RecordedData> RecordedData { protected get; init; }
-    RecordedData FollowData => RecordedData.Count >= CpuDelay ? RecordedData[^CpuDelay] : default;
+    ReadOnlySpan<DataRecord> RecordedData { get; }
+    DataRecord GetFollowDataRecord(int cpuDelay) => RecordedData[cpuDelay];
 }

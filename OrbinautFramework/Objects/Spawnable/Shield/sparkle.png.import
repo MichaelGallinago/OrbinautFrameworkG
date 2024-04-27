@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cywdnh3r85b07"
-path="res://.godot/imported/thunder.png-b315058ddacffee742d8702ea08600c3.ctex"
+uid="uid://caaw40ibok48t"
+path="res://.godot/imported/sparkle.png-b4a612008390e25d6eccce8d83b661ba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Spawnable/Barrier/thunder.png"
-dest_files=["res://.godot/imported/thunder.png-b315058ddacffee742d8702ea08600c3.ctex"]
+source_file="res://Objects/Spawnable/Shield/sparkle.png"
+dest_files=["res://.godot/imported/sparkle.png-b4a612008390e25d6eccce8d83b661ba.ctex"]
 
 [params]
 

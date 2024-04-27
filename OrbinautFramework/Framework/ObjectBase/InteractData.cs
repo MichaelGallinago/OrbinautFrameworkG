@@ -2,11 +2,11 @@ using Godot;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public struct InteractData()
-{
-    public bool IsInteract = true;
-    public Vector2I Radius = default;
-    public Vector2I Offset = default;
-    public Vector2I RadiusExtra = default;
-    public Vector2I OffsetExtra = default;
-}
+public record struct InteractData(
+    bool IsInteract, 
+    Vector2I Radius, 
+    Vector2I Offset, 
+    Vector2I RadiusExtra, 
+    Vector2I OffsetExtra
+);
+    

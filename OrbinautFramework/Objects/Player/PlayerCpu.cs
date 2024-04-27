@@ -3,7 +3,6 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
-using Camera = OrbinautFramework3.Framework.View.Camera;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -90,15 +89,15 @@ public partial class PlayerCpu : Player
 				break;
 		}
 		
-		RecordedData followData = _leadPlayer.FollowData;
+		DataRecord followDataRecord = _leadPlayer.FollowDataRecord;
 
-		Vector2 distance = Position - followData.Position;
+		Vector2 distance = Position - followDataRecord.Position;
 		distance.Y *= -1f;
 		distance = distance.Floor();
 		
 		Position += new Vector2(GetRespawnVelocityX(ref distance.X), Math.Sign(distance.Y));
 
-		if (_leadPlayer.IsDead || followData.Position.Y < 0f || distance == Vector2.Zero) return true;
+		if (_leadPlayer.IsDead || followDataRecord.Position.Y < 0f || distance == Vector2.Zero) return true;
 		
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
@@ -158,7 +157,7 @@ public partial class PlayerCpu : Player
 
 		CpuTarget ??= Players[Id - 1];
 		
-		RecordedData followData = CpuTarget.FollowData;
+		DataRecord followDataRecord = CpuTarget.FollowDataRecord;
 		
 		//TODO: ZIndex
 		//depth = _player1.depth + player_id;
@@ -178,42 +177,42 @@ public partial class PlayerCpu : Player
 		
 		if (CpuTarget.Action == Actions.PeelOut)
 		{
-			followData.InputDown = followData.InputPress = new Buttons();
+			followDataRecord.InputDown = followDataRecord.InputPress = new Buttons();
 		}
 		
 		if (SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
 			if (Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)
 			{
-				followData.Position.X -= 32f;
+				followDataRecord.Position.X -= 32f;
 			}
 		}
 		
 		var doJump = true;
 		
 		// TODO: AI is pushing weirdly rn
-		if (SetPushAnimationBy == null || followData.SetPushAnimationBy != null)
+		if (SetPushAnimationBy == null || followDataRecord.SetPushAnimationBy != null)
 		{
-			int distanceX = Mathf.FloorToInt(followData.Position.X - Position.X);
-			PushCpu(distanceX, ref followData);
-			doJump = CheckCpuJump(distanceX, ref followData);
+			int distanceX = Mathf.FloorToInt(followDataRecord.Position.X - Position.X);
+			PushCpu(distanceX, ref followDataRecord);
+			doJump = CheckCpuJump(distanceX, followDataRecord);
 		}
 		
 		if (doJump && Animation != Animations.Duck && FrameworkData.IsTimePeriodLooped(64f))
 		{
-			followData.InputPress.Abc = followData.InputDown.Abc = true;
+			followDataRecord.InputPress.Abc = followDataRecord.InputDown.Abc = true;
 			IsCpuJumping = true;
 		}
 		
-		Input.Set(followData.InputPress, followData.InputDown);
+		Input.Set(followDataRecord.InputPress, followDataRecord.InputDown);
 		return false;
 	}
 	
-	private void PushCpu(float distanceX, ref RecordedData followData)
+	private void PushCpu(float distanceX, ref DataRecord followDataRecord)
 	{
 		if (distanceX == 0f)
 		{
-			Facing = followData.Facing;
+			Facing = followDataRecord.Facing;
 			return;
 		}
 		
@@ -223,8 +222,8 @@ public partial class PlayerCpu : Player
 		int sign = isMoveToRight ? 1 : -1;
 		if (sign * distanceX > maxDistanceX)
 		{
-			followData.InputDown.Left = followData.InputPress.Left = !isMoveToRight;
-			followData.InputDown.Right = followData.InputPress.Right = isMoveToRight;
+			followDataRecord.InputDown.Left = followDataRecord.InputPress.Left = !isMoveToRight;
+			followDataRecord.InputDown.Right = followDataRecord.InputPress.Right = isMoveToRight;
 		}
 						
 		if (GroundSpeed != 0f && Facing == (Constants.Direction)sign)
@@ -233,11 +232,11 @@ public partial class PlayerCpu : Player
 		}
 	}
 	
-	private bool CheckCpuJump(float distanceX, ref RecordedData followData)
+	private bool CheckCpuJump(float distanceX, DataRecord followDataRecord)
 	{
 		if (IsCpuJumping)
 		{
-			followData.InputDown.Abc = true;
+			followDataRecord.InputDown.Abc = true;
 				
 			if (!IsGrounded) return false;
 			IsCpuJumping = false;
@@ -246,7 +245,7 @@ public partial class PlayerCpu : Player
 		}
 		
 		if (Math.Abs(distanceX) > 64 && !FrameworkData.IsTimePeriodLooped(256f)) return false;
-		return Mathf.FloorToInt(followData.Position.Y - Position.Y) <= -32;
+		return Mathf.FloorToInt(followDataRecord.Position.Y - Position.Y) <= -32;
 	}
 	
 	private bool ProcessStuckCpu()

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cc5nxqmuj67k"
-path="res://.godot/imported/flame_dash.png-77fe28e397e7741f390c80d1cfb3c793.ctex"
+uid="uid://cyvxjxqgh71du"
+path="res://.godot/imported/basic.png-8fad22b3eac520a94ca8ea01dd3c253a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Spawnable/Barrier/flame_dash.png"
-dest_files=["res://.godot/imported/flame_dash.png-77fe28e397e7741f390c80d1cfb3c793.ctex"]
+source_file="res://Objects/Spawnable/Shield/basic.png"
+dest_files=["res://.godot/imported/basic.png-8fad22b3eac520a94ca8ea01dd3c253a.ctex"]
 
 [params]
 
