@@ -47,13 +47,12 @@ public static class SharedData
     public static GiantRingData GiantRingData { get; set; }
     // TODO: ds_giant_rings
     //public static ds_giant_rings { get; set; } = ds_list_create();
-    public static bool PlayerEditMode { get; set; } = false;
+    public static bool IsDebugModeEnabled { get; set; } = false;
     public static Types PlayerType { get; set; } = Types.Sonic;
     public static Types PlayerTypeCpu { get; set; } = Types.Tails;
     public static byte StageId { get; set; } = 0;
     public static byte ContinueCount { get; set; }
     public static byte EmeraldCount { get; set; }
-    public static byte SavedRings { get; set; }
     
     public static uint ScoreCount { get; set; }
     public static uint PlayerRings { get; set; }

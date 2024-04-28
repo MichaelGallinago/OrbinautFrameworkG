@@ -7,6 +7,10 @@ namespace OrbinautFramework3.Framework.View;
 
 public partial class Views : Control
 {
+    public static Views Local => FrameworkData.CurrentScene.Views;
+
+    public event Action<int> OnViewNumberChanged;
+    
     public byte Number
     { 
         get => _number;
@@ -14,19 +18,19 @@ public partial class Views : Control
         {
             _number = value;
             CreateViews();
+            OnViewNumberChanged?.Invoke(_number);
         }
     }
     private byte _number;
     
-    public static Views Local => FrameworkData.CurrentScene.Views;
-    
     [Export] private PackedScene _packedViewContainer;
     [Export] private VBoxContainer _boxContainer;
-
-    private ViewContainer[] _containers;
-    private Camera[] _cameras;
-    private readonly List<ICamera> _camerasWithUpdatedRegions = [];
+    
     public ReadOnlySpan<ICamera> Cameras => _cameras;
+    private Camera[] _cameras;
+    
+    private ViewContainer[] _containers;
+    private readonly List<ICamera> _camerasWithUpdatedRegions = [];
 
     public override void _Ready() => CreateViews();
 

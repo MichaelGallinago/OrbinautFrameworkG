@@ -7,7 +7,8 @@ using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public class EditMode
+//TODO: replace by prefabs
+public class DebugMode
 {
 	private const byte AccelerationMultiplier = 4;
 	private const float Acceleration = 0.046875f;
@@ -17,9 +18,8 @@ public class EditMode
 	private float _speed;
 	private readonly List<Type> _objects;
     
-    public EditMode()
+    public DebugMode()
     {
-	    //TODO: replace by prefabs
 	    _objects =
 	    [
 		    typeof(Common.Ring.Ring), typeof(Common.GiantRing.GiantRing), typeof(Common.ItemBox.ItemBox),

@@ -8,7 +8,7 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface ICpuTarget
 {
-    bool IsDead { get; }
+    bool IsRestartOnDeath { get; }
     Velocity Velocity { get; }
     Actions Action { get; }
     Vector2 Position { get; }

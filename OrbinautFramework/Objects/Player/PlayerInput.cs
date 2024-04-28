@@ -1,5 +1,4 @@
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Input;
 using OrbinautFramework3.Framework.InputModule;
 
 namespace OrbinautFramework3.Objects.Player;

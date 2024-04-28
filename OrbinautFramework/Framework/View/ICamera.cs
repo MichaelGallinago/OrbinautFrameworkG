@@ -7,9 +7,10 @@ public interface ICamera
 {
     public Rect2I ActiveRegion { get; }
     public Vector2I BufferPosition { get; }
+    public Vector2I PreviousPosition { get; }
     public Vector2 Delay { get; }
-    public Vector2I BoundSpeed { get; }
-    public Vector4 Bound { get; }
+    public int BoundSpeed { get; set; }
+    public Vector4 Bound { get; set; }
     public Vector4 Limit { get; }
     public BaseObject Target { set; }
     public Vector2 Position { get; set; }

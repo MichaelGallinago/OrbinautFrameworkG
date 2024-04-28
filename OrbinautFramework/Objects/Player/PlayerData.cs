@@ -57,11 +57,10 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public BaseObject SetPushAnimationBy { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
-	public bool IsDead { get; set; }
+	public bool IsRestartOnDeath { get; set; }
 	public BaseObject OnObject { get; set; }
-	public bool IsSuper { get; set; }
 	public bool IsInvincible { get; set; }
-	public float SuperValue { get; set; }
+	public float SuperTimer { get; set; }
 	
 	public Actions Action { get; set; }
 	public int ActionState { get; set; }
@@ -177,15 +176,14 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		IsJumping = false;
 		IsUnderwater = false;
 		IsHurt = false;
-		IsDead = false;
-		IsSuper = false;
+		IsRestartOnDeath = false;
 		IsInvincible = false;
 		
 		Action = Actions.None;
 		ActionState = 0;
 		ActionValue = 0f;
 		ActionValue2 = 0f;
-		SuperValue = 0f;
+		SuperTimer = 0f;
 		
 		Shield.State = ShieldContainer.States.None;
 		Shield.Type = ShieldContainer.Types.None;

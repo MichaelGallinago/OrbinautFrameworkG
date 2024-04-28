@@ -3,13 +3,14 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed
 {
-	private readonly EditMode _editMode = new();
+	private readonly DebugMode _debugMode = new();
 	
 	[Export] public PackedScene PackedTail { get; private set; }
 	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
@@ -52,23 +53,27 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	public override void _Process(double delta)
 	{
-		if (FrameworkData.IsPaused || !FrameworkData.UpdateTimer && !IsDead) return;
+		if (FrameworkData.IsPaused && !IsRestartOnDeath) return;
 		
 		float processSpeed = FrameworkData.ProcessSpeed;
 		
 		Input.Update(Id);
 
-		// EDIT MODE PLAYER ROUTINE
-		if (_editMode.Update(processSpeed, this, Input)) return;
+		// DEBUG MODE PLAYER ROUTINE
+		if (!IsRestartOnDeath && Id == 0 && SharedData.IsDebugModeEnabled)
+		{
+			if (_debugMode.Update(processSpeed, this, Input)) return;
+		}
 	    
 		// DEFAULT PLAYER ROUTINE
 		ProcessCpu(processSpeed);
-		ProcessRestart(processSpeed);
-	    
-		// Process default player control routine
-		base._Process(delta);
-
-		Camera.Main?.UpdatePlayerCamera(this);
+		ProcessDeath(processSpeed);
+		
+		if (IsRunControlRoutine)
+		{
+			base._Process(delta);
+		}
+		
 		UpdateStatus();
 		ProcessWater();
 		RecordData();
@@ -81,7 +86,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	public void ResetMusic()
 	{
-		if (IsSuper)
+		if (SuperTimer > 0f)
 		{
 			AudioPlayer.Music.Play(MusicStorage.Super);
 		}
@@ -140,30 +145,26 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	private void UpdateStatus()
 	{
-		if (IsDead) return;
-
 		CreateSkidDust();
 		UpdateInvincibilityFlashes();
-
-		ItemSpeedTimer = UpdateItemTimer(ItemSpeedTimer);
-		ItemInvincibilityTimer = UpdateItemTimer(ItemInvincibilityTimer);
+		
+		ItemSpeedTimer = UpdateItemTimer(ItemSpeedTimer, MusicStorage.HighSpeed);
+		ItemInvincibilityTimer = UpdateItemTimer(ItemInvincibilityTimer, MusicStorage.Invincibility);
 
 		UpdateSuperStatus();
 		
-		IsInvincible = InvincibilityTimer != 0 || ItemInvincibilityTimer != 0 || 
-		               IsHurt || IsSuper || Shield.State == Shield.States.DoubleSpin;
+		IsInvincible = InvincibilityTimer > 0f || ItemInvincibilityTimer > 0f || 
+		               IsHurt || SuperTimer > 0f || Shield.State == ShieldContainer.States.DoubleSpin;
 		
 		if (Id == 0 && FrameworkData.Time >= 36000d)
 		{
 			Kill();
 		}
-		
-		UpdateLiveRewards();
 	}
 
 	private void UpdateInvincibilityFlashes()
 	{
-		if (InvincibilityTimer <= 0f) return;
+		if (InvincibilityTimer <= 0f || IsHurt) return;
 		Visible = ((int)InvincibilityTimer & 4) >= 1 || InvincibilityTimer == 0f;
 		InvincibilityTimer -= FrameworkData.ProcessSpeed;
 	}
@@ -180,21 +181,25 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ActionValue2 += FrameworkData.ProcessSpeed;
 	}
 
-	private static float UpdateItemTimer(float timer)
+	private float UpdateItemTimer(float timer, AudioStream itemMusic)
 	{
-		if (timer <= 0f) return timer;
+		if (timer <= 0f) return 0f;
 		timer -= FrameworkData.ProcessSpeed;
-		if (timer <= 0f)
-		{
-			Players[0].ResetMusic();
-		}
+		
+		if (timer > 0f) return timer;
+		timer = 0f;
 
+		if (AudioPlayer.Music.IsPlaying(itemMusic))
+		{
+			ResetMusic();
+		}
+		
 		return timer;
 	}
 
 	private void UpdateSuperStatus()
 	{
-		if (!IsSuper) return;
+		if (SuperTimer <= 0f) return;
 		
 		if (Action == Actions.Transform)
 		{
@@ -202,27 +207,28 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			if (ActionValue <= 0f)
 			{
 				ObjectInteraction = true;
+				IsRunControlRoutine = true;
 				Action = Actions.None;
 			}
 		}
 
-		if (SuperValue > 0f)
+		if (SuperTimer > 0f)
 		{
-			SuperValue -= FrameworkData.ProcessSpeed;
+			SuperTimer -= FrameworkData.ProcessSpeed;
 			return;
 		}
 
-		if (--RingCount > 0)
+		if (--SharedData.PlayerRings > 0)
 		{
-			SuperValue = 60f;
+			SuperTimer = 60f;
 			return;
 		}
 		
-		RingCount = 0;
+		SharedData.PlayerRings = 0;
 		InvincibilityTimer = 1;
-		IsSuper = false;
-				
-		Players[0].ResetMusic();
+		SuperTimer = 0f;
+		
+		ResetMusic();
 	}
 
 	private void UpdateLiveRewards()
@@ -352,7 +358,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					FrameworkData.AllowPause = false;
 				}
 						
-				IsDead = true;
+				IsRestartOnDeath = true;
 				return true;
 		}
 
@@ -412,7 +418,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void UpdateCollision()
 	{
-		if (IsDead) return;
+		if (IsRestartOnDeath) return;
 		
 		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
 		SetRegularHitBox();
@@ -461,7 +467,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void RecordData()
 	{
-		if (IsDead) return;
+		if (IsRestartOnDeath) return;
 		
 		RecordedData.Add(new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
 		if (RecordedData.Count <= MaxRecordLength) return;
@@ -612,9 +618,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		base.ResetState();
 	}
 
-	private void ProcessRestart(float processSpeed)
+	private void ProcessDeath(float processSpeed)
 	{
-		if (!IsDead) return;
+		if (!IsRestartOnDeath) return;
 
 		var positionY = (int)Position.Y;
 		
@@ -747,6 +753,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		GroundSpeed.Value = 0f;
 		Animation = Animations.Move;
 		ObjectInteraction = true;
-		IsDead = false;
+		IsRestartOnDeath = false;
 	}
 }

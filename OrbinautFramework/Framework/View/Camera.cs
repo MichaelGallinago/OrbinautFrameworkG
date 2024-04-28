@@ -45,9 +45,10 @@ public partial class Camera : Camera2D, ICamera
 	private Vector2I _maxSpeed;
 	private Vector2 _speed;
 	public Vector2I BufferPosition { get; private set; }
+	public Vector2I PreviousPosition { get; private set; }
 	public Vector2 Delay { get; private set; }
-	public Vector2I BoundSpeed { get; private set; }
-	public Vector4 Bound { get; private set; }
+	public int BoundSpeed { get; set; }
+	public Vector4 Bound { get; set; }
 	public Vector4 Limit { get; private set; }
 
 	private Vector2I _shakeOffset;
@@ -76,7 +77,7 @@ public partial class Camera : Camera2D, ICamera
 		Target = playerTarget;
 		BufferPosition = (Vector2I)playerTarget.Position - SharedData.ViewSize + 16 * Vector2I.Down;
 		
-		_rawPosition = BufferPosition;
+		_rawPosition = PreviousPosition = BufferPosition;
 	}
 	
 	public override void _Process(double delta)
@@ -90,7 +91,7 @@ public partial class Camera : Camera2D, ICamera
 			float processSpeed = FrameworkData.ProcessSpeed;
 			
 			// Get boundary update speed
-			boundSpeed = Math.Max(2, BoundSpeed.X) * processSpeed;
+			boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
 			
 			FollowTarget(processSpeed);
 		}
@@ -106,6 +107,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		_previousLimit = Limit;
 
+		PreviousPosition = BufferPosition;
 		BufferPosition = _shakeOffset + (Vector2I)(_rawPosition + _bufferOffset).Clamp(
 			new Vector2(Limit.X, Limit.Y), new Vector2(Limit.Z, Limit.W) - SharedData.ViewSize);
 
@@ -128,7 +130,7 @@ public partial class Camera : Camera2D, ICamera
 
 	public void UpdatePlayerCamera(PlayerData player)
 	{
-		if (Target != player || player.IsDead) return;
+		if (Target != player || player.IsRestartOnDeath) return;
 
 		UpdateCdCamera(player);
 

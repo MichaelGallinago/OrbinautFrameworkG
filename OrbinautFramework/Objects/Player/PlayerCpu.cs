@@ -33,7 +33,7 @@ public partial class PlayerCpu : Player
 	
     protected override void ProcessCpu(float processSpeed)
 	{
-		if (IsHurt || IsDead || Id == 0) return;
+		if (IsHurt || IsRestartOnDeath || Id == 0) return;
 		
 		_leadPlayer = Players[0];
 		_delay = DelayStep * Id;
@@ -89,7 +89,7 @@ public partial class PlayerCpu : Player
 				break;
 		}
 		
-		DataRecord followDataRecord = _leadPlayer.FollowDataRecord;
+		DataRecord followDataRecord = _leadPlayer.GetFollowDataRecord();
 
 		Vector2 distance = Position - followDataRecord.Position;
 		distance.Y *= -1f;
@@ -97,7 +97,7 @@ public partial class PlayerCpu : Player
 		
 		Position += new Vector2(GetRespawnVelocityX(ref distance.X), Math.Sign(distance.Y));
 
-		if (_leadPlayer.IsDead || followDataRecord.Position.Y < 0f || distance == Vector2.Zero) return true;
+		if (_leadPlayer.IsRestartOnDeath || followDataRecord.Position.Y < 0f || distance == Vector2.Zero) return true;
 		
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
