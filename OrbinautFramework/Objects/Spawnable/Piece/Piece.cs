@@ -12,13 +12,13 @@ public partial class Piece(Texture2D texture, float waitTimer, float gravity, Ve
 
     public override void _Process(double delta)
     {
-        waitTimer -= FrameworkData.ProcessSpeed;
+        waitTimer -= Scene.Local.ProcessSpeed;
         if (waitTimer > 0f) return;
         
         //TODO: fix this
-        float halfAcceleration = gravity * FrameworkData.ProcessSpeed * 0.5f;
+        float halfAcceleration = gravity * Scene.Local.ProcessSpeed * 0.5f;
         speed.Y += halfAcceleration;
-        Position += speed * FrameworkData.ProcessSpeed;
+        Position += speed * Scene.Local.ProcessSpeed;
         speed.Y += halfAcceleration;
     }
 }

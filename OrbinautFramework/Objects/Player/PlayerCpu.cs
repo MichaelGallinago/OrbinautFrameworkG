@@ -27,7 +27,7 @@ public partial class PlayerCpu : Player
 			Position = Players.First().Position
 		};
 
-		newPlayer._Process(FrameworkData.ProcessSpeed / Constants.BaseFramerate);
+		newPlayer._Process(Scene.Local.ProcessSpeed / Constants.BaseFramerate);
 		*/
 	}
 	
@@ -59,7 +59,7 @@ public partial class PlayerCpu : Player
 		// This forces player to respawn instantly if they're holding any button
 		if (_canReceiveInput && Input.Down is { Abc: false, Start: false })
 		{
-			if (!FrameworkData.IsTimePeriodLooped(64f) || !CpuTarget.ObjectInteraction) return false;
+			if (!Scene.Local.IsTimePeriodLooped(64f) || !CpuTarget.ObjectInteraction) return false;
 		}
 		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
@@ -111,7 +111,7 @@ public partial class PlayerCpu : Player
 
 	private void PlayTailsSound()
 	{
-		if (!FrameworkData.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCamera() || IsUnderwater) return;
+		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCamera() || IsUnderwater) return;
 
 		if (CpuState == CpuStates.Respawn)
 		{
@@ -198,7 +198,7 @@ public partial class PlayerCpu : Player
 			doJump = CheckCpuJump(distanceX, followDataRecord);
 		}
 		
-		if (doJump && Animation != Animations.Duck && FrameworkData.IsTimePeriodLooped(64f))
+		if (doJump && Animation != Animations.Duck && Scene.Local.IsTimePeriodLooped(64f))
 		{
 			followDataRecord.InputPress.Abc = followDataRecord.InputDown.Abc = true;
 			IsCpuJumping = true;
@@ -244,7 +244,7 @@ public partial class PlayerCpu : Player
 			return true;
 		}
 		
-		if (Math.Abs(distanceX) > 64 && !FrameworkData.IsTimePeriodLooped(256f)) return false;
+		if (Math.Abs(distanceX) > 64 && !Scene.Local.IsTimePeriodLooped(256f)) return false;
 		return Mathf.FloorToInt(followDataRecord.Position.Y - Position.Y) <= -32;
 	}
 	
@@ -260,10 +260,10 @@ public partial class PlayerCpu : Player
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
-		if (!FrameworkData.IsTimePeriodLooped(128f))
+		if (!Scene.Local.IsTimePeriodLooped(128f))
 		{
 			Input.Down = Input.Down with { Down = true };
-			if (!FrameworkData.IsTimePeriodLooped(32f)) return false;
+			if (!Scene.Local.IsTimePeriodLooped(32f)) return false;
 			Input.Press = Input.Press with { Abc = true };
 			
 			return false;
@@ -285,7 +285,7 @@ public partial class PlayerCpu : Player
 			return false;
 		}
 		
-		CpuTimer += FrameworkData.ProcessSpeed;
+		CpuTimer += Scene.Local.ProcessSpeed;
 		//TODO: check IsInstanceValid == instance_exists
 		if (CpuTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
 		Respawn();

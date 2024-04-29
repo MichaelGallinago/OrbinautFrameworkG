@@ -139,7 +139,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (!Input.Press.Abc)
 		{
-			ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * FrameworkData.ProcessSpeed;
+			ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * Scene.Local.ProcessSpeed;
 			return true;
 		}
 		
@@ -155,7 +155,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private bool ProcessPeelOut()
 	{
-		if (!SharedData.PeelOut || Type != Types.Sonic || Id > 0 || !IsGrounded) return false;
+		if (!SharedData.Dash || Type != Types.Sonic || Id > 0 || !IsGrounded) return false;
 	
 		// Start Super Peel Out
 		StartSuperPeelOut();
@@ -205,10 +205,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (ActionValue < 30f)
 		{
-			ActionValue += FrameworkData.ProcessSpeed;
+			ActionValue += Scene.Local.ProcessSpeed;
 		}
 
-		float acceleration = 0.390625f * (float)Facing * FrameworkData.ProcessSpeed;
+		float acceleration = 0.390625f * (float)Facing * Scene.Local.ProcessSpeed;
 		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
 		ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
 		GroundSpeed.Value = ActionValue2;
@@ -490,7 +490,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			IsAirLock = false;		
 			if (ActionValue < MaxDropDashCharge)
 			{
-				ActionValue += FrameworkData.ProcessSpeed;
+				ActionValue += Scene.Local.ProcessSpeed;
 			}
 			else if (Animation != Animations.DropDash)
 			{
@@ -585,7 +585,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 		if (ActionValue > 0f)
 		{
-			ActionValue -= FrameworkData.ProcessSpeed;
+			ActionValue -= Scene.Local.ProcessSpeed;
 			if (ActionValue <= 0f)
 			{
 				FlyTired();
@@ -659,7 +659,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			
 			case ClimbStates.Ledge:
 				//TODO: floating point && delta && skill issue
-				ActionValue += FrameworkData.ProcessSpeed;
+				ActionValue += Scene.Local.ProcessSpeed;
 				switch (ActionValue)
 				{
 					case 0f: // Frame 0
@@ -796,7 +796,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (Input.Down.Up)
 		{
-			ActionValue += FrameworkData.ProcessSpeed;
+			ActionValue += Scene.Local.ProcessSpeed;
 			if (ActionValue > maxValue)
 			{
 				ActionValue = 0f;
@@ -808,7 +808,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Input.Down.Down)
 		{
-			ActionValue -= FrameworkData.ProcessSpeed;
+			ActionValue -= Scene.Local.ProcessSpeed;
 			if (ActionValue < 0f)
 			{
 				ActionValue = maxValue;
@@ -919,18 +919,18 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			return;
 		}
 
-		if (ActionValue % 4f < FrameworkData.ProcessSpeed)
+		if (ActionValue % 4f < Scene.Local.ProcessSpeed)
 		{
 			//TODO: obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
 				
-		if (ActionValue > 0f && ActionValue % 8f < FrameworkData.ProcessSpeed)
+		if (ActionValue > 0f && ActionValue % 8f < Scene.Local.ProcessSpeed)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Slide);
 		}
 					
-		ActionValue += FrameworkData.ProcessSpeed;
+		ActionValue += Scene.Local.ProcessSpeed;
 	}
 
 	private void GlideGroundUpdateSpeedX()
@@ -954,7 +954,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void GlideAirTurnAround()
 	{
-		float speed = Angles.ByteAngleStep * FrameworkData.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Local.ProcessSpeed;
 		if (Input.Down.Left && !Mathf.IsZeroApprox(ActionValue))
 		{
 			ActionValue = (ActionValue > 0f ? -ActionValue : ActionValue) + speed;
@@ -977,7 +977,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Input.Down.Abc)
 		{
-			ActionValue += FrameworkData.ProcessSpeed;
+			ActionValue += Scene.Local.ProcessSpeed;
 			if (ActionValue >= MaxDropDashCharge)
 			{
 				AudioPlayer.Sound.Play(SoundStorage.Charge);
@@ -1028,7 +1028,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// Air movement isn't overwritten completely, refer to ProcessMovementAir()
 		if (!IsGrounded) return;
 		
-		ActionValue += FrameworkData.ProcessSpeed;
+		ActionValue += Scene.Local.ProcessSpeed;
 		if (ActionValue >= 60f || GroundSpeed == 0f || SetPushAnimationBy != null || 
 		    MathF.Cos(Mathf.DegToRad(Angle)) <= 0f)
 		{
@@ -1260,7 +1260,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (CarryTimer > 0f)
 		{
-			CarryTimer -= FrameworkData.ProcessSpeed;
+			CarryTimer -= Scene.Local.ProcessSpeed;
 			if (CarryTimer > 0f) return;
 		}
 	

@@ -3,7 +3,7 @@ using OrbinautFramework3.Audio.Player;
 
 namespace OrbinautFramework3.Framework;
 
-public abstract partial class CommonStage : CommonScene
+public abstract partial class Stage : Scene
 {
     public string ZoneName { get; set; } = "UNKNOWN";
     public byte ActId { get; set; }
@@ -18,7 +18,7 @@ public abstract partial class CommonStage : CommonScene
     save_progress    =  false;
     */
     
-    public CommonStage()
+    public Stage()
     {
         IsStage = true;
     }

@@ -26,7 +26,7 @@ public class DebugMode
 		    typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
 	    ];
 	    
-	    switch (FrameworkData.CurrentScene)
+	    switch (Scene.Local)
 	    {
 		    case Stages.TSZ.StageTsz:
 			    // TODO: debug objects
@@ -41,7 +41,7 @@ public class DebugMode
     
     public bool Update(float processSpeed, IEditor editor, IInputContainer input)
     {
-		if (!FrameworkData.PlayerEditMode && !FrameworkData.DeveloperMode) return false;
+		if (!SharedData.DevMode) return false;
 
 		bool debugButton = IsDebugButtonPressed(editor.IsEditMode, input.Press.B);
 		
@@ -49,17 +49,15 @@ public class DebugMode
 		{
 			if (!editor.IsEditMode)
 			{
-				if (FrameworkData.CurrentScene.IsStage)
+				if (Scene.Local.IsStage)
 				{
 					PlayerData.Players[0].ResetMusic();
 				}
 				
 				_speed = 0;
-
-				FrameworkData.UpdateAnimations = true;
-				FrameworkData.UpdateObjects = true;
-				FrameworkData.UpdateTimer = true;
-				FrameworkData.AllowPause = true;
+				
+				Scene.Local.UpdateObjects = true;
+				Scene.Local.AllowPause = true;
 				
 				editor.OnEnableEditMode();
 				editor.IsEditMode = true;
@@ -77,7 +75,7 @@ public class DebugMode
 		// Update speed and position (move faster if in developer mode)
 		if (input.Down.Up || input.Down.Down || input.Down.Left || input.Down.Right)
 		{
-			_speed = MathF.Min(_speed + (FrameworkData.DeveloperMode ? 
+			_speed = MathF.Min(_speed + (SharedData.DevMode ? 
 				Acceleration * AccelerationMultiplier : Acceleration), SpeedLimit);
 			
 			Vector2 position = editor.Position;
@@ -115,7 +113,7 @@ public class DebugMode
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
 			newObject.Culling = BaseObject.CullingType.Delete;
-			FrameworkData.CurrentScene.AddChild(newObject);
+			Scene.Local.AddChild(newObject);
 		}
 		
 		return true;
@@ -124,7 +122,7 @@ public class DebugMode
     private static bool IsDebugButtonPressed(bool isEditMode, bool isPressB)
     {
 	    // If in developer mode, remap debug button to SpaceBar
-	    if (!FrameworkData.DeveloperMode) return isPressB;
+	    if (!SharedData.DevMode) return isPressB;
 	    
 	    bool debugButton = InputUtilities.DebugButtonPress;
 			

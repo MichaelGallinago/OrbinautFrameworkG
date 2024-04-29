@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Framework.View;
 
 public partial class Views : Control
 {
-    public static Views Local => FrameworkData.CurrentScene.Views;
+    public static Views Local => Scene.Local.Views;
 
     public event Action<int> OnViewNumberChanged;
     

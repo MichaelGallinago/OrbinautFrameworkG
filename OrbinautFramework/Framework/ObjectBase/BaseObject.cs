@@ -19,11 +19,11 @@ public abstract partial class BaseObject : Node2D
 				case CullingType.Delete:
 					return;
 				case CullingType.None:
-					FrameworkData.CurrentScene.Culler.AddToCulling(this);
+					ObjectCuller.Local.AddToCulling(this);
 					break;
 				default:
 					if (value != CullingType.None) break;
-					FrameworkData.CurrentScene.Culler.RemoveFromCulling(this);
+					ObjectCuller.Local.RemoveFromCulling(this);
 					break;
 			}
 
@@ -41,7 +41,7 @@ public abstract partial class BaseObject : Node2D
 	{
 		if (Culling != CullingType.None)
 		{
-			FrameworkData.CurrentScene.Culler.AddToCulling(this);
+			ObjectCuller.Local.AddToCulling(this);
 		}
 	}
 	
@@ -53,7 +53,7 @@ public abstract partial class BaseObject : Node2D
 		ZIndex = ResetData.ZIndex;
 	}
 
-	public override void _ExitTree() => FrameworkData.CurrentScene.Culler.RemoveFromCulling(this);
+	public override void _ExitTree() => ObjectCuller.Local.RemoveFromCulling(this);
     
 	public void SetSolid(Vector2I radius, Vector2I offset)
 	{
@@ -200,6 +200,6 @@ public abstract partial class BaseObject : Node2D
 		return target is Player player && player.PushObjects.Contains(this);
 	}
 
-	private void RemoveFromCulling() => FrameworkData.CurrentScene.Culler.RemoveFromCulling(this);
-	private void AddToCulling() => FrameworkData.CurrentScene.Culler.AddToCulling(this);
+	private void RemoveFromCulling() => ObjectCuller.Local.RemoveFromCulling(this);
+	private void AddToCulling() => ObjectCuller.Local.AddToCulling(this);
 }

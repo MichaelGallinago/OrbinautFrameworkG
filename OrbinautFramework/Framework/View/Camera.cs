@@ -86,9 +86,9 @@ public partial class Camera : Camera2D, ICamera
 		
 		var boundSpeed = 0f;
 		
-		if (FrameworkData.UpdateObjects)
+		if (Scene.Local.UpdateObjects)
 		{
-			float processSpeed = FrameworkData.ProcessSpeed;
+			float processSpeed = Scene.Local.ProcessSpeed;
 			
 			// Get boundary update speed
 			boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
@@ -141,10 +141,10 @@ public partial class Camera : Camera2D, ICamera
 		{
 			if (_viewTimer > 0f)
 			{
-				_viewTimer -= FrameworkData.ProcessSpeed;
+				_viewTimer -= Scene.Local.ProcessSpeed;
 			}
 		}
-		else if (SharedData.SpinDash || SharedData.PeelOut)
+		else if (SharedData.SpinDash || SharedData.Dash)
 		{
 			_viewTimer = MaxViewTime;
 		}

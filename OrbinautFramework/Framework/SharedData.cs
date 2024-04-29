@@ -8,7 +8,7 @@ namespace OrbinautFramework3.Framework;
 
 public static class SharedData
 {
-	// Game settings
+	// Default settings. May be overwritten by the config file
     private static Vector2I _viewSize = new(428, 240);
     public static byte WindowScale { get; set; } = 2;
     public static int TargetFps { get; set; } = 165;
@@ -19,17 +19,20 @@ public static class SharedData
     //public static Room StartRoom { get; set; } = rm_devmenu; // TODO: add StartRoom
     public static bool SkipBranding { get; set; } = true;
 
+    // Common
+    public static byte StageIndex { get; set; } = 0; // TODO: make stage prefab storage with enum "Stage"
+    public static byte PreviousRoomId { get; set; } = 0; // TODO: Replace to room
+    public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
 	
     // Originals differences
     public static PhysicsTypes PlayerPhysics { get; set; } = PhysicsTypes.S2;
     public static CpuBehaviours CpuBehaviour { get; set; } = CpuBehaviours.S3;
     public static bool SpinDash { get; set; } = true;
-    public static bool PeelOut { get; set; } = true;
+    public static bool Dash { get; set; } = true;
     public static bool DropDash { get; set; } = true;
     public static bool DoubleSpin { get; set; } = true;
     public static bool CdTimer { get; set; } = false;
     public static bool CdCamera { get; set; } = false;
-    public static bool CdTileFixes { get; set; } = true;
 	
     // Orbinaut improvements
     public static byte RotationMode { get; set; } = 1;
@@ -42,15 +45,14 @@ public static class SharedData
     public static bool NoCameraCap { get; set; } = false;
     
     // Common global variables
-    public static byte? CurrentSaveSlot { get; set; } = 0;
 	public static CheckpointData CheckpointData { get; set; }
     public static GiantRingData GiantRingData { get; set; }
     // TODO: ds_giant_rings
     //public static ds_giant_rings { get; set; } = ds_list_create();
+    public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
     public static Types PlayerType { get; set; } = Types.Sonic;
     public static Types PlayerTypeCpu { get; set; } = Types.Tails;
-    public static byte StageId { get; set; } = 0;
     public static byte ContinueCount { get; set; }
     public static byte EmeraldCount { get; set; }
     

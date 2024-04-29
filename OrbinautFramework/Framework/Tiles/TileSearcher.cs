@@ -39,8 +39,8 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         }
 		
         return tileTransforms.IsRotated ^ isHeight ? 
-            FrameworkData.TilesData.Heights[index][collisionIndex] : 
-            FrameworkData.TilesData.Widths[index][collisionIndex];
+            CollisionUtilities.TilesData.Heights[index][collisionIndex] : 
+            CollisionUtilities.TilesData.Widths[index][collisionIndex];
     }
     
     private static bool GetTileValidity(int index, bool isVertical, Direction direction, TileLayerBehaviours tileLayerBehaviours)

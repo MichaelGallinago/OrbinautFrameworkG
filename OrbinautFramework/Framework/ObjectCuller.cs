@@ -8,7 +8,9 @@ namespace OrbinautFramework3.Framework;
 
 public class ObjectCuller
 {
-	private bool _isCullToggled;
+	public static ObjectCuller Local => Scene.Local.Culler;
+	
+	private bool _isCullToggled = true;
 	private readonly HashSet<BaseObject> _waitingObjects = [];
 	private readonly HashSet<BaseObject> _stoppedObjects = [];
 	public HashSet<BaseObject> ActiveObjects { get; } = [];
@@ -39,7 +41,7 @@ public class ObjectCuller
 
     private bool StopAllObjets()
     {
-	    if (!FrameworkData.IsPaused && FrameworkData.UpdateObjects) return false;
+	    if (!Scene.Local.IsPaused && Scene.Local.UpdateObjects) return false;
 
 	    foreach (BaseObject baseObject in ActiveObjects)
 	    {

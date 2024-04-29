@@ -30,17 +30,17 @@ public class Velocity
 
     public float AccelerationX
     {
-        set => _velocity.X += value * FrameworkData.ProcessSpeed;
+        set => _velocity.X += value * Scene.Local.ProcessSpeed;
     }
     
     public float AccelerationY
     {
-        set => _velocity.Y += value * FrameworkData.ProcessSpeed;
+        set => _velocity.Y += value * Scene.Local.ProcessSpeed;
     }
 
     public Vector2 Acceleration
     {
-        set => _velocity += value * FrameworkData.ProcessSpeed;
+        set => _velocity += value * Scene.Local.ProcessSpeed;
     }
 
     public void Clamp(Vector2 min, Vector2 max)
@@ -69,8 +69,8 @@ public class Velocity
 
     public Vector2 CalculateNewPosition(Vector2 position)
     {
-        return position + ((FrameworkData.ProcessSpeed - 1f) * _instantVector + 
-                           (FrameworkData.ProcessSpeed + 1f) * _velocity) * 0.5f;
+        return position + ((Scene.Local.ProcessSpeed - 1f) * _instantVector + 
+                           (Scene.Local.ProcessSpeed + 1f) * _velocity) * 0.5f;
     }
 
     public void SetDirectionalValue(AcceleratedValue value, float angle)

@@ -18,15 +18,15 @@ public class AcceleratedValue
     
     public float Acceleration
     {
-        set => _value += value * FrameworkData.ProcessSpeed;
+        set => _value += value * Scene.Local.ProcessSpeed;
     }
 
     public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
     public float Sum(float value)
     {
-        return value + ((FrameworkData.ProcessSpeed - 1f) * _instantValue + 
-                        (FrameworkData.ProcessSpeed + 1f) * _value) * 0.5f;
+        return value + ((Scene.Local.ProcessSpeed - 1f) * _instantValue + 
+                        (Scene.Local.ProcessSpeed + 1f) * _value) * 0.5f;
     }
 
     public float Add(float value)

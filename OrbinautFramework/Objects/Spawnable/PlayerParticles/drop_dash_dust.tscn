@@ -1,0 +1,75 @@
+[gd_scene load_steps=12 format=3 uid="uid://dndusf8ud2x35"]
+
+[ext_resource type="Script" path="res://Objects/Spawnable/PlayerParticles/DropDashDust.cs" id="1_xhroy"]
+[ext_resource type="Texture2D" uid="uid://bbjv1134nouqh" path="res://Objects/Spawnable/PlayerParticles/dust_dropdash.png" id="2_ro8ob"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gkuhd"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(0, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ymyyj"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(32, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7x7xx"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(64, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_chr7c"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(96, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_luy1f"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(128, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_svcda"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(160, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hux4c"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(192, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dfiqs"]
+atlas = ExtResource("2_ro8ob")
+region = Rect2(224, 0, 32, 40)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nfo8m"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gkuhd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ymyyj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7x7xx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_chr7c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_luy1f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_svcda")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hux4c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dfiqs")
+}],
+"loop": false,
+"name": &"default",
+"speed": 60.0
+}]
+
+[node name="DropDashDust" type="Node2D"]
+script = ExtResource("1_xhroy")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_nfo8m")
+offset = Vector2(-14, -19)

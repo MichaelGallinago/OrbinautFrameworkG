@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework.Animations;
 
 namespace OrbinautFramework3.Framework;
@@ -11,8 +12,41 @@ public partial class SceneLateUpdate : Node
      
     public override void _Process(double delta)
     {
-        // TODO: replace to "PauseAll" and "ResumeAll"
-        //Animator.Update(FrameworkData.ProcessSpeed);
+        UpdateLiveRewards();
         Update?.Invoke();
+    }
+    
+    private static void UpdateLiveRewards()
+    {
+        if (Scene.Local.IsPaused) return;
+        
+        const int ringIncrement = 100;
+        const int scoreIncrement = 100;
+		
+        if (SharedData.LifeRewards == Vector2I.Zero)
+        {
+            SharedData.LifeRewards = new Vector2I(
+                (int)(SharedData.PlayerRings / ringIncrement * ringIncrement + ringIncrement), 
+                (int)SharedData.ScoreCount / scoreIncrement * scoreIncrement + scoreIncrement);
+        }
+		
+        if (SharedData.PlayerRings >= SharedData.LifeRewards.X && SharedData.LifeRewards.X <= 200)
+        {
+            AddLife(0, ringIncrement);
+        }
+        else if (SharedData.ScoreCount >= SharedData.LifeRewards.Y)
+        {
+            AddLife(1, scoreIncrement);
+        }
+    }
+
+    private static void AddLife(byte rewardIndex, int rewardValue)
+    {
+        AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
+        SharedData.LifeCount++;
+		
+        Vector2I rewards = SharedData.LifeRewards;
+        rewards[rewardIndex] += rewardValue;
+        SharedData.LifeRewards = rewards;
     }
 }

@@ -57,9 +57,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		AudioPlayer.Sound.Play(SoundStorage.Hurt);
 
 		if (Id != 0) return;
-		FrameworkData.UpdateObjects = false;
-		FrameworkData.UpdateTimer = false;
-		FrameworkData.AllowPause = false;
+		Scene.Local.UpdateObjects = false;
+		Scene.Local.UpdateTimer = false;
+		Scene.Local.AllowPause = false;
 	}
 	
 	public void Land()
@@ -439,7 +439,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (Mathf.IsEqualApprox(Angle, 360f)) return;
 		
-		float speed = Angles.ByteAngleStep * FrameworkData.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Local.ProcessSpeed;
 		if (Angle >= 180f)
 		{
 			Angle += speed;
@@ -661,7 +661,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				Velocity.X -= wallDistance / FrameworkData.ProcessSpeed;
+				Velocity.X -= wallDistance / Scene.Local.ProcessSpeed;
 				GroundSpeed.Value = 0f;
 					
 				if (Facing == firstDirection && !IsSpinning)
@@ -671,7 +671,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				Velocity.Y += wallDistance / FrameworkData.ProcessSpeed;
+				Velocity.Y += wallDistance / Scene.Local.ProcessSpeed;
 				break;
 		}
 	}
@@ -878,7 +878,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (GroundLockTimer > 0f)
 		{
-			GroundLockTimer -= FrameworkData.ProcessSpeed;
+			GroundLockTimer -= Scene.Local.ProcessSpeed;
 			return;
 		}
 

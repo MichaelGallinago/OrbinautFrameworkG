@@ -24,8 +24,8 @@ public partial class SceneContinuousUpdate : Node
 
     private void UpdatePause()
     {
-        if (!FrameworkData.AllowPause || !InputUtilities.Press[0].Start) return;
-        _sceneTree.Paused = FrameworkData.IsPaused = !FrameworkData.IsPaused;
-        AudioPlayer.SetPauseState(FrameworkData.IsPaused);
+        if (!Scene.Local.AllowPause || !InputUtilities.Press[0].Start) return;
+        _sceneTree.Paused = Scene.Local.IsPaused = !Scene.Local.IsPaused;
+        AudioPlayer.SetPauseState(Scene.Local.IsPaused);
     }
 }

@@ -10,15 +10,18 @@ namespace OrbinautFramework3.Framework.Tiles;
 public static class CollisionUtilities
 {
 	private static readonly string BinariesPath = "res://Collisions/Binaries/";
+	public static TilesData TilesData { get; }
 	
 	static CollisionUtilities()
 	{
 		BinariesPath = ProjectSettings.GlobalizePath(BinariesPath);
+		TilesData = LoadTileDataBinary(
+			"angles_tsz", "heights_tsz", "widths_tsz");
 	}
 
 	public static float GetRawTileAngle(int index)
 	{
-		return index > 0 ? FrameworkData.TilesData.Angles[index % TileLimit] : float.NaN;
+		return index > 0 ? TilesData.Angles[index % TileLimit] : float.NaN;
 	}
 
 	public static TilesData LoadTileDataBinary(string anglesFileName, string heightsFileName, string widthsFileName)
@@ -105,13 +108,6 @@ public static class CollisionUtilities
 	{
 		(int distance1, float angle1) = FindTile(isVertical, position1, direction, type, tileMap, tileLayerBehaviours);
 		(int distance2, float angle2) = FindTile(isVertical, position2, direction, type, tileMap, tileLayerBehaviours);
-		
-		if (isVertical && SharedData.CdTileFixes && direction == Direction.Positive 
-		    && distance1 == 0 && distance2 == 0 && angle1 is <= 90f and > 22.5f)
-		{
-			return (distance1, 360f);
-		}
-		
 		return distance1 <= distance2 ? (distance1, angle1) : (distance2, angle2);
 	}
 	
@@ -239,10 +235,13 @@ public static class CollisionUtilities
 			angle = (float)(direction == Direction.Positive ? Circle.Quarter : Circle.ThreeQuarters);
 		}
 		
-		// A fix from Sonic CD 1996's PC release. If tile angle is in the lower half, we assume its bottom is flat, 
-		// so in case it is flipped, we should treat it as a flat ground
-		if (!isVertical || !SharedData.CdTileFixes || direction != Direction.Positive) return angle;
-		if (rawAngle is > 90f and <= 270f || !tileData.Transforms.IsFlipped) return angle;
+		if (!isVertical) return angle;
+
+		if (rawAngle is < 90f or > 270f != (direction == Direction.Positive == tileData.Transforms.IsFlipped))
+		{
+			return angle;
+		}
+		
 		tileData.Size = TileSize;
 		return 360f;
 	}

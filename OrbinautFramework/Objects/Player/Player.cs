@@ -21,10 +21,10 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	public override void _Ready()
 	{
 		base._Ready();
-		if (GetOwner<Node>() is CommonScene scene)
+		if (GetOwner<Node>() is Scene scene)
 		{
 			TileMap = scene.CollisionTileMap;
-			if (scene is CommonStage stage)
+			if (scene is Stage stage)
 			{
 				Stage = stage;
 			}
@@ -53,9 +53,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	public override void _Process(double delta)
 	{
-		if (FrameworkData.IsPaused && !IsRestartOnDeath) return;
+		if (Scene.Local.IsPaused && !IsRestartOnDeath) return;
 		
-		float processSpeed = FrameworkData.ProcessSpeed;
+		float processSpeed = Scene.Local.ProcessSpeed;
 		
 		Input.Update(Id);
 
@@ -156,7 +156,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		IsInvincible = InvincibilityTimer > 0f || ItemInvincibilityTimer > 0f || 
 		               IsHurt || SuperTimer > 0f || Shield.State == ShieldContainer.States.DoubleSpin;
 		
-		if (Id == 0 && FrameworkData.Time >= 36000d)
+		if (Id == 0 && Scene.Local.Time >= 36000d)
 		{
 			Kill();
 		}
@@ -166,25 +166,25 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (InvincibilityTimer <= 0f || IsHurt) return;
 		Visible = ((int)InvincibilityTimer & 4) >= 1 || InvincibilityTimer == 0f;
-		InvincibilityTimer -= FrameworkData.ProcessSpeed;
+		InvincibilityTimer -= Scene.Local.ProcessSpeed;
 	}
 
 	private void CreateSkidDust()
 	{
 		if (Animation != Animations.Skid) return;
 		
-		if (ActionValue2 % 4f < FrameworkData.ProcessSpeed)
+		if (ActionValue2 % 4f < Scene.Local.ProcessSpeed)
 		{
 			// TODO: make obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
-		ActionValue2 += FrameworkData.ProcessSpeed;
+		ActionValue2 += Scene.Local.ProcessSpeed;
 	}
 
 	private float UpdateItemTimer(float timer, AudioStream itemMusic)
 	{
 		if (timer <= 0f) return 0f;
-		timer -= FrameworkData.ProcessSpeed;
+		timer -= Scene.Local.ProcessSpeed;
 		
 		if (timer > 0f) return timer;
 		timer = 0f;
@@ -203,7 +203,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		
 		if (Action == Actions.Transform)
 		{
-			ActionValue -= FrameworkData.ProcessSpeed;
+			ActionValue -= Scene.Local.ProcessSpeed;
 			if (ActionValue <= 0f)
 			{
 				ObjectInteraction = true;
@@ -214,7 +214,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 		if (SuperTimer > 0f)
 		{
-			SuperTimer -= FrameworkData.ProcessSpeed;
+			SuperTimer -= Scene.Local.ProcessSpeed;
 			return;
 		}
 
@@ -229,29 +229,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		SuperTimer = 0f;
 		
 		ResetMusic();
-	}
-
-	private void UpdateLiveRewards()
-	{
-		if (Id != 0 || LifeRewards.Count <= 0)
-		{
-			LifeRewards = [RingCount / 100 * 100 + 100, ScoreCount / 50000 * 50000 + 50000];
-			return;
-		}
-		
-		if (RingCount >= LifeRewards[0] && LifeRewards[0] <= 200)
-		{
-			LifeCount++;
-			LifeRewards[0] += 100;
-		}
-		else
-		{
-			if (ScoreCount < LifeRewards[1]) return;
-			LifeCount++;
-			LifeRewards[1] += 50000;
-		}
-
-		AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
 	}
 
 	private void ProcessWater()
@@ -297,24 +274,24 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void RemoveBarrierUnderwater()
 	{
-		if (Shield.Type is not (Shield.Types.Flame or Shield.Types.Thunder)) return;
+		if (Shield.Type is not (ShieldContainer.Types.Flame or ShieldContainer.Types.Thunder)) return;
 		
-		if (Shield.Type == Shield.Types.Thunder)
+		if (Shield.Type == ShieldContainer.Types.Thunder)
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
 		}
-			
-		Shield.Type = Shield.Types.None;
+		
+		Shield.Type = ShieldContainer.Types.None;
 	}
 
 	private bool UpdateAirTimer()
 	{
-		if (Shield.Type == Shield.Types.Water) return false;
+		if (Shield.Type == ShieldContainer.Types.Water) return false;
 		
 		if (AirTimer > -1f)
 		{
-			AirTimer -= FrameworkData.ProcessSpeed;
+			AirTimer -= Scene.Local.ProcessSpeed;
 		}
 			
 		//TODO: fix float comparison
@@ -324,8 +301,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			case 1200f:
 			case 900f:
 				if (Id != 0) break;
-				//TODO: audio
-				//AudioPlayer.PlaySound(SoundStorage.AirAlert);
+				AudioPlayer.Sound.Play(SoundStorage.Alert);
 				break;
 					
 			case 720f:
@@ -345,20 +321,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				IsAirLock = true;
 				if (Camera.Main == null) return true;
 				Camera.Main.Target = null;
-				return true;
-				
-			case -1f:
-				if (Camera.Main == null) return true;
-				if ((int)Position.Y <= Camera.Main.BufferPosition.Y + SharedData.ViewSize.Y + 276) return true;
-					
-				if (Id == 0)
-				{
-					FrameworkData.UpdateEffects = false;
-					FrameworkData.UpdateObjects = false;
-					FrameworkData.AllowPause = false;
-				}
-						
-				IsRestartOnDeath = true;
 				return true;
 		}
 
@@ -460,7 +422,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				break;
 			
 			default:
-				SetHitBoxExtra(Shield.State == Shield.States.DoubleSpin ? new Vector2I(24, 24) : Vector2I.Zero);
+				SetHitBoxExtra(Shield.State == ShieldContainer.States.DoubleSpin ?
+					new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}
 	}
@@ -633,11 +596,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			
 			if (Id == 0)
 			{
-				FrameworkData.UpdateObjects = false;	
+				Scene.Local.UpdateObjects = false;	
 			}
 		}
 		
-		bool isTimeOver = FrameworkData.Time >= 36000d; // TODO: add constant
+		bool isTimeOver = Scene.Local.Time >= 36000d; // TODO: add constant
 		switch (RestartState)
 		{
 			case RestartStates.GameOver:
@@ -660,8 +623,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				{
 					RestartState = RestartStates.ResetLevel;
 					
-					FrameworkData.AllowPause = false;
-					FrameworkData.UpdateTimer = false;
+					Scene.Local.AllowPause = false;
+					Scene.Local.UpdateTimer = false;
 					
 					// TODO: Check this
 					if (--LifeCount > 0 && !isTimeOver)
@@ -697,7 +660,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			
 			case RestartStates.RestartStage:
 				// TODO: Fade
-				//if (FrameworkData.fade.state != Constants.FadeState.Max) break;
+				//if (Scene.Local.fade.state != Constants.FadeState.Max) break;
 
 			    SharedData.LifeCount = LifeCount;
 			    GetTree().ReloadCurrentScene();
@@ -705,12 +668,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			
 			case RestartStates.RestartGame:
 				// TODO: Game restart & fade
-			    //if (FrameworkData.fade.state != Constants.FadeState.Max) break;
+			    //if (Scene.Local.fade.state != Constants.FadeState.Max) break;
 				
 				//TODO: saved data
-			    //FrameworkData.collected_giant_rings = [];
-			    //FrameworkData.player_backup_data = [];
-			    //FrameworkData.checkpoint_data = [];
+			    //Scene.Local.collected_giant_rings = [];
+			    //Scene.Local.player_backup_data = [];
+			    //Scene.Local.checkpoint_data = [];
 				
 			    // TODO: this
 				//game_clear_temp_data();

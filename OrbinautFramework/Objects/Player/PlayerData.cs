@@ -94,7 +94,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
     
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
-	public CommonStage Stage { get; set; }
+	public Stage Stage { get; set; }
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	public HashSet<BaseObject> PushObjects { get; } = [];
 	public bool IsEditMode { get; set; }
@@ -306,7 +306,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 
 	private void InitializeCamera()
 	{
-		ReadOnlySpan<ICamera> cameras = FrameworkData.CurrentScene.Views.Cameras;
+		ReadOnlySpan<ICamera> cameras = Views.Local.Cameras;
 		if (cameras.Length <= Id) return;
 		cameras[Id].Target = this;
 		cameras[Id].Position = Position - SharedData.ViewSize / 2 + Vector2.Down * 16;

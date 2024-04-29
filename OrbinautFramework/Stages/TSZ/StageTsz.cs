@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Stages.TSZ;
 
-public partial class StageTsz : CommonStage
+public partial class StageTsz : Stage
 {
     public StageTsz()
     {

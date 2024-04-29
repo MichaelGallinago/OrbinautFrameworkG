@@ -39,7 +39,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
                 
         if (!_isTouched || _stateTimer > 0f)
         {
-            _stateTimer -= FrameworkData.ProcessSpeed;
+            _stateTimer -= Scene.Local.ProcessSpeed;
             return;
         }
         
@@ -57,7 +57,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
 			
         if (_stateTimer > 0f)
         {
-            _stateTimer -= FrameworkData.ProcessSpeed;
+            _stateTimer -= Scene.Local.ProcessSpeed;
             return;
         }
 			

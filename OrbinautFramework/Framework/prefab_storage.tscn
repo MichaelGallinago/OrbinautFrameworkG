@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxry8xry8hbcd"]
+
+[ext_resource type="Script" path="res://Framework/PrefabStorage.cs" id="1_s3253"]
+
+[node name="PrefabStorage" type="Node2D"]
+script = ExtResource("1_s3253")

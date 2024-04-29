@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Objects.Player;
 public class PlayerInput : IInputContainer
 {
     public bool NoControl { get; set; }
-    public Buttons Down { get; set; }
+    public Buttons Down { get; set; } 
     public Buttons Press { get; set; }
     
     public void Update(int playerId)

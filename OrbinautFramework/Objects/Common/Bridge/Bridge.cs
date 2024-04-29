@@ -71,7 +71,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
 	    UpdateLogPositions();
 
-	    UpdateAngle(isPlayerTouch, FrameworkData.ProcessSpeed);
+	    UpdateAngle(isPlayerTouch, Scene.Local.ProcessSpeed);
 		
 	    QueueRedraw();
     }

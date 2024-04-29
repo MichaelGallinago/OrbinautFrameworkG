@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Screens.Startup;
 
-public partial class Startup : CommonScene
+public partial class Startup : Scene
 {
     [Export] private ResourcePreloader _preloader;
 
