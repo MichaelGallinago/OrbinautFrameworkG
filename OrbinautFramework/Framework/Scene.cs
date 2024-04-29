@@ -35,6 +35,8 @@ public abstract partial class Scene : Node2D
         AddChild(_debug);
 
         Tree = GetTree();
+
+        AttachCamerasToPlayer();
     }
 
     public override void _EnterTree() => Local = this;
@@ -65,4 +67,14 @@ public abstract partial class Scene : Node2D
     
     public bool IsTimePeriodLooped(float period) => Time % period - ProcessSpeed < 0f;
     public bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - ProcessSpeed < 0f;
+
+    private void AttachCamerasToPlayer()
+    {
+        ReadOnlySpan<ICamera> cameras = Views.Cameras;
+        int count = Math.Min(cameras.Length, PlayerData.Players.Count);
+        for (var i = 0; i < count; i++)
+        {
+            cameras[i].Target = PlayerData.Players[i];
+        }
+    }
 }

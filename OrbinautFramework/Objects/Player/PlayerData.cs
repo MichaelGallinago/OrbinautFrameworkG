@@ -46,17 +46,18 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public float SlopeGravity { get; set; }
 
 	public Constants.TileLayers TileLayer { get; set; }
-	public Constants.TileLayerBehaviours TileLayerBehaviour { get; set; }
-	public bool StickToConvex { get; set; }
+	public Constants.TileBehaviours TileBehaviour { get; set; }
+	public bool IsStickToConvex { get; set; }
     
-	public bool ObjectInteraction { get; set; }
-	public bool IsRunControlRoutine { get; set; }
+	public bool IsObjectInteractionEnabled { get; set; }
+	public bool IsControlRoutineEnabled { get; set; }
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
 	public BaseObject SetPushAnimationBy { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
+	public bool IsDead { get; set; }
 	public bool IsRestartOnDeath { get; set; }
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
@@ -92,6 +93,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public bool IsCpuRespawn { get; set; }
 	public ICpuTarget CpuTarget { get; set; }
     
+	public ICamera Camera { get; set; }
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 	public Stage Stage { get; set; }
@@ -105,8 +107,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	protected readonly PlayerInput Input = new();
 	protected readonly TileCollider TileCollider = new();
 	
-	private bool _isInit = true;
-	
 	protected PlayerData()
 	{
 		Id = _playerCount++;
@@ -115,10 +115,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 
 	public override void _Ready()
 	{
-		Reset();
-		Initialize();
-		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		base._Ready();
+		Spawn();
+		InitializeCamera();
 	}
 
 	public static void ResetStatic()
@@ -143,11 +142,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Action = Actions.None;
 	}
 	
-	public override void Reset()
+	protected override void Init()
 	{
 		if (ApplyType()) return;
-		
-		base.Reset();
 		
 		(RadiusNormal, RadiusSpin) = Type switch
 		{
@@ -157,47 +154,44 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		};
 		
 		Radius = RadiusNormal;
-		Position = Position with { Y = Position.Y - Radius.Y - 1f };
 		Gravity = GravityType.Default;
 		Velocity.Vector = Vector2.Zero;
 		GroundSpeed.Value = 0f;
 		Angle = 0f;
 		
 		TileLayer = Constants.TileLayers.Main;
-		TileLayerBehaviour = Constants.TileLayerBehaviours.Floor;
-		StickToConvex = false;
+		TileBehaviour = Constants.TileBehaviours.Floor;
+		IsStickToConvex = false;
 		
-		SetPushAnimationBy = null;
 		OnObject = null;
-		ObjectInteraction = true;
-		IsRunControlRoutine = true;
 		IsGrounded = true;
 		IsSpinning = false;
 		IsJumping = false;
 		IsUnderwater = false;
 		IsHurt = false;
-		IsRestartOnDeath = false;
+		IsDead = false;
 		IsInvincible = false;
+		IsForcedSpin = false;
 		
+		GroundLockTimer = 0f;
+		SuperTimer = 0f;
+
+		IsObjectInteractionEnabled = true;
+		IsControlRoutineEnabled = true;
+
 		Action = Actions.None;
 		ActionState = 0;
-		ActionValue = 0f;
-		ActionValue2 = 0f;
-		SuperTimer = 0f;
-		
+		ActionValue = 0;
+		ActionValue2 = 0;
+
 		Shield.State = ShieldContainer.States.None;
-		Shield.Type = ShieldContainer.Types.None;
-		
 		Facing = Constants.Direction.Positive;
 		Animation = Animations.Idle;
+		SetPushAnimationBy = null;
 		VisualAngle = 0f;
-		
-		IsForcedSpin = false;
-		IsAirLock = false;
-		GroundLockTimer = 0f;
-		
-		AirTimer = Constants.DefaultAirValue;
+		AirTimer = Constants.DefaultAirTimer;
 		ComboCounter = 0;
+		
 		InvincibilityTimer = 0f;
 		ItemSpeedTimer = 0f;
 		ItemInvincibilityTimer = 0f;
@@ -205,103 +199,64 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		CarryTarget = null;
 		CarryTimer = 0f;
 		CarryTargetPosition = Vector2.Zero;
-		
+		IsRestartOnDeath = false;
+		RestartTimer = 0f;
+		CpuTarget = null;
+		CpuState = CpuStates.Main;
 		CpuTimer = 0f;
 		CpuInputTimer = 0f;
 		IsCpuJumping = false;
 		
-		CpuState = _isInit ? CpuStates.Main : CpuStates.RespawnInit;
-		
-		RestartState = RestartStates.GameOver;
-		RestartTimer = 0f;
-		
 		Input.Clear();
 		Input.NoControl = false;
-		
-		if (Id != 0)
-		{
-			Player leadPlayer = Players[Id - 1];
-			
-			if (_isInit)
-			{
-				Position = leadPlayer.Position - new Vector2(16, Radius.Y - leadPlayer.Radius.Y);
-				_isInit = false;
-			}
-			else
-			{
-				Position = new Vector2(Camera.Main.BufferPosition.X + sbyte.MaxValue, leadPlayer.Position.Y - 192);
-			}
-			return;
-		}
+
+		Rotation = 0f;
+		Visible = true;
 		
 		_recordedData = new DataRecord[MaxRecordLength * Players.Count];
 		var record = new DataRecord(
 			Position, Input.Press, Input.Down, IsGrounded, IsJumping, Action, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
-
-		if (!_isInit) return;
-		_isInit = false;
 	}
 
-	private void Initialize()
+	private void Spawn()
 	{
-		// Spawn on position and load saved data (if exists)
 		if (Id == 0)
 		{
-			var _ring_data = global.giant_ring_data;
-			var _checkpoint_data = global.checkpoint_data;
-			
-			if array_length(_ring_data) > 0
-			{
-				x = _ring_data[0];
-				y = _ring_data[1];
-			}
-			else if array_length(global.checkpoint_data) > 0
-			{
-				x = _checkpoint_data[0];
-				y = _checkpoint_data[1] - radius_y - 1;
-			}
-			else
-			{
-				y -= radius_y + 1;
-			}
-		
-			if global.player_shield != SHIELD_NONE
-			{
-				instance_create(x, y, obj_shield, { TargetPlayer: id });
-			}
+			SpawnFirstPlayer();
+			return;
 		}
-	
-		// Spawn behind the previous player
-		else
-		{
-			var _previous_player = player_get(player_index - 1);
-			
-			x = _previous_player.x - 16;
-			y = _previous_player.y + _previous_player.radius_y - radius_y;
-		}
-		
+
+		SpawnFollowingPlayer();
+	}
+
+	private void SpawnFirstPlayer()
+	{
 		if (SharedData.GiantRingData != null)
 		{
 			Position = SharedData.GiantRingData.Position;
 		}
-		else if (SharedData.CheckpointData != null)
-		{
-			Position = SharedData.CheckpointData.Position - new Vector2I(0, Radius.Y + 1);
-		}
 		else
 		{
-			Position = Position with { Y = Position.Y - Radius.Y - 1 };
+			if (SharedData.CheckpointData != null)
+			{
+				Position = SharedData.CheckpointData.Position;
+			}
+			Position -= new Vector2(0, Radius.Y + 1);
 		}
-		
 		
 		if (SharedData.PlayerShield != ShieldContainer.Types.None)
 		{
-			Shield.Type = SharedData.PlayerShield;
+			// TODO: create shield
+			//instance_create(x, y, obj_shield, { TargetPlayer: id });
 		}
-		
-		InitializeCamera();
+	}
+
+	private void SpawnFollowingPlayer()
+	{
+		Player previousPlayer = Players[Id - 1];
+		Position = previousPlayer.Position - new Vector2(16f, Radius.Y - previousPlayer.Radius.Y);
 	}
 
 	private void InitializeCamera()

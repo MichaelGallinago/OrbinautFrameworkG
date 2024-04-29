@@ -82,98 +82,92 @@ public class ObjectCuller
 	    }
     }
     
-    private void StopObjectByBehaviour(BaseObject commonObject)
+    private void StopObjectByBehaviour(BaseObject baseObject)
     {
-	    switch (commonObject.Culling)
+	    switch (baseObject.Culling)
 	    {
-		    case BaseObject.CullingType.Delete: DeleteObject(commonObject); break;
-		    case BaseObject.CullingType.Reset: ResetObject(commonObject); break;
-		    case BaseObject.CullingType.ResetX: ResetXObject(commonObject); break;
-		    case BaseObject.CullingType.ResetY: ResetYObject(commonObject); break;
+		    case BaseObject.CullingType.Delete: DeleteObject(baseObject); break;
+		    case BaseObject.CullingType.Reset: ResetObject(baseObject); break;
+		    case BaseObject.CullingType.ResetX: ResetXObject(baseObject); break;
+		    case BaseObject.CullingType.ResetY: ResetYObject(baseObject); break;
 	    }
     }
 
-    private static void DeleteObject(Node2D commonObject)
+    private static void DeleteObject(Node2D baseObject)
     {
-	    var position = (Vector2I)commonObject.Position;
+	    var position = (Vector2I)baseObject.Position;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
-		    if (camera.CheckPositionInSafeRegion(position) && commonObject.Position.Y < camera.Bound.W) return;
+		    if (camera.CheckPositionInSafeRegion(position) && baseObject.Position.Y < camera.Bound.W) return;
 	    }
 	    
-	    commonObject.QueueFree();
+	    baseObject.QueueFree();
     }
 
-    private void ResetObject(BaseObject commonObject)
+    private void ResetObject(BaseObject baseObject)
     {
-	    var position = (Vector2I)commonObject.Position;
+	    var position = (Vector2I)baseObject.Position;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }
 
-	    if (commonObject.Spawner == null)
-	    {
-		    commonObject.QueueFree();
-		    return;
-	    }
-
-	    var respawnPosition = (Vector2I)commonObject.Spawner.Position;
+	    var respawnPosition = (Vector2I)baseObject.ResetData.Position;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (!camera.CheckPositionInActiveRegion(respawnPosition)) continue;
-		    ActiveObjects.Remove(commonObject);
-		    commonObject.SetProcess(false);
-		    commonObject.Hide();
+		    ActiveObjects.Remove(baseObject);
+		    baseObject.SetProcess(false);
+		    baseObject.Hide();
 		    return;
 	    }
 	    
-	    commonObject.Spawner.Reset();
+	    baseObject.Reset();
     }
     
-    private void ResetXObject(BaseObject commonObject)
+    private void ResetXObject(BaseObject baseObject)
     {
-	    var position = (int)commonObject.Position.X;
+	    var position = (int)baseObject.Position.X;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (camera.CheckXInActiveRegion(position)) return;
 	    }
 
-	    ActiveObjects.Remove(commonObject);
-	    commonObject.SetProcess(false);
+	    ActiveObjects.Remove(baseObject);
+	    baseObject.SetProcess(false);
 	    
-	    var respawnPosition = (int)commonObject.Spawner.Position.X;
+	    var respawnPosition = (int)baseObject.ResetData.Position.X;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (!camera.CheckXInActiveRegion(respawnPosition)) continue;
-		    _waitingObjects.Add(commonObject);
-		    commonObject.Hide();
+		    _waitingObjects.Add(baseObject);
+		    baseObject.Hide();
 		    return;
 	    }
 
-	    commonObject.Reset();
-	    commonObject.SetProcess(false);
-	    commonObject.Hide();
+	    baseObject.Reset();
+	    baseObject.SetProcess(false);
+	    baseObject.Hide();
     }
     
-    private void ResetYObject(BaseObject commonObject)
+    private void ResetYObject(BaseObject baseObject)
     {
-	    var position = (int)commonObject.Position.Y;
+	    var position = (int)baseObject.Position.Y;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (camera.CheckYInActiveRegion(position)) return;
 	    }
 
-	    var respawnPosition = (int)commonObject.Spawner.Position.Y;
+	    var respawnPosition = (int)baseObject.ResetData.Position.Y;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (!camera.CheckYInActiveRegion(respawnPosition)) continue;
-		    ActiveObjects.Remove(commonObject);
-		    commonObject.SetProcess(false);
-		    commonObject.Hide();
+		    ActiveObjects.Remove(baseObject);
+		    baseObject.SetProcess(false);
+		    baseObject.Hide();
 		    return;
 	    }
 	    
-	    commonObject.Spawner.Reset();
+	    baseObject.Reset();
     }
 }

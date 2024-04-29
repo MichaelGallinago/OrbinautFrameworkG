@@ -71,7 +71,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 	private void UpdateSpriteFrames()
 	{
-		int index = _player.Type == Types.Sonic && _player.IsSuper ? 5 : (int)_player.Type;
+		int index = _player.Type == Types.Sonic && _player.SuperTimer > 0f ? 5 : (int)_player.Type;
 		if (_spriteFramesIndex == index) return;
 		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}
@@ -80,7 +80,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		SetAnimationType(type, speed);
 
-		if (!_player.IsSuper || type != Animations.Walk) return;
+		if (_player.SuperTimer <= 0f || type != Animations.Walk) return;
 
 		if (Scene.Local.Time % 4d >= 2d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
@@ -97,7 +97,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	
 	private Animations SonicType => _player.Animation switch
 	{
-		Animations.Move => _player.IsSuper ? 
+		Animations.Move => _player.SuperTimer > 0f ? 
 			GetMoveAnimation(false, 8f) :
 			GetMoveAnimation(SharedData.Dash, 6f),
 		_ => _player.Animation

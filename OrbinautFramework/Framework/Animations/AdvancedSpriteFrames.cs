@@ -82,13 +82,13 @@ public partial class AdvancedSpriteFrames : SpriteFrames
         Parallel.ForEach(Animations, animation =>
         {
             var animationName = (StringName)animation;
-            Parallel.For(0, GetFrameCount(animationName), (i, _) =>
+            for (var i = 0; i < GetFrameCount(animationName); i++)
             {
                 var size = (Vector2I)GetFrameTexture(animationName, i).GetSize();
                 
                 InterlockedWrapper.SetIfGreater(ref width, size.X);
                 InterlockedWrapper.SetIfGreater(ref height, size.Y);
-            });
+            }
         });
         
         _cullSize = new Vector2I(width, height);

@@ -44,7 +44,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		Action = Actions.None;
 		IsRestartOnDeath = true;
-		ObjectInteraction = false;
+		IsObjectInteractionEnabled = false;
 		IsGrounded = false;
 		OnObject = null;
 		Shield.Type = ShieldContainer.Types.None;
@@ -99,7 +99,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		Shield.State = ShieldContainer.States.None;
 		ComboCounter = 0;
-		TileLayerBehaviour = Constants.TileLayerBehaviours.Floor;
+		TileBehaviour = Constants.TileBehaviours.Floor;
 	
 		CpuState = CpuStates.Main;
 
@@ -634,7 +634,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				return;
 		}
 		
-		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileMap, TileLayerBehaviour);
+		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileMap, TileBehaviour);
 		
 		int castQuadrant = Angle switch
 		{
@@ -765,7 +765,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (Action == Actions.Carried) return;
 		
-		if (StickToConvex)
+		if (IsStickToConvex)
 		{
 			Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
 		}
@@ -783,34 +783,34 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (!IsGrounded || OnObject != null) return;
 
-		TileLayerBehaviour = Angle switch
+		TileBehaviour = Angle switch
 		{
-			<= 45 or >= 315 => Constants.TileLayerBehaviours.Floor,
-			> 45 and < 135 => Constants.TileLayerBehaviours.RightWall,
-			>= 135 and <= 225 => Constants.TileLayerBehaviours.Ceiling,
-			_ => Constants.TileLayerBehaviours.LeftWall
+			<= 45 or >= 315 => Constants.TileBehaviours.Floor,
+			> 45 and < 135 => Constants.TileBehaviours.RightWall,
+			>= 135 and <= 225 => Constants.TileBehaviours.Ceiling,
+			_ => Constants.TileBehaviours.LeftWall
 		};
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileLayerBehaviour);
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileBehaviour);
 
-		(int distance, float angle) = TileLayerBehaviour switch
+		(int distance, float angle) = TileBehaviour switch
 		{
-			Constants.TileLayerBehaviours.Floor => TileCollider.FindClosestTile(
+			Constants.TileBehaviours.Floor => TileCollider.FindClosestTile(
 				new Vector2I(-Radius.X, Radius.Y),
 				new Vector2I(Radius.X, Radius.Y), 
 				true, Constants.Direction.Positive),
 			
-			Constants.TileLayerBehaviours.RightWall => TileCollider.FindClosestTile(
+			Constants.TileBehaviours.RightWall => TileCollider.FindClosestTile(
 				new Vector2I(Radius.Y, Radius.X),
 				new Vector2I(Radius.Y, -Radius.X), 
 				false, Constants.Direction.Positive),
 			
-			Constants.TileLayerBehaviours.Ceiling => TileCollider.FindClosestTile(
+			Constants.TileBehaviours.Ceiling => TileCollider.FindClosestTile(
 				new Vector2I(Radius.X, -Radius.Y),
 				new Vector2I(-Radius.X, -Radius.Y), 
 				true, Constants.Direction.Negative),
 			
-			Constants.TileLayerBehaviours.LeftWall => TileCollider.FindClosestTile(
+			Constants.TileBehaviours.LeftWall => TileCollider.FindClosestTile(
 				new Vector2I(-Radius.Y, -Radius.X), 
 				new Vector2I(-Radius.Y, Radius.X), 
 				false, Constants.Direction.Negative),
@@ -821,12 +821,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		const int minTolerance = 4;
 		const int maxTolerance = 14;
 		
-		if (!StickToConvex)
+		if (!IsStickToConvex)
 		{
-			float toleranceCheckSpeed = TileLayerBehaviour switch
+			float toleranceCheckSpeed = TileBehaviour switch
 			{
-				Constants.TileLayerBehaviours.Floor or Constants.TileLayerBehaviours.Ceiling => Velocity.X,
-				Constants.TileLayerBehaviours.RightWall or Constants.TileLayerBehaviours.LeftWall => Velocity.Y,
+				Constants.TileBehaviours.Floor or Constants.TileBehaviours.Ceiling => Velocity.X,
+				Constants.TileBehaviours.RightWall or Constants.TileBehaviours.LeftWall => Velocity.Y,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 			
@@ -845,12 +845,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (distance < -maxTolerance) return;
 		
-		Position += TileLayerBehaviour switch
+		Position += TileBehaviour switch
 		{
-			Constants.TileLayerBehaviours.Floor => new Vector2(0f, distance),
-			Constants.TileLayerBehaviours.RightWall => new Vector2(distance, 0f),
-			Constants.TileLayerBehaviours.Ceiling => new Vector2(0f, -distance),
-			Constants.TileLayerBehaviours.LeftWall => new Vector2(-distance, 0f),
+			Constants.TileBehaviours.Floor => new Vector2(0f, distance),
+			Constants.TileBehaviours.RightWall => new Vector2(distance, 0f),
+			Constants.TileBehaviours.Ceiling => new Vector2(0f, -distance),
+			Constants.TileBehaviours.LeftWall => new Vector2(-distance, 0f),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
@@ -874,7 +874,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private void ProcessSlopeRepel()
 	{
-		if (!IsGrounded || StickToConvex || Action == Actions.HammerDash) return;
+		if (!IsGrounded || IsStickToConvex || Action == Actions.HammerDash) return;
 	
 		if (GroundLockTimer > 0f)
 		{

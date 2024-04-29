@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -226,7 +227,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || Id > 0 && CpuInputTimer == 0) return false;
 		
-		if (Input.Press.C && SharedData.EmeraldCount == 7 && !IsSuper && RingCount >= 50)
+		if (Input.Press.C && SharedData.EmeraldCount == 7 && !IsSuper && SharedData.PlayerRings >= 50)
 		{
 			ResetState();
 			AudioPlayer.Sound.Play(SoundStorage.Transform);
@@ -234,7 +235,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			//TODO: instance_create obj_star_super
 			//instance_create(x, y, obj_star_super, { TargetPlayer: id });
 				
-			ObjectInteraction = false;			
+			IsObjectInteractionEnabled = false;			
 			InvincibilityTimer = 0;
 			IsSuper = true;
 			Action = Actions.Transform;
@@ -260,7 +261,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
 		{
-			if (Shield.Type <= Shield.Types.Normal || IsSuper)
+			if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper)
 			{
 				Action = Actions.DropDash;
 				ActionValue = 0f;
@@ -270,15 +271,15 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// Barrier abilities
 		if (!Input.Press.Abc || IsSuper || Shield.State != Shield.States.None || ItemInvincibilityTimer != 0) return;
 		
-		Shield.State = Shield.States.Active;
+		Shield.State = ShieldContainer.States.Active;
 		IsAirLock = false;
 		
 		switch (Shield.Type)
 		{
-			case Shield.Types.None: JumpDoubleSpin(); break;
-			case Shield.Types.Water: JumpWaterBarrier(); break;
-			case Shield.Types.Flame: JumpFlameBarrier(); break;
-			case Shield.Types.Thunder: JumpThunderBarrier(); break;
+			case ShieldContainer.Types.None: JumpDoubleSpin(); break;
+			case ShieldContainer.Types.Water: JumpWaterBarrier(); break;
+			case ShieldContainer.Types.Flame: JumpFlameBarrier(); break;
+			case ShieldContainer.Types.Thunder: JumpThunderBarrier(); break;
 		}
 	}
 
@@ -297,7 +298,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		*/
 				
-		Shield.State = Shield.States.DoubleSpin;
+		Shield.State = ShieldContainer.States.DoubleSpin;
 				
 		//TODO: obj_double_spin
 		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
@@ -337,7 +338,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void JumpThunderBarrier()
 	{
-		Shield.State = Shield.States.Disabled;
+		Shield.State = ShieldContainer.States.Disabled;
 		Velocity.Y = -5.5f;
 				
 		for (var i = 0; i < 4; i++)
@@ -439,7 +440,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		IsGrounded = false;
 		OnObject = null;
 		SetPushAnimationBy = null;
-		StickToConvex = false;
+		IsStickToConvex = false;
 		Animation = Animations.Spin;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
@@ -450,32 +451,32 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool CheckCeilingDistance()
 	{
-		if (TileLayerBehaviour == Constants.TileLayerBehaviours.Ceiling) return true;
+		if (TileBehaviour == Constants.TileBehaviours.Ceiling) return true;
 		return CalculateCellDistance() >= 6; // Target ceiling distance
 	}
 
 	private int CalculateCellDistance()
 	{
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileLayerBehaviour);
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileBehaviour);
 		
-		return TileLayerBehaviour switch
+		return TileBehaviour switch
 		{
-			Constants.TileLayerBehaviours.Floor => TileCollider.FindClosestDistance(
+			Constants.TileBehaviours.Floor => TileCollider.FindClosestDistance(
 				Radius.Shuffle(-1, -1),
 				Radius.Shuffle( 1, -1),
 				true, Constants.Direction.Negative),
 			
-			Constants.TileLayerBehaviours.RightWall => TileCollider.FindClosestDistance(
+			Constants.TileBehaviours.RightWall => TileCollider.FindClosestDistance(
 				Radius.Shuffle(-1, -1, true),
 				Radius.Shuffle(1, -1, true),
 				false, Constants.Direction.Negative),
 			
-			Constants.TileLayerBehaviours.LeftWall => TileCollider.FindClosestDistance(
+			Constants.TileBehaviours.LeftWall => TileCollider.FindClosestDistance(
 				Radius.Shuffle(-1, 1, true),
 				Radius.Shuffle(1, 1, true),
 				false, Constants.Direction.Positive),
 			
-			Constants.TileLayerBehaviours.Ceiling => throw new ArgumentOutOfRangeException(),
+			Constants.TileBehaviours.Ceiling => throw new ArgumentOutOfRangeException(),
 			
 			_ => throw new ArgumentOutOfRangeException()
 		};
@@ -1229,7 +1230,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// the ceiling, else he is above the edge
 			
 		// Note: tile behaviour here is set to TILE_BEHAVIOUR_ROTATE_180. LBR tiles are not ignored in this case
-		TileCollider.TileLayerBehaviours = Constants.TileLayerBehaviours.Ceiling;
+		TileCollider.TileBehaviours = Constants.TileBehaviours.Ceiling;
 		int floorDistance = TileCollider.FindDistance(
 			new Vector2I((wallRadius + 1) * (int)Facing, -1), 
 			true, Constants.Direction.Positive);

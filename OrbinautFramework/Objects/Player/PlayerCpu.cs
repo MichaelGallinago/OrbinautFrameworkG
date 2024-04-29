@@ -18,9 +18,9 @@ public partial class PlayerCpu : Player
 	{
 		base._ExitTree();
 		
-		if (Players.Count == 0 || !IsCpuRespawn) return;
 		//TODO: check respawn Player cpu
 		/*
+		if (Players.Count == 0 || !IsCpuRespawn) return;
 		var newPlayer = new Player
 		{
 			Type = Type,
@@ -33,13 +33,14 @@ public partial class PlayerCpu : Player
 	
     protected override void ProcessCpu(float processSpeed)
 	{
-		if (IsHurt || IsRestartOnDeath || Id == 0) return;
+		if (IsHurt || IsDead || Id == 0) return;
 		
 		_leadPlayer = Players[0];
 		_delay = DelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
 		_canReceiveInput = Id < Constants.MaxInputDevices;
+		
 		if (_canReceiveInput && Input.Down is not { Abc: false, Up: false, Down: false, Left: false, Right: false })
 		{
 			CpuInputTimer = 600f;
@@ -54,23 +55,30 @@ public partial class PlayerCpu : Player
 		}
 	}
 
-	private bool InitRespawnCpu()
+	private void InitRespawnCpu()
 	{
-		// This forces player to respawn instantly if they're holding any button
+		// Take some time (up to 64 frames (on 60 fps))
+		// to respawn or do not respawn at all unless holding down any button
 		if (_canReceiveInput && Input.Down is { Abc: false, Start: false })
 		{
-			if (!Scene.Local.IsTimePeriodLooped(64f) || !CpuTarget.ObjectInteraction) return false;
+			if (!Scene.Local.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
+		
+		// Enable CPU's camera back
+		//TODO: wtf index?
+		//if player_view.index > 0
+		//{
+		Camera.IsMovementAllowed = true;
+		//}
 		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		CpuState = CpuStates.Respawn;
-		return false;
 	}
 
-	private bool ProcessRespawnCpu()
+	private void ProcessRespawnCpu()
 	{
-		if (CheckIfCpuOffscreen()) return false;
+		if (CheckIfCpuOffscreen()) return;
 		
 		// Force animation & play sound
 		switch (Type)
@@ -89,7 +97,7 @@ public partial class PlayerCpu : Player
 				break;
 		}
 		
-		DataRecord followDataRecord = _leadPlayer.GetFollowDataRecord();
+		DataRecord followDataRecord = _leadPlayer.GetFollowDataRecord(_delay);
 
 		Vector2 distance = Position - followDataRecord.Position;
 		distance.Y *= -1f;
@@ -97,16 +105,14 @@ public partial class PlayerCpu : Player
 		
 		Position += new Vector2(GetRespawnVelocityX(ref distance.X), Math.Sign(distance.Y));
 
-		if (_leadPlayer.IsRestartOnDeath || followDataRecord.Position.Y < 0f || distance == Vector2.Zero) return true;
+		if (_leadPlayer.IsRestartOnDeath || followDataRecord.Position.Y < 0f || distance == Vector2.Zero) return;
 		
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
 		Velocity.Vector = Vector2.Zero;
 		GroundSpeed.Value = 0f;
 		GroundLockTimer = 0f;
-		ObjectInteraction = true;
-		
-		return true;
+		IsObjectInteractionEnabled = true;
 	}
 
 	private void PlayTailsSound()
@@ -157,7 +163,7 @@ public partial class PlayerCpu : Player
 
 		CpuTarget ??= Players[Id - 1];
 		
-		DataRecord followDataRecord = CpuTarget.FollowDataRecord;
+		DataRecord followDataRecord = CpuTarget.GetFollowDataRecord();
 		
 		//TODO: ZIndex
 		//depth = _player1.depth + player_id;
@@ -248,38 +254,34 @@ public partial class PlayerCpu : Player
 		return Mathf.FloorToInt(followDataRecord.Position.Y - Position.Y) <= -32;
 	}
 	
-	private bool ProcessStuckCpu()
+	private void ProcessStuckCpu()
 	{
-		if (CheckIfCpuOffscreen()) return true;
+		if (CheckIfCpuOffscreen()) return;
 		
-		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return false;
+		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return;
 		
 		if (Animation == Animations.Idle)
 		{
-			Facing = MathF.Floor(CpuTarget.Position.X - Position.X) > 0f ? 
-				Constants.Direction.Positive : Constants.Direction.Negative;
+			Facing = CpuTarget.Position.X >= Position.X ? Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
 		if (!Scene.Local.IsTimePeriodLooped(128f))
 		{
 			Input.Down = Input.Down with { Down = true };
-			if (!Scene.Local.IsTimePeriodLooped(32f)) return false;
+			if (!Scene.Local.IsTimePeriodLooped(32f)) return;
 			Input.Press = Input.Press with { Abc = true };
 			
-			return false;
+			return;
 		}
 		
 		Input.Down = Input.Down with { Down = false };
 		Input.Press = Input.Press with { Abc = false };
 		CpuState = CpuStates.Main;
-		
-		return false;
 	}
 	
 	private bool CheckIfCpuOffscreen()
 	{
-		//TODO: check "camera_get(0).bound_right - x < 0" == "Camera.Main.Bounds.Z < Position.X"
-		if (Sprite != null && Sprite.CheckInCamera() || Camera.Main.Bounds.Z < Position.X)
+		if (Sprite != null && Sprite.CheckInCamera(_leadPlayer.Camera) || Camera.Bound.Z < Position.X)
 		{
 			CpuTimer = 0f;
 			return false;
@@ -287,6 +289,7 @@ public partial class PlayerCpu : Player
 		
 		CpuTimer += Scene.Local.ProcessSpeed;
 		//TODO: check IsInstanceValid == instance_exists
+		// Wait 300 steps unless standing on an object that got despawned
 		if (CpuTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
 		Respawn();
 		return true;
@@ -294,14 +297,21 @@ public partial class PlayerCpu : Player
 
 	private void Respawn()
 	{
-		Reset();
+		Init();
 		
 		Position = new Vector2(sbyte.MaxValue, 0);
 		
 		CpuState = CpuStates.RespawnInit;
-		IsRunControlRoutine = false;
-		ObjectInteraction = false;
+		IsControlRoutineEnabled = false;
+		IsObjectInteractionEnabled = false;
 		IsGrounded = false;
+		
+		// Since we're teleporting CPU to the top left corner, temporary disable their camera
+		//TODO: wtf index?
+		//if player_view.index > 0
+		//{
+		Camera.IsMovementAllowed = false;
+		//}
 		
 		ZIndex = (int)Constants.ZIndexes.AboveForeground; 
 	}

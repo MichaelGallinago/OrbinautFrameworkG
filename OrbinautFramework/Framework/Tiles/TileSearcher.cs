@@ -4,7 +4,7 @@ using static OrbinautFramework3.Framework.Constants;
 namespace OrbinautFramework3.Framework.Tiles;
 
 public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap tileMap, 
-    ushort tileLayerId, Direction direction, TileLayerBehaviours tileLayerBehaviours)
+    ushort tileLayerId, Direction direction, TileBehaviours tileBehaviours)
 {
     public FoundTileData Search(int shift)
     {
@@ -22,7 +22,7 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
         int index = tileMap.GetTileIndex(tileMap.GetCellAtlasCoords(tileLayerId, mapPosition));
         var transforms = new TileTransforms(tileMap.GetCellAlternativeTile(tileLayerId, mapPosition));
         byte size = GetTileCollision(isVertical, shiftedPosition, index, transforms);
-        bool isValid = GetTileValidity(index, isVertical, direction, tileLayerBehaviours);
+        bool isValid = GetTileValidity(index, isVertical, direction, tileBehaviours);
 
         return new FoundTileData(index, transforms, isValid, size);
     }
@@ -43,24 +43,24 @@ public class TileSearcher(bool isVertical, Vector2I position, CollisionTileMap t
             CollisionUtilities.TilesData.Widths[index][collisionIndex];
     }
     
-    private static bool GetTileValidity(int index, bool isVertical, Direction direction, TileLayerBehaviours tileLayerBehaviours)
+    private static bool GetTileValidity(int index, bool isVertical, Direction direction, TileBehaviours tileBehaviours)
     {
         return (index / TileLimit) switch
         {
-            2 => !CheckTileValidity(isVertical, direction, tileLayerBehaviours),
-            1 => CheckTileValidity(isVertical, direction, tileLayerBehaviours),
+            2 => !CheckTileValidity(isVertical, direction, tileBehaviours),
+            1 => CheckTileValidity(isVertical, direction, tileBehaviours),
             _ => true
         };
     }
 
-    private static bool CheckTileValidity(bool isVertical, Direction direction, TileLayerBehaviours tileLayerBehaviours)
+    private static bool CheckTileValidity(bool isVertical, Direction direction, TileBehaviours tileBehaviours)
     {
-        return tileLayerBehaviours switch
+        return tileBehaviours switch
         {
-            TileLayerBehaviours.Floor => isVertical && direction == Direction.Positive,
-            TileLayerBehaviours.Ceiling => isVertical && direction == Direction.Negative,
-            TileLayerBehaviours.RightWall => !isVertical && direction == Direction.Positive,
-            TileLayerBehaviours.LeftWall => !isVertical && direction == Direction.Negative,
+            TileBehaviours.Floor => isVertical && direction == Direction.Positive,
+            TileBehaviours.Ceiling => isVertical && direction == Direction.Negative,
+            TileBehaviours.RightWall => !isVertical && direction == Direction.Positive,
+            TileBehaviours.LeftWall => !isVertical && direction == Direction.Negative,
             _ => false
         };
     }

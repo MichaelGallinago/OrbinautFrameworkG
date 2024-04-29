@@ -39,18 +39,24 @@ public abstract partial class BaseObject : Node2D
 	
 	public override void _EnterTree()
 	{
+		ResetData = new ResetData(Visible, Scale, Position, ZIndex);
 		if (Culling != CullingType.None)
 		{
 			ObjectCuller.Local.AddToCulling(this);
 		}
 	}
+
+	public override void _Ready() => Init();
+
+	protected virtual void Init() {}
 	
-	public virtual void Reset()
+	public void Reset()
 	{
 		Position = ResetData.Position;
 		Scale = ResetData.Scale;
 		Visible = ResetData.IsVisible;
 		ZIndex = ResetData.ZIndex;
+		Init();
 	}
 
 	public override void _ExitTree() => ObjectCuller.Local.RemoveFromCulling(this);
@@ -91,7 +97,7 @@ public abstract partial class BaseObject : Node2D
 	
 	public bool CheckCollision(BaseObject target, CollisionSensor type)
 	{
-		if (target is Player { ObjectInteraction: false }) return false;
+		if (target is Player { IsObjectInteractionEnabled: false }) return false;
 
 		return type switch
 		{

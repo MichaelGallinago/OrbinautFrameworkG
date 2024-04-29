@@ -8,7 +8,7 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed
+public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed, ICameraHolder
 {
 	private readonly DebugMode _debugMode = new();
 	
@@ -33,9 +33,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
 
-	public override void Reset()
+	protected override void Init()
 	{
-		base.Reset();
+		base.Init();
 		Sprite.Animate(this);
 	}
 
@@ -69,7 +69,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ProcessCpu(processSpeed);
 		ProcessDeath(processSpeed);
 		
-		if (IsRunControlRoutine)
+		if (IsControlRoutineEnabled)
 		{
 			base._Process(delta);
 		}
@@ -206,8 +206,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			ActionValue -= Scene.Local.ProcessSpeed;
 			if (ActionValue <= 0f)
 			{
-				ObjectInteraction = true;
-				IsRunControlRoutine = true;
+				IsObjectInteractionEnabled = true;
+				IsControlRoutineEnabled = true;
 				Action = Actions.None;
 			}
 		}
@@ -247,7 +247,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return true;
 		
 		IsUnderwater = true;
-		AirTimer = Constants.DefaultAirValue;
+		AirTimer = Constants.DefaultAirTimer;
 		
 		ProcessWaterSplash();
 		//TODO: obj_bubbles_player
@@ -344,7 +344,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		}
 				
 		IsUnderwater = false;	
-		AirTimer = Constants.DefaultAirValue;
+		AirTimer = Constants.DefaultAirTimer;
 			
 		ProcessWaterSplash();
 	}
@@ -562,7 +562,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	public void IncreaseComboScore(int comboCounter = 0)
 	{
-		ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
+		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
     
 	public override void ResetState()
@@ -706,7 +706,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ResetState();
 		ResetZIndex();
 				
-		ObjectInteraction = false;
+		IsObjectInteractionEnabled = false;
 		Visible = true;
 	}
 
@@ -715,7 +715,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Velocity.Vector = Vector2.Zero;
 		GroundSpeed.Value = 0f;
 		Animation = Animations.Move;
-		ObjectInteraction = true;
+		IsObjectInteractionEnabled = true;
 		IsRestartOnDeath = false;
 	}
 }

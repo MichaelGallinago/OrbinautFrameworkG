@@ -14,6 +14,7 @@ public interface ICamera
     public Vector4 Limit { get; }
     public BaseObject Target { set; }
     public Vector2 Position { get; set; }
+    public bool IsMovementAllowed { get; set; }
     
     public bool CheckRectInside(Rect2 rect);
     public bool CheckPositionInSafeRegion(Vector2I position);

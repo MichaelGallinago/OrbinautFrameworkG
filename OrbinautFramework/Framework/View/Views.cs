@@ -33,11 +33,6 @@ public partial class Views : Control
     private readonly List<ICamera> _camerasWithUpdatedRegions = [];
 
     public override void _Ready() => CreateViews();
-
-    public bool CheckRectInCamera(Rect2 rect, int index)
-    {
-        return index < _cameras.Length && _cameras[index].CheckRectInside(rect);
-    }
     
     public bool CheckRectInCameras(Rect2 rect)
     {

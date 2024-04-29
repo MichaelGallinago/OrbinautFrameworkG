@@ -1,4 +1,3 @@
-using Godot;
 using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -6,7 +5,7 @@ namespace OrbinautFramework3.Objects.Player;
 public interface IAnimatedPlayer
 {
     Types Type { get; }
-    bool IsSuper { get; }
+    float SuperTimer { get; }
     Velocity Velocity { get; }
     float ActionValue { get; }
     ICarried CarryTarget { get; }

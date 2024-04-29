@@ -15,7 +15,7 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		TouchObjects.TryAdd(baseObject, Constants.TouchState.None);
 		PushObjects.Add(baseObject);
 		
-		if (!ObjectInteraction) return;
+		if (!IsObjectInteractionEnabled) return;
 		if (SolidData.Radius.X <= 0 || SolidData.Radius.Y <= 0) return;
 		if (baseObject.SolidData.Radius.X <= 0 || baseObject.SolidData.Radius.Y <= 0) return;
 		
