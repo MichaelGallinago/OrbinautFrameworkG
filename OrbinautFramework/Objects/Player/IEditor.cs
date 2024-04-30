@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface IEditor
 {
-    bool IsEditMode { get; set; }
+    bool IsDebugMode { get; set; }
     Vector2 Position { get; set; }
     Constants.Direction Facing { get; }
     

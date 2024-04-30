@@ -43,11 +43,11 @@ public class DebugMode
     {
 		if (!SharedData.DevMode) return false;
 
-		bool debugButton = IsDebugButtonPressed(editor.IsEditMode, input.Press.B);
+		bool debugButton = IsDebugButtonPressed(editor.IsDebugMode, input.Press.B);
 		
 		if (debugButton)
 		{
-			if (!editor.IsEditMode)
+			if (!editor.IsDebugMode)
 			{
 				if (Scene.Local.IsStage)
 				{
@@ -60,17 +60,17 @@ public class DebugMode
 				Scene.Local.AllowPause = true;
 				
 				editor.OnEnableEditMode();
-				editor.IsEditMode = true;
+				editor.IsDebugMode = true;
 			}
 			else
 			{
 				editor.OnDisableEditMode();
-				editor.IsEditMode = false;
+				editor.IsDebugMode = false;
 			}
 		}
 		
-		// Continue if Edit mode is enabled
-		if (!editor.IsEditMode) return false;
+		// Continue if Debug mode is enabled
+		if (!editor.IsDebugMode) return false;
 
 		// Update speed and position (move faster if in developer mode)
 		if (input.Down.Up || input.Down.Down || input.Down.Left || input.Down.Right)
@@ -119,14 +119,14 @@ public class DebugMode
 		return true;
 	}
 
-    private static bool IsDebugButtonPressed(bool isEditMode, bool isPressB)
+    private static bool IsDebugButtonPressed(bool isDebugMode, bool isPressB)
     {
 	    // If in developer mode, remap debug button to SpaceBar
 	    if (!SharedData.DevMode) return isPressB;
 	    
 	    bool debugButton = InputUtilities.DebugButtonPress;
 			
-	    if (isEditMode)
+	    if (isDebugMode)
 	    {
 		    return debugButton || isPressB;
 	    }

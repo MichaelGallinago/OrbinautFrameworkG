@@ -23,7 +23,7 @@ public abstract partial class ForceSpinTrigger : Trigger
     {
         foreach (Player player in PlayerData.Players)
         {
-            if (player.IsEditMode || !CheckForcePlayerSpin(player)) continue;
+            if (player.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
             
             player.IsForcedSpin = !player.IsForcedSpin;
             player.Action = Actions.None;

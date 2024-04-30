@@ -228,22 +228,21 @@ public static class CollisionUtilities
 		}
 		else if (isVertical)
 		{
-			angle = (float)(direction == Direction.Positive ? Circle.Full : Circle.Half);
+			angle = direction == Direction.Positive ? (float)Circle.Full : (float)Circle.Half;
+			
+			// Reset height if the tile was found from the opposite side. This only works correctly
+			// with originals' tile sets since we can't pre-determine if the tile is flipped by default or not
+			if (direction == Direction.Positive == tileData.Transforms.IsFlipped)
+			{
+				tileData.Size = TileSize;
+			}
 		}
 		else
 		{
-			angle = (float)(direction == Direction.Positive ? Circle.Quarter : Circle.ThreeQuarters);
+			angle = direction == Direction.Positive ? (float)Circle.Quarter : (float)Circle.ThreeQuarters;
 		}
 		
-		if (!isVertical) return angle;
-
-		if (rawAngle is < 90f or > 270f != (direction == Direction.Positive == tileData.Transforms.IsFlipped))
-		{
-			return angle;
-		}
-		
-		tileData.Size = TileSize;
-		return 360f;
+		return angle;
 	}
 
 	private static void LoadCollisionArrays(IList<byte[]> collisions, IReadOnlyList<byte> fileData)

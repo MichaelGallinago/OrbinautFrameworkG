@@ -24,7 +24,7 @@ public abstract partial class PathSwapTrigger : Trigger
     {
         foreach (Player player in PlayerData.Players)
         {
-            if (IsGroundOnly && !player.IsGrounded || player.IsEditMode) continue;
+            if (IsGroundOnly && !player.IsGrounded || player.IsDebugMode) continue;
             UpdatePlayerTileLayer(player);
         }
     }

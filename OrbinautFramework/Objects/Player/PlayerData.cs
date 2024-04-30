@@ -11,12 +11,14 @@ namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class PlayerData : BaseObject, ICpuTarget
 {
-	public const byte MaxRecordLength = 32;
+	private const byte MinimalRecordLength = 32;
+	protected const int CpuDelayStep = 16;
 	
 	[Export] private Types _uniqueType;
 	[Export] private SpawnTypes _spawnType;
 
 	public event Action<Types> TypeChanged;
+	private event Action<int> PlayerCountChanged;
 
 	public static List<Player> Players { get; } = [];
 	private static int _playerCount;
@@ -99,7 +101,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Stage Stage { get; set; }
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	public HashSet<BaseObject> PushObjects { get; } = [];
-	public bool IsEditMode { get; set; }
+	public bool IsDebugMode { get; set; }
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
 	
@@ -110,11 +112,13 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	protected PlayerData()
 	{
 		Id = _playerCount++;
+		PlayerCountChanged?.Invoke(_playerCount);
 		Shield = new ShieldContainer(this);
 	}
 
 	public override void _Ready()
 	{
+		PlayerCountChanged += 
 		base._Ready();
 		Spawn();
 		InitializeCamera();
@@ -213,11 +217,21 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Rotation = 0f;
 		Visible = true;
 		
-		_recordedData = new DataRecord[MaxRecordLength * Players.Count];
+		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * Players.Count)];
 		var record = new DataRecord(
 			Position, Input.Press, Input.Down, IsGrounded, IsJumping, Action, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
+	}
+
+	private void ResizeRecordedData(int count)
+	{
+		var resizedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * count)];
+		var record = new DataRecord(
+			Position, Input.Press, Input.Down, IsGrounded, IsJumping, Action, Facing, SetPushAnimationBy);
+		
+		Array.Fill(_recordedData, record);
+		_recordedData = 
 	}
 
 	private void Spawn()

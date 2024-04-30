@@ -433,7 +433,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (IsRestartOnDeath) return;
 		
 		RecordedData.Add(new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
-		if (RecordedData.Count <= MaxRecordLength) return;
+		if (RecordedData.Count <= MinimalRecordLength) return;
 		RecordedData.RemoveAt(0);
 	}
 

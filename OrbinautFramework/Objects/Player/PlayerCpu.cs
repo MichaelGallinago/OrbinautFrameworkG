@@ -8,8 +8,6 @@ namespace OrbinautFramework3.Objects.Player;
 
 public partial class PlayerCpu : Player
 {
-	private const int DelayStep = 16;
-	
 	private bool _canReceiveInput;
 	private ICpuTarget _leadPlayer;
 	private int _delay;
@@ -36,7 +34,7 @@ public partial class PlayerCpu : Player
 		if (IsHurt || IsDead || Id == 0) return;
 		
 		_leadPlayer = Players[0];
-		_delay = DelayStep * Id;
+		_delay = CpuDelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
 		_canReceiveInput = Id < Constants.MaxInputDevices;
@@ -98,31 +96,77 @@ public partial class PlayerCpu : Player
 		}
 		
 		DataRecord followDataRecord = _leadPlayer.GetFollowDataRecord(_delay);
+		Vector2 targetPosition = followDataRecord.Position;
 
-		Vector2 distance = Position - followDataRecord.Position;
-		distance.Y *= -1f;
-		distance = distance.Floor();
+		if (SharedData.CpuBehaviour == CpuBehaviours.S2 && Scene.Local.IsStage)
+		{
+			if (Scene.Local is Stage { IsWaterEnabled: true } stage)
+			{
+				targetPosition.Y = Math.Min(stage.WaterLevel - 16, targetPosition.Y);
+			}
+		}
 		
-		Position += new Vector2(GetRespawnVelocityX(ref distance.X), Math.Sign(distance.Y));
+		int distanceX = Mathf.FloorToInt(Position.X - targetPosition.X);
 
-		if (_leadPlayer.IsRestartOnDeath || followDataRecord.Position.Y < 0f || distance == Vector2.Zero) return;
+		if (distanceX != 0)
+		{
+			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distanceX) / 16, 12) + 1;
+
+			if (distanceX >= 0)
+			{
+				if (velocityX < distanceX)
+				{
+					velocityX *= -1;
+				}
+				else
+				{
+					velocityX = -distanceX;
+					distanceX = 0;
+				}
+
+				Facing = Constants.Direction.Negative;
+			}
+			else
+			{
+				velocityX *= -1;
+
+				if (velocityX >= distanceX)
+				{
+					velocityX = distanceX;
+					distanceX = 0;
+				}
+
+				Facing = Constants.Direction.Positive;
+			}
+
+			Position.X += velocityX * Scene.Local.ProcessSpeed;
+		}
+		
+		int distanceY = Mathf.FloorToInt(targetPosition.X - Position.X);
+		if (distanceY != 0)
+		{
+			Position.Y += Math.Sign(distanceY) * Scene.Local.ProcessSpeed;
+		}
+
+		if (SharedData.CpuBehaviour == CpuBehaviours.S3 && _leadPlayer.IsDead) return;
+
+		if (!IsGrounded || distanceX != 0 || distanceY != 0 || targetPosition.Y != followDataRecord.Position.Y) return;
 		
 		CpuState = CpuStates.Main;
 		Animation = Animations.Move;
-		Velocity.Vector = Vector2.Zero;
-		GroundSpeed.Value = 0f;
-		GroundLockTimer = 0f;
 		IsObjectInteractionEnabled = true;
+		IsControlRoutineEnabled = true;
 	}
 
 	private void PlayTailsSound()
 	{
-		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCamera() || IsUnderwater) return;
+		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
 
 		if (CpuState == CpuStates.Respawn)
 		{
 			if (SharedData.CpuBehaviour != CpuBehaviours.S3) return;
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
+			return;
 		}
 		
 		if (ActionValue > 0f)
