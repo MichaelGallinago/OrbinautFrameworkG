@@ -577,12 +577,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private void ProcessDeath(float processSpeed)
 	{
 		if (!IsDead) return;
-
-		var positionY = (int)Position.Y;
 		
 		// If drowned, wait until we're far enough off-screen
 		const int drownScreenOffset = 276;
-		if (AirTimer == 0 && positionY <= Camera.BufferPosition.Y + SharedData.ViewSize.Y + drownScreenOffset) return;
+		if (AirTimer == 0 && (int)Position.Y <= Camera.BufferPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
+		{
+			return;
+		}
 		
 		// Stop all objects
 		if (Id == 0)
@@ -590,103 +591,79 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			Scene.Local.UpdateObjects = false;
 		}
 		
-		switch (RestartState)
+		switch (DeathState)
 		{
-			case RestartStates.GameOver:
-				var bound = 32f;
-
-				if (Camera.Main != null)
-				{
-					//TODO: check processSpeed
-					if (SharedData.PlayerPhysics < PhysicsTypes.S3)
-					{
-						bound += Camera.Main.LimitBottom * processSpeed; // TODO: check if LimitBottom or Bounds
-					}
-					else
-					{
-						bound += Camera.Main.BufferPosition.Y * processSpeed + SharedData.ViewSize.Y;
-					}
-				}
-		
-				if ((int)Position.Y > bound)
-				{
-					RestartState = RestartStates.ResetLevel;
-					
-					Scene.Local.AllowPause = false;
-					Scene.Local.UpdateTimer = false;
-					
-					// TODO: Check this
-					if (--LifeCount > 0 && Scene.Local.Time < 36000f)
-					{
-						RestartTimer = 60f;
-						break;
-					}
-					
-					// TODO: gameOver
-					//instance_create_depth(0, 0, 0, obj_gui_gameover);		
-					AudioPlayer.Music.Play(MusicStorage.GameOver);
-				}
-				break;
-			
-			case RestartStates.ResetLevel:
-				if (RestartTimer > 0)
-				{
-					if (--RestartTimer != 0) break;
-					RestartState = RestartStates.RestartStage;
-				}
-				else if (AudioPlayer.Music.IsAnyPlaying())
-				{
-					break;
-				}
-				
-				// If restart_timer wasn't set (Game Over or Time Over)
-				RestartState = RestartStates.RestartGame;	
-				AudioPlayer.Music.StopAllWithMute(0.5f);
-				
-				// TODO: fade
-				//fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);
-				break;
-			
-			case RestartStates.RestartStage:
-				// TODO: Fade
-				//if (Scene.Local.fade.state != Constants.FadeState.Max) break;
-
-			    SharedData.LifeCount = LifeCount;
-			    GetTree().ReloadCurrentScene();
-				break;
-			
-			case RestartStates.RestartGame:
-				// TODO: Game restart & fade
-			    //if (Scene.Local.fade.state != Constants.FadeState.Max) break;
-				
-				//TODO: saved data
-			    //Scene.Local.collected_giant_rings = [];
-			    //Scene.Local.player_backup_data = [];
-			    //Scene.Local.checkpoint_data = [];
-				
-			    // TODO: this
-				//game_clear_temp_data();
-			    if (SharedData.ContinueCount > 0)
-			    {
-				    //TODO: game_restart
-				    //game_restart(); 
-				    break;
-			    }
-				
-				// Override save data
-			    if (SharedData.CurrentSaveSlot != null)
-			    {
-				    SharedData.SavedLives = 3;
-				    SharedData.SavedScore = 0;
-				    SharedData.ContinueCount = 0;
-					    
-				    // game_save_data(SharedData.current_save_slot);
-			    }
-				
-				//TODO: game_restart
-			    //game_restart();
-				break;
+			case DeathStates.Wait: WaitOnDeath(); break;
+			case DeathStates.Restart: RestartOnDeath(); break;
 		}
+	}
+
+	private void WaitOnDeath()
+	{
+		var bound = 32f;
+
+		//TODO: check processSpeed
+		if (SharedData.PlayerPhysics < PhysicsTypes.S3)
+		{
+			bound += Camera.Limit.W; // TODO: check if LimitBottom or Bounds
+		}
+		else
+		{
+			bound += Camera.BufferPosition.Y + SharedData.ViewSize.Y;
+		}
+
+		if ((int)Position.Y <= bound) return;
+		
+		RestartState = RestartStates.ResetLevel;
+		
+		// If CPU, respawn
+		if (Id != 0)
+		{
+			m_player_cpu_respawn();
+			return;
+		}
+		
+		// If lead player, go to the next state
+		//TODO: gui hud
+		/*if (instance_exists(obj_gui_hud))
+		{
+			obj_gui_hud.update_timer = false;
+		}*/
+				
+		Scene.Local.AllowPause = false;
+					
+		if (--SharedData.LifeCount > 0 && Scene.Local.Time < 36000f)
+		{
+			DeathState = DeathStates.Restart;
+			RestartTimer = 60f;
+		}
+		else
+		{
+			DeathState = DeathStates.Wait;
+				
+			//TODO: gui gameover
+			//instance_create_depth(0, 0, RENDERER_DEPTH_HUD, obj_gui_gameover);				
+			AudioPlayer.Music.Play(MusicStorage.GameOver);
+		}
+	}
+
+	private void RestartOnDeath()
+	{
+		// Wait 60 steps, then restart
+		if (RestartTimer > 0f)
+		{
+			RestartTimer -= Scene.Local.ProcessSpeed;
+			if (RestartTimer > 0f) return;
+			AudioPlayer.Music.StopAllWithMute(0.5f);
+					
+			// TODO: fade
+			//fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);
+		}
+				
+		// TODO: fade
+		//if (c_framework.fade.state != FADESTATE.PLAINCOLOUR) break;
+
+		Scene.Local.Tree.ReloadCurrentScene();
 	}
 
 	public void OnEnableEditMode()
