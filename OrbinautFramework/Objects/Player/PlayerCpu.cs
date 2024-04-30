@@ -106,22 +106,39 @@ public partial class PlayerCpu : Player
 			}
 		}
 		
-		int distanceX = Mathf.FloorToInt(Position.X - targetPosition.X);
+		if (MoveToLeadPlayer(targetPosition)) return;
 
-		if (distanceX != 0)
+		if (SharedData.CpuBehaviour == CpuBehaviours.S3 && _leadPlayer.IsDead) return;
+
+		if (!IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
+		
+		CpuState = CpuStates.Main;
+		Animation = Animations.Move;
+		IsObjectInteractionEnabled = true;
+		IsControlRoutineEnabled = true;
+	}
+
+	private bool MoveToLeadPlayer(Vector2 targetPosition)
+	{
+		var distance = new Vector2I(
+			Mathf.FloorToInt(Position.X - targetPosition.X),
+			Mathf.FloorToInt(targetPosition.Y - Position.Y));
+
+		Vector2 positionOffset = Vector2.Zero;
+		if (distance.X != 0)
 		{
-			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distanceX) / 16, 12) + 1;
+			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1;
 
-			if (distanceX >= 0)
+			if (distance.X >= 0)
 			{
-				if (velocityX < distanceX)
+				if (velocityX < distance.X)
 				{
 					velocityX *= -1;
 				}
 				else
 				{
-					velocityX = -distanceX;
-					distanceX = 0;
+					velocityX = -distance.X;
+					distance.X = 0;
 				}
 
 				Facing = Constants.Direction.Negative;
@@ -130,32 +147,26 @@ public partial class PlayerCpu : Player
 			{
 				velocityX *= -1;
 
-				if (velocityX >= distanceX)
+				if (velocityX >= distance.X)
 				{
-					velocityX = distanceX;
-					distanceX = 0;
+					velocityX = distance.X;
+					distance.X = 0;
 				}
 
 				Facing = Constants.Direction.Positive;
 			}
 
-			Position.X += velocityX * Scene.Local.ProcessSpeed;
+			positionOffset.X = velocityX * Scene.Local.ProcessSpeed;
 		}
-		
-		int distanceY = Mathf.FloorToInt(targetPosition.X - Position.X);
-		if (distanceY != 0)
+
+		if (distance.Y != 0)
 		{
-			Position.Y += Math.Sign(distanceY) * Scene.Local.ProcessSpeed;
+			positionOffset.Y = Math.Sign(distance.Y) * Scene.Local.ProcessSpeed;
 		}
 
-		if (SharedData.CpuBehaviour == CpuBehaviours.S3 && _leadPlayer.IsDead) return;
+		Position += positionOffset;
 
-		if (!IsGrounded || distanceX != 0 || distanceY != 0 || targetPosition.Y != followDataRecord.Position.Y) return;
-		
-		CpuState = CpuStates.Main;
-		Animation = Animations.Move;
-		IsObjectInteractionEnabled = true;
-		IsControlRoutineEnabled = true;
+		return distance.X != 0 || distance.Y != 0;
 	}
 
 	private void PlayTailsSound()
@@ -201,10 +212,12 @@ public partial class PlayerCpu : Player
 		return velocityX;
 	}
 	
-	private bool ProcessMainCpu()
+	private void ProcessMainCpu()
 	{
-		if (CheckIfCpuOffscreen()) return true;
-
+		FreezeOrFlyIfLeaderDied();
+		if (CheckIfCpuOffscreen()) return;
+		if (!IsObjectInteractionEnabled || CarryTarget != null || Action == Actions.Carried) return;
+		
 		CpuTarget ??= Players[Id - 1];
 		
 		DataRecord followDataRecord = CpuTarget.GetFollowDataRecord();
@@ -215,10 +228,10 @@ public partial class PlayerCpu : Player
 		if (CpuInputTimer > 0f)
 		{
 			CpuInputTimer--;
-			if (!Input.NoControl) return false;
+			if (!Input.NoControl) return;
 		}
 		
-		if (CarryTarget != null || Action == Actions.Carried) return false;
+		if (CarryTarget != null || Action == Actions.Carried) return;
 		
 		if (GroundLockTimer > 0f && GroundSpeed == 0f)
 		{
@@ -255,7 +268,25 @@ public partial class PlayerCpu : Player
 		}
 		
 		Input.Set(followDataRecord.InputPress, followDataRecord.InputDown);
-		return false;
+	}
+
+	private void FreezeOrFlyIfLeaderDied()
+	{
+		// Freeze or start flying (if we're Tails) if lead player has died
+		if (!_leadPlayer.IsDead) return;
+		
+		if (Type == Types.Tails)
+		{
+			Animation = Animations.Fly;
+			CpuState = CpuStates.Respawn;
+			ResetState();
+		}
+		else // Force-disable animation
+		{
+			data_ani.timer = -1;
+		}
+					
+		IsControlRoutineEnabled = false;
 	}
 	
 	private void PushCpu(float distanceX, ref DataRecord followDataRecord)

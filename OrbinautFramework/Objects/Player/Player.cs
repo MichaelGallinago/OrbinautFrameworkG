@@ -565,6 +565,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
     
+	//TODO: what is this????????
 	public override void ResetState()
 	{
 		switch (Action)

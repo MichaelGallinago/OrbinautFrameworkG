@@ -134,6 +134,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	
 	public virtual void ResetState()
 	{
+		Action = Actions.None;
+		
 		IsHurt = false;
 		IsJumping = false;
 		IsSpinning = false;
@@ -143,7 +145,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		SetPushAnimationBy = null;
 		
 		Radius = RadiusNormal;
-		Action = Actions.None;
 	}
 	
 	protected override void Init()
