@@ -66,3 +66,8 @@ public enum RestartStates : byte
 {
     GameOver, ResetLevel, RestartStage, RestartGame
 }
+
+public enum DeathStates : byte
+{
+    Wait, Restart
+}

@@ -8,7 +8,6 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface ICpuTarget
 {
-    bool IsRestartOnDeath { get; }
     bool IsDead { get; }
     Velocity Velocity { get; }
     Actions Action { get; }
@@ -17,6 +16,7 @@ public interface ICpuTarget
     BaseObject OnObject { get; }
     bool IsObjectInteractionEnabled { get; }
     ICamera Camera { get; }
+    int ZIndex { get; }
     
     ReadOnlySpan<DataRecord> RecordedData { get; }
     DataRecord GetFollowDataRecord(int cpuDelay) => RecordedData[cpuDelay];

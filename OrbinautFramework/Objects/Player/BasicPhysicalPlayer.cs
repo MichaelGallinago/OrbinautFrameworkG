@@ -40,10 +40,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	public void Kill()
 	{
-		if (IsRestartOnDeath) return;
+		if (DeathState == DeathStates.Restart) return;
 		
 		Action = Actions.None;
-		IsRestartOnDeath = true;
+		DeathState = DeathStates.Restart;
 		IsObjectInteractionEnabled = false;
 		IsGrounded = false;
 		OnObject = null;
@@ -423,7 +423,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessMovementAir()
 	{
-		if (IsGrounded || IsRestartOnDeath) return;
+		if (IsGrounded || DeathState == DeathStates.Restart) return;
 		
 		if (Action is Actions.Carried or Actions.Climb or Actions.Glide 
 		    && (GlideStates)ActionState != GlideStates.Fall) return;
@@ -707,7 +707,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessLevelBound()
 	{
-		if (IsRestartOnDeath) return;
+		if (DeathState == DeathStates.Restart) return;
 		
 		Framework.Camera camera = Framework.Camera.Main;
 		
@@ -913,7 +913,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private void ProcessCollisionAir()
 	{
-		if (IsGrounded || IsRestartOnDeath) return;
+		if (IsGrounded || DeathState == DeathStates.Restart) return;
 		if (Action is Actions.Glide or Actions.Climb) return;
 		
 		int wallRadius = RadiusNormal.X + 1;

@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -10,24 +11,9 @@ public partial class PlayerCpu : Player
 {
 	private bool _canReceiveInput;
 	private ICpuTarget _leadPlayer;
+	private Buttons _cpuInputDown;
+	private Buttons _cpuInputPress;
 	private int _delay;
-	
-	public override void _ExitTree()
-	{
-		base._ExitTree();
-		
-		//TODO: check respawn Player cpu
-		/*
-		if (Players.Count == 0 || !IsCpuRespawn) return;
-		var newPlayer = new Player
-		{
-			Type = Type,
-			Position = Players.First().Position
-		};
-
-		newPlayer._Process(Scene.Local.ProcessSpeed / Constants.BaseFramerate);
-		*/
-	}
 	
     protected override void ProcessCpu(float processSpeed)
 	{
@@ -98,11 +84,11 @@ public partial class PlayerCpu : Player
 		DataRecord followDataRecord = _leadPlayer.GetFollowDataRecord(_delay);
 		Vector2 targetPosition = followDataRecord.Position;
 
-		if (SharedData.CpuBehaviour == CpuBehaviours.S2 && Scene.Local.IsStage)
+		if (SharedData.CpuBehaviour == CpuBehaviours.S2)
 		{
-			if (Scene.Local is Stage { IsWaterEnabled: true } stage)
+			if (Stage.Local != null && Stage.Local.IsWaterEnabled)
 			{
-				targetPosition.Y = Math.Min(stage.WaterLevel - 16, targetPosition.Y);
+				targetPosition.Y = Math.Min(Stage.Local.WaterLevel - 16, targetPosition.Y);
 			}
 		}
 		
@@ -127,7 +113,8 @@ public partial class PlayerCpu : Player
 		Vector2 positionOffset = Vector2.Zero;
 		if (distance.X != 0)
 		{
-			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1;
+			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
+			velocityX *= Scene.Local.ProcessSpeed;
 
 			if (distance.X >= 0)
 			{
@@ -156,7 +143,7 @@ public partial class PlayerCpu : Player
 				Facing = Constants.Direction.Positive;
 			}
 
-			positionOffset.X = velocityX * Scene.Local.ProcessSpeed;
+			positionOffset.X = velocityX;
 		}
 
 		if (distance.Y != 0)
@@ -188,86 +175,56 @@ public partial class PlayerCpu : Player
 		
 		AudioPlayer.Sound.Play(SoundStorage.Flight2);
 	}
-
-	private float GetRespawnVelocityX(ref float distanceX)
-	{
-		if (distanceX == 0f) return 0f;
-		
-		float velocityX = Math.Abs(CpuTarget.Velocity.X) + Math.Min(MathF.Floor(Math.Abs(distanceX) / 16f), 12f) + 1f;
-	
-		Facing = distanceX >= 0f ? Constants.Direction.Negative : Constants.Direction.Positive;
-		var sign = (int)Facing;
-		distanceX *= sign;
-		
-		if (velocityX >= -distanceX)
-		{
-			velocityX = distanceX;
-			distanceX = 0f;
-		}
-		else
-		{
-			velocityX *= sign;
-		}
-
-		return velocityX;
-	}
 	
 	private void ProcessMainCpu()
 	{
 		FreezeOrFlyIfLeaderDied();
-		if (CheckIfCpuOffscreen()) return;
+		
+		if (CheckIfCpuOffscreen()) return; // Exit if respawned
+		
 		if (!IsObjectInteractionEnabled || CarryTarget != null || Action == Actions.Carried) return;
 		
-		CpuTarget ??= Players[Id - 1];
+		CpuTarget ??= _leadPlayer; // Follow lead player
 		
-		DataRecord followDataRecord = CpuTarget.GetFollowDataRecord();
-		
-		//TODO: ZIndex
-		//depth = _player1.depth + player_id;
-		
+		// Do not run CPU follow logic while under manual control and input is allowed
 		if (CpuInputTimer > 0f)
 		{
-			CpuInputTimer--;
+			CpuInputTimer -= Scene.Local.ProcessSpeed;
 			if (!Input.NoControl) return;
 		}
 		
-		if (CarryTarget != null || Action == Actions.Carried) return;
+		//TODO: check that ZIndex works
+		ZIndex = _leadPlayer.ZIndex + Id;
 		
 		if (GroundLockTimer > 0f && GroundSpeed == 0f)
 		{
 			CpuState = CpuStates.Stuck;
 		}
 		
-		if (CpuTarget.Action == Actions.PeelOut)
+		(Vector2 targetPosition,_cpuInputPress, _cpuInputDown, 
+			Constants.Direction direction, BaseObject setPushAnimationBy) = CpuTarget.GetFollowDataRecord(_delay);
+
+		if (SharedData.CpuBehaviour == CpuBehaviours.S3 &&
+		    Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)
 		{
-			followDataRecord.InputDown = followDataRecord.InputPress = new Buttons();
+			targetPosition.X -= 32f;
 		}
-		
-		if (SharedData.PlayerPhysics >= PhysicsTypes.S3)
-		{
-			if (Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)
-			{
-				followDataRecord.Position.X -= 32f;
-			}
-		}
-		
+
 		var doJump = true;
-		
-		// TODO: AI is pushing weirdly rn
-		if (SetPushAnimationBy == null || followDataRecord.SetPushAnimationBy != null)
+		if (SetPushAnimationBy == null || setPushAnimationBy != null)
 		{
-			int distanceX = Mathf.FloorToInt(followDataRecord.Position.X - Position.X);
-			PushCpu(distanceX, ref followDataRecord);
-			doJump = CheckCpuJump(distanceX, followDataRecord);
+			int distanceX = Mathf.FloorToInt(targetPosition.X - Position.X);
+			PushCpu(distanceX, direction);
+			doJump = CheckCpuJump(distanceX, targetPosition.Y);
 		}
 		
 		if (doJump && Animation != Animations.Duck && Scene.Local.IsTimePeriodLooped(64f))
 		{
-			followDataRecord.InputPress.Abc = followDataRecord.InputDown.Abc = true;
+			_cpuInputPress.Abc = _cpuInputDown.Abc = true;
 			IsCpuJumping = true;
 		}
 		
-		Input.Set(followDataRecord.InputPress, followDataRecord.InputDown);
+		Input.Set(_cpuInputPress, _cpuInputDown);
 	}
 
 	private void FreezeOrFlyIfLeaderDied()
@@ -283,50 +240,50 @@ public partial class PlayerCpu : Player
 		}
 		else // Force-disable animation
 		{
-			data_ani.timer = -1;
+			Sprite.Pause();
 		}
 					
 		IsControlRoutineEnabled = false;
 	}
 	
-	private void PushCpu(float distanceX, ref DataRecord followDataRecord)
+	private void PushCpu(float distanceX, Constants.Direction facing)
 	{
 		if (distanceX == 0f)
 		{
-			Facing = followDataRecord.Facing;
+			Facing = facing;
 			return;
 		}
 		
-		int maxDistanceX = SharedData.PlayerPhysics > PhysicsTypes.S3 ? 48 : 16;
+		int maxDistanceX = SharedData.PlayerPhysics == PhysicsTypes.S3 ? 48 : 16;
 
 		bool isMoveToRight = distanceX > 0f;
 		int sign = isMoveToRight ? 1 : -1;
 		if (sign * distanceX > maxDistanceX)
 		{
-			followDataRecord.InputDown.Left = followDataRecord.InputPress.Left = !isMoveToRight;
-			followDataRecord.InputDown.Right = followDataRecord.InputPress.Right = isMoveToRight;
+			_cpuInputDown.Left = _cpuInputPress.Left = !isMoveToRight;
+			_cpuInputDown.Right = _cpuInputPress.Right = isMoveToRight;
 		}
 						
-		if (GroundSpeed != 0f && Facing == (Constants.Direction)sign)
+		if (GroundSpeed != 0f && IsControlRoutineEnabled && (int)Facing == sign)
 		{
 			Position += Vector2.Right * sign;
 		}
 	}
 	
-	private bool CheckCpuJump(float distanceX, DataRecord followDataRecord)
+	private bool CheckCpuJump(float distanceX, float targetPositionY)
 	{
 		if (IsCpuJumping)
 		{
-			followDataRecord.InputDown.Abc = true;
-				
+			_cpuInputDown.Abc = true;
+				 
 			if (!IsGrounded) return false;
+			
 			IsCpuJumping = false;
-
 			return true;
 		}
 		
-		if (Math.Abs(distanceX) > 64 && !Scene.Local.IsTimePeriodLooped(256f)) return false;
-		return Mathf.FloorToInt(followDataRecord.Position.Y - Position.Y) <= -32;
+		if (distanceX >= 64f && !Scene.Local.IsTimePeriodLooped(256f)) return false;
+		return targetPositionY - Position.Y <= -32;
 	}
 	
 	private void ProcessStuckCpu()

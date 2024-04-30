@@ -111,7 +111,7 @@ public partial class Camera : Camera2D, ICamera
 
 	public void UpdatePlayerCamera(PlayerData player)
 	{
-		if (Target != player || player.IsRestartOnDeath) return;
+		if (Target != player || player.DeathState == DeathStates.Restart) return;
 
 		UpdateCdCamera(player);
 

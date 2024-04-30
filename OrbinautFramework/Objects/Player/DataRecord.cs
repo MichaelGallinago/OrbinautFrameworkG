@@ -9,9 +9,6 @@ public record DataRecord(
     Vector2 Position,
     Buttons InputPress,
     Buttons InputDown,
-    bool IsGrounded,
-    bool IsJumping,
-    Actions Action,
     Constants.Direction Facing,
     BaseObject SetPushAnimationBy
 );

@@ -18,10 +18,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	[Export] private SpawnTypes _spawnType;
 
 	public event Action<Types> TypeChanged;
-	private event Action<int> PlayerCountChanged;
 
 	public static List<Player> Players { get; } = [];
-	private static int _playerCount;
 
 	public Types Type
 	{
@@ -60,7 +58,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
-	public bool IsRestartOnDeath { get; set; }
+	public DeathStates DeathState { get; set; }
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
 	public float SuperTimer { get; set; }
@@ -98,7 +96,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public ICamera Camera { get; set; }
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
-	public Stage Stage { get; set; }
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	public HashSet<BaseObject> PushObjects { get; } = [];
 	public bool IsDebugMode { get; set; }
@@ -111,22 +108,32 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	
 	protected PlayerData()
 	{
-		Id = _playerCount++;
-		PlayerCountChanged?.Invoke(_playerCount);
+		Id = Players.Count;
 		Shield = new ShieldContainer(this);
 	}
 
 	public override void _Ready()
 	{
-		PlayerCountChanged += 
 		base._Ready();
 		Spawn();
 		InitializeCamera();
 	}
 
+	public override void _ExitTree()
+	{
+		base._ExitTree();
+		ResizeAllRecordedData();
+	}
+
+	public override void _EnterTree()
+	{
+		base._EnterTree();
+		ResizeAllRecordedData();
+	}
+
+	//TODO: remove or use this
 	public static void ResetStatic()
 	{
-		_playerCount = 0;
 		Players.Clear();
 	}
 	
@@ -204,7 +211,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		CarryTarget = null;
 		CarryTimer = 0f;
 		CarryTargetPosition = Vector2.Zero;
-		IsRestartOnDeath = false;
+		DeathState = DeathStates.Wait;
 		RestartTimer = 0f;
 		CpuTarget = null;
 		CpuState = CpuStates.Main;
@@ -219,20 +226,39 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		Visible = true;
 		
 		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * Players.Count)];
-		var record = new DataRecord(
-			Position, Input.Press, Input.Down, IsGrounded, IsJumping, Action, Facing, SetPushAnimationBy);
+		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
 	}
-
-	private void ResizeRecordedData(int count)
+	
+	private static void ResizeAllRecordedData()
 	{
-		var resizedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * count)];
-		var record = new DataRecord(
-			Position, Input.Press, Input.Down, IsGrounded, IsJumping, Action, Facing, SetPushAnimationBy);
+		if (Scene.Local.Time == 0f) return;
+
+		int playersCount = Players.Count + 1;
+		foreach (Player player in Players)
+		{
+			player.ResizeRecordedData(playersCount);
+		}
+	}
+
+	private void ResizeRecordedData(int playersCount)
+	{
+		int newLength = Math.Max(MinimalRecordLength, CpuDelayStep * playersCount);
+		int oldLength = _recordedData.Length;
 		
-		Array.Fill(_recordedData, record);
-		_recordedData = 
+		if (newLength <= oldLength)
+		{
+			Array.Resize(ref _recordedData, newLength);
+			return;
+		}
+		
+		var resizedData = new DataRecord[newLength];
+		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+		
+		Array.Copy(_recordedData, resizedData, oldLength);
+		Array.Fill(resizedData, record,oldLength, newLength - oldLength);
+		_recordedData = resizedData;
 	}
 
 	private void Spawn()

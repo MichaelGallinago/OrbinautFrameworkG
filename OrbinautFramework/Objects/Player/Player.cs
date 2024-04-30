@@ -21,15 +21,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	public override void _Ready()
 	{
 		base._Ready();
-		if (GetOwner<Node>() is Scene scene)
-		{
-			TileMap = scene.CollisionTileMap;
-			if (scene is Stage stage)
-			{
-				Stage = stage;
-			}
-		}
-		
+		TileMap = Scene.Local.CollisionTileMap;
 		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
 
@@ -53,14 +45,14 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	
 	public override void _Process(double delta)
 	{
-		if (Scene.Local.IsPaused && !IsRestartOnDeath) return;
+		if (Scene.Local.IsPaused && DeathState == DeathStates.Wait) return;
 		
 		float processSpeed = Scene.Local.ProcessSpeed;
 		
 		Input.Update(Id);
 
 		// DEBUG MODE PLAYER ROUTINE
-		if (!IsRestartOnDeath && Id == 0 && SharedData.IsDebugModeEnabled)
+		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
 		{
 			if (_debugMode.Update(processSpeed, this, Input)) return;
 		}
@@ -98,9 +90,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			AudioPlayer.Music.Play(MusicStorage.HighSpeed);
 		}
-		else if (Stage.Music != null)
+		else if (Stage.Local != null && Stage.Local.Music != null)
 		{
-			AudioPlayer.Music.Play(Stage.Music);
+			AudioPlayer.Music.Play(Stage.Local.Music);
 		}
 	}
 	
@@ -233,7 +225,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void ProcessWater()
 	{
-		if (IsHurt || Stage is not { IsWaterEnabled: true }) return;
+		if (IsHurt || Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
 		
 		if (DiveIntoWater()) return;
 		if (UpdateAirTimer()) return;
@@ -244,7 +236,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsUnderwater) return false;
 		
-		if (Mathf.Floor(Position.Y) < Stage.WaterLevel) return true;
+		if (Mathf.Floor(Position.Y) < Stage.Local.WaterLevel) return true;
 		
 		IsUnderwater = true;
 		AirTimer = Constants.DefaultAirTimer;
@@ -380,7 +372,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void UpdateCollision()
 	{
-		if (IsRestartOnDeath) return;
+		if (DeathState == DeathStates.Wait) return;
 		
 		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
 		SetRegularHitBox();
@@ -430,7 +422,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void RecordData()
 	{
-		if (IsRestartOnDeath) return;
+		if (DeathState == DeathStates.Restart) return;
 		
 		RecordedData.Add(new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
 		if (RecordedData.Count <= MinimalRecordLength) return;
@@ -584,24 +576,20 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void ProcessDeath(float processSpeed)
 	{
-		if (!IsRestartOnDeath) return;
+		if (!IsDead) return;
 
 		var positionY = (int)Position.Y;
 		
 		// If drowned, wait until we're far enough off-screen
 		const int drownScreenOffset = 276;
+		if (AirTimer == 0 && positionY <= Camera.BufferPosition.Y + SharedData.ViewSize.Y + drownScreenOffset) return;
 		
-		if (AirTimer == 0)
+		// Stop all objects
+		if (Id == 0)
 		{
-			if ((int)Position.Y <= Camera.Main.Po .view_y + SharedData.ViewSize.Y + drownScreenOffset) return;
-			
-			if (Id == 0)
-			{
-				Scene.Local.UpdateObjects = false;	
-			}
+			Scene.Local.UpdateObjects = false;
 		}
 		
-		bool isTimeOver = Scene.Local.Time >= 36000d; // TODO: add constant
 		switch (RestartState)
 		{
 			case RestartStates.GameOver:
@@ -628,7 +616,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 					Scene.Local.UpdateTimer = false;
 					
 					// TODO: Check this
-					if (--LifeCount > 0 && !isTimeOver)
+					if (--LifeCount > 0 && Scene.Local.Time < 36000f)
 					{
 						RestartTimer = 60f;
 						break;
@@ -717,6 +705,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		GroundSpeed.Value = 0f;
 		Animation = Animations.Move;
 		IsObjectInteractionEnabled = true;
-		IsRestartOnDeath = false;
+		DeathState = DeathStates.Wait;
 	}
 }
