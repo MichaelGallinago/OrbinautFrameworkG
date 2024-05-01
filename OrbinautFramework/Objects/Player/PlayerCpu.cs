@@ -39,6 +39,17 @@ public partial class PlayerCpu : Player
 		}
 	}
 
+	protected override void SetNextStateOnDeath()
+	{
+		// If CPU, respawn
+		if (Id != 0)
+		{
+			Respawn();
+			return;
+		}
+		base.SetNextStateOnDeath();
+	}
+
 	private void InitRespawnCpu()
 	{
 		// Take some time (up to 64 frames (on 60 fps))

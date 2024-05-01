@@ -7,7 +7,7 @@ public partial class ShieldContainer(Node2D target) : AdvancedAnimatedSprite
 {
     public enum Types : byte
     {
-        None, Normal, Thunder, Flame, Water
+        None, Normal, Lightning, Fire, Bubble
     }
     
     public enum States : byte

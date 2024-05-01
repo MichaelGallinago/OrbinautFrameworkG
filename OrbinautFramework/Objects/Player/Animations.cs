@@ -8,9 +8,6 @@ namespace OrbinautFramework3.Objects.Player;
 public enum Animations : byte
 {
     None,
-    Idle,
-    Spin,
-    SpinDash,
     Push,
     Duck,
     LookUp,
@@ -19,15 +16,20 @@ public enum Animations : byte
     Drown,
     Skid,
     Grab,
-    Balance,
     Transform,
     Bounce,
     Breathe,
-    
+    Flip,
+
+    Idle,
     Move,
     Walk,
     Run,
+    
+    Spin,
+    SpinDash,
     Dash,
+    DropDash,
     
     GlideAir,
     GlideFall,
@@ -36,7 +38,7 @@ public enum Animations : byte
     ClimbWall,
     ClimbLedge,
     
-    DropDash,
+    Balance,
     BalanceFlip,
     BalancePanic,
     BalanceTurn,

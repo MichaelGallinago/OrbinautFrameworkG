@@ -59,21 +59,25 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	    
 		// DEFAULT PLAYER ROUTINE
 		ProcessCpu(processSpeed);
-		ProcessDeath(processSpeed);
+		ProcessDeath();
 		
 		if (IsControlRoutineEnabled)
 		{
 			base._Process(delta);
 		}
+
+		if (!IsDead)
+		{
+			ProcessWater();
+			UpdateStatus();
+			UpdateCollision();
+		}
 		
-		UpdateStatus();
-		ProcessWater();
 		RecordData();
 		ProcessRotation();
 		Sprite.Animate(this);
 		_tail?.Animate(this);
 		ProcessPalette();
-		UpdateCollision();
 	}
 	
 	public void ResetMusic()
@@ -138,33 +142,24 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private void UpdateStatus()
 	{
 		CreateSkidDust();
-		UpdateInvincibilityFlashes();
+		FlickAfterGettingHit();
 		
 		ItemSpeedTimer = UpdateItemTimer(ItemSpeedTimer, MusicStorage.HighSpeed);
 		ItemInvincibilityTimer = UpdateItemTimer(ItemInvincibilityTimer, MusicStorage.Invincibility);
 
-		UpdateSuperStatus();
+		UpdateSuperForm();
 		
 		IsInvincible = InvincibilityTimer > 0f || ItemInvincibilityTimer > 0f || 
 		               IsHurt || SuperTimer > 0f || Shield.State == ShieldContainer.States.DoubleSpin;
 		
-		if (Id == 0 && Scene.Local.Time >= 36000d)
-		{
-			Kill();
-		}
+		KillPlayerOnTimeLimit();
 	}
-
-	private void UpdateInvincibilityFlashes()
-	{
-		if (InvincibilityTimer <= 0f || IsHurt) return;
-		Visible = ((int)InvincibilityTimer & 4) >= 1 || InvincibilityTimer == 0f;
-		InvincibilityTimer -= Scene.Local.ProcessSpeed;
-	}
-
+	
 	private void CreateSkidDust()
 	{
 		if (Animation != Animations.Skid) return;
 		
+		//TODO: fix loop on stutter (maybe PreviousProcessSpeed?)
 		if (ActionValue2 % 4f < Scene.Local.ProcessSpeed)
 		{
 			// TODO: make obj_dust_skid
@@ -173,6 +168,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ActionValue2 += Scene.Local.ProcessSpeed;
 	}
 
+	private void FlickAfterGettingHit()
+	{
+		if (InvincibilityTimer <= 0f || IsHurt) return;
+		Visible = ((int)InvincibilityTimer & 4) > 0 || InvincibilityTimer <= 0f;
+		InvincibilityTimer -= Scene.Local.ProcessSpeed;
+	}
+	
 	private float UpdateItemTimer(float timer, AudioStream itemMusic)
 	{
 		if (timer <= 0f) return 0f;
@@ -181,7 +183,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if (timer > 0f) return timer;
 		timer = 0f;
 
-		if (AudioPlayer.Music.IsPlaying(itemMusic))
+		if (Id == 0 && AudioPlayer.Music.IsPlaying(itemMusic))
 		{
 			ResetMusic();
 		}
@@ -189,7 +191,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		return timer;
 	}
 
-	private void UpdateSuperStatus()
+	private void UpdateSuperForm()
 	{
 		if (SuperTimer <= 0f) return;
 		
@@ -204,15 +206,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 			}
 		}
 
-		if (SuperTimer > 0f)
+		float newSuperTimer = SuperTimer - Scene.Local.ProcessSpeed;
+		if (newSuperTimer > 0f)
 		{
-			SuperTimer -= Scene.Local.ProcessSpeed;
+			SuperTimer = newSuperTimer;
 			return;
 		}
 
 		if (--SharedData.PlayerRings > 0)
 		{
-			SuperTimer = 60f;
+			SuperTimer = 61f;
 			return;
 		}
 		
@@ -223,10 +226,18 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		ResetMusic();
 	}
 
+	private void KillPlayerOnTimeLimit()
+	{
+		if (Id == 0 && Scene.Local.Time >= 36000f)
+		{
+			Kill();
+		}
+	}
+
 	private void ProcessWater()
 	{
 		if (IsHurt || Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
-		
+
 		if (DiveIntoWater()) return;
 		if (UpdateAirTimer()) return;
 		LeaveWater();
@@ -236,115 +247,144 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (IsUnderwater) return false;
 		
-		if (Mathf.Floor(Position.Y) < Stage.Local.WaterLevel) return true;
+		if ((int)Position.Y < Stage.Local.WaterLevel) return true;
 		
 		IsUnderwater = true;
 		AirTimer = Constants.DefaultAirTimer;
+
+		ResetGravityOnWaterEdge();
+
+		if (PreviousPosition.Y < Stage.Local.WaterLevel)
+		{
+			SpawnWaterSplash();
+		}
 		
-		ProcessWaterSplash();
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
-		SlowDownOnDive();
-		RemoveBarrierUnderwater();
+		
+		Velocity.Vector *= new Vector2(0.5f, 0.25f);
+		
+		RemoveShieldUnderwater();
 
-		if (Action != Actions.Flight) return true;
+		if (Action != Actions.Flight) return false;
 		AudioPlayer.Sound.Stop(SoundStorage.Flight);
 		AudioPlayer.Sound.Stop(SoundStorage.Flight2);
-
-		return true;
+		return false;
 	}
 
-	private void SlowDownOnDive()
+	private void ResetGravityOnWaterEdge()
 	{
 		if (Action != Actions.Flight && (Action != Actions.Glide || ActionState == (int)GlideStates.Fall))
 		{
-			Gravity = GravityType.Underwater;
+			ResetGravity();
 		}
-			
-		Velocity.Vector *= new Vector2(0.5f, 0.25f);
 	}
 
-	private void RemoveBarrierUnderwater()
+	private void RemoveShieldUnderwater()
 	{
-		if (Shield.Type is not (ShieldContainer.Types.Flame or ShieldContainer.Types.Thunder)) return;
+		if (Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
 		
-		if (Shield.Type == ShieldContainer.Types.Thunder)
+		if (Shield.Type == ShieldContainer.Types.Lightning)
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
 		}
-		
-		Shield.Type = ShieldContainer.Types.None;
+
+		SharedData.PlayerShield = ShieldContainer.Types.None;
+	}
+
+	private enum AirTimerStates : byte
+	{
+		None, Alert1, Alert2, Alert3, Drowning, Drown
 	}
 
 	private bool UpdateAirTimer()
 	{
-		if (Shield.Type == ShieldContainer.Types.Water) return false;
-		
-		if (AirTimer > -1f)
+		if (Shield.Type == ShieldContainer.Types.Bubble) return false;
+
+		AirTimerStates previousState = GetAirTimerState(AirTimer);
+		if (AirTimer > 0f)
 		{
 			AirTimer -= Scene.Local.ProcessSpeed;
 		}
-			
-		//TODO: fix float comparison
-		switch (AirTimer)
+
+		AirTimerStates state = GetAirTimerState(AirTimer);
+		if (state != previousState + 1) return false;
+		
+		switch (state)
 		{
-			case 1500f:
-			case 1200f:
-			case 900f:
-				if (Id != 0) break;
+			case AirTimerStates.Alert1 or AirTimerStates.Alert2 or AirTimerStates.Alert3 when Id == 0:
 				AudioPlayer.Sound.Play(SoundStorage.Alert);
 				break;
-					
-			case 720f:
-				if (Id != 0) break;
+			
+			case AirTimerStates.Drowning when Id == 0:
 				AudioPlayer.Music.Play(MusicStorage.Drowning);
 				break;
-					
-			case 0f:
-				AudioPlayer.Sound.Play(SoundStorage.Drown);
-				ResetState();
-
-				ZIndex = 0;
-				Animation = Animations.Drown;
-				TileLayer = Constants.TileLayers.None;
-				Velocity.Vector = Vector2.Zero;
-				Gravity	= 0.0625f;
-				IsAirLock = true;
-				if (Camera.Main == null) return true;
-				Camera.Main.Target = null;
+			
+			case AirTimerStates.Drown:
+				ProcessDrown();
 				return true;
 		}
 
 		return false;
 	}
 
+	private static AirTimerStates GetAirTimerState(float value) => value switch
+	{
+		> 1500f => AirTimerStates.None,
+		> 1200f => AirTimerStates.Alert1,
+		> 900f => AirTimerStates.Alert2,
+		> 720f => AirTimerStates.Alert3,
+		> 0f => AirTimerStates.Drowning,
+		_ => AirTimerStates.Drown
+	};
+
+	private void ProcessDrown()
+	{
+		AudioPlayer.Sound.Play(SoundStorage.Drown);
+		ResetState();
+
+		ZIndex = (int)Constants.ZIndexes.AboveForeground;
+		Animation = Animations.Drown;
+		IsDead = true;
+		IsObjectInteractionEnabled = false;
+		Gravity	= GravityType.Underwater;
+		Velocity.Vector = Vector2.Zero;
+		GroundSpeed.Value = 0f;
+		//TODO: solve view id
+		if (Id == 0) //|| player_view.index > 0)
+		{
+			Camera.IsMovementAllowed = false;
+		}
+	}
+
 	private void LeaveWater()
 	{
-		if (MathF.Floor(Position.Y) >= Stage.WaterLevel) return;
+		if ((int)Position.Y >= Stage.Local.WaterLevel) return;
 
-		AccelerateOnLeavingWater();
+		IsUnderwater = false;
+		ResetGravityOnWaterEdge();
+		
+		if (PreviousPosition.Y >= Stage.Local.WaterLevel)
+		{
+			SpawnWaterSplash();
+		}
 		
 		if (Action == Actions.Flight)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 			
-		if (AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
+		if (Id == 0 && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
 		{
-			Players[0].ResetMusic();
+			ResetMusic();
 		}
-				
-		IsUnderwater = false;	
-		AirTimer = Constants.DefaultAirTimer;
-			
-		ProcessWaterSplash();
+		
+		AccelerateOnLeavingWater();
 	}
 
 	private void AccelerateOnLeavingWater()
 	{
-		if (IsHurt || Action == Actions.Glide) return;
-		
 		if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
 		{
 			Velocity.Y *= 2f;
@@ -354,14 +394,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			Velocity.Y = -16f;
 		}
-					
-		if (Action != Actions.Flight)
-		{
-			Gravity = GravityType.Default;
-		}
 	}
 
-	private void ProcessWaterSplash()
+	private void SpawnWaterSplash()
 	{
 		if (Action is Actions.Climb or Actions.Glide || CpuState == CpuStates.Respawn) return;
 		
@@ -372,9 +407,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void UpdateCollision()
 	{
-		if (DeathState == DeathStates.Wait) return;
-		
-		SetSolid(new Vector2I(RadiusNormal.X + 1, Radius.Y));
+		SetSolid(RadiusNormal.X + 1, Radius.Y);
 		SetRegularHitBox();
 		SetExtraHitBox();
 	}
@@ -383,12 +416,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	{
 		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
 		{
-			SetHitBox(new Vector2I(8, Radius.Y - 3));
+			SetHitBox(8, Radius.Y - 3);
 			return;
 		}
 
 		if (Type is Types.Tails or Types.Amy) return;
-		SetHitBox(new Vector2I(8, 10), new Vector2I(0, 6));
+		SetHitBox(8, 10, 0, 6);
 	}
 
 	private void SetExtraHitBox()
@@ -396,102 +429,98 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		switch (Animation)
 		{
 			case Animations.HammerSpin:
-				SetHitBoxExtra(new Vector2I(25, 25));
+				SetHitBoxExtra(25, 25);
 				break;
 			
 			case Animations.HammerDash:
-				//TODO: replace by methods overloading
-				var sign = (int)Facing;
-				(Vector2I radius, Vector2I offset) = (Sprite.Frame & 3) switch
+				(int radiusX, int radiusY, int offsetX, int offsetY) = (Sprite.Frame & 3) switch
 				{
-					0 => (new Vector2I(16, 16), new Vector2I(6 * sign, 0)),
-					1 => (new Vector2I(16, 16), new Vector2I(-7 * sign, 0)),
-					2 => (new Vector2I(14, 20), new Vector2I(-4 * sign, -4)),
-					3 => (new Vector2I(17, 21), new Vector2I(7 * sign, -5)),
+					0 => (16, 16,  6,  0),
+					1 => (16, 16, -7,  0),
+					2 => (14, 20, -4, -4),
+					3 => (17, 21,  7, -5),
 					_ => throw new ArgumentOutOfRangeException()
 				};
-				SetHitBoxExtra(radius, offset);
+				SetHitBoxExtra(radiusX, radiusY, offsetX * (int)Facing, offsetY);
 				break;
-			
 			default:
-				SetHitBoxExtra(Shield.State == ShieldContainer.States.DoubleSpin ?
+				SetHitBoxExtra(Shield.State == ShieldContainer.States.DoubleSpin ? 
 					new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}
-	}
-
-	private void RecordData()
-	{
-		if (DeathState == DeathStates.Restart) return;
-		
-		RecordedData.Add(new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy));
-		if (RecordedData.Count <= MinimalRecordLength) return;
-		RecordedData.RemoveAt(0);
 	}
 
 	private void ProcessRotation()
 	{
 		if (Animation != Animations.Move)
 		{
-			VisualAngle = 360f;
+			VisualAngle = 0f;
 		}
-		else
+		else if (IsGrounded)
 		{
-			if (IsGrounded && SharedData.RotationMode > 0)
-			{
-				var angle = 360f;
-				float step;
-			
-				if (Angle is > 22.5f and <= 337.5f)
-				{
-					angle = Angle;
-					step = 2f - Math.Abs(GroundSpeed) * 3f / 32f;
-				}
-				else
-				{
-					step = 2f - Math.Abs(GroundSpeed) / 16f;
-				}
-
-				float radians = Mathf.DegToRad(angle);
-				float radiansVisual = Mathf.DegToRad(VisualAngle);
-				VisualAngle = Mathf.RadToDeg(MathF.Atan2(
-					Mathf.DegToRad(MathF.Sin(radians) + MathF.Sin(radiansVisual) * step), 
-					Mathf.DegToRad(MathF.Cos(radians) + MathF.Cos(radiansVisual) * step)));
-			}
-			else
-			{
-				VisualAngle = Angle;
-			}
+			RotateOnGround();
+		}
+		else // Match actual angle if airborne
+		{
+			VisualAngle = Angle;
 		}
 	
 		if (SharedData.RotationMode > 0)
 		{
-			RotationDegrees = 360f - VisualAngle;
+			RotationDegrees = VisualAngle;
 		}
 		else
 		{
-			RotationDegrees = 360f - MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
+			RotationDegrees = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
 		}
+	}
+
+	private void RotateOnGround()
+	{
+		// Ground rotation code by Nihil
+		var angle = 0f;
+		float step;
+		
+		if (Angle > 22.5f && SharedData.PlayerPhysics < PhysicsTypes.S2 ? Angle <= 337.5f : Angle < 337.5f)
+		{
+			angle = Angle;
+			step = 2f - Math.Abs(GroundSpeed) * 3f / 32f;
+		}
+		else
+		{
+			step = 2f - Math.Abs(GroundSpeed) / 16f;
+		}
+
+		float radians = Mathf.DegToRad(angle);
+		float radiansVisual = Mathf.DegToRad(VisualAngle);
+		VisualAngle = Mathf.RadToDeg(MathF.Atan2(
+			Mathf.DegToRad(MathF.Sin(radians) + MathF.Sin(radiansVisual) * step), 
+			Mathf.DegToRad(MathF.Cos(radians) + MathF.Cos(radiansVisual) * step)));
 	}
 	
 	private void ProcessPalette()
 	{
-		int[] colours = Type switch
-		{
-			Types.Tails => [4, 5, 6],
-			Types.Knuckles => [7, 8, 9],
-			Types.Amy => [10, 11, 12],
-			_ => [0, 1, 2, 3]
-		};
-
-		// Get current active colour
+		// Get player colour IDs
+		ReadOnlySpan<int> colours = GetPlayerColourIds();
+		
 		int colour = PaletteUtilities.Index[colours[0]];
-	
-		var colourLast = 0;
-		var colourLoop = 0;
-		var duration = 0;
-	
-		// Super State palette logic
+		UpdateSuperPalette(colour, out int colourLast, out int colourLoop, out int duration);
+		UpdateRegularPalette(colour, ref colourLoop, ref colourLast, ref duration);
+		
+		// Apply palette
+		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
+	}
+
+	private ReadOnlySpan<int> GetPlayerColourIds() => Type switch
+	{
+		Types.Tails => [4, 5, 6],
+		Types.Knuckles => [7, 8, 9],
+		Types.Amy => [10, 11, 12],
+		_ => [0, 1, 2, 3]
+	};
+
+	private void UpdateSuperPalette(int colour, out int colourLast, out int colourLoop, out int duration)
+	{
 		switch (Type)
 		{
 			case Types.Sonic:
@@ -505,11 +534,13 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				colourLast = 16;
 				colourLoop = 7;
 				break;
+			
 			case Types.Tails:
 				duration = colour < 2 ? 28 : 12;
 				colourLast = 7;
 				colourLoop = 2;
 				break;
+			
 			case Types.Knuckles:
 				duration = colour switch
 				{
@@ -521,60 +552,48 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 				colourLast = 11;
 				colourLoop = 3;
 				break;
+			
 			case Types.Amy:
 				duration = colour < 2 ? 19 : 4;
 				colourLast = 11;
 				colourLoop = 3;
 				break;
-		}
-	
-		// Default palette logic (overwrites Super State palette logic)
-		if (!IsSuper)
-		{
-			if (colour > 1)
-			{
-				if (Type == Types.Sonic)
-				{
-					colourLast = 21;
-					duration = 4;
-				}
-			}
-			else
-			{
-				colourLast = 1;
+			
+			default:
 				duration = 0;
-			}
+				colourLast = 0;
+				colourLoop = 0;
+				break;
+		}
+	}
+
+	private void UpdateRegularPalette(int colour, ref int colourLoop, ref int colourLast, ref int duration)
+	{
+		if (SuperTimer > 0f) return;
 		
-			colourLoop = 1;
+		if (colour > 1)
+		{
+			if (Type == Types.Sonic)
+			{
+				colourLast = 21;
+				duration = 4;
+			}
+		}
+		else
+		{
+			colourLast = 1;
+			duration = 0;
 		}
 	
-		// Apply palette logic
-		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
+		colourLoop = 1;
 	}
 
 	public void IncreaseComboScore(int comboCounter = 0)
 	{
 		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
-    
-	//TODO: what is this????????
-	public override void ResetState()
-	{
-		switch (Action)
-		{
-			case Actions.PeelOut:
-				AudioPlayer.Sound.Stop(SoundStorage.Charge2);
-				break;
-		
-			case Actions.Flight:
-				AudioPlayer.Sound.Stop(SoundStorage.Flight);
-				AudioPlayer.Sound.Stop(SoundStorage.Flight2);
-				break;
-		}
-		base.ResetState();
-	}
 
-	private void ProcessDeath(float processSpeed)
+	private void ProcessDeath()
 	{
 		if (!IsDead) return;
 		
@@ -615,14 +634,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		if ((int)Position.Y <= bound) return;
 		
 		RestartState = RestartStates.ResetLevel;
-		
-		// If CPU, respawn
-		if (Id != 0)
-		{
-			m_player_cpu_respawn();
-			return;
-		}
-		
+
+		SetNextStateOnDeath();
+	}
+
+	protected virtual void SetNextStateOnDeath()
+	{
 		// If lead player, go to the next state
 		//TODO: gui hud
 		/*if (instance_exists(obj_gui_hud))
@@ -666,14 +683,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Scene.Local.Tree.ReloadCurrentScene();
 	}
 
+	//TODO: update debug mode
 	public void OnEnableEditMode()
 	{
 		ResetGravity();
 		ResetState();
-		ResetZIndex();
+		//ResetZIndex();
 				
-		IsObjectInteractionEnabled = false;
 		Visible = true;
+		IsObjectInteractionEnabled = false;
 	}
 
 	public void OnDisableEditMode()

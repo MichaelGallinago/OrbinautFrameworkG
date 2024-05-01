@@ -50,7 +50,7 @@ public partial class Camera : Camera2D, ICamera
 	
 	public Vector2I BufferPosition { get; private set; }
 	public Vector2I PreviousPosition { get; private set; }
-	public Vector2 Delay { get; private set; }
+	public Vector2 Delay { get; set; }
 	public int BoundSpeed { get; set; }
 	public Vector4 Bound { get; set; }
 	public Vector4 Limit { get; private set; }

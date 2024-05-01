@@ -8,6 +8,7 @@ public interface IAnimatedPlayer
     float SuperTimer { get; }
     Velocity Velocity { get; }
     float ActionValue { get; }
+    PlayerInput Input { get; }
     ICarried CarryTarget { get; }
     Constants.Direction Facing { get; }
     AcceleratedValue GroundSpeed { get; }

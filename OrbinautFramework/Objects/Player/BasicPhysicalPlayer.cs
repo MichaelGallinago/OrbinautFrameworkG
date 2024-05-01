@@ -12,15 +12,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 {
 	protected event Action LandHandler;
 	protected PhysicParams PhysicParams;
-	
-	public override void _Process(double delta)
+
+	protected void UpdatePhysicParameters()
 	{
-		UpdatePhysicParams();
-		ProcessCorePhysics();
+		PhysicParams = PhysicParams.Get(IsUnderwater, SuperTimer > 0f, Type, ItemSpeedTimer);
 	}
 
-	protected void UpdatePhysicParams() => PhysicParams = PhysicParams.Get(IsUnderwater, IsSuper, Type, ItemSpeedTimer);
-	
 	protected void ProcessCorePhysics()
 	{
 		ProcessSlopeResist();
@@ -153,7 +150,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private bool WaterBarrierBounce()
 	{
-		if (Shield.State != ShieldContainer.States.Active || Shield.Type != ShieldContainer.Types.Water) return false;
+		if (Shield.State != ShieldContainer.States.Active || Shield.Type != ShieldContainer.Types.Bubble) return false;
 		
 		float force = IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(Angle);

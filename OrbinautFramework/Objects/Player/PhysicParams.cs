@@ -121,7 +121,7 @@ public struct PhysicParams(
 		    physicParams.JumpSpeed += 0.5f;
 	    }
 	    
-	    if (itemSpeedTimer > 0 && !isUnderwater)
+	    if (itemSpeedTimer > 0f && !isUnderwater)
 	    {
 		    physicParams.Acceleration = 0.09375f;
 		    physicParams.AccelerationAir = 0.1875f;
@@ -130,16 +130,16 @@ public struct PhysicParams(
 		    physicParams.AccelerationTop = 12f;
 	    }
 	    
-	    if (SharedData.PlayerPhysics >= PhysicsTypes.SK)
+	    if (SharedData.PlayerPhysics < PhysicsTypes.SK)
 	    {
-		    if (isSuper)
+		    if (playerType == Types.Tails)
 		    {
-			    physicParams.FrictionRoll = 0.0234375f;
+			    physicParams.DecelerationRoll = physicParams.Deceleration / 4f;
 		    }
 	    }
-	    else if (playerType == Types.Tails)
+	    else if (isSuper)
 	    {
-		    physicParams.DecelerationRoll = physicParams.Deceleration / 4;
+		    physicParams.FrictionRoll = 0.0234375f;
 	    }
 	    
 	    return physicParams;

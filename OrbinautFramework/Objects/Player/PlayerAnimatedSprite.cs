@@ -58,7 +58,11 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 	{
 		_player.Animation = _player.Animation switch
 		{
-			Animations.Bounce or Animations.Breathe or Animations.Transform or Animations.Skid => Animations.Move,
+			Animations.Bounce or Animations.Breathe or Animations.Flip or Animations.Transform => Animations.Move,
+			Animations.Skid when 
+				_player.Input.Down is { Left: false, Right: false } || 
+			    Math.Abs(_player.GroundSpeed) < PlayerConstants.SkidSpeedThreshold 
+					=> Animations.Move,
 			_ => _player.Animation
 		};
 	}

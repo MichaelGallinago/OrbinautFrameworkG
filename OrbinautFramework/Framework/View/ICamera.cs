@@ -5,10 +5,9 @@ namespace OrbinautFramework3.Framework.View;
 
 public interface ICamera
 {
-    public Rect2I ActiveRegion { get; }
     public Vector2I BufferPosition { get; }
     public Vector2I PreviousPosition { get; }
-    public Vector2 Delay { get; }
+    public Vector2 Delay { get; set; }
     public int BoundSpeed { get; set; }
     public Vector4 Bound { get; set; }
     public Vector4 Limit { get; }

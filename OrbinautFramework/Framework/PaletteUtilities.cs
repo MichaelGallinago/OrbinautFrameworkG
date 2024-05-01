@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,8 +11,8 @@ public static class PaletteUtilities
     public static List<int> Colors { get; }
     public static int[] Duration { get; }
     public static int[] Timer { get; }
-    public static int[] Last { get; }
-    public static int[] Loop { get; }
+    public static int[] EndIndex { get; }
+    public static int[] LoopIndex { get; }
     public static int[] Index { get; }
     public static int[][] ColourId { get; }
     public static int[][] ColorSet { get; }
@@ -23,8 +24,8 @@ public static class PaletteUtilities
         Colors = [];
         Duration = new int[PaletteLimit];
         Timer = new int[PaletteLimit];
-        Last = new int[PaletteLimit];
-        Loop = new int[PaletteLimit];
+        EndIndex = new int[PaletteLimit];
+        LoopIndex = new int[PaletteLimit];
         Index = Enumerable.Repeat(1, PaletteLimit).ToArray();
         ColourId =
         [
@@ -35,14 +36,14 @@ public static class PaletteUtilities
         UpdateFlag = true;
     }
 
-    public static void SetRotation(IEnumerable<int> colorsId, int loopIndex, int endIndex, int duration)
+    public static void SetRotation(ReadOnlySpan<int> colorsId, int loopIndex, int endIndex, int duration)
     {
         foreach (int colorId in colorsId)
         {
             Colors.Add(colorId);
 
-            Loop[colorId] = loopIndex;
-            Last[colorId] = endIndex;
+            LoopIndex[colorId] = loopIndex;
+            EndIndex[colorId] = endIndex;
             Duration[colorId] = duration;
         }
     }

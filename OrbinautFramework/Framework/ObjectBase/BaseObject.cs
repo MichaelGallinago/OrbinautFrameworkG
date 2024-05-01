@@ -60,39 +60,43 @@ public abstract partial class BaseObject : Node2D
 	}
 
 	public override void _ExitTree() => ObjectCuller.Local.RemoveFromCulling(this);
-    
-	public void SetSolid(Vector2I radius, Vector2I offset)
+	
+	public void SetSolid(Vector2I radius, Vector2I offset = default)
 	{
 		SolidData.Offset = offset;
-		SetSolid(radius);
-	}
-	
-	public void SetSolid(Vector2I radius)
-	{
 		SolidData.Radius = radius;
 		SolidData.HeightMap = null;
 	}
 	
-	public void SetHitBox(Vector2I radius, Vector2I offset)
+	public void SetSolid(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
 	{
-		InteractData.Offset = offset;
-		SetHitBox(radius);
+		SolidData.Radius = new Vector2I(radiusX, radiusY);
+		SolidData.Offset = new Vector2I(offsetX, offsetY);
+		SolidData.HeightMap = null;
 	}
 	
-	public void SetHitBox(Vector2I radius)
+	public void SetHitBox(Vector2I radius, Vector2I offset = default)
 	{
 		InteractData.Radius = radius;
-	}
-
-	public void SetHitBoxExtra(Vector2I radius, Vector2I offset)
-	{
-		InteractData.OffsetExtra = offset;
-		SetHitBoxExtra(radius);
+		InteractData.Offset = offset;
 	}
 	
-	public void SetHitBoxExtra(Vector2I radius)
+	public void SetHitBox(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
 	{
+		InteractData.Radius = new Vector2I(radiusX, radiusY);
+		InteractData.Offset = new Vector2I(offsetX, offsetY);
+	}
+
+	public void SetHitBoxExtra(Vector2I radius, Vector2I offset = default)
+	{
+		InteractData.OffsetExtra = offset;
 		InteractData.RadiusExtra = radius;
+	}
+	
+	public void SetHitBoxExtra(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
+	{
+		InteractData.RadiusExtra = new Vector2I(radiusX, radiusY);
+		InteractData.OffsetExtra = new Vector2I(offsetX, offsetY);
 	}
 	
 	public bool CheckCollision(BaseObject target, CollisionSensor type)

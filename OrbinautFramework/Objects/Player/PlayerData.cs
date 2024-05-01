@@ -99,11 +99,12 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	public HashSet<BaseObject> PushObjects { get; } = [];
 	public bool IsDebugMode { get; set; }
+	public PlayerInput Input { get; } = new();
+	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
 	
 	protected CollisionTileMap TileMap;
-	protected readonly PlayerInput Input = new();
 	protected readonly TileCollider TileCollider = new();
 	
 	protected PlayerData()
@@ -135,6 +136,14 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public static void ResetStatic()
 	{
 		Players.Clear();
+	}
+	
+	protected void RecordData()
+	{
+		Array.Copy(_recordedData, 0, _recordedData, 
+			1, _recordedData.Length - 1);
+		
+		_recordedData[0] = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 	}
 	
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
