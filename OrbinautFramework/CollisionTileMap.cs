@@ -1,9 +1,7 @@
 using Godot;
-using OrbinautFramework3.Framework;
-
 namespace OrbinautFramework3;
 
-public partial class CollisionTileMap : TileMap
+public partial class CollisionTileMap : TileMapLayer
 {
     private int _columnCount;
 

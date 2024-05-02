@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Godot.Collections;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
@@ -10,7 +11,7 @@ public abstract partial class Scene : Node2D
 {
     public static Scene Local { get; private set; }
     
-    [Export] public CollisionTileMap CollisionTileMap { get; }
+    [Export] public Array<CollisionTileMap> CollisionTileMap { get; }
     [Export] public Views Views { get; }
     
     public SceneTree Tree { get; private set; }
