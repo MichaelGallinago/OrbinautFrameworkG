@@ -103,9 +103,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
-	
-	protected CollisionTileMap TileMap;
-	protected readonly TileCollider TileCollider = new();
+	protected TileCollider TileCollider = new();
 	
 	protected PlayerData()
 	{

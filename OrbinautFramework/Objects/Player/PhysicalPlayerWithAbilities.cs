@@ -209,7 +209,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 
 		float acceleration = 0.390625f * (float)Facing * Scene.Local.ProcessSpeed;
-		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
+		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || SuperTimer > 0f ? 1.5f : 2f);
 		ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
 		GroundSpeed.Value = ActionValue2;
 		return true;
@@ -226,7 +226,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || Id > 0 && CpuInputTimer == 0) return false;
 		
-		if (Input.Press.C && SharedData.EmeraldCount == 7 && !IsSuper && SharedData.PlayerRings >= 50)
+		if (Input.Press.C && SharedData.EmeraldCount == 7 && SuperTimer <= 0f && SharedData.PlayerRings >= 50)
 		{
 			ResetState();
 			AudioPlayer.Sound.Play(SoundStorage.Transform);
@@ -260,7 +260,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
 		{
-			if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper)
+			if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f)
 			{
 				Action = Actions.DropDash;
 				ActionValue = 0f;
@@ -268,7 +268,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		// Barrier abilities
-		if (!Input.Press.Abc || IsSuper || Shield.State != Shield.States.None || ItemInvincibilityTimer != 0) return;
+		if (!Input.Press.Abc || SuperTimer > 0f || Shield.State != ShieldContainer.States.None || ItemInvincibilityTimer != 0) return;
 		
 		Shield.State = ShieldContainer.States.Active;
 		IsAirLock = false;
@@ -456,7 +456,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private int CalculateCellDistance()
 	{
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileBehaviour);
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileBehaviour);
 		
 		return TileBehaviour switch
 		{
@@ -710,7 +710,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			radiusX++;
 		}
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		TileCollider.SetData((Vector2I)Position, TileLayer);
 
 		if (Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
 		
@@ -1059,7 +1059,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		var collisionFlagWall = false;
 		var climbY = (int)Position.Y;
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		TileCollider.SetData((Vector2I)Position, TileLayer);
 		
 		if (moveQuadrant != Angles.Quadrant.Right)
 		{
@@ -1229,7 +1229,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// the ceiling, else he is above the edge
 			
 		// Note: tile behaviour here is set to TILE_BEHAVIOUR_ROTATE_180. LBR tiles are not ignored in this case
-		TileCollider.TileBehaviours = Constants.TileBehaviours.Ceiling;
+		TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
 		int floorDistance = TileCollider.FindDistance(
 			new Vector2I((wallRadius + 1) * (int)Facing, -1), 
 			true, Constants.Direction.Positive);

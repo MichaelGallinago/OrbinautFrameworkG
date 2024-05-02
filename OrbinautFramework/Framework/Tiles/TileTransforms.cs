@@ -1,6 +1,6 @@
 namespace OrbinautFramework3.Framework.Tiles;
 
-public class TileTransforms(int alternativeId)
+public readonly struct TileTransforms(int alternativeId)
 {
     public readonly bool IsRotated = alternativeId >> 14 > 0;
     public readonly bool IsFlipped = (alternativeId & 16383) >> 13 > 0;

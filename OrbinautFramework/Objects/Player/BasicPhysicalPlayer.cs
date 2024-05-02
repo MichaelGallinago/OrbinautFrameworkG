@@ -555,17 +555,17 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		const Constants.Direction direction = Constants.Direction.Positive;	
 		
 		if (Angles.GetQuadrant(Angle) > Angles.Quadrant.Down) return;
-		TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer, TileMap);
+		TileCollider.SetData((Vector2I)Position + new Vector2I(0, Radius.Y), TileLayer);
 		
-		if (TileCollider.FindDistance(new Vector2I(), true, direction) < 12) return;
+		if (TileCollider.FindDistance(0, 0, true, direction) < 12) return;
 		
-		(_, float angleLeft) = TileCollider.FindTile(new Vector2I(-Radius.X, 0), true, direction);
-		(_, float angleRight) = TileCollider.FindTile(new Vector2I(Radius.X, 0), true, direction);
+		(_, float angleLeft) = TileCollider.FindTile(-Radius.X, 0, true, direction);
+		(_, float angleRight) = TileCollider.FindTile(Radius.X, 0, true, direction);
 		
 		if (float.IsNaN(angleLeft) ^ float.IsNaN(angleRight)) return;
 		
 		int sign = float.IsNaN(angleLeft) ? -1 : 1;
-		bool isPanic = TileCollider.FindDistance(new Vector2I(-6 * sign, 0), true, direction) >= 12;
+		bool isPanic = TileCollider.FindDistance(-6 * sign, 0, true, direction) >= 12;
 		BalanceToDirection((Constants.Direction)sign, isPanic);
 	}
 
@@ -574,7 +574,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Type)
 		{
 			case Types.Amy or Types.Tails:
-			case Types.Sonic when IsSuper:
+			case Types.Sonic when SuperTimer > 0f:
 				Animation = Animations.Balance;
 				Facing = direction;
 				break;
@@ -631,7 +631,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				return;
 		}
 		
-		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileMap, TileBehaviour);
+		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileBehaviour);
 		
 		int castQuadrant = Angle switch
 		{
@@ -643,10 +643,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		int wallDistance = castQuadrant switch
 		{
-			0 => TileCollider.FindDistance(new Vector2I(-wallRadius, offsetY), false, firstDirection),
-			1 => TileCollider.FindDistance(new Vector2I(0, wallRadius), true, secondDirection),
-			2 => TileCollider.FindDistance(new Vector2I(wallRadius, 0), false, secondDirection),
-			3 => TileCollider.FindDistance(new Vector2I(0, -wallRadius), true, firstDirection),
+			0 => TileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
+			1 => TileCollider.FindDistance(0, wallRadius, true, secondDirection),
+			2 => TileCollider.FindDistance(wallRadius, 0, false, secondDirection),
+			3 => TileCollider.FindDistance(0, -wallRadius, true, firstDirection),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
@@ -788,28 +788,24 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			_ => Constants.TileBehaviours.LeftWall
 		};
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap, TileBehaviour);
+		TileCollider.SetData((Vector2I)Position, TileLayer, TileBehaviour);
 
 		(int distance, float angle) = TileBehaviour switch
 		{
 			Constants.TileBehaviours.Floor => TileCollider.FindClosestTile(
-				new Vector2I(-Radius.X, Radius.Y),
-				new Vector2I(Radius.X, Radius.Y), 
+				-Radius.X, Radius.Y, Radius.X, Radius.Y, 
 				true, Constants.Direction.Positive),
 			
 			Constants.TileBehaviours.RightWall => TileCollider.FindClosestTile(
-				new Vector2I(Radius.Y, Radius.X),
-				new Vector2I(Radius.Y, -Radius.X), 
+				Radius.Y, Radius.X, Radius.Y, -Radius.X, 
 				false, Constants.Direction.Positive),
 			
 			Constants.TileBehaviours.Ceiling => TileCollider.FindClosestTile(
-				new Vector2I(Radius.X, -Radius.Y),
-				new Vector2I(-Radius.X, -Radius.Y), 
+				Radius.X, -Radius.Y, -Radius.X, -Radius.Y, 
 				true, Constants.Direction.Negative),
 			
 			Constants.TileBehaviours.LeftWall => TileCollider.FindClosestTile(
-				new Vector2I(-Radius.Y, -Radius.X), 
-				new Vector2I(-Radius.Y, Radius.X), 
+				-Radius.Y, -Radius.X, -Radius.Y, Radius.X, 
 				false, Constants.Direction.Negative),
 			
 			_ => throw new ArgumentOutOfRangeException()
@@ -916,7 +912,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		int wallRadius = RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileMap);
+		TileCollider.SetData((Vector2I)Position, TileLayer);
 
 		var moveQuadrantValue = (int)moveQuadrant;
 
@@ -934,8 +930,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		if (moveQuadrantValue == (int)Angles.Quadrant.Up + sign) return;
 		
-		int wallDistance = TileCollider.FindDistance(
-			new Vector2I(sign * wallRadius, 0), false, direction);
+		int wallDistance = TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
 		
 		if (wallDistance >= 0f) return;
 		Position += new Vector2(sign * wallDistance, 0f);
@@ -958,8 +953,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
 		{
 			// Perform right wall collision if moving mostly left and too far into the ceiling
-			int wallDist = TileCollider.FindDistance(
-				new Vector2I(wallRadius, 0), false, Constants.Direction.Positive);
+			int wallDist = TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);
 
 			if (wallDist >= 0) return false;
 			

@@ -11,7 +11,8 @@ public abstract partial class Scene : Node2D
 {
     public static Scene Local { get; private set; }
     
-    [Export] public Array<CollisionTileMap> CollisionTileMap { get; }
+    [Export] public CollisionTileMap CollisionTileMapMain { get; }
+    [Export] public CollisionTileMap CollisionTileMapSecondary { get; }
     [Export] public Views Views { get; }
     
     public SceneTree Tree { get; private set; }

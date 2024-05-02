@@ -21,7 +21,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	public override void _Ready()
 	{
 		base._Ready();
-		TileMap = Scene.Local.CollisionTileMap;
 		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
 
@@ -501,7 +500,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private void ProcessPalette()
 	{
 		// Get player colour IDs
-		ReadOnlySpan<int> colours = GetPlayerColourIds();
+		ReadOnlySpan<int> colours = PlayerColourIds;
 		
 		int colour = PaletteUtilities.Index[colours[0]];
 		UpdateSuperPalette(colour, out int colourLast, out int colourLoop, out int duration);
@@ -511,7 +510,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
 	}
 
-	private ReadOnlySpan<int> GetPlayerColourIds() => Type switch
+	private ReadOnlySpan<int> PlayerColourIds => Type switch
 	{
 		Types.Tails => [4, 5, 6],
 		Types.Knuckles => [7, 8, 9],

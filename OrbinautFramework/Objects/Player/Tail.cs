@@ -8,31 +8,25 @@ namespace OrbinautFramework3.Objects.Player;
 [Tool]
 public partial class Tail : AdvancedAnimatedSprite
 {
-	private float _angle;
-
 	public void Animate(ITailed data)
 	{
+		if (Scene.Local.IsPaused) return;
+		
+		Offset = Vector2.Zero;
+		
 		switch (data.Animation)
 		{
-			case Animations.Idle:
-			case Animations.Duck:
-			case Animations.LookUp:
+			case Animations.Idle or Animations.Duck or Animations.LookUp:
 				SetAnimation("Idle");
 				break;
 			
-			case Animations.Fly:
-			case Animations.FlyTired:
-			case Animations.FlyCarry:
+			case Animations.Fly or Animations.FlyTired:
 				float speed = data.Velocity.Y >= 0f || data.Animation == Animations.FlyTired ? 0.5f : 1f;
 				SetAnimation("Fly", speed);
 				break;
 			
-			case Animations.Push:
-			case Animations.Skid:
-			case Animations.Spin:
-			case Animations.Grab:
-			case Animations.Balance:
-			case Animations.SpinDash:
+			case Animations.Push or Animations.Skid or Animations.Spin or 
+				Animations.Grab or Animations.Balance or Animations.SpinDash:
 				var offset = new Vector2I(-23, 0);
 				if (data.Animation is Animations.SpinDash or Animations.Grab)
 				{
@@ -52,55 +46,31 @@ public partial class Tail : AdvancedAnimatedSprite
 				break;
 		}
 		
-		UpdateAngle(data);
+		RotationDegrees = GetTailAngle(data);
 		ChangeDirection(data);
 	}
-
-	private void ChangeDirection(ITailed data)
+	
+	private static float GetTailAngle(ITailed data)
 	{
-		float scaleX = data.IsSpinning && data.IsGrounded ? 
-			data.GroundSpeed.Value >= 0f ? 1f : -1f : 
-			(float)data.Facing;
-		Scale = Scale with { X = scaleX * Math.Abs(Scale.X) };
-	}
+		if (!data.IsGrounded) return data.VisualAngle;
+		
+		if (!data.IsSpinning) return 0f;
 
-	private void UpdateAngle(ITailed data)
-	{
-		_angle = GetTailAngle(data);
-		RotationDegrees = SharedData.RotationMode == 0 ? MathF.Ceiling((_angle - 22.5f) / 45f) * 45f : _angle;
-	}
-
-	private float GetTailAngle(ITailed data)
-	{
-		if (!data.IsSpinning) return data.VisualAngle;
-
-		float angle;
-		if (!data.IsGrounded)
+		float angle = Mathf.RadToDeg(MathF.Atan2(data.Velocity.Y, data.Velocity.X));
+			
+		if (data.Scale.X < 0f)
 		{
-			// TODO: Check Atan2
-			angle = Mathf.RadToDeg(MathF.Atan2(data.Velocity.Y, data.Velocity.X));
-			return (int)data.Facing >= 0 ? angle : angle + 180f;
-		}
-
-		// Smooth rotation code by Nihil
-		angle = 360f;
-		float step = Math.Abs(data.GroundSpeed);
-				
-		if (data.Angle is > 22.5f and <= 337.5f)
-		{
-			angle -= data.Angle;
-			step = step * 3f / -32f + 2f;
-		}
-		else
-		{
-			step = step / -16f + 2f;
+			angle += 180f;
 		}
 		
-		// TODO: Check Atan2
-		angle = Mathf.DegToRad(angle);
-		float mainAngle = Mathf.DegToRad(_angle);
-		return Mathf.RadToDeg(MathF.Atan2(
-			MathF.Sin(angle) + MathF.Sin(mainAngle) * step, 
-			MathF.Cos(angle) + MathF.Cos(mainAngle) * step));
+		if (SharedData.RotationMode != 0) return angle;
+		
+		return MathF.Ceiling((angle - 22.5f) / 45f) * 45f;
+	}
+	
+	private void ChangeDirection(ITailed data)
+	{
+		Scale = Scale with { X = data.IsSpinning && data.IsGrounded ? 
+			data.GroundSpeed.Value >= 0f ? 1f : -1f : data.Scale.X };
 	}
 }
