@@ -45,6 +45,13 @@ public class TileCollider
         LayerType = type;
         TileBehaviour = tileBehaviour;
     }
+    
+    public void SetData(Vector2I position, TileLayers type, TileBehaviours tileBehaviour = TileBehaviours.Floor)
+    {
+	    Position = position;
+	    LayerType = type;
+	    TileBehaviour = tileBehaviour;
+    }
 
     public (int, float) FindTile(int x, int y, bool isVertical, Direction direction)
     {

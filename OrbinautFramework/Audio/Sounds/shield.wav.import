@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://c1jbk5ytcnkht"
-path="res://.godot/imported/barrier.wav-00cbee4dab040d66e9bed9395fd1df2d.sample"
+path="res://.godot/imported/shield.wav-4a663624890e54ca60c5bb17c4aeae2c.sample"
 
 [deps]
 
-source_file="res://Audio/Sounds/barrier.wav"
-dest_files=["res://.godot/imported/barrier.wav-00cbee4dab040d66e9bed9395fd1df2d.sample"]
+source_file="res://Audio/Sounds/shield.wav"
+dest_files=["res://.godot/imported/shield.wav-4a663624890e54ca60c5bb17c4aeae2c.sample"]
 
 [params]
 

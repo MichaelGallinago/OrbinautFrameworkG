@@ -11,15 +11,20 @@ public partial class ShieldContainer(Node2D target) : AdvancedAnimatedSprite
     }
     
     public enum States : byte
-    { 
+    {
         None, Active, Disabled, DoubleSpin
+    }
+    
+    public enum AnimationTypes : byte
+    {
+        None, Normal, Lightning, Fire, FireDash, Bubble, BubbleBounce
     }
     
     public float Angle { get; set; }
     public States State { get; set; }
     public Node2D Target { get; set; } = target;
-    public float AnimationTimer { get; set; } = -1f;
-    
+    public AnimationTypes AnimationType { get; set; }
+
     private Types _type;
     
     public Types Type

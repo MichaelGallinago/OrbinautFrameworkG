@@ -23,7 +23,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		UpdatePhysicParameters();
 		
 		if (ProcessSpinDash()) return;
-		if (ProcessPeelOut()) return;
+		if (ProcessDash()) return;
 		if (ProcessJump()) return;
 		if (StartJump()) return;
 		
@@ -85,12 +85,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (!SharedData.SpinDash || !IsGrounded) return false;
 		
 		if (StartSpinDash()) return false;
-	
+		
 		// Continue if Spin Dash is being performed
 		if (Action != Actions.SpinDash) return false;
-
+		
 		if (ChargeSpinDash()) return false;
-
+		
 		if (!SharedData.CdCamera && Id == 0)
 		{
 			Camera.Delay = Camera.Delay with { X = 16f };
@@ -153,41 +153,22 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		return true;
 	}
 	
-	private bool ProcessPeelOut()
+	private bool ProcessDash()
 	{
 		if (!SharedData.Dash || Type != Types.Sonic || Id > 0 && CpuInputTimer <= 0f) return false;
-	
-		// Start Super Peel Out
-		StartSuperPeelOut();
-	
-		// Continue if Super Peel Out is being performed
-		if (Action != Actions.PeelOut) return false;
-
-		if (ChargeSuperPeelOut()) return false;
-
-		AudioPlayer.Sound.Stop(SoundStorage.Charge2);
-		Action = Actions.None;
 		
-		if (ActionValue < 30f)
+		StartDash();
+		
+		if (Action == Actions.PeelOut && IsGrounded) return !ChargeDash() && ReleaseDash();
+		
+		if (Action != Actions.PeelOut)
 		{
-			GroundSpeed.Value = 0f;
-			return false;
+			AudioPlayer.Sound.Stop(SoundStorage.Charge2);
 		}
-			
-		if (!SharedData.CdCamera && Id == 0)
-		{
-			Camera.Main.Delay.X = 16f;
-		}
-		
-		AudioPlayer.Sound.Play(SoundStorage.Release2);	
-		
-		if (!SharedData.FixDashRelease) return true;
-			
-		Velocity.SetDirectionalValue(GroundSpeed, Angle);
-		return true;
+		return false;
 	}
 
-	private void StartSuperPeelOut()
+	private void StartDash()
 	{
 		if (Action != Actions.None || Animation != Animations.LookUp || !Input.Down.Up || !Input.Press.Abc) return;
 		
@@ -199,7 +180,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		AudioPlayer.Sound.Play(SoundStorage.Charge2);
 	}
 
-	private bool ChargeSuperPeelOut()
+	private bool ChargeDash()
 	{
 		if (!Input.Down.Up) return false;
 		
@@ -215,6 +196,29 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		return true;
 	}
 
+	private bool ReleaseDash()
+	{
+		AudioPlayer.Sound.Stop(SoundStorage.Charge2);
+		Action = Actions.None;
+		
+		if (ActionValue < 30f)
+		{
+			GroundSpeed.Value = 0f;
+			return false;
+		}
+		
+		if (!SharedData.CdCamera && Camera != null)
+		{
+			Camera.Delay = Camera.Delay with { X = 16f };
+		}
+		
+		AudioPlayer.Sound.Play(SoundStorage.Release2);	
+		
+		if (!SharedData.FixDashRelease) return true;
+		Velocity.SetDirectionalValue(GroundSpeed, Angle);
+		return true;
+	}
+
 	private bool ProcessJump()
 	{
 		if (!IsJumping || IsGrounded) return false;
@@ -225,25 +229,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || Id > 0 && CpuInputTimer == 0) return false;
-		
-		if (Input.Press.C && SharedData.EmeraldCount == 7 && SuperTimer <= 0f && SharedData.PlayerRings >= 50)
-		{
-			ResetState();
-			AudioPlayer.Sound.Play(SoundStorage.Transform);
-			AudioPlayer.Music.Play(MusicStorage.Super);
-			//TODO: instance_create obj_star_super
-			//instance_create(x, y, obj_star_super, { TargetPlayer: id });
-				
-			IsObjectInteractionEnabled = false;			
-			InvincibilityTimer = 0;
-			IsSuper = true;
-			Action = Actions.Transform;
-			ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26f : 36f;
-			Animation = Animations.Transform;
-			
-			// return player control routine
-			return true;
-		}
+
+		if (TransformInJump()) return true;
 		
 		switch (Type)
 		{
@@ -256,11 +243,36 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		return false;
 	}
 
+	private bool TransformInJump()
+	{
+		if (!Input.Press.C || SuperTimer > 0f || SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50)
+		{
+			return false;
+		}
+		
+		ResetState();
+		AudioPlayer.Sound.Play(SoundStorage.Transform);
+		AudioPlayer.Music.Play(MusicStorage.Super);
+		//TODO: instance_create obj_star_super
+		//instance_create(x, y, obj_star_super, { TargetPlayer: id });
+
+		IsControlRoutineEnabled = false;
+		IsObjectInteractionEnabled = false;			
+		InvincibilityTimer = 0;
+		SuperTimer = 1f;
+		Action = Actions.Transform;
+		Animation = Animations.Transform;
+		ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26f : 36f;
+			
+		// return player control routine
+		return true;
+	}
+
 	private void JumpSonic()
 	{
 		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
 		{
-			if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f)
+			if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f || ItemInvincibilityTimer > 0f)
 			{
 				Action = Actions.DropDash;
 				ActionValue = 0f;
@@ -268,7 +280,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		// Barrier abilities
-		if (!Input.Press.Abc || SuperTimer > 0f || Shield.State != ShieldContainer.States.None || ItemInvincibilityTimer != 0) return;
+		if (!Input.Press.Abc || SuperTimer > 0f || 
+		    Shield.State != ShieldContainer.States.None || ItemInvincibilityTimer != 0) return;
 		
 		Shield.State = ShieldContainer.States.Active;
 		IsAirLock = false;
@@ -285,7 +298,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private void JumpDoubleSpin()
 	{
 		if (!SharedData.DoubleSpin) return;
-				
+		
 		//TODO: obj_double_spin
 		/*
 		with obj_double_spin
@@ -296,7 +309,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			}
 		}
 		*/
-				
+		
 		Shield.State = ShieldContainer.States.DoubleSpin;
 				
 		//TODO: obj_double_spin
@@ -307,32 +320,35 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private void JumpWaterBarrier()
 	{
 		Velocity.Vector = new Vector2(0f, 8f);
-				
-		Shield.UpdateFrame(0, 1, [1, 2]);
-		Shield.UpdateDuration([6, 18]);
-		Shield.AnimationTimer = 25f;
-		
-		AudioPlayer.Sound.Play(SoundStorage.BarrierWater2);
+		//TODO: update shield animation
+		Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
+		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 	}
 	
 	private void JumpFlameBarrier()
 	{
-		if (!SharedData.CdCamera)
+		if (!SharedData.CdCamera && Camera != null)
 		{
-			Camera.Main.Delay.X = 16f;
+			Camera.Delay = Camera.Delay with { X = 16f };
 		}
 				
 		IsAirLock = true;
 		Velocity.Vector = new Vector2(8f * (float)Facing, 0f);
-					
-
-		// TODO: SetAnimation
-		//Barrier.SetAnimation(, [2]);
-		ZIndex = -1;
-				
-		Shield.AnimationTimer = 24f;
 		
-		AudioPlayer.Sound.Play(SoundStorage.BarrierFlame2);
+		//TODO: update shield animation
+		if (Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)
+		{
+			Shield.Frame = 0;
+		}
+		else
+		{
+			Shield.AnimationType = ShieldContainer.AnimationTypes.FireDash;
+		}
+		
+		//TODO: check ZIndex
+		ZIndex = -1;
+		
+		AudioPlayer.Sound.Play(SoundStorage.ShieldFire2);
 	}
 
 	private void JumpThunderBarrier()
@@ -346,20 +362,20 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			//instance_create(x, y, obj_barrier_sparkle, { Sparkle_ID: i });
 		}
 		
-		AudioPlayer.Sound.Play(SoundStorage.BarrierThunder2);
+		AudioPlayer.Sound.Play(SoundStorage.ShieldLightning2);
 	}
 
 	private void JumpTails()
 	{
-		if (Action > 0 || !Input.Press.Abc) return;
-				
+		if (Action != Actions.None || !Input.Press.Abc) return;
+		
 		IsAirLock = false;
 		IsSpinning = false;
 		IsJumping = false;
 		Gravity	= GravityType.TailsDown;
 		Action = Actions.Flight;
 		ActionValue = 480f;
-				
+		ActionValue2 = 0f;
 		Radius = RadiusNormal;
 				
 		if (!IsUnderwater)
@@ -373,12 +389,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void JumpKnuckles()
 	{
-		if (Action > 0 || !Input.Press.Abc) return;
-				
+		if (Action != Actions.None || !Input.Press.Abc) return;
+		
 		IsAirLock = false;
 		IsSpinning = false;
 		IsJumping = false;	
-		Animation = Animations.GlideAir;	
+		Animation = Animations.GlideAir;
 		Action = Actions.Glide;
 		ActionState = (int)GlideStates.Air;
 		ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
@@ -395,18 +411,18 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void JumpAmy()
 	{
-		if (Action > 0 || !Input.Press.Abc) return;
-				
+		if (Action != Actions.None || !Input.Press.Abc) return;
+		
 		if (SharedData.NoRollLock)
 		{
-			IsAirLock = false;	
+			IsAirLock = false;
 		}
+		
 		Animation = Animations.HammerSpin;
 		Action = Actions.HammerSpin;
 		ActionValue = 0f;
 		
-		//TODO: audio
-		//AudioPlayer.Sound.Play(SoundStorage.HammerSpin);
+		AudioPlayer.Sound.Play(SoundStorage.Hammer);
 	}
 
 	private bool StartJump()
@@ -415,9 +431,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (!Input.Press.Abc || !CheckCeilingDistance()) return false;
 		
-		if (!SharedData.FixJumpSize)
+		//TODO: check that Triangly fix "!global.player_physics != PHYSICS_CD"
+		if (!SharedData.FixJumpSize && SharedData.PlayerPhysics != PhysicsTypes.CD)
 		{
-			// Why they even do that???
+			// Why do they even do that?
 			Radius = RadiusNormal;
 		}
 	
@@ -434,7 +451,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		float radians = Mathf.DegToRad(Angle);
 		Velocity.Vector += PhysicParams.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
 		
-		IsSpinning = true;	
+		IsSpinning = true;
 		IsJumping = true;
 		IsGrounded = false;
 		OnObject = null;
@@ -444,41 +461,36 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	
-		// return player control routine
+		// Exit control routine
 		return true;
 	}
 
 	private bool CheckCeilingDistance()
 	{
-		if (TileBehaviour == Constants.TileBehaviours.Ceiling) return true;
-		return CalculateCellDistance() >= 6; // Target ceiling distance
-	}
-
-	private int CalculateCellDistance()
-	{
+		const int maxCeilingDistance = 6; 
+		
 		TileCollider.SetData((Vector2I)Position, TileLayer, TileBehaviour);
 		
-		return TileBehaviour switch
+		int distance = TileBehaviour switch
 		{
 			Constants.TileBehaviours.Floor => TileCollider.FindClosestDistance(
-				Radius.Shuffle(-1, -1),
-				Radius.Shuffle( 1, -1),
+				-Radius.X, -Radius.Y, Radius.X, -Radius.Y,
 				true, Constants.Direction.Negative),
 			
 			Constants.TileBehaviours.RightWall => TileCollider.FindClosestDistance(
-				Radius.Shuffle(-1, -1, true),
-				Radius.Shuffle(1, -1, true),
+				-Radius.Y, -Radius.X, Radius.Y, -Radius.X,
 				false, Constants.Direction.Negative),
 			
 			Constants.TileBehaviours.LeftWall => TileCollider.FindClosestDistance(
-				Radius.Shuffle(-1, 1, true),
-				Radius.Shuffle(1, 1, true),
+				-Radius.Y, Radius.X, Radius.Y, Radius.X,
 				false, Constants.Direction.Positive),
 			
-			Constants.TileBehaviours.Ceiling => throw new ArgumentOutOfRangeException(),
+			Constants.TileBehaviours.Ceiling => maxCeilingDistance,
 			
 			_ => throw new ArgumentOutOfRangeException()
 		};
+		
+		return distance >= maxCeilingDistance;
 	}
 
 	private void ChargeDropDash()
@@ -488,16 +500,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Input.Down.Abc)
 		{
 			IsAirLock = false;		
-			if (ActionValue < MaxDropDashCharge)
-			{
-				ActionValue += Scene.Local.ProcessSpeed;
-			}
-			else if (Animation != Animations.DropDash)
-			{
-				Animation = Animations.DropDash;
-				AudioPlayer.Sound.Play(SoundStorage.Charge);
-			}
+			ActionValue += Scene.Local.ProcessSpeed;
 			
+			if (ActionValue < MaxDropDashCharge || Animation == Animations.DropDash) return;
+			
+			AudioPlayer.Sound.Play(SoundStorage.Charge3);
+			Animation = Animations.DropDash;
 			return;
 		}
 		
@@ -524,10 +532,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
 		
-		if (IsSuper)
+		if (SuperTimer > 0f)
 		{
 			UpdateDropDashGroundSpeed(13f, 12f);
-			Camera.Main?.SetShakeTimer(6);
+			Camera.SetShakeTimer(6f);
 		}
 		else
 		{
@@ -551,8 +559,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool CancelDropDash()
 	{
 		if (!SharedData.DropDash || Action != Actions.DropDash) return true;
-
-		if (Shield.Type <= Shield.Types.Normal || IsSuper) return false;
+		
+		if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f || ItemInvincibilityTimer > 0f) return false;
 		
 		Animation = Animations.Spin;
 		Action = Actions.None;

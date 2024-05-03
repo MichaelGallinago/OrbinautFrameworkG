@@ -164,7 +164,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Shield.UpdateDuration([7, 12]);
 		Shield.Timer = 20d;
 			
-		AudioPlayer.Sound.Play(SoundStorage.BarrierWater2);
+		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		
 		return true;
 	}

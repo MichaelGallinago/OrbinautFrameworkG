@@ -60,11 +60,10 @@ public partial class PlayerCpu : Player
 		}
 		
 		// Enable CPU's camera back
-		//TODO: wtf index?
-		//if player_view.index > 0
-		//{
-		Camera.IsMovementAllowed = true;
-		//}
+		if (Camera != null)
+		{
+			Camera.IsMovementAllowed = true;
+		}
 		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
@@ -332,7 +331,7 @@ public partial class PlayerCpu : Player
 		
 		CpuTimer += Scene.Local.ProcessSpeed;
 		//TODO: check IsInstanceValid == instance_exists
-		// Wait 300 steps unless standing on an object that got despawned
+		// Wait 300 steps unless standing on an object that got respawned
 		if (CpuTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
 		Respawn();
 		return true;
@@ -350,11 +349,10 @@ public partial class PlayerCpu : Player
 		IsGrounded = false;
 		
 		// Since we're teleporting CPU to the top left corner, temporary disable their camera
-		//TODO: wtf index?
-		//if player_view.index > 0
-		//{
-		Camera.IsMovementAllowed = false;
-		//}
+		if (Camera != null)
+		{
+			Camera.IsMovementAllowed = false;
+		}
 		
 		ZIndex = (int)Constants.ZIndexes.AboveForeground; 
 	}

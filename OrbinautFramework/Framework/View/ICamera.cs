@@ -20,4 +20,5 @@ public interface ICamera
     public bool CheckPositionInActiveRegion(Vector2I position);
     public bool CheckXInActiveRegion(int position);
     public bool CheckYInActiveRegion(int position);
+    public void SetShakeTimer(float shakeTimer);
 }

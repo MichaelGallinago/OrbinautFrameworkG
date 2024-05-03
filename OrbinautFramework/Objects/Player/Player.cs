@@ -350,8 +350,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Gravity	= GravityType.Underwater;
 		Velocity.Vector = Vector2.Zero;
 		GroundSpeed.Value = 0f;
-		//TODO: solve view id
-		if (Id == 0) //|| player_view.index > 0)
+		
+		if (Camera != null)
 		{
 			Camera.IsMovementAllowed = false;
 		}

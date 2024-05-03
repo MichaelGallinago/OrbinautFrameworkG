@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://c5j0plksbpuwq"
-path="res://.godot/imported/barrier_water.wav-14389fb82c03138b8b7512bcb664b4d1.sample"
+path="res://.godot/imported/shield_bubble.wav-a90f0cd061c4633874eeda1c3c2c676d.sample"
 
 [deps]
 
-source_file="res://Audio/Sounds/barrier_water.wav"
-dest_files=["res://.godot/imported/barrier_water.wav-14389fb82c03138b8b7512bcb664b4d1.sample"]
+source_file="res://Audio/Sounds/shield_bubble.wav"
+dest_files=["res://.godot/imported/shield_bubble.wav-a90f0cd061c4633874eeda1c3c2c676d.sample"]
 
 [params]
 

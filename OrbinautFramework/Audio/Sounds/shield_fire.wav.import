@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://sw632eg8fymv"
-path="res://.godot/imported/barrier_flame.wav-68f36a1c160f3ab72ca673fff37a8c1e.sample"
+path="res://.godot/imported/shield_fire.wav-e8cc40a515558ba2a0b5aa6dbec92247.sample"
 
 [deps]
 
-source_file="res://Audio/Sounds/barrier_flame.wav"
-dest_files=["res://.godot/imported/barrier_flame.wav-68f36a1c160f3ab72ca673fff37a8c1e.sample"]
+source_file="res://Audio/Sounds/shield_fire.wav"
+dest_files=["res://.godot/imported/shield_fire.wav-e8cc40a515558ba2a0b5aa6dbec92247.sample"]
 
 [params]
 

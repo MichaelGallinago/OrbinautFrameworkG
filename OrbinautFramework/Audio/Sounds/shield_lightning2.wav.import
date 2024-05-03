@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://sg03uhp2qer6"
-path="res://.godot/imported/barrier_thunder2.wav-386ec7c85dfaca6a8dca53b5afcf01cb.sample"
+path="res://.godot/imported/shield_lightning2.wav-b1a6b078e1d7ed8ac8f66e97f80c693e.sample"
 
 [deps]
 
-source_file="res://Audio/Sounds/barrier_thunder2.wav"
-dest_files=["res://.godot/imported/barrier_thunder2.wav-386ec7c85dfaca6a8dca53b5afcf01cb.sample"]
+source_file="res://Audio/Sounds/shield_lightning2.wav"
+dest_files=["res://.godot/imported/shield_lightning2.wav-b1a6b078e1d7ed8ac8f66e97f80c693e.sample"]
 
 [params]
 
