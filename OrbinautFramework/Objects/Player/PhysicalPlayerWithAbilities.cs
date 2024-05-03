@@ -545,14 +545,14 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Animation = Animations.Spin;
 		IsSpinning = true;
 		
-		if (!SharedData.CdCamera && Camera.Main != null)
+		if (!SharedData.CdCamera && Camera != null)
 		{
-			Camera.Main.Delay.X = 8;
+			Camera.Delay = Camera.Delay with { X = 8f };
 		}
 			
 		//TODO: obj_dust_dropdash
 		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-		AudioPlayer.Sound.Stop(SoundStorage.Charge);
+		AudioPlayer.Sound.Stop(SoundStorage.Charge3);
 		AudioPlayer.Sound.Play(SoundStorage.Release);
 	}
 
@@ -580,7 +580,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			GroundSpeed.Value = limitSpeed;
 			return;
 		}
-
+		
 		GroundSpeed.Value = force;
 		if (Mathf.IsEqualApprox(Angle, 360f)) return;
 		
@@ -590,71 +590,61 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private void ProcessFlight()
 	{
 		if (Action != Actions.Flight) return;
-	
+
 		if (ActionValue > 0f)
 		{
 			ActionValue -= Scene.Local.ProcessSpeed;
-			if (ActionValue <= 0f)
-			{
-				FlyTired();
-			}
-			else
-			{
-				FlyDefault();
-			}
 		}
 
-		if (!SharedData.FlightCancel || !Input.Down.Down || !Input.Press.Abc) return;
-		
-		Camera.Main.BufferPosition.Y += Radius.Y - RadiusSpin.Y;
-		Radius = RadiusSpin;
-		Animation = Animations.Spin;
-		IsSpinning	= true;
-		Action = Actions.None;
-		
-		AudioPlayer.Sound.Stop(SoundStorage.Flight);
-		AudioPlayer.Sound.Stop(SoundStorage.Flight2);
-		ResetGravity();
-	}
-
-	private void FlyDefault()
-	{
-		Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
-			
-		if (IsUnderwater && CarryTarget != null)
+		if (!FlyUp())
 		{
-			Gravity = GravityType.TailsDown;
-			return;
-		}
-		
-		if (Input.Press.Abc)
-		{
-			Gravity = GravityType.TailsUp;
-		}
-		else if (Velocity.Y < -1f)
-		{
-			Gravity = GravityType.TailsDown;
+			FlyDown();
 		}
 
-		Velocity.MaxY(-4f);
-	}
-	
-	private void FlyTired()
-	{
-		if (!IsUnderwater)
+		PlayTailsSound();
+
+		if (IsUnderwater)
 		{
-			Animation = Animations.FlyTired;
-			AudioPlayer.Sound.Play(SoundStorage.Flight2);
+			Animation = ActionValue > 0f ? Animations.Fly : Animations.FlyTired;
 		}
 		else
 		{
-			Animation = Animations.SwimTired;
+			Animation = ActionValue > 0f ? Animations.Swim : Animations.SwimTired;
+		}
+	}
+
+	private bool FlyUp()
+	{
+		if (ActionValue2 <= 0f) return false;
+
+		if (Velocity.Y < -1f)
+		{
+			ActionValue2 = 0f;
+			return true;
+		}
+		
+		Gravity = GravityType.TailsUp;
+				
+		ActionValue2 += Scene.Local.ProcessSpeed;
+		if (ActionValue2 >= 31f)
+		{
+			ActionValue2 = 0f;
+		}
+
+		return true;
+	}
+
+	private void FlyDown()
+	{
+		if (Input.Press.Abc && ActionValue > 0f && (!IsUnderwater || CarryTarget == null))
+		{
+			//TODO: check that this works
+			ActionValue2 = 1f;
 		}
 			
 		Gravity = GravityType.TailsDown;
-		AudioPlayer.Sound.Stop(SoundStorage.Flight);
 	}
-	
+
 	private void ProcessClimb()
 	{
 		if (Action != Actions.Climb) return;
