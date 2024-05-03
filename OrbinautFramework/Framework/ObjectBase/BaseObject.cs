@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 
 public abstract partial class BaseObject : Node2D
 {
-	public enum CullingType : byte { None, NoBounds, Reset, ResetX, ResetY, Delete }
+	public enum CullingType : byte { None, NoBounds, Reset, ResetX, ResetY, Delete, Pause }
 	
 	[Export] public CullingType Culling
 	{

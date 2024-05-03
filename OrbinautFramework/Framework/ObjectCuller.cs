@@ -11,7 +11,7 @@ public class ObjectCuller
 	public static ObjectCuller Local => Scene.Local.Culler;
 	
 	private bool _isCullToggled = true;
-	private readonly HashSet<BaseObject> _waitingObjects = [];
+	private readonly HashSet<BaseObject> _hiddenObjectsInView = [];
 	private readonly HashSet<BaseObject> _stoppedObjects = [];
 	public HashSet<BaseObject> ActiveObjects { get; } = [];
 	
@@ -75,6 +75,20 @@ public class ObjectCuller
     
     private void StopObjectsByBehaviour()
     {
+	    foreach (BaseObject baseObject in _hiddenObjectsInView)
+	    {
+		    var position = (Vector2I)baseObject.Position;
+		    foreach (ICamera camera in Views.Local.Cameras)
+		    {
+			    if (camera.CheckPositionInActiveRegion(position)) continue;
+			    
+			    baseObject.Reset();
+			    _stoppedObjects.Add(baseObject);
+			    _hiddenObjectsInView.Remove(baseObject);
+			    break;
+		    }
+	    }
+	    
 	    foreach (BaseObject baseObject in ActiveObjects)
 	    {
 		    baseObject.InteractData.IsInteract = true;
@@ -90,6 +104,7 @@ public class ObjectCuller
 		    case BaseObject.CullingType.Reset: ResetObject(baseObject); break;
 		    case BaseObject.CullingType.ResetX: ResetXObject(baseObject); break;
 		    case BaseObject.CullingType.ResetY: ResetYObject(baseObject); break;
+		    case BaseObject.CullingType.Pause: PauseObject(baseObject); break;
 	    }
     }
 
@@ -111,18 +126,21 @@ public class ObjectCuller
 	    {
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }
+	    
+	    ActiveObjects.Remove(baseObject);
+	    baseObject.SetProcess(false);
 
 	    var respawnPosition = (Vector2I)baseObject.ResetData.Position;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (!camera.CheckPositionInActiveRegion(respawnPosition)) continue;
-		    ActiveObjects.Remove(baseObject);
-		    baseObject.SetProcess(false);
+		    _hiddenObjectsInView.Add(baseObject);
 		    baseObject.Hide();
 		    return;
 	    }
 	    
 	    baseObject.Reset();
+	    _stoppedObjects.Add(baseObject);
     }
     
     private void ResetXObject(BaseObject baseObject)
@@ -140,14 +158,13 @@ public class ObjectCuller
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (!camera.CheckXInActiveRegion(respawnPosition)) continue;
-		    _waitingObjects.Add(baseObject);
+		    _hiddenObjectsInView.Add(baseObject);
 		    baseObject.Hide();
 		    return;
 	    }
 
 	    baseObject.Reset();
-	    baseObject.SetProcess(false);
-	    baseObject.Hide();
+	    _stoppedObjects.Add(baseObject);
     }
     
     private void ResetYObject(BaseObject baseObject)
@@ -157,17 +174,33 @@ public class ObjectCuller
 	    {
 		    if (camera.CheckYInActiveRegion(position)) return;
 	    }
+	    
+	    ActiveObjects.Remove(baseObject);
+	    baseObject.SetProcess(false);
 
 	    var respawnPosition = (int)baseObject.ResetData.Position.Y;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
 		    if (!camera.CheckYInActiveRegion(respawnPosition)) continue;
-		    ActiveObjects.Remove(baseObject);
-		    baseObject.SetProcess(false);
+		    _hiddenObjectsInView.Add(baseObject);
 		    baseObject.Hide();
 		    return;
 	    }
 	    
 	    baseObject.Reset();
+	    _stoppedObjects.Add(baseObject);
+    }
+
+    private void PauseObject(BaseObject baseObject)
+    {
+	    var position = (Vector2I)baseObject.Position;
+	    foreach (ICamera camera in Views.Local.Cameras)
+	    {
+		    if (camera.CheckPositionInActiveRegion(position)) return;
+	    }
+	    
+	    baseObject.SetProcess(false);
+	    ActiveObjects.Remove(baseObject);
+	    _stoppedObjects.Add(baseObject);
     }
 }
