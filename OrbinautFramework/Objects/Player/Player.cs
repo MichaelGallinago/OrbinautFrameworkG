@@ -451,36 +451,36 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void ProcessRotation()
 	{
-		if (Animation != Animations.Move)
-		{
-			VisualAngle = 0f;
-		}
-		else if (IsGrounded)
-		{
-			RotateOnGround();
-		}
-		else // Match actual angle if airborne
+		bool isSmoothRotation = SharedData.RotationMode > 0;
+		
+		if (!IsGrounded)
 		{
 			VisualAngle = Angle;
 		}
-	
-		if (SharedData.RotationMode > 0)
+		else if (isSmoothRotation)
 		{
-			RotationDegrees = VisualAngle;
+			RotateOnGround();
 		}
 		else
 		{
-			RotationDegrees = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
+			VisualAngle = Angle is > 22.5f and < 337.5f ? Angle : 0;
 		}
+
+		if (!isSmoothRotation)
+		{
+			VisualAngle = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
+		}
+
+		RotationDegrees = Animation == Animations.Move ? VisualAngle : 0f;
 	}
 
 	private void RotateOnGround()
 	{
-		// Ground rotation code by Nihil
+		// Ground smooth rotation code by Nihil
 		var angle = 0f;
 		float step;
 		
-		if (Angle > 22.5f && SharedData.PlayerPhysics < PhysicsTypes.S2 ? Angle <= 337.5f : Angle < 337.5f)
+		if (Angle is > 22.5f and < 337.5f)
 		{
 			angle = Angle;
 			step = 2f - Math.Abs(GroundSpeed) * 3f / 32f;
@@ -489,11 +489,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			step = 2f - Math.Abs(GroundSpeed) / 16f;
 		}
-
+		
 		float radians = Mathf.DegToRad(angle);
 		float radiansVisual = Mathf.DegToRad(VisualAngle);
 		VisualAngle = Mathf.RadToDeg(MathF.Atan2(
-			Mathf.DegToRad(MathF.Sin(radians) + MathF.Sin(radiansVisual) * step), 
+			Mathf.DegToRad(MathF.Sin(radians) + MathF.Sin(radiansVisual) * step),
 			Mathf.DegToRad(MathF.Cos(radians) + MathF.Cos(radiansVisual) * step)));
 	}
 	
