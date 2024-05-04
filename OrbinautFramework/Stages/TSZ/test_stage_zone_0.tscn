@@ -203,7 +203,6 @@ _sprite = NodePath("AdvancedAnimatedSprite")
 position = Vector2(1040, 960)
 scale = Vector2(1, 30)
 _sprite = NodePath("Sprite2D")
-_newBoundY = 1490
 
 [node name="CameraTrigger2" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("13_7s6he")]
 position = Vector2(8944, 960)

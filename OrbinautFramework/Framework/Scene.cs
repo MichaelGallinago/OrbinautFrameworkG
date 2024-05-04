@@ -10,9 +10,9 @@ public abstract partial class Scene : Node2D
 {
     public static Scene Local { get; private set; }
     
-    [Export] public CollisionTileMap CollisionTileMapMain { get; }
-    [Export] public CollisionTileMap CollisionTileMapSecondary { get; }
-    [Export] public Views Views { get; }
+    [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
+    [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
+    [Export] public Views Views { get; private set; }
     
     public SceneTree Tree { get; private set; }
     public bool IsStage { get; protected set; }
