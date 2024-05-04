@@ -457,7 +457,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 			VisualAngle = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
 		}
 
-		RotationDegrees = Animation == Animations.Move ? VisualAngle : 0f;
+		RotationDegrees = Animation == Animations.Move ? 360f - VisualAngle : 0f;
 	}
 
 	private void RotateOnGround()

@@ -112,7 +112,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		Shield = _packedShield.Instantiate<ShieldContainer>();
 		base._Ready();
 		Spawn();
-		InitializeCamera();
 		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
 
@@ -288,14 +287,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 			// TODO: create shield
 			//instance_create(x, y, obj_shield, { TargetPlayer: id });
 		}
-	}
-
-	private void InitializeCamera()
-	{
-		ReadOnlySpan<ICamera> cameras = Views.Local.Cameras;
-		if (cameras.Length <= Id) return;
-		cameras[Id].Target = this;
-		cameras[Id].Position = Position - SharedData.ViewSize / 2 + Vector2.Down * 16;
 	}
 	
 	private bool ApplyType()

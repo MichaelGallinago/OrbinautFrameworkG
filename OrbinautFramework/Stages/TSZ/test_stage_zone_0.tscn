@@ -71,6 +71,7 @@ region = Rect2(48, 16, 16, 16)
 
 [node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
 process_priority = -1
+texture_filter = 1
 material = SubResource("ShaderMaterial_6rqx3")
 script = ExtResource("1_hkdi5")
 CollisionTileMapMain = NodePath("CollisionTileMapMain")
@@ -78,6 +79,9 @@ CollisionTileMapSecondary = NodePath("CollisionTIleMapSecondary")
 Views = NodePath("ViewContainer")
 
 [node name="ViewContainer" parent="." node_paths=PackedStringArray("_boxContainer") instance=ExtResource("3_8004u")]
+custom_minimum_size = Vector2(400, 200)
+offset_right = 400.0
+offset_bottom = 224.0
 _boxContainer = NodePath("VBoxContainer")
 
 [node name="GraphicsTileMapA" type="TileMapLayer" parent="."]
@@ -108,7 +112,7 @@ script = ExtResource("5_movty")
 
 [node name="Player" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
 use_parent_material = true
-position = Vector2(64, 896)
+position = Vector2(160, 896)
 Sprite = NodePath("AdvancedAnimatedSprite")
 _uniqueType = 2
 
@@ -152,6 +156,7 @@ _layerRight = 0
 Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
 [node name="Parallax2D" type="Parallax2D" parent="."]
+z_index = -4096
 repeat_size = Vector2(512, 320)
 script = ExtResource("3_i0vlt")
 

@@ -54,7 +54,7 @@ public partial class Camera : Camera2D, ICamera
 	public int BoundSpeed { get; set; }
 	public Vector4 Bound { get; set; }
 	public Vector4 Limit { get; private set; }
-	public bool IsMovementAllowed { get; set; }
+	public bool IsMovementAllowed { get; set; } = true;
 
 	private Vector2I _shakeOffset;
 	private float _shakeTimer;
@@ -69,6 +69,7 @@ public partial class Camera : Camera2D, ICamera
 	{
 		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
 		Limit = Bound;
+		
 		_previousLimit = Bound;
 
 		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
@@ -97,16 +98,12 @@ public partial class Camera : Camera2D, ICamera
 		var finalPosition = new Vector2I(BufferPosition.X - Constants.RenderBuffer, BufferPosition.Y);
 		
 		Position = finalPosition;
+		
 		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
 			finalPosition.X + SharedData.ViewSize.X, finalPosition.Y + SharedData.ViewSize.Y);
 		
 		ForceUpdateScroll();
 		UpdateActiveRegion();
-	}
-
-	public void UpdateDelay(int? delayX = null, int? delayY = null)
-	{
-		Delay = new Vector2(delayX ?? Delay.X, delayY ?? Delay.Y);
 	}
 
 	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;

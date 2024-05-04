@@ -15,6 +15,7 @@ public abstract partial class Scene : Node2D
     [Export] public Views Views { get; private set; }
     
     public SceneTree Tree { get; private set; }
+    public World2D World2D { get; private set; }
     public bool IsStage { get; protected set; }
     public ObjectCuller Culler { get; } = new();
     public float ProcessSpeed { get; private set; }

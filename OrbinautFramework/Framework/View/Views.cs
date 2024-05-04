@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -35,8 +36,12 @@ public partial class Views : Control
     private ViewContainer[] _containers;
     private readonly List<ICamera> _camerasWithUpdatedRegions = [];
 
-    public override void _Ready() => CreateViews();
-    
+    public override void _Ready()
+    {
+        CreateViews();
+        AttachCamerasToPlayers();
+    }
+
     public bool CheckRectInCameras(Rect2 rect)
     {
         foreach (Camera camera in _cameras)
@@ -75,6 +80,16 @@ public partial class Views : Control
         
         return CollectionsMarshal.AsSpan(_camerasWithUpdatedRegions);
     }
+    
+    private void AttachCamerasToPlayers()
+    {
+        List<Player> players = PlayerData.Players;
+        int number = Math.Min(_cameras.Length, players.Count);
+        for (var i = 0; i < number; i++)
+        {
+            _cameras[i].Target = players[i];
+        }
+    }
 
     private void RemoveViews()
     {
@@ -105,6 +120,7 @@ public partial class Views : Control
             var viewContainer = _packedViewContainer.Instantiate<ViewContainer>();
             _cameras[i] = viewContainer.Camera;
             _containers[i] = viewContainer;
+            viewContainer.SubViewport.SetWorld2D(Scene.Local.GetWorld2D());
             boxContainer.AddChild(viewContainer);
         }
     }
