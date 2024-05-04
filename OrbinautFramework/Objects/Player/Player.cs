@@ -8,27 +8,14 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed
+public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 {
 	private readonly DebugMode _debugMode = new();
-	
-	[Export] public PackedScene PackedTail { get; private set; }
-	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
+
+	[Export] private PackedScene _packedTail;
 	private Tail _tail;
 
 	public Player() => TypeChanged += OnTypeChanged;
-	
-	public override void _Ready()
-	{
-		base._Ready();
-		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
-	}
-
-	protected override void Init()
-	{
-		base.Init();
-		Sprite.Animate(this);
-	}
 
 	public override void _ExitTree()
 	{
@@ -116,7 +103,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		{
 			case Types.Tails:
 				if (_tail != null) return;
-				_tail = PackedTail.Instantiate<Tail>();
+				_tail = _packedTail.Instantiate<Tail>();
 				AddChild(_tail);
 				break;
 			

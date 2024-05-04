@@ -9,11 +9,12 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PlayerData : BaseObject, ICpuTarget
+public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlayer
 {
 	private const byte MinimalRecordLength = 32;
 	protected const int CpuDelayStep = 16;
 	
+	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
 	[Export] public ShieldContainer Shield { get; set; }
 	[Export] private SpawnTypes _spawnType;
 	[Export] private Types _uniqueType;
@@ -109,6 +110,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		base._Ready();
 		Spawn();
 		InitializeCamera();
+		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
 	}
 
 	public override void _ExitTree()
@@ -229,6 +231,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
+		
+		Sprite.Animate(this);
 	}
 	
 	private static void ResizeAllRecordedData()

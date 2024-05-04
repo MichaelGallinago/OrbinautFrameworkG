@@ -38,26 +38,29 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	public void Kill()
 	{
-		if (DeathState == DeathStates.Restart) return;
+		if (IsDead) return;
 		
+		ResetState();
+		AudioPlayer.Sound.Play(SoundStorage.Hurt);
+
+		if (Id == 0)
+		{
+			SharedData.PlayerShield = ShieldContainer.Types.None;
+		}
+		
+		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		Action = Actions.None;
-		DeathState = DeathStates.Restart;
-		IsObjectInteractionEnabled = false;
-		IsGrounded = false;
-		OnObject = null;
-		Shield.Type = ShieldContainer.Types.None;
 		Animation = Animations.Death;
+		IsDead = true;
+		IsObjectInteractionEnabled = false;
 		Gravity = GravityType.Default;
 		Velocity.Vector = new Vector2(0f, -7f);
 		GroundSpeed.Value = 0f;
-		ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		
-		AudioPlayer.Sound.Play(SoundStorage.Hurt);
 
-		if (Id != 0) return;
-		Scene.Local.UpdateObjects = false;
-		Scene.Local.UpdateTimer = false;
-		Scene.Local.AllowPause = false;
+		if (IsCameraTarget(out ICamera camera))
+		{
+			camera.IsMovementAllowed = false;
+		}
 	}
 	
 	public void Land()

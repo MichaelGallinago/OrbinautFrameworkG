@@ -17,7 +17,7 @@ public class TileCollider
 			"widths_tsz");
 	}
 	
-    public Vector2I Position { set => _position = value; }
+    public Vector2I Position { get; set; }
     public TileBehaviours TileBehaviour { set => _tileBehaviour = value; }
 
     public TileLayers LayerType
@@ -33,7 +33,6 @@ public class TileCollider
 	    }
     }
     
-    private Vector2I _position;
     private TileBehaviours _tileBehaviour;
     private CollisionTileMap _tileMap;
     private bool _isVertical;
@@ -57,14 +56,14 @@ public class TileCollider
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
-        return FindTile(_position + new Vector2I(x, y));
+        return FindTile(Position + new Vector2I(x, y));
     }
     
     public int FindDistance(int x, int y, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
-        return FindTileData(_position + new Vector2I(x, y)).Item1;
+        return FindTileData(Position + new Vector2I(x, y)).Item1;
     }
 
     public (int, float) FindClosestTile(int x1, int y1, int x2, int y2, bool isVertical, Direction direction)
@@ -72,8 +71,8 @@ public class TileCollider
 	    _isVertical = isVertical;
 	    _direction = direction;
 	    
-	    (int distance1, float angle1) = FindTile(_position + new Vector2I(x1, y1));
-	    (int distance2, float angle2) = FindTile(_position + new Vector2I(x2, y2));
+	    (int distance1, float angle1) = FindTile(Position + new Vector2I(x1, y1));
+	    (int distance2, float angle2) = FindTile(Position + new Vector2I(x2, y2));
 	    return distance1 <= distance2 ? (distance1, angle1) : (distance2, angle2);
     }
     
@@ -81,8 +80,8 @@ public class TileCollider
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
-	    int distance1 = FindTileData(_position + new Vector2I(x1, y1)).Item1;
-	    int distance2 = FindTileData(_position + new Vector2I(x2, y2)).Item1;
+	    int distance1 = FindTileData(Position + new Vector2I(x1, y1)).Item1;
+	    int distance2 = FindTileData(Position + new Vector2I(x2, y2)).Item1;
 	    return distance1 <= distance2 ? distance1 : distance2;
     }
 

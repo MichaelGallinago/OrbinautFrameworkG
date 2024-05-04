@@ -727,8 +727,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool ClimbUpOntoWall(int radiusX)
 	{
 		// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-		var offset = new Vector2I(radiusX * (int)Facing, -Radius.Y - 1);
-		int wallDistance = TileCollider.FindDistance(offset, false, Facing);
+		int wallDistance = TileCollider.FindDistance(radiusX * (int)Facing, -Radius.Y - 1, false, Facing);
 			
 		if (wallDistance >= 4)
 		{
@@ -745,8 +744,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 
 		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-		offset = new Vector2I(radiusX * (int)Facing, 1 - RadiusNormal.Y);
-		int ceilDistance = TileCollider.FindDistance(offset, true, Constants.Direction.Negative);
+		int ceilDistance = TileCollider.FindDistance(
+			radiusX * (int)Facing, 1 - RadiusNormal.Y, true, Constants.Direction.Negative);
 
 		if (ceilDistance >= 0) return false;
 		Position -= new Vector2(0f, ceilDistance);
@@ -757,9 +756,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool ReleaseClimbing(int radiusX)
 	{
 		// If Knuckles is no longer against the wall, make him let go
-		var offset = new Vector2I(radiusX * (int)Facing, Radius.Y + 1);
-
-		if (TileCollider.FindDistance(offset, false, Facing) == 0) return LandAfterClimbing(radiusX);
+		if (TileCollider.FindDistance(radiusX * (int)Facing, Radius.Y + 1, false, Facing) == 0)
+		{
+			return LandAfterClimbing(radiusX);
+		}
 		
 		ReleaseClimb();
 		return true;
@@ -767,8 +767,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool LandAfterClimbing(int radiusX)
 	{
-		var offset = new Vector2I(radiusX * (int)Facing, RadiusNormal.Y);
-		(int distance, float angle) = TileCollider.FindTile(offset, true, Constants.Direction.Positive);
+		(int distance, float angle) = TileCollider.FindTile(
+			radiusX * (int)Facing, RadiusNormal.Y, true, Constants.Direction.Positive);
 
 		if (distance >= 0) return false;
 		Position += new Vector2(0f, distance + RadiusNormal.Y - Radius.Y);
@@ -1076,8 +1076,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool CollideWallsOnGlide(int wallRadius, Constants.Direction direction)
 	{
 		var sing = (int)direction;
-		int wallDistance = TileCollider.FindDistance(
-			new Vector2I(sing * wallRadius, 0), false, direction);
+		int wallDistance = TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
 
 		if (wallDistance >= 0) return false;
 		
@@ -1207,8 +1206,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		// Cast a horizontal sensor just above Knuckles.
 		// If the distance returned is not 0, he is either inside the ceiling or above the floor edge
-		TileCollider.Position.Y = climbY - Radius.Y;
-		if (TileCollider.FindDistance(new Vector2I(wallRadius * (int)Facing, 0), false, Facing) == 0)
+		TileCollider.Position = TileCollider.Position with { Y = climbY - Radius.Y };
+		if (TileCollider.FindDistance(wallRadius * (int)Facing, 0, false, Facing) == 0)
 		{
 			return;
 		}
@@ -1219,8 +1218,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// Note: tile behaviour here is set to TILE_BEHAVIOUR_ROTATE_180. LBR tiles are not ignored in this case
 		TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
 		int floorDistance = TileCollider.FindDistance(
-			new Vector2I((wallRadius + 1) * (int)Facing, -1), 
-			true, Constants.Direction.Positive);
+			(wallRadius + 1) * (int)Facing, -1, true, Constants.Direction.Positive);
 				
 		if (floorDistance is < 0 or >= 12)
 		{

@@ -4,9 +4,8 @@ using Godot;
 namespace OrbinautFramework3;
 
 [Tool]
-public partial class TileMapFillerTool : TileMap
+public partial class TileMapFillerTool : TileMapLayer
 {
-    [Export] private byte _layerId;
     [Export] private byte _sourceId;
     [Export] private string _filePath;
     
@@ -54,7 +53,7 @@ public partial class TileMapFillerTool : TileMap
             int mirror = int.Parse(mirrorLine);
             int flip = int.Parse(flipLine);
             index = rotate == 0 ? flip * 8192 + mirror * 4096 : (1 - flip) * 4096 + mirror * 8192 + 16384;
-            SetCell(_layerId, position, _sourceId, atlasCoords, index);
+            SetCell(position, _sourceId, atlasCoords, index);
             
             position.X++;
             position.Y += position.X / width;
