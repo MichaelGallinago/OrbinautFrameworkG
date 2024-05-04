@@ -22,7 +22,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 #endif
 		AnimationFinished += OnAnimationFinished;
 	}
-	
+
 	public void Animate(IAnimatedPlayer player)
 	{
 		_player = player;
