@@ -15,7 +15,7 @@ public class PlayerContainer
     private readonly Stack<AudioStreamPlayer> _freePlayers;
     private readonly byte _playersLimit;
     private readonly int _busIndex;
-    private float _busMuteSpeed = 0f;
+    private float _busMuteSpeed;
 
     public PlayerContainer(ICollection<AudioStreamPlayer> players, byte playersLimit)
     {

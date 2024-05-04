@@ -22,6 +22,7 @@
     <AdditionalFiles Remove="Framework\Camera\**" />
     <AdditionalFiles Remove="Framework\CameraAndSurface\**" />
     <AdditionalFiles Remove="Framework\Input\**" />
+    <AdditionalFiles Remove=".godot\**" />
   </ItemGroup>
   <PropertyGroup>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
@@ -34,10 +35,12 @@
     <Compile Remove="Framework\Camera\**" />
     <Compile Remove="Framework\CameraAndSurface\**" />
     <Compile Remove="Framework\Input\**" />
+    <Compile Remove=".godot\**" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Framework\Camera\**" />
     <EmbeddedResource Remove="Framework\CameraAndSurface\**" />
     <EmbeddedResource Remove="Framework\Input\**" />
+    <EmbeddedResource Remove=".godot\**" />
   </ItemGroup>
 </Project>

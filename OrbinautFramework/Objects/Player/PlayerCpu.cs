@@ -166,26 +166,6 @@ public partial class PlayerCpu : Player
 
 		return distance.X != 0 || distance.Y != 0;
 	}
-
-	private void PlayTailsSound()
-	{
-		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
-
-		if (CpuState == CpuStates.Respawn)
-		{
-			if (SharedData.CpuBehaviour != CpuBehaviours.S3) return;
-			AudioPlayer.Sound.Play(SoundStorage.Flight);
-			return;
-		}
-		
-		if (ActionValue > 0f)
-		{
-			AudioPlayer.Sound.Play(SoundStorage.Flight);
-			return;
-		}
-		
-		AudioPlayer.Sound.Play(SoundStorage.Flight2);
-	}
 	
 	private void ProcessMainCpu()
 	{

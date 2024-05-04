@@ -604,6 +604,26 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Animation = ActionValue > 0f ? Animations.Swim : Animations.SwimTired;
 		}
 	}
+	
+	protected void PlayTailsSound()
+	{
+		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
+
+		if (CpuState == CpuStates.Respawn)
+		{
+			if (SharedData.CpuBehaviour != CpuBehaviours.S3) return;
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
+			return;
+		}
+		
+		if (ActionValue > 0f)
+		{
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
+			return;
+		}
+		
+		AudioPlayer.Sound.Play(SoundStorage.Flight2);
+	}
 
 	private bool FlyUp()
 	{
