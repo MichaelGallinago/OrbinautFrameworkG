@@ -351,7 +351,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Velocity.Vector = Vector2.Zero;
 		GroundSpeed.Value = 0f;
 		
-		if (IsTarget(out ICamera camera))
+		if (IsCameraTarget(out ICamera camera))
 		{
 			camera.IsMovementAllowed = false;
 		}

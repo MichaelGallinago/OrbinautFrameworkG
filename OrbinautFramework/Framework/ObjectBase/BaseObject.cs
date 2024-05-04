@@ -113,7 +113,7 @@ public abstract partial class BaseObject : Node2D
 		};
 	}
 	
-	public bool IsTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
+	public bool IsCameraTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
 	
 	private bool CheckHitBoxCollision(BaseObject target, CollisionSensor type)
 	{

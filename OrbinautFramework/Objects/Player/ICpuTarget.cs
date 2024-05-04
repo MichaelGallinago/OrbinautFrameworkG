@@ -18,4 +18,5 @@ public interface ICpuTarget
     
     ReadOnlySpan<DataRecord> RecordedData { get; }
     DataRecord GetFollowDataRecord(int cpuDelay) => RecordedData[cpuDelay];
+    public bool IsCameraTarget(out ICamera camera);
 }

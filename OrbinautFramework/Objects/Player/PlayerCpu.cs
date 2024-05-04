@@ -61,7 +61,7 @@ public partial class PlayerCpu : Player
 		}
 		
 		// Enable CPU's camera back
-		if (IsTarget(out ICamera camera))
+		if (IsCameraTarget(out ICamera camera))
 		{
 			camera.IsMovementAllowed = true;
 		}
@@ -324,7 +324,10 @@ public partial class PlayerCpu : Player
 	
 	private bool CheckIfCpuOffscreen()
 	{
-		if (Sprite != null && Sprite.CheckInCamera(_leadPlayer.Camera) || Camera.Bound.Z < Position.X)
+		bool isLeadPlayerCameraTarget = _leadPlayer.IsCameraTarget(out ICamera camera);
+		
+		if (Sprite != null && (isLeadPlayerCameraTarget ? 
+		    Sprite.CheckInCamera(camera) || camera.Bound.Z <= Position.X : Sprite.CheckInCameras()))
 		{
 			CpuTimer = 0f;
 			return false;
@@ -350,7 +353,7 @@ public partial class PlayerCpu : Player
 		IsGrounded = false;
 		
 		// Since we're teleporting CPU to the top left corner, temporary disable their camera
-		if (IsTarget(out ICamera camera))
+		if (IsCameraTarget(out ICamera camera))
 		{
 			camera.IsMovementAllowed = false;
 		}

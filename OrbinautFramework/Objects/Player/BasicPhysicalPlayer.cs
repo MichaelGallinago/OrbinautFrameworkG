@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -148,9 +149,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		SetPushAnimationBy = null;
 	}
 
-	private void SetCameraDelay()
+	protected void SetCameraDelayX(float delay)
 	{
-		if (!SharedData.CdCamera && Camera)
+		if (!SharedData.CdCamera && IsCameraTarget(out ICamera camera))
+		{
+			camera.Delay = camera.Delay with { X = delay };
+		}
 	}
 
 	private bool WaterBarrierBounce()
@@ -951,8 +955,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (moveQuadrant == Angles.Quadrant.Down) return false;
 		
 		(int roofDistance, float roofAngle) = TileCollider.FindClosestTile(
-			Radius.Shuffle(-1, -1),
-			Radius.Shuffle(1, -1),
+			-Radius.X, -Radius.Y, Radius.X, -Radius.Y,
 			true, Constants.Direction.Negative);
 			
 		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
@@ -1021,12 +1024,10 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private bool LandOnFeet(out int distance, out float angle)
 	{
 		(int distanceL, float angleL) = TileCollider.FindTile(
-			Radius.Shuffle(-1, 1), 
-			true, Constants.Direction.Positive);
+			-Radius.X, Radius.Y, true, Constants.Direction.Positive);
 			
 		(int distanceR, float angleR) = TileCollider.FindTile(
-			Radius.Shuffle(1, 1), 
-			true, Constants.Direction.Positive);
+			Radius.X, Radius.Y, true, Constants.Direction.Positive);
 
 		if (distanceL > distanceR)
 		{
@@ -1069,8 +1070,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private bool FallOnGround(out int distance, out float angle)
 	{
 		(distance, angle) = TileCollider.FindClosestTile(
-			Radius.Shuffle(-1, 1), 
-			Radius.Shuffle(1, 1),
+			-Radius.X, Radius.Y, Radius.X, Radius.Y,
 			true, Constants.Direction.Positive);
 		
 		if (distance >= 0) return true;

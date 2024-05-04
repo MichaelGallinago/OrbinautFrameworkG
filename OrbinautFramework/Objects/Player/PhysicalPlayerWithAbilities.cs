@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
@@ -91,10 +92,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (ChargeSpinDash()) return false;
 		
-		if (!SharedData.CdCamera && Id == 0)
-		{
-			Camera.Delay = Camera.Delay with { X = 16f };
-		}
+		SetCameraDelayX(16f);
 		
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Animation = Animations.Spin;
@@ -206,11 +204,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			GroundSpeed.Value = 0f;
 			return false;
 		}
-		
-		if (!SharedData.CdCamera && Camera != null)
-		{
-			Camera.Delay = Camera.Delay with { X = 16f };
-		}
+
+		SetCameraDelayX(16f);
 		
 		AudioPlayer.Sound.Play(SoundStorage.Release2);	
 		
@@ -327,10 +322,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void JumpFlameBarrier()
 	{
-		if (!SharedData.CdCamera && Camera != null)
-		{
-			Camera.Delay = Camera.Delay with { X = 16f };
-		}
+		SetCameraDelayX(16f);
 				
 		IsAirLock = true;
 		Velocity.Vector = new Vector2(8f * (float)Facing, 0f);
@@ -535,7 +527,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (SuperTimer > 0f)
 		{
 			UpdateDropDashGroundSpeed(13f, 12f);
-			Camera.SetShakeTimer(6f);
+			if (IsCameraTarget(out ICamera camera))
+			{
+				camera.SetShakeTimer(6f);
+			}
 		}
 		else
 		{
@@ -545,10 +540,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Animation = Animations.Spin;
 		IsSpinning = true;
 		
-		if (!SharedData.CdCamera && Camera != null)
-		{
-			Camera.Delay = Camera.Delay with { X = 8f };
-		}
+		SetCameraDelayX(8f);
 			
 		//TODO: obj_dust_dropdash
 		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
@@ -1100,8 +1092,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (moveQuadrant == Angles.Quadrant.Down) return false;
 		
 		int roofDistance = TileCollider.FindClosestDistance(
-			Radius.Shuffle(-1, -1),
-			Radius.Shuffle(1, -1),
+			-Radius.X, -Radius.Y, Radius.X, -Radius.Y,
 			true, Constants.Direction.Negative);
 			
 		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3)
@@ -1124,8 +1115,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	private bool CollideWithFloorOnGlide()
 	{
 		(int floorDistance, float floorAngle) = TileCollider.FindClosestTile(
-			Radius.Shuffle(-1, 1), 
-			Radius.Shuffle(1, 1),
+			-Radius.X, Radius.Y, Radius.X, Radius.Y,
 			true, Constants.Direction.Positive);
 	
 		if ((GlideStates)ActionState == GlideStates.Ground)
