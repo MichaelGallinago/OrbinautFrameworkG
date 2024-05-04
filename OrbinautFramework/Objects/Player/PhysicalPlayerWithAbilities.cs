@@ -159,9 +159,9 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		StartDash();
 		
-		if (Action == Actions.PeelOut && IsGrounded) return !ChargeDash() && ReleaseDash();
+		if (Action == Actions.Dash && IsGrounded) return !ChargeDash() && ReleaseDash();
 		
-		if (Action != Actions.PeelOut)
+		if (Action != Actions.Dash)
 		{
 			AudioPlayer.Sound.Stop(SoundStorage.Charge2);
 		}
@@ -173,7 +173,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Action != Actions.None || Animation != Animations.LookUp || !Input.Down.Up || !Input.Press.Abc) return;
 		
 		Animation = Animations.Move;
-		Action = Actions.PeelOut;
+		Action = Actions.Dash;
 		ActionValue = 0f;
 		ActionValue2 = 0f;
 			
@@ -427,7 +427,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool StartJump()
 	{
-		if (Action is Actions.SpinDash or Actions.PeelOut || IsForcedSpin || !IsGrounded) return false;
+		if (Action is Actions.SpinDash or Actions.Dash || IsForcedSpin || !IsGrounded) return false;
 		
 		if (!Input.Press.Abc || !CheckCeilingDistance()) return false;
 		

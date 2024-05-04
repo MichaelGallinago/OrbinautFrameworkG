@@ -10,12 +10,10 @@ public interface ICpuTarget
 {
     bool IsDead { get; }
     Velocity Velocity { get; }
-    Actions Action { get; }
     Vector2 Position { get; }
     AcceleratedValue GroundSpeed { get; }
     BaseObject OnObject { get; }
     bool IsObjectInteractionEnabled { get; }
-    ICamera Camera { get; }
     int ZIndex { get; }
     
     ReadOnlySpan<DataRecord> RecordedData { get; }

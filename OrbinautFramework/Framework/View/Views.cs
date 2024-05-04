@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -27,6 +28,8 @@ public partial class Views : Control
     [Export] private VBoxContainer _boxContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
+    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
+    public ICamera BottomCamera { get; private set; }
     private Camera[] _cameras;
     
     private ViewContainer[] _containers;
@@ -42,6 +45,14 @@ public partial class Views : Control
         }
 
         return false;
+    }
+
+    public void UpdateBottomCamera(ICamera camera)
+    {
+        if (camera.BufferPosition.Y > BottomCamera.BufferPosition.Y)
+        {
+            BottomCamera = camera;
+        }
     }
 
     public ReadOnlySpan<ICamera> GetCamerasWithUpdatedRegions()

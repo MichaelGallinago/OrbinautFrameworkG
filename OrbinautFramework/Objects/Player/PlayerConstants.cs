@@ -37,7 +37,7 @@ public enum Actions : byte
 {
     None,
     SpinDash,
-    PeelOut,
+    Dash,
     DropDash,
     DropDashCancel,
     Glide,

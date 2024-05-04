@@ -39,6 +39,13 @@ public abstract partial class Scene : Node2D
         Tree = GetTree();
 
         AttachCamerasToPlayer();
+        _lateUpdate.Update += () =>
+        {
+            foreach (Player player in PlayerData.Players)
+            {
+                player.Camera.P
+            }
+        };
     }
 
     public override void _EnterTree() => Local = this;

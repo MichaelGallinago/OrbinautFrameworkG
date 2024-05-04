@@ -14,8 +14,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	private const byte MinimalRecordLength = 32;
 	protected const int CpuDelayStep = 16;
 	
-	[Export] private Types _uniqueType;
+	[Export] public ShieldContainer Shield { get; set; }
 	[Export] private SpawnTypes _spawnType;
+	[Export] private Types _uniqueType;
 
 	public event Action<Types> TypeChanged;
 
@@ -34,7 +35,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public Velocity Velocity { get; } = new();
 	public AcceleratedValue GroundSpeed { get; set; } = new();
 	
-	public int Id { get; protected set; }
+	public int Id { get; protected set; } = Players.Count;
 	public Animations Animation { get; set; }
 	public bool IsAnimationFrameChanged { get; set; }
 	public int? OverrideAnimationFrame { get; set; }
@@ -67,7 +68,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }
-	public ShieldContainer Shield { get; set; }
     
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
@@ -92,8 +92,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	public bool IsCpuJumping { get; set; }
 	public bool IsCpuRespawn { get; set; }
 	public ICpuTarget CpuTarget { get; set; }
-    
-	public ICamera Camera { get; set; }
+	
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
@@ -103,13 +102,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
-	protected TileCollider TileCollider = new();
-	
-	protected PlayerData()
-	{
-		Id = Players.Count;
-		Shield = new ShieldContainer(this);
-	}
+	protected readonly TileCollider TileCollider = new();
 
 	public override void _Ready()
 	{
@@ -146,7 +139,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 	
 	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
 	
-	public virtual void ResetState()
+	public void ResetState()
 	{
 		Action = Actions.None;
 		
@@ -270,17 +263,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 
 	private void Spawn()
 	{
-		if (Id == 0)
-		{
-			SpawnFirstPlayer();
-			return;
-		}
-
-		SpawnFollowingPlayer();
-	}
-
-	private void SpawnFirstPlayer()
-	{
 		if (SharedData.GiantRingData != null)
 		{
 			Position = SharedData.GiantRingData.Position;
@@ -294,17 +276,11 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget
 			Position -= new Vector2(0, Radius.Y + 1);
 		}
 		
-		if (SharedData.PlayerShield != ShieldContainer.Types.None)
+		if (Id == 0 && SharedData.PlayerShield != ShieldContainer.Types.None)
 		{
 			// TODO: create shield
 			//instance_create(x, y, obj_shield, { TargetPlayer: id });
 		}
-	}
-
-	private void SpawnFollowingPlayer()
-	{
-		Player previousPlayer = Players[Id - 1];
-		Position = previousPlayer.Position - new Vector2(16f, Radius.Y - previousPlayer.Radius.Y);
 	}
 
 	private void InitializeCamera()

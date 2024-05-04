@@ -72,8 +72,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				AudioPlayer.Sound.Stop(SoundStorage.Flight2);
 				break;
 			
-			case Actions.SpinDash or Actions.PeelOut:
-				if (Action == Actions.PeelOut)
+			case Actions.SpinDash or Actions.Dash:
+				if (Action == Actions.Dash)
 				{
 					GroundSpeed.Value = ActionValue2;
 				}
@@ -148,6 +148,11 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		SetPushAnimationBy = null;
 	}
 
+	private void SetCameraDelay()
+	{
+		if (!SharedData.CdCamera && Camera)
+	}
+
 	private bool WaterBarrierBounce()
 	{
 		if (Shield.State != ShieldContainer.States.Active || Shield.Type != ShieldContainer.Types.Bubble) return false;
@@ -184,7 +189,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
     private void ProcessSlopeResist()
 	{
 		if (!IsGrounded || IsSpinning || Angle is > 135f and <= 225f) return;
-		if (Action is Actions.HammerDash or Actions.PeelOut) return;
+		if (Action is Actions.HammerDash or Actions.Dash) return;
 		
 		float slopeGrv = 0.125f * MathF.Sin(Mathf.DegToRad(Angle));
 		if (GroundSpeed != 0f || SharedData.PlayerPhysics >= PhysicsTypes.S3 && Math.Abs(slopeGrv) > 0.05078125f)
@@ -205,7 +210,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessMovementGround()
 	{
 		if (!IsGrounded || IsSpinning) return;
-		if (Action is Actions.SpinDash or Actions.PeelOut or Actions.HammerDash) return;
+		if (Action is Actions.SpinDash or Actions.Dash or Actions.HammerDash) return;
 		
 		// Cancel Knuckles' glide-landing animation
 		
@@ -519,7 +524,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessBalance()
 	{
 		if (!IsGrounded || IsSpinning) return;
-		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.PeelOut) return;
+		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.Dash) return;
 		if (SharedData.PlayerPhysics == PhysicsTypes.SK && Input.Down.Down) return;
 		
 		if (BalanceOnObject()) return;

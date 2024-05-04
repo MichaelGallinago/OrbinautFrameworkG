@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -60,9 +61,9 @@ public partial class PlayerCpu : Player
 		}
 		
 		// Enable CPU's camera back
-		if (Camera != null)
+		if (IsTarget(out ICamera camera))
 		{
-			Camera.IsMovementAllowed = true;
+			camera.IsMovementAllowed = true;
 		}
 		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
@@ -349,9 +350,9 @@ public partial class PlayerCpu : Player
 		IsGrounded = false;
 		
 		// Since we're teleporting CPU to the top left corner, temporary disable their camera
-		if (Camera != null)
+		if (IsTarget(out ICamera camera))
 		{
-			Camera.IsMovementAllowed = false;
+			camera.IsMovementAllowed = false;
 		}
 		
 		ZIndex = (int)Constants.ZIndexes.AboveForeground; 

@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player;
 using static OrbinautFramework3.Framework.Constants;
 
@@ -111,6 +112,8 @@ public abstract partial class BaseObject : Node2D
 			_ => CheckSolidCollision(target, type)
 		};
 	}
+	
+	public bool IsTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
 	
 	private bool CheckHitBoxCollision(BaseObject target, CollisionSensor type)
 	{

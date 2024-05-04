@@ -68,7 +68,7 @@ public partial class Bumper : BaseObject
             
             //TODO: obj_score
             //instance_create(x, y, obj_score);
-            player.IncreaseComboScore();
+            Player.IncreaseComboScore();
 		
             break;
         }

@@ -8,7 +8,7 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed, ICameraHolder
+public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPlayer, ITailed
 {
 	private readonly DebugMode _debugMode = new();
 	
@@ -351,9 +351,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		Velocity.Vector = Vector2.Zero;
 		GroundSpeed.Value = 0f;
 		
-		if (Camera != null)
+		if (IsTarget(out ICamera camera))
 		{
-			Camera.IsMovementAllowed = false;
+			camera.IsMovementAllowed = false;
 		}
 	}
 
@@ -397,7 +397,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 
 	private void SpawnWaterSplash()
 	{
-		if (Action is Actions.Climb or Actions.Glide || CpuState == CpuStates.Respawn) return;
+		if (Action == Actions.Climb || CpuState == CpuStates.Respawn ||
+		    Action == Actions.Glide && ActionState == (int)GlideStates.Fall) return;
 		
 		//TODO: obj_water_splash
 		//instance_create(x, c_stage.water_level, obj_water_splash);
@@ -587,7 +588,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		colourLoop = 1;
 	}
 
-	public void IncreaseComboScore(int comboCounter = 0)
+	public static void IncreaseComboScore(int comboCounter = 0)
 	{
 		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
@@ -595,10 +596,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 	private void ProcessDeath()
 	{
 		if (!IsDead) return;
+
+		ICamera camera = Views.Local.BottomCamera;
 		
 		// If drowned, wait until we're far enough off-screen
 		const int drownScreenOffset = 276;
-		if (AirTimer == 0 && (int)Position.Y <= Camera.BufferPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
+		if (AirTimer == 0 && (int)Position.Y <= camera.BufferPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
 		{
 			return;
 		}
@@ -611,29 +614,18 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, IAnimatedPla
 		
 		switch (DeathState)
 		{
-			case DeathStates.Wait: WaitOnDeath(); break;
+			case DeathStates.Wait: WaitOnDeath(camera); break;
 			case DeathStates.Restart: RestartOnDeath(); break;
 		}
 	}
-
-	private void WaitOnDeath()
+	
+	private void WaitOnDeath(ICamera camera)
 	{
-		var bound = 32f;
-
-		//TODO: check processSpeed
-		if (SharedData.PlayerPhysics < PhysicsTypes.S3)
-		{
-			bound += Camera.Limit.W; // TODO: check if LimitBottom or Bounds
-		}
-		else
-		{
-			bound += Camera.BufferPosition.Y + SharedData.ViewSize.Y;
-		}
-
-		if ((int)Position.Y <= bound) return;
+		if ((int)Position.Y <= 32f + (SharedData.PlayerPhysics < PhysicsTypes.S3 ? 
+			    camera.Limit.W : camera.BufferPosition.Y + SharedData.ViewSize.Y)) return;
 		
 		RestartState = RestartStates.ResetLevel;
-
+		
 		SetNextStateOnDeath();
 	}
 

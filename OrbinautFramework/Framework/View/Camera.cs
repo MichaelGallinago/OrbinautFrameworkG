@@ -30,18 +30,18 @@ public partial class Camera : Camera2D, ICamera
 		get => _target;
 		set
 		{
+			if (!Views.Local.TargetedCameras.TryAdd(value, this)) return;
+			
+			if (_target != null)
+			{
+				Views.Local.TargetedCameras.Remove(_target);
+			}
+				
 			_target = value;
 			_viewTimer = MaxViewTime;
-
-			if (value is not ICameraHolder holder) return;
-			BufferPosition = (Vector2I)holder.Position - SharedData.ViewSize + 16 * Vector2I.Down;
+				
+			BufferPosition = (Vector2I)_target.Position - SharedData.ViewSize + 16 * Vector2I.Down;
 			_rawPosition = PreviousPosition = BufferPosition;
-			
-			if (holder.Camera != null)
-			{
-				holder.Camera.Target = null;
-			}
-			holder.Camera = this;
 		}
 	}
 	private BaseObject _target;
@@ -62,7 +62,7 @@ public partial class Camera : Camera2D, ICamera
 	private Vector2 _rawPosition;
 	private Vector4 _previousLimit; // TODO: check if needed
 	private Vector2I _bufferOffset;
-	private Vector2I _maxSpeed;
+	public Vector2I MaxSpeed { get; private set; }
 	private Vector2 _speed;
 
 	public Camera()
@@ -72,7 +72,7 @@ public partial class Camera : Camera2D, ICamera
 		_previousLimit = Bound;
 
 		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
-		_maxSpeed = new Vector2I(maxSpeed, maxSpeed);
+		MaxSpeed = new Vector2I(maxSpeed, maxSpeed);
 		
 		if (SharedData.CheckpointData is not null)
 		{
@@ -83,7 +83,7 @@ public partial class Camera : Camera2D, ICamera
 	public override void _Process(double delta)
 	{
 		IsActiveRegionChanged = false;
-
+		
 		MoveCamera();
 
 		_previousLimit = Limit;
@@ -92,6 +92,8 @@ public partial class Camera : Camera2D, ICamera
 		BufferPosition = _shakeOffset + (Vector2I)(_rawPosition + _bufferOffset).Clamp(
 			new Vector2(Limit.X, Limit.Y), new Vector2(Limit.Z, Limit.W) - SharedData.ViewSize);
 
+		Views.Local.UpdateBottomCamera(this);
+		
 		var finalPosition = new Vector2I(BufferPosition.X - Constants.RenderBuffer, BufferPosition.Y);
 		
 		Position = finalPosition;
@@ -108,48 +110,7 @@ public partial class Camera : Camera2D, ICamera
 	}
 
 	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
-
-	public void UpdatePlayerCamera(PlayerData player)
-	{
-		if (Target != player || player.DeathState == DeathStates.Restart) return;
-
-		UpdateCdCamera(player);
-
-		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
-		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
-
-		if (doShiftDown || doShiftUp)
-		{
-			if (_viewTimer > 0f)
-			{
-				_viewTimer -= Scene.Local.ProcessSpeed;
-			}
-		}
-		else if (SharedData.SpinDash || SharedData.Dash)
-		{
-			_viewTimer = MaxViewTime;
-		}
-
-		if (_viewTimer > 0f)
-		{
-			if (_bufferOffset.Y != 0)
-			{
-				_bufferOffset.Y -= 2 * Math.Sign(_bufferOffset.Y);
-			}
-		}
-		else
-		{
-			if (doShiftDown && _bufferOffset.Y < 88) 	
-			{
-				_bufferOffset.Y += 2;
-			}
-			else if (doShiftUp && _bufferOffset.Y > -104)
-			{
-				_bufferOffset.Y -= 2;
-			}
-		}
-	}
-
+	
 	public void SetShakeTimer(float shakeTimer) => _shakeTimer = shakeTimer;
 
 	public bool CheckRectInside(Rect2 rect)
@@ -182,27 +143,47 @@ public partial class Camera : Camera2D, ICamera
 		return position >= ActiveRegion.Position.Y && position < ActiveRegion.Position.Y + ActiveRegion.Size.Y;
 	}
 	
-	private void MoveCamera()
+	public void UpdatePlayerCamera(PlayerData player)
 	{
-		if (Scene.Local.IsPaused || !IsMovementAllowed) return;
+		if (Target != player || Scene.Local.IsPaused && player.DeathState == DeathStates.Wait || player.IsDead) return;
 		
-		float processSpeed = Scene.Local.ProcessSpeed;
+		UpdateCdCamera(player);
 
-		// Get boundary update speed
-		float boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
+		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
+		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
 
-		FollowTarget(processSpeed);
+		if (doShiftDown || doShiftUp)
+		{
+			if (_viewTimer > 0f)
+			{
+				_viewTimer -= Scene.Local.ProcessSpeed;
+			}
+		}
+		else if (SharedData.SpinDash || SharedData.Dash)
+		{
+			_viewTimer = MaxViewTime;
+		}
+
+		if (_viewTimer > 0f)
+		{
+			if (_bufferOffset.Y != 0)
+			{
+				_bufferOffset.Y -= 2 * Math.Sign(_bufferOffset.Y);
+			}
 			
-		// Update boundaries
-		Vector2I farBounds = BufferPosition + SharedData.ViewSize;
-		Limit = new Vector4(
-			MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed), // Left
-			MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed), // Top
-			MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed), // Right
-			MoveBoundaryBackward(Limit.W, Bound.W, farBounds.Y, boundSpeed) // Bottom
-		);
+			return;
+		}
+		
+		if (doShiftDown && _bufferOffset.Y < 88) 	
+		{
+			_bufferOffset.Y += 2;
+		}
+		else if (doShiftUp && _bufferOffset.Y > -104)
+		{
+			_bufferOffset.Y -= 2;
+		}
 	}
-
+	
 	private void UpdateCdCamera(PlayerData player)
 	{
 		if (!SharedData.CdCamera) return;
@@ -222,6 +203,27 @@ public partial class Camera : Camera2D, ICamera
 		{
 			_bufferOffset.X += shiftSpeedX * shiftDirectionX;
 		}
+	}
+	
+	private void MoveCamera()
+	{
+		if (!IsMovementAllowed || Scene.Local.IsPaused) return;
+		
+		float processSpeed = Scene.Local.ProcessSpeed;
+
+		// Get boundary update speed
+		float boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
+		
+		FollowTarget(processSpeed);
+		
+		// Update boundaries
+		Vector2I farBounds = BufferPosition + SharedData.ViewSize;
+		Limit = new Vector4(
+			MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed), // Left
+			MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed), // Top
+			MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed), // Right
+			MoveBoundaryBackward(Limit.W, Bound.W, farBounds.Y, boundSpeed) // Bottom
+		);
 	}
 
 	private void UpdateActiveRegion()
@@ -254,7 +256,41 @@ public partial class Camera : Camera2D, ICamera
 
 	private void FollowTarget(float processSpeed)
 	{
-		if (Target != null && !IsInstanceValid(Target))
+		if (IsInstanceValid(Target))
+		{
+			const int freeSpaceX = 16;
+			const int freeSpaceY = 32;
+				
+			Vector2I targetPosition = (Vector2I)_target.Position - BufferPosition - SharedData.ViewSize / 2;
+			targetPosition.Y += 16;
+				
+			if (targetPosition.X > 0)
+			{
+				_speed.X = Math.Min(targetPosition.X, MaxSpeed.X);
+			}
+			else if (targetPosition.X + freeSpaceX < 0)
+			{ 
+				_speed.X = Math.Max(targetPosition.X + freeSpaceX, -MaxSpeed.X);  
+			}
+			else
+			{
+				_speed.X = 0f;
+			}
+				
+			if (targetPosition.Y > freeSpaceY)
+			{
+				_speed.Y = Math.Min(targetPosition.Y - freeSpaceY, MaxSpeed.Y);  
+			}
+			else if (targetPosition.Y + freeSpaceY < 0f)
+			{
+				_speed.Y = Math.Max(targetPosition.Y + freeSpaceY, -MaxSpeed.Y);  
+			} 
+			else
+			{
+				_speed.Y = 0f;
+			}
+		}
+		else
 		{
 			Target = null;
 		}
@@ -277,7 +313,7 @@ public partial class Camera : Camera2D, ICamera
 
 		int extraX = SharedData.CdCamera ? 0 : 8;
 		
-		_speed.X = CalculateSpeed(distance.X + extraX, extraX, _maxSpeed.X * processSpeed);
+		_speed.X = CalculateSpeed(distance.X + extraX, extraX, MaxSpeed.X * processSpeed);
 		
 		if (Target is Player { IsGrounded: true } playerTarget)
 		{	
@@ -286,12 +322,12 @@ public partial class Camera : Camera2D, ICamera
 				distance.Y -= playerTarget.RadiusNormal.Y - playerTarget.Radius.Y;
 			}
 				
-			float limit = Math.Abs(playerTarget.GroundSpeed) < 8f ? 6f : _maxSpeed.Y * processSpeed;
+			float limit = Math.Abs(playerTarget.GroundSpeed) < 8f ? 6f : MaxSpeed.Y * processSpeed;
 			_speed.Y = Math.Clamp(distance.Y, -limit, limit);
 			return;
 		}
 
-		_speed.Y = CalculateSpeed(distance.Y, 32, _maxSpeed.Y * processSpeed);
+		_speed.Y = CalculateSpeed(distance.Y, 32, MaxSpeed.Y * processSpeed);
 	}
 	
 	private void UpdateShakeOffset(float processSpeed)
