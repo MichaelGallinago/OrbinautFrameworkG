@@ -1,8 +1,9 @@
-[gd_scene load_steps=27 format=4 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=28 format=4 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="Shader" path="res://Shaders/main.gdshader" id="1_pey0e"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
+[ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="3_8004u"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="4_i6eum"]
@@ -68,10 +69,16 @@ region = Rect2(48, 0, 16, 16)
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
-[node name="StageTSZ" type="Node2D"]
+[node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
 process_priority = -1
 material = SubResource("ShaderMaterial_6rqx3")
 script = ExtResource("1_hkdi5")
+CollisionTileMapMain = NodePath("CollisionTileMapMain")
+CollisionTileMapSecondary = NodePath("CollisionTIleMapSecondary")
+Views = NodePath("ViewContainer")
+
+[node name="ViewContainer" parent="." node_paths=PackedStringArray("_boxContainer") instance=ExtResource("3_8004u")]
+_boxContainer = NodePath("VBoxContainer")
 
 [node name="GraphicsTileMapA" type="TileMapLayer" parent="."]
 z_index = -11
@@ -101,7 +108,7 @@ script = ExtResource("5_movty")
 
 [node name="Player" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
 use_parent_material = true
-position = Vector2(100, 896)
+position = Vector2(64, 896)
 Sprite = NodePath("AdvancedAnimatedSprite")
 _uniqueType = 2
 
@@ -146,7 +153,6 @@ Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
 
 [node name="Parallax2D" type="Parallax2D" parent="."]
 repeat_size = Vector2(512, 320)
-autoscroll = Vector2(6, 0)
 script = ExtResource("3_i0vlt")
 
 [node name="BackgroundLayer1" parent="Parallax2D" instance=ExtResource("4_e23pr")]

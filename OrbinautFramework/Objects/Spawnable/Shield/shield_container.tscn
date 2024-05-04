@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://b2q2gooc40jhe"]
+
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_6fg3t"]
+[ext_resource type="Script" path="res://Objects/Spawnable/Shield/ShieldContainer.cs" id="2_bh6ag"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_r4rcu"]
+script = ExtResource("1_6fg3t")
+_frameLoops = {}
+_offsets = {}
+_cullSize = Vector2i(0, 0)
+
+[node name="ShieldContainer" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_r4rcu")
+script = ExtResource("2_bh6ag")
+FrameLoop = null

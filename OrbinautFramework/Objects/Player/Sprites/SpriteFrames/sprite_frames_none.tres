@@ -18,3 +18,4 @@ _frameLoops = {}
 _offsets = {
 "None": Vector2(0, -16)
 }
+_cullSize = Vector2i(0, 0)

@@ -22,8 +22,8 @@ public partial class Views : Control
             OnViewNumberChanged?.Invoke(_number);
         }
     }
-    private byte _number;
     
+    [Export] private byte _number = 1;
     [Export] private PackedScene _packedViewContainer;
     [Export] private VBoxContainer _boxContainer;
     
@@ -49,6 +49,12 @@ public partial class Views : Control
 
     public void UpdateBottomCamera(ICamera camera)
     {
+        if (BottomCamera == null)
+        {
+            BottomCamera = camera;
+            return;
+        }
+        
         if (camera.BufferPosition.Y > BottomCamera.BufferPosition.Y)
         {
             BottomCamera = camera;

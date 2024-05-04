@@ -15,9 +15,11 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	protected const int CpuDelayStep = 16;
 	
 	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
-	[Export] public ShieldContainer Shield { get; set; }
+	[Export] private PackedScene _packedShield;
 	[Export] private SpawnTypes _spawnType;
 	[Export] private Types _uniqueType;
+
+	protected ShieldContainer Shield;
 
 	public event Action<Types> TypeChanged;
 
@@ -107,6 +109,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 
 	public override void _Ready()
 	{
+		Shield = _packedShield.Instantiate<ShieldContainer>();
 		base._Ready();
 		Spawn();
 		InitializeCamera();

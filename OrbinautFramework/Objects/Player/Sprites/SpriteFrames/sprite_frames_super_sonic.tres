@@ -637,3 +637,4 @@ _offsets = {
 "SpinDash": Vector2(4, 7),
 "Transform": Vector2(-1, -4)
 }
+_cullSize = Vector2i(0, 0)

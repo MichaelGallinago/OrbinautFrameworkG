@@ -615,3 +615,4 @@ _offsets = {
 "Skid": Vector2(1, 1),
 "SpinDash": Vector2(4, 7)
 }
+_cullSize = Vector2i(0, 0)

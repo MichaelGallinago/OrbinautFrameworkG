@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://ce2tr4eoiv2gs"]
+[gd_scene load_steps=11 format=3 uid="uid://ce2tr4eoiv2gs"]
 
 [ext_resource type="Script" path="res://Objects/Player/PlayerCpu.cs" id="1_cv4v1"]
 [ext_resource type="SpriteFrames" uid="uid://ives1jru75cc" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_amy.tres" id="2_qd5xx"]
 [ext_resource type="PackedScene" uid="uid://b46pvg72ijr8s" path="res://Objects/Player/tail.tscn" id="2_x8pdm"]
+[ext_resource type="PackedScene" uid="uid://b2q2gooc40jhe" path="res://Objects/Spawnable/Shield/shield_container.tscn" id="3_01y4h"]
 [ext_resource type="SpriteFrames" uid="uid://d2maikoa22sg4" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_super_sonic.tres" id="4_51ln1"]
 [ext_resource type="SpriteFrames" uid="uid://vfurlkwg5fr1" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_none.tres" id="4_xjx3q"]
 [ext_resource type="SpriteFrames" uid="uid://b0sykgqai1k4o" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_sonic.tres" id="5_lpceh"]
@@ -14,11 +15,12 @@
 process_priority = -1
 z_index = -2
 script = ExtResource("1_cv4v1")
-PackedTail = ExtResource("2_x8pdm")
+_packedTail = ExtResource("2_x8pdm")
 Sprite = NodePath("AdvancedAnimatedSprite")
-Behaviour = 4
+_packedShield = ExtResource("3_01y4h")
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 16)
 sprite_frames = ExtResource("4_xjx3q")
 animation = &"None"
 offset = Vector2(0, -16)

@@ -3,13 +3,15 @@
 [ext_resource type="Script" path="res://Framework/View/ViewContainer.cs" id="1_evknx"]
 [ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/View/camera.tscn" id="2_jdcn3"]
 
-[node name="ViewContainer" type="SubViewportContainer"]
+[node name="ViewContainer" type="SubViewportContainer" node_paths=PackedStringArray("Camera", "SubViewport")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_evknx")
+Camera = NodePath("CameraView/Camera")
+SubViewport = NodePath("CameraView")
 
 [node name="CameraView" type="SubViewport" parent="."]
 handle_input_locally = false

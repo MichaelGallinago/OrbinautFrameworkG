@@ -687,3 +687,4 @@ _offsets = {
 "Transform": Vector2(-3, 0),
 "Walk": Vector2(-7, -2)
 }
+_cullSize = Vector2i(0, 0)
