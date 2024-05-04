@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
@@ -16,7 +15,7 @@ public partial class PlayerCpu : Player
 	private Buttons _cpuInputPress;
 	private int _delay;
 	
-    protected override void ProcessCpu(float processSpeed)
+    protected override void ProcessCpu()
 	{
 		if (IsHurt || IsDead || Id == 0) return;
 		

@@ -162,19 +162,19 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private bool WaterBarrierBounce()
 	{
-		if (Shield.State != ShieldContainer.States.Active || Shield.Type != ShieldContainer.Types.Bubble) return false;
+		if (Shield.State != ShieldContainer.States.Active || 
+		    SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
 		
 		float force = IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(Angle);
-		Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Sin(radians)) * force;
+		Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
 
 		Shield.State = ShieldContainer.States.None;
 		OnObject = null;
 		IsGrounded = false;
-		
-		Shield.UpdateFrame(0, 1, [3, 2]);
-		Shield.UpdateDuration([7, 12]);
-		Shield.Timer = 20d;
+
+		//TODO: replace animation
+		Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 			
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		
@@ -716,13 +716,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessLevelBound()
 	{
-		if (DeathState == DeathStates.Restart) return;
+		if (IsDead) return;
+
+		//TODO: replace if first player won't be main (somehow)
+		if (!IsCameraTarget(out ICamera camera) && !Players[0].IsCameraTarget(out camera)) return;
 		
-		Framework.Camera camera = Framework.Camera.Main;
-		
-		if (camera == null) return;
-		
-		// Note that position here is checked including subpixel
+		// Left bound
 		if (Position.X + Velocity.X < camera.Limit.X + 16f)
 		{
 			GroundSpeed.Value = 0f;
@@ -731,6 +730,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		float rightBound = camera.Limit.Z - 24f;
+		
+		// Allow player to walk past the right bound if they crossed Sign Post
 		//TODO: replace instance_exists
 		/*if (instance_exists(obj_signpost))
 		{
@@ -738,6 +739,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			rightBound += 64;
 		}*/
 		
+		// Right bound
 		if (Position.X + Velocity.X > rightBound)
 		{
 			GroundSpeed.Value = 0f;
@@ -745,6 +747,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Position = new Vector2(rightBound, Position.Y);
 		}
 		
+		// Top bound
 		switch (Action)
 		{
 			case Actions.Flight or Actions.Climb:
@@ -760,11 +763,12 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 			
 			case Actions.Glide when Position.Y < camera.Limit.Y + 10f:
-				Velocity.X = 0f;
+				GroundSpeed.Value = 0f;
 				break;
 		}
 	
-		if (AirTimer > 0f && Position.Y > Math.Max(camera.Limit.W, camera.Bound.Z))
+		// Bottom bound
+		if (AirTimer > 0f && Position.Y > Math.Max(camera.Limit.W, camera.Bound.W))
 		{
 			Kill();
 		}

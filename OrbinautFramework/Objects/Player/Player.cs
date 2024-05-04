@@ -33,18 +33,16 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	{
 		if (Scene.Local.IsPaused && DeathState == DeathStates.Wait) return;
 		
-		float processSpeed = Scene.Local.ProcessSpeed;
-		
 		Input.Update(Id);
 
 		// DEBUG MODE PLAYER ROUTINE
 		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
 		{
-			if (_debugMode.Update(processSpeed, this, Input)) return;
+			if (_debugMode.Update(this, Input)) return;
 		}
 	    
 		// DEFAULT PLAYER ROUTINE
-		ProcessCpu(processSpeed);
+		ProcessCpu();
 		ProcessDeath();
 		
 		if (IsControlRoutineEnabled)
@@ -86,7 +84,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		}
 	}
 	
-	protected virtual void ProcessCpu(float processSpeed) {}
+	protected virtual void ProcessCpu() {}
 	
 	private void RemovePlayer()
 	{

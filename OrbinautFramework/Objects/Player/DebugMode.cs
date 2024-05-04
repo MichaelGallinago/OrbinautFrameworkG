@@ -39,7 +39,7 @@ public class DebugMode
 	    }
     }
     
-    public bool Update(float processSpeed, IEditor editor, IInputContainer input)
+    public bool Update(IEditor editor, IInputContainer input)
     {
 		if (!SharedData.DevMode) return false;
 
@@ -80,16 +80,18 @@ public class DebugMode
 			
 			Vector2 position = editor.Position;
 
-			if (input.Down.Up) position.Y -= _speed * processSpeed;
-			if (input.Down.Down) position.Y += _speed * processSpeed;
-			if (input.Down.Left) position.X -= _speed * processSpeed;
-			if (input.Down.Right) position.X += _speed * processSpeed;
+			float speed = _speed * Scene.Local.ProcessSpeed;
+			
+			if (input.Down.Up) position.Y -= speed;
+			if (input.Down.Down) position.Y += speed;
+			if (input.Down.Left) position.X -= speed;
+			if (input.Down.Right) position.X += speed;
 
 			editor.Position = position;
 		}
 		else
 		{
-			_speed = 0;
+			_speed = 0f;
 		}
 
 		if (input.Down.A && input.Press.C)
