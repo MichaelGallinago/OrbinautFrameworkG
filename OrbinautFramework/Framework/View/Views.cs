@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
+using Godot.Collections;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 
@@ -26,10 +27,9 @@ public partial class Views : Control
     
     [Export] private byte _number = 1;
     [Export] private PackedScene _packedViewContainer;
-    [Export] private VBoxContainer _boxContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
+    public System.Collections.Generic.Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
     public ICamera BottomCamera { get; private set; }
     private Camera[] _cameras;
     
@@ -40,6 +40,24 @@ public partial class Views : Control
     {
         CreateViews();
         AttachCamerasToPlayers();
+        
+        // TODO: check for memory leak
+        SharedData.ViewSizeChanged += OnViewSizeChanged;
+        OnViewSizeChanged(SharedData.ViewSize);
+    }
+
+    private void OnViewSizeChanged(Vector2I viewSize)
+    {
+        Vector2I renderBuffer = Constants.RenderBuffer * Vector2I.Right;
+        Vector2I size = viewSize + 2 * renderBuffer;
+        Position = -renderBuffer;
+        Size = size;
+
+        foreach (ViewContainer container in _containers)
+        {
+            container.SubViewport.Size = size;
+            container.Size = Size;
+        }
     }
 
     public bool CheckRectInCameras(Rect2 rect)
@@ -60,7 +78,7 @@ public partial class Views : Control
             return;
         }
         
-        if (camera.BufferPosition.Y > BottomCamera.BufferPosition.Y)
+        if (camera.DrawPosition.Y > BottomCamera.DrawPosition.Y)
         {
             BottomCamera = camera;
         }
@@ -93,8 +111,11 @@ public partial class Views : Control
 
     private void RemoveViews()
     {
-        _boxContainer.QueueFree();
-        AddChild(_boxContainer = new VBoxContainer());
+        Array<Node> children = GetChildren();
+        for (var i = 0; i < children.Count; i++)
+        {
+            children[i].QueueFree();
+        }
     }
 
     private void CreateViews()
@@ -103,7 +124,7 @@ public partial class Views : Control
         int columnsCount = GetColumnsCount(_number);
         
         var boxContainer = new HBoxContainer();
-        _boxContainer.AddChild(boxContainer);
+        AddChild(boxContainer);
 
         _cameras = new Camera[_number];
         _containers = new ViewContainer[_number];
@@ -114,7 +135,7 @@ public partial class Views : Control
             if (++column > columnsCount)
             {
                 column = 0;
-                _boxContainer.AddChild(boxContainer = new HBoxContainer());
+                AddChild(boxContainer = new HBoxContainer());
             }
             
             var viewContainer = _packedViewContainer.Instantiate<ViewContainer>();

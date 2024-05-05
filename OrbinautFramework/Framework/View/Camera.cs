@@ -9,7 +9,6 @@ public partial class Camera : Camera2D, ICamera
 {
 	private static readonly Vector2I CullBuffer = new(320, 288);
 	
-	private const byte CentreOffset = 16;
 	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
 	
@@ -40,20 +39,20 @@ public partial class Camera : Camera2D, ICamera
 			_target = value;
 			_viewTimer = MaxViewTime;
 				
-			BufferPosition = (Vector2I)_target.Position - SharedData.ViewSize + 16 * Vector2I.Down;
-			_rawPosition = PreviousPosition = BufferPosition;
+			DrawPosition = (Vector2I)_target.Position - SharedData.ViewSize + 16 * Vector2I.Down;
+			_rawPosition = PreviousPosition = DrawPosition;
 		}
 	}
 	private BaseObject _target;
 
 	public Vector4I Bounds;
 	
-	public Vector2I BufferPosition { get; private set; }
+	public Vector2I DrawPosition { get; private set; }
 	public Vector2I PreviousPosition { get; private set; }
 	public Vector2 Delay { get; set; }
 	public int BoundSpeed { get; set; }
-	public Vector4 Bound { get; set; }
-	public Vector4 Limit { get; private set; }
+	public Vector4 TargetBoundary { get; set; }
+	public Vector4 Boundary { get; private set; }
 	public bool IsMovementAllowed { get; set; } = true;
 
 	private Vector2I _shakeOffset;
@@ -62,18 +61,18 @@ public partial class Camera : Camera2D, ICamera
 	private Vector2 _rawPosition;
 	private Vector4 _previousLimit; // TODO: check if needed
 	private Vector2I _bufferOffset;
-	public Vector2I MaxSpeed { get; private set; }
-	private Vector2 _speed;
+	public Vector2I MaxVelocity { get; private set; }
+	private Vector2 _velocity;
 
 	public Camera()
 	{
-		Bound = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
-		Limit = Bound;
+		TargetBoundary = new Vector4I(LimitTop, LimitLeft, LimitBottom, LimitRight);
+		Boundary = TargetBoundary;
 		
-		_previousLimit = Bound;
+		_previousLimit = TargetBoundary;
 
 		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
-		MaxSpeed = new Vector2I(maxSpeed, maxSpeed);
+		MaxVelocity = new Vector2I(maxSpeed, maxSpeed);
 		
 		if (SharedData.CheckpointData is not null)
 		{
@@ -87,20 +86,16 @@ public partial class Camera : Camera2D, ICamera
 		
 		MoveCamera();
 
-		_previousLimit = Limit;
+		_previousLimit = Boundary;
 
-		PreviousPosition = BufferPosition;
-		BufferPosition = _shakeOffset + (Vector2I)(_rawPosition + _bufferOffset).Clamp(
-			new Vector2(Limit.X, Limit.Y), new Vector2(Limit.Z, Limit.W) - SharedData.ViewSize);
+		PreviousPosition = DrawPosition;
+		DrawPosition = _shakeOffset + ((Vector2I)_rawPosition + _bufferOffset).Clamp(
+			new Vector2I((int)Boundary.X, (int)Boundary.Y), 
+			new Vector2I((int)Boundary.Z, (int)Boundary.W) - SharedData.ViewSize);
 
 		Views.Local.UpdateBottomCamera(this);
 		
-		var finalPosition = new Vector2I(BufferPosition.X - Constants.RenderBuffer, BufferPosition.Y);
-		
-		Position = finalPosition;
-		
-		Bounds = new Vector4I(finalPosition.X, finalPosition.Y, 
-			finalPosition.X + SharedData.ViewSize.X, finalPosition.Y + SharedData.ViewSize.Y);
+		Position = new Vector2(DrawPosition.X - Constants.RenderBuffer, DrawPosition.Y);
 		
 		ForceUpdateScroll();
 		UpdateActiveRegion();
@@ -120,12 +115,12 @@ public partial class Camera : Camera2D, ICamera
 
 	public bool CheckPositionInSafeRegion(Vector2I position)
 	{
-		int distanceY = position.Y - BufferPosition.Y + 128;
+		int distanceY = position.Y - DrawPosition.Y + 128;
 		position.X -= ActiveRegion.Position.X;
 
 		return position.X >= 0 && position.X < ActiveRegion.Size.X && 
 		       distanceY  >= 0 && distanceY  < ActiveRegion.Size.Y && 
-		       position.Y < Limit.W;
+		       position.Y < Boundary.W;
 	}
 
 	public bool CheckPositionInActiveRegion(Vector2I position) => ActiveRegion.HasPoint(position);
@@ -212,126 +207,104 @@ public partial class Camera : Camera2D, ICamera
 		float boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
 		
 		FollowTarget(processSpeed);
+		UpdateShakeOffset(processSpeed);
 		
 		// Update boundaries
-		Vector2I farBounds = BufferPosition + SharedData.ViewSize;
-		Limit = new Vector4(
-			MoveBoundaryForward(Limit.X, Bound.X, BufferPosition.X, boundSpeed), // Left
-			MoveBoundaryForward(Limit.Y, Bound.Y, BufferPosition.Y, boundSpeed), // Top
-			MoveBoundaryBackward(Limit.Z, Bound.Z, farBounds.X, boundSpeed), // Right
-			MoveBoundaryBackward(Limit.W, Bound.W, farBounds.Y, boundSpeed) // Bottom
+		Vector2I farBounds = DrawPosition + SharedData.ViewSize;
+		Boundary = new Vector4(
+			MoveBoundaryForward(Boundary.X, TargetBoundary.X, DrawPosition.X, boundSpeed), // Left
+			MoveBoundaryForward(Boundary.Y, TargetBoundary.Y, DrawPosition.Y, boundSpeed), // Top
+			MoveBoundaryBackward(Boundary.Z, TargetBoundary.Z, farBounds.X, boundSpeed), // Right
+			MoveBoundaryBackward(Boundary.W, TargetBoundary.W, farBounds.Y, boundSpeed) // Bottom
 		);
 	}
 
 	private void UpdateActiveRegion()
 	{
-		Vector2I position = BufferPosition + sbyte.MinValue * Vector2I.One;
+		Vector2I position = DrawPosition + sbyte.MinValue * Vector2I.One;
 		position.X &= sbyte.MinValue;
 		position.Y &= sbyte.MinValue;
 		ActiveRegion = new Rect2I(position, SharedData.ViewSize + CullBuffer);
 	}
 	
-	private static float MoveBoundaryForward(float limit, float bound, float position, float boundSpeed)
+	private static float MoveBoundaryForward(float boundary, float target, int position, float speed)
 	{
-		if (limit < bound)
+		if (boundary < target)
 		{
-			return position >= bound ? bound : Math.Min(bound, Math.Max(limit, position) + boundSpeed);
+			return position >= target ? target : Math.Min(target, Math.Max(boundary, position) + speed);
 		}
 		
-		return limit > bound ? Math.Max(bound, limit - boundSpeed) : limit;
+		return boundary > target ? Math.Max(target, boundary - speed) : boundary;
 	}
 	
-	private static float MoveBoundaryBackward(float limit, float bound, float position, float boundSpeed)
+	private static float MoveBoundaryBackward(float boundary, float target, int position, float speed)
 	{
-		if (limit > bound)
+		if (boundary > target)
 		{
-			return position <= bound ? bound : Math.Max(bound, Math.Min(limit, position) - boundSpeed);
+			return position <= target ? target : Math.Max(target, Math.Min(boundary, position) - speed);
 		}
 		
-		return limit < bound ? Math.Min(bound, limit + boundSpeed) : limit;
+		return boundary < target ? Math.Min(target, boundary + speed) : boundary;
 	}
 
 	private void FollowTarget(float processSpeed)
 	{
-		if (IsInstanceValid(Target))
+		if (!IsInstanceValid(Target))
 		{
-			const int freeSpaceX = 16;
-			const int freeSpaceY = 32;
+			Target = null;
+			return;
+		}
+		
+		const int freeSpaceX = 16;
+		const int freeSpaceY = 32;
+		const float offsetY = 16f;
 			
-			Vector2I targetPosition = (Vector2I)_target.Position - BufferPosition - SharedData.ViewSize / 2;
-			targetPosition.Y += 16;
-				
-			if (targetPosition.X > 0)
-			{
-				_speed.X = Math.Min(targetPosition.X, MaxSpeed.X);
-			}
-			else if (targetPosition.X + freeSpaceX < 0)
-			{ 
-				_speed.X = Math.Max(targetPosition.X + freeSpaceX, -MaxSpeed.X);  
-			}
-			else
-			{
-				_speed.X = 0f;
-			}
-				
-			if (targetPosition.Y > freeSpaceY)
-			{
-				_speed.Y = Math.Min(targetPosition.Y - freeSpaceY, MaxSpeed.Y);  
-			}
-			else if (targetPosition.Y + freeSpaceY < 0f)
-			{
-				_speed.Y = Math.Max(targetPosition.Y + freeSpaceY, -MaxSpeed.Y);  
-			} 
-			else
-			{
-				_speed.Y = 0f;
-			}
+		Vector2I targetPosition = (Vector2I)_target.Position - SharedData.ViewSize / 2;
+		Vector2 distance = targetPosition - _rawPosition;
+		distance.Y += offsetY;
+		
+		Vector2 delay = Delay;
+		if (delay.X > 0f)
+		{
+			delay.X -= processSpeed;
 		}
 		else
 		{
-			Target = null;
-		}
-
-		UpdateSpeed(processSpeed);
-		UpdateShakeOffset(processSpeed);
-		UpdateRawPosition(processSpeed);
-	}
-
-	private void UpdateSpeed(float processSpeed)
-	{
-		if (Target == null)
-		{
-			_speed = new Vector2I();
-			return;
-		}
-		
-		Vector2I distance = (Vector2I)Target.Position - (Vector2I)_rawPosition - SharedData.ViewSize / 2;
-		distance.Y += CentreOffset;
-
-		int extraX = SharedData.CdCamera ? 0 : 8;
-		
-		_speed.X = CalculateSpeed(distance.X + extraX, extraX, MaxSpeed.X * processSpeed);
-		
-		if (Target is Player { IsGrounded: true } playerTarget)
-		{	
-			if (playerTarget.IsSpinning)
+			float speed = MaxVelocity.X * processSpeed;
+			_rawPosition.X = distance.X switch
 			{
-				distance.Y -= playerTarget.RadiusNormal.Y - playerTarget.Radius.Y;
-			}
-				
-			float limit = Math.Abs(playerTarget.GroundSpeed) < 8f ? 6f : MaxSpeed.Y * processSpeed;
-			_speed.Y = Math.Clamp(distance.Y, -limit, limit);
-			return;
+				> 0 => distance.X < speed ? targetPosition.X : _rawPosition.X + speed,
+				< -freeSpaceX => distance.X + freeSpaceX >= -speed ? 
+					targetPosition.X + freeSpaceX : _rawPosition.X - speed,
+				_ => _rawPosition.X
+			};
 		}
 
-		_speed.Y = CalculateSpeed(distance.Y, 32, MaxSpeed.Y * processSpeed);
+		if (delay.Y > 0f)
+		{
+			delay.Y -= processSpeed;
+		}
+		else
+		{
+			float speed = MaxVelocity.Y * processSpeed;
+			_rawPosition.Y = distance.Y switch
+			{
+				> freeSpaceY => distance.Y - freeSpaceY < speed ? 
+					targetPosition.Y - freeSpaceY + offsetY : _rawPosition.Y + speed,
+				< -freeSpaceY => distance.Y + freeSpaceY >= -speed ? 
+					targetPosition.Y + freeSpaceY + offsetY : _rawPosition.Y - speed,
+				_ => _rawPosition.Y
+			};
+		}
+		
+		Delay = delay;
 	}
 	
 	private void UpdateShakeOffset(float processSpeed)
 	{
 		if (_shakeTimer <= 0f)
 		{
-			_shakeOffset = new Vector2I();
+			_shakeOffset = Vector2I.Zero;
 			return;
 		}
 		
@@ -351,16 +324,10 @@ public partial class Camera : Camera2D, ICamera
 				continue;
 			}
 			
-			_rawPosition[i] += _speed[i];
+			_rawPosition[i] += _velocity[i] * processSpeed;
 		}
 
 		Delay = delay;
-	}
-
-	private static float CalculateSpeed(int difference, int threshold, float maxSpeed)
-	{
-		int distance = Math.Abs(difference) - threshold;
-		return distance <= 0 ? 0 : Math.Clamp(distance * Math.Sign(difference), -maxSpeed, maxSpeed);
 	}
 	
 	private static int CalculateShakeOffset(float shakeTimer, int shakeOffset) => shakeOffset switch

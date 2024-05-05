@@ -4,11 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://dq7kp7uewtu3d" path="res://Framework/View/camera.tscn" id="2_jdcn3"]
 
 [node name="ViewContainer" type="SubViewportContainer" node_paths=PackedStringArray("Camera", "SubViewport")]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 2.0
+offset_bottom = 2.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource("1_evknx")
 Camera = NodePath("CameraView/Camera")
 SubViewport = NodePath("CameraView")
@@ -17,7 +16,7 @@ SubViewport = NodePath("CameraView")
 handle_input_locally = false
 snap_2d_vertices_to_pixel = true
 canvas_item_default_texture_filter = 0
-size = Vector2i(400, 224)
+size = Vector2i(2, 2)
 render_target_update_mode = 4
 
 [node name="Camera" parent="CameraView" instance=ExtResource("2_jdcn3")]

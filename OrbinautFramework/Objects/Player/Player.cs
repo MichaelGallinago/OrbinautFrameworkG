@@ -35,6 +35,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		
 		Input.Update(Id);
 
+		if (Input.Press.Start)
+		{
+			Velocity.X = MathF.Max(Velocity.X, 16f);
+		}
+
 		// DEBUG MODE PLAYER ROUTINE
 		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
 		{
@@ -586,7 +591,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		
 		// If drowned, wait until we're far enough off-screen
 		const int drownScreenOffset = 276;
-		if (AirTimer == 0 && (int)Position.Y <= camera.BufferPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
+		if (AirTimer == 0 && (int)Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
 		{
 			return;
 		}
@@ -607,7 +612,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	private void WaitOnDeath(ICamera camera)
 	{
 		if ((int)Position.Y <= 32f + (SharedData.PlayerPhysics < PhysicsTypes.S3 ? 
-			    camera.Limit.W : camera.BufferPosition.Y + SharedData.ViewSize.Y)) return;
+			    camera.Boundary.W : camera.DrawPosition.Y + SharedData.ViewSize.Y)) return;
 		
 		RestartState = RestartStates.ResetLevel;
 		

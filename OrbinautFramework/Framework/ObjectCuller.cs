@@ -113,7 +113,7 @@ public class ObjectCuller
 	    var position = (Vector2I)baseObject.Position;
 	    foreach (ICamera camera in Views.Local.Cameras)
 	    {
-		    if (camera.CheckPositionInSafeRegion(position) && baseObject.Position.Y < camera.Bound.W) return;
+		    if (camera.CheckPositionInSafeRegion(position) && baseObject.Position.Y < camera.TargetBoundary.W) return;
 	    }
 	    
 	    baseObject.QueueFree();

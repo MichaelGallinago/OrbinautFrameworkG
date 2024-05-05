@@ -306,7 +306,7 @@ public partial class PlayerCpu : Player
 		bool isLeadPlayerCameraTarget = _leadPlayer.IsCameraTarget(out ICamera camera);
 		
 		if (Sprite != null && (isLeadPlayerCameraTarget ? 
-		    Sprite.CheckInCamera(camera) || camera.Bound.Z <= Position.X : Sprite.CheckInCameras()))
+		    Sprite.CheckInCamera(camera) || camera.TargetBoundary.Z <= Position.X : Sprite.CheckInCameras()))
 		{
 			CpuTimer = 0f;
 			return false;

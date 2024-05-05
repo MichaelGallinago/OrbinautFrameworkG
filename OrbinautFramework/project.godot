@@ -13,7 +13,7 @@ config_version=5
 config/name="OrbinautFramework3"
 run/main_scene="res://Screens/Startup/startup.tscn"
 config/features=PackedStringArray("4.3", "C#", "GL Compatibility")
-run/max_fps=60
+run/max_fps=165
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 boot_splash/use_filter=false
@@ -24,8 +24,8 @@ AudioPlayer="*res://Audio/Player/audio_player.tscn"
 
 [display]
 
-window/size/viewport_width=400
-window/size/viewport_height=224
+window/size/viewport_width=428
+window/size/viewport_height=240
 window/stretch/mode="viewport"
 
 [dotnet]
@@ -39,6 +39,10 @@ enabled=PackedStringArray()
 [filesystem]
 
 import/blender/enabled=false
+
+[gui]
+
+common/snap_controls_to_pixels=false
 
 [input]
 

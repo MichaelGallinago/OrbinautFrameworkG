@@ -63,7 +63,7 @@ public partial class CameraTrigger : Trigger
         for (var i = 0; i < cameras.Length; i++)
         {
             ICamera camera = cameras[i];
-            Vector2I position = camera.BufferPosition + halfSize;
+            Vector2I position = camera.DrawPosition + halfSize;
 
             float previousX = camera.PreviousPosition.X + halfSize.X;
 	
@@ -84,16 +84,16 @@ public partial class CameraTrigger : Trigger
 
     private void SetNewBound(int viewIndex, ICamera camera, Vector2I triggerBounds)
     {
-        _previousBounds[viewIndex] = new Vector2I((int)camera.Bound.Y, (int)camera.Bound.W);
+        _previousBounds[viewIndex] = new Vector2I((int)camera.TargetBoundary.Y, (int)camera.TargetBoundary.W);
         
         camera.BoundSpeed = (int)_boundSpeed;
-        camera.Bound = camera.Bound with { Y = triggerBounds.X, W = triggerBounds.Y };
+        camera.TargetBoundary = camera.TargetBoundary with { Y = triggerBounds.X, W = triggerBounds.Y };
     }
 
     private void SetPreviousBound(int viewIndex, ICamera camera)
     {
         camera.BoundSpeed = (int)_boundSpeed;
         Vector2I bound = _previousBounds[viewIndex];
-        camera.Bound = camera.Bound with { Y = bound.X, W = bound.Y };
+        camera.TargetBoundary = camera.TargetBoundary with { Y = bound.X, W = bound.Y };
     }
 }

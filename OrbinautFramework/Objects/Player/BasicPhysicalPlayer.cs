@@ -722,14 +722,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (!IsCameraTarget(out ICamera camera) && !Players[0].IsCameraTarget(out camera)) return;
 		
 		// Left bound
-		if (Position.X + Velocity.X < camera.Limit.X + 16f)
+		if (Position.X + Velocity.X < camera.Boundary.X + 16f)
 		{
 			GroundSpeed.Value = 0f;
 			Velocity.X = 0f;
-			Position = new Vector2(camera.Limit.X + 16f, Position.Y);
+			Position = new Vector2(camera.Boundary.X + 16f, Position.Y);
 		}
 		
-		float rightBound = camera.Limit.Z - 24f;
+		float rightBound = camera.Boundary.Z - 24f;
 		
 		// Allow player to walk past the right bound if they crossed Sign Post
 		//TODO: replace instance_exists
@@ -751,7 +751,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Action)
 		{
 			case Actions.Flight or Actions.Climb:
-				if (Position.Y + Velocity.Y >= camera.Limit.Y + 16f) break;
+				if (Position.Y + Velocity.Y >= camera.Boundary.Y + 16f) break;
 	
 				if (Action == Actions.Flight)
 				{
@@ -759,16 +759,16 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				}
 
 				Velocity.Y = 0f;
-				Position = new Vector2(Position.X, camera.Limit.Y + 16f);
+				Position = new Vector2(Position.X, camera.Boundary.Y + 16f);
 				break;
 			
-			case Actions.Glide when Position.Y < camera.Limit.Y + 10f:
+			case Actions.Glide when Position.Y < camera.Boundary.Y + 10f:
 				GroundSpeed.Value = 0f;
 				break;
 		}
 	
 		// Bottom bound
-		if (AirTimer > 0f && Position.Y > Math.Max(camera.Limit.W, camera.Bound.W))
+		if (AirTimer > 0f && Position.Y > Math.Max(camera.Boundary.W, camera.TargetBoundary.W))
 		{
 			Kill();
 		}

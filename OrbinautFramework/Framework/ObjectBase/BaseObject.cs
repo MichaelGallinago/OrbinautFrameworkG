@@ -32,6 +32,17 @@ public abstract partial class BaseObject : Node2D
 		}
 	}
 	private CullingType _culling;
+	
+	public new Vector2 Position
+	{
+		get => _floatPosition;
+		set
+		{
+			base.Position = (Vector2I)value;
+			_floatPosition = value;
+		}
+	}
+	private Vector2 _floatPosition;
 
 	public ResetData ResetData { get; private set; }
 	public Vector2 PreviousPosition { get; set; }
@@ -40,6 +51,7 @@ public abstract partial class BaseObject : Node2D
 	
 	public override void _EnterTree()
 	{
+		Position = base.Position;
 		ResetData = new ResetData(Visible, Scale, Position, ZIndex);
 		if (Culling != CullingType.None)
 		{
