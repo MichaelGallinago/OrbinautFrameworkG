@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cbcy2gu14bwg6" path="res://Framework/View/view_container.tscn" id="2_2kw32"]
 
 [node name="Views" type="Control" node_paths=PackedStringArray("_boxContainer")]
+process_priority = 1024
 texture_filter = 1
 layout_mode = 3
 anchors_preset = 15

@@ -257,7 +257,7 @@ public partial class Camera : Camera2D, ICamera
 		{
 			const int freeSpaceX = 16;
 			const int freeSpaceY = 32;
-				
+			
 			Vector2I targetPosition = (Vector2I)_target.Position - BufferPosition - SharedData.ViewSize / 2;
 			targetPosition.Y += 16;
 				
