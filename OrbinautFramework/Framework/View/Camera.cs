@@ -29,39 +29,43 @@ public partial class Camera : Camera2D, ICamera
 		get => _target;
 		set
 		{
-			if (!Views.Local.TargetedCameras.TryAdd(value, this)) return;
+			if (value != null && !Views.Local.TargetedCameras.TryAdd(value, this)) return;
 			
 			if (_target != null)
 			{
 				Views.Local.TargetedCameras.Remove(_target);
 			}
-				
+			
 			_target = value;
 			_viewTimer = MaxViewTime;
-				
+			_isTargetPlayer = value is PlayerData;
+			
+			if (value == null) return;
+			
 			DrawPosition = (Vector2I)_target.Position - SharedData.ViewSize + 16 * Vector2I.Down;
 			_rawPosition = PreviousPosition = DrawPosition;
 		}
 	}
 	private BaseObject _target;
+	private bool _isTargetPlayer;
 
 	public Vector4I Bounds;
 	
 	public Vector2I DrawPosition { get; private set; }
 	public Vector2I PreviousPosition { get; private set; }
-	public Vector2 Delay { get; set; }
 	public int BoundSpeed { get; set; }
 	public Vector4 TargetBoundary { get; set; }
 	public Vector4 Boundary { get; private set; }
 	public bool IsMovementAllowed { get; set; } = true;
 
+	private Vector2 _delay;
 	private Vector2I _shakeOffset;
 	private float _shakeTimer;
 	private float _viewTimer;
 	private Vector2 _rawPosition;
 	private Vector4 _previousLimit; // TODO: check if needed
-	private Vector2I _bufferOffset;
-	public Vector2I MaxVelocity { get; private set; }
+	private Vector2 _bufferOffset;
+	private Vector2I _maxVelocity;
 	private Vector2 _velocity;
 
 	public Camera()
@@ -72,12 +76,17 @@ public partial class Camera : Camera2D, ICamera
 		_previousLimit = TargetBoundary;
 
 		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
-		MaxVelocity = new Vector2I(maxSpeed, maxSpeed);
+		_maxVelocity = new Vector2I(maxSpeed, maxSpeed);
 		
 		if (SharedData.CheckpointData is not null)
 		{
 			LimitBottom = SharedData.CheckpointData.BottomCameraBound;
 		}
+	}
+
+	public Camera(Vector2I maxVelocity)
+	{
+		_maxVelocity = maxVelocity;
 	}
 
 	public override void _Process(double delta)
@@ -89,7 +98,7 @@ public partial class Camera : Camera2D, ICamera
 		_previousLimit = Boundary;
 
 		PreviousPosition = DrawPosition;
-		DrawPosition = _shakeOffset + ((Vector2I)_rawPosition + _bufferOffset).Clamp(
+		DrawPosition = _shakeOffset + ((Vector2I)_rawPosition + (Vector2I)_bufferOffset).Clamp(
 			new Vector2I((int)Boundary.X, (int)Boundary.Y), 
 			new Vector2I((int)Boundary.Z, (int)Boundary.W) - SharedData.ViewSize);
 
@@ -100,6 +109,8 @@ public partial class Camera : Camera2D, ICamera
 		ForceUpdateScroll();
 		UpdateActiveRegion();
 	}
+
+	public void SetCameraDelayX(float delay) => _delay.X = delay;
 
 	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
 	
@@ -135,11 +146,21 @@ public partial class Camera : Camera2D, ICamera
 		return position >= ActiveRegion.Position.Y && position < ActiveRegion.Position.Y + ActiveRegion.Size.Y;
 	}
 	
-	public void UpdatePlayerCamera(PlayerData player)
+	private void FollowPlayer(float processSpeed, Vector2 targetPosition, PlayerData player)
 	{
-		if (Target != player || Scene.Local.IsPaused && player.DeathState == DeathStates.Wait || player.IsDead) return;
+		if (Scene.Local.IsPaused && player.DeathState == DeathStates.Wait || player.IsDead) return;
 		
-		UpdateCdCamera(player);
+		UpdateCdCamera(player, processSpeed);
+		
+		if (SharedData.CdCamera)
+		{
+			FollowTargetX(processSpeed, targetPosition.X);
+		}
+		else
+		{
+			FollowTargetCdX(processSpeed, targetPosition.X);
+		}
+		FollowPlayerY(processSpeed, targetPosition.Y, player);
 
 		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
 		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
@@ -148,7 +169,7 @@ public partial class Camera : Camera2D, ICamera
 		{
 			if (_viewTimer > 0f)
 			{
-				_viewTimer -= Scene.Local.ProcessSpeed;
+				_viewTimer -= processSpeed;
 			}
 		}
 		else if (SharedData.SpinDash || SharedData.Dash)
@@ -156,42 +177,52 @@ public partial class Camera : Camera2D, ICamera
 			_viewTimer = MaxViewTime;
 		}
 
-		if (_viewTimer > 0f)
-		{
-			if (_bufferOffset.Y != 0)
-			{
-				_bufferOffset.Y -= 2 * Math.Sign(_bufferOffset.Y);
-			}
-			
-			return;
-		}
+		float offsetSpeed = 2f * processSpeed;
 		
-		if (doShiftDown && _bufferOffset.Y < 88) 	
+		if (UpdateBufferOffset(offsetSpeed)) return;
+		
+		if (doShiftDown && _bufferOffset.Y < 88f) 	
 		{
-			_bufferOffset.Y += 2;
+			_bufferOffset.Y += offsetSpeed;
 		}
-		else if (doShiftUp && _bufferOffset.Y > -104)
+		else if (doShiftUp && _bufferOffset.Y > -104f)
 		{
-			_bufferOffset.Y -= 2;
+			_bufferOffset.Y -= offsetSpeed;
 		}
 	}
+
+	private bool UpdateBufferOffset(float offsetSpeed)
+	{
+		if (_viewTimer <= 0f) return false;
+		if (_bufferOffset.Y == 0f) return true;
 	
-	private void UpdateCdCamera(PlayerData player)
+		if (Math.Abs(_bufferOffset.Y) < offsetSpeed)
+		{
+			_bufferOffset.Y = 0f;
+		}
+		else
+		{
+			_bufferOffset.Y -= offsetSpeed * Math.Sign(_bufferOffset.Y);
+		}
+		return true;
+	}
+	
+	private void UpdateCdCamera(PlayerData player, float processSpeed)
 	{
 		if (!SharedData.CdCamera) return;
 		
 		const int shiftSpeedX = 2;
 
-		int shiftDirectionX = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
-
 		if (Math.Abs(player.GroundSpeed) < 6f && player.Action != Actions.SpinDash)
 		{
-			_bufferOffset.X -= shiftSpeedX * Math.Sign(_bufferOffset.X);
-			return;
+			_bufferOffset.X -= shiftSpeedX * Math.Sign(_bufferOffset.X) * processSpeed;
 		}
 
+		if (_delay.X != 0f) return;
+		
 		const int shiftDistanceX = 64;
-		if (Delay.X == 0f && _bufferOffset.X != shiftDistanceX * shiftDirectionX)
+		int shiftDirectionX = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
+		if (!Mathf.IsEqualApprox(_bufferOffset.X, shiftDistanceX * shiftDirectionX))
 		{
 			_bufferOffset.X += shiftSpeedX * shiftDirectionX;
 		}
@@ -203,13 +234,11 @@ public partial class Camera : Camera2D, ICamera
 		
 		float processSpeed = Scene.Local.ProcessSpeed;
 
-		// Get boundary update speed
-		float boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
-		
 		FollowTarget(processSpeed);
 		UpdateShakeOffset(processSpeed);
 		
 		// Update boundaries
+		float boundSpeed = Math.Max(2, BoundSpeed) * processSpeed;
 		Vector2I farBounds = DrawPosition + SharedData.ViewSize;
 		Boundary = new Vector4(
 			MoveBoundaryForward(Boundary.X, TargetBoundary.X, DrawPosition.X, boundSpeed), // Left
@@ -218,6 +247,142 @@ public partial class Camera : Camera2D, ICamera
 			MoveBoundaryBackward(Boundary.W, TargetBoundary.W, farBounds.Y, boundSpeed) // Bottom
 		);
 	}
+
+	private void FollowTarget(float processSpeed)
+	{
+		if (!IsInstanceValid(Target))
+		{
+			Target = null;
+			return;
+		}
+		
+		Vector2 targetPosition = _target.Position - SharedData.ViewSize / 2;
+		if (_isTargetPlayer)
+		{
+			FollowPlayer(processSpeed, targetPosition, Target as PlayerData);
+			return;
+		}
+		
+		FollowTargetX(processSpeed, targetPosition.X);
+		FollowTargetY(processSpeed, targetPosition.Y);
+	}
+		
+	private void FollowTargetX(float processSpeed, float targetPosition)
+	{
+		if (_delay.X > 0f)
+		{
+			_delay.X -= processSpeed;
+			return;
+		}
+		
+		const float freeSpaceX = 16f;
+		float distance = targetPosition - _rawPosition.X;
+		float speed = _maxVelocity.X * processSpeed;
+		
+		_rawPosition.X = distance switch
+		{
+			> 0 => distance <= speed ? 
+				targetPosition : _rawPosition.X + speed,
+			< -freeSpaceX => distance + freeSpaceX >= -speed ? 
+				targetPosition + freeSpaceX : _rawPosition.X - speed,
+			_ => _rawPosition.X
+		};
+	}
+	
+	private void FollowTargetCdX(float processSpeed, float targetPosition)
+	{
+		if (_delay.X > 0f)
+		{
+			_delay.X -= processSpeed;
+			return;
+		}
+		
+		float distance = targetPosition - _rawPosition.X;
+		float speed = _maxVelocity.X * processSpeed;
+		
+		_rawPosition.X = Math.Abs(distance) <= speed ? targetPosition : _rawPosition.X + speed * Math.Sign(distance);
+	}
+	
+	private void FollowTargetY(float processSpeed, float targetPosition)
+	{
+		if (_delay.Y > 0f)
+		{
+			_delay.Y -= processSpeed;
+			return;
+		}
+		
+		const float freeSpaceY = 32f;
+		const float offsetY = 16f;
+		float distance = targetPosition - _rawPosition.Y + offsetY;
+		float speed = _maxVelocity.Y * processSpeed;
+		
+		_rawPosition.Y = distance switch
+		{
+			> freeSpaceY => distance <= speed + freeSpaceY ? 
+				targetPosition + (offsetY - freeSpaceY) : _rawPosition.Y + speed,
+			< -freeSpaceY => -distance <= speed + freeSpaceY ? 
+				targetPosition + (offsetY + freeSpaceY) : _rawPosition.Y - speed,
+			_ => _rawPosition.Y
+		};
+	}
+	
+	private void FollowPlayerY(float processSpeed, float targetPosition, PlayerData player)
+	{
+		if (_delay.Y > 0f)
+		{
+			_delay.Y -= processSpeed;
+			return;
+		}
+		
+		const float offsetY = 16f;
+		float distance = targetPosition - _rawPosition.Y + offsetY;
+
+		if (player.IsGrounded)
+		{
+			if (player.IsSpinning)
+			{
+				distance -= player.RadiusNormal.Y - player.Radius.Y;
+			}
+
+			float limit = processSpeed * (Math.Abs(player.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
+			
+			_rawPosition.Y = distance > limit || distance < -limit ? 
+				_rawPosition.Y + limit * MathF.Sign(_rawPosition.Y) : targetPosition;
+			
+			return;
+		}
+		
+		const float freeSpaceY = 32f;
+		float speed = _maxVelocity.Y * processSpeed;
+		_rawPosition.Y = distance switch
+		{
+			> freeSpaceY => distance <= speed + freeSpaceY ? 
+				targetPosition + (offsetY - freeSpaceY) : _rawPosition.Y + speed,
+			< -freeSpaceY => -distance <= speed + freeSpaceY ? 
+				targetPosition + (offsetY + freeSpaceY) : _rawPosition.Y - speed,
+			_ => _rawPosition.Y
+		};
+	}
+	
+	private void UpdateShakeOffset(float processSpeed)
+	{
+		if (_shakeTimer <= 0f)
+		{
+			_shakeOffset = Vector2I.Zero;
+			return;
+		}
+		
+		_shakeOffset.X = CalculateShakeOffset(_shakeTimer, _shakeOffset.X);
+		_shakeOffset.Y = CalculateShakeOffset(_shakeTimer, _shakeOffset.Y);
+		_shakeTimer -= processSpeed;
+	}
+	
+	private static int CalculateShakeOffset(float shakeTimer, int shakeOffset) => shakeOffset switch
+	{
+		0 => (int)shakeTimer,
+		< 0 => -1 - shakeOffset,
+		_ => -shakeOffset
+	};
 
 	private void UpdateActiveRegion()
 	{
@@ -246,94 +411,4 @@ public partial class Camera : Camera2D, ICamera
 		
 		return boundary < target ? Math.Min(target, boundary + speed) : boundary;
 	}
-
-	private void FollowTarget(float processSpeed)
-	{
-		if (!IsInstanceValid(Target))
-		{
-			Target = null;
-			return;
-		}
-		
-		const int freeSpaceX = 16;
-		const int freeSpaceY = 32;
-		const float offsetY = 16f;
-			
-		Vector2I targetPosition = (Vector2I)_target.Position - SharedData.ViewSize / 2;
-		Vector2 distance = targetPosition - _rawPosition;
-		distance.Y += offsetY;
-		
-		Vector2 delay = Delay;
-		if (delay.X > 0f)
-		{
-			delay.X -= processSpeed;
-		}
-		else
-		{
-			float speed = MaxVelocity.X * processSpeed;
-			_rawPosition.X = distance.X switch
-			{
-				> 0 => distance.X < speed ? targetPosition.X : _rawPosition.X + speed,
-				< -freeSpaceX => distance.X + freeSpaceX >= -speed ? 
-					targetPosition.X + freeSpaceX : _rawPosition.X - speed,
-				_ => _rawPosition.X
-			};
-		}
-
-		if (delay.Y > 0f)
-		{
-			delay.Y -= processSpeed;
-		}
-		else
-		{
-			float speed = MaxVelocity.Y * processSpeed;
-			_rawPosition.Y = distance.Y switch
-			{
-				> freeSpaceY => distance.Y - freeSpaceY < speed ? 
-					targetPosition.Y - freeSpaceY + offsetY : _rawPosition.Y + speed,
-				< -freeSpaceY => distance.Y + freeSpaceY >= -speed ? 
-					targetPosition.Y + freeSpaceY + offsetY : _rawPosition.Y - speed,
-				_ => _rawPosition.Y
-			};
-		}
-		
-		Delay = delay;
-	}
-	
-	private void UpdateShakeOffset(float processSpeed)
-	{
-		if (_shakeTimer <= 0f)
-		{
-			_shakeOffset = Vector2I.Zero;
-			return;
-		}
-		
-		_shakeOffset.X = CalculateShakeOffset(_shakeTimer, _shakeOffset.X);
-		_shakeOffset.Y = CalculateShakeOffset(_shakeTimer, _shakeOffset.Y);
-		_shakeTimer -= processSpeed;
-	}
-
-	private void UpdateRawPosition(float processSpeed)
-	{
-		Vector2 delay = Delay;
-		for (var i = 0; i < 2; i++)
-		{
-			if (delay[i] > 0f)
-			{
-				delay[i] -= processSpeed;
-				continue;
-			}
-			
-			_rawPosition[i] += _velocity[i] * processSpeed;
-		}
-
-		Delay = delay;
-	}
-	
-	private static int CalculateShakeOffset(float shakeTimer, int shakeOffset) => shakeOffset switch
-	{
-		0 => (int)shakeTimer,
-		< 0 => -1 - shakeOffset,
-		_ => -shakeOffset
-	};
 }

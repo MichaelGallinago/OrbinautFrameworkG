@@ -156,7 +156,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (!SharedData.CdCamera && IsCameraTarget(out ICamera camera))
 		{
-			camera.Delay = camera.Delay with { X = delay };
+			camera.SetCameraDelayX(delay);
 		}
 	}
 
