@@ -334,25 +334,29 @@ public partial class Camera : Camera2D, ICamera
 			return;
 		}
 		
-		const float offsetY = 16f;
-		float distance = targetPosition - _rawPosition.Y + offsetY;
+		float distance = targetPosition - _rawPosition.Y;
 
 		if (player.IsGrounded)
 		{
 			if (player.IsSpinning)
 			{
-				distance -= player.RadiusNormal.Y - player.Radius.Y;
+				int offset = player.RadiusNormal.Y - player.Radius.Y;
+				distance -= offset;
+				targetPosition -= offset;
 			}
 
 			float limit = processSpeed * (Math.Abs(player.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
 			
-			_rawPosition.Y = distance > limit || distance < -limit ? 
-				_rawPosition.Y + limit * MathF.Sign(_rawPosition.Y) : targetPosition;
+			_rawPosition.Y = distance <= limit && distance >= -limit ? 
+				targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);
 			
 			return;
 		}
 		
 		const float freeSpaceY = 32f;
+		const float offsetY = 16f;
+		
+		distance += offsetY;
 		float speed = _maxVelocity.Y * processSpeed;
 		_rawPosition.Y = distance switch
 		{
