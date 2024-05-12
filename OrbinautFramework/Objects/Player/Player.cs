@@ -254,10 +254,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		Velocity.Vector *= new Vector2(0.5f, 0.25f);
 		
 		RemoveShieldUnderwater();
-
-		if (Action != Actions.Flight) return false;
-		AudioPlayer.Sound.Stop(SoundStorage.Flight);
-		AudioPlayer.Sound.Stop(SoundStorage.Flight2);
+		
 		return false;
 	}
 
@@ -271,7 +268,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void RemoveShieldUnderwater()
 	{
-		if (Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
+		if (Id != 0 && Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
 		
 		if (Shield.Type == ShieldContainer.Types.Lightning)
 		{
