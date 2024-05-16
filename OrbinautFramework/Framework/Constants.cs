@@ -44,7 +44,7 @@ public static class Constants
 
 	public enum SolidType : byte
 	{
-		All, AllReset, Top, TopReset, Sides, ItemBox
+		Full, FullReset, Top, TopReset, Sides, ItemBox
 	}
 
 	public enum FadeState : byte
@@ -69,6 +69,6 @@ public static class Constants
 	
 	public enum TouchState : byte
 	{
-		None, Up, Down, Left, Right
+		None, Top, Bottom, Left, Right
 	}
 }

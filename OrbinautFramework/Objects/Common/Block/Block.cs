@@ -21,7 +21,7 @@ public partial class Block : BaseObject
             bool isSpinning = player.IsSpinning;
             uint comboCount = player.ComboCounter;
 		    
-            player.ActSolid(this, Constants.SolidType.AllReset);
+            player.ActSolid(this, Constants.SolidType.FullReset);
             /*
             if (!isSpinning || !obj_check_collision(_player, COL_SOLID_U)) continue;
             

@@ -120,37 +120,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		Radius = RadiusNormal;
 	}
-	
-	public void LandOnSolid(BaseObject targetObject, Constants.SolidType type, int distance)
-	{
-		if (type is Constants.SolidType.AllReset or Constants.SolidType.TopReset)
-		{
-			ResetState();
-		}
-
-		Position = Position with { Y = Position.Y - distance + 1 };
-		GroundSpeed.Value = Velocity.X;
-		Velocity.X = 0f;
-		Angle = 360f;
-		
-		OnObject = targetObject;
-
-		if (IsGrounded) return;
-		IsGrounded = true;
-
-		Land();
-	}
-	
-	public void ClearPush()
-	{
-		if (SetPushAnimationBy != this) return;
-		if (Animation is not (Animations.Spin or Animations.SpinDash))
-		{
-			Animation = Animations.Move;
-		}
-		
-		SetPushAnimationBy = null;
-	}
 
 	protected void SetCameraDelayX(float delay)
 	{

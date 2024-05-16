@@ -11,5 +11,6 @@ public interface ITailed
     bool IsSpinning { get; }
     float VisualAngle { get; }
     Animations Animation { get; }
+    float RotationDegrees { get; }
     AcceleratedValue GroundSpeed { get; }
 }

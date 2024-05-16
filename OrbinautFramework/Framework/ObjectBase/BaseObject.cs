@@ -210,8 +210,8 @@ public abstract partial class BaseObject : Node2D
 		
 		return type switch
 		{
-			CollisionSensor.SolidU => touchState == TouchState.Up,
-			CollisionSensor.SolidD => touchState == TouchState.Down,
+			CollisionSensor.SolidU => touchState == TouchState.Top,
+			CollisionSensor.SolidD => touchState == TouchState.Bottom,
 			CollisionSensor.SolidL => touchState == TouchState.Left,
 			CollisionSensor.SolidR => touchState == TouchState.Right,
 			CollisionSensor.SolidAny => touchState != TouchState.None,

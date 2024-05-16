@@ -52,10 +52,10 @@ public partial class Tail : AdvancedAnimatedSprite
 	
 	private static float GetTailAngle(ITailed data)
 	{
-		if (!data.IsGrounded) return data.VisualAngle;
+		if (!data.IsSpinning) return data.RotationDegrees;
 		
-		if (!data.IsSpinning) return 0f;
-
+		if (data.IsGrounded) return data.VisualAngle;
+		
 		float angle = Mathf.RadToDeg(MathF.Atan2(data.Velocity.Y, data.Velocity.X));
 			
 		if (data.Scale.X < 0f)
