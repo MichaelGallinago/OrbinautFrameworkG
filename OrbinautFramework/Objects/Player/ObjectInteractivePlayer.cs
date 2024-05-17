@@ -133,21 +133,21 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 
 		Vector2I clipAbsolute = clip.Abs();
 		bool isLimitedClip = clipAbsolute.Y <= 4;
-		
-		if (clipAbsolute.X >= clipAbsolute.Y || SharedData.PlayerPhysics == PhysicsTypes.SK && isLimitedClip)
+
+		bool isS3Physics = SharedData.PlayerPhysics >= PhysicsTypes.S3;
+		if (clipAbsolute.X >= clipAbsolute.Y || isS3Physics && isLimitedClip)
 		{
-			CollideVertically(clip.Y);
-			return;
+			if (CollideVertically(clip.Y, isS3Physics)) return;
 		}
 
-		CollideHorizontally(isLimitedClip, flooredDistance.X, clip.X);
+		CollideHorizontally(isLimitedClip, flooredDistance.X, clip.X, isS3Physics);
 	}
 
-	private void CollideHorizontally(bool isClip, int flooredDistanceX, int clipX)
+	private void CollideHorizontally(bool isLimitedClip, int flooredDistanceX, int clipX, bool isS3Physics)
 	{
-		if (SharedData.PlayerPhysics < PhysicsTypes.S3 && isClip)
+		if (!isS3Physics && isLimitedClip)
 		{
-			ClearPush(_data.Target);
+			ClearPush(_data.Target); 
 			return;
 		}
 		
@@ -174,61 +174,68 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		Position -= new Vector2(clipX, 0f);
 	}
 	
-	private void CollideVertically(int clipY)
+	private bool CollideVertically(int clipY, bool isS3Physics)
 	{
 		switch (clipY)
 		{
-			case < 0 when _data.Type is not (Constants.SolidType.ItemBox or Constants.SolidType.Sides): 
-				CollideFromBelow(_data.Target, clipY); 
-				break;
+			case < 0: 
+				return CollideUpward(_data.Target, clipY, isS3Physics);
 			
-			case >= 0 and < 16 when _data.Type != Constants.SolidType.Sides: 
+			case < 16 when _data.Type != Constants.SolidType.Sides: 
 				CollideDownward(clipY);
-				break;
+				return true;
 			
 			default: 
-				ClearPush(_data.Target); 
-				break;
+				ClearPush(_data.Target);
+				return true;
 		}
 	}
 	
-	private void CollideFromBelow(BaseObject baseObject, int clipY)
+	private bool CollideUpward(BaseObject baseObject, int clipY, bool isS3Physics)
 	{
-		switch (Velocity.Y)
+		if (_data.Type is Constants.SolidType.ItemBox or Constants.SolidType.Sides) return false;
+
+		if (Velocity.Y == 0f && IsGrounded)
 		{
-			case 0f: CrushPlayer(clipY); break;
-			case < 0f: HandleUpwardCollision(baseObject, clipY); break;
-		}
-	}
-	
-	private void CrushPlayer(int clipY)
-	{
-		if (!IsGrounded || Math.Abs(clipY) < 16) return;
-		Kill();
-	}
-	
-	private void HandleUpwardCollision(BaseObject baseObject, int clipY)
-	{
-		if (SharedData.PlayerPhysics >= PhysicsTypes.S3 && !IsGrounded)
-		{
-			GroundSpeed.Value = 0f;
+			return CrushPlayer(clipY);
 		}
 
-		Position = new Vector2(Position.X, Position.Y - clipY);
-		Velocity.Y = 0f;
-		
+		HandleUpwardCollision(baseObject, clipY, isS3Physics);
+		return true;
+	}
+	
+	private bool CrushPlayer(int clipY)
+	{
+		if (Math.Abs(clipY) < 16) return false;
+		Kill();
+		return true;
+	}
+	
+	private void HandleUpwardCollision(BaseObject baseObject, int clipY, bool isS3Physics)
+	{
+		if (Velocity.Y < 0f)
+		{
+			if (isS3Physics && !IsGrounded)
+			{
+				GroundSpeed.Value = 0f;
+			}
+
+			Position = new Vector2(Position.X, Position.Y - clipY);
+			Velocity.Y = 0f;
+		}
+
 		TouchObjects[baseObject] = Constants.TouchState.Bottom;
 	}
 	
 	private void CollideDownward(int clipY)
 	{
-		if (Velocity.Y < 0) return;
+		if (Velocity.Y < 0f) return;
 		
-		float relX = MathF.Floor(Position.X - _data.Position.X) + _data.Target.SolidData.Radius.X;
-		if (relX < -_data.ExtraSize.X || relX > _data.Target.SolidData.Radius.X * 2 + _data.ExtraSize.X) return;
+		float relativeX = Math.Abs(MathF.Floor(Position.X - _data.Position.X));
+		if (relativeX > _data.Target.SolidData.Radius.X + _data.ExtraSize.X) return;
 		
 		TouchObjects[_data.Target] = Constants.TouchState.Top;
-		LandOnSolid(clipY - GripY);
+		AttachToObject(clipY - GripY);
 	}
 	
 	private void CollideWithPlatformObject()
@@ -244,10 +251,10 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		if (clipY is < -16 or >= 0) return;
 			
 		TouchObjects[_data.Target] = Constants.TouchState.Top;
-		LandOnSolid(-((int)clipY + GripY));
+		AttachToObject(-((int)clipY + GripY));
 	}
 	
-	private void LandOnSolid(int distance)
+	private void AttachToObject(int distance)
 	{
 		if (_data.Type is Constants.SolidType.FullReset or Constants.SolidType.TopReset)
 		{

@@ -53,7 +53,7 @@ public static class SharedData
     public static bool IsDebugModeEnabled { get; set; } = false;
     public static Types PlayerType { get; set; } = Types.Sonic;
     public static Types PlayerTypeCpu { get; set; } = Types.Tails;
-    public static byte ContinueCount { get; set; }
+    public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;
     
     public static uint ScoreCount { get; set; }

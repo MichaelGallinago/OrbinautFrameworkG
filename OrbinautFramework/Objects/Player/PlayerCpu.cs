@@ -29,7 +29,7 @@ public partial class PlayerCpu : Player
 		{
 			CpuInputTimer = 600f;
 		}
-
+		
 		switch (CpuState)
 		{
 			case CpuStates.RespawnInit: InitRespawnCpu(); break;
