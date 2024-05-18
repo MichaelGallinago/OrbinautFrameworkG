@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
@@ -14,16 +15,12 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	protected const int CpuDelayStep = 16;
 	
 	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
-	[Export] private PackedScene _packedShield;
+	[Export] protected ShieldContainer Shield;
 	[Export] private SpawnTypes _spawnType;
 	[Export] private Types _uniqueType;
 
-	protected ShieldContainer Shield;
-
 	public event Action<Types> TypeChanged;
-
-	public static List<Player> Players { get; } = [];
-
+	
 	public Types Type
 	{
 		get => _type;
@@ -37,7 +34,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public Velocity Velocity { get; } = new();
 	public AcceleratedValue GroundSpeed { get; set; } = new();
 	
-	public int Id { get; protected set; } = Players.Count;
+	public int Id { get; set; }
 	public Animations Animation { get; set; }
 	public bool IsAnimationFrameChanged { get; set; }
 	public int? OverrideAnimationFrame { get; set; }
@@ -104,11 +101,10 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
-	protected readonly TileCollider TileCollider = new();
+	protected TileCollider TileCollider = new();
 
 	public override void _Ready()
 	{
-		Shield = _packedShield.Instantiate<ShieldContainer>();
 		base._Ready();
 		Spawn();
 		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
@@ -124,12 +120,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	{
 		base._EnterTree();
 		ResizeAllRecordedData();
-	}
-
-	//TODO: remove or use this
-	public static void ResetStatic()
-	{
-		Players.Clear();
 	}
 	
 	protected void RecordData()
@@ -155,6 +145,26 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		SetPushAnimationBy = null;
 		
 		Radius = RadiusNormal;
+	}
+	
+	public void ResetMusic()
+	{
+		if (SuperTimer > 0f)
+		{
+			AudioPlayer.Music.Play(MusicStorage.Super);
+		}
+		else if (ItemInvincibilityTimer > 0f)
+		{
+			AudioPlayer.Music.Play(MusicStorage.Invincibility);
+		}
+		else if (ItemSpeedTimer > 0f)
+		{
+			AudioPlayer.Music.Play(MusicStorage.HighSpeed);
+		}
+		else if (Stage.Local != null && Stage.Local.Music != null)
+		{
+			AudioPlayer.Music.Play(Stage.Local.Music);
+		}
 	}
 	
 	protected override void Init()
@@ -228,7 +238,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		Rotation = 0f;
 		Visible = true;
 		
-		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * Players.Count)];
+		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * Scene.Local.Players.Count)];
 		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
@@ -240,8 +250,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	{
 		if (Scene.Local.Time == 0f) return;
 
-		int playersCount = Players.Count + 1;
-		foreach (Player player in Players)
+		ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+		int playersCount = players.Length + 1;
+		foreach (Player player in players)
 		{
 			player.ResizeRecordedData(playersCount);
 		}
@@ -264,6 +275,16 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		Array.Copy(_recordedData, resizedData, oldLength);
 		Array.Fill(resizedData, record,oldLength, newLength - oldLength);
 		_recordedData = resizedData;
+	}
+	
+	public void AttachToPlayer(ICarrier carrier)
+	{
+		Facing = carrier.Facing;
+		Velocity.Vector = carrier.Velocity.Vector;
+		Position = carrier.Position + new Vector2(0f, 28f);
+		Scale = new Vector2(Math.Abs(Scale.X) * (float)carrier.Facing, Scale.Y);
+		
+		carrier.CarryTargetPosition = Position;
 	}
 
 	private void Spawn()

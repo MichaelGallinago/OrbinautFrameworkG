@@ -14,6 +14,9 @@ public abstract partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
     
+    public PlayerList Players { get; private set; }
+    public int PlayerCount { get; set; }
+    
     public SceneTree Tree { get; private set; }
     public World2D World2D { get; private set; }
     public bool IsStage { get; protected set; }
@@ -60,7 +63,7 @@ public abstract partial class Scene : Node2D
             objects.PreviousPosition = objects.Position;
         }
         
-        foreach (Player player in PlayerData.Players)
+        foreach (PlayerData player in Players.Values)
         {
             player.TouchObjects.Clear();
             player.PushObjects.Clear();
@@ -73,10 +76,10 @@ public abstract partial class Scene : Node2D
     private void AttachCamerasToPlayer()
     {
         ReadOnlySpan<ICamera> cameras = Views.Cameras;
-        int count = Math.Min(cameras.Length, PlayerData.Players.Count);
+        int count = Math.Min(cameras.Length, Players.Count);
         for (var i = 0; i < count; i++)
         {
-            cameras[i].Target = PlayerData.Players[i];
+            cameras[i].Target = Players.Values[i];
         }
     }
 }

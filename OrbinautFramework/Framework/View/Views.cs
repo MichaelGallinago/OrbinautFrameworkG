@@ -101,8 +101,8 @@ public partial class Views : Control
     
     private void AttachCamerasToPlayers()
     {
-        List<Player> players = PlayerData.Players;
-        int number = Math.Min(_cameras.Length, players.Count);
+        ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+        int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {
             _cameras[i].Target = players[i];

@@ -111,9 +111,6 @@ public partial class Camera : Camera2D, ICamera
 	}
 
 	public void SetCameraDelayX(float delay) => _delay.X = delay;
-
-	public void UpdateShakeTimer(int shakeTimer) => _shakeTimer = shakeTimer;
-	
 	public void SetShakeTimer(float shakeTimer) => _shakeTimer = shakeTimer;
 
 	public bool CheckRectInside(Rect2 rect)

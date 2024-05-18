@@ -86,10 +86,11 @@ tile_map_data = PackedByteArray("AADjAkEAAAABAAAAAADiAkEAAAABAAAAAADhAkEAAAABAAA
 tile_set = ExtResource("1_tw5fm")
 script = ExtResource("5_movty")
 
-[node name="Player" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("4_i6eum")]
+[node name="Player" parent="." node_paths=PackedStringArray("Sprite", "Shield") instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(336, 896)
 Sprite = NodePath("AdvancedAnimatedSprite")
+Shield = NodePath("ShieldContainer")
 _uniqueType = 2
 
 [node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]

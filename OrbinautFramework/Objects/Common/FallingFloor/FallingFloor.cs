@@ -49,7 +49,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
     private void HandlePlayerOnCollapse()
     {
         // When falling apart, act as solid only for the players already standing on the object
-        foreach (Player player in PlayerData.Players)
+        foreach (Player player in Scene.Local.Players.Values)
         {
             if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
             player.ActSolid(this, Constants.SolidType.Top);
@@ -62,7 +62,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
         }
 			
         // Release all players from this object
-        foreach (Player player in PlayerData.Players)
+        foreach (Player player in Scene.Local.Players.Values)
         {
             if (player.OnObject != this) continue;
             player.OnObject = null;
@@ -74,7 +74,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
 
     private void CheckTarget()
     {
-        foreach (Player player in PlayerData.Players)
+        foreach (Player player in Scene.Local.Players.Values)
         {
             player.ActSolid(this, Constants.SolidType.Top);
 			

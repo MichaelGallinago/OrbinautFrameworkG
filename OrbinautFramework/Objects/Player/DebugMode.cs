@@ -51,7 +51,7 @@ public class DebugMode
 			{
 				if (Scene.Local.IsStage)
 				{
-					PlayerData.Players[0].ResetMusic();
+					Scene.Local.Players.First().ResetMusic();
 				}
 				
 				_speed = 0;

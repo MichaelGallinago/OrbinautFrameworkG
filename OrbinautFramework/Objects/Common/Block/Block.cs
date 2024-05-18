@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
@@ -15,7 +16,7 @@ public partial class Block : BaseObject
 
     public override void _Process(double delta)
     {
-        foreach (Player player in PlayerData.Players)
+        foreach (Player player in Scene.Local.Players.Values)
         {
             // Combo counter and spin flag are cleared when player lands, so back them up
             bool isSpinning = player.IsSpinning;

@@ -44,8 +44,8 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
     {
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
-		
-	    foreach (Player player in PlayerData.Players)
+
+	    foreach (Player player in Scene.Local.Players.Values)
 	    {
 		    player.ActSolid(this, Constants.SolidType.Top);
 		    

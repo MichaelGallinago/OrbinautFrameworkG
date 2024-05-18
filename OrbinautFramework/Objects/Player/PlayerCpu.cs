@@ -19,7 +19,7 @@ public partial class PlayerCpu : Player
 	{
 		if (IsHurt || IsDead || Id == 0) return;
 		
-		_leadPlayer = Players[0];
+		_leadPlayer = Scene.Local.Players.First();
 		_delay = CpuDelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
@@ -91,7 +91,7 @@ public partial class PlayerCpu : Player
 				break;
 		}
 		
-		DataRecord followDataRecord = _leadPlayer.GetFollowDataRecord(_delay);
+		DataRecord followDataRecord = _leadPlayer.RecordedData[_delay];
 		Vector2 targetPosition = followDataRecord.Position;
 
 		if (SharedData.CpuBehaviour == CpuBehaviours.S2)
@@ -192,7 +192,7 @@ public partial class PlayerCpu : Player
 		}
 		
 		(Vector2 targetPosition,_cpuInputPress, _cpuInputDown, 
-			Constants.Direction direction, BaseObject setPushAnimationBy) = CpuTarget.GetFollowDataRecord(_delay);
+			Constants.Direction direction, BaseObject setPushAnimationBy) = CpuTarget.RecordedData[_delay];
 
 		if (SharedData.CpuBehaviour == CpuBehaviours.S3 &&
 		    Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)
@@ -305,7 +305,7 @@ public partial class PlayerCpu : Player
 	{
 		bool isLeadPlayerCameraTarget = _leadPlayer.IsCameraTarget(out ICamera camera);
 		
-		if (Sprite != null && (isLeadPlayerCameraTarget ? 
+		if (CpuInputTimer > 0 || Sprite != null && (isLeadPlayerCameraTarget ? 
 		    Sprite.CheckInCamera(camera) || camera.TargetBoundary.Z <= Position.X : Sprite.CheckInCameras()))
 		{
 			CpuTimer = 0f;

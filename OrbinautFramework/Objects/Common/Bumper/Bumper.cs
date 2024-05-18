@@ -31,7 +31,7 @@ public partial class Bumper : BaseObject
 
     public override void _Process(double delta)
     {
-        foreach (Player player in PlayerData.Players)
+        foreach (Player player in Scene.Local.Players.Values)
         {
             if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.HitBox)) continue;
 		    

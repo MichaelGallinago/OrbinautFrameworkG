@@ -11,13 +11,15 @@
 [ext_resource type="SpriteFrames" uid="uid://dqsm7lf3darvq" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_knuckles.tres" id="7_ywak4"]
 [ext_resource type="Script" path="res://Objects/Player/PlayerAnimatedSprite.cs" id="105_mpaxa"]
 
-[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite")]
+[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite", "Shield")]
 process_priority = -1
 z_index = -2
 script = ExtResource("1_cv4v1")
 _packedTail = ExtResource("2_x8pdm")
 Sprite = NodePath("AdvancedAnimatedSprite")
-_packedShield = ExtResource("3_01y4h")
+Shield = NodePath("ShieldContainer")
+
+[node name="ShieldContainer" parent="." instance=ExtResource("3_01y4h")]
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 16)

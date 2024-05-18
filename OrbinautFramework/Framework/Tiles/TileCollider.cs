@@ -4,7 +4,7 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.Tiles;
 
-public class TileCollider
+public struct TileCollider
 {
 	private const string BinariesPath = "res://Collisions/Binaries/";
 	private static readonly TilesData TilesData;

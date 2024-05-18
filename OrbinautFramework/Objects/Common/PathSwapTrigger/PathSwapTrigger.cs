@@ -22,7 +22,7 @@ public abstract partial class PathSwapTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        foreach (Player player in PlayerData.Players)
+        foreach (Player player in Scene.Local.Players.Values)
         {
             if (IsGroundOnly && !player.IsGrounded || player.IsDebugMode) continue;
             UpdatePlayerTileLayer(player);

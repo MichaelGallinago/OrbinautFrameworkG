@@ -16,17 +16,17 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	private Tail _tail;
 
 	public Player() => TypeChanged += OnTypeChanged;
-
-	public override void _ExitTree()
-	{
-		RemovePlayer();
-		base._ExitTree();
-	}
-
+	
 	public override void _EnterTree()
 	{
 		base._EnterTree();
-		Players.Add(this);
+		Scene.Local.Players.Add(this);
+	}
+	
+	public override void _ExitTree()
+	{
+		Scene.Local.Players.Remove(this);
+		base._ExitTree();
 	}
 	
 	public override void _Process(double delta)
@@ -69,36 +69,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		ProcessPalette();
 	}
 	
-	public void ResetMusic()
-	{
-		if (SuperTimer > 0f)
-		{
-			AudioPlayer.Music.Play(MusicStorage.Super);
-		}
-		else if (ItemInvincibilityTimer > 0f)
-		{
-			AudioPlayer.Music.Play(MusicStorage.Invincibility);
-		}
-		else if (ItemSpeedTimer > 0f)
-		{
-			AudioPlayer.Music.Play(MusicStorage.HighSpeed);
-		}
-		else if (Stage.Local != null && Stage.Local.Music != null)
-		{
-			AudioPlayer.Music.Play(Stage.Local.Music);
-		}
-	}
-	
 	protected virtual void ProcessCpu() {}
-	
-	private void RemovePlayer()
-	{
-		Players.Remove(this);
-		for (int i = Id; i < Players.Count; i++)
-		{
-			Players[i].Id--;
-		}
-	}
 
 	private void OnTypeChanged(Types newType)
 	{
@@ -295,7 +266,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		}
 
 		AirTimerStates state = GetAirTimerState(AirTimer);
-		if (state != previousState + 1) return false;
+		if (state == previousState) return false;
 		
 		switch (state)
 		{
