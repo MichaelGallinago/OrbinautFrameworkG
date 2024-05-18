@@ -761,6 +761,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (!IsGrounded || OnObject != null) return;
 
+		// Each tile type has its own rules about how it should react to a specific tile check
+		// Since we're gonna rotate player's sensors, "rotate" tile properties as well
+		
 		TileBehaviour = Angle switch
 		{
 			<= 45 or >= 315 => Constants.TileBehaviours.Floor,
