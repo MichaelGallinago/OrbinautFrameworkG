@@ -20,6 +20,7 @@ Sprite = NodePath("AdvancedAnimatedSprite")
 Shield = NodePath("ShieldContainer")
 
 [node name="ShieldContainer" parent="." instance=ExtResource("3_01y4h")]
+FrameLoop = 0
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 16)

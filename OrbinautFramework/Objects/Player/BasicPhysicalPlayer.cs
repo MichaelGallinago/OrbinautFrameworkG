@@ -240,7 +240,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (GroundSpeed * sign < 0f)
 		{
 			GroundSpeed.Acceleration = sign * PhysicParams.Deceleration;
-			if (GroundSpeed * sign >= 0f)
+			if (direction == Constants.Direction.Positive == GroundSpeed >= 0f)
 			{
 				GroundSpeed.Value = 0.5f * sign;
 			}
@@ -342,7 +342,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (absoluteSpeed < 0f)
 		{
 			GroundSpeed.Acceleration = sign * PhysicParams.DecelerationRoll;
-			if (sign * GroundSpeed < 0f) return;
+			if (direction == Constants.Direction.Positive == GroundSpeed < 0f) return;
 			GroundSpeed.Value = sign * 0.5f;
 			return;
 		}
@@ -387,7 +387,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 		
 		if (GroundSpeed != 0f) return;
-		GroundSpeed.Value = (SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f) * (float)Facing;
+		GroundSpeed.Value = SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f * (float)Facing;
 	}
 	
 	private void ProcessMovementAir()
@@ -762,7 +762,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (!IsGrounded || OnObject != null) return;
 
 		// Each tile type has its own rules about how it should react to a specific tile check
-		// Since we're gonna rotate player's sensors, "rotate" tile properties as well
+		// Since we're going to rotate player's sensors, "rotate" tile properties as well
 		
 		TileBehaviour = Angle switch
 		{
