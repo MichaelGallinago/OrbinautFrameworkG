@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
-using Godot.Collections;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 
@@ -29,10 +28,10 @@ public partial class Views : Control
     [Export] private PackedScene _packedViewContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public System.Collections.Generic.Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
+    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
     public ICamera BottomCamera { get; private set; }
-    private Camera[] _cameras;
     
+    private Camera[] _cameras;
     private ViewContainer[] _containers;
     private readonly List<ICamera> _camerasWithUpdatedRegions = [];
 
@@ -111,7 +110,7 @@ public partial class Views : Control
 
     private void RemoveViews()
     {
-        Array<Node> children = GetChildren();
+        Godot.Collections.Array<Node> children = GetChildren();
         for (var i = 0; i < children.Count; i++)
         {
             children[i].QueueFree();

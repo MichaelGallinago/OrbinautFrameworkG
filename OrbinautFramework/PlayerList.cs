@@ -5,13 +5,15 @@ using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3;
 
-public class PlayerList
+public readonly struct PlayerList
 {
     public ReadOnlySpan<Player> Values => CollectionsMarshal.AsSpan(_players);
     public int Count => _players.Count;
     
     private readonly List<Player> _players = [];
-    
+
+    public PlayerList() {}
+
     public void Add(Player data)
     {
         data.Id = _players.Count;

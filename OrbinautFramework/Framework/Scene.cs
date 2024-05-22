@@ -13,8 +13,8 @@ public abstract partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
-    
-    public PlayerList Players { get; private set; }
+
+    public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }
     
     public SceneTree Tree { get; private set; }
@@ -43,7 +43,7 @@ public abstract partial class Scene : Node2D
 
         AttachCamerasToPlayer();
     }
-
+    
     public override void _EnterTree() => Local = this;
     public override void _ExitTree() => Local = null;
 

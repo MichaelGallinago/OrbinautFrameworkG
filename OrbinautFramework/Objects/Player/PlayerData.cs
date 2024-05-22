@@ -242,7 +242,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
-		
+
 		Sprite.Animate(this);
 	}
 	

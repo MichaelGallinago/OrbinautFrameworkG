@@ -78,10 +78,12 @@ public partial class AdvancedSpriteFrames : SpriteFrames
     {
         int width = _cullSize.X;
         int height = _cullSize.Y;
-        
+           
         Parallel.ForEach(Animations, animation =>
         {
             var animationName = (StringName)animation;
+            if (animationName.IsEmpty) return;
+            
             for (var i = 0; i < GetFrameCount(animationName); i++)
             {
                 var size = (Vector2I)GetFrameTexture(animationName, i).GetSize();

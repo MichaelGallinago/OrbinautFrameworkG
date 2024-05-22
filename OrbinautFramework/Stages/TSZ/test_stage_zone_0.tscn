@@ -89,7 +89,7 @@ script = ExtResource("5_movty")
 [node name="Player" parent="." node_paths=PackedStringArray("Sprite", "Shield") instance=ExtResource("4_i6eum")]
 use_parent_material = true
 position = Vector2(336, 896)
-Sprite = NodePath("AdvancedAnimatedSprite")
+Sprite = NodePath("PlayerAnimatedSprite")
 Shield = NodePath("ShieldContainer")
 _uniqueType = 2
 

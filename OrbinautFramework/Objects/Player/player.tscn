@@ -16,13 +16,13 @@ process_priority = -1
 z_index = -2
 script = ExtResource("1_cv4v1")
 _packedTail = ExtResource("2_x8pdm")
-Sprite = NodePath("AdvancedAnimatedSprite")
+Sprite = NodePath("PlayerAnimatedSprite")
 Shield = NodePath("ShieldContainer")
 
 [node name="ShieldContainer" parent="." instance=ExtResource("3_01y4h")]
 FrameLoop = 0
 
-[node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+[node name="PlayerAnimatedSprite" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, 16)
 sprite_frames = ExtResource("4_xjx3q")
 animation = &"None"

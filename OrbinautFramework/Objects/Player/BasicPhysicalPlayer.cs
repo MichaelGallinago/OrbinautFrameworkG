@@ -455,6 +455,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			}
 			else if (!SharedData.NoSpeedCap || -Velocity.X < PhysicParams.AccelerationTop)
 			{
+				Velocity.AccelerationX = -PhysicParams.AccelerationAir;
 				Velocity.MaxX(-PhysicParams.AccelerationTop);
 			}
 			
@@ -468,6 +469,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			}
 			else if (!SharedData.NoSpeedCap || Velocity.X < PhysicParams.AccelerationTop)
 			{
+				Velocity.AccelerationX = PhysicParams.AccelerationAir;
 				Velocity.MinX(PhysicParams.AccelerationTop);
 			}
 			

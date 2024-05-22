@@ -608,7 +608,7 @@ _offsets = {
 "Duck": Vector2(4, 4),
 "Grab": Vector2(4, -4),
 "Hurt": Vector2(0, 2),
-"Idle": Vector2(0, 1),
+"Idle": Vector2(-1, 0),
 "LookUp": Vector2(-1, 1),
 "Push": Vector2(-3, 2),
 "Run": Vector2(1, 2),
