@@ -33,6 +33,19 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     {
         AnimationLooped += LoopFrame;
         SpriteFramesChanged += UpdateSpriteFrames;
+
+        if (_advancedSpriteFrames != null)
+        {
+            AnimationChanged += UpdateValues;
+            UpdateValues();
+#if TOOLS
+            if (Engine.IsEditorHint())
+            {
+                AnimationChanged += _advancedSpriteFrames.Refresh;
+                _advancedSpriteFrames.Refresh();
+            }
+#endif
+        }
         UpdateSpriteFrames();
 
         Position = default;
@@ -98,7 +111,6 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         _advancedSpriteFrames = SpriteFrames as AdvancedSpriteFrames;
         if (_advancedSpriteFrames == null) return;
         
-        Offset = _advancedSpriteFrames.GetAnimationOffset(Animation);
         AnimationChanged += UpdateValues;
         UpdateValues();
             
@@ -109,12 +121,8 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 #endif
     }
 
-    private void LoopFrame()
-    {
-        if (_frameLoop == 0) return;
-        Frame = _frameLoop;
-    }
-
+    private void LoopFrame() => Frame = _frameLoop;
+    
     private void UpdateValues()
     {
         _frameLoop = _advancedSpriteFrames.GetAnimationFrameLoop(Animation);
