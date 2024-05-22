@@ -32,20 +32,9 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     public override void _Ready()
     {
         AnimationLooped += LoopFrame;
-        SpriteFramesChanged += UpdateSpriteFrames;
 
-        if (_advancedSpriteFrames != null)
-        {
-            AnimationChanged += UpdateValues;
-            UpdateValues();
-#if TOOLS
-            if (Engine.IsEditorHint())
-            {
-                AnimationChanged += _advancedSpriteFrames.Refresh;
-                _advancedSpriteFrames.Refresh();
-            }
-#endif
-        }
+        RegisterAdvancedSpriteFrames();
+        SpriteFramesChanged += UpdateSpriteFrames;
         UpdateSpriteFrames();
 
         Position = default;
@@ -109,6 +98,11 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
         }
         
         _advancedSpriteFrames = SpriteFrames as AdvancedSpriteFrames;
+        RegisterAdvancedSpriteFrames();
+    }
+
+    private void RegisterAdvancedSpriteFrames()
+    {
         if (_advancedSpriteFrames == null) return;
         
         AnimationChanged += UpdateValues;
