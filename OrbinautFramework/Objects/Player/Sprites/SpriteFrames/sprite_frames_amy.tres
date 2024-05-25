@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=100 format=3 uid="uid://ives1jru75cc"]
+[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=99 format=3 uid="uid://ives1jru75cc"]
 
 [ext_resource type="Texture2D" uid="uid://c0dcxkn3l54ff" path="res://Objects/Player/Sprites/Amy/balance.png" id="1_ee1t8"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_rncpm"]
@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://c38w6stwoyt77" path="res://Objects/Player/Sprites/Amy/death.png" id="5_gunif"]
 [ext_resource type="Texture2D" uid="uid://dypowtl1pqssx" path="res://Objects/Player/Sprites/Amy/drown.png" id="7_j165y"]
 [ext_resource type="Texture2D" uid="uid://dms7sx1kxyydx" path="res://Objects/Player/Sprites/Amy/duck.png" id="8_pb82g"]
-[ext_resource type="Texture2D" uid="uid://bxo01xcrhdwxw" path="res://Objects/Player/Sprites/Amy/dash_hammer.png" id="9_4rhy5"]
+[ext_resource type="Texture2D" uid="uid://bqa12u7skparq" path="res://Objects/Player/Sprites/Amy/dash_hammer.png" id="9_4rhy5"]
 [ext_resource type="Texture2D" uid="uid://elqwciyfbwku" path="res://Objects/Player/Sprites/Amy/grab.png" id="9_duboo"]
 [ext_resource type="Texture2D" uid="uid://t5mxlvpbyut1" path="res://Objects/Player/Sprites/Amy/hurt.png" id="10_ywc4w"]
 [ext_resource type="Texture2D" uid="uid://b1a51xbm83qj1" path="res://Objects/Player/Sprites/Amy/idle.png" id="11_wuyfs"]
@@ -18,7 +18,6 @@
 [ext_resource type="Texture2D" uid="uid://c247hd60ubn0o" path="res://Objects/Player/Sprites/Amy/skid.png" id="16_7amav"]
 [ext_resource type="Texture2D" uid="uid://ciphko2m8ar2r" path="res://Objects/Player/Sprites/Amy/spin.png" id="17_pqnn8"]
 [ext_resource type="Texture2D" uid="uid://bgomi41adk71f" path="res://Objects/Player/Sprites/Amy/spin_hammer.png" id="18_8conh"]
-[ext_resource type="Texture2D" uid="uid://co7l1y4y7l8os" path="res://Objects/Player/Sprites/Amy/spindash.png" id="19_8pct0"]
 [ext_resource type="Texture2D" uid="uid://boqh1tiocs88u" path="res://Objects/Player/Sprites/Amy/transform.png" id="20_mkgmw"]
 [ext_resource type="Texture2D" uid="uid://b5xwlp1hwlr1m" path="res://Objects/Player/Sprites/Amy/walk.png" id="21_1dfq0"]
 
@@ -263,27 +262,21 @@ atlas = ExtResource("17_pqnn8")
 region = Rect2(75, 0, 25, 26)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_uw60c"]
-atlas = ExtResource("19_8pct0")
 region = Rect2(0, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kmdw4"]
-atlas = ExtResource("19_8pct0")
 region = Rect2(150, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3g5m7"]
-atlas = ExtResource("19_8pct0")
 region = Rect2(30, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rlfp2"]
-atlas = ExtResource("19_8pct0")
 region = Rect2(60, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a3ci7"]
-atlas = ExtResource("19_8pct0")
 region = Rect2(90, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tsq3f"]
-atlas = ExtResource("19_8pct0")
 region = Rect2(120, 0, 30, 27)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fwu88"]

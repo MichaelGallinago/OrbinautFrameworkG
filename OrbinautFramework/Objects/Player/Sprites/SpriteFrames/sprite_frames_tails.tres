@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=82 format=3 uid="uid://b00rdxd033mnj"]
+[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=78 format=3 uid="uid://b00rdxd033mnj"]
 
 [ext_resource type="Texture2D" uid="uid://drjg2mymcn23l" path="res://Objects/Player/Sprites/Tails/balance.png" id="1_2xak0"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_p3xy2"]
@@ -6,10 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://318d7ev50y8u" path="res://Objects/Player/Sprites/Tails/breathe.png" id="3_oltlp"]
 [ext_resource type="Texture2D" uid="uid://garkownx0jtf" path="res://Objects/Player/Sprites/Tails/dash.png" id="4_rcdhu"]
 [ext_resource type="Texture2D" uid="uid://dnp6sndqdvj5e" path="res://Objects/Player/Sprites/Tails/death.png" id="5_66mn3"]
-[ext_resource type="Texture2D" uid="uid://cgueo15fr3hj1" path="res://Objects/Player/Sprites/Tails/drown.png" id="6_76aos"]
 [ext_resource type="Texture2D" uid="uid://bqdwtpb75sve8" path="res://Objects/Player/Sprites/Tails/duck.png" id="7_0xvsj"]
 [ext_resource type="Texture2D" uid="uid://b756qwdmhr6b3" path="res://Objects/Player/Sprites/Tails/fly.png" id="8_8dwuc"]
-[ext_resource type="Texture2D" uid="uid://dyfqmyxaq5sis" path="res://Objects/Player/Sprites/Tails/fly_lift.png" id="9_b8vng"]
 [ext_resource type="Texture2D" uid="uid://d1vc2xvm2edif" path="res://Objects/Player/Sprites/Tails/fly_tired.png" id="10_ssttu"]
 [ext_resource type="Texture2D" uid="uid://dcr5cnb1a51rk" path="res://Objects/Player/Sprites/Tails/grab.png" id="11_jvgsw"]
 [ext_resource type="Texture2D" uid="uid://v1407hpvi011" path="res://Objects/Player/Sprites/Tails/hurt.png" id="12_isiey"]
@@ -19,9 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://cetyv7rurmqrw" path="res://Objects/Player/Sprites/Tails/run.png" id="16_8qfuu"]
 [ext_resource type="Texture2D" uid="uid://bqgp7gpvdi01p" path="res://Objects/Player/Sprites/Tails/skid.png" id="17_pgv5r"]
 [ext_resource type="Texture2D" uid="uid://dortirvmqpci" path="res://Objects/Player/Sprites/Tails/spin.png" id="18_7veiq"]
-[ext_resource type="Texture2D" uid="uid://cjhsje7gaa8ww" path="res://Objects/Player/Sprites/Tails/spindash.png" id="19_mpebi"]
 [ext_resource type="Texture2D" uid="uid://ccx4fr407ci4p" path="res://Objects/Player/Sprites/Tails/swim.png" id="20_pggls"]
-[ext_resource type="Texture2D" uid="uid://3f2y2agovr0w" path="res://Objects/Player/Sprites/Tails/swim_lift.png" id="21_thw5u"]
 [ext_resource type="Texture2D" uid="uid://cmcxxtnmc4lg8" path="res://Objects/Player/Sprites/Tails/swim_tired.png" id="22_exsyn"]
 [ext_resource type="Texture2D" uid="uid://b0ifjv04djr15" path="res://Objects/Player/Sprites/Tails/transform.png" id="23_y8m0e"]
 [ext_resource type="Texture2D" uid="uid://d0jhkpsyyy2wt" path="res://Objects/Player/Sprites/Tails/walk.png" id="24_phylo"]
@@ -51,11 +47,9 @@ atlas = ExtResource("4_rcdhu")
 region = Rect2(36, 0, 36, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h0cbd"]
-atlas = ExtResource("9_b8vng")
 region = Rect2(0, 0, 31, 29)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_j1dk3"]
-atlas = ExtResource("9_b8vng")
 region = Rect2(31, 0, 31, 29)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5ppqv"]
@@ -155,15 +149,12 @@ atlas = ExtResource("18_7veiq")
 region = Rect2(56, 0, 28, 28)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5w8ka"]
-atlas = ExtResource("19_mpebi")
 region = Rect2(0, 0, 26, 25)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xf2o5"]
-atlas = ExtResource("19_mpebi")
 region = Rect2(26, 0, 26, 25)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_npkfp"]
-atlas = ExtResource("19_mpebi")
 region = Rect2(52, 0, 26, 25)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i5vp3"]
@@ -187,11 +178,9 @@ atlas = ExtResource("20_pggls")
 region = Rect2(156, 0, 39, 30)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h2gkq"]
-atlas = ExtResource("21_thw5u")
 region = Rect2(0, 0, 24, 39)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yswa0"]
-atlas = ExtResource("21_thw5u")
 region = Rect2(24, 0, 24, 39)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_e83ix"]
@@ -333,7 +322,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("6_76aos")
+"texture": null
 }],
 "loop": true,
 "name": &"Drown",
