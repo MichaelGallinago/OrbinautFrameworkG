@@ -39,7 +39,7 @@ public static class Constants
 
 	public enum CollisionSensor : byte
 	{
-		HitBox, HitBoxExtra, SolidPush, SolidU, SolidD, SolidL, SolidR, SolidAny
+		SolidU, SolidD, SolidL, SolidR, SolidAny
 	}
 
 	public enum SolidType : byte

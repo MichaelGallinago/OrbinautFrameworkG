@@ -112,49 +112,37 @@ public abstract partial class BaseObject : Node2D
 		InteractData.OffsetExtra = new Vector2I(offsetX, offsetY);
 	}
 	
-	public bool CheckCollision(BaseObject target, CollisionSensor type)
-	{
-		if (target is Player { IsObjectInteractionEnabled: false }) return false;
-
-		return type switch
-		{
-			CollisionSensor.SolidPush => CheckPushCollision(target),
-			CollisionSensor.HitBox => CheckHitBoxCollision(target, type),
-			CollisionSensor.HitBoxExtra => CheckHitBoxCollision(target, type),
-			_ => CheckSolidCollision(target, type)
-		};
-	}
-	
 	public bool IsCameraTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
 	
-	private bool CheckHitBoxCollision(BaseObject target, CollisionSensor type)
+	public bool CheckHitBoxCollision(BaseObject target, bool isExtraHitBox = false)
 	{
 		if (!InteractData.IsInteract || !target.InteractData.IsInteract) return false;
-		var hitboxColor = new Color();
+		
+		var hitBoxColor = new Color();
 
 		var targetOffset = new Vector2I();
 		var targetRadius = new Vector2I();
-		if (type == CollisionSensor.HitBoxExtra)
+		if (isExtraHitBox)
 		{
 			targetRadius = target.InteractData.RadiusExtra;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0)
 			{
-				type = CollisionSensor.HitBox;	
+				isExtraHitBox = false;
 			}	
 			else
 			{
 				targetOffset = target.InteractData.OffsetExtra;
-				hitboxColor = Color.Color8(0, 0, 220);
+				hitBoxColor = Color.Color8(0, 0, 220);
 			}
 		}
 
-		if (type == CollisionSensor.HitBox)
+		if (!isExtraHitBox)
 		{
 			targetRadius = target.InteractData.Radius;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0) return false;
 			
 			targetOffset = target.InteractData.Offset;
-			hitboxColor = Color.Color8(255, 0, 220);
+			hitBoxColor = Color.Color8(255, 0, 220);
 		}
 		
 		// Calculate bounding boxes for both objects
@@ -185,13 +173,19 @@ public abstract partial class BaseObject : Node2D
 		// This objects should not interact with any other objects this frame anymore
 		InteractData.IsInteract = false;
 		target.InteractData.IsInteract = false;
-			
+		
 		return true;
 	}
 
-	private bool CheckSolidCollision(BaseObject target, CollisionSensor type)
+	public bool CheckPlayerHitBoxCollision(PlayerData player, bool isExtraHitBox = false)
 	{
-		if (target is not Player player) return false;
+		if (!player.IsObjectInteractionEnabled || player.IsHurt) return false;
+		return CheckHitBoxCollision(player, isExtraHitBox);
+	}
+
+	public bool CheckSolidCollision(Player player, CollisionSensor type)
+	{
+		if (!player.IsObjectInteractionEnabled) return false;
 
 		// No solid collision data, exit collision check
 		if (!player.TouchObjects.TryGetValue(this, out TouchState touchState)) return false;
@@ -215,14 +209,26 @@ public abstract partial class BaseObject : Node2D
 			CollisionSensor.SolidL => touchState == TouchState.Left,
 			CollisionSensor.SolidR => touchState == TouchState.Right,
 			CollisionSensor.SolidAny => touchState != TouchState.None,
-			CollisionSensor.HitBox or CollisionSensor.HitBoxExtra or CollisionSensor.SolidPush => false,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}
 
-	private bool CheckPushCollision(BaseObject target)
+	public bool CheckPushCollision(PlayerData player)
 	{
-		return target is Player player && player.PushObjects.Contains(this);
+		//TODO: debug collision
+		/*
+		if _do_debug
+		{
+			var _left = x - _rx + _ox;
+			var _right = x + _rx + _ox;
+			var _width = 4;
+						
+			ds_list_add(_ds_list, _left, y - _ry + _oy, _left + _width, y + _ry + _oy, _push_colour);
+			ds_list_add(_ds_list, _right - _width, y - _ry + _oy, _right, y + _ry + _oy, _push_colour);
+		}
+		*/
+		
+		return player.PushObjects.Contains(this);
 	}
 
 	private void RemoveFromCulling() => ObjectCuller.Local.RemoveFromCulling(this);

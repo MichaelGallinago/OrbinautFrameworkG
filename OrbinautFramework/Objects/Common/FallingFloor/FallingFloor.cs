@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Collections;
-using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Spawnable.Piece;
@@ -51,7 +50,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
         // When falling apart, act as solid only for the players already standing on the object
         foreach (Player player in Scene.Local.Players.Values)
         {
-            if (!CheckCollision(player, Constants.CollisionSensor.SolidU)) continue;
+            if (!CheckSolidCollision(player, Constants.CollisionSensor.SolidU)) continue;
             player.ActSolid(this, Constants.SolidType.Top);
         }
 			
@@ -79,7 +78,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
             player.ActSolid(this, Constants.SolidType.Top);
 			
             if (_isTouched) continue;
-            _isTouched = CheckCollision(player, Constants.CollisionSensor.SolidU);
+            _isTouched = CheckSolidCollision(player, Constants.CollisionSensor.SolidU);
         }
     }
 

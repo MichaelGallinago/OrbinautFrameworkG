@@ -19,6 +19,7 @@ public partial class PathSwapTriggerHorizontal : PathSwapTrigger
     protected override void UpdatePlayerTileLayer(Player player)
     {
         var playerPosition = (Vector2I)player.Position;
+        
         if (playerPosition.Y < Borders.X || playerPosition.Y >= Borders.Y) return;
         
         var previousPositionX = (int)player.PreviousPosition.X;

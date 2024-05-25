@@ -93,44 +93,45 @@ Sprite = NodePath("PlayerAnimatedSprite")
 Shield = NodePath("ShieldContainer")
 _uniqueType = 2
 
-[node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal3" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(11776, 1088)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal4" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal4" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(11888, 1152)
 scale = Vector2(1, 3)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(2432, 960)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("Sprite2D")
+_sprite = NodePath("Sprite2D")
+_isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal2" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal2" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(2560, 1032)
 scale = Vector2(1, 2.75)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal5" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal5" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(4224, 976)
 scale = Vector2(1, 4.5)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal6" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal6" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(4096, 832)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+_sprite = NodePath("Sprite2D")
 
 [node name="Parallax2D" type="Parallax2D" parent="."]
 visible = false
@@ -218,16 +219,15 @@ Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 position = Vector2(11392, 1648)
 Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="PathSwapTriggerHorizontal7" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal7" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(9856, 1216)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
-IsGroundOnly = true
+_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal8" parent="." node_paths=PackedStringArray("Sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal8" parent="." node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
 position = Vector2(10112, 1296)
 scale = Vector2(1, 3.5)
 _layerLeft = 1
 _layerRight = 0
-Sprite = NodePath("../PathSwapTriggerHorizontal/Sprite2D")
+_sprite = NodePath("Sprite2D")

@@ -8,15 +8,15 @@ using Player;
 
 public abstract partial class PathSwapTrigger : Trigger
 {
-    [Export] protected Sprite2D Sprite;
-    [Export] protected bool IsGroundOnly;
+    [Export] private Sprite2D _sprite;
+    [Export] private bool _isGroundOnly;
 
     protected Vector2 Borders;
 
     public override void _Ready()
     {
-        if (Sprite == null) return;
-        float size = Sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
+        if (_sprite == null) return;
+        float size = _sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
         Borders = new Vector2(-size, size);
     }
 
@@ -24,7 +24,7 @@ public abstract partial class PathSwapTrigger : Trigger
     {
         foreach (Player player in Scene.Local.Players.Values)
         {
-            if (IsGroundOnly && !player.IsGrounded || player.IsDebugMode) continue;
+            if (_isGroundOnly && !player.IsGrounded || !player.IsObjectInteractionEnabled) continue;
             UpdatePlayerTileLayer(player);
         }
     }

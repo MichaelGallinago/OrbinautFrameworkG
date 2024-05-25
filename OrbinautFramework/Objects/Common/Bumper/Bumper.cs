@@ -16,25 +16,31 @@ public partial class Bumper : BaseObject
     {
         Sonic1 = 10, Sonic2 = -1
     }
+
+    private const float Force = 7f;
     
     [Export] private HitsLimit _hitsLimit = HitsLimit.Sonic2;
     [Export] private AdvancedAnimatedSprite _sprite;
+    
     private int _state;
     private int _hitsLeft;
 
     public Bumper() => SetHitBox(new Vector2I(8, 8));
+    
     public override void _Ready()
     {
-        _hitsLeft = (int)_hitsLimit;
+        base._Ready();
         _sprite.AnimationFinished += OnAnimationFinished;
     }
 
+    protected override void Init() => _hitsLeft = (int)_hitsLimit;
+    
     public override void _Process(double delta)
     {
         foreach (Player player in Scene.Local.Players.Values)
         {
-            if (player.IsHurt || !CheckCollision(player, Constants.CollisionSensor.HitBox)) continue;
-		    
+            if (!CheckPlayerHitBoxCollision(player)) continue;
+            
             if (_sprite.Animation == "Default")
             {
                 _sprite.Play("Bump");
@@ -42,36 +48,33 @@ public partial class Bumper : BaseObject
             
             AudioPlayer.Sound.Play(SoundStorage.Bumper);
             
-            float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - Position));
-		
-            if (player.Action != Actions.Glide || player.ActionState == (int)GlideStates.Fall)
-            {
-                float bumpSpeed = 7f * MathF.Sin(radians);
-			
-                if (player.IsGrounded)
-                {
-                    player.GroundSpeed.Value = bumpSpeed;
-                }
-                else
-                {
-                    player.Velocity.X = bumpSpeed;
-                }
-            }
-
-            player.Velocity.Y = 7f * MathF.Cos(radians);
-            player.IsJumping = false;
-            player.IsAirLock = false;
+            BumpPlayer(player, Position);
             
             if (_hitsLeft == 0) break;
-            
             _hitsLeft--;
             
             //TODO: obj_score
             //instance_create(x, y, obj_score);
             Player.IncreaseComboScore();
-		
+            
             break;
         }
+    }
+
+    private static void BumpPlayer(PlayerData player, Vector2 position)
+    {
+        if (player.Action == Actions.Carried)
+        {
+            player.Action = Actions.None;
+        }
+        
+        player.IsJumping = false;
+        player.IsGrounded = false;
+        player.IsAirLock = false;
+        player.SetPushAnimationBy = null;
+        
+        float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - position));
+        player.Velocity.Vector = Force * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
     }
 
     private void OnAnimationFinished()

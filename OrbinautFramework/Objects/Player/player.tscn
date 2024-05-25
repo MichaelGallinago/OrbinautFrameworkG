@@ -18,6 +18,7 @@ script = ExtResource("1_cv4v1")
 _packedTail = ExtResource("2_x8pdm")
 Sprite = NodePath("PlayerAnimatedSprite")
 Shield = NodePath("ShieldContainer")
+Culling = 1
 
 [node name="ShieldContainer" parent="." instance=ExtResource("3_01y4h")]
 FrameLoop = 0

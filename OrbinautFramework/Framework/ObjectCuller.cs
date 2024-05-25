@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework;
 
@@ -42,7 +43,7 @@ public class ObjectCuller
     private bool StopAllObjets()
     {
 	    if (!Scene.Local.IsPaused && Scene.Local.UpdateObjects) return false;
-
+	    
 	    foreach (BaseObject baseObject in ActiveObjects)
 	    {
 		    _stoppedObjects.Add(baseObject);
