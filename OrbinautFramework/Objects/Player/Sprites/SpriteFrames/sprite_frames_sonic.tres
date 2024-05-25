@@ -784,6 +784,7 @@ _offsets = {
 "Death": Vector2(-1, -1),
 "Drown": Vector2(-1, 1),
 "Duck": Vector2(3, 4),
+"Flip": Vector2(1, 0),
 "Grab": Vector2(4, -5),
 "Hurt": Vector2(0, 2),
 "Idle": Vector2(-1, 0),
