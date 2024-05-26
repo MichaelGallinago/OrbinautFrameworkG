@@ -12,14 +12,13 @@ public partial class SceneLateUpdate : Node
      
     public override void _Process(double delta)
     {
+        if (Scene.Local.IsPaused) return;
         UpdateLiveRewards();
         Update?.Invoke();
     }
     
     private static void UpdateLiveRewards()
     {
-        if (Scene.Local.IsPaused) return;
-        
         const int ringIncrement = 100;
         const int scoreIncrement = 100;
 		

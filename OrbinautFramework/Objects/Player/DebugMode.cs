@@ -56,7 +56,7 @@ public class DebugMode
 				
 				_speed = 0;
 				
-				Scene.Local.UpdateObjects = true;
+				Scene.Local.Culler.UpdateObjects = true;
 				Scene.Local.AllowPause = true;
 				
 				editor.OnEnableEditMode();

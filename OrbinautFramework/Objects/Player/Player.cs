@@ -34,12 +34,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		if (Scene.Local.IsPaused && DeathState == DeathStates.Wait) return;
 		
 		Input.Update(Id);
-
-		if (Input.Press.Start)
-		{
-			Velocity.X = MathF.Max(Velocity.X, 16f);
-		}
-
+		
 		// DEBUG MODE PLAYER ROUTINE
 		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
 		{
@@ -561,7 +556,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		// Stop all objects
 		if (Id == 0)
 		{
-			Scene.Local.UpdateObjects = false;
+			Scene.Local.Culler.UpdateObjects = false;
 		}
 		
 		switch (DeathState)

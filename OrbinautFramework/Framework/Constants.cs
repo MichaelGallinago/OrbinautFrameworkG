@@ -39,8 +39,9 @@ public static class Constants
 
 	public enum CollisionSensor : byte
 	{
-		SolidU, SolidD, SolidL, SolidR, SolidAny
+		Top, Bottom, Left, Right, Any
 	}
+
 
 	public enum SolidType : byte
 	{

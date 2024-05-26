@@ -204,11 +204,11 @@ public abstract partial class BaseObject : Node2D
 		
 		return type switch
 		{
-			CollisionSensor.SolidU => touchState == TouchState.Top,
-			CollisionSensor.SolidD => touchState == TouchState.Bottom,
-			CollisionSensor.SolidL => touchState == TouchState.Left,
-			CollisionSensor.SolidR => touchState == TouchState.Right,
-			CollisionSensor.SolidAny => touchState != TouchState.None,
+			CollisionSensor.Top => touchState == TouchState.Top,
+			CollisionSensor.Bottom => touchState == TouchState.Bottom,
+			CollisionSensor.Left => touchState == TouchState.Left,
+			CollisionSensor.Right => touchState == TouchState.Right,
+			CollisionSensor.Any => touchState != TouchState.None,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}

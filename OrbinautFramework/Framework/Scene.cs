@@ -22,9 +22,9 @@ public abstract partial class Scene : Node2D
     public bool IsStage { get; protected set; }
     public ObjectCuller Culler { get; } = new();
     public float ProcessSpeed { get; private set; }
+    public float RingSpillTimer { get; set; }
     public bool AllowPause { get; set; }
     public bool IsPaused { get; set; }
-    public bool UpdateObjects { get; set; } = true;
     public float Time { get; set; }
     
     private SceneContinuousUpdate _sceneContinuousUpdate = new();

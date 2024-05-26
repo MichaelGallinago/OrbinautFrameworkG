@@ -11,6 +11,8 @@ public class ObjectCuller
 {
 	public static ObjectCuller Local => Scene.Local.Culler;
 	
+	public bool UpdateObjects { get; set; } = true;
+	
 	private bool _isCullToggled = true;
 	private readonly HashSet<BaseObject> _hiddenObjectsInView = [];
 	private readonly HashSet<BaseObject> _stoppedObjects = [];
@@ -42,7 +44,7 @@ public class ObjectCuller
 
     private bool StopAllObjets()
     {
-	    if (!Scene.Local.IsPaused && Scene.Local.UpdateObjects) return false;
+	    if (!Scene.Local.IsPaused && UpdateObjects) return false;
 	    
 	    foreach (BaseObject baseObject in ActiveObjects)
 	    {

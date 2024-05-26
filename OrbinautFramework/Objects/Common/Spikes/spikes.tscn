@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://bifod3tgod01h"]
+
+[ext_resource type="Texture2D" uid="uid://bmv43haxsvefj" path="res://Objects/Common/Spikes/spikes_vertical.png" id="1_k5w7w"]
+[ext_resource type="Script" path="res://Objects/Common/Spikes/Spikes.cs" id="1_tcdwg"]
+
+[node name="Spikes" type="Node2D"]
+script = ExtResource("1_tcdwg")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_k5w7w")

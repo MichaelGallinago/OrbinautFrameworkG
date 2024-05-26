@@ -49,7 +49,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 	    {
 		    player.ActSolid(this, Constants.SolidType.Top);
 		    
-		    if (!CheckSolidCollision(player, Constants.CollisionSensor.SolidU)) continue;
+		    if (!CheckSolidCollision(player, Constants.CollisionSensor.Top)) continue;
 			
 		    isPlayerTouch = true;
 			
