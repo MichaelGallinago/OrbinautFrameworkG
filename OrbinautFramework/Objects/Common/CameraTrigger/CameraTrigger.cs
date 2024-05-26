@@ -14,9 +14,9 @@ public partial class CameraTrigger : Trigger
     }
     
     [Export] private Sprite2D _sprite;
-    [Export] private bool _triggerWithin;
     [Export] private BoundSpeeds _boundSpeed;
     [Export] private Direction _direction;
+    [Export] private bool _triggerWithin;
     
     private int _height;
     private Vector2I[] _previousBounds;

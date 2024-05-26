@@ -7,8 +7,8 @@ using Player;
 
 public partial class PathSwapTriggerHorizontal : PathSwapTrigger
 {
-    [Export] private Constants.TileLayers _layerLeft;
-    [Export] private Constants.TileLayers _layerRight;
+    [Export] private Constants.TileLayers _layerLeft = Constants.TileLayers.Secondary;
+    [Export] private Constants.TileLayers _layerRight = Constants.TileLayers.Main;
     
     public override void _Ready()
     {

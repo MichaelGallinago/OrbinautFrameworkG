@@ -6,6 +6,7 @@
 [node name="ForceSpinTriggerVertical" type="Node2D"]
 rotation = 1.5708
 script = ExtResource("1_vfaal")
+Culling = 6
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 1, 1, 0.501961)

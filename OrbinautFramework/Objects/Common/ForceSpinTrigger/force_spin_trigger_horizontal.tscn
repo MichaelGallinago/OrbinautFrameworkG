@@ -6,6 +6,7 @@
 [node name="ForceSpinTriggerHorizontal" type="Node2D" node_paths=PackedStringArray("Sprite")]
 script = ExtResource("1_j52nd")
 Sprite = NodePath("Sprite2D")
+Culling = 6
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 1, 1, 0.501961)

@@ -5,7 +5,6 @@
 
 [node name="PathSwapTriggerHorizontal" type="Node2D" node_paths=PackedStringArray("_sprite")]
 script = ExtResource("1_ca4ww")
-_layerRight = 1
 _sprite = NodePath("Sprite2D")
 Culling = 6
 

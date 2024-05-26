@@ -149,7 +149,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		UpdateCdCamera(player, processSpeed);
 		
-		if (SharedData.CdCamera)
+		if (!SharedData.CdCamera)
 		{
 			FollowTargetX(processSpeed, targetPosition.X);
 		}
