@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://bjiphfdgqv734"]
+
+[ext_resource type="Script" path="res://Objects/Common/Spikes/SpikesHorizontal.cs" id="1_gkq36"]
+[ext_resource type="Texture2D" uid="uid://d2w0wqvi4j0g6" path="res://Objects/Common/Spikes/spikes_horizontal.png" id="2_qunnu"]
+
+[node name="SpikesHorizontal" type="Node2D" node_paths=PackedStringArray("_sprite")]
+script = ExtResource("1_gkq36")
+_sprite = NodePath("Sprite2D")
+Culling = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_qunnu")

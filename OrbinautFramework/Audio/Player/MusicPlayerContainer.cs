@@ -25,7 +25,6 @@ public class MusicPlayerContainer : PlayerContainer
 
     public void StopJingle()
     {
-        GD.Print("JingleStop");
         _jinglePlayer.Stop();
         _jinglePlayer.Stream = null;
         UnmuteBus(1f);

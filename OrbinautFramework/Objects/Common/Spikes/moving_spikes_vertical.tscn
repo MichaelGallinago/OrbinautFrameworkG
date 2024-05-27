@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dle7etep66bfj"]
+
+[ext_resource type="PackedScene" uid="uid://bifod3tgod01h" path="res://Objects/Common/Spikes/spikes_vertical.tscn" id="1_csnxd"]
+
+[node name="MovingSpikesVertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("1_csnxd")]
+IsMoving = true
+_sprite = NodePath("Sprite2D")
+Culling = 2

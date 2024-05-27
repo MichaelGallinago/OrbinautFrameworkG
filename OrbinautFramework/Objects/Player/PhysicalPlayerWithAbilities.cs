@@ -1098,7 +1098,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Input.Press.Left && GroundSpeed > 0f || Input.Press.Right && GroundSpeed < 0f)
 		{
 			Facing = (Constants.Direction)(-(int)Facing);
-			GroundSpeed.Value *= -1f;
+			GroundSpeed.Value = -GroundSpeed;
 		}
 		
 		Velocity.SetDirectionalValue(GroundSpeed, Angle);

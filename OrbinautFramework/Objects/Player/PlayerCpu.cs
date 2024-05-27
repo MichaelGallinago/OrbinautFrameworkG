@@ -130,7 +130,7 @@ public partial class PlayerCpu : Player
 			{
 				if (velocityX < distance.X)
 				{
-					velocityX *= -1;
+					velocityX = -velocityX;
 				}
 				else
 				{
@@ -142,7 +142,7 @@ public partial class PlayerCpu : Player
 			}
 			else
 			{
-				velocityX *= -1;
+				velocityX = -velocityX;
 
 				if (velocityX >= distance.X)
 				{

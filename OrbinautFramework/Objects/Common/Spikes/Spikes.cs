@@ -1,49 +1,104 @@
 using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
 using Player;
 
-public partial class Spikes : BaseObject
+public abstract partial class Spikes : BaseObject
 {
+    [Export] public bool IsMoving { get; set; }
+    
+    [Export] private Sprite2D _sprite;
+    
     private Constants.CollisionSensor _sensor;
+    private int _retractDistance;
+    private bool _isFlipped;
+    
+    private float _retractValue = 8f;
+    private float _retractTimer;
+    private float _retractOffset;
+    private Rect2 _rectangle;
+    private Vector2 _initialPosition;
     
     public override void _Ready()
     {
         base._Ready();
+        _initialPosition = Position;
+        _rectangle = _sprite.GetRect();
+
+        Vector2 size = _rectangle.Size.Abs() * Scale;
         
-        _sensor = Angles.GetQuadrant(RotationDegrees) switch
-        {
-            Angles.Quadrant.Up => Constants.CollisionSensor.Top,
-            Angles.Quadrant.Down => Constants.CollisionSensor.Bottom,
-            Angles.Quadrant.Left => Constants.CollisionSensor.Left,
-            Angles.Quadrant.Right => Constants.CollisionSensor.Right,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-        
-        SetSolid(16, 16);
+        SetSolid((Vector2I)size / 2);
+        GetDirectionSpecificData(size).Deconstruct(out _isFlipped, out _sensor, out _retractDistance);
     }
 
-    public override void _Process(double delta) => HurtPlayers();
+    public override void _Process(double delta)
+    {
+        if (IsMoving)
+        {
+            Move();
+        }
+        
+        CollideWithPlayers();
+    }
 
-    private void HurtPlayers()
+    protected abstract void CollideWithPlayer(Player player);
+    protected abstract Vector2 GetRetractOffsetVector(float retractOffset);
+    protected abstract SpikesDto GetDirectionSpecificData(Vector2 size);
+
+    private void CollideWithPlayers()
     {
         foreach (Player player in Scene.Local.Players.Values)
         {
-            player.ActSolid(this, Constants.SolidType.Full);
-            
+            CollideWithPlayer(player);
             if (!CheckSolidCollision(player, _sensor)) continue;
-            
-            player.Hurt(Position.X);
-
-            if (!AudioPlayer.Sound.IsPlaying(SoundStorage.Hurt)) continue;
-            
-            AudioPlayer.Sound.Stop(SoundStorage.Hurt);
-            AudioPlayer.Sound.Play(SoundStorage.SpikesHurt);
+            HurtPlayer(player);
         }
+    }
+
+    private void HurtPlayer(BasicPhysicalPlayer player)
+    {
+        player.Hurt(Position.X);
+            
+        if (!AudioPlayer.Sound.IsPlaying(SoundStorage.Hurt)) return;
+            
+        AudioPlayer.Sound.Stop(SoundStorage.Hurt);
+        AudioPlayer.Sound.Play(SoundStorage.SpikesHurt);
+    }
+    
+    private void Move()
+    {
+        UpdateRetraction();
+        _rectangle.Position = Position = _initialPosition + GetRetractOffsetVector(_retractOffset);
+    }
+    
+    private void UpdateRetraction()
+    {
+        if (_retractTimer > 0f)
+        {
+            _retractTimer -= Scene.Local.ProcessSpeed;
+            if (_retractTimer <= 0f && Views.Local.CheckRectInCameras(_rectangle))
+            {
+                AudioPlayer.Sound.Play(SoundStorage.SpikesMove);
+            }
+            return;
+        }
+
+        _retractOffset += _retractValue;
+
+        if (Math.Abs(_retractOffset) < _retractDistance && 
+            (_isFlipped ? _retractOffset < 0f : _retractOffset > 0f)) return;
+            
+        _retractOffset = _isFlipped
+            ? Math.Clamp(_retractOffset, -_retractDistance, 0f)
+            : Math.Clamp(_retractOffset, 0f, _retractDistance);
+            
+        _retractTimer = 60f;
+        _retractValue = -_retractValue;
     }
 }

@@ -32,10 +32,12 @@ public partial class Bumper : BaseObject
         base._Ready();
         _sprite.AnimationFinished += OnAnimationFinished;
     }
-
-    protected override void Init() => _hitsLeft = (int)_hitsLimit;
     
-    public override void _Process(double delta)
+    public override void _Process(double delta) => CheckCollisionWithPlayers();
+    
+    protected override void Init() => _hitsLeft = (int)_hitsLimit;
+
+    private void CheckCollisionWithPlayers()
     {
         foreach (Player player in Scene.Local.Players.Values)
         {

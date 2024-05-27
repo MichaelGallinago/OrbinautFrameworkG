@@ -58,7 +58,7 @@ public partial class Block : BaseObject
 					
                     if i > 0
                     {
-                        _spd_x *= -1;
+                        _spd_x = -_spd_x;
                     }
 					
                     if j > 0
