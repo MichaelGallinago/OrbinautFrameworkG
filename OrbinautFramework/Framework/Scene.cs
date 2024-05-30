@@ -8,6 +8,11 @@ namespace OrbinautFramework3.Framework;
 
 public abstract partial class Scene : Node2D
 {
+    public enum States : byte
+    {
+        Normal, StopObjects, Paused
+    }
+    
     public static Scene Local { get; private set; }
     
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
@@ -24,7 +29,7 @@ public abstract partial class Scene : Node2D
     public float ProcessSpeed { get; private set; }
     public float RingSpillTimer { get; set; }
     public bool AllowPause { get; set; }
-    public bool IsPaused { get; set; }
+    public States State { get; set; } = States.Normal;
     public float Time { get; set; }
     
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
@@ -51,7 +56,7 @@ public abstract partial class Scene : Node2D
     {
         ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
         
-        if (!IsPaused)
+        if (State != States.Paused)
         {
             Time += ProcessSpeed;
         }

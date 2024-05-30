@@ -44,6 +44,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (Id == 0)
 		{
+			Scene.Local.AllowPause = false;
+			Scene.Local.State = Scene.States.StopObjects;
+			
 			SharedData.PlayerShield = ShieldContainer.Types.None;
 		}
 		

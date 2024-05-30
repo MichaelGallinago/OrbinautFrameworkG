@@ -33,6 +33,7 @@ public static class SharedData
     public static bool DoubleSpin { get; set; } = true;
     public static bool CdTimer { get; set; } = false;
     public static bool CdCamera { get; set; } = false;
+    public static bool SuperstarsTweaks { get; set; } = true;
 	
     // Orbinaut improvements
     public static byte RotationMode { get; set; } = 1;
@@ -84,12 +85,26 @@ public static class SharedData
 		    _sensorDebugType = value;
 	    }
     }
-    
-    static SharedData() => WindowName = "Orbinaut Framework 3";
-    public static string WindowName { set => DisplayServer.WindowSetTitle(value); }
 
     public enum SensorDebugTypes : byte
     {
 	    None, Collision, HitBox, SolidBox
+    }
+    
+    public static void ClearFull()
+    {
+	    CheckpointData = null;
+	    GiantRingData = null;
+	    // TODO: ds_giant_rings
+	    //ds_list_clear(global.ds_giant_rings);
+	    
+	    Clear();
+    }
+
+    public static void Clear()
+    {
+	    PlayerShield = ShieldContainer.Types.None;
+	    PlayerRings = 0;
+	    LifeRewards = Vector2I.Zero;
     }
 }

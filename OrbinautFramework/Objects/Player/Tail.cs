@@ -10,7 +10,7 @@ public partial class Tail : AdvancedAnimatedSprite
 {
 	public void Animate(ITailed data)
 	{
-		if (Scene.Local.IsPaused) return;
+		if (Scene.Local.State == Scene.States.Paused) return;
 		
 		Offset = Vector2.Zero;
 		

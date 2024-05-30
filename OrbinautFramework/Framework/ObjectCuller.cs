@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
-using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework;
 
 public class ObjectCuller
 {
 	public static ObjectCuller Local => Scene.Local.Culler;
-	
-	public bool UpdateObjects { get; set; } = true;
 	
 	private bool _isCullToggled = true;
 	private readonly HashSet<BaseObject> _hiddenObjectsInView = [];
@@ -44,7 +41,7 @@ public class ObjectCuller
 
     private bool StopAllObjets()
     {
-	    if (!Scene.Local.IsPaused && UpdateObjects) return false;
+	    if (Scene.Local.State != Scene.States.Paused) return false;
 	    
 	    foreach (BaseObject baseObject in ActiveObjects)
 	    {

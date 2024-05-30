@@ -145,7 +145,7 @@ public partial class Camera : Camera2D, ICamera
 	
 	private void FollowPlayer(float processSpeed, Vector2 targetPosition, PlayerData player)
 	{
-		if (Scene.Local.IsPaused && player.DeathState == DeathStates.Wait || player.IsDead) return;
+		if (Scene.Local.State == Scene.States.Paused && player.DeathState == DeathStates.Wait || player.IsDead) return;
 		
 		UpdateCdCamera(player, processSpeed);
 		
@@ -227,7 +227,7 @@ public partial class Camera : Camera2D, ICamera
 	
 	private void MoveCamera()
 	{
-		if (!IsMovementAllowed || Scene.Local.IsPaused) return;
+		if (!IsMovementAllowed || Scene.Local.State == Scene.States.Paused) return;
 		
 		float processSpeed = Scene.Local.ProcessSpeed;
 

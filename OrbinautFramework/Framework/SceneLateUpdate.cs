@@ -12,7 +12,7 @@ public partial class SceneLateUpdate : Node
      
     public override void _Process(double delta)
     {
-        if (Scene.Local.IsPaused) return;
+        if (Scene.Local.State == Scene.States.Paused) return;
         UpdateLiveRewards();
         Update?.Invoke();
     }

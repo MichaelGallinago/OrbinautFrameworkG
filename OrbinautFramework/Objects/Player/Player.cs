@@ -31,8 +31,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	
 	public override void _Process(double delta)
 	{
-		if (Scene.Local.IsPaused && DeathState == DeathStates.Wait) return;
-		
 		Input.Update(Id);
 		
 		// DEBUG MODE PLAYER ROUTINE
@@ -441,8 +439,8 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		{
 			angleDifference += 360f;
 		}
-		
-		return (VisualAngle + angleDifference * 0.5f) % 360f;
+
+		return (VisualAngle + angleDifference * (Math.Abs(GroundSpeed) >= 6f ? 0.5f : 0.25f)) % 360f;
 	}
 	
 	private void ProcessPalette()
@@ -551,12 +549,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		if (AirTimer == 0 && (int)Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
 		{
 			return;
-		}
-		
-		// Stop all objects
-		if (Id == 0)
-		{
-			Scene.Local.Culler.UpdateObjects = false;
 		}
 		
 		switch (DeathState)

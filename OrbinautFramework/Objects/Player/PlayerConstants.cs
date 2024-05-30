@@ -60,7 +60,7 @@ public enum GlideStates : byte
 	
 public enum ClimbStates : byte
 {
-    Normal, Ledge
+    Normal, Ledge, WallJump
 }
 
 public enum RestartStates : byte

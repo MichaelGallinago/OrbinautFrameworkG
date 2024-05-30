@@ -228,9 +228,9 @@ public partial class PlayerCpu : Player
 			CpuState = CpuStates.Respawn;
 			ResetState();
 		}
-		else // Force-disable animation
+		else
 		{
-			Sprite.Pause();
+			//TODO: instance_deactivate_object(id);
 		}
 					
 		IsControlRoutineEnabled = false;

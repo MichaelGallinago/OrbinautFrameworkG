@@ -32,57 +32,7 @@ public class PlayerContainer
         _playersLimit = playersLimit;
         _busIndex = AudioServer.GetBusIndex(_freePlayers.Peek().Bus);
     }
-
-    public void UpdateVolume()
-    {
-        UpdateBusVolume();
-        UpdatePlayersVolume();
-    }
-
-    private void UpdateBusVolume()
-    {
-        if (_busMuteSpeed == 0f) return;
-        
-        float volume = AudioServer.GetBusVolumeDb(_busIndex);
-        volume += _busMuteSpeed;
-
-        if (volume is > MinimalVolume and < DefaultVolume)
-        {
-            AudioServer.SetBusVolumeDb(_busIndex, volume);
-            return;
-        }
-
-        _busMuteSpeed = 0f;
-        AudioServer.SetBusVolumeDb(_busIndex, Math.Clamp(volume, MinimalVolume, DefaultVolume));
-    }
-
-    private void UpdatePlayersVolume()
-    {
-        foreach (AudioStreamPlayer player in _volumeChangeList.Keys)
-        {
-            (float speed, bool stop) data = _volumeChangeList[player];
-            player.VolumeDb += Scene.Local.ProcessSpeed * data.speed;
-            
-            switch (player.VolumeDb)
-            {
-                case <= MinimalVolume:
-                    player.VolumeDb = MinimalVolume;
-                    if (data.stop)
-                    {
-                        player.Stop();
-                        FreePlayer(player);
-                    }
-                    _volumeChangeList.Remove(player);
-                    break;
-                
-                case >= DefaultVolume:
-                    player.VolumeDb = DefaultVolume;
-                    _volumeChangeList.Remove(player);
-                    break;
-            }
-        }
-    }
-
+    
     public bool IsPlaying(AudioStream audio) => _activePlayers.ContainsKey(audio);
     public bool IsAnyPlaying() => _activePlayers.Count > 0;
     public void Play(AudioStream audio) => GetPlayer(audio)?.Play();
@@ -140,6 +90,56 @@ public class PlayerContainer
         foreach (AudioStreamPlayer soundPlayers in _freePlayers)
         {
             soundPlayers.StreamPaused = isPaused;
+        }
+    }
+    
+    public void UpdateVolume()
+    {
+        UpdateBusVolume();
+        UpdatePlayersVolume();
+    }
+
+    private void UpdateBusVolume()
+    {
+        if (_busMuteSpeed == 0f) return;
+        
+        float volume = AudioServer.GetBusVolumeDb(_busIndex);
+        volume += _busMuteSpeed;
+
+        if (volume is > MinimalVolume and < DefaultVolume)
+        {
+            AudioServer.SetBusVolumeDb(_busIndex, volume);
+            return;
+        }
+
+        _busMuteSpeed = 0f;
+        AudioServer.SetBusVolumeDb(_busIndex, Math.Clamp(volume, MinimalVolume, DefaultVolume));
+    }
+
+    private void UpdatePlayersVolume()
+    {
+        foreach (AudioStreamPlayer player in _volumeChangeList.Keys)
+        {
+            (float speed, bool stop) data = _volumeChangeList[player];
+            player.VolumeDb += Scene.Local.ProcessSpeed * data.speed;
+            
+            switch (player.VolumeDb)
+            {
+                case <= MinimalVolume:
+                    player.VolumeDb = MinimalVolume;
+                    if (data.stop)
+                    {
+                        player.Stop();
+                        FreePlayer(player);
+                    }
+                    _volumeChangeList.Remove(player);
+                    break;
+                
+                case >= DefaultVolume:
+                    player.VolumeDb = DefaultVolume;
+                    _volumeChangeList.Remove(player);
+                    break;
+            }
         }
     }
 

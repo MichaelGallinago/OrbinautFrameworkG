@@ -584,6 +584,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (Action != Actions.Flight) return;
 
+		// Flight timer
 		if (ActionValue > 0f)
 		{
 			ActionValue -= Scene.Local.ProcessSpeed;
@@ -656,6 +657,11 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 			
 		Gravity = GravityType.TailsDown;
+		
+		if (SharedData.SuperstarsTweaks && Input.Down.Down)
+		{
+			Gravity *= 3f;
+		}
 	}
 
 	private void ProcessClimb()
@@ -666,6 +672,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		{
 			case ClimbStates.Normal: ClimbNormal(); break;
 			case ClimbStates.Ledge: ClimbLedge(); break;
+			case ClimbStates.WallJump: ClimbJump(); break;
 		}
 	}
 
@@ -699,7 +706,12 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			}
 			return;
 		}
-		
+
+		ClimbJump();
+	}
+
+	private void ClimbJump()
+	{
 		Animation = Animations.Spin;
 		IsSpinning = true;
 		IsJumping = true;
@@ -1260,10 +1272,11 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		{
 			Position += Vector2.Right;
 		}
-			
-		Animation = Animations.ClimbWall;
+
+		bool isWallJump = SharedData.SuperstarsTweaks && (Input.Down.Up || Input.Down.Down);
+		ActionState = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal);
 		Action = Actions.Climb;
-		ActionState = (int)ClimbStates.Normal;
+		Animation = Animations.ClimbWall;
 		ActionValue = 0f;
 		GroundSpeed.Value = 0f;
 		Velocity.Y = 0f;
