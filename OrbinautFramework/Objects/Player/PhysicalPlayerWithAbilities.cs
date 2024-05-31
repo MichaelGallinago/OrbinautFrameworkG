@@ -29,12 +29,15 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (StartJump()) return;
 		
 		// Abilities logic
-		ChargeDropDash();
-		ProcessFlight();
-		ProcessClimb();
-		ProcessGlide();
-		ChargeHammerSpin();
-		ProcessHammerDash();
+		switch (Action)
+		{
+			case Actions.DropDash: ChargeDropDash(); break;
+			case Actions.Flight: ProcessFlight(); break;
+			case Actions.Climb: ProcessClimb(); break;
+			case Actions.Glide: ProcessGlide(); break;
+			case Actions.HammerSpin: ChargeHammerSpin(); break;
+			case Actions.HammerDash: ProcessHammerDash(); break;
+		}
 		
 		ProcessCorePhysics();
 		
@@ -80,6 +83,11 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		AttachToPlayer(carrier);
+	}
+	
+	private void UpdatePhysicParameters()
+	{
+		PhysicParams = PhysicParams.Get(IsUnderwater, SuperTimer > 0f, Type, ItemSpeedTimer);
 	}
 	
 	private bool ProcessSpinDash()
@@ -158,12 +166,15 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		StartDash();
 		
-		if (Action == Actions.Dash && IsGrounded) return !ChargeDash() && ReleaseDash();
-		
 		if (Action != Actions.Dash)
 		{
 			AudioPlayer.Sound.Stop(SoundStorage.Charge2);
 		}
+		else if (IsGrounded)
+		{
+			return !ChargeDash() && ReleaseDash();
+		}
+		
 		return false;
 	}
 
@@ -551,7 +562,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool CancelDropDash()
 	{
-		if (!SharedData.DropDash || Action != Actions.DropDash) return true;
+		//TODO: remove Action != Actions.DropDash somehow
+		if (!SharedData.DropDash && Action != Actions.DropDash) return true;
 		
 		if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f || ItemInvincibilityTimer > 0f) return false;
 		
@@ -582,8 +594,6 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void ProcessFlight()
 	{
-		if (Action != Actions.Flight) return;
-
 		// Flight timer
 		if (ActionValue > 0f)
 		{
@@ -666,8 +676,6 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void ProcessClimb()
 	{
-		if (Action != Actions.Climb) return;
-		
 		switch ((ClimbStates)ActionState)
 		{
 			case ClimbStates.Normal: ClimbNormal(); break;
@@ -876,7 +884,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void ProcessGlide()
 	{
-		if (Action != Actions.Glide || ActionState == (int)GlideStates.Fall) return;
+		if (ActionState == (int)GlideStates.Fall) return;
 		
 		switch ((GlideStates)ActionState)
 		{
@@ -1031,7 +1039,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void ChargeHammerSpin()
 	{
-		if (Action != Actions.HammerSpin || IsGrounded) return;
+		if (IsGrounded) return;
 		
 		// Charge
 		if (Input.Down.Abc)
@@ -1080,8 +1088,6 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	private void ProcessHammerDash()
 	{
-		if (Action != Actions.HammerDash) return;
-
 		// Note that ACTION_HAMMERDASH is used for movement logic only so the respective
 		// animation isn't cleared alongside the action flag. All checks for Hammer Dash should refer to its animation
 		

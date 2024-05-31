@@ -13,26 +13,41 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	protected event Action LandHandler;
 	protected PhysicParams PhysicParams;
 
-	protected void UpdatePhysicParameters()
-	{
-		PhysicParams = PhysicParams.Get(IsUnderwater, SuperTimer > 0f, Type, ItemSpeedTimer);
-	}
-
 	protected void ProcessCorePhysics()
 	{
-		ProcessSlopeResist();
-		ProcessSlopeResistRoll();
-		ProcessMovementGround();
-		ProcessMovementRoll();
-		ProcessMovementAir();
-		ProcessBalance();
-		ProcessCollisionGroundWalls();
-		ProcessRollStart();
+		if (IsGrounded)
+		{
+			if (IsSpinning)
+			{
+				ProcessSlopeResistRoll();
+				ProcessMovementRoll();
+			}
+			else
+			{
+				ProcessSlopeResist();
+				ProcessMovementGround();
+				ProcessBalance();
+			}
+			ProcessCollisionGroundWalls();
+			ProcessRollStart();
+		}
+		else
+		{
+			ProcessMovementAir();
+		}
+		
 		ProcessLevelBound();
 		ProcessPosition();
-		ProcessCollisionGroundFloor();
-		ProcessSlopeRepel();
-		ProcessCollisionAir();
+
+		if (IsGrounded)
+		{
+			ProcessCollisionGroundFloor();
+			ProcessSlopeRepel();
+		}
+		else
+		{
+			ProcessCollisionAir();
+		}
 	}
 	
 	public void Kill()
@@ -246,7 +261,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
     private void ProcessSlopeResist()
 	{
-		if (!IsGrounded || IsSpinning || Action is Actions.HammerDash or Actions.Dash) return;
+		if (Action is Actions.HammerDash or Actions.Dash) return;
 		if (Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
 		
 		float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(Angle));
@@ -260,7 +275,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessSlopeResistRoll()
 	{
-		if (!IsGrounded || !IsSpinning) return;
 		if (Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
 	
 		float angleSine = MathF.Sin(Mathf.DegToRad(Angle));
@@ -270,7 +284,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessMovementGround()
 	{
-		if (!IsGrounded || IsSpinning) return;
 		if (Action is Actions.SpinDash or Actions.Dash or Actions.HammerDash) return;
 		
 		// Cancel Knuckles' glide-landing animation
@@ -396,8 +409,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessMovementRoll()
 	{
-		if (!IsGrounded || !IsSpinning) return;
-		
 		if (GroundLockTimer <= 0f)
 		{
 			if (Input.Down.Left)
@@ -475,7 +486,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessMovementAir()
 	{
-		if (IsGrounded || IsDead) return;
 		if (Action is Actions.Carried or Actions.Climb or Actions.Glide && ActionState != (int)GlideStates.Fall) return;
 
 		RotateInAir();
@@ -570,7 +580,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessBalance()
 	{
-		if (!IsGrounded || IsSpinning) return;
 		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.Dash) return;
 		
 		// Don't allow player to duck or look up
@@ -666,8 +675,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessCollisionGroundWalls()
 	{
-		if (!IsGrounded) return;
-		
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
 		// and S3K physics are enabled
 		if (Angle is > 90f and <= 270f && (SharedData.PlayerPhysics < PhysicsTypes.SK || Angle % 90f != 0f)) return;
@@ -722,7 +729,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				Velocity.X -= wallDistance / Scene.Local.ProcessSpeed;
+				Velocity.X -= wallDistance;
 				GroundSpeed.Value = 0f;
 					
 				if (Facing == firstDirection && !IsSpinning)
@@ -732,14 +739,14 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				Velocity.Y += wallDistance / Scene.Local.ProcessSpeed;
+				Velocity.Y += wallDistance;
 				break;
 		}
 	}
 	
 	private void ProcessRollStart()
 	{
-		if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
+		if (IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
 		if (!IsForcedSpin && (Input.Down.Left || Input.Down.Right)) return;
 
 		if (!CheckSpinPossibility() && !IsForcedSpin) return;
@@ -770,7 +777,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessLevelBound()
 	{
 		if (IsDead) return;
-		
 		if (!IsCameraTarget(out ICamera camera) && !Scene.Local.Players.First().IsCameraTarget(out camera)) return;
 		
 		// Left bound
@@ -844,8 +850,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 	private void ProcessCollisionGroundFloor()
 	{
-		if (!IsGrounded || OnObject != null) return;
-
+		if (OnObject != null) return;
+		
 		// Each tile type has its own rules about how it should react to a specific tile check
 		// Since we're going to rotate player's sensors, "rotate" tile properties as well
 		
@@ -936,7 +942,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private void ProcessSlopeRepel()
 	{
-		if (!IsGrounded || IsStickToConvex || Action == Actions.HammerDash) return;
+		if (IsStickToConvex || Action == Actions.HammerDash) return;
 	
 		if (GroundLockTimer > 0f)
 		{
@@ -976,7 +982,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	private void ProcessCollisionAir()
 	{
-		if (IsGrounded || IsDead || Action is Actions.Glide or Actions.Climb) return;
+		if (IsDead) return;
+		
+		if (Action is Actions.Glide or Actions.Climb) return;
 		
 		int wallRadius = RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));

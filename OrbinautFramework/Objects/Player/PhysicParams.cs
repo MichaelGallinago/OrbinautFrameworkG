@@ -14,20 +14,20 @@ public struct PhysicParams(
     }
     
     public float Acceleration { get; private set; } = acceleration;
-    public float AccelerationGlide { get; private set; }  = accelerationGlide;
-    public float AccelerationAir { get; private set; }  = accelerationAir;
-    public float AccelerationTop { get; private set; }  = accelerationTop;
-    public float AccelerationClimb { get; private set; }  = accelerationClimb;
-    public float Deceleration { get; }  = deceleration;
-    public float DecelerationRoll { get; private set; }  = decelerationRoll;
-    public float Friction { get; private set; }  = friction;
-    public float FrictionRoll { get; private set; }  = frictionRoll;
-    public float MinimalJumpSpeed { get; private set; }  = minimalJumpSpeed;
-    public float JumpSpeed { get; private set; }  = jumpSpeed;
+    public float AccelerationGlide { get; private set; } = accelerationGlide;
+    public float AccelerationAir { get; private set; } = accelerationAir;
+    public float AccelerationTop { get; private set; } = accelerationTop;
+    public float AccelerationClimb { get; private set; } = accelerationClimb;
+    public float Deceleration { get; } = deceleration;
+    public float DecelerationRoll { get; private set; } = decelerationRoll;
+    public float Friction { get; private set; } = friction;
+    public float FrictionRoll { get; private set; } = frictionRoll;
+    public float MinimalJumpSpeed { get; private set; } = minimalJumpSpeed;
+    public float JumpSpeed { get; private set; } = jumpSpeed;
 
     private static readonly Dictionary<Type, PhysicParams> ParamsMap = new()
     {
-	    { Type.Default, new PhysicParams(
+	    [Type.Default] = new PhysicParams(
 		    0.046875f,
 		    0.015625f,
 		    0.09375f,
@@ -39,9 +39,9 @@ public struct PhysicParams(
 		    0.0234375f,
 		    -4f,
 		    -6.5f
-		)},
+	    ),
 	    
-	    { Type.SuperSonic, new PhysicParams(
+	    [Type.SuperSonic] = new PhysicParams(
 		    0.1875f,
 		    0.015625f,
 		    0.375f,
@@ -53,9 +53,9 @@ public struct PhysicParams(
 		    0.09375f,
 		    -4f,
 		    -8f
-	    )},
+	    ),
 	    
-	    { Type.Super, new PhysicParams(
+	    [Type.Super] = new PhysicParams(
 		    0.09375f,
 		    0.046875f,
 		    0.1875f,
@@ -67,9 +67,9 @@ public struct PhysicParams(
 		    0.0234375f,
 		    -4f,
 		    -6.5f
-		)},
+		),
 	    
-	    { Type.Underwater, new PhysicParams(
+	    [Type.Underwater] = new PhysicParams(
 		    0.0234375f,
 		    0.015625f,
 		    0.046875f,
@@ -81,9 +81,9 @@ public struct PhysicParams(
 		    0.0234375f,
 		    -2f,
 		    -3.5f
-	    )},
+	    ),
 	    
-	    { Type.UnderwaterSuperSonic, new PhysicParams(
+	    [Type.UnderwaterSuperSonic] = new PhysicParams(
 		    0.09375f,
 		    0.015625f,
 		    0.1875f,
@@ -95,9 +95,9 @@ public struct PhysicParams(
 		    0.046875f,
 		    -2f,
 		    -3.5f
-		)},
+		),
 	    
-	    { Type.UnderwaterSuper, new PhysicParams(
+	    [Type.UnderwaterSuper] = new PhysicParams(
 		    0.046875f,
 		    0.046875f,
 		    0.09375f,
@@ -109,7 +109,7 @@ public struct PhysicParams(
 		    0.0234375f,
 		    -2f,
 		    -3.5f
-	    )}
+	    )
     };
 
     public static PhysicParams Get(bool isUnderwater, bool isSuper, Types playerType, float itemSpeedTimer)
