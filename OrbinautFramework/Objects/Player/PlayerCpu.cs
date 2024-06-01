@@ -16,7 +16,7 @@ public partial class PlayerCpu : Player
 	private int _delay;
 	
     protected override void ProcessCpu()
-	{
+    {
 		if (IsHurt || IsDead || Id == 0) return;
 		
 		_leadPlayer = Scene.Local.Players.First();
@@ -162,7 +162,7 @@ public partial class PlayerCpu : Player
 		}
 
 		Position += positionOffset;
-
+		
 		return distance.X != 0 || distance.Y != 0;
 	}
 	

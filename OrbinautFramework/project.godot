@@ -27,7 +27,9 @@ AudioPlayer="*res://Audio/Player/audio_player.tscn"
 
 window/size/viewport_width=428
 window/size/viewport_height=240
+window/size/transparent=true
 window/stretch/mode="viewport"
+window/vsync/vsync_mode=0
 
 [dotnet]
 
@@ -348,6 +350,8 @@ ui_swap_input_direction={
 
 common/physics_ticks_per_second=1
 common/max_physics_steps_per_frame=1
+common/physics_jitter_fix=0.0
+common/enable_object_picking=false
 
 [rendering]
 
