@@ -32,6 +32,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	public override void _Process(double delta)
 	{
 		Input.Update(Id);
+
+		GD.Print(Velocity.X);
+		if (Input.Down.Start)
+		{
+			GroundSpeed.Acceleration = 8f;
+		}
 		
 		// DEBUG MODE PLAYER ROUTINE
 		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
@@ -103,7 +109,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		UpdateSuperForm();
 		
 		IsInvincible = InvincibilityTimer > 0f || ItemInvincibilityTimer > 0f || 
-		               IsHurt || SuperTimer > 0f || Shield.State == ShieldContainer.States.DoubleSpin;
+		               IsHurt || IsSuper || Shield.State == ShieldContainer.States.DoubleSpin;
 		
 		KillPlayerOnTimeLimit();
 	}
@@ -146,7 +152,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void UpdateSuperForm()
 	{
-		if (SuperTimer <= 0f) return;
+		if (!IsSuper) return;
 		
 		if (Action == Actions.Transform)
 		{
@@ -514,7 +520,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void UpdateRegularPalette(int colour, ref int colourLoop, ref int colourLast, ref int duration)
 	{
-		if (SuperTimer > 0f) return;
+		if (IsSuper) return;
 		
 		if (colour > 1)
 		{

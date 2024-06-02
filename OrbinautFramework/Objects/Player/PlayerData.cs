@@ -14,12 +14,14 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	private const byte MinimalRecordLength = 32;
 	protected const int CpuDelayStep = 16;
 	
-	[Export] public PlayerAnimatedSprite Sprite { get; private set; }
+	[Export] protected PlayerAnimatedSprite Sprite { get; private set; }
 	[Export] protected ShieldContainer Shield;
 	[Export] private SpawnTypes _spawnType;
 	[Export] private Types _uniqueType;
 
 	public event Action<Types> TypeChanged;
+
+	public bool IsSuper => SuperTimer > 0f;
 	
 	public Types Type
 	{
@@ -149,7 +151,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	
 	public void ResetMusic()
 	{
-		if (SuperTimer > 0f)
+		if (IsSuper)
 		{
 			AudioPlayer.Music.Play(MusicStorage.Super);
 		}

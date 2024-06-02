@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Objects.Player;
 public interface IAnimatedPlayer
 {
     Types Type { get; }
-    float SuperTimer { get; }
+    bool IsSuper { get; }
     Velocity Velocity { get; }
     float ActionValue { get; }
     PlayerInput Input { get; }

@@ -15,7 +15,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 	protected void UpdatePhysicParameters()
 	{
-		PhysicParams = PhysicParams.Get(IsUnderwater, SuperTimer > 0f, Type, ItemSpeedTimer);
+		PhysicParams = PhysicParams.Get(IsUnderwater, IsSuper, Type, ItemSpeedTimer);
 	}
 
 	protected void ProcessCorePhysics()
@@ -629,7 +629,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (Type)
 		{
 			case Types.Amy or Types.Tails:
-			case Types.Sonic when SuperTimer > 0f:
+			case Types.Sonic when IsSuper:
 				Animation = Animations.Balance;
 				Facing = direction;
 				break;
@@ -722,9 +722,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				Velocity.X -= wallDistance / Scene.Local.ProcessSpeed;
+				Velocity.Modify(new Vector2(-wallDistance, 0f));
 				GroundSpeed.Value = 0f;
-					
+				
 				if (Facing == firstDirection && !IsSpinning)
 				{
 					SetPushAnimationBy = this;
@@ -732,7 +732,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				Velocity.Y += wallDistance / Scene.Local.ProcessSpeed;
+				Velocity.Modify(new Vector2(0f, wallDistance));
 				break;
 		}
 	}

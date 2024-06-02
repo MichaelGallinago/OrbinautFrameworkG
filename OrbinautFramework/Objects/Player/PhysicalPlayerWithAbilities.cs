@@ -101,7 +101,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Radius = RadiusSpin;
 		IsSpinning = true;
 		
-		GroundSpeed.Value = ((SuperTimer > 0 ? 11 : 8) + MathF.Round(ActionValue) / 2f) * (float)Facing;
+		GroundSpeed.Value = ((IsSuper ? 11f : 8f) + MathF.Round(ActionValue) / 2f) * (float)Facing;
 		
 		AudioPlayer.Sound.Stop(SoundStorage.Charge);
 		AudioPlayer.Sound.Play(SoundStorage.Release);
@@ -189,7 +189,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 
 		float acceleration = 0.390625f * (float)Facing * Scene.Local.ProcessSpeed;
-		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || SuperTimer > 0f ? 1.5f : 2f);
+		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
 		ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
 		GroundSpeed.Value = ActionValue2;
 		return true;
@@ -241,10 +241,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private bool TransformInJump()
 	{
-		if (!Input.Press.C || SuperTimer > 0f || SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50)
-		{
-			return false;
-		}
+		if (!Input.Press.C || IsSuper || SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 		
 		ResetState();
 		AudioPlayer.Sound.Play(SoundStorage.Transform);
@@ -268,7 +265,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
 		{
-			if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f || ItemInvincibilityTimer > 0f)
+			if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper || ItemInvincibilityTimer > 0f)
 			{
 				Action = Actions.DropDash;
 				ActionValue = 0f;
@@ -276,7 +273,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		// Barrier abilities
-		if (!Input.Press.Abc || SuperTimer > 0f || 
+		if (!Input.Press.Abc || IsSuper || 
 		    Shield.State != ShieldContainer.States.None || ItemInvincibilityTimer != 0) return;
 		
 		Shield.State = ShieldContainer.States.Active;
@@ -525,7 +522,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
 		Radius = RadiusSpin;
 		
-		if (SuperTimer > 0f)
+		if (IsSuper)
 		{
 			UpdateDropDashGroundSpeed(13f, 12f);
 			if (IsCameraTarget(out ICamera camera))
@@ -553,7 +550,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (!SharedData.DropDash || Action != Actions.DropDash) return true;
 		
-		if (Shield.Type <= ShieldContainer.Types.Normal || SuperTimer > 0f || ItemInvincibilityTimer > 0f) return false;
+		if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper || ItemInvincibilityTimer > 0f) return false;
 		
 		Animation = Animations.Spin;
 		Action = Actions.None;
@@ -1069,7 +1066,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		ActionValue = 0f;
 		GroundSpeed.Value = 6f * (float)Facing;
 		
-		if (SuperTimer > 0f && IsCameraTarget(out ICamera camera))
+		if (IsSuper && IsCameraTarget(out ICamera camera))
 		{
 			camera.SetShakeTimer(6f);
 		}

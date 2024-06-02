@@ -54,7 +54,8 @@ public abstract partial class Scene : Node2D
 
     public override void _Process(double deltaTime)
     {
-        ProcessSpeed = Math.Min(1.0f, (float)(deltaTime * Constants.BaseFramerate));
+        ProcessSpeed = Engine.MaxFps > 60 || Engine.MaxFps == 0 ? 
+            Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate)) : 1f;
         
         if (State != States.Paused)
         {

@@ -43,6 +43,11 @@ public class Velocity
         set => _velocity += value * Scene.Local.ProcessSpeed;
     }
 
+    public void Modify(Vector2 modificator)
+    {
+        _velocity += modificator;
+    }
+
     public void Clamp(Vector2 min, Vector2 max)
     {
         ClampX(min.X, max.X);
