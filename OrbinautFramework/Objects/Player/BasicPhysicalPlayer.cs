@@ -714,16 +714,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		};
 		
 		if (wallDistance >= 0) return;
+		
 		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
-
-		float oldVelocityX = Velocity.X;
+		float offset = wallDistance / Scene.Local.ProcessSpeed;
 		
-		//TODO: check "/"
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				Velocity.Modify(new Vector2(-wallDistance, 0f));
+				Velocity.Modify(new Vector2(-offset, 0f));
 				GroundSpeed.Value = 0f;
 				
 				if (Facing == firstDirection && !IsSpinning)
@@ -733,11 +732,9 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				Velocity.Modify(new Vector2(0f, wallDistance));
+				Velocity.Modify(new Vector2(0f, offset));
 				break;
 		}
-		
-		//GD.Print(oldVelocityX, " ", wallDistance, " ", Velocity.X);
 	}
 	
 	private void ProcessRollStart()

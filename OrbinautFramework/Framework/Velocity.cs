@@ -45,6 +45,7 @@ public class Velocity
 
     public void Modify(Vector2 modificator)
     {
+        _instantVector += modificator;
         _velocity += modificator;
     }
 
