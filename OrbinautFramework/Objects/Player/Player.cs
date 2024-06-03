@@ -32,8 +32,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	public override void _Process(double delta)
 	{
 		Input.Update(Id);
-
-		GD.Print(Velocity.X);
+		
 		if (Input.Down.Start)
 		{
 			GroundSpeed.Acceleration = 8f;

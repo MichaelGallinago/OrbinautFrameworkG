@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Godot;
 
 namespace OrbinautFramework3.Framework.Tiles;
@@ -63,6 +64,6 @@ public static class Angles
     
     public static float GetFloatAngle(byte angle)
     {
-        return (ByteAngleLimit - angle) * (int)Circle.Full / (float)ByteAngleLimit;
+        return (ByteAngleLimit - angle) * (int)Circle.Full / (float)ByteAngleLimit % (float)Circle.Full;
     }
 }

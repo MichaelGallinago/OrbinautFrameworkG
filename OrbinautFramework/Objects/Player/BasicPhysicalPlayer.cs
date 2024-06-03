@@ -412,7 +412,15 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		}
 
 		ApplyGroundFriction(PhysicParams.FrictionRoll);
-		UpdateSpinningOnGround();
+
+		if (IsForcedSpin)
+		{
+			ForceSpin();
+		}
+		else
+		{
+			StopSpinning();
+		}
 	
 		Velocity.SetDirectionalValue(GroundSpeed, Angle);
 		Velocity.ClampX(-16f, 16f);
@@ -422,31 +430,24 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		var sign = (float)direction;
 		float absoluteSpeed = sign * GroundSpeed;
-		if (absoluteSpeed < 0f)
+		
+		if (absoluteSpeed >= 0f)
 		{
-			GroundSpeed.Acceleration = sign * PhysicParams.DecelerationRoll;
-			if (direction == Constants.Direction.Positive == GroundSpeed < 0f) return;
-			GroundSpeed.Value = sign * 0.5f;
+			SetPushAnimationBy = null;
+			Facing = direction;
 			return;
 		}
 		
-		Facing = direction;
-		SetPushAnimationBy = null;
+		GroundSpeed.Acceleration = sign * PhysicParams.DecelerationRoll;
+		if (direction == Constants.Direction.Positive == GroundSpeed < 0f) return;
+		GroundSpeed.Value = sign * 0.5f;
 	}
 	
-	private void UpdateSpinningOnGround()
+	private void StopSpinning()
 	{
-		if (StopSpinning()) return;
-		ForceSpin();
-	}
-	
-	private bool StopSpinning()
-	{
-		if (IsForcedSpin) return false;
-		
 		if (GroundSpeed != 0f)
 		{
-			if (SharedData.PlayerPhysics != PhysicsTypes.SK || Math.Abs(GroundSpeed) >= 0.5f) return true;
+			if (SharedData.PlayerPhysics != PhysicsTypes.SK || Math.Abs(GroundSpeed) >= 0.5f) return;
 		}
 		
 		Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
@@ -454,8 +455,6 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		IsSpinning = false;
 		Radius = RadiusNormal;
 		Animation = Animations.Idle;
-		
-		return true;
 	}
 	
 	private void ForceSpin()
@@ -717,6 +716,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		if (wallDistance >= 0) return;
 		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
+
+		float oldVelocityX = Velocity.X;
 		
 		//TODO: check "/"
 		switch (quadrant)
@@ -735,6 +736,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				Velocity.Modify(new Vector2(0f, wallDistance));
 				break;
 		}
+		
+		//GD.Print(oldVelocityX, " ", wallDistance, " ", Velocity.X);
 	}
 	
 	private void ProcessRollStart()
@@ -922,16 +925,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private float SnapFloorAngle(float floorAngle)
 	{
 		float difference = Math.Abs(Angle % 180f - floorAngle % 180f);
-		
-		if (difference is <= 45f or >= 135f) return floorAngle;
-		
-		floorAngle = MathF.Round(Angle / 90f) % 4f * 90f;
-		if (floorAngle == 0f)
-		{
-			floorAngle = 360f;
-		}
-		
-		return floorAngle;
+		return difference is < 45f or > 135f ? floorAngle : MathF.Round(Angle / 90f) % 4f * 90f;
 	}
 
 	private void ProcessSlopeRepel()

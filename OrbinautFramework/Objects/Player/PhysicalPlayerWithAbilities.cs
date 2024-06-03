@@ -572,7 +572,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 		
 		GroundSpeed.Value = force;
-		if (Mathf.IsEqualApprox(Angle, 360f)) return;
+		if (Mathf.IsZeroApprox(Angle)) return;
 		
 		GroundSpeed.Value += MathF.Floor(GroundSpeed / 2f);
 	}

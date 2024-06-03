@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Godot;
 using static OrbinautFramework3.Framework.Constants;
@@ -40,7 +41,7 @@ public readonly struct TilesData(byte[][] heights, byte[][] widths, float[] angl
 			widths[0][j] = 0;
 			heights[0][j] = 0;
 		}
-		angles[0] = 360f;
+		angles[0] = 0f;
 
 		FillCollisionDataFromTileMap(tileMap, heights, widths, offset, cellSize);
 		FillAnglesFromAngleData(angleData, angles);
@@ -92,7 +93,7 @@ public readonly struct TilesData(byte[][] heights, byte[][] widths, float[] angl
 	
 		for (; i < TileLimit; i++)
 		{
-			angles[i] = 360f;
+			angles[i] = 0f;
 		}
 	}
 	private static void LoadCollisionArrays(byte[][] collisions, byte[] fileData)

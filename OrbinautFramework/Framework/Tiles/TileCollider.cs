@@ -7,6 +7,7 @@ namespace OrbinautFramework3.Framework.Tiles;
 public struct TileCollider
 {
 	private const string BinariesPath = "res://Collisions/Binaries/";
+	private const int MaxDistance = TileSize * 2;
 	private static readonly TilesData TilesData;
 	
 	static TileCollider()
@@ -33,11 +34,13 @@ public struct TileCollider
 	    }
     }
     
-    private TileBehaviours _tileBehaviour;
-    private CollisionTileMap _tileMap;
     private bool _isVertical;
     private Direction _direction;
-
+    private Vector2I _searchPosition;
+    private CollisionTileMap _tileMap;
+    private FoundTileData _foundTileData;
+    private TileBehaviours _tileBehaviour;
+    
     public void SetData(int x, int y, TileLayers type, TileBehaviours tileBehaviour = TileBehaviours.Floor)
     {
         Position = new Vector2I(x, y);
@@ -56,32 +59,45 @@ public struct TileCollider
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
-        return FindTile(Position + new Vector2I(x, y));
+	    
+	    _searchPosition = Position + new Vector2I(x, y);
+        return GetTile();
     }
     
     public int FindDistance(int x, int y, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
-        return FindTileData(Position + new Vector2I(x, y)).Item1;
+	    
+	    _searchPosition = Position + new Vector2I(x, y);
+	    return GetDistance();
     }
 
     public (int, float) FindClosestTile(int x1, int y1, int x2, int y2, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
+
+	    _searchPosition = Position + new Vector2I(x1, y1);
+	    (int distance, float) tile1 = GetTile();
 	    
-	    (int distance1, float angle1) = FindTile(Position + new Vector2I(x1, y1));
-	    (int distance2, float angle2) = FindTile(Position + new Vector2I(x2, y2));
-	    return distance1 <= distance2 ? (distance1, angle1) : (distance2, angle2);
+	    _searchPosition = Position + new Vector2I(x2, y2);
+	    (int distance, float) tile2 = GetTile();
+	    
+	    return tile1.distance <= tile2.distance ? tile1 : tile2;
     }
     
-    public int FindClosestDistance(int x1, int y1, int x2, int y2,  bool isVertical, Direction direction)
+    public int FindClosestDistance(int x1, int y1, int x2, int y2, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
-	    int distance1 = FindTileData(Position + new Vector2I(x1, y1)).Item1;
-	    int distance2 = FindTileData(Position + new Vector2I(x2, y2)).Item1;
+	    
+	    _searchPosition = Position + new Vector2I(x1, y1);
+	    int distance1 = GetDistance();
+
+	    _searchPosition = Position + new Vector2I(x2, y2);
+	    int distance2 = GetDistance();
+	    
 	    return distance1 <= distance2 ? distance1 : distance2;
     }
 
@@ -89,56 +105,61 @@ public struct TileCollider
 	{
 		return index > 0 ? TilesData.Angles[index % TileLimit] : float.NaN;
 	}
-	
-	private (int, float) FindTile(Vector2I position)
+
+	private int GetDistance()
 	{
-		(int distance, FoundTileData tileData) = FindTileData(position);
+		if (!FindTileData()) return MaxDistance;
 		
-		// Return both the distance and the angle
-		return (distance, GetTileAngle(tileData));
+		ValidateHeight();
+		return CalculateDistance();
 	}
 	
-	private (int, FoundTileData) FindTileData(Vector2I position)
+	private (int, float) GetTile()
+	{
+		if (!FindTileData()) return (MaxDistance, float.NaN);
+		
+		float angle = GetTileAngle();
+		return (CalculateDistance(), angle);
+	}
+	
+	private bool FindTileData()
 	{
 		// Return empty data if no tile data was found
-		if (_tileMap == null) return (DoubleTileSize, default);
-
-		// If above the room, use topmost valid level collision
+		if (_tileMap == null) return false;
+		
 		if (!_isVertical)
 		{
-			position.Y = Math.Max(0, position.Y);
+			_searchPosition.Y = Math.Max(0, _searchPosition.Y);
 		}
-		
-		// Set the direction as an integer (-1 for leftwards, 1 for rightwards)
-		var sign = (sbyte)_direction;
 		
 		// Add check to the debug list
 		//TODO: debug
 		/*
 		if (global.debug_collision)
 		{
+			var sign = (sbyte)_direction;
 			ds_list_add(c_engine.collision.ds_sensors, position.X, position.Y, position.X -
 				Math.Floor(sprite_get_width(sprite_index) / 4) * sign, position.Y, sign == 1 ? 0x5961E9 : 0xF84AEA);
 		}
 		*/
 		
 		// Get tile at position
-		int shift;
-		FoundTileData tileData = Search(shift = 0, position);
+		sbyte shift = 0;
+		FoundTileData tileData = Search(shift);
 
 		if (tileData.Size == 0 || !tileData.IsValid)
 		{
 			// If no width found or tile is invalid, get a further tile
-			shift = TileSize;
-			tileData = Search(shift, position);
+			shift = (sbyte)TileSize;
+			tileData = Search(shift);
 
-			if (!tileData.IsValid) return (DoubleTileSize, default);
+			if (!tileData.IsValid) return false;
 		}
 		else if (tileData.Size == TileSize)
 		{
 			// If width found is TileSize and tile is valid, get a closer tile
 			shift = -TileSize;
-			FoundTileData newTileData = Search(shift, position);
+			FoundTileData newTileData = Search(shift);
 
 			// If no width found or tile is invalid, return to back to the initial tile
 			if (newTileData.Size == 0 || !newTileData.IsValid)
@@ -151,55 +172,63 @@ public struct TileCollider
 			}
 		}
 
-		// Calculate distance to the edge of the found tile
-		int distance = CalculateDistance(tileData.Size, sign, shift, 
-			_isVertical ? position.Y : position.X);
-
-		// Return both the distance and the tileData
-		return (distance, tileData);
+		tileData.Shift = shift;
+		_foundTileData = tileData;
+		return true;
 	}
 
-	private static int CalculateDistance(byte size, int sign, int shift, int distancePosition)
+	private int CalculateDistance()
 	{
-		const int tileSizeMinusOne = TileSize - 1;
-		int distance = sign * (distancePosition / TileSize * TileSize - distancePosition) + shift - size;
-		return sign == 1 ? distance + tileSizeMinusOne : distance;
-	}
-
-	private float GetTileAngle(FoundTileData tileData)
-	{
-		if (!tileData.IsValidAngle) return float.NaN;
-		float rawAngle = GetRawTileAngle(tileData.Index);
-
-		if (float.IsNaN(rawAngle)) return rawAngle;
+		int distancePosition = _isVertical ? _searchPosition.Y : _searchPosition.X;
 		
-		float angle;
-		if (!Mathf.IsEqualApprox(rawAngle, (float)Angles.Circle.Full))
+		int distance = (int)_direction * (distancePosition / TileSize * TileSize - distancePosition) + 
+			_foundTileData.Shift - _foundTileData.Size;
+		
+		return _direction == Direction.Positive ? distance + (TileSize - 1) : distance;
+	}
+
+	private float GetTileAngle()
+	{
+		if (!_foundTileData.IsValidAngle) return float.NaN;
+		float rawAngle = GetRawTileAngle(_foundTileData.Index);
+
+		// TODO: check this (rawAngle != 360f)
+		switch (rawAngle)
 		{
-			angle = Angles.TransformTileAngle(rawAngle, tileData.Transforms);
+			case float.NaN: return rawAngle;
+			case > 0f: return Angles.TransformTileAngle(rawAngle, _foundTileData.Transforms);
 		}
-		else if (_isVertical)
+		
+		if (!_isVertical)
 		{
-			angle = _direction == Direction.Positive ? (float)Angles.Circle.Full : (float)Angles.Circle.Half;
+			return _direction == Direction.Positive ? (float)Angles.Circle.Quarter : (float)Angles.Circle.ThreeQuarters;
+		}
+		
+		// Reset height if the tile was found from the opposite side. This only works correctly
+		// with originals' tile sets since we can't pre-determine if the tile is flipped by default or not
+		if (_direction == Direction.Positive == _foundTileData.Transforms.IsFlipped)
+		{
+			_foundTileData.Size = TileSize;
+		}
 			
-			// Reset height if the tile was found from the opposite side. This only works correctly
-			// with originals' tile sets since we can't pre-determine if the tile is flipped by default or not
-			if (_direction == Direction.Positive == tileData.Transforms.IsFlipped)
-			{
-				tileData.Size = TileSize;
-			}
-		}
-		else
-		{
-			angle = _direction == Direction.Positive ? (float)Angles.Circle.Quarter : (float)Angles.Circle.ThreeQuarters;
-		}
+		return _direction == Direction.Positive ? 0f : (float)Angles.Circle.Half;
+	}
+
+	private void ValidateHeight()
+	{
+		if (!_foundTileData.IsValidAngle) return;
+		if (GetRawTileAngle(_foundTileData.Index) > 0f) return;
+		if (!_isVertical) return;
 		
-		return angle;
+		if (_direction == Direction.Positive == _foundTileData.Transforms.IsFlipped)
+		{
+			_foundTileData.Size = TileSize;
+		}
 	}
 	
-	private FoundTileData Search(int shift, Vector2I position)
+	private FoundTileData Search(sbyte shift)
 	{
-		Vector2I shiftedPosition = position;
+		Vector2I shiftedPosition = _searchPosition;
 		if (_isVertical)
 		{
 			shiftedPosition.Y += shift * (int)_direction;
@@ -215,7 +244,7 @@ public struct TileCollider
 		byte size = GetTileCollision(shiftedPosition, index, transforms);
 		bool isValid = GetTileValidity(index, _direction, _tileBehaviour);
 
-		return new FoundTileData(index, transforms, isValid, size);
+		return new FoundTileData(index, shift, transforms, isValid, size);
 	}
 	
     private byte GetTileCollision(Vector2I position, int index, TileTransforms tileTransforms)
