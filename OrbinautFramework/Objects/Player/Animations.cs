@@ -22,6 +22,7 @@ public enum Animations : byte
     Flip,
 
     Idle,
+    Wait,
     Move,
     Walk,
     Run,

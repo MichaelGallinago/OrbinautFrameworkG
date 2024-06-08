@@ -24,6 +24,7 @@ Culling = 1
 FrameLoop = 0
 
 [node name="PlayerAnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 16)
 sprite_frames = ExtResource("4_xjx3q")
 animation = &"None"
 offset = Vector2(0, -16)

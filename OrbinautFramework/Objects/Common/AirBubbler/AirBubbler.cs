@@ -17,7 +17,7 @@ public partial class AirBubbler : BaseObject
         _waitCycle = 0;
     }
     
-    private byte SetDelay()
+    private static byte SetDelay()
     {
         return (byte)(GD.Randi() & sbyte.MaxValue + 128);
     }

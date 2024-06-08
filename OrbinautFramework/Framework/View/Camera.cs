@@ -147,17 +147,16 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (Scene.Local.State == Scene.States.Paused && player.DeathState == DeathStates.Wait || player.IsDead) return;
 		
-		UpdateCdCamera(player, processSpeed);
-		
-		if (!SharedData.CdCamera)
+		FollowPlayerY(processSpeed, targetPosition.Y, player);
+		if (SharedData.CdCamera)
 		{
-			FollowTargetX(processSpeed, targetPosition.X);
+			FollowTargetCdX(processSpeed, targetPosition.X);
+			UpdateCdCamera(player, processSpeed);
 		}
 		else
 		{
-			FollowTargetCdX(processSpeed, targetPosition.X);
+			FollowTargetX(processSpeed, targetPosition.X);
 		}
-		FollowPlayerY(processSpeed, targetPosition.Y, player);
 
 		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
 		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
@@ -192,37 +191,27 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (_viewTimer <= 0f) return false;
 		if (_bufferOffset.Y == 0f) return true;
-	
-		if (Math.Abs(_bufferOffset.Y) < offsetSpeed)
-		{
-			_bufferOffset.Y = 0f;
-		}
-		else
-		{
-			_bufferOffset.Y -= offsetSpeed * Math.Sign(_bufferOffset.Y);
-		}
+		
+		_bufferOffset.Y = _bufferOffset.Y.MoveToward(0f, offsetSpeed);
 		return true;
 	}
 	
 	private void UpdateCdCamera(PlayerData player, float processSpeed)
 	{
-		if (!SharedData.CdCamera) return;
-		
 		const int shiftSpeedX = 2;
-
+		
 		if (Math.Abs(player.GroundSpeed) < 6f && player.Action != Actions.SpinDash)
 		{
-			_bufferOffset.X -= shiftSpeedX * Math.Sign(_bufferOffset.X) * processSpeed;
+			_bufferOffset.X = _bufferOffset.X.MoveToward(0f, shiftSpeedX * processSpeed);
+			return;
 		}
-
-		if (_delay.X != 0f) return;
+		
+		if (_delay.X > 0f) return;
 		
 		const int shiftDistanceX = 64;
-		int shiftDirectionX = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
-		if (!Mathf.IsEqualApprox(_bufferOffset.X, shiftDistanceX * shiftDirectionX))
-		{
-			_bufferOffset.X += shiftSpeedX * shiftDirectionX;
-		}
+		int shiftSign = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
+		_bufferOffset.X = _bufferOffset.X.MoveToward(
+			shiftDistanceX * shiftSign, shiftSpeedX * shiftSign * processSpeed);
 	}
 	
 	private void MoveCamera()
@@ -296,8 +285,10 @@ public partial class Camera : Camera2D, ICamera
 		
 		float distance = targetPosition - _rawPosition.X;
 		float speed = _maxVelocity.X * processSpeed;
+
+		if (distance == 0f) return;
 		
-		_rawPosition.X = Math.Abs(distance) <= speed ? targetPosition : _rawPosition.X + speed * Math.Sign(distance);
+		_rawPosition.X = Math.Abs(distance) > speed ? _rawPosition.X + speed * Math.Sign(distance) : targetPosition;
 	}
 	
 	private void FollowTargetY(float processSpeed, float targetPosition)

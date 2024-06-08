@@ -184,26 +184,6 @@ region = Rect2(40, 0, 40, 39)
 atlas = ExtResource("14_oo56e")
 region = Rect2(0, 0, 31, 39)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_fnlj5"]
-atlas = ExtResource("14_oo56e")
-region = Rect2(31, 0, 31, 39)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_meys5"]
-atlas = ExtResource("14_oo56e")
-region = Rect2(62, 0, 31, 39)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_an58s"]
-atlas = ExtResource("14_oo56e")
-region = Rect2(93, 0, 31, 39)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_m5vxe"]
-atlas = ExtResource("14_oo56e")
-region = Rect2(124, 0, 31, 39)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_v0jxj"]
-atlas = ExtResource("14_oo56e")
-region = Rect2(155, 0, 31, 39)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_8aslv"]
 atlas = ExtResource("15_bp6jt")
 region = Rect2(0, 0, 29, 38)
@@ -303,6 +283,26 @@ region = Rect2(90, 0, 30, 27)
 [sub_resource type="AtlasTexture" id="AtlasTexture_r3u48"]
 atlas = ExtResource("20_cy0sl")
 region = Rect2(120, 0, 30, 27)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fnlj5"]
+atlas = ExtResource("14_oo56e")
+region = Rect2(31, 0, 31, 39)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_meys5"]
+atlas = ExtResource("14_oo56e")
+region = Rect2(62, 0, 31, 39)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_an58s"]
+atlas = ExtResource("14_oo56e")
+region = Rect2(93, 0, 31, 39)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m5vxe"]
+atlas = ExtResource("14_oo56e")
+region = Rect2(124, 0, 31, 39)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v0jxj"]
+atlas = ExtResource("14_oo56e")
+region = Rect2(155, 0, 31, 39)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0iklc"]
 atlas = ExtResource("21_xf41f")
@@ -570,41 +570,8 @@ animations = [{
 "frames": [{
 "duration": 180.0,
 "texture": SubResource("AtlasTexture_qar7l")
-}, {
-"duration": 6.0,
-"texture": SubResource("AtlasTexture_fnlj5")
-}, {
-"duration": 30.0,
-"texture": SubResource("AtlasTexture_meys5")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_an58s")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_m5vxe")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_an58s")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_m5vxe")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_an58s")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_m5vxe")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_an58s")
-}, {
-"duration": 18.0,
-"texture": SubResource("AtlasTexture_m5vxe")
-}, {
-"duration": 60.0,
-"texture": SubResource("AtlasTexture_v0jxj")
 }],
-"loop": true,
+"loop": false,
 "name": &"Idle",
 "speed": 60.0
 }, {
@@ -740,6 +707,44 @@ animations = [{
 "speed": 60.0
 }, {
 "frames": [{
+"duration": 6.0,
+"texture": SubResource("AtlasTexture_fnlj5")
+}, {
+"duration": 30.0,
+"texture": SubResource("AtlasTexture_meys5")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_an58s")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_m5vxe")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_an58s")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_m5vxe")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_an58s")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_m5vxe")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_an58s")
+}, {
+"duration": 18.0,
+"texture": SubResource("AtlasTexture_m5vxe")
+}, {
+"duration": 60.0,
+"texture": SubResource("AtlasTexture_v0jxj")
+}],
+"loop": true,
+"name": &"Wait",
+"speed": 60.0
+}, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_0iklc")
 }, {
@@ -771,8 +776,8 @@ animations = [{
 script = ExtResource("1_muhhk")
 _frameLoops = {
 "Duck": 1,
-"Idle": 3,
-"LookUp": 1
+"LookUp": 1,
+"Wait": 2
 }
 _offsets = {
 "Balance": Vector2(-1, 2),
@@ -793,6 +798,7 @@ _offsets = {
 "Run": Vector2(0, 2),
 "Skid": Vector2(1, 0),
 "SpinDash": Vector2(4, 6),
+"Wait": Vector2(-1, 0),
 "Walk": Vector2(0, -1)
 }
 _cullSize = Vector2i(0, 0)

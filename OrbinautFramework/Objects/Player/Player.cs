@@ -33,11 +33,6 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	{
 		Input.Update(Id);
 		
-		if (Input.Down.Start)
-		{
-			GroundSpeed.Acceleration = 8f;
-		}
-		
 		// DEBUG MODE PLAYER ROUTINE
 		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
 		{

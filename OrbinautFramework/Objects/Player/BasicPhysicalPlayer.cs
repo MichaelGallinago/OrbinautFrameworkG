@@ -368,14 +368,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			Animation = Animations.Push;
 		}
 		
-		// Set idle animation
 		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
-		if (quadrant == Angles.Quadrant.Down && GroundSpeed == 0f)
-		{
-			Animation = Input.Down.Up ? Animations.LookUp : Input.Down.Down ? Animations.Duck : Animations.Idle;
-			SetPushAnimationBy = null;
-			return;
-		}
+		if (SetIdleAnimation(quadrant)) return;
 			
 		if (Animation == Animations.Skid) return;
 		
@@ -392,6 +386,27 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		Animation = Animations.Skid;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Skid);
+	}
+
+	private bool SetIdleAnimation(Angles.Quadrant quadrant)
+	{
+		if (quadrant != Angles.Quadrant.Down || GroundSpeed != 0f) return false;
+		
+		if (Input.Down.Up)
+		{
+			Animation = Animations.LookUp;
+		}
+		else if (Input.Down.Down)
+		{
+			Animation = Animations.Duck;
+		}
+		else if (Animation != Animations.Wait)
+		{
+			Animation = Animations.Idle;
+		}
+			
+		SetPushAnimationBy = null;
+		return true;
 	}
 	
 	private void ProcessMovementRoll()
@@ -688,7 +703,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 				sign = (int)Constants.Direction.Negative;
 				firstDirection = Constants.Direction.Positive;
 				secondDirection = Constants.Direction.Negative;
-				wallRadius *= sign;
+				wallRadius = -wallRadius;
 				break;
 			
 			default: return;

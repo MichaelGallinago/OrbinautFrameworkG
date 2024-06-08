@@ -200,7 +200,9 @@ public partial class PlayerCpu : Player
 			targetPosition.X -= 32f;
 		}
 
-		var doJump = true;
+		// Copy and modify inputs if we are not pushing anything or
+		// if the followed player was pushing something a few frames ago
+		bool doJump = Animation != Animations.Duck && CpuTarget.Animation != Animations.Wait;
 		if (SetPushAnimationBy == null || setPushAnimationBy != null)
 		{
 			int distanceX = Mathf.FloorToInt(targetPosition.X - Position.X);
@@ -208,7 +210,7 @@ public partial class PlayerCpu : Player
 			doJump = CheckCpuJump(distanceX, targetPosition.Y);
 		}
 		
-		if (doJump && Animation != Animations.Duck && Scene.Local.IsTimePeriodLooped(64f))
+		if (doJump && Scene.Local.IsTimePeriodLooped(64f))
 		{
 			_cpuInputPress.Abc = _cpuInputDown.Abc = true;
 			IsCpuJumping = true;
