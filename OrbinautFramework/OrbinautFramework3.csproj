@@ -1,9 +1,10 @@
-<Project Sdk="Godot.NET.Sdk/4.3.0-beta.1">
+<Project Sdk="Godot.NET.Sdk/4.3.0-beta.2">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="DryIoc" Version="5.4.3" />
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.6.1-beta.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -12,6 +13,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageReference Include="Meziantou.Framework.FastEnumToStringGenerator" Version="2.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
   </ItemGroup>

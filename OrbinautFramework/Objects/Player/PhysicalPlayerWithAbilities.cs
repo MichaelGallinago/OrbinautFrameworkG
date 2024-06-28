@@ -1,17 +1,22 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using OrbinautFramework3.Scenes;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePlayer, ICarrier, ICarried
 {
 	protected int ClimbAnimationFrameNumber;
+	
+	[UsedImplicitly] private IScene _scene;
 	
 	protected PhysicalPlayerWithAbilities()
 	{
@@ -136,8 +141,8 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (!Input.Press.Abc)
 		{
-			//TODO: check math with ProcessSpeed
-			ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * Scene.Local.ProcessSpeed;
+			//TODO: check math with Speed
+			ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * Scene.Speed;
 			return true;
 		}
 		
@@ -185,10 +190,10 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (ActionValue < 30f)
 		{
-			ActionValue += Scene.Local.ProcessSpeed;
+			ActionValue += Scene.Speed;
 		}
 
-		float acceleration = 0.390625f * (float)Facing * Scene.Local.ProcessSpeed;
+		float acceleration = 0.390625f * (float)Facing * Scene.Speed;
 		float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
 		ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
 		GroundSpeed.Value = ActionValue2;
@@ -490,7 +495,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		if (Input.Down.Abc)
 		{
 			IsAirLock = false;		
-			ActionValue += Scene.Local.ProcessSpeed;
+			ActionValue += Scene.Speed;
 			
 			if (ActionValue < MaxDropDashCharge || Animation == Animations.DropDash) return;
 			
@@ -584,7 +589,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// Flight timer
 		if (ActionValue > 0f)
 		{
-			ActionValue -= Scene.Local.ProcessSpeed;
+			ActionValue -= Scene.Speed;
 		}
 
 		if (!FlyUp())
@@ -606,7 +611,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	
 	protected void PlayTailsSound()
 	{
-		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
+		if (!_scene.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
 
 		if (CpuState == CpuStates.Respawn)
 		{
@@ -636,7 +641,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		Gravity = GravityType.TailsUp;
 				
-		ActionValue2 += Scene.Local.ProcessSpeed;
+		ActionValue2 += Scene.Speed;
 		if (ActionValue2 >= 31f)
 		{
 			ActionValue2 = 0f;
@@ -783,7 +788,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 	{
 		if (Input.Down.Up)
 		{
-			ActionValue += Scene.Local.ProcessSpeed;
+			ActionValue += Scene.Speed;
 			if (ActionValue > maxValue)
 			{
 				ActionValue = 0f;
@@ -795,7 +800,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		if (Input.Down.Down)
 		{
-			ActionValue -= Scene.Local.ProcessSpeed;
+			ActionValue -= Scene.Speed;
 			if (ActionValue < 0f)
 			{
 				ActionValue = maxValue;
@@ -829,7 +834,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		//TODO: check this
 		
 		ClimbLedgeStates previousState = GetClimbLedgeState(ActionValue);
-		ActionValue += Scene.Local.ProcessSpeed;
+		ActionValue += Scene.Speed;
 		ClimbLedgeStates state = GetClimbLedgeState(ActionValue);
 		if (state == previousState) return;
 		
@@ -954,18 +959,18 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		}
 
 		// Spawn dust particles
-		if (ActionValue % 4f < Scene.Local.ProcessSpeed)
+		if (ActionValue % 4f < Scene.Speed)
 		{
 			//TODO: obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
 				
-		if (ActionValue > 0f && ActionValue % 8f < Scene.Local.ProcessSpeed)
+		if (ActionValue > 0f && ActionValue % 8f < Scene.Speed)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Slide);
 		}
 					
-		ActionValue += Scene.Local.ProcessSpeed;
+		ActionValue += Scene.Speed;
 	}
 
 	private void GlideGroundUpdateSpeedX()
@@ -989,7 +994,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void GlideAirTurnAround()
 	{
-		float speed = Angles.ByteAngleStep * Scene.Local.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Speed;
 		if (Input.Down.Left && !Mathf.IsZeroApprox(ActionValue))
 		{
 			if (ActionValue > 0f)
@@ -1033,7 +1038,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		// Charge
 		if (Input.Down.Abc)
 		{
-			ActionValue += Scene.Local.ProcessSpeed;
+			ActionValue += Scene.Speed;
 			if (ActionValue >= MaxDropDashCharge)
 			{
 				AudioPlayer.Sound.Play(SoundStorage.Charge3);
@@ -1088,7 +1093,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			return;
 		}
 		
-		ActionValue += Scene.Local.ProcessSpeed;
+		ActionValue += Scene.Speed;
 		if (ActionValue >= 60f)
 		{
 			Action = Actions.None;
@@ -1324,7 +1329,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 		if (CarryTimer > 0f)
 		{
-			CarryTimer -= Scene.Local.ProcessSpeed;
+			CarryTimer -= Scene.Speed;
 			if (CarryTimer > 0f) return;
 		}
 	
@@ -1341,7 +1346,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 
 	private void GrabAnotherPlayer()
 	{
-		foreach (Player player in Scene.Local.Players.Values)
+		foreach (Player player in _scene.Players.Values)
 		{
 			if (player == this) continue;
 			if (player.Action is Actions.SpinDash or Actions.Carried) continue;

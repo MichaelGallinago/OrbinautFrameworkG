@@ -1,12 +1,14 @@
 using Godot;
+using JetBrains.Annotations;
+using OrbinautFramework3.Scenes;
 
 namespace OrbinautFramework3.Framework;
 
 public partial class Debug : Node
 {
 	private const int DebugFrameLimit = 2;
-	private const string StartupPath = "res://Screens/Startup/startup.tscn";
-	private const string DevMenuPath = "res://Screens/Startup/startup.tscn"; // TODO: replace
+	
+	[UsedImplicitly] private IScene _scene;
 	
 	private enum DebugKeys
 	{
@@ -44,7 +46,7 @@ public partial class Debug : Node
 		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? SharedData.TargetFps : DebugFrameLimit;
 	}
 	
-	private static void OnRestartRoomPressed() => Scene.Local.Tree.ReloadCurrentScene();
-	private static void OnRestartGamePressed() => Scene.Local.Tree.ChangeSceneToFile(StartupPath);
-	private static void OnDevMenuPressed() => Scene.Local.Tree.ChangeSceneToFile(DevMenuPath);
+	private void OnRestartRoomPressed() => _scene.Reload();
+	private void OnRestartGamePressed() => _scene.Change(Scenes.Scenes.Startup);
+	private void OnDevMenuPressed() => _scene.Change(Scenes.Scenes.DevMenu);
 }

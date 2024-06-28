@@ -1,16 +1,20 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using OrbinautFramework3.Scenes;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
+using Stage = OrbinautFramework3.Scenes.Stage;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 {
 	private readonly DebugMode _debugMode = new();
+	[UsedImplicitly] private IScene _scene;
 
 	[Export] private PackedScene _packedTail;
 	private Tail _tail;
@@ -20,12 +24,12 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	public override void _EnterTree()
 	{
 		base._EnterTree();
-		Scene.Local.Players.Add(this);
+		_scene.Players.Add(this);
 	}
 	
 	public override void _ExitTree()
 	{
-		Scene.Local.Players.Remove(this);
+		_scene.Players.Remove(this);
 		base._ExitTree();
 	}
 	
@@ -113,25 +117,25 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		if (Animation != Animations.Skid) return;
 		
 		//TODO: fix loop on stutter (maybe PreviousProcessSpeed?)
-		if (ActionValue2 % 4f < Scene.Local.ProcessSpeed)
+		if (ActionValue2 % 4f < Scene.Speed)
 		{
 			// TODO: make obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
-		ActionValue2 += Scene.Local.ProcessSpeed;
+		ActionValue2 += Scene.Speed;
 	}
 
 	private void FlickAfterGettingHit()
 	{
 		if (InvincibilityTimer <= 0f || IsHurt) return;
 		Visible = ((int)InvincibilityTimer & 4) > 0 || InvincibilityTimer <= 0f;
-		InvincibilityTimer -= Scene.Local.ProcessSpeed;
+		InvincibilityTimer -= Scene.Speed;
 	}
 	
 	private float UpdateItemTimer(float timer, AudioStream itemMusic)
 	{
 		if (timer <= 0f) return 0f;
-		timer -= Scene.Local.ProcessSpeed;
+		timer -= Scene.Speed;
 		
 		if (timer > 0f) return timer;
 		timer = 0f;
@@ -150,7 +154,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		
 		if (Action == Actions.Transform)
 		{
-			ActionValue -= Scene.Local.ProcessSpeed;
+			ActionValue -= Scene.Speed;
 			if (ActionValue <= 0f)
 			{
 				IsObjectInteractionEnabled = true;
@@ -159,7 +163,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 			}
 		}
 
-		float newSuperTimer = SuperTimer - Scene.Local.ProcessSpeed;
+		float newSuperTimer = SuperTimer - Scene.Speed;
 		if (newSuperTimer > 0f)
 		{
 			SuperTimer = newSuperTimer;
@@ -181,7 +185,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void KillPlayerOnTimeLimit()
 	{
-		if (Id == 0 && Scene.Local.Time >= 36000f)
+		if (Id == 0 && _scene.Time >= 36000f)
 		{
 			Kill();
 		}
@@ -255,7 +259,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		AirTimerStates previousState = GetAirTimerState(AirTimer);
 		if (AirTimer > 0f)
 		{
-			AirTimer -= Scene.Local.ProcessSpeed;
+			AirTimer -= Scene.Speed;
 		}
 
 		AirTimerStates state = GetAirTimerState(AirTimer);
@@ -542,7 +546,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	{
 		if (!IsDead) return;
 
-		ICamera camera = Views.Local.BottomCamera;
+		ICamera camera = _scene.Views.BottomCamera;
 		
 		// If drowned, wait until we're far enough off-screen
 		const int drownScreenOffset = 276;
@@ -577,9 +581,9 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 			obj_gui_hud.update_timer = false;
 		}*/
 				
-		Scene.Local.AllowPause = false;
+		_scene.AllowPause = false;
 					
-		if (--SharedData.LifeCount > 0 && Scene.Local.Time < 36000f)
+		if (--SharedData.LifeCount > 0 && _scene.Time < 36000f)
 		{
 			DeathState = DeathStates.Restart;
 			RestartTimer = 60f;
@@ -599,7 +603,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		// Wait 60 steps, then restart
 		if (RestartTimer > 0f)
 		{
-			RestartTimer -= Scene.Local.ProcessSpeed;
+			RestartTimer -= Scene.Speed;
 			if (RestartTimer > 0f) return;
 			AudioPlayer.Music.StopAllWithMute(0.5f);
 					
@@ -610,7 +614,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		// TODO: fade
 		//if (c_framework.fade.state != FADESTATE.PLAINCOLOUR) break;
 
-		Scene.Local.Tree.ReloadCurrentScene();
+		_scene.Reload();
 	}
 
 	//TODO: update debug mode

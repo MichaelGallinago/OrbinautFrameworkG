@@ -1,7 +1,9 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Scenes;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Common.CameraTrigger;
@@ -18,6 +20,8 @@ public partial class CameraTrigger : Trigger
     [Export] private Direction _direction;
     [Export] private bool _triggerWithin;
     
+    [UsedImplicitly] private IScene _scene;
+    
     private int _height;
     private Vector2I[] _previousBounds;
 
@@ -26,8 +30,8 @@ public partial class CameraTrigger : Trigger
         if (_sprite?.Texture == null) return;
         _height = (int)(_sprite.Texture.GetSize().Y * Scale.Y) / 2;
         
-        Views.Local.OnViewNumberChanged += CreateTargetBoundStorages;
-        CreateTargetBoundStorages(Views.Local.Number);
+        _scene.Views.OnViewNumberChanged += CreateTargetBoundStorages;
+        CreateTargetBoundStorages(_scene.Views.Number);
     }
 
     private void CreateTargetBoundStorages(int number)
@@ -46,7 +50,7 @@ public partial class CameraTrigger : Trigger
             _previousBounds = new Vector2I[number];
         }
         
-        int length = Views.Local.Cameras.Length;
+        int length = _scene.Views.Cameras.Length;
         var defaultBound = new Vector2I(0, ushort.MaxValue);
         for (; i < length; i++)
         {
@@ -57,7 +61,7 @@ public partial class CameraTrigger : Trigger
     public override void _Process(double delta)
     {
         Vector2I halfSize = SharedData.ViewSize / 2;
-        ReadOnlySpan<ICamera> cameras = Views.Local.Cameras;
+        ReadOnlySpan<ICamera> cameras = _scene.Views.Cameras;
         var triggerBounds = new Vector2I((int)Position.Y - _height, (int)Position.Y + _height);
         
         for (var i = 0; i < cameras.Length; i++)

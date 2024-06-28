@@ -2,6 +2,7 @@
 using OrbinautFramework3.Framework;
 using System.Collections.Generic;
 using Godot;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Audio.Player;
 
@@ -33,8 +34,8 @@ public class PlayerContainer
         _busIndex = AudioServer.GetBusIndex(_freePlayers.Peek().Bus);
     }
     
+    public bool IsAnyPlaying => _activePlayers.Count > 0;
     public bool IsPlaying(AudioStream audio) => _activePlayers.ContainsKey(audio);
-    public bool IsAnyPlaying() => _activePlayers.Count > 0;
     public void Play(AudioStream audio) => GetPlayer(audio)?.Play();
     
     public void PlayPitched(AudioStream audio, float pitch)
@@ -121,7 +122,7 @@ public class PlayerContainer
         foreach (AudioStreamPlayer player in _volumeChangeList.Keys)
         {
             (float speed, bool stop) data = _volumeChangeList[player];
-            player.VolumeDb += Scene.Local.ProcessSpeed * data.speed;
+            player.VolumeDb += Scene.Speed * data.speed;
             
             switch (player.VolumeDb)
             {

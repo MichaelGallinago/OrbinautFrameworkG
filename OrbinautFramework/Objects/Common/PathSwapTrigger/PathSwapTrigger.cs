@@ -1,6 +1,9 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Common.PathSwapTrigger;
 
@@ -10,6 +13,8 @@ public abstract partial class PathSwapTrigger : Trigger
 {
     [Export] private Sprite2D _sprite;
     [Export] private bool _isGroundOnly;
+    
+    [UsedImplicitly] private IScene _scene;
 
     protected Vector2 Borders;
 
@@ -22,7 +27,7 @@ public abstract partial class PathSwapTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             if (_isGroundOnly && !player.IsGrounded || !player.IsObjectInteractionEnabled) continue;
             UpdatePlayerTileLayer(player);

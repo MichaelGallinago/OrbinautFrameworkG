@@ -1,10 +1,13 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
+using OrbinautFramework3.Scenes;
 
 namespace OrbinautFramework3.Framework;
 
 public class Velocity
 {
+    [UsedImplicitly] private IScene _scene;
     private Vector2 _velocity;
     private Vector2 _instantVector;
     
@@ -30,17 +33,17 @@ public class Velocity
 
     public float AccelerationX
     {
-        set => _velocity.X += value * Scene.Local.ProcessSpeed;
+        set => _velocity.X += value * Scene.Speed;
     }
     
     public float AccelerationY
     {
-        set => _velocity.Y += value * Scene.Local.ProcessSpeed;
+        set => _velocity.Y += value * Scene.Speed;
     }
 
     public Vector2 Acceleration
     {
-        set => _velocity += value * Scene.Local.ProcessSpeed;
+        set => _velocity += value * Scene.Speed;
     }
 
     public void Modify(Vector2 modificator)
@@ -75,8 +78,8 @@ public class Velocity
 
     public Vector2 CalculateNewPosition(Vector2 position)
     {
-        return position + ((Scene.Local.ProcessSpeed - 1f) * _instantVector + 
-                           (Scene.Local.ProcessSpeed + 1f) * _velocity) * 0.5f;
+        return position + ((Scene.Speed - 1f) * _instantVector + 
+                           (Scene.Speed + 1f) * _velocity) * 0.5f;
     }
 
     public void SetDirectionalValue(AcceleratedValue value, float angle)

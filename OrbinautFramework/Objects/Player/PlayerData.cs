@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using OrbinautFramework3.Scenes;
+using Stage = OrbinautFramework3.Scenes.Stage;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -33,6 +36,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		}
 	}
 	private Types _type;
+	
 	public Velocity Velocity { get; } = new();
 	public AcceleratedValue GroundSpeed { get; set; } = new();
 	
@@ -102,6 +106,9 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public PlayerInput Input { get; } = new();
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
+	
+	[UsedImplicitly] private IScene _scene;
+	
 	private DataRecord[] _recordedData;
 	protected TileCollider TileCollider = new();
 
@@ -240,7 +247,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		Rotation = 0f;
 		Visible = true;
 		
-		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * Scene.Local.Players.Count)];
+		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * _scene.Players.Count)];
 		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 		
 		Array.Fill(_recordedData, record);
@@ -248,11 +255,11 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		Sprite.Animate(this);
 	}
 	
-	private static void ResizeAllRecordedData()
+	private void ResizeAllRecordedData()
 	{
-		if (Scene.Local.Time == 0f) return;
+		if (_scene.Time == 0f) return;
 
-		ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+		ReadOnlySpan<Player> players = _scene.Players.Values;
 		int playersCount = players.Length + 1;
 		foreach (Player player in players)
 		{

@@ -1,9 +1,12 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
@@ -12,8 +15,9 @@ using Player;
 public abstract partial class Spikes : BaseObject
 {
     [Export] public bool IsMoving { get; set; }
-    
     [Export] private Sprite2D _sprite;
+    
+    [UsedImplicitly] private IScene _scene;
     
     private Constants.CollisionSensor _sensor;
     private int _retractDistance;
@@ -53,7 +57,7 @@ public abstract partial class Spikes : BaseObject
 
     private void CollideWithPlayers()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             CollideWithPlayer(player);
             if (!CheckSolidCollision(player, _sensor)) continue;
@@ -81,8 +85,8 @@ public abstract partial class Spikes : BaseObject
     {
         if (_retractTimer > 0f)
         {
-            _retractTimer -= Scene.Local.ProcessSpeed;
-            if (_retractTimer <= 0f && Views.Local.CheckRectInCameras(_rectangle))
+            _retractTimer -= Scene.Speed;
+            if (_retractTimer <= 0f && _scene.Views.CheckRectInCameras(_rectangle))
             {
                 AudioPlayer.Sound.Play(SoundStorage.SpikesMove);
             }

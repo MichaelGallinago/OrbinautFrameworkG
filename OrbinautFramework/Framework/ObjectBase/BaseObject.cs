@@ -1,7 +1,9 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Scenes;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
@@ -20,11 +22,11 @@ public abstract partial class BaseObject : Node2D
 				case CullingType.Delete:
 					return;
 				case CullingType.None:
-					ObjectCuller.Local.AddToCulling(this);
+					_culler.AddToCulling(this);
 					break;
 				default:
 					if (value != CullingType.None) break;
-					ObjectCuller.Local.RemoveFromCulling(this);
+					_culler.RemoveFromCulling(this);
 					break;
 			}
 
@@ -49,13 +51,16 @@ public abstract partial class BaseObject : Node2D
 	public InteractData InteractData;
 	public SolidData SolidData;
 	
+	[UsedImplicitly] private ObjectCuller _culler;
+	[UsedImplicitly] private IScene _scene;
+	
 	public override void _EnterTree()
 	{
 		Position = base.Position;
 		ResetData = new ResetData(Visible, Scale, Position, ZIndex);
 		if (Culling != CullingType.None)
 		{
-			ObjectCuller.Local.AddToCulling(this);
+			_culler.AddToCulling(this);
 		}
 	}
 
@@ -72,7 +77,7 @@ public abstract partial class BaseObject : Node2D
 		Init();
 	}
 
-	public override void _ExitTree() => ObjectCuller.Local.RemoveFromCulling(this);
+	public override void _ExitTree() => _culler.RemoveFromCulling(this);
 	
 	public void SetSolid(Vector2I radius, Vector2I offset = default)
 	{
@@ -112,7 +117,7 @@ public abstract partial class BaseObject : Node2D
 		InteractData.OffsetExtra = new Vector2I(offsetX, offsetY);
 	}
 	
-	public bool IsCameraTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
+	public bool IsCameraTarget(out ICamera camera) => _scene.Views.TargetedCameras.TryGetValue(this, out camera);
 	
 	public bool CheckHitBoxCollision(BaseObject target, bool isExtraHitBox = false)
 	{
@@ -231,6 +236,6 @@ public abstract partial class BaseObject : Node2D
 		return player.PushObjects.Contains(this);
 	}
 
-	private void RemoveFromCulling() => ObjectCuller.Local.RemoveFromCulling(this);
-	private void AddToCulling() => ObjectCuller.Local.AddToCulling(this);
+	private void RemoveFromCulling() => _culler.RemoveFromCulling(this);
+	private void AddToCulling() => _culler.AddToCulling(this);
 }

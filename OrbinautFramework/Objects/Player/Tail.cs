@@ -1,16 +1,21 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Player;
 
 [Tool]
 public partial class Tail : AdvancedAnimatedSprite
 {
+	[UsedImplicitly] private IScene _scene;
+	
 	public void Animate(ITailed data)
 	{
-		if (Scene.Local.State == Scene.States.Paused) return;
+		if (_scene.State == Scene.States.Paused) return;
 		
 		Offset = Vector2.Zero;
 		

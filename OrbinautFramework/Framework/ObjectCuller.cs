@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Scenes;
 
 namespace OrbinautFramework3.Framework;
 
-public class ObjectCuller
+public class ObjectCuller(IScene scene)
 {
-	public static ObjectCuller Local => Scene.Local.Culler;
+	public HashSet<BaseObject> ActiveObjects { get; } = [];
 	
 	private bool _isCullToggled = true;
 	private readonly HashSet<BaseObject> _hiddenObjectsInView = [];
 	private readonly HashSet<BaseObject> _stoppedObjects = [];
-	public HashSet<BaseObject> ActiveObjects { get; } = [];
 	
 	public void RemoveFromCulling(BaseObject baseObject)
 	{
@@ -31,17 +31,17 @@ public class ObjectCuller
 		
 		if (_isCullToggled)
 		{
-			ResumeRegions(Views.Local.Cameras);
+			ResumeRegions(scene.Views.Cameras);
 			_isCullToggled = false;
 			return;
 		}
 
-		ResumeRegions(Views.Local.GetCamerasWithUpdatedRegions());
+		ResumeRegions(scene.Views.GetCamerasWithUpdatedRegions());
 	}
 
     private bool StopAllObjets()
     {
-	    if (Scene.Local.State != Scene.States.Paused) return false;
+	    if (scene.State != Scene.States.Paused) return false;
 	    
 	    foreach (BaseObject baseObject in ActiveObjects)
 	    {
@@ -78,7 +78,7 @@ public class ObjectCuller
 	    foreach (BaseObject baseObject in _hiddenObjectsInView)
 	    {
 		    var position = (Vector2I)baseObject.Position;
-		    foreach (ICamera camera in Views.Local.Cameras)
+		    foreach (ICamera camera in scene.Views.Cameras)
 		    {
 			    if (camera.CheckPositionInActiveRegion(position)) continue;
 			    
@@ -108,10 +108,10 @@ public class ObjectCuller
 	    }
     }
 
-    private static void DeleteObject(Node2D baseObject)
+    private void DeleteObject(Node2D baseObject)
     {
 	    var position = (Vector2I)baseObject.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (camera.CheckPositionInSafeRegion(position) && baseObject.Position.Y < camera.TargetBoundary.W) return;
 	    }
@@ -122,7 +122,7 @@ public class ObjectCuller
     private void ResetObject(BaseObject baseObject)
     {
 	    var position = (Vector2I)baseObject.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }
@@ -131,7 +131,7 @@ public class ObjectCuller
 	    baseObject.SetProcess(false);
 
 	    var respawnPosition = (Vector2I)baseObject.ResetData.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (!camera.CheckPositionInActiveRegion(respawnPosition)) continue;
 		    _hiddenObjectsInView.Add(baseObject);
@@ -146,7 +146,7 @@ public class ObjectCuller
     private void ResetXObject(BaseObject baseObject)
     {
 	    var position = (int)baseObject.Position.X;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (camera.CheckXInActiveRegion(position)) return;
 	    }
@@ -155,7 +155,7 @@ public class ObjectCuller
 	    baseObject.SetProcess(false);
 	    
 	    var respawnPosition = (int)baseObject.ResetData.Position.X;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (!camera.CheckXInActiveRegion(respawnPosition)) continue;
 		    _hiddenObjectsInView.Add(baseObject);
@@ -170,7 +170,7 @@ public class ObjectCuller
     private void ResetYObject(BaseObject baseObject)
     {
 	    var position = (int)baseObject.Position.Y;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (camera.CheckYInActiveRegion(position)) return;
 	    }
@@ -179,7 +179,7 @@ public class ObjectCuller
 	    baseObject.SetProcess(false);
 
 	    var respawnPosition = (int)baseObject.ResetData.Position.Y;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (!camera.CheckYInActiveRegion(respawnPosition)) continue;
 		    _hiddenObjectsInView.Add(baseObject);
@@ -194,7 +194,7 @@ public class ObjectCuller
     private void PauseObject(BaseObject baseObject)
     {
 	    var position = (Vector2I)baseObject.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in scene.Views.Cameras)
 	    {
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }

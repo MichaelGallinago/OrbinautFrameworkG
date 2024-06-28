@@ -2,19 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Scenes;
 
 namespace OrbinautFramework3.Framework.View;
 
-public partial class Views : Control
+public partial class Views : Control, IViews
 {
-    public static Views Local => Scene.Local.Views;
-
     public event Action<int> OnViewNumberChanged;
     
     public byte Number
-    { 
+    {
         get => _number;
         set
         {
@@ -24,12 +24,14 @@ public partial class Views : Control
         }
     }
     
+    public ICamera BottomCamera { get; private set; }
+    public ReadOnlySpan<ICamera> Cameras => _cameras;
+    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
+    
     [Export] private byte _number = 1;
     [Export] private PackedScene _packedViewContainer;
     
-    public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
-    public ICamera BottomCamera { get; private set; }
+    [UsedImplicitly] private IScene _scene;
     
     private Camera[] _cameras;
     private ViewContainer[] _containers;
@@ -100,7 +102,7 @@ public partial class Views : Control
     
     private void AttachCamerasToPlayers()
     {
-        ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+        ReadOnlySpan<Player> players = _scene.Players.Values;
         int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {
@@ -140,7 +142,7 @@ public partial class Views : Control
             var viewContainer = _packedViewContainer.Instantiate<ViewContainer>();
             _cameras[i] = viewContainer.Camera;
             _containers[i] = viewContainer;
-            viewContainer.SubViewport.SetWorld2D(Scene.Local.GetWorld2D());
+            viewContainer.SubViewport.SetWorld2D(_scene.GetWorld2D());
             boxContainer.AddChild(viewContainer);
         }
     }

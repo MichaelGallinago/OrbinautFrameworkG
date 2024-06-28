@@ -1,7 +1,10 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
@@ -9,6 +12,8 @@ using Player;
 
 public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : BaseObject
 {
+	[UsedImplicitly] private IScene _scene;
+	
     private int _activeLogId;
     private int _maxDip;
     private float _angle;
@@ -45,7 +50,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
 
-	    foreach (Player player in Scene.Local.Players.Values)
+	    foreach (Player player in _scene.Players.Values)
 	    {
 		    player.ActSolid(this, Constants.SolidType.Top);
 		    
@@ -71,7 +76,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
 	    UpdateLogPositions();
 
-	    UpdateAngle(isPlayerTouch, Scene.Local.ProcessSpeed);
+	    UpdateAngle(isPlayerTouch, Scene.Speed);
 		
 	    QueueRedraw();
     }

@@ -1,8 +1,11 @@
 using Godot;
 using Godot.Collections;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Spawnable.Piece;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Common.FallingFloor;
 
@@ -14,6 +17,8 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
     {
         Solid, Collapse, Fallen
     }
+    
+    [UsedImplicitly] private IScene _scene;
 
     private States _state;
     private float _stateTimer = 8f;
@@ -38,7 +43,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
                 
         if (!_isTouched || _stateTimer > 0f)
         {
-            _stateTimer -= Scene.Local.ProcessSpeed;
+            _stateTimer -= Scene.Speed;
             return;
         }
         
@@ -48,7 +53,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
     private void HandlePlayerOnCollapse()
     {
         // When falling apart, act as solid only for the players already standing on the object
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             if (!CheckSolidCollision(player, Constants.CollisionSensor.Top)) continue;
             player.ActSolid(this, Constants.SolidType.Top);
@@ -56,12 +61,12 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
 			
         if (_stateTimer > 0f)
         {
-            _stateTimer -= Scene.Local.ProcessSpeed;
+            _stateTimer -= Scene.Speed;
             return;
         }
 			
         // Release all players from this object
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             if (player.OnObject != this) continue;
             player.OnObject = null;
@@ -73,7 +78,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
 
     private void CheckTarget()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             player.ActSolid(this, Constants.SolidType.Top);
 			

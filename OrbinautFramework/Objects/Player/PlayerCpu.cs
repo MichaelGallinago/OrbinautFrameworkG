@@ -1,14 +1,19 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Scenes;
+using Stage = OrbinautFramework3.Scenes.Stage;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public partial class PlayerCpu : Player
 {
+	[UsedImplicitly] private IScene _scene;
+	
 	private bool _canReceiveInput;
 	private ICpuTarget _leadPlayer;
 	private Buttons _cpuInputDown;
@@ -19,7 +24,7 @@ public partial class PlayerCpu : Player
     {
 		if (IsHurt || IsDead || Id == 0) return;
 		
-		_leadPlayer = Scene.Local.Players.First();
+		_leadPlayer = _scene.Players.First();
 		_delay = CpuDelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
@@ -56,7 +61,7 @@ public partial class PlayerCpu : Player
 		// to respawn or do not respawn at all unless holding down any button
 		if (_canReceiveInput && Input.Down is { Abc: false, Start: false })
 		{
-			if (!Scene.Local.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
+			if (!_scene.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
 		
 		// Enable CPU's camera back
@@ -124,7 +129,7 @@ public partial class PlayerCpu : Player
 		if (distance.X != 0)
 		{
 			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
-			velocityX *= Scene.Local.ProcessSpeed;
+			velocityX *= Scene.Speed;
 
 			if (distance.X >= 0)
 			{
@@ -158,7 +163,7 @@ public partial class PlayerCpu : Player
 
 		if (distance.Y != 0)
 		{
-			positionOffset.Y = Math.Sign(distance.Y) * Scene.Local.ProcessSpeed;
+			positionOffset.Y = Math.Sign(distance.Y) * Scene.Speed;
 		}
 
 		Position += positionOffset;
@@ -179,7 +184,7 @@ public partial class PlayerCpu : Player
 		// Do not run CPU follow logic while under manual control and input is allowed
 		if (CpuInputTimer > 0f)
 		{
-			CpuInputTimer -= Scene.Local.ProcessSpeed;
+			CpuInputTimer -= Scene.Speed;
 			if (!Input.NoControl) return;
 		}
 		
@@ -210,7 +215,7 @@ public partial class PlayerCpu : Player
 			doJump = CheckCpuJump(distanceX, targetPosition.Y);
 		}
 		
-		if (doJump && Scene.Local.IsTimePeriodLooped(64f))
+		if (doJump && _scene.IsTimePeriodLooped(64f))
 		{
 			_cpuInputPress.Abc = _cpuInputDown.Abc = true;
 			IsCpuJumping = true;
@@ -274,7 +279,7 @@ public partial class PlayerCpu : Player
 			return true;
 		}
 		
-		if (distanceX >= 64f && !Scene.Local.IsTimePeriodLooped(256f)) return false;
+		if (distanceX >= 64f && !_scene.IsTimePeriodLooped(256f)) return false;
 		return targetPositionY - Position.Y <= -32;
 	}
 	
@@ -289,10 +294,10 @@ public partial class PlayerCpu : Player
 			Facing = CpuTarget.Position.X >= Position.X ? Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
-		if (!Scene.Local.IsTimePeriodLooped(128f))
+		if (!_scene.IsTimePeriodLooped(128f))
 		{
 			Input.Down = Input.Down with { Down = true };
-			if (!Scene.Local.IsTimePeriodLooped(32f)) return;
+			if (!_scene.IsTimePeriodLooped(32f)) return;
 			Input.Press = Input.Press with { Abc = true };
 			
 			return;
@@ -314,7 +319,7 @@ public partial class PlayerCpu : Player
 			return false;
 		}
 		
-		CpuTimer += Scene.Local.ProcessSpeed;
+		CpuTimer += Scene.Speed;
 		//TODO: check IsInstanceValid == instance_exists
 		// Wait 300 steps unless standing on an object that got respawned
 		if (CpuTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;

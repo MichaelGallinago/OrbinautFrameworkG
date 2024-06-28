@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Scenes;
+using OrbinautFramework3.Scenes.Stages.TSZ;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -13,6 +17,8 @@ public class DebugMode
 	private const byte AccelerationMultiplier = 4;
 	private const float Acceleration = 0.046875f;
 	private const byte SpeedLimit = 16;
+	
+	[UsedImplicitly] private IScene _scene;
 
 	private int _index;
 	private float _speed;
@@ -26,9 +32,9 @@ public class DebugMode
 		    typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
 	    ];
 	    
-	    switch (Scene.Local)
+	    switch (_scene)
 	    {
-		    case Stages.TSZ.StageTsz:
+		    case StageTsz:
 			    // TODO: debug objects
 			    _objects.AddRange(new List<Type>
 			    {
@@ -49,15 +55,15 @@ public class DebugMode
 		{
 			if (!editor.IsDebugMode)
 			{
-				if (Scene.Local.IsStage)
+				if (_scene.IsStage)
 				{
-					Scene.Local.Players.First().ResetMusic();
+					_scene.Players.First().ResetMusic();
 				}
 				
 				_speed = 0;
 
-				Scene.Local.State = Scene.States.Normal;
-				Scene.Local.AllowPause = true;
+				_scene.State = Scene.States.Normal;
+				_scene.AllowPause = true;
 				
 				editor.OnEnableEditMode();
 				editor.IsDebugMode = true;
@@ -80,7 +86,7 @@ public class DebugMode
 			
 			Vector2 position = editor.Position;
 
-			float speed = _speed * Scene.Local.ProcessSpeed;
+			float speed = _speed * Scene.Speed;
 			
 			if (input.Down.Up) position.Y -= speed;
 			if (input.Down.Down) position.Y += speed;
@@ -115,7 +121,7 @@ public class DebugMode
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
 			newObject.Culling = BaseObject.CullingType.Delete;
-			Scene.Local.AddChild(newObject);
+			_scene.AddChild(newObject);
 		}
 		
 		return true;

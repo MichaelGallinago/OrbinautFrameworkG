@@ -1,6 +1,7 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Spawnable.Piece;
 
@@ -12,13 +13,13 @@ public partial class Piece(Texture2D texture, float waitTimer, float gravity, Ve
 
     public override void _Process(double delta)
     {
-        waitTimer -= Scene.Local.ProcessSpeed;
+        waitTimer -= Scene.Speed;
         if (waitTimer > 0f) return;
         
         //TODO: fix this
-        float halfAcceleration = gravity * Scene.Local.ProcessSpeed * 0.5f;
+        float halfAcceleration = gravity * Scene.Speed * 0.5f;
         speed.Y += halfAcceleration;
-        Position += speed * Scene.Local.ProcessSpeed;
+        Position += speed * Scene.Speed;
         speed.Y += halfAcceleration;
     }
 }

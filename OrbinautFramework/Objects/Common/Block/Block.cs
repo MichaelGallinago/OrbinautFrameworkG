@@ -1,7 +1,10 @@
 using System.Reflection.Emit;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Common.Block;
 
@@ -9,6 +12,8 @@ using Player;
 
 public partial class Block : BaseObject
 {
+    [UsedImplicitly] private IScene _scene;
+    
     public Block()
     {
         SetSolid(new Vector2I(16, 16));
@@ -16,7 +21,7 @@ public partial class Block : BaseObject
 
     public override void _Process(double delta)
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             // Combo counter and spin flag are cleared when player lands, so back them up
             bool isSpinning = player.IsSpinning;

@@ -1,6 +1,8 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Scenes;
 
 namespace OrbinautFramework3.Framework.Animations;
 
@@ -24,6 +26,8 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
             _advancedSpriteFrames?.SetAnimationFrameLoop(Animation, _frameLoop);
         }
     }
+    
+    [UsedImplicitly] private IScene _scene;
 
     private StringName _nextAnimation;
     private int _frameLoop;
@@ -67,7 +71,7 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 #endif
     
     public bool CheckInCamera(ICamera camera) => camera.CheckRectInside(CullRect);
-    public bool CheckInCameras() => Views.Local.CheckRectInCameras(CullRect);
+    public bool CheckInCameras() => _scene.Views.CheckRectInCameras(CullRect);
 
     public void SetAnimation(StringName animation, float customSpeed = 1f)
     {

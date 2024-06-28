@@ -1,10 +1,13 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -12,6 +15,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 {
 	protected event Action LandHandler;
 	protected PhysicParams PhysicParams;
+	
+	[UsedImplicitly] private IScene _scene;
 
 	protected void UpdatePhysicParameters()
 	{
@@ -44,8 +49,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 
 		if (Id == 0)
 		{
-			Scene.Local.AllowPause = false;
-			Scene.Local.State = Scene.States.StopObjects;
+			_scene.AllowPause = false;
+			_scene.State = Scene.States.StopObjects;
 			
 			SharedData.PlayerShield = ShieldContainer.Types.None;
 		}
@@ -203,7 +208,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 			ringAngle = 101.25f;
 		}
 
-		Scene.Local.RingSpillTimer = 256f;
+		_scene.RingSpillTimer = 256f;
 	
 		SharedData.PlayerRings = 0;
 		SharedData.LifeRewards = SharedData.LifeRewards with { X = 100 };
@@ -503,7 +508,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (Mathf.IsEqualApprox(Angle, 0f)) return;
 		
-		float speed = Angles.ByteAngleStep * Scene.Local.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Speed;
 		Angle += Angle >= 180f ? speed : -speed;
 		
 		if (Angle is < 0f or >= 360f)
@@ -732,7 +737,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 		
 		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
-		float offset = wallDistance / Scene.Local.ProcessSpeed;
+		float offset = wallDistance / Scene.Speed;
 		
 		switch (quadrant)
 		{
@@ -786,7 +791,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	{
 		if (IsDead) return;
 		
-		if (!IsCameraTarget(out ICamera camera) && !Scene.Local.Players.First().IsCameraTarget(out camera)) return;
+		if (!IsCameraTarget(out ICamera camera) && !_scene.Players.First().IsCameraTarget(out camera)) return;
 		
 		// Left bound
 		if (Position.X + Velocity.X < camera.Boundary.X + 16f)
@@ -946,7 +951,7 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	
 		if (GroundLockTimer > 0f)
 		{
-			GroundLockTimer -= Scene.Local.ProcessSpeed;
+			GroundLockTimer -= Scene.Speed;
 			return;
 		}
 

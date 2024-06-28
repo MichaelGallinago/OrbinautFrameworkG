@@ -1,5 +1,7 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
+using OrbinautFramework3.Scenes;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.Tiles;
@@ -10,6 +12,7 @@ public struct TileCollider
 	private const int MaxDistance = TileSize * 2;
 	private static readonly TilesData TilesData;
 	
+	//TODO: better setup 
 	static TileCollider()
 	{
 		TilesData = TilesData.LoadTileDataBinary(BinariesPath,
@@ -27,12 +30,14 @@ public struct TileCollider
 	    {
 		    _tileMap = value switch
 		    {
-			    TileLayers.Main => Scene.Local.CollisionTileMapMain,
-			    TileLayers.Secondary => Scene.Local.CollisionTileMapSecondary,
+			    TileLayers.Main => _scene.CollisionTileMapMain,
+			    TileLayers.Secondary => _scene.CollisionTileMapSecondary,
 			    _ => null
 		    };
 	    }
     }
+    
+    [UsedImplicitly] private IScene _scene;
     
     private bool _isVertical;
     private Direction _direction;

@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bm4ufwvwfils8"]
-
-[ext_resource type="Script" path="res://Framework/Background/Background.cs" id="1_aubvv"]
-
-[node name="Parallax2D" type="Parallax2D"]
-repeat_size = Vector2(512, 320)
-autoscroll = Vector2(6, 0)
-script = ExtResource("1_aubvv")

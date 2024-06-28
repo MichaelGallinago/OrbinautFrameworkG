@@ -1,10 +1,13 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Common.Bumper;
 
@@ -21,6 +24,8 @@ public partial class Bumper : BaseObject
     
     [Export] private HitsLimit _hitsLimit = HitsLimit.Sonic2;
     [Export] private AdvancedAnimatedSprite _sprite;
+    
+    [UsedImplicitly] private IScene _scene;
     
     private int _state;
     private int _hitsLeft;
@@ -39,7 +44,7 @@ public partial class Bumper : BaseObject
 
     private void CheckCollisionWithPlayers()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in _scene.Players.Values)
         {
             if (!CheckPlayerHitBoxCollision(player)) continue;
             

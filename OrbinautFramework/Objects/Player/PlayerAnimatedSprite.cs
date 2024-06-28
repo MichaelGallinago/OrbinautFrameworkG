@@ -1,8 +1,11 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player.Extensions;
+using OrbinautFramework3.Scenes;
+using Scene = OrbinautFramework3.Scenes.Scene;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -11,9 +14,11 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
 	
+	[UsedImplicitly] private IScene _scene;
+	
 	private IAnimatedPlayer _player;
 	private int _spriteFramesIndex;
-
+	
 	public override void _Ready()
 	{
 		base._Ready();
@@ -86,8 +91,8 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 		SetAnimationType(type, speed);
 
 		if (!_player.IsSuper || type != Animations.Walk) return;
-
-		if (Scene.Local.Time % 4d >= 2d) return;
+		
+		if (_scene.Time % 4d >= 2d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}
