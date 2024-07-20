@@ -570,14 +570,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	protected virtual void SetNextStateOnDeath()
 	{
-		// If lead player, go to the next state
 		//TODO: gui hud
 		/*if (instance_exists(obj_gui_hud))
 		{
 			obj_gui_hud.update_timer = false;
 		}*/
-				
-		Scene.Local.AllowPause = false;
 					
 		if (--SharedData.LifeCount > 0 && Scene.Local.Time < 36000f)
 		{

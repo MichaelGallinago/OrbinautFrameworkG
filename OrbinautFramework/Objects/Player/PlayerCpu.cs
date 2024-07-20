@@ -59,12 +59,6 @@ public partial class PlayerCpu : Player
 			if (!Scene.Local.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
 		
-		// Enable CPU's camera back
-		if (IsCameraTarget(out ICamera camera))
-		{
-			camera.IsMovementAllowed = true;
-		}
-		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		CpuState = CpuStates.Respawn;
@@ -191,7 +185,7 @@ public partial class PlayerCpu : Player
 			CpuState = CpuStates.Stuck;
 		}
 		
-		(Vector2 targetPosition,_cpuInputPress, _cpuInputDown, 
+		(Vector2 targetPosition, _cpuInputPress, _cpuInputDown, 
 			Constants.Direction direction, BaseObject setPushAnimationBy) = CpuTarget.RecordedData[_delay];
 
 		if (SharedData.CpuBehaviour == CpuBehaviours.S3 &&
@@ -210,6 +204,7 @@ public partial class PlayerCpu : Player
 			doJump = CheckCpuJump(distanceX, targetPosition.Y);
 		}
 		
+		// Jump
 		if (doJump && Scene.Local.IsTimePeriodLooped(64f))
 		{
 			_cpuInputPress.Abc = _cpuInputDown.Abc = true;
@@ -326,19 +321,19 @@ public partial class PlayerCpu : Player
 	{
 		Init();
 		
+		if (IsCameraTarget(out ICamera camera))
+		{
+			camera.IsMovementAllowed = true;
+			InvincibilityTimer = 60f;
+			return;
+		}
+		
 		Position = new Vector2(sbyte.MaxValue, 0);
+		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
 		CpuState = CpuStates.RespawnInit;
 		IsControlRoutineEnabled = false;
 		IsObjectInteractionEnabled = false;
 		IsGrounded = false;
-		
-		// Since we're teleporting CPU to the top left corner, temporary disable their camera
-		if (IsCameraTarget(out ICamera camera))
-		{
-			camera.IsMovementAllowed = false;
-		}
-		
-		ZIndex = (int)Constants.ZIndexes.AboveForeground; 
 	}
 }

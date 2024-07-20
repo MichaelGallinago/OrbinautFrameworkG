@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://l33qohh6lu7b"]
 
-[ext_resource type="Script" path="res://Screens/Startup/Startup.cs" id="1_5grtg"]
+[ext_resource type="Script" path="res://Scenes/Screens/Startup/Startup.cs" id="1_5grtg"]
 [ext_resource type="Shader" path="res://Shaders/fade.gdshader" id="1_v4hqx"]
 [ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Stages/TSZ/test_stage_zone_0.tscn" id="3_qnu5n"]
 
