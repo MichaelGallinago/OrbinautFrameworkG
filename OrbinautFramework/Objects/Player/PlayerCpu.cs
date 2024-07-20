@@ -66,7 +66,7 @@ public partial class PlayerCpu : Player
 
 	private void ProcessRespawnCpu()
 	{
-		if (CheckIfCpuOffscreen()) return;
+		if (CheckCpuRespawn()) return;
 		
 		// Force animation & play sound
 		switch (Type)
@@ -164,7 +164,7 @@ public partial class PlayerCpu : Player
 	{
 		FreezeOrFlyIfLeaderDied();
 		
-		if (CheckIfCpuOffscreen()) return; // Exit if respawned
+		if (CheckCpuRespawn()) return; // Exit if respawned
 		
 		if (!IsObjectInteractionEnabled || CarryTarget != null || Action == Actions.Carried) return;
 		
@@ -275,7 +275,7 @@ public partial class PlayerCpu : Player
 	
 	private void ProcessStuckCpu()
 	{
-		if (CheckIfCpuOffscreen()) return;
+		if (CheckCpuRespawn()) return;
 		
 		if (GroundLockTimer > 0f || CpuInputTimer > 0f || GroundSpeed != 0f) return;
 		
@@ -298,21 +298,18 @@ public partial class PlayerCpu : Player
 		CpuState = CpuStates.Main;
 	}
 	
-	private bool CheckIfCpuOffscreen()
+	private bool CheckCpuRespawn()
 	{
-		bool isLeadPlayerCameraTarget = _leadPlayer.IsCameraTarget(out ICamera camera);
-		
-		if (CpuInputTimer > 0 || Sprite != null && (isLeadPlayerCameraTarget ? 
-		    Sprite.CheckInCamera(camera) || camera.TargetBoundary.Z <= Position.X : Sprite.CheckInCameras()))
+		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && camera.TargetBoundary.Z <= Position.X;
+		if (isBehindLeader || Sprite != null && Sprite.CheckInCameras())
 		{
-			CpuTimer = 0f;
+			CpuRespawnTimer = 0f;
 			return false;
 		}
 		
-		CpuTimer += Scene.Local.ProcessSpeed;
 		//TODO: check IsInstanceValid == instance_exists
-		// Wait 300 steps unless standing on an object that got respawned
-		if (CpuTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
+		CpuRespawnTimer += Scene.Local.ProcessSpeed;
+		if (CpuRespawnTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
 		Respawn();
 		return true;
 	}

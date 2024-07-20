@@ -9,7 +9,7 @@ namespace OrbinautFramework3.Framework;
 public static class SharedData
 {
 	// Default settings. May be overwritten by the config file
-    private static Vector2I _viewSize = new(428, 240);
+    private static Vector2I _viewSize = new(400, 224);
     public static byte WindowScale { get; set; } = 2;
     public static int TargetFps { get; set; } = 165;
     public static bool DevMode { get; set; } = true;

@@ -19,7 +19,7 @@ public static class InputUtilities
 
     private static Godot.Collections.Array<int> _gamepads;
 
-    private static List<KeyboardControl> KeyboardControl { get; set; }  =
+    private static List<KeyboardControl> KeyboardControl { get; set; } =
     [
         new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
             Key.A, Key.S, Key.D, Key.Enter, Key.Space),

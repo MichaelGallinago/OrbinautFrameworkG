@@ -189,7 +189,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void ProcessWater()
 	{
-		if (IsHurt || Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
+		if (Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
 
 		if (DiveIntoWater()) return;
 		if (UpdateAirTimer()) return;
@@ -200,7 +200,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	{
 		if (IsUnderwater) return false;
 		
-		if ((int)Position.Y < Stage.Local.WaterLevel) return true;
+		if ((int)Position.Y < Stage.Local.WaterLevel || IsHurt) return true;
 		
 		IsUnderwater = true;
 		AirTimer = Constants.DefaultAirTimer;
@@ -238,6 +238,11 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
+		}
+		else if (Shield.Type == ShieldContainer.Types.Fire)
+		{
+			//TODO: obj_explosion_dust
+			//instance_create(x, c_stage.water_level, obj_explosion_dust, { MakeSound: false });
 		}
 
 		SharedData.PlayerShield = ShieldContainer.Types.None;
@@ -310,7 +315,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void LeaveWater()
 	{
-		if ((int)Position.Y >= Stage.Local.WaterLevel) return;
+		if ((int)Position.Y >= Stage.Local.WaterLevel || IsHurt) return;
 
 		IsUnderwater = false;
 		ResetGravityOnWaterEdge();

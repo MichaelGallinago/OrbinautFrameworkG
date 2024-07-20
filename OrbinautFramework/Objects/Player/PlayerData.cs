@@ -88,7 +88,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public Vector2 CarryTargetPosition { get; set; }
     
 	public CpuStates CpuState { get; set; } = CpuStates.Main;
-	public float CpuTimer { get; set; }
+	public float CpuRespawnTimer { get; set; }
 	public float CpuInputTimer { get; set; }
 	public bool IsCpuJumping { get; set; }
 	public bool IsCpuRespawn { get; set; }
@@ -230,7 +230,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		RestartTimer = 0f;
 		CpuTarget = null;
 		CpuState = CpuStates.Main;
-		CpuTimer = 0f;
+		CpuRespawnTimer = 0f;
 		CpuInputTimer = 0f;
 		IsCpuJumping = false;
 		

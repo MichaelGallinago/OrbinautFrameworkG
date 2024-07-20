@@ -156,12 +156,20 @@ public abstract partial class BaseObject : Node2D
 			
 		// Register collision check if debugging
 		//TODO: debug collision
-		/*if (SharedData.DebugCollision == 2)
+		/*
+		if global.debug_collision == 2
 		{
-			var _ds_list = c_engine.collision.ds_interact;
+			var _ds_list = c_framework.collision.ds_interact;
 			
-			ds_list_add(_ds_list, _target_l, _target_t, _target_r, _target_b, _hitbox_colour);
-			ds_list_add(_ds_list, _this_l, _this_t, _this_r, _this_b, _hitbox_colour);
+			if ds_list_find_index(_ds_list, _target) == -1
+			{
+				ds_list_add(_ds_list, _target_l, _target_t, _target_r, _target_b, _hitbox_colour, _target);
+			}
+			
+			if ds_list_find_index(_ds_list, id) == -1
+			{
+				ds_list_add(_ds_list, _this_l, _this_t, _this_r, _this_b, _hitbox_colour, id);
+			}
 		}*/
 		
 		// Check for collision in the x-axis
@@ -170,7 +178,7 @@ public abstract partial class BaseObject : Node2D
 		// Check for collision in the y-axis
 		if (targetBoundsPositive.Y < boundsNegative.Y || targetBoundsNegative.Y > boundsPositive.Y) return false;
 		
-		// This objects should not interact with any other objects this frame anymore
+		// Objects should no longer interact with any other object this step
 		InteractData.IsInteract = false;
 		target.InteractData.IsInteract = false;
 		

@@ -490,7 +490,8 @@ public abstract partial class BasicPhysicalPlayer : PlayerData
 	private void ProcessMovementAir()
 	{
 		if (IsGrounded || IsDead) return;
-		if (Action is Actions.Carried or Actions.Climb or Actions.Glide && ActionState != (int)GlideStates.Fall) return;
+		if (Action is Actions.Carried or Actions.Climb or Actions.SpinDash || 
+		    Action == Actions.Glide && ActionState != (int)GlideStates.Fall) return;
 
 		RotateInAir();
 		LimitVerticalVelocity();

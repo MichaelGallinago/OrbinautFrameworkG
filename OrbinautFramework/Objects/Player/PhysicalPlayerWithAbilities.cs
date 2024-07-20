@@ -224,7 +224,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 			Velocity.MaxY(PhysicParams.MinimalJumpSpeed);
 		}
 		
-		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || Id > 0 && CpuInputTimer == 0) return false;
+		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || CpuInputTimer == 0 && Id > 0) return false;
 
 		if (TransformInJump()) return true;
 		
@@ -256,6 +256,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		Action = Actions.Transform;
 		Animation = Animations.Transform;
 		ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26f : 36f;
+		Visible = true;
 			
 		// return player control routine
 		return true;

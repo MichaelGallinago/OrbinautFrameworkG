@@ -79,11 +79,22 @@ public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
 		if (SharedData.SensorDebugType != SharedData.SensorDebugTypes.SolidBox) return;
 		// TODO: debug
 		/*
-		var _ds_list = c_framework.collision.ds_solids;
-		var _solid_colour = $00FFFF;
-		
-		ds_list_add(_ds_list, _obj_x - _obj_w, _obj_y - _obj_h + _slope_offset, _obj_x + _obj_w, _obj_y + _obj_h + _slope_offset, _solid_colour);
-		ds_list_add(_ds_list, _px - _pw, _py - _ph, _px + _pw, _py + _ph, _solid_colour);
+		// Register collision check if debugging
+		if global.debug_collision == 3
+		{
+			var _ds_list = c_framework.collision.ds_solid_size;
+			var _solid_colour = $00FFFF;
+			
+			if ds_list_find_index(_ds_list, _player) == -1
+			{
+				ds_list_add(_ds_list, _px - _pw, _py - _ph, _px + _pw, _py + _ph, _solid_colour, _player);
+			}
+			
+			if ds_list_find_index(_ds_list, id) == -1
+			{
+				ds_list_add(_ds_list, _obj_x - _obj_w, _obj_y - _obj_h + _slope_offset, _obj_x + _obj_w, _obj_y + _obj_h + _slope_offset, _solid_colour, id);
+			}
+		}
 		*/
 	}
 	
