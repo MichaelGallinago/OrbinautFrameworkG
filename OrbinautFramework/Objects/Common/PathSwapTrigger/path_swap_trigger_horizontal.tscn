@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://djgcqtur5n565"]
+
+[ext_resource type="Script" path="res://Objects/Common/PathSwapTrigger/PathSwapTriggerHorizontal.cs" id="1_ca4ww"]
+[ext_resource type="Texture2D" uid="uid://k1ir016cixbt" path="res://Objects/Common/PathSwapTrigger/path_swap.png" id="2_d8oyk"]
+
+[node name="PathSwapTriggerHorizontal" type="Node2D" node_paths=PackedStringArray("_sprite")]
+script = ExtResource("1_ca4ww")
+_sprite = NodePath("Sprite2D")
+Culling = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.501961)
+z_index = 4096
+z_as_relative = false
+texture = ExtResource("2_d8oyk")

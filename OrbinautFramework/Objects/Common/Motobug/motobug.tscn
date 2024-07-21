@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://6mgd41cvafii"]
+
+[ext_resource type="Script" path="res://Objects/Common/Motobug/Motobug.cs" id="1_tcgk7"]
+[ext_resource type="Texture2D" uid="uid://cng0f6cpcfns0" path="res://Objects/Common/Motobug/motobug.png" id="2_yef14"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c8k5d"]
+atlas = ExtResource("2_yef14")
+region = Rect2(0, 0, 40, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ton07"]
+atlas = ExtResource("2_yef14")
+region = Rect2(40, 0, 40, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a1vcy"]
+atlas = ExtResource("2_yef14")
+region = Rect2(80, 0, 40, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sjkgm"]
+atlas = ExtResource("2_yef14")
+region = Rect2(120, 0, 40, 29)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ankvk"]
+animations = [{
+"frames": [{
+"duration": 8.0,
+"texture": SubResource("AtlasTexture_c8k5d")
+}, {
+"duration": 8.0,
+"texture": SubResource("AtlasTexture_ton07")
+}, {
+"duration": 8.0,
+"texture": SubResource("AtlasTexture_a1vcy")
+}, {
+"duration": 8.0,
+"texture": SubResource("AtlasTexture_sjkgm")
+}],
+"loop": true,
+"name": &"default",
+"speed": 60.0
+}]
+
+[node name="Motobug" type="Node2D" node_paths=PackedStringArray("_sprite")]
+script = ExtResource("1_tcgk7")
+_sprite = NodePath("AnimatedSprite2D")
+Culling = 2
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ankvk")

@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://b46pvg72ijr8s"]
+
+[ext_resource type="SpriteFrames" uid="uid://dw5n2gxkoi7nl" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_tail.tres" id="1_0672x"]
+[ext_resource type="Script" path="res://Objects/Player/Tail.cs" id="6_jd43f"]
+
+[node name="AdvancedAnimatedSprite" type="AnimatedSprite2D"]
+show_behind_parent = true
+sprite_frames = ExtResource("1_0672x")
+animation = &"Move"
+script = ExtResource("6_jd43f")

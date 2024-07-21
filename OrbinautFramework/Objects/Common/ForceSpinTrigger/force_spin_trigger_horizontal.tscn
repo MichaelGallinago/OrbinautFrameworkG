@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://c77b22svl3edt"]
+
+[ext_resource type="Script" path="res://Objects/Common/ForceSpinTrigger/ForceSpinTriggerHorizontal.cs" id="1_j52nd"]
+[ext_resource type="Texture2D" uid="uid://dibm2p3l0mhvh" path="res://Objects/Common/ForceSpinTrigger/force_spin.png" id="2_86jsy"]
+
+[node name="ForceSpinTriggerHorizontal" type="Node2D" node_paths=PackedStringArray("Sprite")]
+script = ExtResource("1_j52nd")
+Sprite = NodePath("Sprite2D")
+Culling = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.501961)
+z_index = 4096
+z_as_relative = false
+texture = ExtResource("2_86jsy")

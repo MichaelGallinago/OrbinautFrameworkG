@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cpvkodwtpmjel"]
+
+[ext_resource type="Script" path="res://Objects/Common/Block/Block.cs" id="1_84ob3"]
+
+[node name="Block" type="Node2D"]
+z_index = -4
+position = Vector2(24, 872)
+script = ExtResource("1_84ob3")
+Behaviour = 2

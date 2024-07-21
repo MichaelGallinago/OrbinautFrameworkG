@@ -1,0 +1,45 @@
+[gd_scene load_steps=11 format=3 uid="uid://cps57gwcr3a6o"]
+
+[ext_resource type="Texture2D" uid="uid://b5wsb23sxlkx8" path="res://Objects/Common/FallingFloor/basic.png" id="1_2kuss"]
+[ext_resource type="Script" path="res://Objects/Common/FallingFloor/FallingFloorSpawner.cs" id="2_dwu72"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_la00d"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pvb6v"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pls5g"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0rp6y"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ikgil"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_17ex6"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3tq4"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_io8fr"]
+atlas = ExtResource("1_2kuss")
+region = Rect2(48, 16, 16, 16)
+
+[node name="FallingFloorSpawner" type="Sprite2D"]
+z_index = -5
+texture = ExtResource("1_2kuss")
+offset = Vector2(0, 8)
+script = ExtResource("2_dwu72")
+_collisionRadius = Vector2i(32, 8)
+_piecesTextures = [SubResource("AtlasTexture_la00d"), SubResource("AtlasTexture_pvb6v"), SubResource("AtlasTexture_pls5g"), SubResource("AtlasTexture_0rp6y"), SubResource("AtlasTexture_ikgil"), SubResource("AtlasTexture_17ex6"), SubResource("AtlasTexture_m3tq4"), SubResource("AtlasTexture_io8fr")]
+metadata/_edit_pinned_properties_ = [&"_piecesTextures"]

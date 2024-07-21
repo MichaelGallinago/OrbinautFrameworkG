@@ -1,0 +1,46 @@
+<Project Sdk="Godot.NET.Sdk/4.3.0-beta.3">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.6.1-beta.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Meziantou.Framework.FastEnumToStringGenerator" Version="2.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="**/*.ogg" />
+    <AdditionalFiles Include="**/*.wav" />
+    <AdditionalFiles Include="**/*.mp3" />
+    <AdditionalFiles Remove="Framework\Camera\**" />
+    <AdditionalFiles Remove="Framework\CameraAndSurface\**" />
+    <AdditionalFiles Remove="Framework\Input\**" />
+    <AdditionalFiles Remove=".godot\**" />
+  </ItemGroup>
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    <ProjectPath>$(MSBuildProjectDirectory)</ProjectPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioStorageSourceGenerator\AudioStorageSourceGenerator.csproj" OutputItemType="Analyzer" />
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <Compile Remove="Framework\Camera\**" />
+    <Compile Remove="Framework\CameraAndSurface\**" />
+    <Compile Remove="Framework\Input\**" />
+    <Compile Remove=".godot\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Framework\Camera\**" />
+    <EmbeddedResource Remove="Framework\CameraAndSurface\**" />
+    <EmbeddedResource Remove="Framework\Input\**" />
+    <EmbeddedResource Remove=".godot\**" />
+  </ItemGroup>
+</Project>

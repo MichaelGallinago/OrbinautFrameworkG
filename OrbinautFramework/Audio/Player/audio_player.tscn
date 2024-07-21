@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpxu1jp0bnk05"]
+
+[ext_resource type="Script" path="res://Audio/Player/AudioPlayer.cs" id="1_3urlq"]
+
+[node name="AudioPlayer" type="Node2D" node_paths=PackedStringArray("_jinglePlayer", "_musicPlayers", "_soundPlayers")]
+script = ExtResource("1_3urlq")
+_jinglePlayer = NodePath("JinglePlayer")
+_musicPlayers = [NodePath("MusicPlayer1"), NodePath("MusicPlayer2"), NodePath("MusicPlayer3")]
+_soundPlayers = [NodePath("SoundPlayer1"), NodePath("SoundPlayer2"), NodePath("SoundPlayer3"), NodePath("SoundPlayer4"), NodePath("SoundPlayer5"), NodePath("SoundPlayer6"), NodePath("SoundPlayer7"), NodePath("SoundPlayer8")]
+
+[node name="MusicPlayer1" type="AudioStreamPlayer" parent="."]
+bus = &"Music"
+
+[node name="MusicPlayer2" type="AudioStreamPlayer" parent="."]
+bus = &"Music"
+
+[node name="MusicPlayer3" type="AudioStreamPlayer" parent="."]
+bus = &"Music"
+
+[node name="JinglePlayer" type="AudioStreamPlayer" parent="."]
+bus = &"Jingle"
+
+[node name="SoundPlayer1" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer2" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer3" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer4" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer5" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer6" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer7" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"
+
+[node name="SoundPlayer8" type="AudioStreamPlayer" parent="."]
+bus = &"Sounds"

@@ -1,0 +1,58 @@
+[gd_scene load_steps=9 format=3 uid="uid://b8uvs02jxyk0t"]
+
+[ext_resource type="Script" path="res://Objects/Common/Bumper/Bumper.cs" id="1_ur7uk"]
+[ext_resource type="Texture2D" uid="uid://ecpnf5viy4s1" path="res://Objects/Common/Bumper/bumper.png" id="3_3buyg"]
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="4_thiwj"]
+[ext_resource type="Script" path="res://Framework/Animations/AdvancedAnimatedSprite.cs" id="5_wqvxw"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q0eh2"]
+atlas = ExtResource("3_3buyg")
+region = Rect2(36, 0, 36, 36)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eogub"]
+atlas = ExtResource("3_3buyg")
+region = Rect2(0, 0, 36, 36)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hj5c3"]
+atlas = ExtResource("3_3buyg")
+region = Rect2(0, 0, 36, 36)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mun1y"]
+animations = [{
+"frames": [{
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_q0eh2")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_eogub")
+}, {
+"duration": 5.0,
+"texture": SubResource("AtlasTexture_q0eh2")
+}],
+"loop": false,
+"name": &"Bump",
+"speed": 60.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hj5c3")
+}],
+"loop": true,
+"name": &"Default",
+"speed": 0.0
+}]
+script = ExtResource("4_thiwj")
+_frameLoops = {}
+_offsets = {}
+_cullSize = Vector2i(0, 0)
+
+[node name="Bumper" type="Node2D" node_paths=PackedStringArray("_sprite")]
+z_index = -1
+script = ExtResource("1_ur7uk")
+_sprite = NodePath("AdvancedAnimatedSprite")
+Culling = 6
+
+[node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_mun1y")
+animation = &"Default"
+script = ExtResource("5_wqvxw")

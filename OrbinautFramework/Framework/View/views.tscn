@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://djuush8jqlb77"]
+
+[ext_resource type="Script" path="res://Framework/View/Views.cs" id="1_epmq4"]
+[ext_resource type="PackedScene" uid="uid://cbcy2gu14bwg6" path="res://Framework/View/view_container.tscn" id="2_2kw32"]
+
+[node name="Views" type="VBoxContainer"]
+process_priority = 1024
+texture_filter = 1
+script = ExtResource("1_epmq4")
+_packedViewContainer = ExtResource("2_2kw32")

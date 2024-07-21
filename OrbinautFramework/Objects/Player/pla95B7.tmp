@@ -1,0 +1,25 @@
+[gd_scene load_steps=10 format=3 uid="uid://ce2tr4eoiv2gs"]
+
+[ext_resource type="Script" path="res://Objects/Player/Player.cs" id="1_w3650"]
+[ext_resource type="SpriteFrames" uid="uid://ives1jru75cc" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_amy.tres" id="2_qd5xx"]
+[ext_resource type="PackedScene" uid="uid://b46pvg72ijr8s" path="res://Objects/Player/tail.tscn" id="2_x8pdm"]
+[ext_resource type="SpriteFrames" uid="uid://d2maikoa22sg4" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_super_sonic.tres" id="4_51ln1"]
+[ext_resource type="SpriteFrames" uid="uid://vfurlkwg5fr1" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_none.tres" id="4_xjx3q"]
+[ext_resource type="SpriteFrames" uid="uid://b0sykgqai1k4o" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_sonic.tres" id="5_lpceh"]
+[ext_resource type="SpriteFrames" uid="uid://b00rdxd033mnj" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_tails.tres" id="6_1iqsb"]
+[ext_resource type="SpriteFrames" uid="uid://dqsm7lf3darvq" path="res://Objects/Player/Sprites/SpriteFrames/sprite_frames_knuckles.tres" id="7_ywak4"]
+[ext_resource type="Script" path="res://Objects/Player/PlayerAnimatedSprite.cs" id="105_mpaxa"]
+
+[node name="Player" type="Node2D" node_paths=PackedStringArray("Sprite")]
+process_priority = -1
+z_index = -2
+script = ExtResource("1_w3650")
+Sprite = NodePath("AdvancedAnimatedSprite")
+PackedTail = ExtResource("2_x8pdm")
+Behaviour = 4
+
+[node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("4_xjx3q")
+animation = &"None"
+script = ExtResource("105_mpaxa")
+_spriteFrames = [ExtResource("4_xjx3q"), ExtResource("5_lpceh"), ExtResource("6_1iqsb"), ExtResource("7_ywak4"), ExtResource("2_qd5xx"), ExtResource("4_51ln1")]

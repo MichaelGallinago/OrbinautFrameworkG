@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://l33qohh6lu7b"]
+
+[ext_resource type="Script" path="res://Scenes/Screens/Startup/Startup.cs" id="1_5grtg"]
+[ext_resource type="Shader" path="res://Shaders/fade.gdshader" id="1_v4hqx"]
+[ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Stages/TSZ/test_stage_zone_0.tscn" id="3_qnu5n"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_da42i"]
+shader = ExtResource("1_v4hqx")
+shader_parameter/u_step = null
+shader_parameter/u_type = null
+
+[node name="Startup" type="Node2D" node_paths=PackedStringArray("_preloader")]
+material = SubResource("ShaderMaterial_da42i")
+script = ExtResource("1_5grtg")
+_preloader = NodePath("ResourcePreloader")
+
+[node name="ResourcePreloader" type="ResourcePreloader" parent="."]
+resources = [PackedStringArray("test_stage_zone_0"), [ExtResource("3_qnu5n")]]

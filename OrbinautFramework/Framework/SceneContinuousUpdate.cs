@@ -1,0 +1,34 @@
+using Godot;
+using OrbinautFramework3.Audio.Player;
+using OrbinautFramework3.Framework.InputModule;
+
+namespace OrbinautFramework3.Framework;
+
+public partial class SceneContinuousUpdate : Node
+{
+    private SceneTree _sceneTree;
+
+    public SceneContinuousUpdate()
+    {
+        ProcessPriority = int.MinValue;
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
+    public override void _Ready() => _sceneTree = GetTree();
+    
+    public override void _Process(double delta)
+    {
+        InputUtilities.Update();
+        UpdatePause();
+    }
+
+    private void UpdatePause()
+    {
+        if (!Scene.Local.AllowPause || !InputUtilities.Press[0].Start) return;
+        
+        bool isPause = Scene.Local.State != Scene.States.Paused;
+        Scene.Local.State = isPause ? Scene.States.Paused : Scene.States.Normal;
+        _sceneTree.Paused = isPause;
+        AudioPlayer.SetPauseState(isPause);
+    }
+}

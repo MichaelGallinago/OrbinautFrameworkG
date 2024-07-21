@@ -1,0 +1,9 @@
+
+All GUI objects are spawned by room controllers or other objects. 
+They are not placed manually
+
+However, not all GUI objects are inherited from CommonObject class 
+as they don't really need to utilise any of the framework functions
+
+This also allows them to always run their code and be displayed
+no matter what current framework state is

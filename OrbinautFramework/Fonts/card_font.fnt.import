@@ -1,0 +1,16 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://uu5h7x5c7ex7"
+path="res://.godot/imported/card_font.fnt-a9a69550e75cf496ed6d997b8189a02d.fontdata"
+
+[deps]
+
+source_file="res://Fonts/card_font.fnt"
+dest_files=["res://.godot/imported/card_font.fnt-a9a69550e75cf496ed6d997b8189a02d.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
