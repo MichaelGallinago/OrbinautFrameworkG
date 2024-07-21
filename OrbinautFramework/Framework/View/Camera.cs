@@ -210,8 +210,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		const int shiftDistanceX = 64;
 		int shiftSign = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
-		_bufferOffset.X = _bufferOffset.X.MoveToward(
-			shiftDistanceX * shiftSign, shiftSpeedX * shiftSign * processSpeed);
+		_bufferOffset.X = _bufferOffset.X.MoveToward(shiftDistanceX * shiftSign, shiftSpeedX * processSpeed);
 	}
 	
 	private void MoveCamera()
@@ -285,7 +284,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		float distance = targetPosition - _rawPosition.X;
 		float speed = _maxVelocity.X * processSpeed;
-
+		
 		if (distance == 0f) return;
 		
 		_rawPosition.X = Math.Abs(distance) > speed ? _rawPosition.X + speed * Math.Sign(distance) : targetPosition;

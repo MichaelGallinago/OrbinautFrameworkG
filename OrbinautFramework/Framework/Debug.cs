@@ -5,8 +5,8 @@ namespace OrbinautFramework3.Framework;
 public partial class Debug : Node
 {
 	private const int DebugFrameLimit = 2;
-	private const string StartupPath = "res://Screens/Startup/startup.tscn";
-	private const string DevMenuPath = "res://Screens/Startup/startup.tscn"; // TODO: replace
+	private const string StartupPath = "res://Scenes/Screens/Startup/startup.tscn";
+	private const string DevMenuPath = "res://Scenes/Screens/Startup/startup.tscn"; // TODO: replace
 	
 	private enum DebugKeys
 	{
