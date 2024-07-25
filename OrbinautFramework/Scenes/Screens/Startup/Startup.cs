@@ -1,39 +1,30 @@
 using Godot;
 using OrbinautFramework3.Framework;
 
-namespace OrbinautFramework3.Screens.Startup;
+namespace OrbinautFramework3.Scenes.Screens.Startup;
 
 public partial class Startup : Scene
 {
-    [Export] private ResourcePreloader _preloader;
-
-    private int _time;
+    [Export] private PackedScene _nextScene;
     
     public override void _Ready()
     {
         PhysicsServer2D.SetActive(false);
         PhysicsServer3D.SetActive(false);
+
+        ChangeScene();
     }
 
-    public override void _Process(double deltaTime)
+    private void ChangeScene()
     {
-        _time++;
-
-        if (_time < 100)
+        SceneTree sceneTree = GetTree();
+        
+        if (_nextScene == null)
         {
+            sceneTree.Quit();
             return;
         }
         
-        SceneTree sceneTree = GetTree();
-        
-        if (_preloader == null)
-        {
-            sceneTree.Quit();
-        }
-        else
-        {
-            Resource scene = _preloader.GetResource("test_stage_zone_0");
-            sceneTree.CallDeferred("change_scene_to_packed", scene);
-        }
+        sceneTree.CallDeferred("change_scene_to_packed", _nextScene);
     }
 }

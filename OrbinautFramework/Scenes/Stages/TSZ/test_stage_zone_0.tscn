@@ -1,13 +1,13 @@
 [gd_scene load_steps=30 format=4 uid="uid://bk2gkg61pmtco"]
 
-[ext_resource type="Script" path="res://Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
+[ext_resource type="Script" path="res://Scenes/Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="3_8004u"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="3_jpaxp"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="5_movty"]
-[ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
+[ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Scenes/Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 [ext_resource type="PackedScene" uid="uid://djgcqtur5n565" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_horizontal.tscn" id="11_1127g"]
 [ext_resource type="PackedScene" uid="uid://cr02pmwqgey42" path="res://Objects/Common/Bridge/tsz_bridge.tscn" id="12_ncrh2"]
 [ext_resource type="PackedScene" uid="uid://dtlx4fu2pgj4d" path="res://Objects/Common/CameraTrigger/camera_trigger.tscn" id="13_7s6he"]
@@ -18,9 +18,9 @@
 [ext_resource type="PackedScene" uid="uid://dx3syhqnbbgmd" path="res://Objects/Common/Spikes/moving_spikes_horizontal.tscn" id="16_bdqn7"]
 [ext_resource type="PackedScene" uid="uid://c77b22svl3edt" path="res://Objects/Common/ForceSpinTrigger/force_spin_trigger_horizontal.tscn" id="16_p2jm1"]
 [ext_resource type="PackedScene" uid="uid://bifod3tgod01h" path="res://Objects/Common/Spikes/spikes_vertical.tscn" id="16_x5qvi"]
-[ext_resource type="TileSet" uid="uid://bfevce17ikl0q" path="res://Stages/TSZ/Graphics/graphics_tile_set_a.tres" id="17_dgj2a"]
+[ext_resource type="TileSet" uid="uid://bfevce17ikl0q" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_a.tres" id="17_dgj2a"]
 [ext_resource type="PackedScene" uid="uid://1gciguema0rh" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_vertical.tscn" id="18_0iln7"]
-[ext_resource type="TileSet" uid="uid://dvuwhwecgwu0r" path="res://Stages/TSZ/Graphics/graphics_tile_set_b.tres" id="18_5sdh5"]
+[ext_resource type="TileSet" uid="uid://dvuwhwecgwu0r" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_b.tres" id="18_5sdh5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0gqu0"]
 atlas = ExtResource("15_ve5v6")

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfskr42gkuary"
-path="res://.godot/imported/layer_a.png-f429a5f9564c6716a65569e61825f50d.ctex"
+uid="uid://gvy2s2xbcjw7"
+path="res://.godot/imported/background_layer0.png-be953d6aad85d1e98400b2b51c997199.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Stages/TSZ/Graphics/layer_a.png"
-dest_files=["res://.godot/imported/layer_a.png-f429a5f9564c6716a65569e61825f50d.ctex"]
+source_file="res://Scenes/Stages/TSZ/Graphics/background_layer0.png"
+dest_files=["res://.godot/imported/background_layer0.png-be953d6aad85d1e98400b2b51c997199.ctex"]
 
 [params]
 
