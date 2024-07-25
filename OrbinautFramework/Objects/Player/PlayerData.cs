@@ -5,6 +5,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -63,7 +64,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
 	
-	public Actions Action { get; set; }
+	public IAction Action { get; set; }
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }

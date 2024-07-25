@@ -573,8 +573,15 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		SetNextStateOnDeath();
 	}
 
-	protected virtual void SetNextStateOnDeath()
+	private void SetNextStateOnDeath()
 	{
+		// If CPU, respawn
+		if (Id != 0)
+		{
+			Respawn();
+			return;
+		}
+		
 		//TODO: gui hud
 		/*if (instance_exists(obj_gui_hud))
 		{

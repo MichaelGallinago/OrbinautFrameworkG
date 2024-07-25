@@ -1,6 +1,6 @@
 ﻿namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public class GlideCancel
+public interface IAction
 {
-    
+    void Perform(Player player);
 }

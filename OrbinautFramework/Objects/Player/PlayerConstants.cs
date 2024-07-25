@@ -32,33 +32,6 @@ public enum CpuBehaviours : byte
 {
     S2, S3
 }
-    
-public enum Actions : byte
-{
-    None,
-    SpinDash,
-    Dash,
-    DropDash,
-    DropDashCancel,
-    Glide,
-    Climb,
-    Flight,
-    Transform,
-    HammerDash,
-    HammerSpin,
-    HammerSpinCancel,
-    Carried
-}
-
-public enum GlideStates : byte
-{
-    Air, Ground, Fall
-}
-	
-public enum ClimbStates : byte
-{
-    Normal, Ledge, WallJump
-}
 
 public enum RestartStates : byte
 {

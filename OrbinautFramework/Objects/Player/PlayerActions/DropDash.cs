@@ -1,6 +1,9 @@
 ﻿namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public class DropDash
+public struct DropDash : IAction
 {
-    
+    public void Perform(Player player)
+    {
+        
+    }
 }

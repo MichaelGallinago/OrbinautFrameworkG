@@ -1,6 +1,224 @@
-﻿namespace OrbinautFramework3.Objects.Player.PlayerActions;
+﻿using Godot;
+using OrbinautFramework3.Audio.Player;
+using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Tiles;
 
-public class Climb : IData
+namespace OrbinautFramework3.Objects.Player.PlayerActions;
+
+public struct Climb : IAction
 {
-    
+	public enum States : byte
+	{
+		Normal, Ledge, WallJump
+	}
+	
+	private enum ClimbLedgeStates : byte
+	{
+		None, Frame0, Frame1, Frame2, End
+	}
+	
+	private States _state;
+	
+    public void Perform(Player player)
+    {
+	    switch (_state)
+	    {
+		    case States.Normal: ClimbNormal(); break;
+		    case States.Ledge: ClimbLedge(); break;
+		    case States.WallJump: ClimbJump(); break;
+	    }
+    }
+
+	private void ClimbNormal()
+	{
+		if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X) || Velocity.X != 0f)
+		{
+			ReleaseClimb();
+			return;
+		}
+		
+		const int stepsPerClimbFrame = 4;
+		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
+		
+		int radiusX = Radius.X;
+		if (Facing == Constants.Direction.Negative)
+		{
+			radiusX++;
+		}
+		
+		TileCollider.SetData((Vector2I)Position, TileLayer);
+
+		if (Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+		
+		if (!Input.Press.Abc)
+		{
+			// Update animation frame if still climbing
+			if (Velocity.Y != 0)
+			{
+				OverrideAnimationFrame = Mathf.FloorToInt(ActionValue / stepsPerClimbFrame);
+			}
+			return;
+		}
+
+		ClimbJump();
+	}
+
+	private void ClimbJump()
+	{
+		Animation = Animations.Spin;
+		IsSpinning = true;
+		IsJumping = true;
+		Action = Actions.None;
+		Facing = (Constants.Direction)(-(int)Facing);
+		Velocity.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpSpeed);
+			
+		AudioPlayer.Sound.Play(SoundStorage.Jump);
+		ResetGravity();
+	}
+
+	private bool ClimbUpOntoWall(int radiusX)
+	{
+		// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
+		int wallDistance = TileCollider.FindDistance(radiusX * (int)Facing, -Radius.Y - 1, false, Facing);
+		
+		if (wallDistance >= 4)
+		{
+			_state = (int)States.Ledge;
+			ActionValue = 0f;
+			Velocity.Y = 0f;
+			Gravity = 0f;
+			return true;
+		}
+
+		// If Knuckles has encountered a small dip in the wall, cancel climb movement
+		if (wallDistance != 0)
+		{
+			Velocity.Y = 0f;
+		}
+
+		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
+		int ceilDistance = TileCollider.FindDistance(
+			radiusX * (int)Facing, 1 - RadiusNormal.Y, true, Constants.Direction.Negative);
+
+		if (ceilDistance >= 0) return false;
+		Position -= new Vector2(0f, ceilDistance);
+		Velocity.Y = 0f;
+		return false;
+	}
+
+	private bool ReleaseClimbing(int radiusX)
+	{
+		// If Knuckles is no longer against the wall, make him let go
+		if (TileCollider.FindDistance(radiusX * (int)Facing, Radius.Y + 1, false, Facing) == 0)
+		{
+			return LandAfterClimbing(radiusX);
+		}
+		
+		ReleaseClimb();
+		return true;
+	}
+
+	private bool LandAfterClimbing(int radiusX)
+	{
+		(int distance, float angle) = TileCollider.FindTile(
+			radiusX * (int)Facing, RadiusNormal.Y, true, Constants.Direction.Positive);
+
+		if (distance >= 0) return false;
+		Position += new Vector2(0f, distance + RadiusNormal.Y - Radius.Y);
+		Angle = angle;
+				
+		Land();
+
+		Animation = Animations.Idle;
+		Velocity.Y = 0f;
+				
+		return true;
+	}
+
+	private void UpdateVerticalSpeedOnClimb(int maxValue)
+	{
+		if (Input.Down.Up)
+		{
+			ActionValue += Scene.Local.ProcessSpeed;
+			if (ActionValue > maxValue)
+			{
+				ActionValue = 0f;
+			}
+
+			Velocity.Y = -PhysicParams.AccelerationClimb;
+			return;
+		}
+		
+		if (Input.Down.Down)
+		{
+			ActionValue -= Scene.Local.ProcessSpeed;
+			if (ActionValue < 0f)
+			{
+				ActionValue = maxValue;
+			}
+
+			Velocity.Y = PhysicParams.AccelerationClimb;
+			return;
+		}
+
+		Velocity.Y = 0f;
+	}
+
+	private void ReleaseClimb()
+	{
+		Animation = Animations.GlideFall;
+		Action = Actions.Glide;
+		_state = (int)GlideStates.Fall;
+		ActionValue = 1f;
+		Radius = RadiusNormal;
+		
+		ResetGravity();
+	}
+
+	private void ClimbLedge()
+	{
+		//TODO: check this
+		
+		ClimbLedgeStates previousState = GetClimbLedgeState(ActionValue);
+		ActionValue += Scene.Local.ProcessSpeed;
+		ClimbLedgeStates state = GetClimbLedgeState(ActionValue);
+		if (state == previousState) return;
+		
+		switch (state)
+		{
+			case ClimbLedgeStates.Frame0:
+				Animation = Animations.ClimbLedge;
+				Position += new Vector2(3f * (float)Facing, -3f);
+				break;
+					
+			case ClimbLedgeStates.Frame1:
+				Position += new Vector2(8f * (float)Facing, -10f);
+				break;
+					
+			case ClimbLedgeStates.Frame2:
+				Position -= new Vector2(8f * (float)Facing, 12f);
+				break;
+					
+			case ClimbLedgeStates.End:
+				Land();
+				Animation = Animations.Idle;
+				Position += new Vector2(8f * (float)Facing, 4f);
+
+				// Subtract that 1px that was applied when we attached to the wall
+				if (Facing == Constants.Direction.Negative)
+				{
+					Position += Vector2.Left;
+				}
+				break;
+		}
+	}
+	
+	private static ClimbLedgeStates GetClimbLedgeState(float value) => value switch
+	{
+		<= 0f => ClimbLedgeStates.None,
+		<= 6f => ClimbLedgeStates.Frame0,
+		<= 12f => ClimbLedgeStates.Frame1,
+		<= 18f => ClimbLedgeStates.Frame2,
+		_ => ClimbLedgeStates.End
+	};
 }

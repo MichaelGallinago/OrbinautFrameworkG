@@ -1,6 +1,9 @@
 ﻿namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public class SpinDash
+public struct SpinDash : IAction
 {
-    
+    public void Perform(Player player)
+    {
+        
+    }
 }
