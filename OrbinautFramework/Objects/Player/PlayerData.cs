@@ -20,8 +20,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	[Export] private Types _uniqueType;
 
 	public event Action<Types> TypeChanged;
-
-	public bool IsSuper => SuperTimer > 0f;
 	
 	public Types Type
 	{
@@ -45,7 +43,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public Vector2I RadiusSpin { get; set; }
 	public float Gravity { get; set; }
 	public float Angle { get; set; }
-	public float SlopeGravity { get; set; }
+
+	public SuperData SuperData { get; set; } = new();
 
 	public Constants.TileLayers TileLayer { get; set; }
 	public Constants.TileBehaviours TileBehaviour { get; set; }
@@ -63,7 +62,6 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public DeathStates DeathState { get; set; }
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
-	public float SuperTimer { get; set; }
 	
 	public Actions Action { get; set; }
 	public int ActionState { get; set; }
@@ -83,22 +81,14 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public float ItemSpeedTimer { get; set; }
 	public float ItemInvincibilityTimer { get; set; }
 
-	public ICarried CarryTarget { get; set; }
-	public float CarryTimer { get; set; }
-	public Vector2 CarryTargetPosition { get; set; }
-    
-	public CpuStates CpuState { get; set; } = CpuStates.Main;
-	public float CpuRespawnTimer { get; set; }
-	public float CpuInputTimer { get; set; }
-	public bool IsCpuJumping { get; set; }
-	public bool IsCpuRespawn { get; set; }
-	public ICpuTarget CpuTarget { get; set; }
+	public CarryData CarryData { get; set; } = new();
+
+	public CpuData CpuData { get; set; } = new();
 	
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
 	public HashSet<BaseObject> PushObjects { get; } = [];
-	public bool IsDebugMode { get; set; }
 	public PlayerInput Input { get; } = new();
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;

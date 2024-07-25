@@ -14,6 +14,8 @@ public class DebugMode
 	private const float Acceleration = 0.046875f;
 	private const byte SpeedLimit = 16;
 
+	public bool IsEnabled { get; set; }
+	
 	private int _index;
 	private float _speed;
 	private readonly List<Type> _objects;
