@@ -6,20 +6,18 @@ using OrbinautFramework3.Framework.Tiles;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Glide : IAction
+public struct Glide(Glide.States state) : IAction
 {
 	public enum States : byte
 	{
 		Air, Ground, Fall
 	}
 
-	private States _state;
-	
-    public void Perform(Player player)
+	public void Perform(Player player)
     {
-	    if (_state == States.Fall) return;
+	    if (state == States.Fall) return;
 		
-	    switch (_state)
+	    switch (state)
 	    {
 		    case States.Air: GlideAir(); break;
 		    case States.Ground: GlideGround(); break;
@@ -247,7 +245,7 @@ public struct Glide : IAction
 			-Radius.X, Radius.Y, Radius.X, Radius.Y,
 			true, Constants.Direction.Positive);
 	
-		if (_state == States.Ground)
+		if (state == States.Ground)
 		{
 			if (floorDistance > 14)
 			{
@@ -271,7 +269,7 @@ public struct Glide : IAction
 
 	private void LandWhenGlide()
 	{
-		switch (_state)
+		switch (state)
 		{
 			case States.Air: LandAir(); break;
 			case States.Fall: LandFall(); break;
@@ -288,7 +286,7 @@ public struct Glide : IAction
 		}
 				
 		Animation = Animations.GlideGround;
-		_state = States.Ground;
+		state = States.Ground;
 		ActionValue = 0f;
 		Gravity = 0f;
 	}
@@ -312,7 +310,7 @@ public struct Glide : IAction
 
 	private void AttachToWall(int wallRadius, int climbY)
 	{
-		if (_state != (int)States.Air) return;
+		if (state != (int)States.Air) return;
 
 		CheckCollisionOnAttaching(wallRadius, climbY);
 			
@@ -322,7 +320,7 @@ public struct Glide : IAction
 		}
 
 		bool isWallJump = SharedData.SuperstarsTweaks && (Input.Down.Up || Input.Down.Down);
-		_state = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal);
+		state = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal);
 		Action = Actions.Climb;
 		Animation = Animations.ClimbWall;
 		ActionValue = 0f;
@@ -362,7 +360,7 @@ public struct Glide : IAction
 	private void ReleaseGlide()
 	{
 		Animation = Animations.GlideFall;
-		_state = (int)States.Fall;
+		state = (int)States.Fall;
 		ActionValue = 0f;
 		Radius = RadiusNormal;
 		

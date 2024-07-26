@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
@@ -52,7 +53,7 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 				
 			IsSpinning = true;
 			IsJumping = true;
-			Action = Actions.None;
+			Action = new Default();
 			Animation = Animations.Spin;
 			Radius = RadiusSpin;
 			Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpSpeed);
@@ -483,100 +484,6 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		return distance >= maxCeilingDistance;
 	}
 
-	private void ChargeDropDash()
-	{
-		if (IsGrounded || CancelDropDash()) return;
-		
-		if (Input.Down.Abc)
-		{
-			IsAirLock = false;		
-			ActionValue += Scene.Local.ProcessSpeed;
-			
-			if (ActionValue < MaxDropDashCharge || Animation == Animations.DropDash) return;
-			
-			AudioPlayer.Sound.Play(SoundStorage.Charge3);
-			Animation = Animations.DropDash;
-			return;
-		}
-		
-		switch (ActionValue)
-		{
-			case <= 0f:
-				return;
-			
-			case >= MaxDropDashCharge:
-				Animation = Animations.Spin;
-				Action = Actions.DropDashCancel;
-				break;
-		}
-		
-		ActionValue = 0f;
-	}
-	
-	private void ReleaseDropDash()
-	{
-		if (CancelDropDash()) return;
-		
-		if (ActionValue < MaxDropDashCharge) return;
-		
-		Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-		Radius = RadiusSpin;
-		
-		if (IsSuper)
-		{
-			UpdateDropDashGroundSpeed(13f, 12f);
-			if (IsCameraTarget(out ICamera camera))
-			{
-				camera.SetShakeTimer(6f);
-			}
-		}
-		else
-		{
-			UpdateDropDashGroundSpeed(12f, 8f);
-		}
-		
-		Animation = Animations.Spin;
-		IsSpinning = true;
-		
-		SetCameraDelayX(8f);
-			
-		//TODO: obj_dust_dropdash
-		//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
-		AudioPlayer.Sound.Stop(SoundStorage.Charge3);
-		AudioPlayer.Sound.Play(SoundStorage.Release);
-	}
-
-	private bool CancelDropDash()
-	{
-		if (!SharedData.DropDash || Action != Actions.DropDash) return true;
-		
-		if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper || ItemInvincibilityTimer > 0f) return false;
-		
-		Animation = Animations.Spin;
-		Action = Actions.None;
-		return true;
-	}
-
-	private void UpdateDropDashGroundSpeed(float limitSpeed, float force)
-	{
-		var sign = (float)Facing;
-		limitSpeed *= sign;
-		force *= sign;
-		
-		if (Velocity.X * sign >= 0f)
-		{
-			GroundSpeed.Value = MathF.Floor(GroundSpeed / 4f) + force;
-			if (sign * GroundSpeed <= limitSpeed) return;
-			GroundSpeed.Value = limitSpeed;
-			return;
-		}
-		
-		GroundSpeed.Value = force;
-		if (Mathf.IsZeroApprox(Angle)) return;
-		
-		GroundSpeed.Value += MathF.Floor(GroundSpeed / 2f);
-	}
-
 	private void ReleaseHammerSpin()
 	{
 		if (Action != Actions.HammerSpin) return;
@@ -594,54 +501,5 @@ public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePla
 		
 		AudioPlayer.Sound.Stop(SoundStorage.Charge3);
 		AudioPlayer.Sound.Play(SoundStorage.Release);
-	}
-
-	private void CancelHammerDash()
-	{
-		Animation = Animations.Move;
-		Action = Actions.None;
-	}
-
-	private void Carry()
-	{
-		if (Type != Types.Tails) return;
-
-		if (CarryTimer > 0f)
-		{
-			CarryTimer -= Scene.Local.ProcessSpeed;
-			if (CarryTimer > 0f) return;
-		}
-	
-		if (CarryTarget != null)
-		{
-			CarryTarget.OnAttached(this);
-			return;
-		}
-		
-		if (Action != Actions.Flight) return;
-
-		GrabAnotherPlayer();
-	}
-
-	private void GrabAnotherPlayer()
-	{
-		foreach (Player player in Scene.Local.Players.Values)
-		{
-			if (player == this) continue;
-			if (player.Action is Actions.SpinDash or Actions.Carried) continue;
-			if (!player.IsControlRoutineEnabled || !player.IsObjectInteractionEnabled) continue;
-
-			Vector2 delta = (player.Position - Position).Abs();
-			if (delta.X >= 16f || delta.Y >= 48f) continue;
-				
-			player.ResetState();
-			AudioPlayer.Sound.Play(SoundStorage.Grab);
-				
-			player.Animation = Animations.Grab;
-			player.Action = Actions.Carried;
-			CarryTarget = player;
-
-			player.AttachToPlayer(this);
-		}
 	}
 }

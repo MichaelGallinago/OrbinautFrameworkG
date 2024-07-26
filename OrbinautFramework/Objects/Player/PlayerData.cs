@@ -63,8 +63,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public DeathStates DeathState { get; set; }
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
-	
-	public IAction Action { get; set; }
+
+	public ActionContainer<IAction> Action { get; set; } = new ActionContainer<IAction>(new Flight());
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }
