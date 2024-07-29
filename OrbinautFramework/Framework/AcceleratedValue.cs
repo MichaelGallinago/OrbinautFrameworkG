@@ -53,15 +53,29 @@ public class AcceleratedValue
         }
     }
     
+    //TODO: change to SetMax
     public void Max(float value)
     {
         if (_value >= value) return;
         Value = value;
     }
     
+    //TODO: change to SetMin
     public void Min(float value)
     {
         if (_value <= value) return;
         Value = value;
+    }
+    
+    public void ApplyFriction(float friction)
+    {
+        int sign = Math.Sign(_value);
+        Acceleration = -sign * friction;
+		
+        switch (sign)
+        {
+            case  1: Max(0f); break;
+            case -1: Min(0f); break;
+        }
     }
 }

@@ -10,15 +10,10 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlayer
+public class PlayerData
 {
 	private const byte MinimalRecordLength = 32;
 	protected const int CpuDelayStep = 16;
-	
-	[Export] protected PlayerAnimatedSprite Sprite { get; private set; }
-	[Export] protected ShieldContainer Shield;
-	[Export] private SpawnTypes _spawnType;
-	[Export] private Types _uniqueType;
 
 	public event Action<Types> TypeChanged;
 	
@@ -32,6 +27,8 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 		}
 	}
 	private Types _type;
+	
+	public PhysicParams PhysicParams;
 	public Velocity Velocity { get; } = new();
 	public AcceleratedValue GroundSpeed { get; set; } = new();
 	
@@ -64,7 +61,7 @@ public abstract partial class PlayerData : BaseObject, ICpuTarget, IAnimatedPlay
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
 
-	public ActionContainer<IAction> Action { get; set; } = new ActionContainer<IAction>(new Flight());
+	public IAction Action { get; set; }
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }

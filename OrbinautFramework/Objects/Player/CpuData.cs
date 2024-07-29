@@ -23,7 +23,7 @@ public class CpuData
 	private Buttons _cpuInputPress;
 	private int _delay;
 	
-    protected override void ProcessCpu()
+    public void Process()
     {
 		if (IsHurt || IsDead || Id == 0) return;
 		
@@ -123,7 +123,8 @@ public class CpuData
 		{
 			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
 			velocityX *= Scene.Local.ProcessSpeed;
-
+			
+			//TODO: check this
 			if (distance.X >= 0)
 			{
 				if (velocityX < distance.X)

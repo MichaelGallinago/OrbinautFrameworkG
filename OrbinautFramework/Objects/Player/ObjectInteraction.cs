@@ -5,10 +5,9 @@ using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class ObjectInteractivePlayer : BasicPhysicalPlayer
+public struct ObjectInteraction
 {
 	private const int GripY = 4;
-	
 	private SolidObjectData _data;
 	
 	public void ClearPush(BaseObject target)

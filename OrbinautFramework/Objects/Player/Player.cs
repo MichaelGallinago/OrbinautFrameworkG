@@ -2,21 +2,35 @@ using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
+public sealed partial class Player : BaseObject
 {
 	private readonly DebugMode _debugMode = new();
+	public PlayerData Data { get; } = new();
 
+	[Export] private PlayerAnimatedSprite _sprite;
+	[Export] private ShieldContainer _shield;
+	[Export] private SpawnTypes _spawnType;
+	[Export] private Types _uniqueType;
 	[Export] private PackedScene _packedTail;
 	private Tail _tail;
 
-	public Player() => TypeChanged += OnTypeChanged;
-	
+	private CpuData _cpuData = new();
+	private ObjectInteraction _objectInteraction = new();
+	private PhysicsData _physicsData = new();
+
+	public Player()
+	{
+		Data.TypeChanged += OnTypeChanged;
+	}
+
 	public override void _EnterTree()
 	{
 		base._EnterTree();
@@ -31,24 +45,24 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 	
 	public override void _Process(double delta)
 	{
-		Input.Update(Id);
+		Data.Input.Update(Data.Id);
 		
 		// DEBUG MODE PLAYER ROUTINE
-		if (DeathState == DeathStates.Wait && Id == 0 && SharedData.IsDebugModeEnabled)
+		if (Data.DeathState == DeathStates.Wait && Data.Id == 0 && SharedData.IsDebugModeEnabled)
 		{
 			if (_debugMode.Update(this, Input)) return;
 		}
 	    
 		// DEFAULT PLAYER ROUTINE
-		ProcessCpu();
+		_cpuData.Process();
 		ProcessDeath();
 		
-		if (IsControlRoutineEnabled)
+		if (Data.IsControlRoutineEnabled)
 		{
-			base._Process(delta);
+			RunControlRoutine();
 		}
 
-		if (!IsDead)
+		if (!Data.IsDead)
 		{
 			ProcessWater();
 			UpdateStatus();
@@ -57,12 +71,41 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		
 		RecordData();
 		ProcessRotation();
-		Sprite.Animate(this);
+		_sprite.Animate(this);
 		_tail?.Animate(this);
 		ProcessPalette();
 	}
+
+	private void RunControlRoutine()
+	{
+		_physicsData.UpdatePhysicParameters();
+		
+		if (ProcessSpinDash()) return;
+		if (ProcessDash()) return;
+		if (ProcessJump()) return;
+		if (StartJump()) return;
+		
+		// Abilities logic
+		ChargeDropDash();
+		ProcessFlight();
+		ProcessClimb();
+		ProcessGlide();
+		ChargeHammerSpin();
+		ProcessHammerDash();
+		
+		_physicsData.ProcessCorePhysics();
+		
+		ProcessGlideCollision();
+		Carry();
+	}
 	
-	protected virtual void ProcessCpu() {}
+	private void SetCameraDelayX(float delay)
+	{
+		if (!SharedData.CdCamera && IsCameraTarget(out ICamera camera))
+		{
+			camera.SetCameraDelayX(delay);
+		}
+	}
 
 	private void OnTypeChanged(Types newType)
 	{
@@ -75,7 +118,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 				break;
 			
 			case Types.Knuckles:
-				ClimbAnimationFrameNumber = Sprite.GetAnimationFrameCount(Animations.ClimbWall, newType);
+				ClimbAnimationFrameNumber = _sprite.GetAnimationFrameCount(Animations.ClimbWall, newType);
 				RemoveTail();
 				break;
 			
@@ -103,7 +146,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 		UpdateSuperForm();
 		
 		IsInvincible = InvincibilityTimer > 0f || ItemInvincibilityTimer > 0f || 
-		               IsHurt || IsSuper || Shield.State == ShieldContainer.States.DoubleSpin;
+		               IsHurt || IsSuper || _shield.State == ShieldContainer.States.DoubleSpin;
 		
 		KillPlayerOnTimeLimit();
 	}
@@ -232,14 +275,14 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private void RemoveShieldUnderwater()
 	{
-		if (Id != 0 && Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
+		if (Id != 0 && _shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
 		
-		if (Shield.Type == ShieldContainer.Types.Lightning)
+		if (_shield.Type == ShieldContainer.Types.Lightning)
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
 		}
-		else if (Shield.Type == ShieldContainer.Types.Fire)
+		else if (_shield.Type == ShieldContainer.Types.Fire)
 		{
 			//TODO: obj_explosion_dust
 			//instance_create(x, c_stage.water_level, obj_explosion_dust, { MakeSound: false });
@@ -255,7 +298,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 
 	private bool UpdateAirTimer()
 	{
-		if (Shield.Type == ShieldContainer.Types.Bubble) return false;
+		if (_shield.Type == ShieldContainer.Types.Bubble) return false;
 
 		AirTimerStates previousState = GetAirTimerState(AirTimer);
 		if (AirTimer > 0f)
@@ -389,7 +432,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 				break;
 			
 			case Animations.HammerDash:
-				(int radiusX, int radiusY, int offsetX, int offsetY) = (Sprite.Frame & 3) switch
+				(int radiusX, int radiusY, int offsetX, int offsetY) = (_sprite.Frame & 3) switch
 				{
 					0 => (16, 16,  6,  0),
 					1 => (16, 16, -7,  0),
@@ -400,7 +443,7 @@ public partial class Player : PhysicalPlayerWithAbilities, IEditor, ITailed
 				SetHitBoxExtra(radiusX, radiusY, offsetX * (int)Facing, offsetY);
 				break;
 			default:
-				SetHitBoxExtra(Shield.State == ShieldContainer.States.DoubleSpin ? 
+				SetHitBoxExtra(_shield.State == ShieldContainer.States.DoubleSpin ? 
 					new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}

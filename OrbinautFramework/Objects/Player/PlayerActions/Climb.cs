@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
@@ -18,27 +19,29 @@ public struct Climb : IAction
 	}
 	
 	private States _state;
+	private int _climbAnimationFrameNumber = 0;
 	
     public void Perform(Player player)
     {
 	    switch (_state)
 	    {
-		    case States.Normal: ClimbNormal(); break;
-		    case States.Ledge: ClimbLedge(); break;
-		    case States.WallJump: ClimbJump(); break;
+		    case States.Normal: ClimbNormal(player); break;
+		    case States.Ledge: ClimbLedge(player); break;
+		    case States.WallJump: ClimbJump(player); break;
+		    default: throw new ArgumentOutOfRangeException(_state.ToString());
 	    }
     }
 
-	private void ClimbNormal()
+	private void ClimbNormal(Player player)
 	{
-		if (!Mathf.IsEqualApprox(Position.X, PreviousPosition.X) || Velocity.X != 0f)
+		if (!Mathf.IsEqualApprox(player.Position.X, player.PreviousPosition.X) || Velocity.X != 0f)
 		{
 			ReleaseClimb();
 			return;
 		}
 		
 		const int stepsPerClimbFrame = 4;
-		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
+		UpdateVerticalSpeedOnClimb(_climbAnimationFrameNumber * stepsPerClimbFrame);
 		
 		int radiusX = Radius.X;
 		if (Facing == Constants.Direction.Negative)
@@ -63,7 +66,7 @@ public struct Climb : IAction
 		ClimbJump();
 	}
 
-	private void ClimbJump()
+	private void ClimbJump(PlayerData player)
 	{
 		Animation = Animations.Spin;
 		IsSpinning = true;
@@ -175,7 +178,7 @@ public struct Climb : IAction
 		ResetGravity();
 	}
 
-	private void ClimbLedge()
+	private void ClimbLedge(PlayerData player)
 	{
 		//TODO: check this
 		

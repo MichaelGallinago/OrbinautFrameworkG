@@ -9,37 +9,12 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PhysicalPlayerWithAbilities : ObjectInteractivePlayer, ICarrier, ICarried
+public class PhysicalPlayerPhysicWithAbilities
 {
-	protected int ClimbAnimationFrameNumber;
-	
-	protected PhysicalPlayerWithAbilities()
+	protected PhysicalPlayerPhysicWithAbilities()
 	{
 		LandHandler += ReleaseDropDash;
 		LandHandler += ReleaseHammerSpin;
-	}
-
-	public override void _Process(double delta)
-	{
-		UpdatePhysicParameters();
-		
-		if (ProcessSpinDash()) return;
-		if (ProcessDash()) return;
-		if (ProcessJump()) return;
-		if (StartJump()) return;
-		
-		// Abilities logic
-		ChargeDropDash();
-		ProcessFlight();
-		ProcessClimb();
-		ProcessGlide();
-		ChargeHammerSpin();
-		ProcessHammerDash();
-		
-		ProcessCorePhysics();
-		
-		ProcessGlideCollision();
-		Carry();
 	}
 	
 	public void OnAttached(ICarrier carrier)

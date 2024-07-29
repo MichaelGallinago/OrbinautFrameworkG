@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
@@ -61,9 +62,9 @@ public abstract partial class Spikes : BaseObject
         }
     }
 
-    private void HurtPlayer(BasicPhysicalPlayer player)
+    private void HurtPlayer(PhysicsData physicsData)
     {
-        player.Hurt(Position.X);
+        physicsData.Hurt(Position.X);
             
         if (!AudioPlayer.Sound.IsPlaying(SoundStorage.Hurt)) return;
             
