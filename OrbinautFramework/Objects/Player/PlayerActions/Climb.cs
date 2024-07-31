@@ -8,6 +8,8 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Climb : IAction
 {
+	public Player Player { private get; init; }
+	
 	public enum States : byte
 	{
 		Normal, Ledge, WallJump
@@ -18,21 +20,26 @@ public struct Climb : IAction
 		None, Frame0, Frame1, Frame2, End
 	}
 	
-	private States _state;
+	private States _state = States.Normal;
 	private int _climbAnimationFrameNumber = 0;
-	
-    public void Perform(Player player)
+
+	public Climb()
+	{
+		
+	}
+
+	public void Perform()
     {
 	    switch (_state)
 	    {
-		    case States.Normal: ClimbNormal(player); break;
-		    case States.Ledge: ClimbLedge(player); break;
-		    case States.WallJump: ClimbJump(player); break;
+		    case States.Normal: ClimbNormal(); break;
+		    case States.Ledge: ClimbLedge(); break;
+		    case States.WallJump: ClimbJump(); break;
 		    default: throw new ArgumentOutOfRangeException(_state.ToString());
 	    }
     }
 
-	private void ClimbNormal(Player player)
+	private void ClimbNormal()
 	{
 		if (!Mathf.IsEqualApprox(player.Position.X, player.PreviousPosition.X) || Velocity.X != 0f)
 		{
@@ -66,7 +73,7 @@ public struct Climb : IAction
 		ClimbJump();
 	}
 
-	private void ClimbJump(PlayerData player)
+	private void ClimbJump()
 	{
 		Animation = Animations.Spin;
 		IsSpinning = true;
@@ -178,7 +185,7 @@ public struct Climb : IAction
 		ResetGravity();
 	}
 
-	private void ClimbLedge(PlayerData player)
+	private void ClimbLedge()
 	{
 		//TODO: check this
 		

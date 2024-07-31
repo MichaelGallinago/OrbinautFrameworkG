@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public class Damage
+public struct Damage
 {
     public void Kill()
     {

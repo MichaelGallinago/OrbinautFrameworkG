@@ -1,5 +1,7 @@
 ﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
+using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Physics.StateChangers;
@@ -74,14 +76,14 @@ public struct Landing
 	    float force = IsUnderwater ? -4f : -7.5f;
 	    float radians = Mathf.DegToRad(Angle);
 	    Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
-
+	    
 	    Shield.State = ShieldContainer.States.None;
 	    OnObject = null;
 	    IsGrounded = false;
-
+	    
 	    //TODO: replace animation
 	    Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
-			
+	    
 	    AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		
 	    return true;

@@ -2,5 +2,7 @@
 
 public interface IAction
 {
-    void Perform(Player player);
+    Player Player { init; }
+    
+    void Perform();
 }

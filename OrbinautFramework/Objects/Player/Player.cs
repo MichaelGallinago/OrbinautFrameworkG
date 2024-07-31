@@ -5,6 +5,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Physics;
+using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
@@ -13,7 +14,7 @@ namespace OrbinautFramework3.Objects.Player;
 public sealed partial class Player : BaseObject
 {
 	private readonly DebugMode _debugMode = new();
-	public PlayerData Data { get; } = new();
+	public PlayerData Data { get; }
 
 	[Export] private PlayerAnimatedSprite _sprite;
 	[Export] private ShieldContainer _shield;
@@ -28,6 +29,7 @@ public sealed partial class Player : BaseObject
 
 	public Player()
 	{
+		Data = new PlayerData(this);
 		Data.TypeChanged += OnTypeChanged;
 	}
 
@@ -86,12 +88,15 @@ public sealed partial class Player : BaseObject
 		if (StartJump()) return;
 		
 		// Abilities logic
+		Data.Action.Perform();
+		/*
 		ChargeDropDash();
 		ProcessFlight();
 		ProcessClimb();
 		ProcessGlide();
 		ChargeHammerSpin();
 		ProcessHammerDash();
+		*/
 		
 		_physicsData.ProcessCorePhysics();
 		
@@ -156,12 +161,12 @@ public sealed partial class Player : BaseObject
 		if (Animation != Animations.Skid) return;
 		
 		//TODO: fix loop on stutter (maybe PreviousProcessSpeed?)
-		if (ActionValue2 % 4f < Scene.Local.ProcessSpeed)
+		if (DustTimer % 4f < Scene.Local.ProcessSpeed)
 		{
 			// TODO: make obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
-		ActionValue2 += Scene.Local.ProcessSpeed;
+		DustTimer += Scene.Local.ProcessSpeed;
 	}
 
 	private void FlickAfterGettingHit()

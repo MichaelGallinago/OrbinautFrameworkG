@@ -5,7 +5,6 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
-using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
@@ -13,8 +12,7 @@ namespace OrbinautFramework3.Objects.Player;
 public class PlayerData
 {
 	private const byte MinimalRecordLength = 32;
-	protected const int CpuDelayStep = 16;
-
+	
 	public event Action<Types> TypeChanged;
 	
 	public Types Type
@@ -61,7 +59,7 @@ public class PlayerData
 	public BaseObject OnObject { get; set; }
 	public bool IsInvincible { get; set; }
 
-	public IAction Action { get; set; }
+	public Actions Action { get; set; }
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }
@@ -93,6 +91,11 @@ public class PlayerData
 	private DataRecord[] _recordedData;
 	protected TileCollider TileCollider = new();
 
+	public PlayerData(Player player)
+	{
+		Action = new Actions(player);
+	}
+
 	public override void _Ready()
 	{
 		base._Ready();
@@ -112,7 +115,7 @@ public class PlayerData
 		ResizeAllRecordedData();
 	}
 	
-	protected void RecordData()
+	public void RecordData()
 	{
 		Array.Copy(_recordedData, 0, _recordedData, 
 			1, _recordedData.Length - 1);

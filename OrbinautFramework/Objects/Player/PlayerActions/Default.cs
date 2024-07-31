@@ -2,7 +2,9 @@
 
 public struct Default : IAction
 {
-    public void Perform(Player player)
+    public Player Player { private get; init; }
+    
+    public void Perform()
     {
         throw new System.NotImplementedException();
     }

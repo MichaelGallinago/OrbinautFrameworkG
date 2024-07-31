@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\AudioStorageSourceGenerator\AudioStorageSourceGenerator.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\ActionSourceGenerator\ActionSourceGenerator.csproj" OutputItemType="Analyzer" />
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
     <Compile Remove="Framework\Camera\**" />
     <Compile Remove="Framework\CameraAndSurface\**" />

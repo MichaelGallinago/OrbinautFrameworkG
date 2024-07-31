@@ -2,7 +2,9 @@
 
 public struct HammerDash : IAction
 {
-    public void Perform(Player player)
+    public Player Player { private get; init; }
+    
+    public void Perform()
     {
         // Note that ACTION_HAMMERDASH is used for movement logic only so the respective
         // animation isn't cleared alongside the action flag. All checks for Hammer Dash should refer to its animation

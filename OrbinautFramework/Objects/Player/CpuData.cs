@@ -10,6 +10,8 @@ namespace OrbinautFramework3.Objects.Player;
 
 public class CpuData
 {
+	public const int DelayStep = 16;
+	
     public CpuStates State { get; set; } = CpuStates.Main;
     public float RespawnTimer { get; set; }
     public float InputTimer { get; set; }
@@ -28,7 +30,7 @@ public class CpuData
 		if (IsHurt || IsDead || Id == 0) return;
 		
 		_leadPlayer = Scene.Local.Players.First();
-		_delay = CpuDelayStep * Id;
+		_delay = DelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
 		_canReceiveInput = Id < Constants.MaxInputDevices;

@@ -66,7 +66,7 @@ public struct Ground
         if (quadrant != Angles.Quadrant.Down || !doSkid) return;
         if (Math.Abs(GroundSpeed) < PlayerConstants.SkidSpeedThreshold) return;
 		
-        ActionValue2 = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
+        DustTimer = 0f; // We'll use this as a timer to spawn dust particles in UpdateStatus()
         Animation = Animations.Skid;
 		
         AudioPlayer.Sound.Play(SoundStorage.Skid);

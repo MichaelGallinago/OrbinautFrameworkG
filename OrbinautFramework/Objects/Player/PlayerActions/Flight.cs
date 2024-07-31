@@ -6,10 +6,12 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Flight : IAction
 {
+	public Player Player { private get; init; }
+	
 	private float _flightTimer;
 	private float _flyUpTimer;
 	
-    public void Perform(Player player)
+    public void Perform()
     {
         // Flight timer
         if (_flightTimer > 0f)

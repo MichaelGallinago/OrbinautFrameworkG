@@ -8,12 +8,14 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Glide(Glide.States state) : IAction
 {
+	public Player Player { private get; init; }
+	
 	public enum States : byte
 	{
 		Air, Ground, Fall
 	}
 
-	public void Perform(Player player)
+	public void Perform()
     {
 	    if (state == States.Fall) return;
 		
