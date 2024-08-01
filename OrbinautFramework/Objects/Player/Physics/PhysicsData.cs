@@ -8,6 +8,9 @@ namespace OrbinautFramework3.Objects.Player.Physics;
 
 public struct PhysicsData
 {
+	public Velocity Velocity { get; } = new();
+	public AcceleratedValue GroundSpeed { get; set; } = new();
+	
 	private SlopeRepel _slopeRepel;
 	private SlopeResist _slopeResist;
 	private Movement _movement;

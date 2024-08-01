@@ -25,10 +25,6 @@ public class PlayerData
 	}
 	private Types _type;
 	
-	public PhysicParams PhysicParams;
-	public Velocity Velocity { get; } = new();
-	public AcceleratedValue GroundSpeed { get; set; } = new();
-	
 	public int Id { get; set; }
 	public Animations Animation { get; set; }
 	public bool IsAnimationFrameChanged { get; set; }
@@ -71,8 +67,6 @@ public class PlayerData
 	public float InvincibilityTimer { get; set; }
 	public float ItemSpeedTimer { get; set; }
 	public float ItemInvincibilityTimer { get; set; }
-
-	public CpuData CpuData { get; set; } = new();
 	
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
@@ -171,8 +165,6 @@ public class PlayerData
 
 		Action.Type = Actions.Types.Default;
 		ActionState = 0;
-		ActionValue = 0;
-		ActionValue2 = 0;
 
 		Shield.State = ShieldContainer.States.None;
 		Facing = Constants.Direction.Positive;
@@ -240,16 +232,6 @@ public class PlayerData
 		Array.Copy(_recordedData, resizedData, oldLength);
 		Array.Fill(resizedData, record,oldLength, newLength - oldLength);
 		_recordedData = resizedData;
-	}
-	
-	public void AttachToPlayer(ICarrier carrier)
-	{
-		Facing = carrier.Facing;
-		Velocity.Vector = carrier.Velocity.Vector;
-		Position = carrier.Position + new Vector2(0f, 28f);
-		Scale = new Vector2(Math.Abs(Scale.X) * (float)carrier.Facing, Scale.Y);
-		
-		carrier.CarryTargetPosition = Position;
 	}
 
 	public void Spawn()

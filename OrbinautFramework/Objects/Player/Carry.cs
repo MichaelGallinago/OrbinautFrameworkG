@@ -50,7 +50,7 @@ public struct Carry
             player.Action = Actions.Carried;
             Target = player;
 
-            player.AttachToPlayer(this);
+            player.AttachToCarrier(this);
         }
     }
 }
