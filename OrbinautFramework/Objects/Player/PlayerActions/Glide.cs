@@ -35,7 +35,7 @@ public struct Glide(Glide.States state) : IAction
 		
 		if (Input.Down.Abc) return;
 
-		ReleaseGlide();
+		Release();
 		Velocity.X *= 0.25f;
 	}
 
@@ -170,7 +170,7 @@ public struct Glide(Glide.States state) : IAction
 		ActionValue += speed;
 	}
 	
-	private void ProcessCollision()
+	public void ProcessCollision()
 	{
 		if (Action != Actions.Glide) return;
 		
@@ -251,7 +251,7 @@ public struct Glide(Glide.States state) : IAction
 		{
 			if (floorDistance > 14)
 			{
-				ReleaseGlide();
+				Release();
 				return false;
 			}
 			
@@ -351,7 +351,7 @@ public struct Glide(Glide.States state) : IAction
 				
 		if (floorDistance is < 0 or >= 12)
 		{
-			ReleaseGlide();
+			Release();
 			return;
 		}
 		
@@ -359,7 +359,7 @@ public struct Glide(Glide.States state) : IAction
 		Position += new Vector2(0f, floorDistance);
 	}
 
-	private void ReleaseGlide()
+	private void Release()
 	{
 		Animation = Animations.GlideFall;
 		state = (int)States.Fall;
