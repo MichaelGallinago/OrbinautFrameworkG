@@ -210,7 +210,7 @@ public sealed partial class Player : Node2D, ICullable
 
 	private void SetRegularHitBox()
 	{
-		if (Animation != Animations.Duck || SharedData.PlayerPhysics >= PhysicsTypes.S3)
+		if (Animation != Animations.Duck || SharedData.PhysicsType >= PhysicsTypes.S3)
 		{
 			SetHitBox(8, Radius.Y - 3);
 			return;

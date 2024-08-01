@@ -16,7 +16,7 @@ public struct Ground
 		
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
 		// and S3K physics are enabled
-		if (Angle is > 90f and <= 270f && (SharedData.PlayerPhysics < PhysicsTypes.SK || Angle % 90f != 0f)) return;
+		if (Angle is > 90f and <= 270f && (SharedData.PhysicsType < PhysicsTypes.SK || Angle % 90f != 0f)) return;
 
 		int wallRadius = RadiusNormal.X + 1;
 		int offsetY = Angle == 0f ? 8 : 0;
@@ -108,7 +108,7 @@ public struct Ground
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
-		Angle = SharedData.PlayerPhysics >= PhysicsTypes.S2 ? SnapFloorAngle(angle) : angle;
+		Angle = SharedData.PhysicsType >= PhysicsTypes.S2 ? SnapFloorAngle(angle) : angle;
 	}
 
 	private Constants.TileBehaviours GetTileBehaviour() => Angle switch
@@ -151,7 +151,7 @@ public struct Ground
 			_ => throw new ArgumentOutOfRangeException(TileBehaviour.ToString())
 		};
 			
-		float tolerance = SharedData.PlayerPhysics < PhysicsTypes.S2 ? 
+		float tolerance = SharedData.PhysicsType < PhysicsTypes.S2 ? 
 			MaxTolerance : Math.Min(MinTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), MaxTolerance);
 
 		if (distance <= tolerance) return false;

@@ -12,7 +12,17 @@ public class CpuData
 {
 	public const int DelayStep = 16;
 	
-    public CpuStates State { get; set; } = CpuStates.Main;
+	public enum States : byte
+	{
+		RespawnInit, Respawn, Main, Fly, Stuck
+	}
+	
+	public enum Behaviours : byte
+	{
+		S2, S3
+	}
+	
+    public States State { get; set; } = States.Main;
     public float RespawnTimer { get; set; }
     public float InputTimer { get; set; }
     public bool IsJumping { get; set; }
@@ -42,10 +52,10 @@ public class CpuData
 		
 		switch (State)
 		{
-			case CpuStates.RespawnInit: InitRespawnCpu(); break;
-			case CpuStates.Respawn: ProcessRespawnCpu(); break;
-			case CpuStates.Main: ProcessMainCpu(); break;
-			case CpuStates.Stuck: ProcessStuckCpu(); break;
+			case States.RespawnInit: InitRespawnCpu(); break;
+			case States.Respawn: ProcessRespawnCpu(); break;
+			case States.Main: ProcessMainCpu(); break;
+			case States.Stuck: ProcessStuckCpu(); break;
 		}
 	}
 
@@ -60,7 +70,7 @@ public class CpuData
 		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
-		State = CpuStates.Respawn;
+		State = States.Respawn;
 	}
 
 	private void ProcessRespawnCpu()
@@ -87,7 +97,7 @@ public class CpuData
 		DataRecord followDataRecord = _leadPlayer.RecordedData[_delay];
 		Vector2 targetPosition = followDataRecord.Position;
 
-		if (SharedData.CpuBehaviour == CpuBehaviours.S2)
+		if (SharedData.Behaviour == Behaviours.S2)
 		{
 			if (Stage.Local != null && Stage.Local.IsWaterEnabled)
 			{
@@ -97,11 +107,11 @@ public class CpuData
 		
 		if (MoveToLeadPlayer(targetPosition)) return;
 
-		if (SharedData.CpuBehaviour == CpuBehaviours.S3 && _leadPlayer.IsDead) return;
+		if (SharedData.Behaviour == Behaviours.S3 && _leadPlayer.IsDead) return;
 
 		if (!IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
 		
-		State = CpuStates.Main;
+		State = States.Main;
 		Animation = Animations.Move;
 		IsObjectInteractionEnabled = true;
 		IsControlRoutineEnabled = true;
@@ -110,7 +120,7 @@ public class CpuData
 	private void PlayRespawnFlyingSound()
 	{
 		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
-		if (SharedData.CpuBehaviour != CpuBehaviours.S3) return;
+		if (SharedData.Behaviour != Behaviours.S3) return;
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
 	}
 
@@ -189,13 +199,13 @@ public class CpuData
 		
 		if (GroundLockTimer > 0f && GroundSpeed == 0f)
 		{
-			State = CpuStates.Stuck;
+			State = States.Stuck;
 		}
 		
 		(Vector2 targetPosition, _cpuInputPress, _cpuInputDown, 
 			Constants.Direction direction, OrbinautData setPushAnimationBy) = CpuTarget.RecordedData[_delay];
 
-		if (SharedData.CpuBehaviour == CpuBehaviours.S3 &&
+		if (SharedData.Behaviour == Behaviours.S3 &&
 		    Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)
 		{
 			targetPosition.X -= 32f;
@@ -229,7 +239,7 @@ public class CpuData
 		if (Type == Types.Tails)
 		{
 			Animation = Animations.Fly;
-			State = CpuStates.Respawn;
+			State = States.Respawn;
 			ResetState();
 		}
 		else
@@ -248,7 +258,7 @@ public class CpuData
 			return;
 		}
 		
-		int maxDistanceX = SharedData.PlayerPhysics == PhysicsTypes.S3 ? 48 : 16;
+		int maxDistanceX = SharedData.PhysicsType == PhysicsTypes.S3 ? 48 : 16;
 
 		bool isMoveToRight = distanceX > 0f;
 		int sign = isMoveToRight ? 1 : -1;
@@ -302,7 +312,7 @@ public class CpuData
 		
 		Input.Down = Input.Down with { Down = false };
 		Input.Press = Input.Press with { Abc = false };
-		State = CpuStates.Main;
+		State = States.Main;
 	}
 	
 	private bool CheckCpuRespawn()
@@ -335,7 +345,7 @@ public class CpuData
 		Position = new Vector2(sbyte.MaxValue, 0);
 		ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
-		CpuState = CpuStates.RespawnInit;
+		CpuState = States.RespawnInit;
 		IsControlRoutineEnabled = false;
 		IsObjectInteractionEnabled = false;
 		IsGrounded = false;

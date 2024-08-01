@@ -39,7 +39,7 @@ public struct Air
 		{
 			Velocity.Y = -15.75f;
 		}
-		else if (SharedData.PlayerPhysics == PhysicsTypes.CD && Velocity.Y > 16f)
+		else if (SharedData.PhysicsType == PhysicsTypes.CD && Velocity.Y > 16f)
 		{
 			Velocity.Y = 16f;
 		}

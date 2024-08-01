@@ -59,7 +59,7 @@ public struct Rolling
     {
         if (GroundSpeed != 0f)
         {
-            if (SharedData.PlayerPhysics != PhysicsTypes.SK || Math.Abs(GroundSpeed) >= 0.5f) return;
+            if (SharedData.PhysicsType != PhysicsTypes.SK || Math.Abs(GroundSpeed) >= 0.5f) return;
         }
 		
         Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
@@ -71,7 +71,7 @@ public struct Rolling
 	
     private void ForceSpin()
     {
-        if (SharedData.PlayerPhysics == PhysicsTypes.CD)
+        if (SharedData.PhysicsType == PhysicsTypes.CD)
         {
             if (GroundSpeed.Value is >= 0f and < 2f)
             {
@@ -81,6 +81,6 @@ public struct Rolling
         }
 		
         if (GroundSpeed != 0f) return;
-        GroundSpeed.Value = SharedData.PlayerPhysics == PhysicsTypes.S1 ? 2f : 4f * (float)Facing;
+        GroundSpeed.Value = SharedData.PhysicsType == PhysicsTypes.S1 ? 2f : 4f * (float)Facing;
     }
 }

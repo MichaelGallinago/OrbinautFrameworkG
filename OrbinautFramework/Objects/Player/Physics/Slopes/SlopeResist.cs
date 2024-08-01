@@ -25,7 +25,7 @@ public struct SlopeResist
         float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(Angle));
 		
         // Decrease ground speed
-        if (GroundSpeed != 0f || SharedData.PlayerPhysics >= PhysicsTypes.S3 && Math.Abs(slopeGravity) > 0.05078125f)
+        if (GroundSpeed != 0f || SharedData.PhysicsType >= PhysicsTypes.S3 && Math.Abs(slopeGravity) > 0.05078125f)
         {
             GroundSpeed.Acceleration = -slopeGravity;
         }

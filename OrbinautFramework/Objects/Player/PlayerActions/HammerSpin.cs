@@ -21,7 +21,7 @@ public struct HammerSpin : IAction
         {
             case <= 0f: return;
 			
-            case >= PlayerConstants.MaxDropDashCharge:
+            case >= DropDash.MaxCharge:
                 Player.Data.Animation = Animations.Spin;
                 Player.Data.Action = Actions.HammerSpinCancel;
                 break;
@@ -33,7 +33,7 @@ public struct HammerSpin : IAction
     public void Release()
     {
         if (Action != Actions.HammerSpin) return;
-        if (ActionValue < MaxDropDashCharge) return;
+        if (ActionValue < DropDash.MaxCharge) return;
 
         Animation = Animations.HammerDash;
         Action = Actions.HammerDash;
@@ -52,7 +52,7 @@ public struct HammerSpin : IAction
     private void Charge()
     {
         Player.Data.ActionValue += Scene.Local.ProcessSpeed;
-        if (ActionValue >= MaxDropDashCharge)
+        if (ActionValue >= DropDash.MaxCharge)
         {
             AudioPlayer.Sound.Play(SoundStorage.Charge3);
         }

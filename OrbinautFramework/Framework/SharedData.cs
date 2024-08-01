@@ -25,8 +25,8 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
 	
     // Originals differences
-    public static PhysicsTypes PlayerPhysics { get; set; } = PhysicsTypes.S2;
-    public static CpuBehaviours CpuBehaviour { get; set; } = CpuBehaviours.S3;
+    public static PhysicsTypes PhysicsType { get; set; } = PhysicsTypes.S2;
+    public static CpuData.Behaviours Behaviour { get; set; } = CpuData.Behaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool Dash { get; set; } = true;
     public static bool DropDash { get; set; } = true;

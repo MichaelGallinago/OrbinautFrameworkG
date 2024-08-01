@@ -26,7 +26,7 @@ public struct Rolling
     {
         if (!Input.Down.Down) return false;
 		
-        if (SharedData.PlayerPhysics != PhysicsTypes.SK)
+        if (SharedData.PhysicsType != PhysicsTypes.SK)
         {
             return Math.Abs(GroundSpeed) >= 0.5f;
         }

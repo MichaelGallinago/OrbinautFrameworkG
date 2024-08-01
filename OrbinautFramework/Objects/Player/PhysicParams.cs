@@ -130,7 +130,7 @@ public struct PhysicParams(
 		    physicParams.AccelerationTop = 12f;
 	    }
 	    
-	    if (SharedData.PlayerPhysics < PhysicsTypes.SK)
+	    if (SharedData.PhysicsType < PhysicsTypes.SK)
 	    {
 		    if (playerType == Types.Tails)
 		    {

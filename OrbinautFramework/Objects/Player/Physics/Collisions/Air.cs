@@ -52,7 +52,7 @@ public struct Air
 			-Radius.X, -Radius.Y, Radius.X, -Radius.Y,
 			true, Constants.Direction.Negative);
 			
-		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PlayerPhysics >= PhysicsTypes.S3 && roofDistance <= -14f)
+		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PhysicsType >= PhysicsTypes.S3 && roofDistance <= -14f)
 		{
 			// Perform right wall collision if moving mostly left and too far into the ceiling
 			int wallDist = TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);

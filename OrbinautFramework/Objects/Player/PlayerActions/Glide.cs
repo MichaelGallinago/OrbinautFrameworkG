@@ -224,7 +224,7 @@ public struct Glide(Glide.States state) : IAction
 			-Radius.X, -Radius.Y, Radius.X, -Radius.Y, 
 			true, Constants.Direction.Negative);
 			
-		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && SharedData.PlayerPhysics >= PhysicsTypes.S3)
+		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && SharedData.PhysicsType >= PhysicsTypes.S3)
 		{
 			// Perform right wall collision instead if moving mostly left and too far into the ceiling
 			return CollideWalls(wallRadius, Constants.Direction.Positive);

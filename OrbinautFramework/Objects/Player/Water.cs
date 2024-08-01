@@ -166,7 +166,7 @@ public struct Water
 
 	private void AccelerateOnLeave()
 	{
-		if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
+		if (SharedData.PhysicsType <= PhysicsTypes.S2 || Velocity.Y >= -4f)
 		{
 			Velocity.Y *= 2f;
 		}

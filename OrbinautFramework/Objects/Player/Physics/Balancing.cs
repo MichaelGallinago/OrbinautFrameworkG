@@ -13,7 +13,7 @@ public struct Balancing
 		if (GroundSpeed != 0 || Action is Actions.SpinDash or Actions.Dash) return;
 		
 		// Don't allow player to duck or look up
-		if (SharedData.PlayerPhysics == PhysicsTypes.SK && (Input.Down.Down || Input.Down.Up)) return;
+		if (SharedData.PhysicsType == PhysicsTypes.SK && (Input.Down.Down || Input.Down.Up)) return;
 		
 		if (BalanceOnTiles()) return;
 		BalanceOnObject();

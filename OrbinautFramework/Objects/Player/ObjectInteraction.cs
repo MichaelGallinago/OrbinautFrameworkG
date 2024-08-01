@@ -149,7 +149,7 @@ public struct ObjectInteraction()
 		Vector2I clipAbsolute = clip.Abs();
 		bool isLimitedClip = clipAbsolute.Y <= 4;
 
-		bool isS3Physics = SharedData.PlayerPhysics >= PhysicsTypes.S3;
+		bool isS3Physics = SharedData.PhysicsType >= PhysicsTypes.S3;
 		if (clipAbsolute.X >= clipAbsolute.Y || isS3Physics && isLimitedClip)
 		{
 			if (CollideVertically(clip.Y, isS3Physics)) return;

@@ -29,7 +29,7 @@ public struct Death
     
     private void Wait(ICamera camera)
     {
-    	if ((int)Position.Y <= 32f + (SharedData.PlayerPhysics < PhysicsTypes.S3 ? 
+    	if ((int)Position.Y <= 32f + (SharedData.PhysicsType < PhysicsTypes.S3 ? 
     		    camera.Boundary.W : camera.DrawPosition.Y + SharedData.ViewSize.Y)) return;
     	
     	RestartState = RestartStates.ResetLevel;
