@@ -40,6 +40,7 @@ public sealed partial class Player : Node2D, ICullable
 	private Jump _jump = new();
 	private Rotation _rotation = new();
 	private Palette _palette = new();
+	private Carry _carry = new();
 
 	public Player()
 	{
@@ -121,7 +122,7 @@ public sealed partial class Player : Node2D, ICullable
 		_physicsData.ProcessCorePhysics();
 		
 		ProcessGlideCollision();
-		Carry();
+		_carry.Process();
 	}
 	
 	public void OnAttached(ICarrier carrier)

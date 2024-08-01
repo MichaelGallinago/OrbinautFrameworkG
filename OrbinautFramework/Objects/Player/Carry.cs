@@ -5,13 +5,13 @@ using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public class CarryData
+public struct Carry
 {
     public ICarried Target { get; set; }
     public float Timer { get; set; }
     public Vector2 TargetPosition { get; set; }
     
-    private void Carry(Player player)
+    public void Process()
     {
         if (Type != Types.Tails) return;
 

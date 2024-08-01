@@ -72,8 +72,6 @@ public class PlayerData
 	public float ItemSpeedTimer { get; set; }
 	public float ItemInvincibilityTimer { get; set; }
 
-	public CarryData CarryData { get; set; } = new();
-
 	public CpuData CpuData { get; set; } = new();
 	
 	public RestartStates RestartState { get; set; }
