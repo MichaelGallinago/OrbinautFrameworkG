@@ -14,20 +14,21 @@ namespace OrbinautFramework3.Objects.Player;
 
 public sealed partial class Player : Node2D, ICullable
 {
-	public ICullable.Types CullingType { get; }
+	[Export] public ICullable.Types CullingType { get; }
 	
-	private readonly DebugMode _debugMode = new();
-	public PlayerData Data { get; }
-	public IMemento Memento { get; }
-
 	[Export] private PlayerAnimatedSprite _sprite;
 	[Export] private ShieldContainer _shield;
 	[Export] private SpawnTypes _spawnType;
 	[Export] private Types _uniqueType;
 	[Export] private PackedScene _packedTail;
-	private Tail _tail;
-
+	
+	public PlayerData Data { get; }
+	public IMemento Memento { get; }
+	
+	private readonly DebugMode _debugMode = new();
 	private CpuData _cpuData = new();
+	private Tail _tail;
+	
 	private Landing _landing = new();
 	private ObjectInteraction _objectInteraction = new();
 	private PhysicsData _physicsData = new();
@@ -38,6 +39,7 @@ public sealed partial class Player : Node2D, ICullable
 	private Dash _dash = new();
 	private Jump _jump = new();
 	private Rotation _rotation = new();
+	private Palette _palette = new();
 
 	public Player()
 	{
@@ -101,7 +103,7 @@ public sealed partial class Player : Node2D, ICullable
 		_rotation.Process();
 		_sprite.Animate(this);
 		_tail?.Animate(this);
-		ProcessPalette();
+		_palette.Process();
 	}
 
 	private void RunControlRoutine()
@@ -241,96 +243,6 @@ public sealed partial class Player : Node2D, ICullable
 					new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}
-	}
-	
-	private void ProcessPalette()
-	{
-		// Get player colour IDs
-		ReadOnlySpan<int> colours = PlayerColourIds;
-		
-		int colour = PaletteUtilities.Index[colours[0]];
-		UpdateSuperPalette(colour, out int colourLast, out int colourLoop, out int duration);
-		UpdateRegularPalette(colour, ref colourLoop, ref colourLast, ref duration);
-		
-		// Apply palette
-		PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
-	}
-
-	private ReadOnlySpan<int> PlayerColourIds => Type switch
-	{
-		Types.Tails => [4, 5, 6],
-		Types.Knuckles => [7, 8, 9],
-		Types.Amy => [10, 11, 12],
-		_ => [0, 1, 2, 3]
-	};
-
-	private void UpdateSuperPalette(int colour, out int colourLast, out int colourLoop, out int duration)
-	{
-		switch (Type)
-		{
-			case Types.Sonic:
-				duration = colour switch
-				{
-					< 2 => 19,
-					< 7 => 4,
-					_ => 8
-				};
-			    
-				colourLast = 16;
-				colourLoop = 7;
-				break;
-			
-			case Types.Tails:
-				duration = colour < 2 ? 28 : 12;
-				colourLast = 7;
-				colourLoop = 2;
-				break;
-			
-			case Types.Knuckles:
-				duration = colour switch
-				{
-					< 2 => 17,
-					< 3 => 15,
-					_ => 3
-				};
-
-				colourLast = 11;
-				colourLoop = 3;
-				break;
-			
-			case Types.Amy:
-				duration = colour < 2 ? 19 : 4;
-				colourLast = 11;
-				colourLoop = 3;
-				break;
-			
-			default:
-				duration = 0;
-				colourLast = 0;
-				colourLoop = 0;
-				break;
-		}
-	}
-
-	private void UpdateRegularPalette(int colour, ref int colourLoop, ref int colourLast, ref int duration)
-	{
-		if (IsSuper) return;
-		
-		if (colour > 1)
-		{
-			if (Type == Types.Sonic)
-			{
-				colourLast = 21;
-				duration = 4;
-			}
-		}
-		else
-		{
-			colourLast = 1;
-			duration = 0;
-		}
-	
-		colourLoop = 1;
 	}
 
 	public static void IncreaseComboScore(int comboCounter = 0)
