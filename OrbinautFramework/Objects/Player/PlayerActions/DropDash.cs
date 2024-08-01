@@ -9,55 +9,54 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct DropDash : IAction
 {
+	public const byte MaxCharge = 22;
+
+	private float _charge;
+	
 	public Player Player { private get; init; }
 	
     public void Perform()
     {
-        
-    }
-    
-    private void ChargeDropDash()
-    {
-	    if (IsGrounded || CancelDropDash()) return;
+	    if (Player.Data.IsGrounded || Cancel()) return;
 		
-	    if (Input.Down.Abc)
+	    if (Player.Data.Input.Down.Abc)
 	    {
-		    IsAirLock = false;		
-		    ActionValue += Scene.Local.ProcessSpeed;
+		    Player.Data.IsAirLock = false;		
+		    _charge += Scene.Local.ProcessSpeed;
 			
-		    if (ActionValue < MaxDropDashCharge || Animation == Animations.DropDash) return;
+		    if (_charge < MaxCharge || Player.Data.Animation == Animations.DropDash) return;
 			
 		    AudioPlayer.Sound.Play(SoundStorage.Charge3);
-		    Animation = Animations.DropDash;
+		    Player.Data.Animation = Animations.DropDash;
 		    return;
 	    }
 		
-	    switch (ActionValue)
+	    switch (_charge)
 	    {
 		    case <= 0f:
 			    return;
 			
-		    case >= MaxDropDashCharge:
-			    Animation = Animations.Spin;
-			    Action = Actions.DropDashCancel;
+		    case >= MaxCharge:
+			    Player.Data.Animation = Animations.Spin;
+			    Player.Data.Action.Type = Actions.Types.None;
 			    break;
 	    }
 		
-	    ActionValue = 0f;
+	    _charge = 0f;
     }
     
-    private void ReleaseDropDash()
+    private void Release()
     {
-    	if (CancelDropDash()) return;
+    	if (Cancel()) return;
     	
-    	if (ActionValue < MaxDropDashCharge) return;
+    	if (_charge < MaxCharge) return;
     	
-    	Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-    	Radius = RadiusSpin;
+    	Position += new Vector2(0f, Player.Data.Radius.Y - Player.Data.RadiusSpin.Y);
+	    Player.Data.Radius = Player.Data.RadiusSpin;
     	
-    	if (IsSuper)
+    	if (Player.Data.SuperData.IsSuper)
     	{
-    		UpdateDropDashGroundSpeed(13f, 12f);
+    		UpdateGroundSpeed(13f, 12f);
     		if (IsCameraTarget(out ICamera camera))
     		{
     			camera.SetShakeTimer(6f);
@@ -65,11 +64,11 @@ public struct DropDash : IAction
     	}
     	else
     	{
-    		UpdateDropDashGroundSpeed(12f, 8f);
+    		UpdateGroundSpeed(12f, 8f);
     	}
     	
-    	Animation = Animations.Spin;
-    	IsSpinning = true;
+	    Player.Data.Animation = Animations.Spin;
+	    Player.Data.IsSpinning = true;
     	
     	SetCameraDelayX(8f);
     		
@@ -79,34 +78,35 @@ public struct DropDash : IAction
     	AudioPlayer.Sound.Play(SoundStorage.Release);
     }
 
-    private bool CancelDropDash()
+    private bool Cancel()
     {
-    	if (!SharedData.DropDash || Action != Actions.DropDash) return true;
+    	if (!SharedData.DropDash || Player.Data.Action != Actions.Types.DropDash) return true;
     	
-    	if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper || ItemInvincibilityTimer > 0f) return false;
+    	if (Shield.Type <= ShieldContainer.Types.Normal || 
+	        Player.Data.SuperData.IsSuper || Player.Data.ItemInvincibilityTimer > 0f) return false;
     	
-    	Animation = Animations.Spin;
-    	Action = Actions.None;
+	    Player.Data.Animation = Animations.Spin;
+	    Player.Data.Action.Type = Actions.Types.Default;
     	return true;
     }
 
-    private void UpdateDropDashGroundSpeed(float limitSpeed, float force)
+    private void UpdateGroundSpeed(float limitSpeed, float force)
     {
-    	var sign = (float)Facing;
+    	var sign = (float)Player.Data.Facing;
     	limitSpeed *= sign;
     	force *= sign;
-    	
-    	if (Velocity.X * sign >= 0f)
+	    
+    	if (Player.Data.Velocity.X * sign >= 0f)
     	{
-    		GroundSpeed.Value = MathF.Floor(GroundSpeed / 4f) + force;
-    		if (sign * GroundSpeed <= limitSpeed) return;
-    		GroundSpeed.Value = limitSpeed;
+		    Player.Data.GroundSpeed.Value = MathF.Floor(Player.Data.GroundSpeed / 4f) + force;
+    		if (sign * Player.Data.GroundSpeed <= limitSpeed) return;
+		    Player.Data.GroundSpeed.Value = limitSpeed;
     		return;
     	}
     	
-    	GroundSpeed.Value = force;
-    	if (Mathf.IsZeroApprox(Angle)) return;
+	    Player.Data.GroundSpeed.Value = force;
+    	if (Mathf.IsZeroApprox(Player.Data.Angle)) return;
     	
-    	GroundSpeed.Value += MathF.Floor(GroundSpeed / 2f);
+	    Player.Data.GroundSpeed.Value += MathF.Floor(Player.Data.GroundSpeed / 2f);
     }
 }

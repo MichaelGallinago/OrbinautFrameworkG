@@ -21,7 +21,8 @@ public struct Climb() : IAction
 	}
 	
 	private States _state = States.Normal;
-	private int _climbAnimationFrameNumber = 0;
+	private float _step;
+	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 
 	public void Perform()
     {
@@ -36,14 +37,14 @@ public struct Climb() : IAction
 
 	private void ClimbNormal()
 	{
-		if (!Mathf.IsEqualApprox(Player.Position.X, Player.PreviousPosition.X) || Velocity.X != 0f)
+		if (!Mathf.IsEqualApprox(Player.Position.X, PreviousPosition.X) || Velocity.X != 0f)
 		{
 			ReleaseClimb();
 			return;
 		}
 		
 		const int stepsPerClimbFrame = 4;
-		UpdateVerticalSpeedOnClimb(_climbAnimationFrameNumber * stepsPerClimbFrame);
+		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
 		
 		int radiusX = Player.Data.Radius.X;
 		if (Facing == Constants.Direction.Negative)
@@ -60,7 +61,7 @@ public struct Climb() : IAction
 			// Update animation frame if still climbing
 			if (Velocity.Y != 0)
 			{
-				OverrideAnimationFrame = Mathf.FloorToInt(ActionValue / stepsPerClimbFrame);
+				OverrideAnimationFrame = Mathf.FloorToInt(_step / stepsPerClimbFrame);
 			}
 			return;
 		}
@@ -89,7 +90,7 @@ public struct Climb() : IAction
 		if (wallDistance >= 4)
 		{
 			_state = (int)States.Ledge;
-			ActionValue = 0f;
+			_step = 0f;
 			Velocity.Y = 0f;
 			Gravity = 0f;
 			return true;
@@ -144,10 +145,10 @@ public struct Climb() : IAction
 	{
 		if (Input.Down.Up)
 		{
-			ActionValue += Scene.Local.ProcessSpeed;
-			if (ActionValue > maxValue)
+			_step += Scene.Local.ProcessSpeed;
+			if (_step > maxValue)
 			{
-				ActionValue = 0f;
+				_step = 0f;
 			}
 
 			Velocity.Y = -PhysicParams.AccelerationClimb;
@@ -156,10 +157,10 @@ public struct Climb() : IAction
 		
 		if (Input.Down.Down)
 		{
-			ActionValue -= Scene.Local.ProcessSpeed;
-			if (ActionValue < 0f)
+			_step -= Scene.Local.ProcessSpeed;
+			if (_step < 0f)
 			{
-				ActionValue = maxValue;
+				_step = maxValue;
 			}
 
 			Velocity.Y = PhysicParams.AccelerationClimb;
@@ -174,7 +175,7 @@ public struct Climb() : IAction
 		Animation = Animations.GlideFall;
 		Action = Actions.Glide;
 		_state = (int)GlideStates.Fall;
-		ActionValue = 1f;
+		_step = 1f;
 		Radius = RadiusNormal;
 		
 		ResetGravity();
@@ -184,9 +185,9 @@ public struct Climb() : IAction
 	{
 		//TODO: check this
 		
-		ClimbLedgeStates previousState = GetClimbLedgeState(ActionValue);
-		ActionValue += Scene.Local.ProcessSpeed;
-		ClimbLedgeStates state = GetClimbLedgeState(ActionValue);
+		ClimbLedgeStates previousState = GetClimbLedgeState(_step);
+		_step += Scene.Local.ProcessSpeed;
+		ClimbLedgeStates state = GetClimbLedgeState(_step);
 		if (state == previousState) return;
 		
 		switch (state)

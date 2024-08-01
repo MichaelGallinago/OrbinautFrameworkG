@@ -75,6 +75,8 @@ namespace OrbinautFramework3.Objects.Player
 """
         }
         
+        public static implicit operator Types(Actions action) => action.Type;
+        
         public Types Type 
         {
             get => _type;

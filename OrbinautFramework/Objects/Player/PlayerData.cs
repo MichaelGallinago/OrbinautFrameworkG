@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
@@ -52,7 +51,6 @@ public class PlayerData
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
 	public OrbinautData SetPushAnimationBy { get; set; }
-	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
 	public DeathStates DeathState { get; set; }
@@ -61,8 +59,6 @@ public class PlayerData
 
 	public Actions Action;
 	public int ActionState { get; set; }
-	public float ActionValue { get; set; }
-	public float ActionValue2 { get; set; }
     
 	public Constants.Direction Facing { get; set; }
 	public float VisualAngle { get; set; }
@@ -70,8 +66,7 @@ public class PlayerData
 	public bool IsForcedSpin { get; set; }
 	public float GroundLockTimer { get; set; }
 	public bool IsAirLock { get; set; }
-    
-	public float AirTimer { get; set; }
+	
 	public uint ComboCounter { get; set; }
 	public float InvincibilityTimer { get; set; }
 	public float ItemSpeedTimer { get; set; }

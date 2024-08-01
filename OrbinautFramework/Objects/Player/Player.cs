@@ -5,6 +5,8 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Physics;
+using OrbinautFramework3.Objects.Player.Physics.StateChangers;
+using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
@@ -26,8 +28,16 @@ public sealed partial class Player : Node2D, ICullable
 	private Tail _tail;
 
 	private CpuData _cpuData = new();
+	private Landing _landing = new();
 	private ObjectInteraction _objectInteraction = new();
 	private PhysicsData _physicsData = new();
+	private Water _water = new();
+	private Status _status = new();
+	private Death _death = new();
+	private SpinDash _spinDash = new();
+	private Dash _dash = new();
+	private Jump _jump = new();
+	private Rotation _rotation = new();
 
 	public Player()
 	{
@@ -35,6 +45,9 @@ public sealed partial class Player : Node2D, ICullable
 		Data.TypeChanged += OnTypeChanged;
 
 		Memento = new BaseMemento(this);
+		
+		_landing.LandHandler += ReleaseDropDash;
+		_landing.LandHandler += ReleaseHammerSpin;
 	}
 
 	public override void _Ready()
@@ -70,7 +83,7 @@ public sealed partial class Player : Node2D, ICullable
 	    
 		// DEFAULT PLAYER ROUTINE
 		_cpuData.Process();
-		ProcessDeath();
+		_death.Process();
 		
 		if (Data.IsControlRoutineEnabled)
 		{
@@ -79,13 +92,13 @@ public sealed partial class Player : Node2D, ICullable
 
 		if (!Data.IsDead)
 		{
-			ProcessWater();
-			UpdateStatus();
+			_water.Process();
+			_status.Update();
 			UpdateCollision();
 		}
 		
 		Data.Record();
-		ProcessRotation();
+		_rotation.Process();
 		_sprite.Animate(this);
 		_tail?.Animate(this);
 		ProcessPalette();
@@ -95,10 +108,10 @@ public sealed partial class Player : Node2D, ICullable
 	{
 		_physicsData.UpdatePhysicParameters();
 		
-		if (ProcessSpinDash()) return;
-		if (ProcessDash()) return;
-		if (ProcessJump()) return;
-		if (StartJump()) return;
+		if (_spinDash.Perform()) return;
+		if (_dash.Perform()) return;
+		if (_jump.Perform()) return;
+		if (_jump.Start()) return;
 		
 		// Abilities logic
 		Data.Action.Perform();
@@ -107,6 +120,46 @@ public sealed partial class Player : Node2D, ICullable
 		
 		ProcessGlideCollision();
 		Carry();
+	}
+	
+	public void OnAttached(ICarrier carrier)
+	{
+		Vector2 previousPosition = carrier.CarryTargetPosition;
+		
+		if (Input.Press.Abc)
+		{
+			carrier.CarryTarget = null;
+			carrier.CarryTimer = 18f;
+				
+			IsSpinning = true;
+			IsJumping = true;
+			Action = new Default();
+			Animation = Animations.Spin;
+			Radius = RadiusSpin;
+			Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpSpeed);
+					
+			if (Input.Down.Left)
+			{
+				Velocity.X = -2f;
+			}
+			else if (Input.Down.Right)
+			{
+				Velocity.X = 2f;
+			}
+			
+			AudioPlayer.Sound.Play(SoundStorage.Jump);
+			return;
+		}
+		
+		if (Action != Actions.Carried || carrier.Action != Actions.Flight || !Position.IsEqualApprox(previousPosition))
+		{
+			carrier.CarryTarget = null;
+			carrier.CarryTimer = 60f;
+			Action = Actions.None;
+			return;
+		}
+		
+		AttachToPlayer(carrier);
 	}
 	
 	private void SetCameraDelayX(float delay)
@@ -143,275 +196,6 @@ public sealed partial class Player : Node2D, ICullable
 		if (_tail == null) return;
 		_tail.QueueFree();
 		_tail = null;
-	}
-	
-	private void UpdateStatus()
-	{
-		CreateSkidDust();
-		FlickAfterGettingHit();
-		
-		ItemSpeedTimer = UpdateItemTimer(ItemSpeedTimer, MusicStorage.HighSpeed);
-		ItemInvincibilityTimer = UpdateItemTimer(ItemInvincibilityTimer, MusicStorage.Invincibility);
-
-		UpdateSuperForm();
-		
-		IsInvincible = InvincibilityTimer > 0f || ItemInvincibilityTimer > 0f || 
-		               IsHurt || IsSuper || _shield.State == ShieldContainer.States.DoubleSpin;
-		
-		KillPlayerOnTimeLimit();
-	}
-	
-	private void CreateSkidDust()
-	{
-		if (Animation != Animations.Skid) return;
-		
-		//TODO: fix loop on stutter (maybe PreviousProcessSpeed?)
-		if (DustTimer % 4f < Scene.Local.ProcessSpeed)
-		{
-			// TODO: make obj_dust_skid
-			//instance_create(x, y + Radius.Y, obj_dust_skid);
-		}
-		DustTimer += Scene.Local.ProcessSpeed;
-	}
-
-	private void FlickAfterGettingHit()
-	{
-		if (InvincibilityTimer <= 0f || IsHurt) return;
-		Visible = ((int)InvincibilityTimer & 4) > 0 || InvincibilityTimer <= 0f;
-		InvincibilityTimer -= Scene.Local.ProcessSpeed;
-	}
-	
-	private float UpdateItemTimer(float timer, AudioStream itemMusic)
-	{
-		if (timer <= 0f) return 0f;
-		timer -= Scene.Local.ProcessSpeed;
-		
-		if (timer > 0f) return timer;
-		timer = 0f;
-
-		if (Id == 0 && AudioPlayer.Music.IsPlaying(itemMusic))
-		{
-			ResetMusic();
-		}
-		
-		return timer;
-	}
-
-	private void UpdateSuperForm()
-	{
-		if (!IsSuper) return;
-		
-		if (Action == Actions.Transform)
-		{
-			ActionValue -= Scene.Local.ProcessSpeed;
-			if (ActionValue <= 0f)
-			{
-				IsObjectInteractionEnabled = true;
-				IsControlRoutineEnabled = true;
-				Action = Actions.None;
-			}
-		}
-
-		float newSuperTimer = SuperTimer - Scene.Local.ProcessSpeed;
-		if (newSuperTimer > 0f)
-		{
-			SuperTimer = newSuperTimer;
-			return;
-		}
-
-		if (--SharedData.PlayerRings > 0)
-		{
-			SuperTimer = 61f;
-			return;
-		}
-		
-		SharedData.PlayerRings = 0;
-		InvincibilityTimer = 1;
-		SuperTimer = 0f;
-		
-		ResetMusic();
-	}
-
-	private void KillPlayerOnTimeLimit()
-	{
-		if (Id == 0 && Scene.Local.Time >= 36000f)
-		{
-			Kill();
-		}
-	}
-
-	private void ProcessWater()
-	{
-		if (Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
-
-		if (DiveIntoWater()) return;
-		if (UpdateAirTimer()) return;
-		LeaveWater();
-	}
-
-	private bool DiveIntoWater()
-	{
-		if (IsUnderwater) return false;
-		
-		if ((int)Position.Y < Stage.Local.WaterLevel || IsHurt) return true;
-		
-		IsUnderwater = true;
-		AirTimer = Constants.DefaultAirTimer;
-
-		ResetGravityOnWaterEdge();
-
-		if (PreviousPosition.Y < Stage.Local.WaterLevel)
-		{
-			SpawnWaterSplash();
-		}
-		
-		//TODO: obj_bubbles_player
-		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
-		
-		Velocity.Vector *= new Vector2(0.5f, 0.25f);
-		
-		RemoveShieldUnderwater();
-		
-		return false;
-	}
-
-	private void ResetGravityOnWaterEdge()
-	{
-		if (Action != Actions.Flight && (Action != Actions.Glide || ActionState == (int)GlideStates.Fall))
-		{
-			ResetGravity();
-		}
-	}
-
-	private void RemoveShieldUnderwater()
-	{
-		if (Id != 0 && _shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
-		
-		if (_shield.Type == ShieldContainer.Types.Lightning)
-		{
-			//TODO: obj_water_flash
-			//instance_create(x, y, obj_water_flash);
-		}
-		else if (_shield.Type == ShieldContainer.Types.Fire)
-		{
-			//TODO: obj_explosion_dust
-			//instance_create(x, c_stage.water_level, obj_explosion_dust, { MakeSound: false });
-		}
-
-		SharedData.PlayerShield = ShieldContainer.Types.None;
-	}
-
-	private enum AirTimerStates : byte
-	{
-		None, Alert1, Alert2, Alert3, Drowning, Drown
-	}
-
-	private bool UpdateAirTimer()
-	{
-		if (_shield.Type == ShieldContainer.Types.Bubble) return false;
-
-		AirTimerStates previousState = GetAirTimerState(AirTimer);
-		if (AirTimer > 0f)
-		{
-			AirTimer -= Scene.Local.ProcessSpeed;
-		}
-
-		AirTimerStates state = GetAirTimerState(AirTimer);
-		if (state == previousState) return false;
-		
-		switch (state)
-		{
-			case AirTimerStates.Alert1 or AirTimerStates.Alert2 or AirTimerStates.Alert3 when Id == 0:
-				AudioPlayer.Sound.Play(SoundStorage.Alert);
-				break;
-			
-			case AirTimerStates.Drowning when Id == 0:
-				AudioPlayer.Music.Play(MusicStorage.Drowning);
-				break;
-			
-			case AirTimerStates.Drown:
-				ProcessDrown();
-				return true;
-		}
-
-		return false;
-	}
-
-	private static AirTimerStates GetAirTimerState(float value) => value switch
-	{
-		> 1500f => AirTimerStates.None,
-		> 1200f => AirTimerStates.Alert1,
-		> 900f => AirTimerStates.Alert2,
-		> 720f => AirTimerStates.Alert3,
-		> 0f => AirTimerStates.Drowning,
-		_ => AirTimerStates.Drown
-	};
-
-	private void ProcessDrown()
-	{
-		AudioPlayer.Sound.Play(SoundStorage.Drown);
-		ResetState();
-
-		ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		Animation = Animations.Drown;
-		IsDead = true;
-		IsObjectInteractionEnabled = false;
-		Gravity	= GravityType.Underwater;
-		Velocity.Vector = Vector2.Zero;
-		GroundSpeed.Value = 0f;
-		
-		if (IsCameraTarget(out ICamera camera))
-		{
-			camera.IsMovementAllowed = false;
-		}
-	}
-
-	private void LeaveWater()
-	{
-		if ((int)Position.Y >= Stage.Local.WaterLevel || IsHurt) return;
-
-		IsUnderwater = false;
-		ResetGravityOnWaterEdge();
-		
-		if (PreviousPosition.Y >= Stage.Local.WaterLevel)
-		{
-			SpawnWaterSplash();
-		}
-		
-		if (Action == Actions.Flight)
-		{
-			AudioPlayer.Sound.Play(SoundStorage.Flight);
-		}
-			
-		if (Id == 0 && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
-		{
-			ResetMusic();
-		}
-		
-		AccelerateOnLeavingWater();
-	}
-
-	private void AccelerateOnLeavingWater()
-	{
-		if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
-		{
-			Velocity.Y *= 2f;
-		}
-					
-		if (Velocity.Y < -16f)
-		{
-			Velocity.Y = -16f;
-		}
-	}
-
-	private void SpawnWaterSplash()
-	{
-		if (Action == Actions.Climb || CpuState == CpuStates.Respawn ||
-		    Action == Actions.Glide && ActionState == (int)GlideStates.Fall) return;
-		
-		//TODO: obj_water_splash
-		//instance_create(x, c_stage.water_level, obj_water_splash);
-		AudioPlayer.Sound.Play(SoundStorage.Splash);
 	}
 
 	private void UpdateCollision()
@@ -457,48 +241,6 @@ public sealed partial class Player : Node2D, ICullable
 					new Vector2I(24, 24) : Vector2I.Zero);
 				break;
 		}
-	}
-
-	private void ProcessRotation()
-	{
-		bool isSmoothRotation = SharedData.RotationMode > 0;
-		
-		if (!IsGrounded)
-		{
-			VisualAngle = Angle;
-		}
-		else
-		{
-			float rangeAngle = Angle is > 22.5f and < 337.5f ? Angle : 0f;
-			VisualAngle = isSmoothRotation ? CalculateSmoothVisualAngle(rangeAngle) : rangeAngle;
-		}
-		
-		if (!isSmoothRotation)
-		{
-			VisualAngle = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
-		}
-
-		RotationDegrees = Animation == Animations.Move ? 360f - VisualAngle : 0f;
-	}
-
-	private float CalculateSmoothVisualAngle(float rangeAngle)
-	{
-		float angleDifference = rangeAngle - VisualAngle;
-		
-		float delta = Math.Abs(angleDifference);
-		float clockwiseDelta = Math.Abs(angleDifference + 360f);
-		float counterclockwiseDelta = Math.Abs(angleDifference - 360f);
-		
-		if (delta >= counterclockwiseDelta)
-		{
-			angleDifference += counterclockwiseDelta < clockwiseDelta ? -360f : 360f;
-		}
-		else if (delta >= clockwiseDelta)
-		{
-			angleDifference += 360f;
-		}
-
-		return (VisualAngle + angleDifference * (Math.Abs(GroundSpeed) >= 6f ? 0.5f : 0.25f)) % 360f;
 	}
 	
 	private void ProcessPalette()
@@ -594,85 +336,6 @@ public sealed partial class Player : Node2D, ICullable
 	public static void IncreaseComboScore(int comboCounter = 0)
 	{
 		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
-	}
-
-	private void ProcessDeath()
-	{
-		if (!IsDead) return;
-
-		ICamera camera = Views.Local.BottomCamera;
-		
-		// If drowned, wait until we're far enough off-screen
-		const int drownScreenOffset = 276;
-		if (AirTimer == 0 && (int)Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
-		{
-			return;
-		}
-		
-		switch (DeathState)
-		{
-			case DeathStates.Wait: WaitOnDeath(camera); break;
-			case DeathStates.Restart: RestartOnDeath(); break;
-		}
-	}
-	
-	private void WaitOnDeath(ICamera camera)
-	{
-		if ((int)Position.Y <= 32f + (SharedData.PlayerPhysics < PhysicsTypes.S3 ? 
-			    camera.Boundary.W : camera.DrawPosition.Y + SharedData.ViewSize.Y)) return;
-		
-		RestartState = RestartStates.ResetLevel;
-		
-		SetNextStateOnDeath();
-	}
-
-	private void SetNextStateOnDeath()
-	{
-		// If CPU, respawn
-		if (Id != 0)
-		{
-			Respawn();
-			return;
-		}
-		
-		//TODO: gui hud
-		/*if (instance_exists(obj_gui_hud))
-		{
-			obj_gui_hud.update_timer = false;
-		}*/
-					
-		if (--SharedData.LifeCount > 0 && Scene.Local.Time < 36000f)
-		{
-			DeathState = DeathStates.Restart;
-			RestartTimer = 60f;
-		}
-		else
-		{
-			DeathState = DeathStates.Wait;
-				
-			//TODO: gui gameover
-			//instance_create_depth(0, 0, RENDERER_DEPTH_HUD, obj_gui_gameover);				
-			AudioPlayer.Music.Play(MusicStorage.GameOver);
-		}
-	}
-
-	private void RestartOnDeath()
-	{
-		// Wait 60 steps, then restart
-		if (RestartTimer > 0f)
-		{
-			RestartTimer -= Scene.Local.ProcessSpeed;
-			if (RestartTimer > 0f) return;
-			AudioPlayer.Music.StopAllWithMute(0.5f);
-					
-			// TODO: fade
-			//fade_perform(FADE_MD_OUT, FADE_BL_BLACK, 1);
-		}
-				
-		// TODO: fade
-		//if (c_framework.fade.state != FADESTATE.PLAINCOLOUR) break;
-
-		Scene.Local.Tree.ReloadCurrentScene();
 	}
 
 	//TODO: update debug mode
