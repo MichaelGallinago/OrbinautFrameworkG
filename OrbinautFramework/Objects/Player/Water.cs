@@ -17,12 +17,12 @@ public struct Water
 	{
 		if (Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
 
-		if (DiveIntoWater()) return;
+		if (Dive()) return;
 		if (UpdateAirTimer()) return;
-		LeaveWater();
+		Leave();
 	}
 
-	private bool DiveIntoWater()
+	private bool Dive()
 	{
 		if (IsUnderwater) return false;
 		
@@ -31,11 +31,11 @@ public struct Water
 		IsUnderwater = true;
 		AirTimer = Constants.DefaultAirTimer;
 
-		ResetGravityOnWaterEdge();
+		ResetGravityOnEdge();
 
 		if (PreviousPosition.Y < Stage.Local.WaterLevel)
 		{
-			SpawnWaterSplash();
+			SpawnSplash();
 		}
 		
 		//TODO: obj_bubbles_player
@@ -48,7 +48,7 @@ public struct Water
 		return false;
 	}
 
-	private void ResetGravityOnWaterEdge()
+	private void ResetGravityOnEdge()
 	{
 		if (Action != Actions.Flight && (Action != Actions.Glide || ActionState == (int)GlideStates.Fall))
 		{
@@ -139,16 +139,16 @@ public struct Water
 		}
 	}
 
-	private void LeaveWater()
+	private void Leave()
 	{
 		if ((int)Position.Y >= Stage.Local.WaterLevel || IsHurt) return;
 
 		IsUnderwater = false;
-		ResetGravityOnWaterEdge();
+		ResetGravityOnEdge();
 		
 		if (PreviousPosition.Y >= Stage.Local.WaterLevel)
 		{
-			SpawnWaterSplash();
+			SpawnSplash();
 		}
 		
 		if (Action == Actions.Flight)
@@ -161,10 +161,10 @@ public struct Water
 			ResetMusic();
 		}
 		
-		AccelerateOnLeavingWater();
+		AccelerateOnLeave();
 	}
 
-	private void AccelerateOnLeavingWater()
+	private void AccelerateOnLeave()
 	{
 		if (SharedData.PlayerPhysics <= PhysicsTypes.S2 || Velocity.Y >= -4f)
 		{
@@ -177,7 +177,7 @@ public struct Water
 		}
 	}
 
-	private void SpawnWaterSplash()
+	private void SpawnSplash()
 	{
 		if (Action == Actions.Climb || CpuState == CpuStates.Respawn ||
 		    Action == Actions.Glide && ActionState == (int)GlideStates.Fall) return;
