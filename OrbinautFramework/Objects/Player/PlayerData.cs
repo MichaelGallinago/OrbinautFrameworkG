@@ -51,15 +51,15 @@ public class PlayerData
 	public bool IsGrounded { get; set; }
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
-	public BaseObject SetPushAnimationBy { get; set; }
+	public OrbinautData SetPushAnimationBy { get; set; }
 	public bool IsUnderwater { get; set; }
 	public bool IsHurt { get; set; }
 	public bool IsDead { get; set; }
 	public DeathStates DeathState { get; set; }
-	public BaseObject OnObject { get; set; }
+	public OrbinautData OnObject { get; set; }
 	public bool IsInvincible { get; set; }
 
-	public Actions Action { get; set; }
+	public Actions Action;
 	public int ActionState { get; set; }
 	public float ActionValue { get; set; }
 	public float ActionValue2 { get; set; }
@@ -83,8 +83,6 @@ public class PlayerData
 	
 	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
-	public Dictionary<BaseObject, Constants.TouchState> TouchObjects { get; } = [];
-	public HashSet<BaseObject> PushObjects { get; } = [];
 	public PlayerInput Input { get; } = new();
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
@@ -95,27 +93,8 @@ public class PlayerData
 	{
 		Action = new Actions(player);
 	}
-
-	public override void _Ready()
-	{
-		base._Ready();
-		Spawn();
-		Sprite.FrameChanged += () => IsAnimationFrameChanged = true;
-	}
-
-	public override void _ExitTree()
-	{
-		base._ExitTree();
-		ResizeAllRecordedData();
-	}
-
-	public override void _EnterTree()
-	{
-		base._EnterTree();
-		ResizeAllRecordedData();
-	}
 	
-	public void RecordData()
+	public void Record()
 	{
 		Array.Copy(_recordedData, 0, _recordedData, 
 			1, _recordedData.Length - 1);
@@ -127,7 +106,7 @@ public class PlayerData
 	
 	public void ResetState()
 	{
-		Action = Actions.None;
+		Action.Type = Actions.Types.Default;
 		
 		IsHurt = false;
 		IsJumping = false;
@@ -142,7 +121,7 @@ public class PlayerData
 	
 	public void ResetMusic()
 	{
-		if (IsSuper)
+		if (SuperData.IsSuper)
 		{
 			AudioPlayer.Music.Play(MusicStorage.Super);
 		}
@@ -160,7 +139,7 @@ public class PlayerData
 		}
 	}
 	
-	protected override void Init()
+	public void Init()
 	{
 		if (ApplyType()) return;
 		
@@ -192,12 +171,12 @@ public class PlayerData
 		IsForcedSpin = false;
 		
 		GroundLockTimer = 0f;
-		SuperTimer = 0f;
+		SuperData.Timer = 0f;
 
 		IsObjectInteractionEnabled = true;
 		IsControlRoutineEnabled = true;
 
-		Action = Actions.None;
+		Action.Type = Actions.Types.Default;
 		ActionState = 0;
 		ActionValue = 0;
 		ActionValue2 = 0;
@@ -239,7 +218,7 @@ public class PlayerData
 		Sprite.Animate(this);
 	}
 	
-	private static void ResizeAllRecordedData()
+	public static void ResizeAllRecordedData()
 	{
 		if (Scene.Local.Time == 0f) return;
 
@@ -280,7 +259,7 @@ public class PlayerData
 		carrier.CarryTargetPosition = Position;
 	}
 
-	private void Spawn()
+	public void Spawn()
 	{
 		if (SharedData.GiantRingData != null)
 		{

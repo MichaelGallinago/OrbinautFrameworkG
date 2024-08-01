@@ -6,117 +6,26 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public abstract partial class BaseObject : Node2D
+[GlobalClass]
+public partial class OrbinautData : Resource
 {
-	public enum CullingType : byte { None, NoBounds, Reset, ResetX, ResetY, Delete, Pause }
-	
-	[Export] public CullingType Culling
-	{
-		get => _culling;
-		set
-		{ 
-			switch (_culling)
-			{
-				case CullingType.Delete:
-					return;
-				case CullingType.None:
-					ObjectCuller.Local.AddToCulling(this);
-					break;
-				default:
-					if (value != CullingType.None) break;
-					ObjectCuller.Local.RemoveFromCulling(this);
-					break;
-			}
-
-			_culling = value;
-		}
-	}
-	private CullingType _culling;
-	
-	public new Vector2 Position
-	{
-		get => _floatPosition;
-		set
-		{
-			base.Position = (Vector2I)value;
-			_floatPosition = value;
-		}
-	}
-	private Vector2 _floatPosition;
-
-	public ResetData ResetData { get; private set; }
 	public Vector2 PreviousPosition { get; set; }
-	public InteractData InteractData;
-	public SolidData SolidData;
-	
-	public override void _EnterTree()
-	{
-		Position = base.Position;
-		ResetData = new ResetData(Visible, Scale, Position, ZIndex);
-		if (Culling != CullingType.None)
-		{
-			ObjectCuller.Local.AddToCulling(this);
-		}
-	}
+	public HitBox HitBox;
+	public SolidBox SolidBox;
 
 	public override void _Ready() => Init();
 
 	protected virtual void Init() {}
-	
-	public void Reset()
-	{
-		Position = ResetData.Position;
-		Scale = ResetData.Scale;
-		Visible = ResetData.IsVisible;
-		ZIndex = ResetData.ZIndex;
-		Init();
-	}
 
 	public override void _ExitTree() => ObjectCuller.Local.RemoveFromCulling(this);
 	
-	public void SetSolid(Vector2I radius, Vector2I offset = default)
-	{
-		SolidData.Offset = offset;
-		SolidData.Radius = radius;
-		SolidData.HeightMap = null;
-	}
-	
-	public void SetSolid(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
-	{
-		SolidData.Radius = new Vector2I(radiusX, radiusY);
-		SolidData.Offset = new Vector2I(offsetX, offsetY);
-		SolidData.HeightMap = null;
-	}
-	
-	public void SetHitBox(Vector2I radius, Vector2I offset = default)
-	{
-		InteractData.Radius = radius;
-		InteractData.Offset = offset;
-	}
-	
-	public void SetHitBox(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
-	{
-		InteractData.Radius = new Vector2I(radiusX, radiusY);
-		InteractData.Offset = new Vector2I(offsetX, offsetY);
-	}
-
-	public void SetHitBoxExtra(Vector2I radius, Vector2I offset = default)
-	{
-		InteractData.OffsetExtra = offset;
-		InteractData.RadiusExtra = radius;
-	}
-	
-	public void SetHitBoxExtra(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
-	{
-		InteractData.RadiusExtra = new Vector2I(radiusX, radiusY);
-		InteractData.OffsetExtra = new Vector2I(offsetX, offsetY);
-	}
 	
 	public bool IsCameraTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
 	
-	public bool CheckHitBoxCollision(BaseObject target, bool isExtraHitBox = false)
+	//TODO: cleanup
+	public bool CheckHitBoxCollision(OrbinautData target, bool isExtraHitBox = false)
 	{
-		if (!InteractData.IsInteract || !target.InteractData.IsInteract) return false;
+		if (!HitBox.IsInteract || !target.HitBox.IsInteract) return false;
 		
 		var hitBoxColor = new Color();
 
@@ -124,31 +33,31 @@ public abstract partial class BaseObject : Node2D
 		var targetRadius = new Vector2I();
 		if (isExtraHitBox)
 		{
-			targetRadius = target.InteractData.RadiusExtra;
+			targetRadius = target.HitBox.RadiusExtra;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0)
 			{
 				isExtraHitBox = false;
 			}	
 			else
 			{
-				targetOffset = target.InteractData.OffsetExtra;
+				targetOffset = target.HitBox.OffsetExtra;
 				hitBoxColor = Color.Color8(0, 0, 220);
 			}
 		}
 
 		if (!isExtraHitBox)
 		{
-			targetRadius = target.InteractData.Radius;
+			targetRadius = target.HitBox.Radius;
 			if (targetRadius.X <= 0 || targetRadius.Y <= 0) return false;
 			
-			targetOffset = target.InteractData.Offset;
+			targetOffset = target.HitBox.Offset;
 			hitBoxColor = Color.Color8(255, 0, 220);
 		}
 		
 		// Calculate bounding boxes for both objects
-		Vector2I position = (Vector2I)Position + InteractData.Offset;
-		Vector2I boundsNegative = position - InteractData.Radius;
-		Vector2I boundsPositive = position + InteractData.Radius;
+		Vector2I position = (Vector2I)Position + HitBox.Offset;
+		Vector2I boundsNegative = position - HitBox.Radius;
+		Vector2I boundsPositive = position + HitBox.Radius;
 			
 		Vector2I targetPosition = (Vector2I)target.Position + targetOffset;
 		Vector2I targetBoundsNegative = targetPosition - targetRadius;
@@ -179,8 +88,8 @@ public abstract partial class BaseObject : Node2D
 		if (targetBoundsPositive.Y < boundsNegative.Y || targetBoundsNegative.Y > boundsPositive.Y) return false;
 		
 		// Objects should no longer interact with any other object this step
-		InteractData.IsInteract = false;
-		target.InteractData.IsInteract = false;
+		HitBox.IsInteract = false;
+		target.HitBox.IsInteract = false;
 		
 		return true;
 	}

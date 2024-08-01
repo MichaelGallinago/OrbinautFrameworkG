@@ -47,4 +47,7 @@
     <EmbeddedResource Remove=".godot\**" />
     <EmbeddedResource Remove="Stages\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Objects\Resources\" />
+  </ItemGroup>
 </Project>

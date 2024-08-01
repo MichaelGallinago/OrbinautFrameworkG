@@ -113,10 +113,10 @@ public class DebugMode
 		else if (input.Press.C)
 		{
 			//TODO: replace by prefabs
-			if (Activator.CreateInstance(_objects[_index]) is not BaseObject newObject) return true;
+			if (Activator.CreateInstance(_objects[_index]) is not OrbinautData newObject) return true;
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
-			newObject.Culling = BaseObject.CullingType.Delete;
+			newObject.Culling = OrbinautData.CullingType.Delete;
 			Scene.Local.AddChild(newObject);
 		}
 		

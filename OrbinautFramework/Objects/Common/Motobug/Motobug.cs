@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.Motobug;
 
-public partial class Motobug : BaseObject
+public partial class Motobug : OrbinautData
 {
     [Export] private AnimatedSprite2D _sprite;
     private Vector2 _velocity;

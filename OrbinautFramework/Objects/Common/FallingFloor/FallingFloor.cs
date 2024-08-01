@@ -8,7 +8,7 @@ namespace OrbinautFramework3.Objects.Common.FallingFloor;
 
 using Player;
 
-public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : BaseObject
+public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : OrbinautData
 {
     private enum States : byte
     {

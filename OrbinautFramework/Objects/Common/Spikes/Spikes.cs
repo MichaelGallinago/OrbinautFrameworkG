@@ -10,7 +10,7 @@ namespace OrbinautFramework3.Objects.Common.Spikes;
 
 using Player;
 
-public abstract partial class Spikes : BaseObject
+public abstract partial class Spikes : OrbinautData
 {
     [Export] public bool IsMoving { get; set; }
     

@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Objects.Common.Bridge;
 
 using Player;
 
-public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : BaseObject
+public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : OrbinautData
 {
     private int _activeLogId;
     private int _maxDip;
@@ -33,7 +33,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
         }
 
         // Player should not balance on this object
-        SolidData.NoBalance = true;
+        SolidBox.NoBalance = true;
 
         // Properties
         SetSolid(new Vector2I(logAmount * _logSizeHalf, _logSizeHalf));

@@ -5,16 +5,18 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Physics;
-using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public sealed partial class Player : BaseObject
+public sealed partial class Player : Node2D, ICullable
 {
+	public ICullable.Types CullingType { get; }
+	
 	private readonly DebugMode _debugMode = new();
 	public PlayerData Data { get; }
+	public IMemento Memento { get; }
 
 	[Export] private PlayerAnimatedSprite _sprite;
 	[Export] private ShieldContainer _shield;
@@ -31,17 +33,28 @@ public sealed partial class Player : BaseObject
 	{
 		Data = new PlayerData(this);
 		Data.TypeChanged += OnTypeChanged;
+
+		Memento = new BaseMemento(this);
+	}
+
+	public override void _Ready()
+	{
+		base._Ready();
+		Data.Spawn();
+		_sprite.FrameChanged += () => Data.IsAnimationFrameChanged = true;
 	}
 
 	public override void _EnterTree()
 	{
 		base._EnterTree();
+		PlayerData.ResizeAllRecordedData();
 		Scene.Local.Players.Add(this);
 	}
 	
 	public override void _ExitTree()
 	{
 		Scene.Local.Players.Remove(this);
+		PlayerData.ResizeAllRecordedData();
 		base._ExitTree();
 	}
 	
@@ -52,7 +65,7 @@ public sealed partial class Player : BaseObject
 		// DEBUG MODE PLAYER ROUTINE
 		if (Data.DeathState == DeathStates.Wait && Data.Id == 0 && SharedData.IsDebugModeEnabled)
 		{
-			if (_debugMode.Update(this, Input)) return;
+			if (_debugMode.Update(this, Data.Input)) return;
 		}
 	    
 		// DEFAULT PLAYER ROUTINE
@@ -71,7 +84,7 @@ public sealed partial class Player : BaseObject
 			UpdateCollision();
 		}
 		
-		RecordData();
+		Data.Record();
 		ProcessRotation();
 		_sprite.Animate(this);
 		_tail?.Animate(this);
@@ -89,14 +102,6 @@ public sealed partial class Player : BaseObject
 		
 		// Abilities logic
 		Data.Action.Perform();
-		/*
-		ChargeDropDash();
-		ProcessFlight();
-		ProcessClimb();
-		ProcessGlide();
-		ChargeHammerSpin();
-		ProcessHammerDash();
-		*/
 		
 		_physicsData.ProcessCorePhysics();
 		

@@ -10,5 +10,5 @@ public record DataRecord(
     Buttons InputPress,
     Buttons InputDown,
     Constants.Direction Facing,
-    BaseObject SetPushAnimationBy
+    OrbinautData SetPushAnimationBy
 );

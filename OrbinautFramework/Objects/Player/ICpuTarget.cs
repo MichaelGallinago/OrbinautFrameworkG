@@ -12,7 +12,7 @@ public interface ICpuTarget
     bool IsDead { get; }
     Vector2 Position { get; }
     Velocity Velocity { get; }
-    BaseObject OnObject { get; }
+    OrbinautData OnObject { get; }
     Animations Animation { get; }
     AcceleratedValue GroundSpeed { get; }
     bool IsObjectInteractionEnabled { get; }

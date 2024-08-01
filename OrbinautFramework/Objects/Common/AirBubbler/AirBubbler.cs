@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Common.AirBubbler;
 
-public partial class AirBubbler : BaseObject
+public partial class AirBubbler : OrbinautData
 {
     private int _state;
     private byte _waitTime;

@@ -2,7 +2,7 @@ using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Framework;
 
-public abstract partial class Trigger : BaseObject
+public abstract partial class Trigger : OrbinautData
 {
     protected Trigger()
     {

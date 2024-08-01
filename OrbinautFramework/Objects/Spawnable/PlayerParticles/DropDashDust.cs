@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
-public partial class DropDashDust : BaseObject
+public partial class DropDashDust : OrbinautData
 {
     [Export] private AnimatedSprite2D _sprite;
     

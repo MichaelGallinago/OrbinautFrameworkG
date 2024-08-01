@@ -193,7 +193,7 @@ public class CpuData
 		}
 		
 		(Vector2 targetPosition, _cpuInputPress, _cpuInputDown, 
-			Constants.Direction direction, BaseObject setPushAnimationBy) = CpuTarget.RecordedData[_delay];
+			Constants.Direction direction, OrbinautData setPushAnimationBy) = CpuTarget.RecordedData[_delay];
 
 		if (SharedData.CpuBehaviour == CpuBehaviours.S3 &&
 		    Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)

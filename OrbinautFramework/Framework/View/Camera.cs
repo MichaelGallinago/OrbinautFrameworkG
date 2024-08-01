@@ -24,7 +24,7 @@ public partial class Camera : Camera2D, ICamera
 	private Rect2I _activeRegion;
 	public bool IsActiveRegionChanged { get; private set; }
     
-	[Export] public BaseObject Target
+	[Export] public OrbinautData Target
 	{
 		get => _target;
 		set
@@ -46,7 +46,7 @@ public partial class Camera : Camera2D, ICamera
 			_rawPosition = PreviousPosition = DrawPosition;
 		}
 	}
-	private BaseObject _target;
+	private OrbinautData _target;
 	private bool _isTargetPlayer;
 
 	public Vector4I Bounds;

@@ -10,7 +10,7 @@ namespace OrbinautFramework3.Objects.Common.Bumper;
 
 using Player;
 
-public partial class Bumper : BaseObject
+public partial class Bumper : OrbinautData
 {
     private enum HitsLimit : sbyte
     {

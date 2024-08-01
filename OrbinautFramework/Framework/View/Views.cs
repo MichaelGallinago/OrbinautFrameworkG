@@ -28,7 +28,7 @@ public partial class Views : Control
     [Export] private PackedScene _packedViewContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
+    public Dictionary<OrbinautData, ICamera> TargetedCameras { get; } = [];
     public ICamera BottomCamera { get; private set; }
     
     private Camera[] _cameras;

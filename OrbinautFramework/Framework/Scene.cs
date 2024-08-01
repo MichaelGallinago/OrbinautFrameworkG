@@ -64,7 +64,7 @@ public abstract partial class Scene : Node2D
         
         Culler.EarlyCull();
         
-        foreach (BaseObject objects in Culler.ActiveObjects)
+        foreach (OrbinautData objects in Culler.ActiveObjects)
         {
             objects.PreviousPosition = objects.Position;
         }

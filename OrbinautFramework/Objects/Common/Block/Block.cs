@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Objects.Common.Block;
 
 using Player;
 
-public partial class Block : BaseObject
+public partial class Block : OrbinautData
 {
     public Block()
     {

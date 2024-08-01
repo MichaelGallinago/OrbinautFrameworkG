@@ -6,7 +6,7 @@ using OrbinautFramework3.Framework.Tiles;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Climb : IAction
+public struct Climb() : IAction
 {
 	public Player Player { private get; init; }
 	
@@ -23,11 +23,6 @@ public struct Climb : IAction
 	private States _state = States.Normal;
 	private int _climbAnimationFrameNumber = 0;
 
-	public Climb()
-	{
-		
-	}
-
 	public void Perform()
     {
 	    switch (_state)
@@ -41,7 +36,7 @@ public struct Climb : IAction
 
 	private void ClimbNormal()
 	{
-		if (!Mathf.IsEqualApprox(player.Position.X, player.PreviousPosition.X) || Velocity.X != 0f)
+		if (!Mathf.IsEqualApprox(Player.Position.X, Player.PreviousPosition.X) || Velocity.X != 0f)
 		{
 			ReleaseClimb();
 			return;
@@ -50,7 +45,7 @@ public struct Climb : IAction
 		const int stepsPerClimbFrame = 4;
 		UpdateVerticalSpeedOnClimb(_climbAnimationFrameNumber * stepsPerClimbFrame);
 		
-		int radiusX = Radius.X;
+		int radiusX = Player.Data.Radius.X;
 		if (Facing == Constants.Direction.Negative)
 		{
 			radiusX++;
