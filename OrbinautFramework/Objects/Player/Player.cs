@@ -1,4 +1,3 @@
-using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
@@ -11,10 +10,8 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public sealed partial class Player : Node2D, ICullable
+public abstract partial class Player : OrbinautNode, ICarried
 {
-	[Export] public ICullable.Types CullingType { get; }
-	
 	[Export] private PlayerAnimatedSprite _sprite;
 	[Export] private ShieldContainer _shield;
 	[Export] private SpawnTypes _spawnType;
@@ -22,13 +19,12 @@ public sealed partial class Player : Node2D, ICullable
 	[Export] private PackedScene _packedTail;
 	
 	public PlayerData Data { get; }
-	public IMemento Memento { get; }
 	
 	private readonly DebugMode _debugMode = new();
 	private CpuData _cpuData = new();
 	private Tail _tail;
 	
-	private Landing _landing = new();
+	protected Landing Landing = new();
 	private ObjectInteraction _objectInteraction = new();
 	private PhysicsData _physicsData = new();
 	private Water _water = new();
@@ -41,16 +37,15 @@ public sealed partial class Player : Node2D, ICullable
 	private Palette _palette = new();
 	private Carry _carry = new();
 	private CarryTarget _carryTarget = new();
+	private CollisionBoxes _collisionBoxes = new();
 
 	public Player()
 	{
 		Data = new PlayerData(this);
 		Data.TypeChanged += OnTypeChanged;
-
-		Memento = new BaseMemento(this);
 		
-		_landing.LandHandler += ReleaseDropDash;
-		_landing.LandHandler += ReleaseHammerSpin;
+		Landing.LandHandler += ReleaseDropDash;
+		Landing.LandHandler += ReleaseHammerSpin;
 	}
 
 	public override void _Ready()
@@ -97,7 +92,7 @@ public sealed partial class Player : Node2D, ICullable
 		{
 			_water.Process();
 			_status.Update();
-			UpdateCollision();
+			_collisionBoxes.Update();
 		}
 		
 		Data.Record();
@@ -159,51 +154,6 @@ public sealed partial class Player : Node2D, ICullable
 		if (_tail == null) return;
 		_tail.QueueFree();
 		_tail = null;
-	}
-
-	private void UpdateCollision()
-	{
-		SetSolid(RadiusNormal.X + 1, Radius.Y);
-		SetRegularHitBox();
-		SetExtraHitBox();
-	}
-
-	private void SetRegularHitBox()
-	{
-		if (Animation != Animations.Duck || SharedData.PhysicsType >= PhysicsTypes.S3)
-		{
-			SetHitBox(8, Radius.Y - 3);
-			return;
-		}
-
-		if (Type is Types.Tails or Types.Amy) return;
-		SetHitBox(8, 10, 0, 6);
-	}
-
-	private void SetExtraHitBox()
-	{
-		switch (Animation)
-		{
-			case Animations.HammerSpin:
-				SetHitBoxExtra(25, 25);
-				break;
-			
-			case Animations.HammerDash:
-				(int radiusX, int radiusY, int offsetX, int offsetY) = (_sprite.Frame & 3) switch
-				{
-					0 => (16, 16,  6,  0),
-					1 => (16, 16, -7,  0),
-					2 => (14, 20, -4, -4),
-					3 => (17, 21,  7, -5),
-					_ => throw new ArgumentOutOfRangeException()
-				};
-				SetHitBoxExtra(radiusX, radiusY, offsetX * (int)Facing, offsetY);
-				break;
-			default:
-				SetHitBoxExtra(_shield.State == ShieldContainer.States.DoubleSpin ? 
-					new Vector2I(24, 24) : Vector2I.Zero);
-				break;
-		}
 	}
 
 	public static void IncreaseComboScore(int comboCounter = 0)

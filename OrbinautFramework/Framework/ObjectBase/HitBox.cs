@@ -2,9 +2,25 @@ using Godot;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public record struct HitBox(
-    bool IsInteract, Vector2I Radius, Vector2I Offset, Vector2I RadiusExtra, Vector2I OffsetExtra)
+public partial class HitBox : Resource
 {
+    [Export] public bool IsInteract { get; private set; }
+    [Export] public Vector2I Radius { get; private set; }
+    [Export] public Vector2I Offset { get; private set; }
+    [Export] public Vector2I RadiusExtra { get; private set; }
+    [Export] public Vector2I OffsetExtra { get; private set; }
+
+    public HitBox(bool isInteract, Vector2I radius, Vector2I offset, Vector2I radiusExtra, Vector2I offsetExtra)
+    {
+        IsInteract = isInteract;
+        Radius = radius;
+        Offset = offset;
+        RadiusExtra = radiusExtra;
+        OffsetExtra = offsetExtra;
+    }
+    
+    public HitBox() : this(false, default, default, default, default) {}
+    
     public void Set(Vector2I radius, Vector2I offset = default)
     {
         Radius = radius;
