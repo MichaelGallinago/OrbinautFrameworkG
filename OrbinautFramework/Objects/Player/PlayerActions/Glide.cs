@@ -14,7 +14,7 @@ public struct Glide(Glide.States state) : IAction
 	{
 		Air, Ground, Fall
 	}
-
+	
 	public void Perform()
     {
 	    if (state == States.Fall) return;
@@ -98,18 +98,18 @@ public struct Glide(Glide.States state) : IAction
 		}
 
 		// Spawn dust particles
-		if (ActionValue % 4f < Scene.Local.ProcessSpeed)
+		if (ActionValue % 4f < Scene.Instance.ProcessSpeed)
 		{
 			//TODO: obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
 				
-		if (ActionValue > 0f && ActionValue % 8f < Scene.Local.ProcessSpeed)
+		if (ActionValue > 0f && ActionValue % 8f < Scene.Instance.ProcessSpeed)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Slide);
 		}
 					
-		ActionValue += Scene.Local.ProcessSpeed;
+		ActionValue += Scene.Instance.ProcessSpeed;
 	}
 
 	private void UpdateGroundVelocityX()
@@ -133,7 +133,7 @@ public struct Glide(Glide.States state) : IAction
 
 	private void TurnAroundAir()
 	{
-		float speed = Angles.ByteAngleStep * Scene.Local.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
 		if (Input.Down.Left && !Mathf.IsZeroApprox(ActionValue))
 		{
 			if (ActionValue > 0f)
@@ -170,10 +170,8 @@ public struct Glide(Glide.States state) : IAction
 		ActionValue += speed;
 	}
 	
-	public void ProcessCollision()
+	public void LatePerform()
 	{
-		if (Action != Actions.Glide) return;
-		
 		var climbY = (int)Position.Y;
 		var collisionFlagWall = false;
 		int wallRadius = RadiusNormal.X + 1;

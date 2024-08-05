@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
@@ -54,7 +55,7 @@ public abstract partial class Spikes : OrbinautData
 
     private void CollideWithPlayers()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in Scene.Instance.Players.Values)
         {
             CollideWithPlayer(player);
             if (!CheckSolidCollision(player, _sensor)) continue;
@@ -62,9 +63,9 @@ public abstract partial class Spikes : OrbinautData
         }
     }
 
-    private void HurtPlayer(PhysicsData physicsData)
+    private void HurtPlayer(PhysicsCore physicsCore)
     {
-        physicsData.Hurt(Position.X);
+        physicsCore.Hurt(Position.X);
             
         if (!AudioPlayer.Sound.IsPlaying(SoundStorage.Hurt)) return;
             
@@ -82,7 +83,7 @@ public abstract partial class Spikes : OrbinautData
     {
         if (_retractTimer > 0f)
         {
-            _retractTimer -= Scene.Local.ProcessSpeed;
+            _retractTimer -= Scene.Instance.ProcessSpeed;
             if (_retractTimer <= 0f && Views.Local.CheckRectInCameras(_rectangle))
             {
                 AudioPlayer.Sound.Play(SoundStorage.SpikesMove);

@@ -27,8 +27,8 @@ public struct TileCollider
 	    {
 		    _tileMap = value switch
 		    {
-			    TileLayers.Main => Scene.Local.CollisionTileMapMain,
-			    TileLayers.Secondary => Scene.Local.CollisionTileMapSecondary,
+			    TileLayers.Main => Scene.Instance.CollisionTileMapMain,
+			    TileLayers.Secondary => Scene.Instance.CollisionTileMapSecondary,
 			    _ => null
 		    };
 	    }

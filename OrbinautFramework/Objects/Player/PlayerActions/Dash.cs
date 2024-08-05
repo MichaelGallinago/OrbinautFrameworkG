@@ -42,10 +42,10 @@ public struct Dash
     	
     	if (ActionValue < 30f)
     	{
-    		ActionValue += Scene.Local.ProcessSpeed;
+    		ActionValue += Scene.Instance.ProcessSpeed;
     	}
 
-    	float acceleration = 0.390625f * (float)Facing * Scene.Local.ProcessSpeed;
+    	float acceleration = 0.390625f * (float)Facing * Scene.Instance.ProcessSpeed;
     	float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
     	ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
     	GroundSpeed.Value = ActionValue2;

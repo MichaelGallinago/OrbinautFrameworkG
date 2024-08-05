@@ -1,5 +1,6 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -30,9 +31,8 @@ public struct HammerSpin : IAction
         Player.Data.ActionValue = 0f;
     }
     
-    public void Release()
+    public void OnLand()
     {
-        if (Action != Actions.HammerSpin) return;
         if (ActionValue < DropDash.MaxCharge) return;
 
         Animation = Animations.HammerDash;
@@ -51,7 +51,7 @@ public struct HammerSpin : IAction
 
     private void Charge()
     {
-        Player.Data.ActionValue += Scene.Local.ProcessSpeed;
+        Player.Data.ActionValue += Scene.Instance.ProcessSpeed;
         if (ActionValue >= DropDash.MaxCharge)
         {
             AudioPlayer.Sound.Play(SoundStorage.Charge3);

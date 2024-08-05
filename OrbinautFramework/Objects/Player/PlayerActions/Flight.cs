@@ -1,6 +1,7 @@
 ﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -16,7 +17,7 @@ public struct Flight : IAction
         // Flight timer
         if (_flightTimer > 0f)
         {
-            _flightTimer -= Scene.Local.ProcessSpeed;
+            _flightTimer -= Scene.Instance.ProcessSpeed;
         }
 
         if (!FlyUp())
@@ -36,9 +37,9 @@ public struct Flight : IAction
         }
     }
     
-    public void PlayFlightSound()
+    private void PlayFlightSound()
     {
-    	if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
+    	if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
 	    
     	if (_flightTimer > 0f)
     	{
@@ -61,7 +62,7 @@ public struct Flight : IAction
     	
     	Gravity = GravityType.TailsUp;
     			
-    	_flyUpTimer += Scene.Local.ProcessSpeed;
+    	_flyUpTimer += Scene.Instance.ProcessSpeed;
     	if (_flyUpTimer >= 31f)
     	{
     		_flyUpTimer = 0f;

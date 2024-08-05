@@ -2,10 +2,13 @@
 using Godot;
 using OrbinautFramework3.Framework;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct Rotation
+public struct AngleRotation
 {
+    public float Angle { get; set; }
+    public float VisualAngle { get; set; }
+    
     public void Process()
     {
         bool isSmoothRotation = SharedData.RotationMode > 0;

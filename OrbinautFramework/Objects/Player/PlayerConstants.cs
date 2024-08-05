@@ -9,25 +9,10 @@ public static class PlayerConstants
 
 public enum Types : byte
 {
-    None, Sonic, Tails, Knuckles, Amy
-}
-	
-public enum SpawnTypes : byte
-{
-    Global, GlobalAI, Unique, None
+    Sonic, Tails, Knuckles, Amy
 }
     
 public enum PhysicsTypes : byte
 {
     S1, CD, S2, S3, SK
-}
-
-public enum RestartStates : byte
-{
-    GameOver, ResetLevel, RestartStage, RestartGame
-}
-
-public enum DeathStates : byte
-{
-    Wait, Restart
 }

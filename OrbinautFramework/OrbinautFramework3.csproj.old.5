@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.3.0-beta.3">
+<Project Sdk="Godot.NET.Sdk/4.3.0-rc.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\AudioStorageSourceGenerator\AudioStorageSourceGenerator.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\ActionSourceGenerator\ActionSourceGenerator.csproj" OutputItemType="Analyzer" />
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
     <Compile Remove="Framework\Camera\**" />
     <Compile Remove="Framework\CameraAndSurface\**" />
@@ -45,5 +46,8 @@
     <EmbeddedResource Remove="Framework\Input\**" />
     <EmbeddedResource Remove=".godot\**" />
     <EmbeddedResource Remove="Stages\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Objects\Resources\" />
   </ItemGroup>
 </Project>

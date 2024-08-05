@@ -9,7 +9,7 @@ namespace OrbinautFramework3.Framework.View;
 
 public partial class Views : Control
 {
-    public static Views Local => Scene.Local.Views;
+    public static Views Local => Scene.Instance.Views;
 
     public event Action<int> OnViewNumberChanged;
     
@@ -100,7 +100,7 @@ public partial class Views : Control
     
     private void AttachCamerasToPlayers()
     {
-        ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+        ReadOnlySpan<Player> players = Scene.Instance.Players.Values;
         int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {
@@ -140,7 +140,7 @@ public partial class Views : Control
             var viewContainer = _packedViewContainer.Instantiate<ViewContainer>();
             _cameras[i] = viewContainer.Camera;
             _containers[i] = viewContainer;
-            viewContainer.SubViewport.SetWorld2D(Scene.Local.GetWorld2D());
+            viewContainer.SubViewport.SetWorld2D(Scene.Instance.GetWorld2D());
             boxContainer.AddChild(viewContainer);
         }
     }

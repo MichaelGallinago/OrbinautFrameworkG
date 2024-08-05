@@ -7,6 +7,20 @@ namespace OrbinautFramework3.Objects.Player;
 
 public struct Death
 {
+	public enum States : byte
+	{
+		Wait, Restart
+	}
+	
+	public enum RestartStates : byte
+	{
+		GameOver, ResetLevel, RestartStage, RestartGame
+	}
+	
+	public bool IsDead { get; set; }
+	public States State { get; set; }
+	public RestartStates RestartState { get; set; }
+	
     public void Process()
     {
     	if (!IsDead) return;
@@ -20,10 +34,10 @@ public struct Death
     		return;
     	}
     	
-    	switch (DeathState)
+    	switch (State)
     	{
-    		case DeathStates.Wait: Wait(camera); break;
-    		case DeathStates.Restart: Restart(); break;
+    		case States.Wait: Wait(camera); break;
+    		case States.Restart: Restart(); break;
     	}
     }
     
@@ -52,14 +66,14 @@ public struct Death
     		obj_gui_hud.update_timer = false;
     	}*/
     				
-    	if (--SharedData.LifeCount > 0 && Scene.Local.Time < 36000f)
+    	if (--SharedData.LifeCount > 0 && Scene.Instance.Time < 36000f)
     	{
-    		DeathState = DeathStates.Restart;
+    		State = States.Restart;
     		RestartTimer = 60f;
     	}
     	else
     	{
-    		DeathState = DeathStates.Wait;
+    		State = States.Wait;
     			
     		//TODO: gui gameover
     		//instance_create_depth(0, 0, RENDERER_DEPTH_HUD, obj_gui_gameover);				
@@ -72,7 +86,7 @@ public struct Death
     	// Wait 60 steps, then restart
     	if (RestartTimer > 0f)
     	{
-    		RestartTimer -= Scene.Local.ProcessSpeed;
+    		RestartTimer -= Scene.Instance.ProcessSpeed;
     		if (RestartTimer > 0f) return;
     		AudioPlayer.Music.StopAllWithMute(0.5f);
     				
@@ -83,6 +97,6 @@ public struct Death
     	// TODO: fade
     	//if (c_framework.fade.state != FADESTATE.PLAINCOLOUR) break;
 
-    	Scene.Local.Tree.ReloadCurrentScene();
+    	Scene.Instance.Tree.ReloadCurrentScene();
     }
 }

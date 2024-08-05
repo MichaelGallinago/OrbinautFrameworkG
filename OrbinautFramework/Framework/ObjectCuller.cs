@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Framework;
 
 public class ObjectCuller
 {
-	public static ObjectCuller Local => Scene.Local.Culler;
+	public static ObjectCuller Local => Scene.Instance.Culler;
 	
 	private bool _isCullToggled = true;
 	private readonly HashSet<ICullable> _hiddenObjectsInView = [];
@@ -40,7 +40,7 @@ public class ObjectCuller
 
     private bool StopAllObjets()
     {
-	    if (Scene.Local.State != Scene.States.Paused) return false;
+	    if (Scene.Instance.State != Scene.States.Paused) return false;
 	    
 	    foreach (ICullable target in ActiveObjects)
 	    {

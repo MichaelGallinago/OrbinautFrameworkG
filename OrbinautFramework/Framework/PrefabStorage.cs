@@ -2,8 +2,11 @@ using Godot;
 
 namespace OrbinautFramework3.Framework;
 
-public partial class PrefabStorage : Node2D
+//TODO: fill this
+public partial class PrefabStorage : Resource
 {
-    //TODO: fill this
-    //[Export] PackedScene 
+    [Export] public PackedScene PlayerSonic { get; private set; }
+    [Export] public PackedScene PlayerKnuckles { get; private set; }
+    [Export] public PackedScene PlayerAmy { get; private set; }
+    [Export] public PackedScene PlayerTails { get; private set; }
 }

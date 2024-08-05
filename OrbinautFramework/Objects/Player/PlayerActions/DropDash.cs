@@ -22,7 +22,7 @@ public struct DropDash : IAction
 	    if (Player.Data.Input.Down.Abc)
 	    {
 		    Player.Data.IsAirLock = false;		
-		    _charge += Scene.Local.ProcessSpeed;
+		    _charge += Scene.Instance.ProcessSpeed;
 			
 		    if (_charge < MaxCharge || Player.Data.Animation == Animations.DropDash) return;
 			
@@ -45,7 +45,7 @@ public struct DropDash : IAction
 	    _charge = 0f;
     }
     
-    private void Release()
+    public void OnLand()
     {
     	if (Cancel()) return;
     	
@@ -77,6 +77,26 @@ public struct DropDash : IAction
     	AudioPlayer.Sound.Stop(SoundStorage.Charge3);
     	AudioPlayer.Sound.Play(SoundStorage.Release);
     }
+    
+    private void UpdateGroundSpeed(float limitSpeed, float force)
+    {
+	    var sign = (float)Player.Data.Facing;
+	    limitSpeed *= sign;
+	    force *= sign;
+	    
+	    if (Player.Data.Velocity.X * sign >= 0f)
+	    {
+		    Player.Data.GroundSpeed.Value = MathF.Floor(Player.Data.GroundSpeed / 4f) + force;
+		    if (sign * Player.Data.GroundSpeed <= limitSpeed) return;
+		    Player.Data.GroundSpeed.Value = limitSpeed;
+		    return;
+	    }
+    	
+	    Player.Data.GroundSpeed.Value = force;
+	    if (Mathf.IsZeroApprox(Player.Data.Angle)) return;
+    	
+	    Player.Data.GroundSpeed.Value += MathF.Floor(Player.Data.GroundSpeed / 2f);
+    }
 
     private bool Cancel()
     {
@@ -88,25 +108,5 @@ public struct DropDash : IAction
 	    Player.Data.Animation = Animations.Spin;
 	    Player.Data.Action.Type = Actions.Types.Default;
     	return true;
-    }
-
-    private void UpdateGroundSpeed(float limitSpeed, float force)
-    {
-    	var sign = (float)Player.Data.Facing;
-    	limitSpeed *= sign;
-    	force *= sign;
-	    
-    	if (Player.Data.Velocity.X * sign >= 0f)
-    	{
-		    Player.Data.GroundSpeed.Value = MathF.Floor(Player.Data.GroundSpeed / 4f) + force;
-    		if (sign * Player.Data.GroundSpeed <= limitSpeed) return;
-		    Player.Data.GroundSpeed.Value = limitSpeed;
-    		return;
-    	}
-    	
-	    Player.Data.GroundSpeed.Value = force;
-    	if (Mathf.IsZeroApprox(Player.Data.Angle)) return;
-    	
-	    Player.Data.GroundSpeed.Value += MathF.Floor(Player.Data.GroundSpeed / 2f);
     }
 }

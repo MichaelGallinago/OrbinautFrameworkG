@@ -33,10 +33,7 @@ public struct Water
 
 		ResetGravityOnEdge();
 
-		if (PreviousPosition.Y < Stage.Local.WaterLevel)
-		{
-			SpawnSplash();
-		}
+		SpawnSplash();
 		
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
@@ -86,7 +83,7 @@ public struct Water
 		AirTimerStates previousState = GetAirTimerState(AirTimer);
 		if (AirTimer > 0f)
 		{
-			AirTimer -= Scene.Local.ProcessSpeed;
+			AirTimer -= Scene.Instance.ProcessSpeed;
 		}
 
 		AirTimerStates state = GetAirTimerState(AirTimer);
@@ -146,10 +143,7 @@ public struct Water
 		IsUnderwater = false;
 		ResetGravityOnEdge();
 		
-		if (PreviousPosition.Y >= Stage.Local.WaterLevel)
-		{
-			SpawnSplash();
-		}
+		SpawnSplash();
 		
 		if (Action == Actions.Flight)
 		{

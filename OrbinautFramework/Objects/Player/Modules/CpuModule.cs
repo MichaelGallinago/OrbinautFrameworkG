@@ -6,9 +6,9 @@ using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
-public class CpuData
+public class CpuModule
 {
 	public const int DelayStep = 16;
 	
@@ -39,7 +39,7 @@ public class CpuData
     {
 		if (IsHurt || IsDead || Id == 0) return;
 		
-		_leadPlayer = Scene.Local.Players.First();
+		_leadPlayer = Scene.Instance.Players.First();
 		_delay = DelayStep * Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
@@ -65,7 +65,7 @@ public class CpuData
 		// to respawn or do not respawn at all unless holding down any button
 		if (_canReceiveInput && Input.Down is { Abc: false, Start: false })
 		{
-			if (!Scene.Local.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
+			if (!Scene.Instance.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
 		
 		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
@@ -119,7 +119,7 @@ public class CpuData
 
 	private void PlayRespawnFlyingSound()
 	{
-		if (!Scene.Local.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
+		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
 		if (SharedData.Behaviour != Behaviours.S3) return;
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
 	}
@@ -134,7 +134,7 @@ public class CpuData
 		if (distance.X != 0)
 		{
 			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
-			velocityX *= Scene.Local.ProcessSpeed;
+			velocityX *= Scene.Instance.ProcessSpeed;
 			
 			//TODO: check this
 			if (distance.X >= 0)
@@ -169,7 +169,7 @@ public class CpuData
 
 		if (distance.Y != 0)
 		{
-			positionOffset.Y = Math.Sign(distance.Y) * Scene.Local.ProcessSpeed;
+			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.ProcessSpeed;
 		}
 
 		Position += positionOffset;
@@ -190,7 +190,7 @@ public class CpuData
 		// Do not run CPU follow logic while under manual control and input is allowed
 		if (InputTimer > 0f)
 		{
-			InputTimer -= Scene.Local.ProcessSpeed;
+			InputTimer -= Scene.Instance.ProcessSpeed;
 			if (!Input.NoControl) return;
 		}
 		
@@ -222,7 +222,7 @@ public class CpuData
 		}
 		
 		// Jump
-		if (doJump && Scene.Local.IsTimePeriodLooped(64f))
+		if (doJump && Scene.Instance.IsTimePeriodLooped(64f))
 		{
 			_cpuInputPress.Abc = _cpuInputDown.Abc = true;
 			IsJumping = true;
@@ -286,7 +286,7 @@ public class CpuData
 			return true;
 		}
 		
-		if (distanceX >= 64f && !Scene.Local.IsTimePeriodLooped(256f)) return false;
+		if (distanceX >= 64f && !Scene.Instance.IsTimePeriodLooped(256f)) return false;
 		return targetPositionY - Position.Y <= -32;
 	}
 	
@@ -301,10 +301,10 @@ public class CpuData
 			Facing = CpuTarget.Position.X >= Position.X ? Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
-		if (!Scene.Local.IsTimePeriodLooped(128f))
+		if (!Scene.Instance.IsTimePeriodLooped(128f))
 		{
 			Input.Down = Input.Down with { Down = true };
-			if (!Scene.Local.IsTimePeriodLooped(32f)) return;
+			if (!Scene.Instance.IsTimePeriodLooped(32f)) return;
 			Input.Press = Input.Press with { Abc = true };
 			
 			return;
@@ -325,7 +325,7 @@ public class CpuData
 		}
 		
 		//TODO: check IsInstanceValid == instance_exists
-		CpuRespawnTimer += Scene.Local.ProcessSpeed;
+		CpuRespawnTimer += Scene.Instance.ProcessSpeed;
 		if (CpuRespawnTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
 		Respawn();
 		return true;

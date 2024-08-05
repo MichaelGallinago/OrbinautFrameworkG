@@ -1,15 +1,16 @@
 using System;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Player.Physics.Slopes;
 using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
-namespace OrbinautFramework3.Objects.Player.Physics;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct PhysicsData
+public struct PhysicsCore
 {
+	public float Gravity { get; set; }
 	public Velocity Velocity { get; } = new();
-	public AcceleratedValue GroundSpeed { get; set; } = new();
+	public AcceleratedValue GroundSpeed { get; } = new();
 	
 	private SlopeRepel _slopeRepel;
 	private SlopeResist _slopeResist;
@@ -21,10 +22,8 @@ public struct PhysicsData
 	private Position _position;
 	
 	private PhysicParams _physicParams;
-	
-	private Landing _landing = new();
 
-	public PhysicsData()
+	public PhysicsCore()
 	{
 		_slopeRepel = new SlopeRepel();
 		_slopeResist = new SlopeResist();
@@ -35,6 +34,8 @@ public struct PhysicsData
 		_cameraBounds = new CameraBounds();
 		_position = new Position();
 	}
+	
+	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
 
 	public void UpdatePhysicParameters()
 	{

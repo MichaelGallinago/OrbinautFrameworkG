@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFramework3.Objects.Common.GiantRing;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Framework;
@@ -26,7 +27,7 @@ public static class SharedData
 	
     // Originals differences
     public static PhysicsTypes PhysicsType { get; set; } = PhysicsTypes.S2;
-    public static CpuData.Behaviours Behaviour { get; set; } = CpuData.Behaviours.S3;
+    public static CpuModule.Behaviours Behaviour { get; set; } = CpuModule.Behaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool Dash { get; set; } = true;
     public static bool DropDash { get; set; } = true;

@@ -45,7 +45,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
 
-	    foreach (Player player in Scene.Local.Players.Values)
+	    foreach (Player player in Scene.Instance.Players.Values)
 	    {
 		    player.ActSolid(this, Constants.SolidType.Top);
 		    
@@ -71,7 +71,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
 	    UpdateLogPositions();
 
-	    UpdateAngle(isPlayerTouch, Scene.Local.ProcessSpeed);
+	    UpdateAngle(isPlayerTouch, Scene.Instance.ProcessSpeed);
 		
 	    QueueRedraw();
     }

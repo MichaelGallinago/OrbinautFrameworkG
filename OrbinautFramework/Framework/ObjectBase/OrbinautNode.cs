@@ -37,13 +37,6 @@ public abstract partial class OrbinautNode : Node2D, ICullable
         }
     }
     private Vector2 _floatPosition;
-
-    public IMemento Memento { get; }
-
-    protected OrbinautNode()
-    {
-        Memento = new BaseMemento(this);
-    }
     
     public override void _EnterTree()
     {

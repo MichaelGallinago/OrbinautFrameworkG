@@ -5,6 +5,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.Bumper;
 
@@ -39,7 +40,7 @@ public partial class Bumper : OrbinautData
 
     private void CheckCollisionWithPlayers()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in Scene.Instance.Players.Values)
         {
             if (!CheckPlayerHitBoxCollision(player)) continue;
             

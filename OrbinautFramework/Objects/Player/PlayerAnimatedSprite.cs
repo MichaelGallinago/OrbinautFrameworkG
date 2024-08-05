@@ -87,7 +87,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 		if (!_player.IsSuper || type != Animations.Walk) return;
 
-		if (Scene.Local.Time % 4d >= 2d) return;
+		if (Scene.Instance.Time % 4d >= 2d) return;
 		int frameCount = SpriteFrames.GetFrameCount(Animation);
 		SetFrameAndProgress((Frame + frameCount / 2) % frameCount, FrameProgress);
 	}

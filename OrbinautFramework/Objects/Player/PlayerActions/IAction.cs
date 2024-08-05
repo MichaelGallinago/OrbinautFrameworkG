@@ -3,6 +3,4 @@
 public interface IAction
 {
     Player Player { init; }
-    
-    void Perform();
 }

@@ -2,7 +2,8 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
-using OrbinautFramework3.Objects.Player.Physics;
+using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
@@ -10,48 +11,52 @@ using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class Player : OrbinautNode, ICarried
+public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 {
+	[Export] public ShieldContainer Shield { get; private set; }
 	[Export] private PlayerAnimatedSprite _sprite;
-	[Export] private ShieldContainer _shield;
-	[Export] private SpawnTypes _spawnType;
 	[Export] private Types _uniqueType;
 	[Export] private PackedScene _packedTail;
 	
+	public IMemento Memento { get; }
 	public PlayerData Data { get; }
+		
+	public CarryTarget CarryTarget { get; } = new();
 	
 	private readonly DebugMode _debugMode = new();
-	private CpuData _cpuData = new();
+	private CpuModule _cpuModule = new();
 	private Tail _tail;
 	
-	protected Landing Landing = new();
+	private Landing _landing = new();
 	private ObjectInteraction _objectInteraction = new();
-	private PhysicsData _physicsData = new();
+	private PhysicsCore _physicsCore = new();
 	private Water _water = new();
 	private Status _status = new();
 	private Death _death = new();
 	private SpinDash _spinDash = new();
 	private Dash _dash = new();
 	private Jump _jump = new();
-	private Rotation _rotation = new();
+	private AngleRotation _angleRotation = new();
 	private Palette _palette = new();
 	private Carry _carry = new();
-	private CarryTarget _carryTarget = new();
 	private CollisionBoxes _collisionBoxes = new();
-
+	private Damage _damage = new();
+	
 	public Player()
 	{
+		Memento = new PlayerMemento(this);
 		Data = new PlayerData(this);
-		Data.TypeChanged += OnTypeChanged;
 		
-		Landing.LandHandler += ReleaseDropDash;
-		Landing.LandHandler += ReleaseHammerSpin;
+		Init();
+		
+		Data.TypeChanged += OnTypeChanged;
+		_landing.LandHandler += () => Data.Action.OnLand();
 	}
 
 	public override void _Ready()
 	{
 		base._Ready();
-		Data.Spawn();
+		Spawn();
 		_sprite.FrameChanged += () => Data.IsAnimationFrameChanged = true;
 	}
 
@@ -59,12 +64,12 @@ public abstract partial class Player : OrbinautNode, ICarried
 	{
 		base._EnterTree();
 		PlayerData.ResizeAllRecordedData();
-		Scene.Local.Players.Add(this);
+		Scene.Instance.Players.Add(this);
 	}
 	
 	public override void _ExitTree()
 	{
-		Scene.Local.Players.Remove(this);
+		Scene.Instance.Players.Remove(this);
 		PlayerData.ResizeAllRecordedData();
 		base._ExitTree();
 	}
@@ -74,13 +79,13 @@ public abstract partial class Player : OrbinautNode, ICarried
 		Data.Input.Update(Data.Id);
 		
 		// DEBUG MODE PLAYER ROUTINE
-		if (Data.DeathState == DeathStates.Wait && Data.Id == 0 && SharedData.IsDebugModeEnabled)
+		if (_death.State == Death.States.Wait && Data.Id == 0 && SharedData.IsDebugModeEnabled)
 		{
 			if (_debugMode.Update(this, Data.Input)) return;
 		}
 	    
 		// DEFAULT PLAYER ROUTINE
-		_cpuData.Process();
+		_cpuModule?.Process();
 		_death.Process();
 		
 		if (Data.IsControlRoutineEnabled)
@@ -88,7 +93,7 @@ public abstract partial class Player : OrbinautNode, ICarried
 			RunControlRoutine();
 		}
 
-		if (!Data.IsDead)
+		if (!_death.IsDead)
 		{
 			_water.Process();
 			_status.Update();
@@ -96,27 +101,36 @@ public abstract partial class Player : OrbinautNode, ICarried
 		}
 		
 		Data.Record();
-		_rotation.Process();
+		_angleRotation.Process();
 		_sprite.Animate(this);
 		_tail?.Animate(this);
 		_palette.Process();
 	}
 
+	private void Init()
+	{
+		Data.Init();
+
+		RotationDegrees = 0f;
+		Visible = true;
+		
+		_sprite.Animate(this);
+	}
+
 	private void RunControlRoutine()
 	{
-		_physicsData.UpdatePhysicParameters();
+		_physicsCore.UpdatePhysicParameters();
 		
 		if (_spinDash.Perform()) return;
 		if (_dash.Perform()) return;
 		if (_jump.Perform()) return;
 		if (_jump.Start()) return;
 		
-		// Abilities logic
 		Data.Action.Perform();
 		
-		_physicsData.ProcessCorePhysics();
-		
-		ProcessGlideCollision();
+		_physicsCore.ProcessCorePhysics();
+
+		Data.Action.LatePerform();
 		_carry.Process();
 	}
 	
@@ -160,7 +174,8 @@ public abstract partial class Player : OrbinautNode, ICarried
 	{
 		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
-
+	
+	/*
 	//TODO: update debug mode
 	public void OnEnableEditMode()
 	{
@@ -179,5 +194,27 @@ public abstract partial class Player : OrbinautNode, ICarried
 		Animation = Animations.Move;
 		IsObjectInteractionEnabled = true;
 		DeathState = DeathStates.Wait;
+	}*/
+	
+	public void Spawn()
+	{
+		if (SharedData.GiantRingData != null)
+		{
+			Position = SharedData.GiantRingData.Position;
+		}
+		else
+		{
+			if (SharedData.CheckpointData != null)
+			{
+				Position = SharedData.CheckpointData.Position;
+			}
+			Position -= new Vector2(0, Radius.Y + 1);
+		}
+		
+		if (Id == 0 && SharedData.PlayerShield != ShieldContainer.Types.None)
+		{
+			// TODO: create shield
+			//instance_create(x, y, obj_shield, { TargetPlayer: id });
+		}
 	}
 }

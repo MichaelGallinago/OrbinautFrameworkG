@@ -64,7 +64,7 @@ public struct SpinDash
     	if (!Input.Press.Abc)
     	{
     		//TODO: check math with ProcessSpeed
-    		ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * Scene.Local.ProcessSpeed;
+    		ActionValue -= MathF.Floor(ActionValue * 8f) / 256f * Scene.Instance.ProcessSpeed;
     		return true;
     	}
     	

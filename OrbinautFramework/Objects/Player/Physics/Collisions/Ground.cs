@@ -64,7 +64,7 @@ public struct Ground
 		
 		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
-		float offset = wallDistance / Scene.Local.ProcessSpeed;
+		float offset = wallDistance / Scene.Instance.ProcessSpeed;
 		
 		switch (quadrant)
 		{

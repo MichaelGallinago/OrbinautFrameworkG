@@ -21,7 +21,7 @@ public abstract partial class ForceSpinTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in Scene.Instance.Players.Values)
         {
             if (player.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
             

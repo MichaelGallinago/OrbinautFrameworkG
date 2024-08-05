@@ -4,10 +4,10 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 
 public partial class SolidBox : Resource
 {
-    public bool NoBalance { get; private set; }
-    public Vector2I Radius { get; private set; }
-    public Vector2I Offset { get; private set; }
-    public short[] HeightMap { get; private set; }
+    [Export] public bool NoBalance { get; private set; }
+    [Export] public Vector2I Radius { get; private set; }
+    [Export] public Vector2I Offset { get; private set; }
+    [Export] public short[] HeightMap { get; private set; }
     
     public SolidBox() : this(false, default, default, null) {}
     

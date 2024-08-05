@@ -46,15 +46,15 @@ public struct Climb() : IAction
 		const int stepsPerClimbFrame = 4;
 		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
 		
-		int radiusX = Player.Data.Radius.X;
-		if (Facing == Constants.Direction.Negative)
+		int radiusX = Player.CollisionBoxes.Radius.X;
+		if (Player.Data.Facing == Constants.Direction.Negative)
 		{
 			radiusX++;
 		}
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer);
+		Player.Data.TileCollider.SetData((Vector2I)Player.Position, Player.Data.TileLayer);
 
-		if (Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+		if (Player.PhysicsCore.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
 		
 		if (!Input.Press.Abc)
 		{
@@ -145,7 +145,7 @@ public struct Climb() : IAction
 	{
 		if (Input.Down.Up)
 		{
-			_step += Scene.Local.ProcessSpeed;
+			_step += Scene.Instance.ProcessSpeed;
 			if (_step > maxValue)
 			{
 				_step = 0f;
@@ -157,7 +157,7 @@ public struct Climb() : IAction
 		
 		if (Input.Down.Down)
 		{
-			_step -= Scene.Local.ProcessSpeed;
+			_step -= Scene.Instance.ProcessSpeed;
 			if (_step < 0f)
 			{
 				_step = maxValue;
@@ -186,7 +186,7 @@ public struct Climb() : IAction
 		//TODO: check this
 		
 		ClimbLedgeStates previousState = GetClimbLedgeState(_step);
-		_step += Scene.Local.ProcessSpeed;
+		_step += Scene.Instance.ProcessSpeed;
 		ClimbLedgeStates state = GetClimbLedgeState(_step);
 		if (state == previousState) return;
 		

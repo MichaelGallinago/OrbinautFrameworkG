@@ -24,7 +24,7 @@ public struct Air
 	{
 		if (Mathf.IsEqualApprox(Angle, 0f)) return;
 		
-		float speed = Angles.ByteAngleStep * Scene.Local.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
 		Angle += Angle >= 180f ? speed : -speed;
 		
 		if (Angle is < 0f or >= 360f)

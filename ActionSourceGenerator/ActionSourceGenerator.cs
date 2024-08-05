@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -29,7 +30,7 @@ public class ActionGenerator : IIncrementalGenerator
     private static void Build(SourceProductionContext context, ImmutableArray<StructDeclarationSyntax> structs)
     {
         if (structs.IsDefaultOrEmpty) return;
-
+        
         var sourceBuilder = new StringBuilder();
 
         List<string> namespaces = [];
@@ -43,6 +44,38 @@ public class ActionGenerator : IIncrementalGenerator
                 case FileScopedNamespaceDeclarationSyntax fileScopedNamespaceDecl:
                     namespaces.Add(fileScopedNamespaceDecl.Name.ToString());
                     break;
+            }
+        }
+        
+        List<string> entersMethods = [];
+        List<string> exitsMethods = [];
+        Dictionary<string, List<string>> otherMethods = [];
+        foreach (StructDeclarationSyntax? structDeclaration in structs)
+        {
+            string structName = structDeclaration.Identifier.Text;
+            
+            IEnumerable<MethodDeclarationSyntax> methods = structDeclaration.Members
+                .OfType<MethodDeclarationSyntax>()
+                .Where(method => method.Modifiers.Any(SyntaxKind.PublicKeyword));
+            
+            
+            foreach (MethodDeclarationSyntax? method in methods)
+            {
+                string methodName = method.Identifier.Text;
+                switch (methodName)
+                {
+                    case "Enter": entersMethods.Add(structName); break;
+                    case "Exit": exitsMethods.Add(structName); break;
+                    default:
+                        if (otherMethods.ContainsKey(methodName))
+                        {
+                            otherMethods[methodName].Add(structName);
+                            break;
+                        }
+                        
+                        otherMethods.Add(methodName, [structName]);
+                        break;
+                }
             }
         }
         
@@ -71,19 +104,31 @@ namespace OrbinautFramework3.Objects.Player
         {
             sourceBuilder.Append(structDeclaration.Identifier.Text).Append(", ");
         }
-        sourceBuilder.Append('\n').Append( 
+
+        sourceBuilder.Append('\n').Append(
 """
         }
         
         public static implicit operator Types(Actions action) => action.Type;
         
-        public Types Type 
+        public Types Type
         {
             get => _type;
             set
             {
-                _type = value;
-                switch (_type)
+"""
+        );
+        
+        if (exitsMethods.Count > 0)
+        {
+            sourceBuilder.Append(
+"\n                Exit();"
+            );
+        }
+        
+        sourceBuilder.Append('\n').Append(
+"""
+                switch (value)
                 {
 """
         );
@@ -99,10 +144,11 @@ namespace OrbinautFramework3.Objects.Player
 """             
                     default: throw new ArgumentOutOfRangeException();
                 }
+                _type = value;
             }
         }
         
-        [FieldOffset(0)] private Types _type;
+        [FieldOffset(0)] private Types _type = Types.None;
         [FieldOffset(8)] private Player _player = player;
 """    
         );
@@ -112,28 +158,19 @@ namespace OrbinautFramework3.Objects.Player
             string name = structDeclaration.Identifier.Text;
             sourceBuilder.Append($"\n\t\t[FieldOffset(16)] public {name} {name};");
         }
-
-        sourceBuilder.Append('\n').Append(
-"""
-
-        public void Perform()
-        {
-            switch (_type)
-            {
-"""
-        );
         
-        foreach (StructDeclarationSyntax? structDeclaration in structs)
+        foreach (KeyValuePair<string, List<string>> method in otherMethods)
         {
-            string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append($"\n\t\t\t\tcase Types.{name}: {name}.Perform(); break;");
+            AddMethod(sourceBuilder, method.Key, method.Value);
+        }
+        
+        if (exitsMethods.Count > 0)
+        {
+            AddMethod(sourceBuilder, "Exit", exitsMethods);
         }
 
         sourceBuilder.Append('\n').Append(
 """
-                default: throw new ArgumentOutOfRangeException();
-            }
-        }
     }
 }
 
@@ -141,5 +178,29 @@ namespace OrbinautFramework3.Objects.Player
         );
         
         context.AddSource("Action.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+    }
+
+    private static void AddMethod(
+        StringBuilder sourceBuilder, string methodName, List<string> actions, string access = "public")
+    {
+        sourceBuilder.Append("\n\n\t\t").Append(access).Append(" void ").Append(methodName).Append("()\n").Append(
+"""
+        {
+            switch (_type)
+            {
+"""
+        );
+        
+        foreach (string action in actions)
+        {
+            sourceBuilder.Append($"\n\t\t\t\tcase Types.{action}: {action}.{methodName}(); break;");
+        }
+
+        sourceBuilder.Append('\n').Append(
+"""
+            }
+        }
+"""
+        );
     }
 }

@@ -3,11 +3,11 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct Carry
 {
-    public ICarried Target { get; set; }
+    public ICarryTarget Target { get; set; }
     public float Timer { get; set; }
     public Vector2 TargetPosition { get; set; }
     
@@ -17,7 +17,7 @@ public struct Carry
 
         if (Timer > 0f)
         {
-            Timer -= Scene.Local.ProcessSpeed;
+            Timer -= Scene.Instance.ProcessSpeed;
             if (Timer > 0f) return;
         }
 	
@@ -34,7 +34,7 @@ public struct Carry
 
     private void GrabAnotherPlayer(Player carrier)
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (Player player in Scene.Instance.Players.Values)
         {
             if (player == carrier) continue;
             if (player.Action is Actions.SpinDash or Actions.Carried) continue;

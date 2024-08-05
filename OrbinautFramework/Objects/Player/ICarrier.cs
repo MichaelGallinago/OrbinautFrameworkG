@@ -10,7 +10,7 @@ public interface ICarrier
     Vector2 Position { get; }
     Constants.Direction Facing { get; }
     float CarryTimer { get; set; }
-    ICarried CarryTarget { get; set; }
+    ICarryTarget CarryTarget { get; set; }
     Vector2 CarryTargetPosition { get; set; }
 
     private void Carry()

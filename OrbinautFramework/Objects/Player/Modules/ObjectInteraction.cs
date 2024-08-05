@@ -4,7 +4,7 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct ObjectInteraction()
 {

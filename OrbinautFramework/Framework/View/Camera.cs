@@ -2,6 +2,7 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -145,7 +146,7 @@ public partial class Camera : Camera2D, ICamera
 	
 	private void FollowPlayer(float processSpeed, Vector2 targetPosition, PlayerData player)
 	{
-		if (Scene.Local.State == Scene.States.Paused && player.DeathState == DeathStates.Wait || player.IsDead) return;
+		if (Scene.Instance.State == Scene.States.Paused && player.DeathState == DeathStates.Wait || player.IsDead) return;
 		
 		FollowPlayerY(processSpeed, targetPosition.Y, player);
 		if (SharedData.CdCamera)
@@ -215,9 +216,9 @@ public partial class Camera : Camera2D, ICamera
 	
 	private void MoveCamera()
 	{
-		if (!IsMovementAllowed || Scene.Local.State == Scene.States.Paused) return;
+		if (!IsMovementAllowed || Scene.Instance.State == Scene.States.Paused) return;
 		
-		float processSpeed = Scene.Local.ProcessSpeed;
+		float processSpeed = Scene.Instance.ProcessSpeed;
 
 		FollowTarget(processSpeed);
 		UpdateShakeOffset(processSpeed);

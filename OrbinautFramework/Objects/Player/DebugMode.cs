@@ -28,7 +28,7 @@ public class DebugMode
 		    typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
 	    ];
 	    
-	    switch (Scene.Local)
+	    switch (Scene.Instance)
 	    {
 		    case Stages.TSZ.StageTsz:
 			    // TODO: debug objects
@@ -51,15 +51,15 @@ public class DebugMode
 		{
 			if (!editor.IsDebugMode)
 			{
-				if (Scene.Local.IsStage)
+				if (Scene.Instance.IsStage)
 				{
-					Scene.Local.Players.First().ResetMusic();
+					Scene.Instance.Players.First().ResetMusic();
 				}
 				
 				_speed = 0;
 
-				Scene.Local.State = Scene.States.Normal;
-				Scene.Local.AllowPause = true;
+				Scene.Instance.State = Scene.States.Normal;
+				Scene.Instance.AllowPause = true;
 				
 				editor.OnEnableEditMode();
 				editor.IsDebugMode = true;
@@ -82,7 +82,7 @@ public class DebugMode
 			
 			Vector2 position = editor.Position;
 
-			float speed = _speed * Scene.Local.ProcessSpeed;
+			float speed = _speed * Scene.Instance.ProcessSpeed;
 			
 			if (input.Down.Up) position.Y -= speed;
 			if (input.Down.Down) position.Y += speed;
@@ -117,7 +117,7 @@ public class DebugMode
 			
 			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
 			newObject.Culling = OrbinautData.CullingType.Delete;
-			Scene.Local.AddChild(newObject);
+			Scene.Instance.AddChild(newObject);
 		}
 		
 		return true;

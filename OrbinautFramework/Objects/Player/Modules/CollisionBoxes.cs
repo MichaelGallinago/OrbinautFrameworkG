@@ -1,7 +1,17 @@
-﻿namespace OrbinautFramework3.Objects.Player;
+﻿using System;
+using Godot;
+using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Spawnable.Shield;
+
+namespace OrbinautFramework3.Objects.Player;
 
 public struct CollisionBoxes
 {
+    public Vector2I Radius;
+    public Vector2I RadiusNormal { get; set; }
+    public Vector2I RadiusSpin { get; set; }
+    
     public void Update()
     {
         SolidBox.Set(RadiusNormal.X + 1, Radius.Y);

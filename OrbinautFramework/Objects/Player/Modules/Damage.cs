@@ -9,6 +9,8 @@ namespace OrbinautFramework3.Objects.Player;
 
 public struct Damage
 {
+	public bool IsHurt { get; set; }
+	
     public void Kill()
     {
     	if (IsDead) return;
@@ -18,8 +20,8 @@ public struct Damage
 
     	if (Id == 0)
     	{
-    		Scene.Local.AllowPause = false;
-    		Scene.Local.State = Scene.States.StopObjects;
+    		Scene.Instance.AllowPause = false;
+    		Scene.Instance.State = Scene.States.StopObjects;
     		
     		SharedData.PlayerShield = ShieldContainer.Types.None;
     	}
@@ -111,7 +113,7 @@ public struct Damage
 		    ringAngle = 101.25f;
 	    }
 
-	    Scene.Local.RingSpillTimer = 256f;
+	    Scene.Instance.RingSpillTimer = 256f;
 	
 	    SharedData.PlayerRings = 0;
 	    SharedData.LifeRewards = SharedData.LifeRewards with { X = 100 };

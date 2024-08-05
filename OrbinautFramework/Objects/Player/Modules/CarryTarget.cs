@@ -5,7 +5,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct CarryTarget
 {

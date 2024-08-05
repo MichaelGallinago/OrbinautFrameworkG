@@ -13,12 +13,13 @@ public abstract partial class Scene : Node2D
         Normal, StopObjects, Paused
     }
     
-    public static Scene Local { get; private set; }
+    public static Scene Instance { get; private set; }
     
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
-
+    [Export] public Resource PrefabStorage { get; init; }
+    
     public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }
     
@@ -36,8 +37,12 @@ public abstract partial class Scene : Node2D
     private SceneLateUpdate _lateUpdate = new();
     private Debug _debug = new();
     
-    protected Scene() => ProcessPriority = int.MinValue;
-    
+    protected Scene()
+    {
+        PrefabStorage = _prefabStorage.Instantiate();
+        ProcessPriority = int.MinValue;
+    }
+
     public override void _Ready()
     {
         AddChild(_sceneContinuousUpdate);
@@ -49,8 +54,22 @@ public abstract partial class Scene : Node2D
         AttachCamerasToPlayer();
     }
     
-    public override void _EnterTree() => Local = this;
-    public override void _ExitTree() => Local = null;
+    public override void _EnterTree()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            return;
+        }
+        
+        QueueFree();
+    }
+
+    public override void _ExitTree()
+    {
+        if (Instance != this) return;
+        Instance = null;
+    }
 
     public override void _Process(double deltaTime)
     {

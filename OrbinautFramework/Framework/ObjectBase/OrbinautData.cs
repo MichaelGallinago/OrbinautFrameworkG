@@ -2,6 +2,7 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Data;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
@@ -10,15 +11,6 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 public partial class OrbinautData : Resource
 {
 	public Vector2 PreviousPosition { get; set; }
-	public HitBox HitBox;
-	public SolidBox SolidBox;
-
-	public override void _Ready() => Init();
-
-	protected virtual void Init() {}
-
-	public override void _ExitTree() => ObjectCuller.Local.RemoveFromCulling(this);
-	
 	
 	public bool IsCameraTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
 	

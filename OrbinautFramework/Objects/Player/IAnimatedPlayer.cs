@@ -9,7 +9,7 @@ public interface IAnimatedPlayer
     Velocity Velocity { get; }
     float ActionValue { get; }
     PlayerInput Input { get; }
-    ICarried CarryTarget { get; }
+    ICarryTarget CarryTarget { get; }
     Constants.Direction Facing { get; }
     AcceleratedValue GroundSpeed { get; }
     Animations Animation { get; set; }

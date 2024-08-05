@@ -4,9 +4,10 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Data;
 
 public class PlayerData
 {
@@ -29,11 +30,6 @@ public class PlayerData
 	public Animations Animation { get; set; }
 	public bool IsAnimationFrameChanged { get; set; }
 	public int? OverrideAnimationFrame { get; set; }
-	public Vector2I Radius;
-	public Vector2I RadiusNormal { get; set; }
-	public Vector2I RadiusSpin { get; set; }
-	public float Gravity { get; set; }
-	public float Angle { get; set; }
 
 	public SuperData SuperData { get; set; } = new();
 
@@ -43,21 +39,17 @@ public class PlayerData
     
 	public bool IsObjectInteractionEnabled { get; set; }
 	public bool IsControlRoutineEnabled { get; set; }
-	public bool IsGrounded { get; set; }
+	public bool IsGrounded { get; set; } = true;
 	public bool IsSpinning { get; set; }
 	public bool IsJumping { get; set; }
 	public OrbinautData SetPushAnimationBy { get; set; }
 	public bool IsHurt { get; set; }
-	public bool IsDead { get; set; }
-	public DeathStates DeathState { get; set; }
 	public OrbinautData OnObject { get; set; }
 	public bool IsInvincible { get; set; }
 
 	public Actions Action;
-	public int ActionState { get; set; }
     
 	public Constants.Direction Facing { get; set; }
-	public float VisualAngle { get; set; }
 	
 	public bool IsForcedSpin { get; set; }
 	public float GroundLockTimer { get; set; }
@@ -68,17 +60,18 @@ public class PlayerData
 	public float ItemSpeedTimer { get; set; }
 	public float ItemInvincibilityTimer { get; set; }
 	
-	public RestartStates RestartState { get; set; }
 	public float RestartTimer { get; set; }
 	public PlayerInput Input { get; } = new();
 	
 	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
-	protected TileCollider TileCollider = new();
+	public TileCollider TileCollider = new();
 
 	public PlayerData(Player player)
 	{
 		Action = new Actions(player);
+		if (ApplyType(player)) return;
+		Init();
 	}
 	
 	public void Record()
@@ -88,8 +81,6 @@ public class PlayerData
 		
 		_recordedData[0] = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 	}
-	
-	public void ResetGravity() => Gravity = IsUnderwater ? GravityType.Underwater : GravityType.Default;
 	
 	public void ResetState()
 	{
@@ -128,96 +119,101 @@ public class PlayerData
 	
 	public void Init()
 	{
-		if (ApplyType()) return;
-		
-		(RadiusNormal, RadiusSpin) = Type switch
-		{
-			Types.Tails => (new Vector2I(9, 15), new Vector2I(7, 14)),
-			Types.Amy => (new Vector2I(9, 16), new Vector2I(7, 12)),
-			_ => (new Vector2I(9, 19), new Vector2I(7, 14))
-		};
-		
-		Radius = RadiusNormal;
-		Gravity = GravityType.Default;
-		Velocity.Vector = Vector2.Zero;
-		GroundSpeed.Value = 0f;
-		Angle = 0f;
-		
-		TileLayer = Constants.TileLayers.Main;
-		TileBehaviour = Constants.TileBehaviours.Floor;
-		IsStickToConvex = false;
-		
-		OnObject = null;
-		IsGrounded = true;
-		IsSpinning = false;
-		IsJumping = false;
-		IsUnderwater = false;
-		IsHurt = false;
-		IsDead = false;
-		IsInvincible = false;
-		IsForcedSpin = false;
-		
-		GroundLockTimer = 0f;
-		SuperData.Timer = 0f;
+        TileLayer = Constants.TileLayers.Main;
+        TileBehaviour = Constants.TileBehaviours.Floor;
+        IsStickToConvex = false;
+        
+        OnObject = null;
+        IsGrounded = true;
+        IsSpinning = false;
+        IsJumping = false;
+        IsHurt = false;
+        IsInvincible = false;
+        IsForcedSpin = false;
+        
+        GroundLockTimer = 0f;
+        SuperData.Timer = 0f;
 
-		IsObjectInteractionEnabled = true;
-		IsControlRoutineEnabled = true;
+        IsObjectInteractionEnabled = true;
+        IsControlRoutineEnabled = true;
 
-		Action.Type = Actions.Types.Default;
-		ActionState = 0;
+        Action.Type = Actions.Types.Default;
+        
+        Facing = Constants.Direction.Positive;
+        Animation = Animations.Idle;
+        SetPushAnimationBy = null;
+        ComboCounter = 0;
+        
+        InvincibilityTimer = 0f;
+        ItemSpeedTimer = 0f;
+        ItemInvincibilityTimer = 0f;
+        
+        RestartTimer = 0f;
+        
+        Input.Clear();
+        Input.NoControl = false;
+        
+        (_collisionBoxes.RadiusNormal, _collisionBoxes.RadiusSpin) = Type switch
+        {
+	        Types.Tails => (new Vector2I(9, 15), new Vector2I(7, 14)),
+	        Types.Amy => (new Vector2I(9, 16), new Vector2I(7, 12)),
+	        _ => (new Vector2I(9, 19), new Vector2I(7, 14))
+        };
+        _collisionBoxes.Radius = _collisionBoxes.RadiusNormal;
+		
+        _physicsCore.Gravity = GravityType.Default;
+        _physicsCore.Velocity.Vector = Vector2.Zero;
+        _physicsCore.GroundSpeed.Value = 0f;
+        _angleRotation.Angle = 0f;
+		
+        _water.IsUnderwater = false;
+        _death.IsDead = false;
+		
+        Shield.State = ShieldContainer.States.None;
+		
+        _angleRotation.VisualAngle = 0f;
+        _water.AirTimer = Constants.DefaultAirTimer;
+		
+        _carry.Target = null;
+        _carry.Timer = 0f;
+        _carry.TargetPosition = Vector2.Zero;
+        _death.State = Death.States.Wait;
 
-		Shield.State = ShieldContainer.States.None;
-		Facing = Constants.Direction.Positive;
-		Animation = Animations.Idle;
-		SetPushAnimationBy = null;
-		VisualAngle = 0f;
-		AirTimer = Constants.DefaultAirTimer;
-		ComboCounter = 0;
-		
-		InvincibilityTimer = 0f;
-		ItemSpeedTimer = 0f;
-		ItemInvincibilityTimer = 0f;
-		
-		CarryTarget = null;
-		CarryTimer = 0f;
-		CarryTargetPosition = Vector2.Zero;
-		DeathState = DeathStates.Wait;
-		RestartTimer = 0f;
-		CpuTarget = null;
-		CpuState = CpuStates.Main;
-		CpuRespawnTimer = 0f;
-		CpuInputTimer = 0f;
-		IsCpuJumping = false;
-		
-		Input.Clear();
-		Input.NoControl = false;
+        if (_cpuModule != null)
+        {
+	        _cpuModule.Target = null;
+	        _cpuModule.State = CpuModule.States.Main;
+	        _cpuModule.RespawnTimer = 0f;
+	        _cpuModule.InputTimer = 0f;
+	        _cpuModule.IsJumping = false;
+        }
 
-		Rotation = 0f;
-		Visible = true;
-		
-		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuDelayStep * Scene.Local.Players.Count)];
+        FillRecordedData();
+	}
+
+	public void FillRecordedData()
+	{
+		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
 		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
-		
+        
 		Array.Fill(_recordedData, record);
-
-		Sprite.Animate(this);
 	}
 	
 	public static void ResizeAllRecordedData()
 	{
-		if (Scene.Local.Time == 0f) return;
+		if (Scene.Instance.Time == 0f) return;
 
-		ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+		ReadOnlySpan<Player> players = Scene.Instance.Players.Values;
 		int playersCount = players.Length + 1;
 		foreach (Player player in players)
 		{
-			player.ResizeRecordedData(playersCount);
+			player.Data.ResizeRecordedData(playersCount);
 		}
 	}
 
 	private void ResizeRecordedData(int playersCount)
 	{
-		int newLength = Math.Max(MinimalRecordLength, CpuDelayStep * playersCount);
+		int newLength = Math.Max(MinimalRecordLength, CpuModule.DelayStep * playersCount);
 		int oldLength = _recordedData.Length;
 		
 		if (newLength <= oldLength)
@@ -233,30 +229,8 @@ public class PlayerData
 		Array.Fill(resizedData, record,oldLength, newLength - oldLength);
 		_recordedData = resizedData;
 	}
-
-	public void Spawn()
-	{
-		if (SharedData.GiantRingData != null)
-		{
-			Position = SharedData.GiantRingData.Position;
-		}
-		else
-		{
-			if (SharedData.CheckpointData != null)
-			{
-				Position = SharedData.CheckpointData.Position;
-			}
-			Position -= new Vector2(0, Radius.Y + 1);
-		}
-		
-		if (Id == 0 && SharedData.PlayerShield != ShieldContainer.Types.None)
-		{
-			// TODO: create shield
-			//instance_create(x, y, obj_shield, { TargetPlayer: id });
-		}
-	}
 	
-	private bool ApplyType()
+	private bool ApplyType(Player player)
 	{
 		Type = _spawnType switch
 		{
@@ -268,7 +242,7 @@ public class PlayerData
 		_spawnType = SpawnTypes.None;
 		
 		if (Type != Types.None) return false;
-		QueueFree();
+		player.QueueFree();
 		return true;
 	}
 }
