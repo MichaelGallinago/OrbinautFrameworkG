@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player.Physics;
+using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
@@ -10,8 +12,8 @@ public struct ObjectInteraction()
 {
 	private const int GripY = 4;
 	
-	public HashSet<OrbinautData> PushObjects { get; } = [];
-	public Dictionary<OrbinautData, Constants.TouchState> TouchObjects { get; } = [];
+	public HashSet<SolidBox> PushObjects { get; } = [];
+	public Dictionary<SolidBox, TouchState> TouchObjects { get; } = [];
 	
 	private SolidObjectData _data;
 	
@@ -26,10 +28,10 @@ public struct ObjectInteraction()
 		}
 	}
 
-	public void ActSolid(OrbinautData orbinautData, Constants.SolidType type, bool isFullRoutine = true)
+	public void ActSolid(OrbinautData orbinautData, SolidType type, bool isFullRoutine = true)
 	{
 		// Initialise flags for the player collision
-		TouchObjects.TryAdd(orbinautData, Constants.TouchState.None);
+		TouchObjects.TryAdd(orbinautData, TouchState.None);
 		PushObjects.Add(orbinautData);
 		
 		if (!IsObjectInteractionEnabled) return;
@@ -49,7 +51,7 @@ public struct ObjectInteraction()
 		
 		if (!isFullRoutine) return;
 		
-		if (type != Constants.SolidType.Top)
+		if (type != SolidType.Top)
 		{
 			CollideWithRegularObject(slopeOffset);
 		}
@@ -57,6 +59,36 @@ public struct ObjectInteraction()
 		{
 			CollideWithPlatformObject();
 		}
+	}
+	
+	public bool CheckSolidCollision(SolidBox solidBox, CollisionSensor type)
+	{
+		if (!IsObjectInteractionEnabled) return false;
+
+		// No solid collision data, exit collision check
+		if (!TouchObjects.TryGetValue(solidBox, out TouchState touchState)) return false;
+		
+		// Register collision check if debugging
+		//TODO: debug collision
+		/*if (SharedData.DebugCollision == 3 && ds_list_find_index(dsList, id) == -1)
+		{
+			var dsList = c_engine.collision.ds_solids_c;
+
+			var _rx = solidBox.Radius.X;
+			var _ry = solidBox.Radius.Y;
+			var _ox = solidBox.Offset.X;
+			var _oy = solidBox.Offset.Y;
+		}*/
+		
+		return type switch
+		{
+			CollisionSensor.Top => touchState == TouchState.Top,
+			CollisionSensor.Bottom => touchState == TouchState.Bottom,
+			CollisionSensor.Left => touchState == TouchState.Left,
+			CollisionSensor.Right => touchState == TouchState.Right,
+			CollisionSensor.Any => touchState != TouchState.None,
+			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+		};
 	}
 	
 	private Vector2I GetExtraSize()
@@ -104,7 +136,7 @@ public struct ObjectInteraction()
 	
 	private void StandingOnObject(int slopeOffset)
 	{
-		TouchObjects[_data.Target] = Constants.TouchState.Top;
+		TouchObjects[_data.Target] = TouchState.Top;
 		
 		// Adjust player's position
 		Position = _data.Position + new Vector2(
@@ -113,13 +145,13 @@ public struct ObjectInteraction()
 
 		float relativeX = Math.Abs(MathF.Floor(Position.X - _data.Position.X)) - _data.Target.SolidBox.Radius.X;
 
-		if (_data.Type == Constants.SolidType.Top ? relativeX <= _data.ExtraSize.X : relativeX < SolidBox.Radius.X + 1)
+		if (_data.Type == SolidType.Top ? relativeX <= _data.ExtraSize.X : relativeX < SolidBox.Radius.X + 1)
 		{
 			return;
 		}
 			
 		// Reset touch flags and player's on-object status if they are out of bounds
-		TouchObjects[_data.Target] = Constants.TouchState.None;
+		TouchObjects[_data.Target] = TouchState.None;
 		OnObject = null;
 	}
 	
@@ -166,7 +198,7 @@ public struct ObjectInteraction()
 			return;
 		}
 		
-		TouchObjects[_data.Target] = flooredDistanceX < 0 ? Constants.TouchState.Left : Constants.TouchState.Right;
+		TouchObjects[_data.Target] = flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
 
 		UpdatePushingStatus(clipX, flooredDistanceX);
 	}
@@ -196,7 +228,7 @@ public struct ObjectInteraction()
 			case < 0: 
 				return CollideUpward(_data.Target, clipY, isS3Physics);
 			
-			case < 16 when _data.Type != Constants.SolidType.Sides: 
+			case < 16 when _data.Type != SolidType.Sides: 
 				CollideDownward(clipY);
 				return true;
 			
@@ -208,7 +240,7 @@ public struct ObjectInteraction()
 	
 	private bool CollideUpward(OrbinautData orbinautData, int clipY, bool isS3Physics)
 	{
-		if (_data.Type is Constants.SolidType.ItemBox or Constants.SolidType.Sides) return false;
+		if (_data.Type is SolidType.ItemBox or SolidType.Sides) return false;
 
 		if (Velocity.Y == 0f && IsGrounded)
 		{
@@ -239,7 +271,7 @@ public struct ObjectInteraction()
 			Velocity.Y = 0f;
 		}
 
-		TouchObjects[orbinautData] = Constants.TouchState.Bottom;
+		TouchObjects[orbinautData] = TouchState.Bottom;
 	}
 	
 	private void CollideDownward(int clipY)
@@ -249,7 +281,7 @@ public struct ObjectInteraction()
 		float relativeX = Math.Abs(MathF.Floor(Position.X - _data.Position.X));
 		if (relativeX > _data.Target.SolidBox.Radius.X + _data.ExtraSize.X) return;
 		
-		TouchObjects[_data.Target] = Constants.TouchState.Top;
+		TouchObjects[_data.Target] = TouchState.Top;
 		AttachToObject(clipY - GripY);
 	}
 	
@@ -265,13 +297,13 @@ public struct ObjectInteraction()
 			
 		if (clipY is < -16 or >= 0) return;
 			
-		TouchObjects[_data.Target] = Constants.TouchState.Top;
+		TouchObjects[_data.Target] = TouchState.Top;
 		AttachToObject(-((int)clipY + GripY));
 	}
 	
 	private void AttachToObject(int distance)
 	{
-		if (_data.Type is Constants.SolidType.FullReset or Constants.SolidType.TopReset)
+		if (_data.Type is SolidType.FullReset or SolidType.TopReset)
 		{
 			ResetState();
 		}

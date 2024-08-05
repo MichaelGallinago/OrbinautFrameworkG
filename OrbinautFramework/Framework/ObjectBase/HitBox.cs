@@ -114,5 +114,11 @@ public partial class HitBox : Resource
 		
 		return true;
 	}
+    
+	public bool CheckPlayerCollision(PlayerData player, bool isExtraHitBox = false)
+	{
+		if (!player.IsObjectInteractionEnabled || player.IsHurt) return false;
+		return CheckCollision(player, isExtraHitBox);
+	}
 }
     

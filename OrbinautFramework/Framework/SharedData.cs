@@ -53,8 +53,7 @@ public static class SharedData
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
-    public static Types PlayerType { get; set; } = Types.Sonic;
-    public static Types PlayerTypeCpu { get; set; } = Types.Tails;
+    public static Types[] PlayerTypes { get; set; } = [Types.Sonic, Types.Tails];
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;
     
