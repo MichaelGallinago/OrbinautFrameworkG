@@ -51,14 +51,16 @@ public class PlayerData
 	public float RestartTimer { get; set; }
 	public PlayerInput Input { get; } = new();
 	
-	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
 	private DataRecord[] _recordedData;
+	public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
+	
 	public TileCollider TileCollider = new();
 
 	public PlayerData(IPlayer player)
 	{
+		Owner = player;
 		Action = new Actions(this);
-		if (ApplyType(player)) return;
+		Spawn();
 		Init();
 	}
 	
@@ -67,7 +69,7 @@ public class PlayerData
 		Array.Copy(_recordedData, 0, _recordedData, 
 			1, _recordedData.Length - 1);
 		
-		_recordedData[0] = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+		_recordedData[0] = new DataRecord(Owner.Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 	}
 	
 	public void ResetState()
@@ -182,11 +184,33 @@ public class PlayerData
         Owner.RotationDegrees = 0f;
         Owner.Visible = true;
 	}
+	
+	public void Spawn()
+	{
+		if (SharedData.GiantRingData != null)
+		{
+			Owner.Position = SharedData.GiantRingData.Position;
+		}
+		else
+		{
+			if (SharedData.CheckpointData != null)
+			{
+				Owner.Position = SharedData.CheckpointData.Position;
+			}
+			Owner.Position -= new Vector2(0, Radius.Y + 1);
+		}
+		
+		if (Id == 0 && SharedData.PlayerShield != ShieldContainer.Types.None)
+		{
+			// TODO: create shield
+			//instance_create(x, y, obj_shield, { TargetPlayer: id });
+		}
+	}
 
 	public void FillRecordedData()
 	{
 		_recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
-		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+		var record = new DataRecord(Owner.Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
         
 		Array.Fill(_recordedData, record);
 	}
@@ -215,26 +239,10 @@ public class PlayerData
 		}
 		
 		var resizedData = new DataRecord[newLength];
-		var record = new DataRecord(Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+		var record = new DataRecord(Owner.Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
 		
 		Array.Copy(_recordedData, resizedData, oldLength);
 		Array.Fill(resizedData, record,oldLength, newLength - oldLength);
 		_recordedData = resizedData;
-	}
-	
-	private bool ApplyType(Player player)
-	{
-		Type = _spawnType switch
-		{
-			SpawnTypes.Global => SharedData.PlayerType,
-			SpawnTypes.GlobalAI => SharedData.PlayerTypeCpu,
-			SpawnTypes.Unique => _uniqueType,
-			_ => Type
-		};
-		_spawnType = SpawnTypes.None;
-		
-		if (Type != Types.None) return false;
-		player.QueueFree();
-		return true;
 	}
 }

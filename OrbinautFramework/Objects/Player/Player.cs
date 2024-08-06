@@ -51,7 +51,6 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 	public override void _Ready()
 	{
 		base._Ready();
-		Spawn();
 		_sprite.FrameChanged += () => Data.IsAnimationFrameChanged = true;
 	}
 
@@ -144,26 +143,4 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 		IsObjectInteractionEnabled = true;
 		DeathState = DeathStates.Wait;
 	}*/
-	
-	public void Spawn()
-	{
-		if (SharedData.GiantRingData != null)
-		{
-			Position = SharedData.GiantRingData.Position;
-		}
-		else
-		{
-			if (SharedData.CheckpointData != null)
-			{
-				Position = SharedData.CheckpointData.Position;
-			}
-			Position -= new Vector2(0, Radius.Y + 1);
-		}
-		
-		if (Id == 0 && SharedData.PlayerShield != ShieldContainer.Types.None)
-		{
-			// TODO: create shield
-			//instance_create(x, y, obj_shield, { TargetPlayer: id });
-		}
-	}
 }

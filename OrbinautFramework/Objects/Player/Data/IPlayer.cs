@@ -7,8 +7,11 @@ public interface IPlayer
 {
     Vector2 Position { get; set; }
     Vector2 Scale { get; set; }
+    int ZIndex { get; set; }
     float RotationDegrees { get; set; }
     float Rotation { get; set; }
     bool Visible { get; set; }
-    public ShieldContainer Shield { get; }
+    ShieldContainer Shield { get; }
+    
+    void Init();
 }
