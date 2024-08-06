@@ -107,4 +107,9 @@ public static class SharedData
 	    PlayerRings = 0;
 	    LifeRewards = Vector2I.Zero;
     }
+    
+    public static void IncreaseComboScore(int comboCounter = 0)
+    {
+	    ScoreCount += PlayerConstants.ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
+    }
 }

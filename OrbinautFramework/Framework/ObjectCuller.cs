@@ -30,12 +30,12 @@ public class ObjectCuller
 		
 		if (_isCullToggled)
 		{
-			ResumeRegions(Views.Local.Cameras);
+			ResumeRegions(Views.Instance.Cameras);
 			_isCullToggled = false;
 			return;
 		}
 
-		ResumeRegions(Views.Local.GetCamerasWithUpdatedRegions());
+		ResumeRegions(Views.Instance.GetCamerasWithUpdatedRegions());
 	}
 
     private bool StopAllObjets()
@@ -77,7 +77,7 @@ public class ObjectCuller
 	    foreach (ICullable target in _hiddenObjectsInView)
 	    {
 		    var position = (Vector2I)target.Position;
-		    foreach (ICamera camera in Views.Local.Cameras)
+		    foreach (ICamera camera in Views.Instance.Cameras)
 		    {
 			    if (camera.CheckPositionInActiveRegion(position)) continue;
 			    
@@ -109,7 +109,7 @@ public class ObjectCuller
     private static void DeleteObject(ICullable target)
     {
 	    var position = (Vector2I)target.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (camera.CheckPositionInSafeRegion(position) && target.Position.Y < camera.TargetBoundary.W) return;
 	    }
@@ -120,7 +120,7 @@ public class ObjectCuller
     private void ResetObject(ICullable target)
     {
 	    var position = (Vector2I)target.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }
@@ -129,7 +129,7 @@ public class ObjectCuller
 	    target.SetProcess(false);
 
 	    var respawnPosition = (Vector2I)target.Memento.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (!camera.CheckPositionInActiveRegion(respawnPosition)) continue;
 		    _hiddenObjectsInView.Add(target);
@@ -144,7 +144,7 @@ public class ObjectCuller
     private void ResetXObject(ICullable target)
     {
 	    var position = (int)target.Position.X;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (camera.CheckXInActiveRegion(position)) return;
 	    }
@@ -153,7 +153,7 @@ public class ObjectCuller
 	    target.SetProcess(false);
 	    
 	    var respawnPosition = (int)target.Memento.Position.X;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (!camera.CheckXInActiveRegion(respawnPosition)) continue;
 		    _hiddenObjectsInView.Add(target);
@@ -168,7 +168,7 @@ public class ObjectCuller
     private void ResetYObject(ICullable target)
     {
 	    var position = (int)target.Position.Y;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (camera.CheckYInActiveRegion(position)) return;
 	    }
@@ -177,7 +177,7 @@ public class ObjectCuller
 	    target.SetProcess(false);
 
 	    var respawnPosition = (int)target.Memento.Position.Y;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (!camera.CheckYInActiveRegion(respawnPosition)) continue;
 		    _hiddenObjectsInView.Add(target);
@@ -192,7 +192,7 @@ public class ObjectCuller
     private void PauseObject(ICullable target)
     {
 	    var position = (Vector2I)target.Position;
-	    foreach (ICamera camera in Views.Local.Cameras)
+	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }

@@ -84,7 +84,7 @@ public abstract partial class Spikes : OrbinautData
         if (_retractTimer > 0f)
         {
             _retractTimer -= Scene.Instance.ProcessSpeed;
-            if (_retractTimer <= 0f && Views.Local.CheckRectInCameras(_rectangle))
+            if (_retractTimer <= 0f && Views.Instance.CheckRectInCameras(_rectangle))
             {
                 AudioPlayer.Sound.Play(SoundStorage.SpikesMove);
             }

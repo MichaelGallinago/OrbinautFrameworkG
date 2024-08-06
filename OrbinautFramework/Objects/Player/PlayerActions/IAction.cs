@@ -1,6 +1,8 @@
-﻿namespace OrbinautFramework3.Objects.Player.PlayerActions;
+﻿using OrbinautFramework3.Objects.Player.Data;
+
+namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public interface IAction
 {
-    Player Player { init; }
+    PlayerData Data { init; }
 }

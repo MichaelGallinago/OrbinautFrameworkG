@@ -26,8 +26,8 @@ public partial class CameraTrigger : Trigger
         if (_sprite?.Texture == null) return;
         _height = (int)(_sprite.Texture.GetSize().Y * Scale.Y) / 2;
         
-        Views.Local.OnViewNumberChanged += CreateTargetBoundStorages;
-        CreateTargetBoundStorages(Views.Local.Number);
+        Views.Instance.OnViewNumberChanged += CreateTargetBoundStorages;
+        CreateTargetBoundStorages(Views.Instance.Number);
     }
 
     private void CreateTargetBoundStorages(int number)
@@ -46,7 +46,7 @@ public partial class CameraTrigger : Trigger
             _previousBounds = new Vector2I[number];
         }
         
-        int length = Views.Local.Cameras.Length;
+        int length = Views.Instance.Cameras.Length;
         var defaultBound = new Vector2I(0, ushort.MaxValue);
         for (; i < length; i++)
         {
@@ -57,7 +57,7 @@ public partial class CameraTrigger : Trigger
     public override void _Process(double delta)
     {
         Vector2I halfSize = SharedData.ViewSize / 2;
-        ReadOnlySpan<ICamera> cameras = Views.Local.Cameras;
+        ReadOnlySpan<ICamera> cameras = Views.Instance.Cameras;
         var triggerBounds = new Vector2I((int)Position.Y - _height, (int)Position.Y + _height);
         
         for (var i = 0; i < cameras.Length; i++)

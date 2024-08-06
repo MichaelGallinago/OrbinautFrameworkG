@@ -89,10 +89,10 @@ public class ActionGenerator : IIncrementalGenerator
 using System;
 using System.Runtime.InteropServices;
 
-namespace OrbinautFramework3.Objects.Player
+namespace OrbinautFramework3.Objects.Player.Data
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct Actions(Player player)
+    public struct Actions(PlayerData data)
     {
         public enum Types : 
 """
@@ -137,7 +137,7 @@ namespace OrbinautFramework3.Objects.Player
         {
             string name = structDeclaration.Identifier.Text;
             sourceBuilder.Append($"\n\t\t\t\t\tcase Types.{name}: {name} = new {name} ");
-            sourceBuilder.Append("{ Player = _player }; break;");
+            sourceBuilder.Append("{ Data = _data }; break;");
         }
 
         sourceBuilder.Append('\n').Append(
@@ -149,7 +149,7 @@ namespace OrbinautFramework3.Objects.Player
         }
         
         [FieldOffset(0)] private Types _type = Types.None;
-        [FieldOffset(8)] private Player _player = player;
+        [FieldOffset(8)] private PlayerData _data = data;
 """    
         );
         

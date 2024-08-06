@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
@@ -10,7 +11,7 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Jump
 {
-	public Player Player { private get; init; }
+	public PlayerData Data { private get; init; }
 
 	public bool Perform()
 	{

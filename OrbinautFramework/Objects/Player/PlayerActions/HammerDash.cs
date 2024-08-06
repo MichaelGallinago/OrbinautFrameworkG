@@ -1,8 +1,13 @@
-﻿namespace OrbinautFramework3.Objects.Player.PlayerActions;
+﻿using System;
+using Godot;
+using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
+
+namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct HammerDash : IAction
 {
-    public Player Player { private get; init; }
+    public PlayerData Data { private get; init; }
     
     public void Perform()
     {

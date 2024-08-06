@@ -3,12 +3,15 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct DropDash : IAction
 {
+	public PlayerData Data { private get; init; }
+	
 	public const byte MaxCharge = 22;
 
 	private float _charge;

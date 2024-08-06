@@ -2,5 +2,8 @@
 
 public partial class Knuckles : Player
 {
-    
+    public Knuckles()
+    {
+        ClimbAnimationFrameNumber = _sprite.GetAnimationFrameCount(Animations.ClimbWall, Types.Knuckles);
+    }
 }

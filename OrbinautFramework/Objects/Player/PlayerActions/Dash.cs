@@ -2,12 +2,13 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Dash
 {
-    public Player Player { private get; init; }
+	public PlayerData Data { private get; init; }
     
     public bool Perform()
     {

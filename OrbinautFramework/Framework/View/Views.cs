@@ -9,7 +9,7 @@ namespace OrbinautFramework3.Framework.View;
 
 public partial class Views : Control
 {
-    public static Views Local => Scene.Instance.Views;
+    public static Views Instance => Scene.Instance.Views;
 
     public event Action<int> OnViewNumberChanged;
     
@@ -28,7 +28,7 @@ public partial class Views : Control
     [Export] private PackedScene _packedViewContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public Dictionary<OrbinautData, ICamera> TargetedCameras { get; } = [];
+    public Dictionary<Node2D, ICamera> TargetedCameras { get; } = [];
     public ICamera BottomCamera { get; private set; }
     
     private Camera[] _cameras;
@@ -39,11 +39,11 @@ public partial class Views : Control
     {
         CreateViews();
         AttachCamerasToPlayers();
-        
-        // TODO: check for memory leak
-        SharedData.ViewSizeChanged += OnViewSizeChanged;
         OnViewSizeChanged(SharedData.ViewSize);
     }
+    
+    public override void _EnterTree() => SharedData.ViewSizeChanged += OnViewSizeChanged;
+    public override void _ExitTree() => SharedData.ViewSizeChanged -= OnViewSizeChanged;
 
     private void OnViewSizeChanged(Vector2I viewSize)
     {

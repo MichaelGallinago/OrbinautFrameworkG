@@ -4,7 +4,6 @@
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="3_8004u"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
-[ext_resource type="PackedScene" uid="uid://ce2tr4eoiv2gs" path="res://Objects/Player/player.tscn" id="3_jpaxp"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="5_movty"]
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Scenes/Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
@@ -21,6 +20,7 @@
 [ext_resource type="TileSet" uid="uid://bfevce17ikl0q" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_a.tres" id="17_dgj2a"]
 [ext_resource type="PackedScene" uid="uid://1gciguema0rh" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_vertical.tscn" id="18_0iln7"]
 [ext_resource type="TileSet" uid="uid://dvuwhwecgwu0r" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_b.tres" id="18_5sdh5"]
+[ext_resource type="PackedScene" uid="uid://bwifksf6vle21" path="res://Objects/Player/Spawner/player_spawner.tscn" id="21_cuvbg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0gqu0"]
 atlas = ExtResource("15_ve5v6")
@@ -64,10 +64,8 @@ Views = NodePath("Views")
 
 [node name="Views" parent="." instance=ExtResource("3_8004u")]
 
-[node name="Player" parent="." node_paths=PackedStringArray("Sprite", "Shield") instance=ExtResource("3_jpaxp")]
-position = Vector2(208, 896)
-Sprite = NodePath("PlayerAnimatedSprite")
-Shield = NodePath("ShieldContainer")
+[node name="PlayerSpawner" parent="." instance=ExtResource("21_cuvbg")]
+position = Vector2(176, 880)
 
 [node name="Parallax2D" type="Parallax2D" parent="."]
 visible = false
@@ -137,143 +135,117 @@ script = ExtResource("5_movty")
 
 [node name="PathSwapHorizontal" type="Node" parent="Triggers"]
 
-[node name="PathSwapTriggerHorizontal" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(2432, 960)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal2" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal2" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(2560, 1032)
 scale = Vector2(1, 2.75)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal3" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal3" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(11776, 1088)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal4" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal4" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(11888, 1152)
 scale = Vector2(1, 3)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal5" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal5" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(4224, 976)
 scale = Vector2(1, 4.5)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal6" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal6" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(4096, 832)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal7" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal7" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(9856, 1216)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal8" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal8" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(10112, 1296)
 scale = Vector2(1, 3.5)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal9" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal9" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(15360, 1088)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal10" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal10" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13184, 320)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal11" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal11" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13184, 576)
 _layerLeft = 0
 _layerRight = 1
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal12" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal12" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13440, 1216)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal13" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal13" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13632, 1290)
 scale = Vector2(1, 3.313)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal14" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal14" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17640, 832)
 scale = Vector2(1, 2)
 _layerLeft = 0
 _layerRight = 1
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal15" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal15" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(18200, 832)
 scale = Vector2(1, 2)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal16" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal16" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17152, 1984)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal17" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal17" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 2032)
 scale = Vector2(1, 3.5)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal18" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal18" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 1600)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal19" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal19" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 192)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal20" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal20" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17408, 288)
 scale = Vector2(1, 3)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal21" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal21" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(19328, 1088)
-_sprite = NodePath("Sprite2D")
 _isGroundOnly = true
 
-[node name="PathSwapTriggerHorizontal22" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal22" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(19520, 1152)
 scale = Vector2(1, 2)
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerHorizontal23" parent="Triggers/PathSwapHorizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("11_1127g")]
+[node name="PathSwapTriggerHorizontal23" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(15488, 1168)
 scale = Vector2(1, 2.5)
-_sprite = NodePath("Sprite2D")
 
 [node name="PathSwapVertical" type="Node" parent="Triggers"]
 
-[node name="PathSwapTriggerVertical" parent="Triggers/PathSwapVertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("18_0iln7")]
+[node name="PathSwapTriggerVertical" parent="Triggers/PathSwapVertical" instance=ExtResource("18_0iln7")]
 position = Vector2(17920, 1344)
 scale = Vector2(4, 1)
 _layerBelow = 1
-_sprite = NodePath("Sprite2D")
 
-[node name="PathSwapTriggerVertical2" parent="Triggers/PathSwapVertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("18_0iln7")]
+[node name="PathSwapTriggerVertical2" parent="Triggers/PathSwapVertical" instance=ExtResource("18_0iln7")]
 position = Vector2(17360, 1504)
 _layerAbove = 0
 _layerBelow = 1
-_sprite = NodePath("Sprite2D")
 
 [node name="ForceSpinHorizontal" type="Node" parent="Triggers"]
 
-[node name="ForceSpinTriggerHorizontal" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(7296, 1008)
-Sprite = NodePath("Sprite2D")
 
 [node name="ForceSpinTriggerHorizontal2" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
 position = Vector2(7552, 1264)
@@ -313,10 +285,9 @@ Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
 [node name="Camera" type="Node" parent="Triggers"]
 
-[node name="CameraTrigger" parent="Triggers/Camera" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_7s6he")]
+[node name="CameraTrigger" parent="Triggers/Camera" instance=ExtResource("13_7s6he")]
 position = Vector2(1040, 786)
 scale = Vector2(1, 24.563)
-_sprite = NodePath("Sprite2D")
 
 [node name="CameraTrigger2" parent="Triggers/Camera" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_7s6he")]
 position = Vector2(11000, 1152)
@@ -336,394 +307,304 @@ _boundSpeed = 2
 
 [node name="Vertical" type="Node" parent="Common/Spikes"]
 
-[node name="SpikesVertical" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(4336, 1072)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical2" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical2" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(4304, 1072)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical3" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical3" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(5064, 1008)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical4" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical4" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(8768, 1360)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical5" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical5" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(9984, 1104)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical6" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical6" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10480, 1072)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical7" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical7" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10160, 688)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical8" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical8" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10752, 720)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical9" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical9" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10096, 240)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical10" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical10" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(9624, 176)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical11" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical11" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13656, 1712)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical12" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical12" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14640, 2096)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical13" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical13" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(15056, 1808)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical14" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical14" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14896, 1648)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical15" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical15" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14928, 1648)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical16" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical16" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16288, 1936)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical17" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical17" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16352, 1936)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical18" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical18" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13936, 1200)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical19" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical19" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(12912, 464)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical20" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical20" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13168, 848)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical21" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical21" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13136, 848)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical22" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical22" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16304, 784)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical23" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical23" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16272, 784)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical24" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical24" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16240, 784)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical25" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical25" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16208, 688)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical26" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical26" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16240, 688)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical27" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical27" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16272, 688)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical28" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical28" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16304, 688)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical29" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical29" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16176, 656)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical30" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical30" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16336, 656)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical31" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical31" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16048, 688)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical32" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical32" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16528, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical33" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical33" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16560, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical34" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical34" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16592, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical35" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical35" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16624, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical36" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical36" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16656, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical37" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical37" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16688, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical38" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical38" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical39" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical39" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 560)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical40" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical40" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16656, 144)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical41" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical41" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16688, 144)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical42" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical42" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 144)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical43" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical43" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 144)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical44" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical44" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16784, 144)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical45" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical45" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16848, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical46" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical46" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16880, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical47" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical47" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16912, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical48" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical48" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16944, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical49" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical49" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16976, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical50" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical50" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17008, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical51" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical51" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17040, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical52" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical52" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17072, 336)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical53" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical53" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17744, 496)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical54" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical54" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17776, 496)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical55" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical55" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17808, 496)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical56" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical56" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18032, 496)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical57" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical57" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18064, 496)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical58" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical58" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18096, 496)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical59" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical59" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17872, 528)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical60" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical60" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17904, 528)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical61" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical61" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17936, 528)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical62" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical62" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17968, 528)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical63" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical63" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18000, 512)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical64" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical64" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17840, 512)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical65" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical65" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19248, 784)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical66" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical66" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19152, 816)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical67" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical67" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19696, 720)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical68" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical68" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19664, 720)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical69" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical69" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19632, 720)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical70" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical70" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19600, 720)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical71" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical71" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19920, 976)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical72" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical72" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(20144, 976)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical73" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical73" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(20592, 1328)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical74" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical74" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18544, 1616)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical75" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical75" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18576, 1616)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical76" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical76" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18032, 2032)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical77" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical77" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17936, 2032)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical78" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical78" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17520, 2160)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical79" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical79" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 2032)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical80" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical80" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16848, 1872)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical81" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical81" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17040, 1712)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical82" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical82" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17008, 1712)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical83" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical83" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 1584)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical84" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical84" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 1584)
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical85" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical85" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14928, 2064)
-_sprite = NodePath("Sprite2D")
 
-[node name="SpikesVertical86" parent="Common/Spikes/Vertical" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_x5qvi")]
+[node name="SpikesVertical86" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17584, 944)
-_sprite = NodePath("Sprite2D")
 
 [node name="Horizontal" type="Node" parent="Common/Spikes"]
 
-[node name="SpikesHorizontal" parent="Common/Spikes/Horizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("15_ekqnw")]
+[node name="SpikesHorizontal" parent="Common/Spikes/Horizontal" instance=ExtResource("15_ekqnw")]
 position = Vector2(16752, 336)
 rotation = -3.14159
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="MovingSpikesHorizontal" parent="Common/Spikes/Horizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_bdqn7")]
+[node name="MovingSpikesHorizontal" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1968)
 rotation = 3.14159
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="MovingSpikesHorizontal2" parent="Common/Spikes/Horizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_bdqn7")]
+[node name="MovingSpikesHorizontal2" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1936)
 rotation = 3.14159
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
-[node name="MovingSpikesHorizontal3" parent="Common/Spikes/Horizontal" node_paths=PackedStringArray("_sprite") instance=ExtResource("16_bdqn7")]
+[node name="MovingSpikesHorizontal3" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1904)
 rotation = 3.14159
 scale = Vector2(1, -1)
-_sprite = NodePath("Sprite2D")
 
 [node name="Bridges" type="Node" parent="Common"]
 
@@ -778,65 +659,50 @@ position = Vector2(19968, 1000)
 
 [node name="Bumpers" type="Node" parent="Common"]
 
-[node name="Bumper" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(264, 816)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper2" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper2" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(16320, 1728)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper3" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper3" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17920, 892)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper4" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper4" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17892, 840)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper5" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper5" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17848, 868)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper6" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper6" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(18512, 1008)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper7" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper7" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17992, 868)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper8" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper8" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17948, 840)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper9" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper9" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17808, 316)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper10" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper10" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17852, 288)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper11" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper11" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17988, 288)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper12" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper12" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(18032, 316)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper13" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper13" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(19120, 1008)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper14" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper14" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(14544, 2256)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
-[node name="Bumper15" parent="Common/Bumpers" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_qd0sa")]
+[node name="Bumper15" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(14576, 2256)
-_sprite = NodePath("AdvancedAnimatedSprite")
 
 [node name="FallingFloors" type="Node" parent="Common"]
 

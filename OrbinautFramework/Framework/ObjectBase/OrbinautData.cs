@@ -11,8 +11,6 @@ namespace OrbinautFramework3.Framework.ObjectBase;
 public partial class OrbinautData : Resource
 {
 	public Vector2 PreviousPosition { get; set; }
-	
-	public bool IsCameraTarget(out ICamera camera) => Views.Local.TargetedCameras.TryGetValue(this, out camera);
 
 	public bool CheckPushCollision(PlayerData player)
 	{

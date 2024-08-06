@@ -67,7 +67,7 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 #endif
     
     public bool CheckInCamera(ICamera camera) => camera.CheckRectInside(CullRect);
-    public bool CheckInCameras() => Views.Local.CheckRectInCameras(CullRect);
+    public bool CheckInCameras() => Views.Instance.CheckRectInCameras(CullRect);
 
     public void SetAnimation(StringName animation, float customSpeed = 1f)
     {

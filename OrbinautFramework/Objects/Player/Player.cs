@@ -1,22 +1,20 @@
+using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Spawnable.Shield;
-using static OrbinautFramework3.Objects.Player.PlayerConstants;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 {
-	[Export] public ShieldContainer Shield { get; private set; }
+	[Export] public ShieldContainer Shield { get; init; }
 	[Export] private PlayerAnimatedSprite _sprite;
-	[Export] private Types _uniqueType;
-	[Export] private PackedScene _packedTail;
+	[Export] public Types Type { get; init; }
 	
 	public IMemento Memento { get; }
 	public PlayerData Data { get; }
@@ -25,7 +23,6 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 	
 	private readonly DebugMode _debugMode = new();
 	private CpuModule _cpuModule = new();
-	private Tail _tail;
 	
 	private Landing _landing = new();
 	private ObjectInteraction _objectInteraction = new();
@@ -48,8 +45,6 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 		Data = new PlayerData(this);
 		
 		Init();
-		
-		Data.TypeChanged += OnTypeChanged;
 		_landing.LandHandler += () => Data.Action.OnLand();
 	}
 
@@ -103,17 +98,12 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 		Data.Record();
 		_angleRotation.Process();
 		_sprite.Animate(this);
-		_tail?.Animate(this);
 		_palette.Process();
 	}
 
-	private void Init()
+	public void Init()
 	{
 		Data.Init();
-
-		RotationDegrees = 0f;
-		Visible = true;
-		
 		_sprite.Animate(this);
 	}
 
@@ -132,47 +122,6 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 
 		Data.Action.LatePerform();
 		_carry.Process();
-	}
-	
-	private void SetCameraDelayX(float delay)
-	{
-		if (!SharedData.CdCamera && IsCameraTarget(out ICamera camera))
-		{
-			camera.SetCameraDelayX(delay);
-		}
-	}
-
-	private void OnTypeChanged(Types newType)
-	{
-		switch (newType)
-		{
-			case Types.Tails:
-				if (_tail != null) return;
-				_tail = _packedTail.Instantiate<Tail>();
-				AddChild(_tail);
-				break;
-			
-			case Types.Knuckles:
-				ClimbAnimationFrameNumber = _sprite.GetAnimationFrameCount(Animations.ClimbWall, newType);
-				RemoveTail();
-				break;
-			
-			default:
-				RemoveTail();
-				break;
-		}
-	}
-
-	private void RemoveTail()
-	{
-		if (_tail == null) return;
-		_tail.QueueFree();
-		_tail = null;
-	}
-
-	public static void IncreaseComboScore(int comboCounter = 0)
-	{
-		SharedData.ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
 	}
 	
 	/*

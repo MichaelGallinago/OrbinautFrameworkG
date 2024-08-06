@@ -1,13 +1,14 @@
 ﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Flight : IAction
 {
-	public Player Player { private get; init; }
+	public PlayerData Data { private get; init; }
 	
 	private float _flightTimer;
 	private float _flyUpTimer;

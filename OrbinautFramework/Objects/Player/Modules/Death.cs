@@ -25,7 +25,7 @@ public struct Death
     {
     	if (!IsDead) return;
 
-    	ICamera camera = Views.Local.BottomCamera;
+    	ICamera camera = Views.Instance.BottomCamera;
     	
     	// If drowned, wait until we're far enough off-screen
     	const int drownScreenOffset = 276;

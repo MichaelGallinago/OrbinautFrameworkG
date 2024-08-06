@@ -30,11 +30,11 @@ public partial class Camera : Camera2D, ICamera
 		get => _target;
 		set
 		{
-			if (value != null && !Views.Local.TargetedCameras.TryAdd(value, this)) return;
+			if (value != null && !Views.Instance.TargetedCameras.TryAdd(value, this)) return;
 			
 			if (_target != null)
 			{
-				Views.Local.TargetedCameras.Remove(_target);
+				Views.Instance.TargetedCameras.Remove(_target);
 			}
 			
 			_target = value;
@@ -103,7 +103,7 @@ public partial class Camera : Camera2D, ICamera
 			new Vector2I((int)Boundary.X, (int)Boundary.Y), 
 			new Vector2I((int)Boundary.Z, (int)Boundary.W) - SharedData.ViewSize);
 
-		Views.Local.UpdateBottomCamera(this);
+		Views.Instance.UpdateBottomCamera(this);
 		
 		Position = new Vector2(DrawPosition.X - Constants.RenderBuffer, DrawPosition.Y);
 		

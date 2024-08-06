@@ -39,7 +39,6 @@ public abstract partial class Scene : Node2D
     
     protected Scene()
     {
-        PrefabStorage = _prefabStorage.Instantiate();
         ProcessPriority = int.MinValue;
     }
 

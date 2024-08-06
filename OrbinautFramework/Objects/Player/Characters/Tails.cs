@@ -1,9 +1,14 @@
 ﻿using Godot;
-using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Player.Characters;
 
 public partial class Tails : Player//, ICarrier
 {
-
+    [Export] private Tail _tail;
+    
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+        _tail.Animate(this);
+    }
 }

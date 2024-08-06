@@ -12,20 +12,8 @@ namespace OrbinautFramework3.Objects.Player.Data;
 public class PlayerData
 {
 	private const byte MinimalRecordLength = 32;
-	
-	public event Action<Types> TypeChanged;
-	
-	public Types Type
-	{
-		get => _type;
-		set
-		{
-			TypeChanged?.Invoke(value);
-			_type = value;
-		}
-	}
-	private Types _type;
-	
+
+	public IPlayer Owner { get; set; }
 	public int Id { get; set; }
 	public Animations Animation { get; set; }
 	public bool IsAnimationFrameChanged { get; set; }
@@ -67,9 +55,9 @@ public class PlayerData
 	private DataRecord[] _recordedData;
 	public TileCollider TileCollider = new();
 
-	public PlayerData(Player player)
+	public PlayerData(IPlayer player)
 	{
-		Action = new Actions(player);
+		Action = new Actions(this);
 		if (ApplyType(player)) return;
 		Init();
 	}
@@ -164,20 +152,21 @@ public class PlayerData
         _physicsCore.Gravity = GravityType.Default;
         _physicsCore.Velocity.Vector = Vector2.Zero;
         _physicsCore.GroundSpeed.Value = 0f;
+        
         _angleRotation.Angle = 0f;
+        _angleRotation.VisualAngle = 0f;
 		
         _water.IsUnderwater = false;
+        _water.AirTimer = Constants.DefaultAirTimer;
+        
         _death.IsDead = false;
+        _death.State = Death.States.Wait;
 		
         Shield.State = ShieldContainer.States.None;
-		
-        _angleRotation.VisualAngle = 0f;
-        _water.AirTimer = Constants.DefaultAirTimer;
-		
+        
         _carry.Target = null;
         _carry.Timer = 0f;
         _carry.TargetPosition = Vector2.Zero;
-        _death.State = Death.States.Wait;
 
         if (_cpuModule != null)
         {
@@ -189,6 +178,9 @@ public class PlayerData
         }
 
         FillRecordedData();
+        
+        Owner.RotationDegrees = 0f;
+        Owner.Visible = true;
 	}
 
 	public void FillRecordedData()
