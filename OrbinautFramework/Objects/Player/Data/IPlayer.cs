@@ -1,4 +1,5 @@
 ﻿using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Data;
@@ -11,6 +12,9 @@ public interface IPlayer
     float RotationDegrees { get; set; }
     float Rotation { get; set; }
     bool Visible { get; set; }
+    
+    HitBox HitBox { get; }
+    SolidBox SolidBox { get; }
     ShieldContainer Shield { get; }
     
     void Init();

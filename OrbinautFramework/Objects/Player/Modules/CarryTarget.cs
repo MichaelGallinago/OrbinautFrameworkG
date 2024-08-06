@@ -2,26 +2,27 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct CarryTarget
+public struct CarryTarget(PlayerData data)
 {
     public void OnAttached(ICarrier carrier)
     {
     	Vector2 previousPosition = carrier.CarryTargetPosition;
     	
-    	if (Input.Press.Abc)
+    	if (data.Input.Press.Abc)
     	{
     		carrier.CarryTarget = null;
     		carrier.CarryTimer = 18f;
-    			
-    		IsSpinning = true;
-    		IsJumping = true;
-    		Action = new Default();
-    		Animation = Animations.Spin;
+		    
+		    data.IsSpinning = true;
+		    data.IsJumping = true;
+		    data.Action.Type = Actions.Types.Default;
+		    data.Animation = Animations.Spin;
     		Radius = RadiusSpin;
     		Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpSpeed);
     				

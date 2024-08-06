@@ -1,7 +1,7 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct Palette
 {
