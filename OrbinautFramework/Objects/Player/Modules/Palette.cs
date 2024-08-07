@@ -15,14 +15,12 @@ public struct Palette
 	
     public void Process()
     {
-    	// Get player colour IDs
     	ReadOnlySpan<int> colours = PlayerColourIds;
     	
     	int colour = PaletteUtilities.Index[colours[0]];
     	UpdateSuper(colour, out int colourLast, out int colourLoop, out int duration);
     	UpdateRegular(colour, ref colourLoop, ref colourLast, ref duration);
-    	
-    	// Apply palette
+	    
     	PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
     }
 

@@ -13,6 +13,7 @@ public interface IPlayer
     float Rotation { get; set; }
     bool Visible { get; set; }
     
+    public Player.Types Type { get; }
     HitBox HitBox { get; }
     SolidBox SolidBox { get; }
     ShieldContainer Shield { get; }

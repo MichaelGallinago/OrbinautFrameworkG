@@ -159,8 +159,8 @@ public partial class Camera : Camera2D, ICamera
 			FollowTargetX(processSpeed, targetPosition.X);
 		}
 
-		bool doShiftDown = player.Animation == Objects.Player.Animations.Duck;
-		bool doShiftUp = player.Animation == Objects.Player.Animations.LookUp;
+		bool doShiftDown = player.Visual == Objects.Player.Animations.Duck;
+		bool doShiftUp = player.Visual == Objects.Player.Animations.LookUp;
 
 		if (doShiftDown || doShiftUp)
 		{

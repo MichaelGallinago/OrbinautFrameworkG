@@ -108,8 +108,9 @@ public static class SharedData
 	    LifeRewards = Vector2I.Zero;
     }
     
+    private static ReadOnlySpan<uint> ComboScoreValues => [10, 100, 200, 500, 1000, 10000];
     public static void IncreaseComboScore(int comboCounter = 0)
     {
-	    ScoreCount += PlayerConstants.ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
+	    ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
     }
 }

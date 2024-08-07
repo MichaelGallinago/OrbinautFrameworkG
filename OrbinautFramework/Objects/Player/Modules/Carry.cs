@@ -7,10 +7,6 @@ namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct Carry
 {
-    public ICarryTarget Target { get; set; }
-    public float Timer { get; set; }
-    public Vector2 TargetPosition { get; set; }
-    
     public void Process()
     {
         if (Type != Types.Tails) return;

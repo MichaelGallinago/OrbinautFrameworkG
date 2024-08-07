@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
@@ -8,12 +7,9 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct ObjectInteraction()
+public struct ObjectInteraction
 {
 	private const int GripY = 4;
-	
-	public HashSet<SolidBox> PushObjects { get; } = [];
-	public Dictionary<SolidBox, TouchState> TouchObjects { get; } = [];
 	
 	private SolidObjectData _data;
 	
@@ -89,6 +85,24 @@ public struct ObjectInteraction()
 			CollisionSensor.Any => touchState != TouchState.None,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
+	}
+	
+	public bool CheckPushCollision(PlayerData player)
+	{
+		//TODO: debug collision
+		/*
+		if _do_debug
+		{
+			var _left = x - _rx + _ox;
+			var _right = x + _rx + _ox;
+			var _width = 4;
+
+			ds_list_add(_ds_list, _left, y - _ry + _oy, _left + _width, y + _ry + _oy, _push_colour);
+			ds_list_add(_ds_list, _right - _width, y - _ry + _oy, _right, y + _ry + _oy, _push_colour);
+		}
+		*/
+		
+		return player.PushObjects.Contains(this);
 	}
 	
 	private Vector2I GetExtraSize()

@@ -27,6 +27,8 @@ public abstract partial class OrbinautNode : Node2D, ICullable
     }
     private ICullable.Types _culling;
     
+    public Vector2 PreviousPosition { get; set; }
+    
     public new Vector2 Position
     {
         get => _floatPosition;

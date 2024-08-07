@@ -9,8 +9,6 @@ namespace OrbinautFramework3.Objects.Player;
 
 public struct Damage
 {
-	public bool IsHurt { get; set; }
-	
     public void Kill()
     {
     	if (IsDead) return;

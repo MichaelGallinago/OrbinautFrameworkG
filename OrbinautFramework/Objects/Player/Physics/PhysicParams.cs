@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using OrbinautFramework3.Framework;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Physics;
 
 public struct PhysicParams(
     float acceleration, float accelerationGlide, float accelerationAir, float accelerationTop, float accelerationClimb,
@@ -25,9 +26,9 @@ public struct PhysicParams(
     public float MinimalJumpSpeed { get; private set; } = minimalJumpSpeed;
     public float JumpSpeed { get; private set; } = jumpSpeed;
 
-    private static readonly Dictionary<Type, PhysicParams> ParamsMap = new()
+    private static PhysicParams GetParams(Type type) => type switch
     {
-	    [Type.Default] = new PhysicParams(
+	    Type.Default => new PhysicParams(
 		    0.046875f,
 		    0.015625f,
 		    0.09375f,
@@ -40,8 +41,7 @@ public struct PhysicParams(
 		    -4f,
 		    -6.5f
 	    ),
-	    
-	    [Type.SuperSonic] = new PhysicParams(
+	    Type.SuperSonic => new PhysicParams(
 		    0.1875f,
 		    0.015625f,
 		    0.375f,
@@ -54,8 +54,7 @@ public struct PhysicParams(
 		    -4f,
 		    -8f
 	    ),
-	    
-	    [Type.Super] = new PhysicParams(
+	    Type.Super => new PhysicParams(
 		    0.09375f,
 		    0.046875f,
 		    0.1875f,
@@ -68,8 +67,7 @@ public struct PhysicParams(
 		    -4f,
 		    -6.5f
 		),
-	    
-	    [Type.Underwater] = new PhysicParams(
+	    Type.Underwater => new PhysicParams(
 		    0.0234375f,
 		    0.015625f,
 		    0.046875f,
@@ -82,8 +80,7 @@ public struct PhysicParams(
 		    -2f,
 		    -3.5f
 	    ),
-	    
-	    [Type.UnderwaterSuperSonic] = new PhysicParams(
+	    Type.UnderwaterSuperSonic => new PhysicParams(
 		    0.09375f,
 		    0.015625f,
 		    0.1875f,
@@ -95,9 +92,8 @@ public struct PhysicParams(
 		    0.046875f,
 		    -2f,
 		    -3.5f
-		),
-	    
-	    [Type.UnderwaterSuper] = new PhysicParams(
+	    ),
+	    Type.UnderwaterSuper => new PhysicParams(
 		    0.046875f,
 		    0.046875f,
 		    0.09375f,
@@ -109,12 +105,14 @@ public struct PhysicParams(
 		    0.0234375f,
 		    -2f,
 		    -3.5f
-	    )
+		),
+	    _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
-
-    public static PhysicParams Get(bool isUnderwater, bool isSuper, Types playerType, float itemSpeedTimer)
+    
+    public static void Get(
+	    bool isUnderwater, bool isSuper, Types playerType, float itemSpeedTimer, out PhysicParams physicParams)
     {
-	    PhysicParams physicParams = ParamsMap[GetType(isUnderwater, isSuper, playerType)];
+	    physicParams = GetParams(GetType(isUnderwater, isSuper, playerType));
 	    
 	    if (playerType == Types.Knuckles)
 	    {
@@ -141,8 +139,6 @@ public struct PhysicParams(
 	    {
 		    physicParams.FrictionRoll = 0.0234375f;
 	    }
-	    
-	    return physicParams;
     }
 
     private static Type GetType(bool isUnderwater, bool isSuper, Types playerType)

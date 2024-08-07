@@ -11,10 +11,12 @@ public class PlayerLogic
 {
     public CarryTarget CarryTarget { get; } = new();
     
+    private readonly Recorder _recorder = new();
     private readonly DebugMode _debugMode = new();
     private readonly CpuModule _cpuModule = new();
     private readonly PlayerData _data;
-    
+
+    private Music _music = new();
     private Landing _landing = new();
     private ObjectInteraction _objectInteraction = new();
     private PhysicsCore _physicsCore = new();
@@ -35,13 +37,15 @@ public class PlayerLogic
         _data = new PlayerData(player);
         _landing.LandHandler += () => _data.Action.OnLand();
     }
-    
+
+    public void Init() => _data.Init();
+
     public void Process()
     {
         _data.Input.Update(_data.Id);
 		
         // DEBUG MODE PLAYER ROUTINE
-        if (_death.State == Death.States.Wait && _data.Id == 0 && SharedData.IsDebugModeEnabled)
+        if (_data.Death.State == Death.States.Wait && _data.Id == 0 && SharedData.IsDebugModeEnabled)
         {
             if (_debugMode.Update(this, _data.Input)) return;
         }
@@ -50,19 +54,19 @@ public class PlayerLogic
         _cpuModule?.Process();
         _death.Process();
 		
-        if (_data.IsControlRoutineEnabled)
+        if (_data.Physics.IsControlRoutineEnabled)
         {
             RunControlRoutine();
         }
 
-        if (!_death.IsDead)
+        if (!_data.Death.IsDead)
         {
             _water.Process();
             _status.Update();
             _collisionBoxes.Update();
         }
 		
-        _data.Record();
+        _recorder.Record();
         _angleRotation.Process();
         _palette.Process();
     }
@@ -84,7 +88,7 @@ public class PlayerLogic
         _carry.Process();
     }
 
-    public void SetAnimationFrameChanged() => _data.IsAnimationFrameChanged = true;
+    public void SetAnimationFrameChanged() => _data.Visual.IsFrameChanged = true;
 
     /*
     //TODO: update debug mode

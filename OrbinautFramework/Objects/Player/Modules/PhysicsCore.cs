@@ -8,9 +8,10 @@ namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct PhysicsCore
 {
-	public float Gravity { get; set; }
-	public Velocity Velocity { get; } = new();
-	public AcceleratedValue GroundSpeed { get; } = new();
+	public enum Types : byte
+	{
+		S1, CD, S2, S3, SK
+	}
 	
 	private SlopeRepel _slopeRepel;
 	private SlopeResist _slopeResist;

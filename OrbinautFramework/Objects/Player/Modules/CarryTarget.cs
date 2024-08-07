@@ -22,7 +22,7 @@ public struct CarryTarget(PlayerData data)
 		    data.IsSpinning = true;
 		    data.IsJumping = true;
 		    data.Action.Type = Actions.Types.Default;
-		    data.Animation = Animations.Spin;
+		    data.Visual = Animations.Spin;
     		Radius = RadiusSpin;
     		Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpSpeed);
     				

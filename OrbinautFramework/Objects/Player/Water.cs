@@ -10,9 +10,6 @@ namespace OrbinautFramework3.Objects.Player;
 
 public struct Water
 {
-	public bool IsUnderwater { get; set; }
-	public float AirTimer { get; set; }
-	
     public void Process()
 	{
 		if (Stage.Local == null || !Stage.Local.IsWaterEnabled) return;

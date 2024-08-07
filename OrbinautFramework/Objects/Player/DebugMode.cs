@@ -18,10 +18,13 @@ public class DebugMode
 	
 	private int _index;
 	private float _speed;
+	private IEditor _editor;
 	private readonly List<Type> _objects;
     
-    public DebugMode()
+    public DebugMode(IEditor editor)
     {
+	    _editor = editor;
+	    
 	    _objects =
 	    [
 		    typeof(Common.Ring.Ring), typeof(Common.GiantRing.GiantRing), typeof(Common.ItemBox.ItemBox),
@@ -41,15 +44,15 @@ public class DebugMode
 	    }
     }
     
-    public bool Update(IEditor editor, IInputContainer input)
+    public bool Update(IInputContainer input)
     {
 		if (!SharedData.DevMode) return false;
 
-		bool debugButton = IsDebugButtonPressed(editor.IsDebugMode, input.Press.B);
+		bool debugButton = IsDebugButtonPressed(_editor.IsDebugMode, input.Press.B);
 		
 		if (debugButton)
 		{
-			if (!editor.IsDebugMode)
+			if (!_editor.IsDebugMode)
 			{
 				if (Scene.Instance.IsStage)
 				{
@@ -61,18 +64,18 @@ public class DebugMode
 				Scene.Instance.State = Scene.States.Normal;
 				Scene.Instance.AllowPause = true;
 				
-				editor.OnEnableEditMode();
-				editor.IsDebugMode = true;
+				_editor.OnEnableEditMode();
+				_editor.IsDebugMode = true;
 			}
 			else
 			{
-				editor.OnDisableEditMode();
-				editor.IsDebugMode = false;
+				_editor.OnDisableEditMode();
+				_editor.IsDebugMode = false;
 			}
 		}
 		
 		// Continue if Debug mode is enabled
-		if (!editor.IsDebugMode) return false;
+		if (!_editor.IsDebugMode) return false;
 
 		// Update speed and position (move faster if in developer mode)
 		if (input.Down.Up || input.Down.Down || input.Down.Left || input.Down.Right)
@@ -80,7 +83,7 @@ public class DebugMode
 			_speed = MathF.Min(_speed + (SharedData.DevMode ? 
 				Acceleration * AccelerationMultiplier : Acceleration), SpeedLimit);
 			
-			Vector2 position = editor.Position;
+			Vector2 position = _editor.Position;
 
 			float speed = _speed * Scene.Instance.ProcessSpeed;
 			
@@ -89,7 +92,7 @@ public class DebugMode
 			if (input.Down.Left) position.X -= speed;
 			if (input.Down.Right) position.X += speed;
 
-			editor.Position = position;
+			_editor.Position = position;
 		}
 		else
 		{
@@ -113,10 +116,10 @@ public class DebugMode
 		else if (input.Press.C)
 		{
 			//TODO: replace by prefabs
-			if (Activator.CreateInstance(_objects[_index]) is not OrbinautData newObject) return true;
+			if (Activator.CreateInstance(_objects[_index]) is not OrbinautNode newObject) return true;
 			
-			newObject.Scale = new Vector2(newObject.Scale.X * (int)editor.Facing, newObject.Scale.Y);
-			newObject.Culling = OrbinautData.CullingType.Delete;
+			newObject.Scale = new Vector2(newObject.Scale.X * (int)_editor.Facing, newObject.Scale.Y);
+			newObject.CullingType = ICullable.Types.Delete;
 			Scene.Instance.AddChild(newObject);
 		}
 		

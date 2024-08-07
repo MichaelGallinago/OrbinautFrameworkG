@@ -3,23 +3,15 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Physics;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
+//TODO: check this
 public struct Death
 {
 	public enum States : byte
 	{
 		Wait, Restart
 	}
-	
-	public enum RestartStates : byte
-	{
-		GameOver, ResetLevel, RestartStage, RestartGame
-	}
-	
-	public bool IsDead { get; set; }
-	public States State { get; set; }
-	public RestartStates RestartState { get; set; }
 	
     public void Process()
     {
@@ -45,9 +37,7 @@ public struct Death
     {
     	if ((int)Position.Y <= 32f + (SharedData.PhysicsType < PhysicsTypes.S3 ? 
     		    camera.Boundary.W : camera.DrawPosition.Y + SharedData.ViewSize.Y)) return;
-    	
-    	RestartState = RestartStates.ResetLevel;
-    	
+	    
     	SetNextState();
     }
 

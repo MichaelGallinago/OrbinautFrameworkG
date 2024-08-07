@@ -8,13 +8,18 @@ namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 {
+	public enum Types : byte
+	{
+		Sonic, Tails, Knuckles, Amy
+	}
+	
 	[Export] public ShieldContainer Shield { get; init; }
 	[Export] private PlayerAnimatedSprite _sprite;
 	[Export] public Types Type { get; init; }
 	
 	public IMemento Memento { get; }
 
-	private PlayerLogic _logic;
+	private readonly PlayerLogic _logic;
 
 	protected Player()
 	{
@@ -28,14 +33,14 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 	public override void _EnterTree()
 	{
 		base._EnterTree();
-		PlayerData.ResizeAllRecordedData();
+		Recorder.ResizeAll();
 		Scene.Instance.Players.Add(this);
 	}
 	
 	public override void _ExitTree()
 	{
 		Scene.Instance.Players.Remove(this);
-		PlayerData.ResizeAllRecordedData();
+		Recorder.ResizeAll();
 		base._ExitTree();
 	}
 	
