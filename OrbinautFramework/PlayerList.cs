@@ -2,25 +2,24 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3;
 
-public readonly struct PlayerList
+public readonly struct PlayerList()
 {
-    public ReadOnlySpan<Player> Values => CollectionsMarshal.AsSpan(_players);
+    public ReadOnlySpan<PlayerData> Values => CollectionsMarshal.AsSpan(_players);
     public int Count => _players.Count;
     
-    private readonly List<Player> _players = [];
-
-    public PlayerList() {}
-
-    public void Add(Player data)
+    private readonly List<PlayerData> _players = [];
+    
+    public void Add(PlayerData data)
     {
         data.Id = _players.Count;
         _players.Add(data);
     }
     
-    public void Remove(Player data)
+    public void Remove(PlayerData data)
     {
         _players.Remove(data);
         for (int i = data.Id; i < _players.Count; i++)
@@ -36,8 +35,8 @@ public readonly struct PlayerList
             throw new IndexOutOfRangeException();
         }
 
-        Player firstPlayer = _players[fromIndex];
-        Player secondPlayer = _players[toIndex];
+        PlayerData firstPlayer = _players[fromIndex];
+        PlayerData secondPlayer = _players[toIndex];
 
         firstPlayer.Id = toIndex;
         secondPlayer.Id = fromIndex;
@@ -46,5 +45,5 @@ public readonly struct PlayerList
         _players[fromIndex] = secondPlayer;
     }
 
-    public Player First() => _players[0];
+    public PlayerData First() => _players[0];
 }

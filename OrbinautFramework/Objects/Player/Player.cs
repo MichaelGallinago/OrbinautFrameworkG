@@ -14,7 +14,7 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 	}
 	
 	[Export] public ShieldContainer Shield { get; init; }
-	[Export] private PlayerAnimatedSprite _sprite;
+	[Export] public PlayerAnimatedSprite Sprite { get; init; }
 	[Export] public Types Type { get; init; }
 	
 	public IMemento Memento { get; }
@@ -28,7 +28,7 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 		Init();
 	}
 
-	public override void _Ready() => _sprite.FrameChanged += _logic.SetAnimationFrameChanged;
+	public override void _Ready() => Sprite.FrameChanged += _logic.SetAnimationFrameChanged;
 
 	public override void _EnterTree()
 	{
@@ -47,12 +47,12 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 	public override void _Process(double delta)
 	{
 		_logic.Process();
-		_sprite.Animate(this);
+		Sprite.Animate(this);
 	}
 
 	public void Init()
 	{
 		_logic.Init();
-		_sprite.Animate(this);
+		Sprite.Animate(this);
 	}
 }

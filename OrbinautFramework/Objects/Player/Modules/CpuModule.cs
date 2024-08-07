@@ -5,10 +5,11 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public class CpuModule
+public class CpuModule(PlayerData data)
 {
 	public const int DelayStep = 16;
 	
@@ -31,21 +32,31 @@ public class CpuModule
     
     private bool _canReceiveInput;
 	private ICpuTarget _leadPlayer;
-	private Buttons _cpuInputDown;
-	private Buttons _cpuInputPress;
+	private Buttons _inputDown;
+	private Buttons _inputPress;
 	private int _delay;
+
+	public void Init()
+	{
+		Target = null;
+		State = States.Main;
+		RespawnTimer = 0f;
+		InputTimer = 0f;
+		IsJumping = false;
+	}
 	
     public void Process()
     {
-		if (IsHurt || IsDead || Id == 0) return;
+		if (data.Damage.IsHurt || data.Death.IsDead || data.Id == 0) return;
 		
 		_leadPlayer = Scene.Instance.Players.First();
-		_delay = DelayStep * Id;
+		_delay = DelayStep * data.Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
-		_canReceiveInput = Id < Constants.MaxInputDevices;
+		_canReceiveInput = data.Id < Constants.MaxInputDevices;
 		
-		if (_canReceiveInput && Input.Down is not { Abc: false, Up: false, Down: false, Left: false, Right: false })
+		if (_canReceiveInput && 
+		    data.Input.Down is not { Abc: false, Up: false, Down: false, Left: false, Right: false })
 		{
 			InputTimer = 600f;
 		}
@@ -63,12 +74,12 @@ public class CpuModule
 	{
 		// Take some time (up to 64 frames (on 60 fps))
 		// to respawn or do not respawn at all unless holding down any button
-		if (_canReceiveInput && Input.Down is { Abc: false, Start: false })
+		if (_canReceiveInput && data.Input.Down is { Abc: false, Start: false })
 		{
 			if (!Scene.Instance.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
 		
-		Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
+		data.Player.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		State = States.Respawn;
 	}
@@ -76,22 +87,11 @@ public class CpuModule
 	private void ProcessRespawnCpu()
 	{
 		if (CheckCpuRespawn()) return;
-		
-		// Force animation & play sound
-		switch (Type)
+
+		SetRespawnAnimation();
+		if (data.Player.Type == Player.Types.Tails)
 		{
-			case Types.Sonic or Types.Amy: 
-				Animation = Animations.Spin; 
-				break;
-			
-			case Types.Tails: 
-				Animation = IsUnderwater ? Animations.Swim : Animations.Fly;
-				PlayRespawnFlyingSound();
-				break;
-			
-			case Types.Knuckles:
-				Animation = Animations.GlideAir;
-				break;
+			PlayRespawnFlyingSound();
 		}
 		
 		DataRecord followDataRecord = _leadPlayer.RecordedData[_delay];
@@ -109,17 +109,29 @@ public class CpuModule
 
 		if (SharedData.Behaviour == Behaviours.S3 && _leadPlayer.IsDead) return;
 
-		if (!IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
+		if (!data.Physics.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
 		
 		State = States.Main;
-		Animation = Animations.Move;
-		IsObjectInteractionEnabled = true;
-		IsControlRoutineEnabled = true;
+		data.Visual.Animation = Animations.Move;
+		data.Collision.IsObjectInteractionEnabled = true;
+		data.Physics.IsControlRoutineEnabled = true;
+	}
+
+	private void SetRespawnAnimation()
+	{
+		data.Visual.Animation = data.Player.Type switch
+		{
+			Player.Types.Sonic or Player.Types.Amy => Animations.Spin, 
+			Player.Types.Tails => data.Water.IsUnderwater ? Animations.Swim : Animations.Fly,
+			Player.Types.Knuckles => Animations.GlideAir,
+			_ => throw new ArgumentOutOfRangeException()
+		};
 	}
 
 	private void PlayRespawnFlyingSound()
 	{
-		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !Sprite.CheckInCameras() || IsUnderwater) return;
+		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.Player.Sprite.CheckInCameras() || 
+		    data.Water.IsUnderwater) return;
 		if (SharedData.Behaviour != Behaviours.S3) return;
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
 	}
@@ -127,8 +139,8 @@ public class CpuModule
 	private bool MoveToLeadPlayer(Vector2 targetPosition)
 	{
 		var distance = new Vector2I(
-			Mathf.FloorToInt(Position.X - targetPosition.X),
-			Mathf.FloorToInt(targetPosition.Y - Position.Y));
+			Mathf.FloorToInt(data.Player.Position.X - targetPosition.X),
+			Mathf.FloorToInt(targetPosition.Y - data.Player.Position.Y));
 
 		Vector2 positionOffset = Vector2.Zero;
 		if (distance.X != 0)
@@ -149,7 +161,7 @@ public class CpuModule
 					distance.X = 0;
 				}
 
-				Facing = Constants.Direction.Negative;
+				data.Visual.Facing = Constants.Direction.Negative;
 			}
 			else
 			{
@@ -161,7 +173,7 @@ public class CpuModule
 					distance.X = 0;
 				}
 
-				Facing = Constants.Direction.Positive;
+				data.Visual.Facing = Constants.Direction.Positive;
 			}
 
 			positionOffset.X = velocityX;
@@ -172,7 +184,7 @@ public class CpuModule
 			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.ProcessSpeed;
 		}
 
-		Position += positionOffset;
+		data.Player.Position += positionOffset;
 		
 		return distance.X != 0 || distance.Y != 0;
 	}
@@ -183,26 +195,27 @@ public class CpuModule
 		
 		if (CheckCpuRespawn()) return; // Exit if respawned
 		
-		if (!IsObjectInteractionEnabled || CarryTarget != null || Action == Actions.Carried) return;
+		if (!data.Collision.IsObjectInteractionEnabled || 
+		    data.Carry.Target != null || data.Action.Type == Actions.Carried) return;
 		
-		CpuTarget ??= _leadPlayer; // Follow lead player
+		Target ??= _leadPlayer; // Follow lead player
 		
 		// Do not run CPU follow logic while under manual control and input is allowed
 		if (InputTimer > 0f)
 		{
 			InputTimer -= Scene.Instance.ProcessSpeed;
-			if (!Input.NoControl) return;
+			if (!data.Input.NoControl) return;
 		}
 		
 		//TODO: check that ZIndex works
-		ZIndex = _leadPlayer.ZIndex + Id;
+		data.Player.ZIndex = _leadPlayer.ZIndex + data.Id;
 		
-		if (GroundLockTimer > 0f && GroundSpeed == 0f)
+		if (data.Physics.GroundLockTimer > 0f && data.Physics.GroundSpeed == 0f)
 		{
 			State = States.Stuck;
 		}
 		
-		(Vector2 targetPosition, _cpuInputPress, _cpuInputDown, 
+		(Vector2 targetPosition, _inputPress, _inputDown, 
 			Constants.Direction direction, OrbinautData setPushAnimationBy) = CpuTarget.RecordedData[_delay];
 
 		if (SharedData.Behaviour == Behaviours.S3 &&
@@ -224,11 +237,11 @@ public class CpuModule
 		// Jump
 		if (doJump && Scene.Instance.IsTimePeriodLooped(64f))
 		{
-			_cpuInputPress.Abc = _cpuInputDown.Abc = true;
+			_inputPress.Abc = _inputDown.Abc = true;
 			IsJumping = true;
 		}
 		
-		Input.Set(_cpuInputPress, _cpuInputDown);
+		Input.Set(_inputPress, _inputDown);
 	}
 
 	private void FreezeOrFlyIfLeaderDied()
@@ -264,8 +277,8 @@ public class CpuModule
 		int sign = isMoveToRight ? 1 : -1;
 		if (sign * distanceX > maxDistanceX)
 		{
-			_cpuInputDown.Left = _cpuInputPress.Left = !isMoveToRight;
-			_cpuInputDown.Right = _cpuInputPress.Right = isMoveToRight;
+			_inputDown.Left = _inputPress.Left = !isMoveToRight;
+			_inputDown.Right = _inputPress.Right = isMoveToRight;
 		}
 						
 		if (GroundSpeed != 0f && IsControlRoutineEnabled && (int)Facing == sign)
@@ -278,7 +291,7 @@ public class CpuModule
 	{
 		if (IsJumping)
 		{
-			_cpuInputDown.Abc = true;
+			_inputDown.Abc = true;
 				 
 			if (!IsGrounded) return false;
 			

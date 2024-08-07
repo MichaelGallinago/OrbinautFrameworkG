@@ -13,44 +13,50 @@ public class PlayerLogic
     
     private readonly Recorder _recorder = new();
     private readonly DebugMode _debugMode = new();
-    private readonly CpuModule _cpuModule = new();
+    private readonly CpuModule _cpuModule;
     private readonly PlayerData _data;
 
-    private Music _music = new();
-    private Landing _landing = new();
-    private ObjectInteraction _objectInteraction = new();
-    private PhysicsCore _physicsCore = new();
-    private Water _water = new();
-    private Status _status = new();
-    private Death _death = new();
-    private SpinDash _spinDash = new();
     private Dash _dash = new();
     private Jump _jump = new();
-    private AngleRotation _angleRotation = new();
-    private Palette _palette = new();
     private Carry _carry = new();
-    private CollisionBoxes _collisionBoxes = new();
+    private Death _death = new();
+    private Music _music = new();
+    private Water _water = new();
     private Damage _damage = new();
+    private Status _status = new();
+    private Landing _landing = new();
+    private Palette _palette = new();
+    private SpinDash _spinDash = new();
+    private PhysicsCore _physicsCore = new();
+    private AngleRotation _angleRotation = new();
+    private CollisionBoxes _collisionBoxes = new();
+    private Initialization _initialization = new();
+    private ObjectInteraction _objectInteraction = new();
 
     public PlayerLogic(IPlayer player)
     {
         _data = new PlayerData(player);
+        _cpuModule = new CpuModule(_data);
         _landing.LandHandler += () => _data.Action.OnLand();
     }
 
-    public void Init() => _data.Init();
+    public void Init()
+    {
+        _initialization.Init();
+        _initialization.Spawn();
+        _cpuModule?.Init();
+        _recorder.Fill();
+    }
 
     public void Process()
     {
         _data.Input.Update(_data.Id);
-		
-        // DEBUG MODE PLAYER ROUTINE
+        
         if (_data.Death.State == Death.States.Wait && _data.Id == 0 && SharedData.IsDebugModeEnabled)
         {
             if (_debugMode.Update(this, _data.Input)) return;
         }
-	    
-        // DEFAULT PLAYER ROUTINE
+
         _cpuModule?.Process();
         _death.Process();
 		

@@ -17,6 +17,7 @@ public interface IPlayer
     HitBox HitBox { get; }
     SolidBox SolidBox { get; }
     ShieldContainer Shield { get; }
+    PlayerAnimatedSprite Sprite { get; }
     
     void Init();
 }

@@ -7,15 +7,15 @@ namespace OrbinautFramework3.Framework;
 
 public class PlayerMemento(PlayerData originator) : IMemento
 {
-    public Vector2 Position { get; } = originator.Owner.Position;
-    private readonly Vector2 _scale = originator.Owner.Scale;
-    private readonly int _zIndex = originator.Owner.ZIndex;
+    public Vector2 Position { get; } = originator.Player.Position;
+    private readonly Vector2 _scale = originator.Player.Scale;
+    private readonly int _zIndex = originator.Player.ZIndex;
     
     public void Reset()
     {
-        originator.Owner.Position = Position;
-        originator.Owner.ZIndex = _zIndex;
-        originator.Owner.Scale = _scale;
+        originator.Player.Position = Position;
+        originator.Player.ZIndex = _zIndex;
+        originator.Player.Scale = _scale;
 
         originator.Init();
     }
