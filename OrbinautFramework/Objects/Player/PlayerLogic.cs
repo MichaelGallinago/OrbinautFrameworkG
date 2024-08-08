@@ -1,13 +1,12 @@
 ﻿using OrbinautFramework3.Framework;
-using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 
-namespace OrbinautFramework3.Objects;
+namespace OrbinautFramework3.Objects.Player;
 
-public class PlayerLogic
+public class PlayerLogic : IStateHolder<ActionFsm.States>
 {
     public CarryTarget CarryTarget { get; } = new();
     
@@ -15,6 +14,12 @@ public class PlayerLogic
     private readonly DebugMode _debugMode = new();
     private readonly CpuModule _cpuModule;
     private readonly PlayerData _data;
+    
+    public ActionFsm.States State
+    {
+        get => _actionFsm.State;
+        set => _actionFsm.State = value;
+    }
 
     private Dash _dash;
     private Jump _jump = new();
@@ -27,6 +32,7 @@ public class PlayerLogic
     private Landing _landing = new();
     private Palette _palette = new();
     private SpinDash _spinDash = new();
+    private ActionFsm _actionFsm;
     private PhysicsCore _physicsCore = new();
     private AngleRotation _angleRotation = new();
     private CollisionBoxes _collisionBoxes = new();
@@ -35,12 +41,13 @@ public class PlayerLogic
 
     public PlayerLogic(IPlayerNode playerNode)
     {
-        _data = new PlayerData(playerNode);
+        _data = new PlayerData(this, playerNode);
         
         _dash = new Dash(_data);
+        _actionFsm = new ActionFsm(_data);
         
         _cpuModule = new CpuModule(_data);
-        _landing.LandHandler += () => _data.Action.OnLand();
+        _landing.LandHandler += () => _actionFsm.OnLand();
     }
 
     public void Init()
@@ -89,11 +96,11 @@ public class PlayerLogic
         if (_jump.Perform()) return;
         if (_jump.Start()) return;
 		
-        _data.Action.Perform();
+        _actionFsm.Perform();
 		
         _physicsCore.ProcessCorePhysics();
 
-        _data.Action.LatePerform();
+        _actionFsm.LatePerform();
         _carry.Process();
     }
     

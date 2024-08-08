@@ -1,36 +1,42 @@
 ﻿using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct AngleRotation
+public struct AngleRotation(PlayerData data)
 {
     public void Process()
     {
+        float visualAngle = CalculateVisualAngle();
+        data.Rotation.VisualAngle = visualAngle;
+        data.PlayerNode.RotationDegrees = data.Visual.Animation == Animations.Move ? 360f - visualAngle : 0f;
+    }
+
+    private float CalculateVisualAngle()
+    {
         bool isSmoothRotation = SharedData.RotationMode > 0;
-		
-        if (!IsGrounded)
+        float angle = data.Rotation.Angle;
+        float visualAngle;
+        
+        if (!data.Physics.IsGrounded)
         {
-            VisualAngle = Angle;
+            if (isSmoothRotation) return angle;
+            visualAngle = angle;
         }
         else
         {
-            float rangeAngle = Angle is > 22.5f and < 337.5f ? Angle : 0f;
-            VisualAngle = isSmoothRotation ? CalculateSmoothVisualAngle(rangeAngle) : rangeAngle;
+            visualAngle = angle is > 22.5f and < 337.5f ? angle : 0f;
+            if (isSmoothRotation) return CalculateSmoothVisualAngle(visualAngle);
         }
-		
-        if (!isSmoothRotation)
-        {
-            VisualAngle = MathF.Ceiling((VisualAngle - 22.5f) / 45f) * 45f;
-        }
-
-        RotationDegrees = Animation == Animations.Move ? 360f - VisualAngle : 0f;
+        
+        return MathF.Ceiling((visualAngle - 22.5f) / 45f) * 45f;
     }
 
     private float CalculateSmoothVisualAngle(float rangeAngle)
     {
-        float angleDifference = rangeAngle - VisualAngle;
+        float angleDifference = rangeAngle - data.Rotation.VisualAngle;
 		
         float delta = Math.Abs(angleDifference);
         float clockwiseDelta = Math.Abs(angleDifference + 360f);
@@ -45,6 +51,7 @@ public struct AngleRotation
             angleDifference += 360f;
         }
 
-        return (VisualAngle + angleDifference * (Math.Abs(GroundSpeed) >= 6f ? 0.5f : 0.25f)) % 360f;
+        float multiplier = Math.Abs(data.Physics.GroundSpeed) >= 6f ? 0.5f : 0.25f;
+        return (data.Rotation.VisualAngle + angleDifference * multiplier) % 360f;
     }
 }

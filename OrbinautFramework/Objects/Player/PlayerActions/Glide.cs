@@ -8,20 +8,24 @@ using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Glide(Glide.States state) : IAction
+public struct Glide : IAction
 {
-	public PlayerData Data { private get; init; }
-	
 	public enum States : byte
 	{
 		Air, Ground, Fall
 	}
 	
+	public PlayerData Data { private get; init; }
+
+	private States _state;
+	private float _glideAngle;
+	// GroundSpeed - glide speed
+	
 	public void Perform()
     {
-	    if (state == States.Fall) return;
+	    if (_state == States.Fall) return;
 		
-	    switch (state)
+	    switch (_state)
 	    {
 		    case States.Air: GlideAir(); break;
 		    case States.Ground: GlideGround(); break;
@@ -51,7 +55,7 @@ public struct Glide(Glide.States state) : IAction
 			return;
 		}
 
-		if (ActionValue % 180f != 0f) return;
+		if (_glideAngle % 180f != 0f) return;
 		GroundSpeed.Acceleration = PhysicParams.AccelerationGlide;
 		GroundSpeed.Min(24f);
 	}
@@ -60,13 +64,13 @@ public struct Glide(Glide.States state) : IAction
 	{
 		const float glideGravity = 0.125f;
 
-		Velocity.X = GroundSpeed * -MathF.Cos(Mathf.DegToRad(ActionValue));
+		Velocity.X = GroundSpeed * -MathF.Cos(Mathf.DegToRad(_glideAngle));
 		Gravity = Velocity.Y < 0.5f ? glideGravity : -glideGravity;
 	}
 
 	private void UpdateAirAnimationFrame()
 	{
-		float angle = Math.Abs(ActionValue) % 180f;
+		float angle = Math.Abs(_glideAngle) % 180f;
 		switch (angle)
 		{
 			case < 30f or > 150f:
@@ -100,18 +104,18 @@ public struct Glide(Glide.States state) : IAction
 		}
 
 		// Spawn dust particles
-		if (ActionValue % 4f < Scene.Instance.ProcessSpeed)
+		if (_glideAngle % 4f < Scene.Instance.ProcessSpeed)
 		{
 			//TODO: obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
 				
-		if (ActionValue > 0f && ActionValue % 8f < Scene.Instance.ProcessSpeed)
+		if (_glideAngle > 0f && _glideAngle % 8f < Scene.Instance.ProcessSpeed)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Slide);
 		}
 					
-		ActionValue += Scene.Instance.ProcessSpeed;
+		_glideAngle += Scene.Instance.ProcessSpeed;
 	}
 
 	private void UpdateGroundVelocityX()
@@ -136,40 +140,40 @@ public struct Glide(Glide.States state) : IAction
 	private void TurnAroundAir()
 	{
 		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
-		if (Input.Down.Left && !Mathf.IsZeroApprox(ActionValue))
+		if (Input.Down.Left && !Mathf.IsZeroApprox(_glideAngle))
 		{
-			if (ActionValue > 0f)
+			if (_glideAngle > 0f)
 			{
-				ActionValue = -ActionValue;
+				_glideAngle = -_glideAngle;
 			}
 			
-			ActionValue += speed;
+			_glideAngle += speed;
 			
-			if (ActionValue < 0f)
+			if (_glideAngle < 0f)
 			{
-				ActionValue = 0f;
+				_glideAngle = 0f;
 			}
 			return;
 		}
 		
-		if (Input.Down.Right && !Mathf.IsEqualApprox(ActionValue, 180f))
+		if (Input.Down.Right && !Mathf.IsEqualApprox(_glideAngle, 180f))
 		{
-			if (ActionValue < 0f)
+			if (_glideAngle < 0f)
 			{
-				ActionValue = -ActionValue;
+				_glideAngle = -_glideAngle;
 			}
 			
-			ActionValue += speed;
+			_glideAngle += speed;
 
-			if (ActionValue > 180f)
+			if (_glideAngle > 180f)
 			{
-				ActionValue = 180f;
+				_glideAngle = 180f;
 			}
 			return;
 		}
 		
-		if (Mathf.IsZeroApprox(ActionValue % 180f)) return;
-		ActionValue += speed;
+		if (Mathf.IsZeroApprox(_glideAngle % 180f)) return;
+		_glideAngle += speed;
 	}
 	
 	public void LatePerform()
@@ -247,7 +251,7 @@ public struct Glide(Glide.States state) : IAction
 			-Radius.X, Radius.Y, Radius.X, Radius.Y,
 			true, Constants.Direction.Positive);
 	
-		if (state == States.Ground)
+		if (_state == States.Ground)
 		{
 			if (floorDistance > 14)
 			{
@@ -271,7 +275,7 @@ public struct Glide(Glide.States state) : IAction
 
 	private void LandWhenGlide()
 	{
-		switch (state)
+		switch (_state)
 		{
 			case States.Air: LandAir(); break;
 			case States.Fall: LandFall(); break;
@@ -288,8 +292,8 @@ public struct Glide(Glide.States state) : IAction
 		}
 				
 		Animation = Animations.GlideGround;
-		state = States.Ground;
-		ActionValue = 0f;
+		_state = States.Ground;
+		_glideAngle = 0f;
 		Gravity = 0f;
 	}
 
@@ -312,7 +316,7 @@ public struct Glide(Glide.States state) : IAction
 
 	private void AttachToWall(int wallRadius, int climbY)
 	{
-		if (state != (int)States.Air) return;
+		if (_state != (int)States.Air) return;
 
 		CheckCollisionOnAttaching(wallRadius, climbY);
 			
@@ -322,10 +326,10 @@ public struct Glide(Glide.States state) : IAction
 		}
 
 		bool isWallJump = SharedData.SuperstarsTweaks && (Input.Down.Up || Input.Down.Down);
-		state = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal);
+		_state = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal);
 		Action = Actions.Climb;
 		Animation = Animations.ClimbWall;
-		ActionValue = 0f;
+		_glideAngle = 0f;
 		GroundSpeed.Value = 0f;
 		Velocity.Y = 0f;
 		Gravity	= 0f;
@@ -362,8 +366,8 @@ public struct Glide(Glide.States state) : IAction
 	private void Release()
 	{
 		Animation = Animations.GlideFall;
-		state = (int)States.Fall;
-		ActionValue = 0f;
+		_state = (int)States.Fall;
+		_glideAngle = 0f;
 		Radius = RadiusNormal;
 		
 		ResetGravity();

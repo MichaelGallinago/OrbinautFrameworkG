@@ -6,14 +6,13 @@ namespace OrbinautFramework3.Objects.Player;
 
 public interface IPlayerCameraTarget : IPosition
 {
-    IPlayerNode PlayerNode { get; }
-    
-    public Actions.Types ActionType { get; }
     DeathData Death { get; }
-    PhysicsData Physics { get; }
-    CollisionData Collision { get; }
     VisualData Visual { get; }
-
+    PhysicsData Physics { get; }
+    IPlayerNode PlayerNode { get; }
+    ActionFsm.States State { get; }
+    CollisionData Collision { get; }
+    
     Vector2 IPosition.Position
     {
         get => PlayerNode.Position;

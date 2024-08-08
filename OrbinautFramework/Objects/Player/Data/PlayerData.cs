@@ -2,17 +2,11 @@ using OrbinautFramework3.Framework.Tiles;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class PlayerData : IPlayerCameraTarget, IActor, ICpuTarget
+public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode playerNode) 
+	: IPlayerCameraTarget, IPlayerData, IPlayerCpuTarget
 {
-	public IPlayerNode PlayerNode { get; }
 	public int Id { get; set; }
-	
-	public Actions.Types ActionType
-	{
-		get => Action.Type;
-		set => Action.Type = value;
-	}
-	public Actions Action;
+	public IPlayerNode PlayerNode { get; } = playerNode;
 	
 	public ItemData Item { get; } = new();
 	public CarryData Carry { get; } = new();
@@ -25,17 +19,18 @@ public class PlayerData : IPlayerCameraTarget, IActor, ICpuTarget
 	public PhysicsData Physics { get; } = new();
 	public RotationData Rotation { get; } = new();
 	public CollisionData Collision { get; } = new();
-	public TileCollider TileCollider { get; } = new();
 	
-	public PlayerData(IPlayerNode playerNode)
+	public TileCollider TileCollider { get; } = new();
+
+	public ActionFsm.States State
 	{
-		PlayerNode = playerNode;
-		Action = new Actions(this);
+		get => stateHolder.State; 
+		set => stateHolder.State = value;
 	}
 	
 	public void ResetState()
 	{
-		Action.Type = Actions.Types.Default;
+		State = ActionFsm.States.Default;
 		
 		Damage.IsHurt = false;
 		

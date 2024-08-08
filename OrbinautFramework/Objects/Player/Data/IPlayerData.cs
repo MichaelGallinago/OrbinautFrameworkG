@@ -1,7 +1,7 @@
 ﻿namespace OrbinautFramework3.Objects.Player.Data;
 
-public interface IActor
+public interface IPlayerData
 {
     public int Id { get; set; }
-    public Actions.Types ActionType { get; set; }
+    ActionFsm.States State { get; }
 }

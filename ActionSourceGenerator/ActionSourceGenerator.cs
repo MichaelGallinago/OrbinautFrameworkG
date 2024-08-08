@@ -92,9 +92,9 @@ using System.Runtime.InteropServices;
 namespace OrbinautFramework3.Objects.Player.Data
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct Actions(PlayerData data)
+    public struct ActionFsm(PlayerData data)
     {
-        public enum Types : 
+        public enum States : 
 """
         );
         
@@ -109,11 +109,9 @@ namespace OrbinautFramework3.Objects.Player.Data
 """
         }
         
-        public static implicit operator Types(Actions action) => action.Type;
-        
-        public Types Type
+        public States State
         {
-            get => _type;
+            get => _state;
             set
             {
 """
@@ -136,7 +134,7 @@ namespace OrbinautFramework3.Objects.Player.Data
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append($"\n\t\t\t\t\tcase Types.{name}: {name} = new {name} ");
+            sourceBuilder.Append($"\n\t\t\t\t\tcase States.{name}: {name} = new {name} ");
             sourceBuilder.Append("{ Data = _data }; break;");
         }
 
@@ -144,11 +142,11 @@ namespace OrbinautFramework3.Objects.Player.Data
 """             
                     default: throw new ArgumentOutOfRangeException();
                 }
-                _type = value;
+                _state = value;
             }
         }
         
-        [FieldOffset(0)] private Types _type = Types.None;
+        [FieldOffset(0)] private States _state = States.None;
         [FieldOffset(8)] private PlayerData _data = data;
 """    
         );
@@ -156,7 +154,7 @@ namespace OrbinautFramework3.Objects.Player.Data
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append($"\n\t\t[FieldOffset(16)] public {name} {name};");
+            sourceBuilder.Append($"\n\t\t[FieldOffset(16)] private {name} {name};");
         }
         
         foreach (KeyValuePair<string, List<string>> method in otherMethods)
@@ -177,7 +175,7 @@ namespace OrbinautFramework3.Objects.Player.Data
 """
         );
         
-        context.AddSource("Action.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+        context.AddSource("ActionFsm.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
     }
 
     private static void AddMethod(
@@ -186,14 +184,14 @@ namespace OrbinautFramework3.Objects.Player.Data
         sourceBuilder.Append("\n\n\t\t").Append(access).Append(" void ").Append(methodName).Append("()\n").Append(
 """
         {
-            switch (_type)
+            switch (_state)
             {
 """
         );
         
         foreach (string action in actions)
         {
-            sourceBuilder.Append($"\n\t\t\t\tcase Types.{action}: {action}.{methodName}(); break;");
+            sourceBuilder.Append($"\n\t\t\t\tcase States.{action}: {action}.{methodName}(); break;");
         }
 
         sourceBuilder.Append('\n').Append(
