@@ -96,9 +96,7 @@ public class PlayerLogic
         _data.Action.LatePerform();
         _carry.Process();
     }
-
-    public void SetAnimationFrameChanged() => _data.Visual.IsFrameChanged = true;
-
+    
     /*
     //TODO: update debug mode
     public void OnEnableEditMode()

@@ -11,8 +11,6 @@ namespace OrbinautFramework3.Objects.Player.Modules;
 
 public class CpuModule(PlayerData data)
 {
-	public const int DelayStep = 16;
-	
 	public enum States : byte
 	{
 		RespawnInit, Respawn, Main, Fly, Stuck
@@ -23,7 +21,10 @@ public class CpuModule(PlayerData data)
 		S2, S3
 	}
 	
-    public States State { get; set; } = States.Main;
+	public const int DelayStep = 16;
+	private const int JumpFrequency = 64;
+	
+    public States State { get; set; }
     public float RespawnTimer { get; set; }
     public float InputTimer { get; set; }
     public bool IsJumping { get; set; }
@@ -63,14 +64,14 @@ public class CpuModule(PlayerData data)
 		
 		switch (State)
 		{
-			case States.RespawnInit: InitRespawnCpu(); break;
-			case States.Respawn: ProcessRespawnCpu(); break;
-			case States.Main: ProcessMainCpu(); break;
-			case States.Stuck: ProcessStuckCpu(); break;
+			case States.RespawnInit: InitRespawn(); break;
+			case States.Respawn: ProcessRespawn(); break;
+			case States.Main: ProcessMain(); break;
+			case States.Stuck: ProcessStuck(); break;
 		}
 	}
 
-	private void InitRespawnCpu()
+	private void InitRespawn()
 	{
 		// Take some time (up to 64 frames (on 60 fps))
 		// to respawn or do not respawn at all unless holding down any button
@@ -84,9 +85,9 @@ public class CpuModule(PlayerData data)
 		State = States.Respawn;
 	}
 
-	private void ProcessRespawnCpu()
+	private void ProcessRespawn()
 	{
-		if (CheckCpuRespawn()) return;
+		if (CheckRespawn()) return;
 
 		SetRespawnAnimation();
 		if (data.PlayerNode.Type == PlayerNode.Types.Tails)
@@ -190,18 +191,18 @@ public class CpuModule(PlayerData data)
 		return distance.X != 0 || distance.Y != 0;
 	}
 	
-	private void ProcessMainCpu()
+	private void ProcessMain()
 	{
 		FreezeOrFlyIfLeaderDied();
 		
-		if (CheckCpuRespawn()) return; // Exit if respawned
+		if (CheckRespawn()) return; // Exit if respawned
 		
 		if (!data.Collision.IsObjectInteractionEnabled || 
 		    data.Carry.Target != null || data.ActionType == Actions.Types.Carried) return;
 		
 		Target ??= _leadPlayer; // Follow lead player
 		
-		// Do not run CPU follow logic while under manual control and input is allowed
+		// Exit if CPU logic is disabled
 		if (InputTimer > 0f)
 		{
 			InputTimer -= Scene.Instance.ProcessSpeed;
@@ -215,34 +216,46 @@ public class CpuModule(PlayerData data)
 		{
 			State = States.Stuck;
 		}
+
+		TryJump();
 		
+		data.Input.Set(_inputPress, _inputDown);
+	}
+
+	private void TryJump()
+	{
 		(Vector2 targetPosition, _inputPress, _inputDown, 
-			Constants.Direction direction, OrbinautNode setPushAnimationBy) = Target.RecordedData[_delay];
+			Constants.Direction direction, OrbinautNode isTargetPush) = Target.RecordedData[_delay];
 
 		if (SharedData.Behaviour == Behaviours.S3 &&
 		    Math.Abs(Target.GroundSpeed) < 4f && Target.OnObject == null)
 		{
 			targetPosition.X -= 32f;
 		}
+		
+		// Copy (and modify) inputs if we are not pushing anything or if the followed player
+		// was pushing something a few frames ago
+		if (data.Visual.SetPushBy != null && isTargetPush == null)
+		{
+			Jump();
+			return;
+		}
+		
+		int distanceX = Mathf.FloorToInt(targetPosition.X - data.PlayerNode.Position.X);
+		Push(distanceX, direction);
+		if (CheckJump(distanceX, targetPosition.Y))
+		{
+			Jump();
+		}
+	}
 
-		// Copy and modify inputs if we are not pushing anything or
-		// if the followed player was pushing something a few frames ago
-		bool doJump = data.Visual.Animation != Animations.Duck && Target.Animation != Animations.Wait;
-		if (data.Visual.SetPushBy == null || setPushAnimationBy != null)
-		{
-			int distanceX = Mathf.FloorToInt(targetPosition.X - data.PlayerNode.Position.X);
-			PushCpu(distanceX, direction);
-			doJump = CheckCpuJump(distanceX, targetPosition.Y);
-		}
+	private void Jump()
+	{
+		if (data.Visual.Animation == Animations.Duck || Target.Animation == Animations.Wait) return;
+		if (!Scene.Instance.IsTimePeriodLooped(JumpFrequency)) return;
 		
-		// Jump
-		if (doJump && Scene.Instance.IsTimePeriodLooped(64f))
-		{
-			_inputPress.Abc = _inputDown.Abc = true;
-			IsJumping = true;
-		}
-		
-		data.Input.Set(_inputPress, _inputDown);
+		_inputPress.Abc = _inputDown.Abc = true;
+		IsJumping = true;
 	}
 
 	private void FreezeOrFlyIfLeaderDied()
@@ -264,7 +277,7 @@ public class CpuModule(PlayerData data)
 		data.Physics.IsControlRoutineEnabled = false;
 	}
 	
-	private void PushCpu(float distanceX, Constants.Direction facing)
+	private void Push(float distanceX, Constants.Direction facing)
 	{
 		if (distanceX == 0f)
 		{
@@ -288,7 +301,7 @@ public class CpuModule(PlayerData data)
 		}
 	}
 	
-	private bool CheckCpuJump(float distanceX, float targetPositionY)
+	private bool CheckJump(float distanceX, float targetPositionY)
 	{
 		if (IsJumping)
 		{
@@ -299,14 +312,15 @@ public class CpuModule(PlayerData data)
 			IsJumping = false;
 			return true;
 		}
-		
-		if (distanceX >= 64f && !Scene.Instance.IsTimePeriodLooped(256f)) return false;
-		return targetPositionY - data.PlayerNode.Position.Y <= -32;
+
+		const float jumpPeriod = JumpFrequency * 4f;
+		if (distanceX >= 64f && !Scene.Instance.IsTimePeriodLooped(jumpPeriod)) return false;
+		return targetPositionY - data.PlayerNode.Position.Y <= -32f;
 	}
 	
-	private void ProcessStuckCpu()
+	private void ProcessStuck()
 	{
-		if (CheckCpuRespawn()) return;
+		if (CheckRespawn()) return;
 		
 		if (data.Physics.GroundLockTimer > 0f || InputTimer > 0f || data.Physics.GroundSpeed != 0f) return;
 		
@@ -330,7 +344,7 @@ public class CpuModule(PlayerData data)
 		State = States.Main;
 	}
 	
-	private bool CheckCpuRespawn()
+	private bool CheckRespawn()
 	{
 		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && 
 		                      camera.TargetBoundary.Z <= data.PlayerNode.Position.X;
@@ -341,10 +355,12 @@ public class CpuModule(PlayerData data)
 			return false;
 		}
 		
-		//TODO: check IsInstanceValid == instance_exists
 		RespawnTimer += Scene.Instance.ProcessSpeed;
-		if (RespawnTimer < 300f && 
-		    (data.Collision.OnObject == null || GodotObject.IsInstanceValid(data.Collision.OnObject))) return false;
+		if (RespawnTimer < 300f)
+		{
+			if (data.Collision.OnObject == null || GodotObject.IsInstanceValid(data.Collision.OnObject)) return false;
+		}
+		
 		Respawn();
 		return true;
 	}

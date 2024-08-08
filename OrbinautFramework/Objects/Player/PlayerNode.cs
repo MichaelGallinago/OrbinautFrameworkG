@@ -24,11 +24,15 @@ public abstract partial class PlayerNode : OrbinautNode, ICarryTarget, IPlayerNo
 	protected PlayerNode()
 	{
 		_logic = new PlayerLogic(this);
-		Memento = new PlayerMemento(Data);
+		Memento = new PlayerMemento(this);
 		Init();
 	}
-
-	public override void _Ready() => Sprite.FrameChanged += _logic.SetAnimationFrameChanged;
+	
+	public void Init()
+	{
+		_logic.Init();
+		Sprite.Animate(this);
+	}
 
 	public override void _EnterTree()
 	{
@@ -47,12 +51,6 @@ public abstract partial class PlayerNode : OrbinautNode, ICarryTarget, IPlayerNo
 	public override void _Process(double delta)
 	{
 		_logic.Process();
-		Sprite.Animate(this);
-	}
-
-	public void Init()
-	{
-		_logic.Init();
 		Sprite.Animate(this);
 	}
 

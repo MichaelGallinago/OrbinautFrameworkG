@@ -10,6 +10,9 @@ namespace OrbinautFramework3.Objects.Player;
 public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
 	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
+
+	public bool IsFrameChanged { get; private set; }
+	public bool IsFinished { get; private set; }
 	
 	private IAnimatedPlayer _player;
 	private int _spriteFramesIndex;
@@ -31,18 +34,19 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 		switch (player.Type)
 		{
-			case Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
-			case Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
-			case Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
-			case Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
+			case PlayerNode.Types.Sonic: AnimateSonic(SonicType, SonicSpeed); break;
+			case PlayerNode.Types.Tails: AnimateTails(TailsType, TailsSpeed); break;
+			case PlayerNode.Types.Knuckles: AnimateKnuckles(KnucklesType, KnucklesSpeed); break;
+			case PlayerNode.Types.Amy: AnimateAmy(AmyType, SonicSpeed); break;
 		}
 		
 		UpdateScale();
-		player.IsAnimationFrameChanged = false;
+		IsFrameChanged = false;
+		IsFinished = false;
 		OverrideFrame();
 	}
 
-	public int GetAnimationFrameCount(Animations animation, Types playerType)
+	public int GetAnimationFrameCount(Animations animation, PlayerNode.Types playerType)
 	{
 		return _spriteFrames[(int)playerType].GetFrameCount(animation.ToStringFast());
 	}
@@ -56,10 +60,11 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 	private void OnAnimationFinished()
 	{
+		IsFinished = true;
 		_player.Animation = _player.Animation switch
 		{
 			Animations.Bounce or Animations.Breathe or Animations.Flip or Animations.Transform => Animations.Move,
-			Animations.Idle when _player.Type == Types.Sonic => Animations.Wait,
+			Animations.Idle when _player.Type == PlayerNode.Types.Sonic => Animations.Wait,
 			Animations.Skid when
 				_player.Input.Down is { Left: false, Right: false } || 
 			    Math.Abs(_player.GroundSpeed) < PlayerConstants.SkidSpeedThreshold 
@@ -76,7 +81,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 
 	private void UpdateSpriteFrames()
 	{
-		int index = _player.Type == Types.Sonic && _player.IsSuper ? 5 : (int)_player.Type;
+		int index = _player.Type == PlayerNode.Types.Sonic && _player.IsSuper ? 5 : (int)_player.Type;
 		if (_spriteFramesIndex == index) return;
 		SpriteFrames = _spriteFrames[_spriteFramesIndex = index];
 	}

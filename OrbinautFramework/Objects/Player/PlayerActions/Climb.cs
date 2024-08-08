@@ -23,7 +23,7 @@ public struct Climb() : IAction
 	}
 	
 	private States _state = States.Normal;
-	private float _step;
+	private float _animationValue;
 	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 
 	public void Perform()
@@ -63,7 +63,7 @@ public struct Climb() : IAction
 			// Update animation frame if still climbing
 			if (Velocity.Y != 0)
 			{
-				OverrideAnimationFrame = Mathf.FloorToInt(_step / stepsPerClimbFrame);
+				OverrideAnimationFrame = Mathf.FloorToInt(_animationValue / stepsPerClimbFrame);
 			}
 			return;
 		}
@@ -92,7 +92,7 @@ public struct Climb() : IAction
 		if (wallDistance >= 4)
 		{
 			_state = (int)States.Ledge;
-			_step = 0f;
+			_animationValue = 0f;
 			Velocity.Y = 0f;
 			Gravity = 0f;
 			return true;
@@ -147,10 +147,10 @@ public struct Climb() : IAction
 	{
 		if (Input.Down.Up)
 		{
-			_step += Scene.Instance.ProcessSpeed;
-			if (_step > maxValue)
+			_animationValue += Scene.Instance.ProcessSpeed;
+			if (_animationValue > maxValue)
 			{
-				_step = 0f;
+				_animationValue = 0f;
 			}
 
 			Velocity.Y = -PhysicParams.AccelerationClimb;
@@ -159,10 +159,10 @@ public struct Climb() : IAction
 		
 		if (Input.Down.Down)
 		{
-			_step -= Scene.Instance.ProcessSpeed;
-			if (_step < 0f)
+			_animationValue -= Scene.Instance.ProcessSpeed;
+			if (_animationValue < 0f)
 			{
-				_step = maxValue;
+				_animationValue = maxValue;
 			}
 
 			Velocity.Y = PhysicParams.AccelerationClimb;
@@ -177,7 +177,7 @@ public struct Climb() : IAction
 		Animation = Animations.GlideFall;
 		Action = Actions.Glide;
 		_state = (int)GlideStates.Fall;
-		_step = 1f;
+		_animationValue = 1f;
 		Radius = RadiusNormal;
 		
 		ResetGravity();
@@ -185,48 +185,30 @@ public struct Climb() : IAction
 
 	private void ClimbLedge()
 	{
-		//TODO: check this
-		
-		ClimbLedgeStates previousState = GetClimbLedgeState(_step);
-		_step += Scene.Instance.ProcessSpeed;
-		ClimbLedgeStates state = GetClimbLedgeState(_step);
-		if (state == previousState) return;
-		
-		switch (state)
+		if (Data.Visual.Animation != Animations.ClimbLedge)
 		{
-			case ClimbLedgeStates.Frame0:
-				Animation = Animations.ClimbLedge;
-				Position += new Vector2(3f * (float)Facing, -3f);
-				break;
-					
-			case ClimbLedgeStates.Frame1:
-				Position += new Vector2(8f * (float)Facing, -10f);
-				break;
-					
-			case ClimbLedgeStates.Frame2:
-				Position -= new Vector2(8f * (float)Facing, 12f);
-				break;
-					
-			case ClimbLedgeStates.End:
-				Land();
-				Animation = Animations.Idle;
-				Position += new Vector2(8f * (float)Facing, 4f);
+			Animation = Animations.ClimbLedge;
+			Position += new Vector2(3f * (float)Facing, -3f);
+		}
+		else if (Data.PlayerNode.Sprite.IsFrameChanged)
+		{
+			switch (Data.PlayerNode.Sprite.Frame)
+			{
+				case 1: Position += new Vector2(8f * (float)Facing, -10f); break;
+				case 2: Position -= new Vector2(8f * (float)Facing, 12f); break;
+			}
+		}
+		else if (Data.PlayerNode.Sprite.IsFinished)
+		{
+			Land();
+			Animation = Animations.Idle;
+			Position += new Vector2(8f * (float)Facing, 4f);
 
-				// Subtract that 1px that was applied when we attached to the wall
-				if (Facing == Constants.Direction.Negative)
-				{
-					Position += Vector2.Left;
-				}
-				break;
+			// Subtract that 1px that was applied when we attached to the wall
+			if (Facing == Constants.Direction.Negative)
+			{
+				Position += Vector2.Left;
+			}
 		}
 	}
-	
-	private static ClimbLedgeStates GetClimbLedgeState(float value) => value switch
-	{
-		<= 0f => ClimbLedgeStates.None,
-		<= 6f => ClimbLedgeStates.Frame0,
-		<= 12f => ClimbLedgeStates.Frame1,
-		<= 18f => ClimbLedgeStates.Frame2,
-		_ => ClimbLedgeStates.End
-	};
 }

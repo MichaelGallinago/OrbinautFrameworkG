@@ -1,4 +1,3 @@
-using System;
 using Godot;
 using OrbinautFramework3.Objects.Player;
 
@@ -12,11 +11,11 @@ public partial class PrefabStorage : Resource
     [Export] public PackedScene PlayerKnuckles { get; private set; }
     [Export] public PackedScene PlayerAmy { get; private set; }
     
-    public PackedScene GetPlayer(Types type) => type switch
+    public PackedScene GetPlayer(PlayerNode.Types type) => type switch
     {
-        Types.Tails => PlayerTails,
-        Types.Knuckles => PlayerKnuckles,
-        Types.Amy => PlayerAmy,
+        PlayerNode.Types.Tails => PlayerTails,
+        PlayerNode.Types.Knuckles => PlayerKnuckles,
+        PlayerNode.Types.Amy => PlayerAmy,
         _ => PlayerSonic
     };
 }

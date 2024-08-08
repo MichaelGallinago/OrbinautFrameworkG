@@ -9,6 +9,9 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Dash(PlayerData data)
 {
+	private float _charge;
+	private float _releaseSpeed;
+	
     public bool Perform()
     {
 	    if (!SharedData.Dash || data.PlayerNode.Type != PlayerNode.Types.Sonic || 
@@ -32,8 +35,8 @@ public struct Dash(PlayerData data)
     	
     	data.Visual.Animation = Animations.Move;
 	    data.ActionType = Actions.Types.Dash;
-    	ActionValue = 0f;
-    	ActionValue2 = 0f;
+    	_charge = 0f;
+    	_releaseSpeed = 0f;
     		
     	AudioPlayer.Sound.Play(SoundStorage.Charge2);
     }
@@ -42,15 +45,15 @@ public struct Dash(PlayerData data)
     {
     	if (!Input.Down.Up) return false;
     	
-    	if (ActionValue < 30f)
+    	if (_charge < 30f)
     	{
-    		ActionValue += Scene.Instance.ProcessSpeed;
+    		_charge += Scene.Instance.ProcessSpeed;
     	}
 
     	float acceleration = 0.390625f * (float)Facing * Scene.Instance.ProcessSpeed;
     	float launchSpeed = PhysicParams.AccelerationTop * (ItemSpeedTimer > 0f || IsSuper ? 1.5f : 2f);
-    	ActionValue2 = Math.Clamp(ActionValue2 + acceleration, -launchSpeed, launchSpeed);
-    	GroundSpeed.Value = ActionValue2;
+    	_releaseSpeed = Math.Clamp(_releaseSpeed + acceleration, -launchSpeed, launchSpeed);
+    	GroundSpeed.Value = _releaseSpeed;
     	return true;
     }
 
@@ -59,7 +62,7 @@ public struct Dash(PlayerData data)
     	AudioPlayer.Sound.Stop(SoundStorage.Charge2);
     	Action = Actions.None;
     	
-    	if (ActionValue < 30f)
+    	if (_charge < 30f)
     	{
     		GroundSpeed.Value = 0f;
     		return false;

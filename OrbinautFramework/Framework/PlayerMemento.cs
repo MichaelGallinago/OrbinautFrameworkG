@@ -5,17 +5,17 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework;
 
-public class PlayerMemento(PlayerData originator) : IMemento
+public class PlayerMemento(PlayerNode originator) : IMemento
 {
-    public Vector2 Position { get; } = originator.PlayerNode.Position;
-    private readonly Vector2 _scale = originator.PlayerNode.Scale;
-    private readonly int _zIndex = originator.PlayerNode.ZIndex;
+    public Vector2 Position { get; } = originator.Position;
+    private readonly Vector2 _scale = originator.Scale;
+    private readonly int _zIndex = originator.ZIndex;
     
     public void Reset()
     {
-        originator.PlayerNode.Position = Position;
-        originator.PlayerNode.ZIndex = _zIndex;
-        originator.PlayerNode.Scale = _scale;
+        originator.Position = Position;
+        originator.ZIndex = _zIndex;
+        originator.Scale = _scale;
 
         originator.Init();
     }

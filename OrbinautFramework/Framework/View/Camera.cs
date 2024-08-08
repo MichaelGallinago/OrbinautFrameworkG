@@ -149,8 +149,8 @@ public partial class Camera : Camera2D, ICamera
 	
 	private void FollowPlayer(float processSpeed, Vector2 targetPosition, IPlayerCameraTarget data)
 	{
-		if (Scene.Instance.State == Scene.States.Paused && 
-		    data.Death.State == Death.States.Wait || data.Death.IsDead) return;
+		if (Scene.Instance.State == Scene.States.Paused && data.Death.State == Death.States.Wait) return;
+		if (data.Death.IsDead) return;
 		
 		FollowPlayerY(processSpeed, targetPosition.Y, data);
 		if (SharedData.CdCamera)

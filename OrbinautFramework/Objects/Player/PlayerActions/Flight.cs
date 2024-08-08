@@ -11,7 +11,7 @@ public struct Flight : IAction
 	public PlayerData Data { private get; init; }
 	
 	private float _flightTimer;
-	private float _flyUpTimer;
+	private float _ascensionTimer;
 	
     public void Perform()
     {
@@ -53,20 +53,20 @@ public struct Flight : IAction
 
     private bool FlyUp()
     {
-    	if (_flyUpTimer <= 0f) return false;
+    	if (_ascensionTimer <= 0f) return false;
 
     	if (Velocity.Y < -1f)
     	{
-    		_flyUpTimer = 0f;
+    		_ascensionTimer = 0f;
     		return true;
     	}
     	
     	Gravity = GravityType.TailsUp;
     			
-    	_flyUpTimer += Scene.Instance.ProcessSpeed;
-    	if (_flyUpTimer >= 31f)
+    	_ascensionTimer += Scene.Instance.ProcessSpeed;
+    	if (_ascensionTimer >= 31f)
     	{
-    		_flyUpTimer = 0f;
+    		_ascensionTimer = 0f;
     	}
 
     	return true;
@@ -77,7 +77,7 @@ public struct Flight : IAction
     	if (Input.Press.Abc && _flightTimer > 0f && (!IsUnderwater || CarryTarget == null))
     	{
     		//TODO: check that this works
-    		_flyUpTimer = 1f;
+    		_ascensionTimer = 1f;
     	}
     		
     	Gravity = GravityType.TailsDown;

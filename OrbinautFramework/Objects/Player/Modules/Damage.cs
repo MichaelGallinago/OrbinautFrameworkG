@@ -1,11 +1,12 @@
 ﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
-namespace OrbinautFramework3.Objects.Player;
+namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct Damage
 {
@@ -18,13 +19,14 @@ public struct Damage
 
     	if (Id == 0)
     	{
-    		Scene.Instance.AllowPause = false;
     		Scene.Instance.State = Scene.States.StopObjects;
     		
     		SharedData.PlayerShield = ShieldContainer.Types.None;
     	}
     	
     	ZIndex = (int)Constants.ZIndexes.AboveForeground;
+	    Visible = true;
+	    
     	Action = Actions.None;
     	Animation = Animations.Death;
     	IsDead = true;
