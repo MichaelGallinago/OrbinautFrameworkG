@@ -1,4 +1,5 @@
 ﻿using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
@@ -7,7 +8,7 @@ public class VisualData
     public int? OverrideFrame { get; set; }
     public bool IsFrameChanged { get; set; }
     public Animations Animation { get; set; }
-    public OrbinautData SetPushBy { get; set; }
+    public OrbinautNode SetPushBy { get; set; } //TODO: replace OrbinautNode with interface
     public Constants.Direction Facing { get; set; }
 
     public void Init()

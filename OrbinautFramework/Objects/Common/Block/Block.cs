@@ -16,7 +16,7 @@ public partial class Block : OrbinautData
 
     public override void _Process(double delta)
     {
-        foreach (Player player in Scene.Instance.Players.Values)
+        foreach (PlayerNode player in Scene.Instance.Players.Values)
         {
             // Combo counter and spin flag are cleared when player lands, so back them up
             bool isSpinning = player.IsSpinning;

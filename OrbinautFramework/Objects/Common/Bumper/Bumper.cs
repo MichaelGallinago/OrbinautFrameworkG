@@ -40,7 +40,7 @@ public partial class Bumper : OrbinautData
 
     private void CheckCollisionWithPlayers()
     {
-        foreach (Player player in Scene.Instance.Players.Values)
+        foreach (PlayerNode player in Scene.Instance.Players.Values)
         {
             if (!CheckPlayerHitBoxCollision(player)) continue;
             
@@ -58,7 +58,7 @@ public partial class Bumper : OrbinautData
             
             //TODO: obj_score
             //instance_create(x, y, obj_score);
-            Player.IncreaseComboScore();
+            PlayerNode.IncreaseComboScore();
             
             break;
         }

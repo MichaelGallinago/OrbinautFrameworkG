@@ -16,7 +16,7 @@ public class PlayerLogic
     private readonly CpuModule _cpuModule;
     private readonly PlayerData _data;
 
-    private Dash _dash = new();
+    private Dash _dash;
     private Jump _jump = new();
     private Carry _carry = new();
     private Death _death = new();
@@ -33,9 +33,12 @@ public class PlayerLogic
     private Initialization _initialization = new();
     private ObjectInteraction _objectInteraction = new();
 
-    public PlayerLogic(IPlayer player)
+    public PlayerLogic(IPlayerNode playerNode)
     {
-        _data = new PlayerData(player);
+        _data = new PlayerData(playerNode);
+        
+        _dash = new Dash(_data);
+        
         _cpuModule = new CpuModule(_data);
         _landing.LandHandler += () => _data.Action.OnLand();
     }

@@ -2,11 +2,16 @@ using OrbinautFramework3.Framework.Tiles;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class PlayerData
+public class PlayerData : IPlayerCameraTarget, IActor, ICpuTarget
 {
-	public IPlayer Player { get; set; }
+	public IPlayerNode PlayerNode { get; }
 	public int Id { get; set; }
-
+	
+	public Actions.Types ActionType
+	{
+		get => Action.Type;
+		set => Action.Type = value;
+	}
 	public Actions Action;
 	
 	public ItemData Item { get; } = new();
@@ -22,9 +27,9 @@ public class PlayerData
 	public CollisionData Collision { get; } = new();
 	public TileCollider TileCollider { get; } = new();
 	
-	public PlayerData(IPlayer player)
+	public PlayerData(IPlayerNode playerNode)
 	{
-		Player = player;
+		PlayerNode = playerNode;
 		Action = new Actions(this);
 	}
 	

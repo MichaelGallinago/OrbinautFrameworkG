@@ -28,9 +28,9 @@ public struct Carry
         GrabAnotherPlayer();
     }
 
-    private void GrabAnotherPlayer(Player carrier)
+    private void GrabAnotherPlayer(PlayerNode carrier)
     {
-        foreach (Player player in Scene.Instance.Players.Values)
+        foreach (PlayerNode player in Scene.Instance.Players.Values)
         {
             if (player == carrier) continue;
             if (player.Action is Actions.SpinDash or Actions.Carried) continue;

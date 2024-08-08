@@ -1,6 +1,6 @@
 ﻿namespace OrbinautFramework3.Objects.Player.Characters;
 
-public partial class Knuckles : Player
+public partial class Knuckles : PlayerNode
 {
     public Knuckles()
     {

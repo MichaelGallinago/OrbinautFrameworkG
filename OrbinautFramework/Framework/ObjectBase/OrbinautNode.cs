@@ -2,7 +2,7 @@
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public abstract partial class OrbinautNode : Node2D, ICullable
+public abstract partial class OrbinautNode : Node2D, ICullable, IPosition
 {
     [Export] public HitBox HitBox { get; init; }
     [Export] public SolidBox SolidBox { get; init; }

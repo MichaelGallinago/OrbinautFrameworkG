@@ -10,7 +10,7 @@ public interface ICamera
     public int BoundSpeed { get; set; }
     public Vector4 TargetBoundary { get; set; }
     public Vector4 Boundary { get; }
-    public OrbinautData Target { set; }
+    public IPosition Target { set; }
     public bool IsMovementAllowed { get; set; }
     
     public bool CheckRectInside(Rect2 rect);

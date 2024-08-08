@@ -1,8 +1,8 @@
 using System;
 using Godot;
-using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -25,7 +25,7 @@ public partial class Camera : Camera2D, ICamera
 	private Rect2I _activeRegion;
 	public bool IsActiveRegionChanged { get; private set; }
     
-	[Export] public OrbinautData Target
+	[Export] public IPosition Target
 	{
 		get => _target;
 		set
@@ -39,7 +39,8 @@ public partial class Camera : Camera2D, ICamera
 			
 			_target = value;
 			_viewTimer = MaxViewTime;
-			_isTargetPlayer = value is PlayerData;
+			_isTargetPlayer = value is IPlayerCameraTarget;
+			_godotObjectTarget = value as GodotObject;
 			
 			if (value == null) return;
 			
@@ -47,8 +48,10 @@ public partial class Camera : Camera2D, ICamera
 			_rawPosition = PreviousPosition = DrawPosition;
 		}
 	}
-	private OrbinautData _target;
+	
+	private IPosition _target;
 	private bool _isTargetPlayer;
+	private GodotObject _godotObjectTarget;
 
 	public Vector4I Bounds;
 	
@@ -144,23 +147,24 @@ public partial class Camera : Camera2D, ICamera
 		return position >= ActiveRegion.Position.Y && position < ActiveRegion.Position.Y + ActiveRegion.Size.Y;
 	}
 	
-	private void FollowPlayer(float processSpeed, Vector2 targetPosition, PlayerData player)
+	private void FollowPlayer(float processSpeed, Vector2 targetPosition, IPlayerCameraTarget data)
 	{
-		if (Scene.Instance.State == Scene.States.Paused && player.DeathState == DeathStates.Wait || player.IsDead) return;
+		if (Scene.Instance.State == Scene.States.Paused && 
+		    data.Death.State == Death.States.Wait || data.Death.IsDead) return;
 		
-		FollowPlayerY(processSpeed, targetPosition.Y, player);
+		FollowPlayerY(processSpeed, targetPosition.Y, data);
 		if (SharedData.CdCamera)
 		{
 			FollowTargetCdX(processSpeed, targetPosition.X);
-			UpdateCdCamera(player, processSpeed);
+			UpdateCdCamera(data, processSpeed);
 		}
 		else
 		{
 			FollowTargetX(processSpeed, targetPosition.X);
 		}
 
-		bool doShiftDown = player.Visual == Objects.Player.Animations.Duck;
-		bool doShiftUp = player.Visual == Objects.Player.Animations.LookUp;
+		bool doShiftDown = data.Visual.Animation == Objects.Player.Animations.Duck;
+		bool doShiftUp = data.Visual.Animation == Objects.Player.Animations.LookUp;
 
 		if (doShiftDown || doShiftUp)
 		{
@@ -197,11 +201,11 @@ public partial class Camera : Camera2D, ICamera
 		return true;
 	}
 	
-	private void UpdateCdCamera(PlayerData player, float processSpeed)
+	private void UpdateCdCamera(IPlayerCameraTarget data, float processSpeed)
 	{
 		const int shiftSpeedX = 2;
 		
-		if (Math.Abs(player.GroundSpeed) < 6f && player.Action != Actions.SpinDash)
+		if (Math.Abs(data.Physics.GroundSpeed) < 6f && data.ActionType != Actions.Types.SpinDash)
 		{
 			_bufferOffset.X = _bufferOffset.X.MoveToward(0f, shiftSpeedX * processSpeed);
 			return;
@@ -209,8 +213,10 @@ public partial class Camera : Camera2D, ICamera
 		
 		if (_delay.X > 0f) return;
 		
+		int shiftSign = data.Physics.GroundSpeed != 0f ? 
+			Math.Sign(data.Physics.GroundSpeed) : (int)data.Visual.Facing;
+		
 		const int shiftDistanceX = 64;
-		int shiftSign = player.GroundSpeed != 0f ? Math.Sign(player.GroundSpeed) : (int)player.Facing;
 		_bufferOffset.X = _bufferOffset.X.MoveToward(shiftDistanceX * shiftSign, shiftSpeedX * processSpeed);
 	}
 	
@@ -236,7 +242,7 @@ public partial class Camera : Camera2D, ICamera
 
 	private void FollowTarget(float processSpeed)
 	{
-		if (!IsInstanceValid(Target))
+		if (_godotObjectTarget != null && !IsInstanceValid(_godotObjectTarget))
 		{
 			Target = null;
 			return;
@@ -245,7 +251,7 @@ public partial class Camera : Camera2D, ICamera
 		Vector2 targetPosition = _target.Position - SharedData.ViewSize / 2;
 		if (_isTargetPlayer)
 		{
-			FollowPlayer(processSpeed, targetPosition, Target as PlayerData);
+			FollowPlayer(processSpeed, targetPosition, Target as IPlayerCameraTarget);
 			return;
 		}
 		
@@ -314,7 +320,7 @@ public partial class Camera : Camera2D, ICamera
 		};
 	}
 	
-	private void FollowPlayerY(float processSpeed, float targetPosition, PlayerData player)
+	private void FollowPlayerY(float processSpeed, float targetPosition, IPlayerCameraTarget data)
 	{
 		if (_delay.Y > 0f)
 		{
@@ -324,16 +330,16 @@ public partial class Camera : Camera2D, ICamera
 		
 		float distance = targetPosition - _rawPosition.Y;
 
-		if (player.IsGrounded)
+		if (data.Physics.IsGrounded)
 		{
-			if (player.IsSpinning)
+			if (data.Physics.IsSpinning)
 			{
-				int offset = player.RadiusNormal.Y - player.Radius.Y;
+				int offset = data.Collision.RadiusNormal.Y - data.Collision.Radius.Y;
 				distance -= offset;
 				targetPosition -= offset;
 			}
 
-			float limit = processSpeed * (Math.Abs(player.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
+			float limit = processSpeed * (Math.Abs(data.Physics.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
 			
 			_rawPosition.Y = distance <= limit && distance >= -limit ? 
 				targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);

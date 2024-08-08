@@ -16,19 +16,19 @@ public partial class PathSwapTriggerVertical : PathSwapTrigger
         Borders += Vector2.One * Position.X;
     }
 
-    protected override void UpdatePlayerTileLayer(Player player)
+    protected override void UpdatePlayerTileLayer(PlayerNode playerNode)
     {
-        var playerPosition = (Vector2I)player.Position;
+        var playerPosition = (Vector2I)playerNode.Position;
         if (playerPosition.X < Borders.X || playerPosition.X >= Borders.Y) return;
             
-        var previousPositionY = (int)player.PreviousPosition.Y;
+        var previousPositionY = (int)playerNode.PreviousPosition.Y;
         if (previousPositionY < Position.Y && playerPosition.Y >= Position.Y)
         {
-            player.TileLayer = _layerBelow;
+            playerNode.TileLayer = _layerBelow;
         }
         else if (previousPositionY >= Position.X && playerPosition.X < Position.X)
         {
-            player.TileLayer = _layerAbove;
+            playerNode.TileLayer = _layerAbove;
         }
     }
 }

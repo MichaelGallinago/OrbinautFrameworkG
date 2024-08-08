@@ -16,21 +16,21 @@ public struct DropDash : IAction
 
 	private float _charge;
 	
-	public Player Player { private get; init; }
+	public PlayerNode PlayerNode { private get; init; }
 	
     public void Perform()
     {
-	    if (Player.Data.IsGrounded || Cancel()) return;
+	    if (PlayerNode.Data.IsGrounded || Cancel()) return;
 		
-	    if (Player.Data.Input.Down.Abc)
+	    if (PlayerNode.Data.Input.Down.Abc)
 	    {
-		    Player.Data.IsAirLock = false;		
+		    PlayerNode.Data.IsAirLock = false;		
 		    _charge += Scene.Instance.ProcessSpeed;
 			
-		    if (_charge < MaxCharge || Player.Data.Animation == Animations.DropDash) return;
+		    if (_charge < MaxCharge || PlayerNode.Data.Animation == Animations.DropDash) return;
 			
 		    AudioPlayer.Sound.Play(SoundStorage.Charge3);
-		    Player.Data.Animation = Animations.DropDash;
+		    PlayerNode.Data.Animation = Animations.DropDash;
 		    return;
 	    }
 		
@@ -40,8 +40,8 @@ public struct DropDash : IAction
 			    return;
 			
 		    case >= MaxCharge:
-			    Player.Data.Animation = Animations.Spin;
-			    Player.Data.Action.Type = Actions.Types.None;
+			    PlayerNode.Data.Animation = Animations.Spin;
+			    PlayerNode.Data.Action.Type = Actions.Types.None;
 			    break;
 	    }
 		
@@ -54,10 +54,10 @@ public struct DropDash : IAction
     	
     	if (_charge < MaxCharge) return;
     	
-    	Position += new Vector2(0f, Player.Data.Radius.Y - Player.Data.RadiusSpin.Y);
-	    Player.Data.Radius = Player.Data.RadiusSpin;
+    	Position += new Vector2(0f, PlayerNode.Data.Radius.Y - PlayerNode.Data.RadiusSpin.Y);
+	    PlayerNode.Data.Radius = PlayerNode.Data.RadiusSpin;
     	
-    	if (Player.Data.SuperData.IsSuper)
+    	if (PlayerNode.Data.SuperData.IsSuper)
     	{
     		UpdateGroundSpeed(13f, 12f);
     		if (IsCameraTarget(out ICamera camera))
@@ -70,8 +70,8 @@ public struct DropDash : IAction
     		UpdateGroundSpeed(12f, 8f);
     	}
     	
-	    Player.Data.Animation = Animations.Spin;
-	    Player.Data.IsSpinning = true;
+	    PlayerNode.Data.Animation = Animations.Spin;
+	    PlayerNode.Data.IsSpinning = true;
     	
     	SetCameraDelayX(8f);
     		
@@ -83,33 +83,33 @@ public struct DropDash : IAction
     
     private void UpdateGroundSpeed(float limitSpeed, float force)
     {
-	    var sign = (float)Player.Data.Facing;
+	    var sign = (float)PlayerNode.Data.Facing;
 	    limitSpeed *= sign;
 	    force *= sign;
 	    
-	    if (Player.Data.Velocity.X * sign >= 0f)
+	    if (PlayerNode.Data.Velocity.X * sign >= 0f)
 	    {
-		    Player.Data.GroundSpeed.Value = MathF.Floor(Player.Data.GroundSpeed / 4f) + force;
-		    if (sign * Player.Data.GroundSpeed <= limitSpeed) return;
-		    Player.Data.GroundSpeed.Value = limitSpeed;
+		    PlayerNode.Data.GroundSpeed.Value = MathF.Floor(PlayerNode.Data.GroundSpeed / 4f) + force;
+		    if (sign * PlayerNode.Data.GroundSpeed <= limitSpeed) return;
+		    PlayerNode.Data.GroundSpeed.Value = limitSpeed;
 		    return;
 	    }
     	
-	    Player.Data.GroundSpeed.Value = force;
-	    if (Mathf.IsZeroApprox(Player.Data.Angle)) return;
+	    PlayerNode.Data.GroundSpeed.Value = force;
+	    if (Mathf.IsZeroApprox(PlayerNode.Data.Angle)) return;
     	
-	    Player.Data.GroundSpeed.Value += MathF.Floor(Player.Data.GroundSpeed / 2f);
+	    PlayerNode.Data.GroundSpeed.Value += MathF.Floor(PlayerNode.Data.GroundSpeed / 2f);
     }
 
     private bool Cancel()
     {
-    	if (!SharedData.DropDash || Player.Data.Action != Actions.Types.DropDash) return true;
+    	if (!SharedData.DropDash || PlayerNode.Data.Action != Actions.Types.DropDash) return true;
     	
     	if (Shield.Type <= ShieldContainer.Types.Normal || 
-	        Player.Data.SuperData.IsSuper || Player.Data.ItemInvincibilityTimer > 0f) return false;
+	        PlayerNode.Data.SuperData.IsSuper || PlayerNode.Data.ItemInvincibilityTimer > 0f) return false;
     	
-	    Player.Data.Animation = Animations.Spin;
-	    Player.Data.Action.Type = Actions.Types.Default;
+	    PlayerNode.Data.Animation = Animations.Spin;
+	    PlayerNode.Data.Action.Type = Actions.Types.Default;
     	return true;
     }
 }

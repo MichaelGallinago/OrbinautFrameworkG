@@ -39,7 +39,7 @@ public struct Climb() : IAction
 
 	private void ClimbNormal()
 	{
-		if (!Mathf.IsEqualApprox(Player.Position.X, PreviousPosition.X) || Velocity.X != 0f)
+		if (!Mathf.IsEqualApprox(PlayerNode.Position.X, PreviousPosition.X) || Velocity.X != 0f)
 		{
 			ReleaseClimb();
 			return;
@@ -48,15 +48,15 @@ public struct Climb() : IAction
 		const int stepsPerClimbFrame = 4;
 		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
 		
-		int radiusX = Player.CollisionBoxes.Radius.X;
-		if (Player.Data.Facing == Constants.Direction.Negative)
+		int radiusX = PlayerNode.CollisionBoxes.Radius.X;
+		if (PlayerNode.Data.Facing == Constants.Direction.Negative)
 		{
 			radiusX++;
 		}
 		
-		Player.Data.TileCollider.SetData((Vector2I)Player.Position, Player.Data.TileLayer);
+		PlayerNode.Data.TileCollider.SetData((Vector2I)PlayerNode.Position, PlayerNode.Data.TileLayer);
 
-		if (Player.PhysicsCore.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+		if (PlayerNode.PhysicsCore.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
 		
 		if (!Input.Press.Abc)
 		{

@@ -49,13 +49,13 @@ public abstract partial class Spikes : OrbinautData
         CollideWithPlayers();
     }
 
-    protected abstract void CollideWithPlayer(Player player);
+    protected abstract void CollideWithPlayer(PlayerNode playerNode);
     protected abstract Vector2 GetRetractOffsetVector(float retractOffset);
     protected abstract SpikesDto GetDirectionSpecificData(Vector2 size);
 
     private void CollideWithPlayers()
     {
-        foreach (Player player in Scene.Instance.Players.Values)
+        foreach (PlayerNode player in Scene.Instance.Players.Values)
         {
             CollideWithPlayer(player);
             if (!CheckSolidCollision(player, _sensor)) continue;

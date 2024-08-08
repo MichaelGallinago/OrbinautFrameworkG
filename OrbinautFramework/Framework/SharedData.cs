@@ -26,7 +26,7 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
 	
     // Originals differences
-    public static PhysicsTypes PhysicsType { get; set; } = PhysicsTypes.S2;
+    public static PhysicsCore.Types PhysicsType { get; set; } = PhysicsCore.Types.S2;
     public static CpuModule.Behaviours Behaviour { get; set; } = CpuModule.Behaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool Dash { get; set; } = true;
@@ -53,7 +53,7 @@ public static class SharedData
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
-    public static Types[] PlayerTypes { get; set; } = [Types.Sonic, Types.Tails];
+    public static PlayerNode.Types[] PlayerTypes { get; set; } = [PlayerNode.Types.Sonic, PlayerNode.Types.Tails];
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;
     

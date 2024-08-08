@@ -20,7 +20,7 @@ public class CollisionData
     public HashSet<SolidBox> PushObjects { get; } = [];
     public Dictionary<SolidBox, Constants.TouchState> TouchObjects { get; } = [];
 
-    public void Init(Player.Types type)
+    public void Init(PlayerNode.Types type)
     {
         IsObjectInteractionEnabled = true;
         IsStickToConvex = false;
@@ -30,8 +30,8 @@ public class CollisionData
         
         (RadiusNormal, RadiusSpin) = type switch
         {
-            Player.Types.Tails => (new Vector2I(9, 15), new Vector2I(7, 14)),
-            Player.Types.Amy => (new Vector2I(9, 16), new Vector2I(7, 12)),
+            PlayerNode.Types.Tails => (new Vector2I(9, 15), new Vector2I(7, 14)),
+            PlayerNode.Types.Amy => (new Vector2I(9, 16), new Vector2I(7, 12)),
             _ => (new Vector2I(9, 19), new Vector2I(7, 14))
         };
         Radius = RadiusNormal;

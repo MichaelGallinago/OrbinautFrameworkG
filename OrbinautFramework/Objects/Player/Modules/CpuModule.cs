@@ -79,7 +79,7 @@ public class CpuModule(PlayerData data)
 			if (!Scene.Instance.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
 		
-		data.Player.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
+		data.PlayerNode.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		State = States.Respawn;
 	}
@@ -89,7 +89,7 @@ public class CpuModule(PlayerData data)
 		if (CheckCpuRespawn()) return;
 
 		SetRespawnAnimation();
-		if (data.Player.Type == Player.Types.Tails)
+		if (data.PlayerNode.Type == PlayerNode.Types.Tails)
 		{
 			PlayRespawnFlyingSound();
 		}
@@ -119,28 +119,29 @@ public class CpuModule(PlayerData data)
 
 	private void SetRespawnAnimation()
 	{
-		data.Visual.Animation = data.Player.Type switch
+		data.Visual.Animation = data.PlayerNode.Type switch
 		{
-			Player.Types.Sonic or Player.Types.Amy => Animations.Spin, 
-			Player.Types.Tails => data.Water.IsUnderwater ? Animations.Swim : Animations.Fly,
-			Player.Types.Knuckles => Animations.GlideAir,
+			PlayerNode.Types.Sonic or PlayerNode.Types.Amy => Animations.Spin, 
+			PlayerNode.Types.Tails => data.Water.IsUnderwater ? Animations.Swim : Animations.Fly,
+			PlayerNode.Types.Knuckles => Animations.GlideAir,
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
 
 	private void PlayRespawnFlyingSound()
 	{
-		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.Player.Sprite.CheckInCameras() || 
-		    data.Water.IsUnderwater) return;
 		if (SharedData.Behaviour != Behaviours.S3) return;
+		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.PlayerNode.Sprite.CheckInCameras()) return;
+		if (data.Water.IsUnderwater) return;
+		
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
 	}
 
 	private bool MoveToLeadPlayer(Vector2 targetPosition)
 	{
 		var distance = new Vector2I(
-			Mathf.FloorToInt(data.Player.Position.X - targetPosition.X),
-			Mathf.FloorToInt(targetPosition.Y - data.Player.Position.Y));
+			Mathf.FloorToInt(data.PlayerNode.Position.X - targetPosition.X),
+			Mathf.FloorToInt(targetPosition.Y - data.PlayerNode.Position.Y));
 
 		Vector2 positionOffset = Vector2.Zero;
 		if (distance.X != 0)
@@ -184,7 +185,7 @@ public class CpuModule(PlayerData data)
 			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.ProcessSpeed;
 		}
 
-		data.Player.Position += positionOffset;
+		data.PlayerNode.Position += positionOffset;
 		
 		return distance.X != 0 || distance.Y != 0;
 	}
@@ -196,7 +197,7 @@ public class CpuModule(PlayerData data)
 		if (CheckCpuRespawn()) return; // Exit if respawned
 		
 		if (!data.Collision.IsObjectInteractionEnabled || 
-		    data.Carry.Target != null || data.Action.Type == Actions.Carried) return;
+		    data.Carry.Target != null || data.ActionType == Actions.Types.Carried) return;
 		
 		Target ??= _leadPlayer; // Follow lead player
 		
@@ -208,7 +209,7 @@ public class CpuModule(PlayerData data)
 		}
 		
 		//TODO: check that ZIndex works
-		data.Player.ZIndex = _leadPlayer.ZIndex + data.Id;
+		data.PlayerNode.ZIndex = _leadPlayer.ZIndex + data.Id;
 		
 		if (data.Physics.GroundLockTimer > 0f && data.Physics.GroundSpeed == 0f)
 		{
@@ -216,20 +217,20 @@ public class CpuModule(PlayerData data)
 		}
 		
 		(Vector2 targetPosition, _inputPress, _inputDown, 
-			Constants.Direction direction, OrbinautData setPushAnimationBy) = CpuTarget.RecordedData[_delay];
+			Constants.Direction direction, OrbinautNode setPushAnimationBy) = Target.RecordedData[_delay];
 
 		if (SharedData.Behaviour == Behaviours.S3 &&
-		    Math.Abs(CpuTarget.GroundSpeed) < 4f && CpuTarget.OnObject == null)
+		    Math.Abs(Target.GroundSpeed) < 4f && Target.OnObject == null)
 		{
 			targetPosition.X -= 32f;
 		}
 
 		// Copy and modify inputs if we are not pushing anything or
 		// if the followed player was pushing something a few frames ago
-		bool doJump = Animation != Animations.Duck && CpuTarget.Animation != Animations.Wait;
-		if (SetPushAnimationBy == null || setPushAnimationBy != null)
+		bool doJump = data.Visual.Animation != Animations.Duck && Target.Animation != Animations.Wait;
+		if (data.Visual.SetPushBy == null || setPushAnimationBy != null)
 		{
-			int distanceX = Mathf.FloorToInt(targetPosition.X - Position.X);
+			int distanceX = Mathf.FloorToInt(targetPosition.X - data.PlayerNode.Position.X);
 			PushCpu(distanceX, direction);
 			doJump = CheckCpuJump(distanceX, targetPosition.Y);
 		}
@@ -241,7 +242,7 @@ public class CpuModule(PlayerData data)
 			IsJumping = true;
 		}
 		
-		Input.Set(_inputPress, _inputDown);
+		data.Input.Set(_inputPress, _inputDown);
 	}
 
 	private void FreezeOrFlyIfLeaderDied()
@@ -249,29 +250,29 @@ public class CpuModule(PlayerData data)
 		// Freeze or start flying (if we're Tails) if lead player has died
 		if (!_leadPlayer.IsDead) return;
 		
-		if (Type == Types.Tails)
+		if (data.PlayerNode.Type == PlayerNode.Types.Tails)
 		{
-			Animation = Animations.Fly;
+			data.Visual.Animation = Animations.Fly;
 			State = States.Respawn;
-			ResetState();
+			data.ResetState();
 		}
 		else
 		{
 			//TODO: instance_deactivate_object(id);
 		}
 					
-		IsControlRoutineEnabled = false;
+		data.Physics.IsControlRoutineEnabled = false;
 	}
 	
 	private void PushCpu(float distanceX, Constants.Direction facing)
 	{
 		if (distanceX == 0f)
 		{
-			Facing = facing;
+			data.Visual.Facing = facing;
 			return;
 		}
 		
-		int maxDistanceX = SharedData.PhysicsType == PhysicsTypes.S3 ? 48 : 16;
+		int maxDistanceX = SharedData.PhysicsType == PhysicsCore.Types.S3 ? 48 : 16;
 
 		bool isMoveToRight = distanceX > 0f;
 		int sign = isMoveToRight ? 1 : -1;
@@ -281,9 +282,9 @@ public class CpuModule(PlayerData data)
 			_inputDown.Right = _inputPress.Right = isMoveToRight;
 		}
 						
-		if (GroundSpeed != 0f && IsControlRoutineEnabled && (int)Facing == sign)
+		if (data.Physics.GroundSpeed != 0f && data.Physics.IsControlRoutineEnabled && (int)data.Visual.Facing == sign)
 		{
-			Position += Vector2.Right * sign;
+			data.PlayerNode.Position += Vector2.Right * sign;
 		}
 	}
 	
@@ -293,53 +294,57 @@ public class CpuModule(PlayerData data)
 		{
 			_inputDown.Abc = true;
 				 
-			if (!IsGrounded) return false;
+			if (!data.Physics.IsGrounded) return false;
 			
 			IsJumping = false;
 			return true;
 		}
 		
 		if (distanceX >= 64f && !Scene.Instance.IsTimePeriodLooped(256f)) return false;
-		return targetPositionY - Position.Y <= -32;
+		return targetPositionY - data.PlayerNode.Position.Y <= -32;
 	}
 	
 	private void ProcessStuckCpu()
 	{
 		if (CheckCpuRespawn()) return;
 		
-		if (GroundLockTimer > 0f || InputTimer > 0f || GroundSpeed != 0f) return;
+		if (data.Physics.GroundLockTimer > 0f || InputTimer > 0f || data.Physics.GroundSpeed != 0f) return;
 		
-		if (Animation == Animations.Idle)
+		if (data.Visual.Animation == Animations.Idle)
 		{
-			Facing = CpuTarget.Position.X >= Position.X ? Constants.Direction.Positive : Constants.Direction.Negative;
+			data.Visual.Facing = Target.Position.X >= data.PlayerNode.Position.X ? 
+				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
 		if (!Scene.Instance.IsTimePeriodLooped(128f))
 		{
-			Input.Down = Input.Down with { Down = true };
+			data.Input.Down = data.Input.Down with { Down = true };
 			if (!Scene.Instance.IsTimePeriodLooped(32f)) return;
-			Input.Press = Input.Press with { Abc = true };
+			data.Input.Press = data.Input.Press with { Abc = true };
 			
 			return;
 		}
 		
-		Input.Down = Input.Down with { Down = false };
-		Input.Press = Input.Press with { Abc = false };
+		data.Input.Down = data.Input.Down with { Down = false };
+		data.Input.Press = data.Input.Press with { Abc = false };
 		State = States.Main;
 	}
 	
 	private bool CheckCpuRespawn()
 	{
-		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && camera.TargetBoundary.Z <= Position.X;
-		if (isBehindLeader || Sprite != null && Sprite.CheckInCameras())
+		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && 
+		                      camera.TargetBoundary.Z <= data.PlayerNode.Position.X;
+		
+		if (isBehindLeader || data.PlayerNode.Sprite != null && data.PlayerNode.Sprite.CheckInCameras())
 		{
-			CpuRespawnTimer = 0f;
+			RespawnTimer = 0f;
 			return false;
 		}
 		
 		//TODO: check IsInstanceValid == instance_exists
-		CpuRespawnTimer += Scene.Instance.ProcessSpeed;
-		if (CpuRespawnTimer < 300f && (OnObject == null || IsInstanceValid(OnObject))) return false;
+		RespawnTimer += Scene.Instance.ProcessSpeed;
+		if (RespawnTimer < 300f && 
+		    (data.Collision.OnObject == null || GodotObject.IsInstanceValid(data.Collision.OnObject))) return false;
 		Respawn();
 		return true;
 	}
@@ -348,19 +353,19 @@ public class CpuModule(PlayerData data)
 	{
 		Init();
 		
-		if (IsCameraTarget(out ICamera camera))
+		if (data.IsCameraTarget(out ICamera camera))
 		{
 			camera.IsMovementAllowed = true;
-			InvincibilityTimer = 60f;
+			data.Damage.InvincibilityTimer = 60f;
 			return;
 		}
 		
-		Position = new Vector2(sbyte.MaxValue, 0);
-		ZIndex = (int)Constants.ZIndexes.AboveForeground;
+		data.PlayerNode.Position = new Vector2(sbyte.MaxValue, 0);
+		data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
-		CpuState = States.RespawnInit;
-		IsControlRoutineEnabled = false;
-		IsObjectInteractionEnabled = false;
-		IsGrounded = false;
+		State = States.RespawnInit;
+		data.Physics.IsControlRoutineEnabled = false;
+		data.Collision.IsObjectInteractionEnabled = false;
+		data.Physics.IsGrounded = false;
 	}
 }

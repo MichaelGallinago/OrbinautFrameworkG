@@ -2,7 +2,7 @@
 
 namespace OrbinautFramework3.Objects.Player.Characters;
 
-public partial class Tails : Player//, ICarrier
+public partial class Tails : PlayerNode//, ICarrier
 {
     [Export] private Tail _tail;
     

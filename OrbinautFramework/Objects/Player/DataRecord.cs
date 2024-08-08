@@ -10,5 +10,5 @@ public record DataRecord(
     Buttons InputPress,
     Buttons InputDown,
     Constants.Direction Facing,
-    OrbinautData SetPushAnimationBy
+    OrbinautNode SetPushAnimationBy //TODO: replace OrbinautNode with interface
 );

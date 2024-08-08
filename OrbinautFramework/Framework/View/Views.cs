@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
-using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -28,7 +27,7 @@ public partial class Views : Control
     [Export] private PackedScene _packedViewContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public Dictionary<Node2D, ICamera> TargetedCameras { get; } = [];
+    public Dictionary<IPosition, ICamera> TargetedCameras { get; } = [];
     public ICamera BottomCamera { get; private set; }
     
     private Camera[] _cameras;
@@ -100,7 +99,7 @@ public partial class Views : Control
     
     private void AttachCamerasToPlayers()
     {
-        ReadOnlySpan<Player> players = Scene.Instance.Players.Values;
+        ReadOnlySpan<PlayerData> players = Scene.Instance.Players.Values;
         int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {

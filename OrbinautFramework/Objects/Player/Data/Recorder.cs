@@ -5,7 +5,7 @@ using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class Recorder
+public class Recorder(PlayerData data)
 {
     private const byte MinimalRecordLength = 32;
     
@@ -16,9 +16,9 @@ public class Recorder
     {
         if (Scene.Instance.Time == 0f) return;
 
-        ReadOnlySpan<Player> players = Scene.Instance.Players.Values;
+        ReadOnlySpan<PlayerData> players = Scene.Instance.Players.Values;
         int playersCount = players.Length + 1;
-        foreach (Player player in players)
+        foreach (PlayerData player in players)
         {
             Resize(playersCount);
         }
@@ -29,13 +29,15 @@ public class Recorder
         Array.Copy(_recordedData, 0, _recordedData, 
             1, _recordedData.Length - 1);
 		
-        _recordedData[0] = new DataRecord(Owner.Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+        _recordedData[0] = new DataRecord(
+            data.PlayerNode.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
     }
     
     public void Fill()
     {
         _recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
-        var record = new DataRecord(Owner.Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+        var record = new DataRecord(
+            data.PlayerNode.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
         
         Array.Fill(_recordedData, record);
     }
@@ -52,7 +54,8 @@ public class Recorder
         }
 		
         var resizedData = new DataRecord[newLength];
-        var record = new DataRecord(Owner.Position, Input.Press, Input.Down, Facing, SetPushAnimationBy);
+        var record = new DataRecord(
+            data.PlayerNode.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
 		
         Array.Copy(_recordedData, resizedData, oldLength);
         Array.Fill(resizedData, record,oldLength, newLength - oldLength);

@@ -7,19 +7,18 @@ using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Dash
+public struct Dash(PlayerData data)
 {
-	public PlayerData Data { private get; init; }
-    
     public bool Perform()
     {
-	    if (!SharedData.Dash || Type != Types.Sonic || Id > 0 && CpuInputTimer <= 0f) return false;
+	    if (!SharedData.Dash || data.PlayerNode.Type != PlayerNode.Types.Sonic || 
+	        data.Id > 0 && CpuInputTimer <= 0f) return false;
     	
 	    StartDash();
     	
-	    if (Action == Actions.Dash && IsGrounded) return !ChargeDash() && ReleaseDash();
+	    if (data.ActionType == Actions.Types.Dash && data.Physics.IsGrounded) return !ChargeDash() && ReleaseDash();
     	
-	    if (Action != Actions.Dash)
+	    if (data.ActionType != Actions.Types.Dash)
 	    {
 		    AudioPlayer.Sound.Stop(SoundStorage.Charge2);
 	    }
@@ -28,10 +27,11 @@ public struct Dash
 
     private void StartDash()
     {
-    	if (Action != Actions.None || Animation != Animations.LookUp || !Input.Down.Up || !Input.Press.Abc) return;
+    	if (data.ActionType != Actions.Types.Default || data.Visual.Animation != Animations.LookUp) return;
+	    if (!data.Input.Down.Up || !data.Input.Press.Abc) return;
     	
-    	Animation = Animations.Move;
-    	Action = Actions.Dash;
+    	data.Visual.Animation = Animations.Move;
+	    data.ActionType = Actions.Types.Dash;
     	ActionValue = 0f;
     	ActionValue2 = 0f;
     		

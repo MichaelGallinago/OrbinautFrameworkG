@@ -87,7 +87,7 @@ public abstract partial class Scene : Node2D
             objects.PreviousPosition = objects.Position;
         }
         
-        foreach (Player player in Players.Values)
+        foreach (PlayerNode player in Players.Values)
         {
             player.TouchObjects.Clear();
             player.PushObjects.Clear();

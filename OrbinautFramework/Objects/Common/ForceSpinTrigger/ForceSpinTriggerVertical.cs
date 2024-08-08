@@ -12,11 +12,11 @@ public partial class ForceSpinTriggerVertical : ForceSpinTrigger
         Borders += Vector2.One * Position.X;
     }
     
-    protected override bool CheckForcePlayerSpin(Player player)
+    protected override bool CheckForcePlayerSpin(PlayerNode playerNode)
     {
-        var playerPosition = (Vector2I)player.Position;
+        var playerPosition = (Vector2I)playerNode.Position;
 		
         if (playerPosition.X < Borders.X || playerPosition.X >= Borders.Y) return false;
-        return (int)player.PreviousPosition.Y >= Position.Y != playerPosition.Y >= Position.Y;
+        return (int)playerNode.PreviousPosition.Y >= Position.Y != playerPosition.Y >= Position.Y;
     }
 }

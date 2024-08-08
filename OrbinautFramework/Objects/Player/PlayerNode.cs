@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
+public abstract partial class PlayerNode : OrbinautNode, ICarryTarget, IPlayerNode
 {
 	public enum Types : byte
 	{
@@ -21,7 +21,7 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 
 	private readonly PlayerLogic _logic;
 
-	protected Player()
+	protected PlayerNode()
 	{
 		_logic = new PlayerLogic(this);
 		Memento = new PlayerMemento(Data);
@@ -55,4 +55,6 @@ public abstract partial class Player : OrbinautNode, ICarryTarget, IPlayer
 		_logic.Init();
 		Sprite.Animate(this);
 	}
+
+	public bool IsInstanceValid() => GodotObject.IsInstanceValid(this);
 }

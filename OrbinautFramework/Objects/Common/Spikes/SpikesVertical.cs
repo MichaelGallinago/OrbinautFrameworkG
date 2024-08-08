@@ -7,9 +7,9 @@ using Player;
 
 public partial class SpikesVertical : Spikes
 {
-    protected override void CollideWithPlayer(Player player)
+    protected override void CollideWithPlayer(PlayerNode playerNode)
     {
-        player.ActSolid(this, player.IsInvincible ? Constants.SolidType.Full : Constants.SolidType.FullReset);
+        playerNode.ActSolid(this, playerNode.IsInvincible ? Constants.SolidType.Full : Constants.SolidType.FullReset);
     }
 
     protected override Vector2 GetRetractOffsetVector(float retractOffset) => new(0f, retractOffset);

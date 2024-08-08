@@ -11,25 +11,25 @@ public struct HammerSpin : IAction
     
     public void Perform()
     {
-        if (Player.Data.IsGrounded) return;
+        if (PlayerNode.Data.IsGrounded) return;
         
-        if (Player.Data.Input.Down.Abc)
+        if (PlayerNode.Data.Input.Down.Abc)
         {
             Charge();
             return;
         }
 		
-        switch (Player.Data.ActionValue)
+        switch (PlayerNode.Data.ActionValue)
         {
             case <= 0f: return;
 			
             case >= DropDash.MaxCharge:
-                Player.Data.Animation = Animations.Spin;
-                Player.Data.Action = Actions.HammerSpinCancel;
+                PlayerNode.Data.Animation = Animations.Spin;
+                PlayerNode.Data.Action = Actions.HammerSpinCancel;
                 break;
         }
 
-        Player.Data.ActionValue = 0f;
+        PlayerNode.Data.ActionValue = 0f;
     }
     
     public void OnLand()
@@ -52,7 +52,7 @@ public struct HammerSpin : IAction
 
     private void Charge()
     {
-        Player.Data.ActionValue += Scene.Instance.ProcessSpeed;
+        PlayerNode.Data.ActionValue += Scene.Instance.ProcessSpeed;
         if (ActionValue >= DropDash.MaxCharge)
         {
             AudioPlayer.Sound.Play(SoundStorage.Charge3);
