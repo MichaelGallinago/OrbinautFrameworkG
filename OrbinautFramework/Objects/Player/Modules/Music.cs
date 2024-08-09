@@ -1,21 +1,22 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct Music
+public struct Music(PlayerData data)
 {
     public void Reset()
     {
-        if (Super.IsSuper)
+        if (data.Super.IsSuper)
         {
             AudioPlayer.Music.Play(MusicStorage.Super);
         }
-        else if (Item.InvincibilityTimer > 0f)
+        else if (data.Item.InvincibilityTimer > 0f)
         {
             AudioPlayer.Music.Play(MusicStorage.Invincibility);
         }
-        else if (Item.SpeedTimer > 0f)
+        else if (data.Item.SpeedTimer > 0f)
         {
             AudioPlayer.Music.Play(MusicStorage.HighSpeed);
         }

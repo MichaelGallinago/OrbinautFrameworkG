@@ -1,15 +1,16 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct Palette
+public struct Palette(PlayerData data)
 {
-	private ReadOnlySpan<int> PlayerColourIds => Type switch
+	private ReadOnlySpan<int> PlayerColourIds => data.PlayerNode.Type switch
 	{
-		Types.Tails => [4, 5, 6],
-		Types.Knuckles => [7, 8, 9],
-		Types.Amy => [10, 11, 12],
+		PlayerNode.Types.Tails => [4, 5, 6],
+		PlayerNode.Types.Knuckles => [7, 8, 9],
+		PlayerNode.Types.Amy => [10, 11, 12],
 		_ => [0, 1, 2, 3]
 	};
 	
@@ -26,9 +27,9 @@ public struct Palette
 
     private void UpdateSuper(int colour, out int colourLast, out int colourLoop, out int duration)
     {
-    	switch (Type)
+    	switch (data.PlayerNode.Type)
     	{
-    		case Types.Sonic:
+    		case PlayerNode.Types.Sonic:
     			duration = colour switch
     			{
     				< 2 => 19,
@@ -40,13 +41,13 @@ public struct Palette
     			colourLoop = 7;
     			break;
     		
-    		case Types.Tails:
+    		case PlayerNode.Types.Tails:
     			duration = colour < 2 ? 28 : 12;
     			colourLast = 7;
     			colourLoop = 2;
     			break;
     		
-    		case Types.Knuckles:
+    		case PlayerNode.Types.Knuckles:
     			duration = colour switch
     			{
     				< 2 => 17,
@@ -58,7 +59,7 @@ public struct Palette
     			colourLoop = 3;
     			break;
     		
-    		case Types.Amy:
+    		case PlayerNode.Types.Amy:
     			duration = colour < 2 ? 19 : 4;
     			colourLast = 11;
     			colourLoop = 3;
@@ -74,11 +75,11 @@ public struct Palette
 
     private void UpdateRegular(int colour, ref int colourLoop, ref int colourLast, ref int duration)
     {
-    	if (IsSuper) return;
+    	if (data.Super.IsSuper) return;
     	
     	if (colour > 1)
     	{
-    		if (Type == Types.Sonic)
+    		if (data.PlayerNode.Type == PlayerNode.Types.Sonic)
     		{
     			colourLast = 21;
     			duration = 4;
