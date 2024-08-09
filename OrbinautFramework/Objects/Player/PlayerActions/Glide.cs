@@ -8,7 +8,8 @@ using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Glide : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct Glide
 {
 	public enum States : byte
 	{

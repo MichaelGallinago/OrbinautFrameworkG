@@ -5,10 +5,9 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct HammerDash : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct HammerDash(PlayerData data)
 {
-    public PlayerData Data { private get; init; }
-    
     public void Perform()
     {
         // Note that ACTION_HAMMERDASH is used for movement logic only so the respective

@@ -2,7 +2,8 @@
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Default : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct Default
 {
     public PlayerData Data { private get; init; }
     

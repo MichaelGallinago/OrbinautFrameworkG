@@ -2,27 +2,21 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Physics;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Climb() : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct Climb(PlayerData data)
 {
-	public PlayerData Data { private get; init; }
-	
-	public enum States : byte
+	private enum ClimbStates : byte
 	{
-		Normal, Ledge, WallJump
+		Normal, Ledge, WallJump, Fall
 	}
 	
-	private enum ClimbLedgeStates : byte
-	{
-		None, Frame0, Frame1, Frame2, End
-	}
-	
-	private States _state = States.Normal;
+	private ClimbStates _state = ClimbStates.Normal;
 	private float _animationValue;
 	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 
@@ -30,16 +24,17 @@ public struct Climb() : IAction
     {
 	    switch (_state)
 	    {
-		    case States.Normal: ClimbNormal(); break;
-		    case States.Ledge: ClimbLedge(); break;
-		    case States.WallJump: ClimbJump(); break;
+		    case ClimbStates.Normal: ClimbNormal(); break;
+		    case ClimbStates.Ledge: ClimbLedge(); break;
+		    case ClimbStates.WallJump: ClimbJump(); break;
 		    default: throw new ArgumentOutOfRangeException(_state.ToString());
 	    }
     }
 
 	private void ClimbNormal()
 	{
-		if (!Mathf.IsEqualApprox(PlayerNode.Position.X, PreviousPosition.X) || Velocity.X != 0f)
+		if (!Mathf.IsEqualApprox(data.PlayerNode.Position.X, data.PlayerNode.PreviousPosition.X) || 
+		    data.Physics.Velocity.X != 0f)
 		{
 			ReleaseClimb();
 			return;
@@ -48,22 +43,22 @@ public struct Climb() : IAction
 		const int stepsPerClimbFrame = 4;
 		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
 		
-		int radiusX = PlayerNode.CollisionBoxes.Radius.X;
-		if (PlayerNode.Data.Facing == Constants.Direction.Negative)
+		int radiusX = data.Collision.Radius.X;
+		if (data.Visual.Facing == Constants.Direction.Negative)
 		{
 			radiusX++;
 		}
 		
-		PlayerNode.Data.TileCollider.SetData((Vector2I)PlayerNode.Position, PlayerNode.Data.TileLayer);
+		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
 
-		if (PlayerNode.PhysicsCore.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+		if (data.Physics.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
 		
-		if (!Input.Press.Abc)
+		if (!data.Input.Press.Abc)
 		{
 			// Update animation frame if still climbing
-			if (Velocity.Y != 0)
+			if (data.Physics.Velocity.Y != 0)
 			{
-				OverrideAnimationFrame = Mathf.FloorToInt(_animationValue / stepsPerClimbFrame);
+				data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / stepsPerClimbFrame);
 			}
 			return;
 		}
@@ -73,51 +68,66 @@ public struct Climb() : IAction
 
 	private void ClimbJump()
 	{
-		Animation = Animations.Spin;
-		IsSpinning = true;
-		IsJumping = true;
-		Action = Actions.None;
-		Facing = (Constants.Direction)(-(int)Facing);
-		Velocity.Vector = new Vector2(3.5f * (float)Facing, PhysicParams.MinimalJumpSpeed);
-			
+		data.Visual.Animation = Animations.Spin;
+		data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
+		
+		data.State = States.Default;
+		
+		data.Physics.IsJumping = true;
+		data.Physics.IsSpinning = true;
+		data.Physics.ResetGravity(data.Water.IsUnderwater);
+		data.Physics.Velocity.Vector = new Vector2(
+			3.5f * (float)data.Visual.Facing, 
+			PhysicParams.MinimalJumpSpeed);
+		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
-		ResetGravity();
 	}
 
 	private bool ClimbUpOntoWall(int radiusX)
 	{
 		// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-		int wallDistance = TileCollider.FindDistance(radiusX * (int)Facing, -Radius.Y - 1, false, Facing);
+		int wallDistance = data.TileCollider.FindDistance(
+			radiusX * (int)data.Visual.Facing, 
+			-data.Collision.Radius.Y - 1, 
+			false, 
+			data.Visual.Facing);
 		
 		if (wallDistance >= 4)
 		{
-			_state = (int)States.Ledge;
+			_state = ClimbStates.Ledge;
 			_animationValue = 0f;
-			Velocity.Y = 0f;
-			Gravity = 0f;
+			data.Physics.Velocity.Y = 0f;
+			data.Physics.Gravity = 0f;
 			return true;
 		}
 
 		// If Knuckles has encountered a small dip in the wall, cancel climb movement
 		if (wallDistance != 0)
 		{
-			Velocity.Y = 0f;
+			data.Physics.Velocity.Y = 0f;
 		}
 
 		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-		int ceilDistance = TileCollider.FindDistance(
-			radiusX * (int)Facing, 1 - RadiusNormal.Y, true, Constants.Direction.Negative);
+		int ceilDistance = data.TileCollider.FindDistance(
+			radiusX * (int)data.Visual.Facing, 
+			1 - data.Collision.RadiusNormal.Y, 
+			true, 
+			Constants.Direction.Negative);
 
 		if (ceilDistance >= 0) return false;
-		Position -= new Vector2(0f, ceilDistance);
-		Velocity.Y = 0f;
+		data.PlayerNode.Position -= new Vector2(0f, ceilDistance);
+		data.Physics.Velocity.Y = 0f;
 		return false;
 	}
 
 	private bool ReleaseClimbing(int radiusX)
 	{
 		// If Knuckles is no longer against the wall, make him let go
-		if (TileCollider.FindDistance(radiusX * (int)Facing, Radius.Y + 1, false, Facing) == 0)
+		if (data.TileCollider.FindDistance(
+			    radiusX * (int)data.Visual.Facing, 
+			    data.Collision.Radius.Y + 1, 
+			    false, 
+			    data.Visual.Facing) == 0)
 		{
 			return LandAfterClimbing(radiusX);
 		}
@@ -128,24 +138,29 @@ public struct Climb() : IAction
 
 	private bool LandAfterClimbing(int radiusX)
 	{
-		(int distance, float angle) = TileCollider.FindTile(
-			radiusX * (int)Facing, RadiusNormal.Y, true, Constants.Direction.Positive);
+		(int distance, float angle) = data.TileCollider.FindTile(
+			radiusX * (int)data.Visual.Facing, 
+			data.Collision.RadiusNormal.Y, 
+			true, 
+			Constants.Direction.Positive);
 
 		if (distance >= 0) return false;
-		Position += new Vector2(0f, distance + RadiusNormal.Y - Radius.Y);
-		Angle = angle;
+		
+		data.PlayerNode.Position += 
+			new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
+		data.Rotation.Angle = angle;
 				
 		Land();
 
-		Animation = Animations.Idle;
-		Velocity.Y = 0f;
+		data.Visual.Animation = Animations.Idle;
+		data.Physics.Velocity.Y = 0f;
 				
 		return true;
 	}
 
 	private void UpdateVerticalSpeedOnClimb(int maxValue)
 	{
-		if (Input.Down.Up)
+		if (data.Input.Down.Up)
 		{
 			_animationValue += Scene.Instance.ProcessSpeed;
 			if (_animationValue > maxValue)
@@ -153,11 +168,11 @@ public struct Climb() : IAction
 				_animationValue = 0f;
 			}
 
-			Velocity.Y = -PhysicParams.AccelerationClimb;
+			data.Physics.Velocity.Y = -PhysicParams.AccelerationClimb;
 			return;
 		}
 		
-		if (Input.Down.Down)
+		if (data.Input.Down.Down)
 		{
 			_animationValue -= Scene.Instance.ProcessSpeed;
 			if (_animationValue < 0f)
@@ -165,49 +180,50 @@ public struct Climb() : IAction
 				_animationValue = maxValue;
 			}
 
-			Velocity.Y = PhysicParams.AccelerationClimb;
+			data.Physics.Velocity.Y = PhysicParams.AccelerationClimb;
 			return;
 		}
 
-		Velocity.Y = 0f;
+		data.Physics.Velocity.Y = 0f;
 	}
 
 	private void ReleaseClimb()
 	{
-		Animation = Animations.GlideFall;
-		Action = Actions.Glide;
-		_state = (int)GlideStates.Fall;
-		_animationValue = 1f;
-		Radius = RadiusNormal;
+		data.Visual.Animation = Animations.GlideFall;
+		data.State = States.Glide;
+		data.Collision.Radius = data.Collision.RadiusNormal;
 		
-		ResetGravity();
+		_state = ClimbStates.Fall;
+		_animationValue = 1f;
+		
+		data.Physics.ResetGravity(data.Water.IsUnderwater);
 	}
 
 	private void ClimbLedge()
 	{
-		if (Data.Visual.Animation != Animations.ClimbLedge)
+		if (data.Visual.Animation != Animations.ClimbLedge)
 		{
-			Animation = Animations.ClimbLedge;
-			Position += new Vector2(3f * (float)Facing, -3f);
+			data.Visual.Animation = Animations.ClimbLedge;
+			data.PlayerNode.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
 		}
-		else if (Data.PlayerNode.Sprite.IsFrameChanged)
+		else if (data.PlayerNode.Sprite.IsFrameChanged)
 		{
-			switch (Data.PlayerNode.Sprite.Frame)
+			switch (data.PlayerNode.Sprite.Frame)
 			{
-				case 1: Position += new Vector2(8f * (float)Facing, -10f); break;
-				case 2: Position -= new Vector2(8f * (float)Facing, 12f); break;
+				case 1: data.PlayerNode.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
+				case 2: data.PlayerNode.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
 			}
 		}
-		else if (Data.PlayerNode.Sprite.IsFinished)
+		else if (data.PlayerNode.Sprite.IsFinished)
 		{
 			Land();
-			Animation = Animations.Idle;
-			Position += new Vector2(8f * (float)Facing, 4f);
+			data.Visual.Animation = Animations.Idle;
+			data.PlayerNode.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
 
 			// Subtract that 1px that was applied when we attached to the wall
-			if (Facing == Constants.Direction.Negative)
+			if (data.Visual.Facing == Constants.Direction.Negative)
 			{
-				Position += Vector2.Left;
+				data.PlayerNode.Position += Vector2.Left;
 			}
 		}
 	}

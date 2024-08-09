@@ -1,20 +1,24 @@
-﻿namespace OrbinautFramework3.Objects.Player.Physics;
+﻿using Godot;
+using OrbinautFramework3.Objects.Player.Data;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-public struct Position
+namespace OrbinautFramework3.Objects.Player.Physics;
+
+public struct Position(PlayerData data)
 {
     public void Update()
     {
-        if (Action == Actions.Carried) return;
+        if (data.State == States.Carried) return;
 		
-        if (IsStickToConvex)
+        if (data.Collision.IsStickToConvex)
         {
-            Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
+            data.Physics.Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
         }
 		
-        Position = Velocity.CalculateNewPosition(Position);
-        Velocity.Vector = Velocity.Vector;
+        data.PlayerNode.Position = data.Physics.Velocity.CalculateNewPosition(data.PlayerNode.Position);
+        data.Physics.Velocity.ResetInstantVelocity();
 		
-        if (IsGrounded) return;
-        Velocity.AccelerationY = Gravity;
+        if (data.Physics.IsGrounded) return;
+        data.Physics.Velocity.AccelerationY = data.Physics.Gravity;
     }
 }

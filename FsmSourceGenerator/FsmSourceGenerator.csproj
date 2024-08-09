@@ -8,8 +8,8 @@
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
 
-        <RootNamespace>ActionSourceGenerator</RootNamespace>
-        <PackageId>ActionSourceGenerator</PackageId>
+        <RootNamespace>FsmSourceGenerator</RootNamespace>
+        <PackageId>FsmSourceGenerator</PackageId>
     </PropertyGroup>
 
     <ItemGroup>

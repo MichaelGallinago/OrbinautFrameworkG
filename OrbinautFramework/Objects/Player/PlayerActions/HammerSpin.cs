@@ -5,10 +5,9 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct HammerSpin : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct HammerSpin(PlayerData data)
 {
-    public PlayerData Data { private get; init; }
-    
     public void Perform()
     {
         if (PlayerNode.Data.IsGrounded) return;

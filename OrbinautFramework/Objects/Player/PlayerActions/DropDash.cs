@@ -8,10 +8,9 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct DropDash : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct DropDash(PlayerData data)
 {
-	public PlayerData Data { private get; init; }
-	
 	public const byte MaxCharge = 22;
 
 	private float _charge;

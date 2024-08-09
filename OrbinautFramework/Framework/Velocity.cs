@@ -88,6 +88,8 @@ public class Velocity
         _instantVector = _velocity;
     }
 
+    public void ResetInstantVelocity() => _instantVector = _velocity;
+
     public void ClampX(float min, float max) => ClampAxis(ref _velocity.X, ref _instantVector.X, min, max);
     public void ClampY(float min, float max) => ClampAxis(ref _velocity.Y, ref _instantVector.Y, min, max);
     public void MinX(float value) => MinAxis(ref _velocity.X, ref _instantVector.X, value);

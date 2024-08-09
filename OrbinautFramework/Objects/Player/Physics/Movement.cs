@@ -1,19 +1,13 @@
-﻿using OrbinautFramework3.Objects.Player.Physics.Movements;
+﻿using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Physics.Movements;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Movement
+public struct Movement(PlayerData data)
 {
-	private Ground _ground;
-	private Rolling _rolling;
-	private Air _air;
-
-	public Movement()
-	{
-		_ground = new Ground();
-		_rolling = new Rolling();
-		_air = new Air();
-	}
+	private Ground _ground = new(data);
+	private Rolling _rolling = new(data);
+	private Air _air = new(data);
 
 	public void Move()
 	{

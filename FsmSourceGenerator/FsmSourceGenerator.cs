@@ -7,34 +7,100 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace ActionSourceGenerator;
+namespace FsmSourceGenerator;
 
 [Generator]
-public class ActionGenerator : IIncrementalGenerator
+public class FsmGenerator : IIncrementalGenerator
 {
-    private const string InterfaceName = "IAction";
+    private const string GeneratorNamespace = nameof(FsmSourceGenerator);
+    private const string AttributeName = nameof(FsmAttribute);
+    private const string StateAttributeName = nameof(FsmStateAttribute);
+    private const string FullStateAttributeName = $"{GeneratorNamespace}.{StateAttributeName}";
+    private const string FullAttributeName = $"{GeneratorNamespace}.{AttributeName}";
     
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValueProvider<ImmutableArray<StructDeclarationSyntax>> structsWithInterface = 
-            context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: (node, _) => node is StructDeclarationSyntax,
-                transform: (ctx, _) => (StructDeclarationSyntax)ctx.Node)
-            .Where(structDecl => structDecl.BaseList != null && structDecl.BaseList.Types
-                .Any(baseType => baseType.Type is IdentifierNameSyntax { Identifier.Text: InterfaceName }))
+        IncrementalValueProvider<ImmutableArray<FsmData?>> provider = 
+            context.SyntaxProvider.ForAttributeWithMetadataName(
+                FullAttributeName,
+                static (_, _) => true,
+                static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Collect();
 
-        context.RegisterSourceOutput(structsWithInterface, Build);
+        IncrementalValueProvider<ImmutableArray<StateData?>> statesProvider =
+            context.SyntaxProvider.ForAttributeWithMetadataName(
+                    FullStateAttributeName,
+                    static (node, _) => node is StructDeclarationSyntax,
+                    static (ctx, _) => GetStatesTargetForGeneration(ctx))
+                .Where(result => result is { FsmName: not null })
+                .Collect();
+
+        context.RegisterSourceOutput(context.CompilationProvider.Combine(provider).Combine(statesProvider), Build);
     }
     
-    private static void Build(SourceProductionContext context, ImmutableArray<StructDeclarationSyntax> structs)
+    private static FsmData? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
-        if (structs.IsDefaultOrEmpty) return;
+        AttributeData? attribute = context.Attributes
+            .FirstOrDefault(a => a.AttributeClass?.Name == AttributeName);
+
+        if (attribute == null) return null;
         
+        var name = (string)attribute.ConstructorArguments[0].Value!;
+        var namespaceName = (string)attribute.ConstructorArguments[1].Value!;
+
+        return new FsmData(name, namespaceName);
+    }
+    
+    private static StateData? GetStatesTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    {
+        AttributeData? attribute = context.Attributes
+            .FirstOrDefault(a => a.AttributeClass?.Name == StateAttributeName);
+        
+        if (attribute == null) return null;
+        var fsmNameArgument = attribute.ConstructorArguments.First().Value as string;
+
+        var structDeclaration = (StructDeclarationSyntax)context.TargetNode;
+        return new StateData(structDeclaration, fsmNameArgument!);
+    }
+    
+    private readonly record struct FsmData(string Name, string Namespace)
+    {
+        public readonly string Name = Name;
+        public readonly string Namespace = Namespace;
+    }
+    
+    private readonly record struct StateData(StructDeclarationSyntax Struct, string FsmName)
+    {
+        public readonly StructDeclarationSyntax Struct = Struct;
+        public readonly string? FsmName = FsmName;
+    }
+    
+    private static void Build(SourceProductionContext context, (
+        (Compilation Compilation, ImmutableArray<FsmData?> Fsms) Left, ImmutableArray<StateData?> States) data)
+    {
+        ImmutableArray<FsmData?> fsms = data.Left.Fsms;
+        
+        if (fsms.IsDefaultOrEmpty) return;
         var sourceBuilder = new StringBuilder();
 
+        foreach (FsmData? fsm in fsms)
+        {
+            if (fsm == null) continue;
+            string name = fsm.Value.Name;
+            StructDeclarationSyntax[] states = data.States
+                .Where(x => x!.Value.FsmName == name)
+                .Select(x => x!.Value.Struct)
+                .ToArray();
+            CreateFsmFile(sourceBuilder, fsm.Value, context, states);
+        }
+    }
+
+    private static void CreateFsmFile(
+        StringBuilder sourceBuilder, FsmData fsmData, 
+        SourceProductionContext context, StructDeclarationSyntax[] structs)
+    {
         List<string> namespaces = [];
-        foreach (StructDeclarationSyntax? structDeclaration in structs)
+        foreach (StructDeclarationSyntax structDeclaration in structs)
         {
             switch (structDeclaration.Parent)
             {
@@ -50,7 +116,7 @@ public class ActionGenerator : IIncrementalGenerator
         List<string> entersMethods = [];
         List<string> exitsMethods = [];
         Dictionary<string, List<string>> otherMethods = [];
-        foreach (StructDeclarationSyntax? structDeclaration in structs)
+        foreach (StructDeclarationSyntax structDeclaration in structs)
         {
             string structName = structDeclaration.Identifier.Text;
             
@@ -83,26 +149,33 @@ public class ActionGenerator : IIncrementalGenerator
         {
             sourceBuilder.Append($"using {namespaceName};\n");
         }
-        
+
         sourceBuilder.Append(
 """
 using System;
 using System.Runtime.InteropServices;
 
-namespace OrbinautFramework3.Objects.Player.Data
+"""
+        ).Append("\nnamespace ").Append(fsmData.Namespace).Append('\n').Append(
+"""
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct ActionFsm(PlayerData data)
+"""
+        ).Append("\n\tpublic struct ").Append(fsmData.Name).Append("Fsm(PlayerData data)\n").Append(
+"""
     {
         public enum States : 
 """
-        );
-        
-        sourceBuilder.Append("int").Append("\n\t\t{\n\t\t\t");
+        ).Append("int").Append("\n\t\t{\n\t\t\t");
 
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             sourceBuilder.Append(structDeclaration.Identifier.Text).Append(", ");
+        }
+
+        if (structs.All(x => x.Identifier.Text != "None"))
+        {
+            sourceBuilder.Append("None");
         }
 
         sourceBuilder.Append('\n').Append(
@@ -176,6 +249,7 @@ namespace OrbinautFramework3.Objects.Player.Data
         );
         
         context.AddSource("ActionFsm.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+        sourceBuilder.Clear();
     }
 
     private static void AddMethod(

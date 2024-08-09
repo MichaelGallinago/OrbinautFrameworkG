@@ -1,17 +1,12 @@
-﻿using OrbinautFramework3.Objects.Player.Physics.Collisions;
+﻿using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Physics.Collisions;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Collision
+public struct Collision(PlayerData data)
 {
-	private Air _air;
-	private Ground _ground;
-
-	public Collision()
-	{
-		_air = new Air();
-		_ground = new Ground();
-	}
+	private Air _air = new(data);
+	private Ground _ground = new(data);
 
 	public void CollideAir() => _air.Collide();
 	public void CollideFloorGround() => _ground.CollideFloor();

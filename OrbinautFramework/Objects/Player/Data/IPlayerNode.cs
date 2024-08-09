@@ -1,12 +1,12 @@
 ﻿using Godot;
+using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public interface IPlayerNode
+public interface IPlayerNode : IPosition
 {
-    Vector2 Position { get; set; }
     Vector2 Scale { get; set; }
     int ZIndex { get; set; }
     float RotationDegrees { get; set; }

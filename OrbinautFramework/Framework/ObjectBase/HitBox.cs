@@ -1,4 +1,5 @@
 using Godot;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
@@ -117,7 +118,7 @@ public partial class HitBox : Resource
     
 	public bool CheckPlayerCollision(PlayerData player, bool isExtraHitBox = false)
 	{
-		if (!player.IsObjectInteractionEnabled || player.IsHurt) return false;
+		if (!player.Collision.IsObjectInteractionEnabled || player.Damage.IsHurt) return false;
 		return CheckCollision(player, isExtraHitBox);
 	}
 }

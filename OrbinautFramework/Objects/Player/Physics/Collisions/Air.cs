@@ -1,20 +1,22 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Collisions;
 
-public struct Air
+public struct Air(PlayerData data)
 {
     public void Collide()
 	{
-		if (IsGrounded || IsDead || Action is Actions.Glide or Actions.Climb) return;
+		if (data.Physics.IsGrounded || data.Death.IsDead || data.State is States.Glide or States.Climb) return;
 		
-		int wallRadius = RadiusNormal.X + 1;
-		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
+		int wallRadius = data.Collision.RadiusNormal.X + 1;
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Physics.Velocity));
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer);
+		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
 
 		var moveQuadrantValue = (int)moveQuadrant;
 
@@ -32,15 +34,15 @@ public struct Air
 		
 		if (moveQuadrantValue == (int)Angles.Quadrant.Up + sign) return false;
 		
-		int wallDistance = TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
+		int wallDistance = data.TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
 		
 		if (wallDistance >= 0f) return false;
-		Position += new Vector2(sign * wallDistance, 0f);
-		TileCollider.Position = (Vector2I)Position;
-		Velocity.X = 0f;
+		data.PlayerNode.Position += new Vector2(sign * wallDistance, 0f);
+		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Physics.Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return false;
-		GroundSpeed.Value = Velocity.Y;
+		data.Physics.GroundSpeed.Value = data.Physics.Velocity.Y;
 		return true;
 	}
 
@@ -48,44 +50,44 @@ public struct Air
 	{
 		if (moveQuadrant == Angles.Quadrant.Down) return false;
 		
-		(int roofDistance, float roofAngle) = TileCollider.FindClosestTile(
-			-Radius.X, -Radius.Y, Radius.X, -Radius.Y,
+		(int roofDistance, float roofAngle) = data.TileCollider.FindClosestTile(
+			-data.Collision.Radius.X, -data.Collision.Radius.Y, data.Collision.Radius.X, -data.Collision.Radius.Y,
 			true, Constants.Direction.Negative);
 			
-		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PhysicsType >= PhysicsTypes.S3 && roofDistance <= -14f)
+		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PhysicsType >= PhysicsCore.Types.S3 && roofDistance <= -14f)
 		{
 			// Perform right wall collision if moving mostly left and too far into the ceiling
-			int wallDist = TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);
+			int wallDist = data.TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);
 
 			if (wallDist >= 0) return false;
 			
-			Position += new Vector2(wallDist, 0f);
-			Velocity.X = 0f;
+			data.PlayerNode.Position += new Vector2(wallDist, 0f);
+			data.Physics.Velocity.X = 0f;
 			return true;
 		}
 		
 		if (roofDistance >= 0) return false;
 		
-		Position -= new Vector2(0f, roofDistance);
-		if (moveQuadrant == Angles.Quadrant.Up && Action != Actions.Flight && 
+		data.PlayerNode.Position -= new Vector2(0f, roofDistance);
+		if (moveQuadrant == Angles.Quadrant.Up && data.State != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
-			Angle = roofAngle;
-			GroundSpeed.Value = roofAngle < 180f ? -Velocity.Y : Velocity.Y;
-			Velocity.Y = 0f;
+			data.Rotation.Angle = roofAngle;
+			data.Physics.GroundSpeed.Value = roofAngle < 180f ? -data.Physics.Velocity.Y : data.Physics.Velocity.Y;
+			data.Physics.Velocity.Y = 0f;
 					
 			Land();
 			return true;
 		}
 		
-		if (Velocity.Y < 0f)
+		if (data.Physics.Velocity.Y < 0f)
 		{
-			Velocity.Y = 0f;
+			data.Physics.Velocity.Y = 0f;
 		}
 		
-		if (Action == Actions.Flight)
+		if (data.State == States.Flight)
 		{
-			Gravity	= GravityType.TailsDown;
+			data.Physics.Gravity = GravityType.TailsDown;
 		}
 		
 		return true;
@@ -102,25 +104,25 @@ public struct Air
 		{
 			if (LandOnFeet(out distance, out angle)) return;
 		}
-		else if (Velocity.Y >= 0) // If moving mostly left or right, continue if our vertical velocity is positive
+		else if (data.Physics.Velocity.Y >= 0) // If moving mostly left or right, continue if our vertical velocity is positive
 		{
 			if (FallOnGround(out distance, out angle)) return;
 		}
 		else return;
 		
-		Position += new Vector2(0f, distance);
-		Angle = angle;
+		data.PlayerNode.Position += new Vector2(0f, distance);
+		data.Rotation.Angle = angle;
 		
 		Land();
 	}
 
 	private bool LandOnFeet(out int distance, out float angle)
 	{
-		(int distanceL, float angleL) = TileCollider.FindTile(
-			-Radius.X, Radius.Y, true, Constants.Direction.Positive);
+		(int distanceL, float angleL) = data.TileCollider.FindTile(
+			-data.Collision.Radius.X, data.Collision.Radius.Y, true, Constants.Direction.Positive);
 			
-		(int distanceR, float angleR) = TileCollider.FindTile(
-			Radius.X, Radius.Y, true, Constants.Direction.Positive);
+		(int distanceR, float angleR) = data.TileCollider.FindTile(
+			data.Collision.Radius.X, data.Collision.Radius.Y, true, Constants.Direction.Positive);
 
 		if (distanceL > distanceR)
 		{
@@ -136,28 +138,28 @@ public struct Air
 		// Exit if too far into the ground when BOTH sensors find it.
 		// So if we're landing on a ledge, it doesn't matter how far we're clipping into the ground
 		
-		float minClip = -(Velocity.Y + 8f);		
+		float minClip = -(data.Physics.Velocity.Y + 8f);		
 		if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return true;
 		
 		if (Angles.GetQuadrant(angle) != Angles.Quadrant.Down)
 		{
-			if (Velocity.Y > 15.75f)
+			if (data.Physics.Velocity.Y > 15.75f)
 			{
-				Velocity.Y = 15.75f;
+				data.Physics.Velocity.Y = 15.75f;
 			}
 			
-			GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
-			Velocity.X = 0f;
+			data.Physics.GroundSpeed.Value = angle < 180f ? -data.Physics.Velocity.Y : data.Physics.Velocity.Y;
+			data.Physics.Velocity.X = 0f;
 		}
 		else if (angle is > 22.5f and <= 337.5f)
 		{
-			GroundSpeed.Value = angle < 180f ? -Velocity.Y : Velocity.Y;
-			GroundSpeed.Value *= 0.5f;
+			data.Physics.GroundSpeed.Value = angle < 180f ? -data.Physics.Velocity.Y : data.Physics.Velocity.Y;
+			data.Physics.GroundSpeed.Value *= 0.5f;
 		}
 		else 
 		{
-			GroundSpeed.Value = Velocity.X;
-			Velocity.Y = 0f;
+			data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
+			data.Physics.Velocity.Y = 0f;
 		}
 		
 		return false;
@@ -165,14 +167,18 @@ public struct Air
 
 	private bool FallOnGround(out int distance, out float angle)
 	{
-		(distance, angle) = TileCollider.FindClosestTile(
-			-Radius.X, Radius.Y, Radius.X, Radius.Y,
-			true, Constants.Direction.Positive);
+		(distance, angle) = data.TileCollider.FindClosestTile(
+			-data.Collision.Radius.X, 
+			data.Collision.Radius.Y, 
+			data.Collision.Radius.X, 
+			data.Collision.Radius.Y,
+			true, 
+			Constants.Direction.Positive);
 		
 		if (distance >= 0) return true;
 		
-		GroundSpeed.Value = Velocity.X;
-		Velocity.Y = 0f;
+		data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
+		data.Physics.Velocity.Y = 0f;
 		
 		return false;
 	}

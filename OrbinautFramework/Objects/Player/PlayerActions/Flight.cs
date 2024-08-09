@@ -6,7 +6,8 @@ using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Flight : IAction
+[FsmSourceGenerator.FsmState("Action")]
+public struct Flight
 {
 	public PlayerData Data { private get; init; }
 	

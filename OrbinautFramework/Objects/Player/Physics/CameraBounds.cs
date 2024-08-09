@@ -1,32 +1,38 @@
-﻿using Godot;
+﻿using System;
+using Godot;
+using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct CameraBounds
+public struct CameraBounds(PlayerData data)
 {
     public void Match()
     {
-    	if (IsDead) return;
+    	if (data.Death.IsDead) return;
     	
-    	if (!IsCameraTarget(out ICamera camera) && !Scene.Local.Players.First().IsCameraTarget(out camera)) return;
+	    //TODO: check this
+    	if (!data.PlayerNode.IsCameraTarget(out ICamera camera) && 
+	        !Scene.Instance.Players.First().PlayerNode.IsCameraTarget(out camera)) return;
 
-	    ShiftToLeftBound();
-	    ShiftToRightBound();
-	    ShiftToTopBound();
-	    KillUnderBottomBound();
+	    ShiftToLeftBound(camera);
+	    ShiftToRightBound(camera);
+	    ShiftToTopBound(camera);
+	    KillUnderBottomBound(camera);
     }
 
-    private void ShiftToLeftBound()
+    private void ShiftToLeftBound(ICamera camera)
     {
-	    if (Position.X + Velocity.X < camera.Boundary.X + 16f)
-	    {
-		    GroundSpeed.Value = 0f;
-		    Velocity.X = 0f;
-		    Position = new Vector2(camera.Boundary.X + 16f, Position.Y);
-	    }
+	    if (data.PlayerNode.Position.X + data.Physics.Velocity.X >= camera.Boundary.X + 16f) return;
+	    
+	    data.Physics.GroundSpeed.Value = 0f;
+	    data.Physics.Velocity.X = 0f;
+	    data.PlayerNode.Position = new Vector2(camera.Boundary.X + 16f, data.PlayerNode.Position.Y);
     }
     
-    private void ShiftToRightBound()
+    private void ShiftToRightBound(ICamera camera)
     {
 	    float rightBound = camera.Boundary.Z - 24f;
     	
@@ -39,41 +45,40 @@ public struct CameraBounds
 	    }*/
     	
 	    // Right bound
-	    if (Position.X + Velocity.X > rightBound)
-	    {
-		    GroundSpeed.Value = 0f;
-		    Velocity.X = 0f;
-		    Position = new Vector2(rightBound, Position.Y);
-	    }
+	    if (data.PlayerNode.Position.X + data.Physics.Velocity.X <= rightBound) return;
+	    
+	    data.Physics.GroundSpeed.Value = 0f;
+	    data.Physics.Velocity.X = 0f;
+	    data.PlayerNode.Position = new Vector2(rightBound, data.PlayerNode.Position.Y);
     }
 
-    private void ShiftToTopBound()
+    private void ShiftToTopBound(ICamera camera)
     {
-	    switch (Action)
+	    switch (data.State)
 	    {
-		    case Actions.Flight or Actions.Climb:
-			    if (Position.Y + Velocity.Y >= camera.Boundary.Y + 16f) break;
+		    case States.Flight or States.Climb:
+			    if (data.PlayerNode.Position.Y + data.Physics.Velocity.Y >= camera.Boundary.Y + 16f) break;
     
-			    if (Action == Actions.Flight)
+			    if (data.State == States.Flight)
 			    {
-				    Gravity	= GravityType.TailsDown;
+				    data.Physics.Gravity = GravityType.TailsDown;
 			    }
 
-			    Velocity.Y = 0f;
-			    Position = new Vector2(Position.X, camera.Boundary.Y + 16f);
+			    data.Physics.Velocity.Y = 0f;
+			    data.PlayerNode.Position = new Vector2(data.PlayerNode.Position.X, camera.Boundary.Y + 16f);
 			    break;
     		
-		    case Actions.Glide when Position.Y < camera.Boundary.Y + 10f:
-			    GroundSpeed.Value = 0f;
+		    case States.Glide when data.PlayerNode.Position.Y < camera.Boundary.Y + 10f:
+			    data.Physics.GroundSpeed.Value = 0f;
 			    break;
 	    }
     }
 
-    private void KillUnderBottomBound()
+    private void KillUnderBottomBound(ICamera camera)
     {
-	    if (AirTimer > 0f && Position.Y > Math.Max(camera.Boundary.W, camera.TargetBoundary.W))
-	    {
-		    Kill();
-	    }
+	    if (data.Water.AirTimer <= 0f) return;
+	    if (data.PlayerNode.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return;
+	    
+	    Kill();
     }
 }

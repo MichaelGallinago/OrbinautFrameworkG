@@ -2,48 +2,55 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
+using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Collisions;
 
-public struct Ground
+public struct Ground(PlayerData data)
 {
 	private const int MinTolerance = 4;
 	private const int MaxTolerance = 14;
 	
 	public void CollideWalls()
     {
-        if (!IsGrounded) return;
+        if (!data.Physics.IsGrounded) return;
 		
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
 		// and S3K physics are enabled
-		if (Angle is > 90f and <= 270f && (SharedData.PhysicsType < PhysicsTypes.SK || Angle % 90f != 0f)) return;
+		if (data.Rotation.Angle is > 90f and <= 270f && 
+		    (SharedData.PhysicsType < PhysicsCore.Types.SK || data.Rotation.Angle % 90f != 0f)) return;
 
-		int wallRadius = RadiusNormal.X + 1;
-		int offsetY = Angle == 0f ? 8 : 0;
+		int wallRadius = data.Collision.RadiusNormal.X + 1;
+		int offsetY = data.Rotation.Angle == 0f ? 8 : 0;
 		
 		int sign;
-		Constants.Direction firstDirection, secondDirection;
-		switch ((float)GroundSpeed)
+		Direction firstDirection, secondDirection;
+		switch (data.Physics.GroundSpeed.Value)
 		{
 			case < 0f:
-				sign = (int)Constants.Direction.Positive;
-				firstDirection = Constants.Direction.Negative;
-				secondDirection = Constants.Direction.Positive;
+				sign = (int)Direction.Positive;
+				firstDirection = Direction.Negative;
+				secondDirection = Direction.Positive;
 				break;
 			
 			case > 0f:
-				sign = (int)Constants.Direction.Negative;
-				firstDirection = Constants.Direction.Positive;
-				secondDirection = Constants.Direction.Negative;
+				sign = (int)Direction.Negative;
+				firstDirection = Direction.Positive;
+				secondDirection = Direction.Negative;
 				wallRadius = -wallRadius;
 				break;
 			
 			default: return;
 		}
 		
-		TileCollider.SetData((Vector2I)Velocity.CalculateNewPosition(Position), TileLayer, TileBehaviour);
+		data.TileCollider.SetData(
+			(Vector2I)data.Physics.Velocity.CalculateNewPosition(data.PlayerNode.Position), 
+			data.Collision.TileLayer,
+			data.Collision.TileBehaviour);
 		
-		int castQuadrant = Angle switch
+		int castQuadrant = data.Rotation.Angle switch
 		{
 			>= 45f and <= 128f => 1,
 			> 128f and < 225f => 2,
@@ -53,33 +60,33 @@ public struct Ground
 		
 		int wallDistance = castQuadrant switch
 		{
-			0 => TileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
-			1 => TileCollider.FindDistance(0, wallRadius, true, secondDirection),
-			2 => TileCollider.FindDistance(wallRadius, 0, false, secondDirection),
-			3 => TileCollider.FindDistance(0, -wallRadius, true, firstDirection),
+			0 => data.TileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
+			1 => data.TileCollider.FindDistance(0, wallRadius, true, secondDirection),
+			2 => data.TileCollider.FindDistance(wallRadius, 0, false, secondDirection),
+			3 => data.TileCollider.FindDistance(0, -wallRadius, true, firstDirection),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
 		if (wallDistance >= 0) return;
 		
-		Angles.Quadrant quadrant = Angles.GetQuadrant(Angle);
+		Angles.Quadrant quadrant = Angles.GetQuadrant(data.Rotation.Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
 		float offset = wallDistance / Scene.Instance.ProcessSpeed;
 		
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				Velocity.Modify(new Vector2(-offset, 0f));
-				GroundSpeed.Value = 0f;
+				data.Physics.Velocity.Modify(new Vector2(-offset, 0f));
+				data.Physics.GroundSpeed.Value = 0f;
 				
-				if (Facing == firstDirection && !IsSpinning)
+				if (data.Visual.Facing == firstDirection && !data.Physics.IsSpinning)
 				{
-					SetPushAnimationBy = this;
+					data.Visual.SetPushBy = data.PlayerNode;
 				}
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				Velocity.Modify(new Vector2(0f, offset));
+				data.Physics.Velocity.Modify(new Vector2(0f, offset));
 				break;
 		}
     }
@@ -88,84 +95,88 @@ public struct Ground
 	// Since we're going to rotate player's sensors, "rotate" tile properties as well
 	public void CollideFloor()
 	{
-		if (!IsGrounded || OnObject != null) return;
+		if (!data.Physics.IsGrounded || data.Collision.OnObject != null) return;
 
-		TileBehaviour = GetTileBehaviour();
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileBehaviour);
+		data.Collision.TileBehaviour = GetTileBehaviour();
+		data.TileCollider.SetData(
+			(Vector2I)data.PlayerNode.Position,
+			data.Collision.TileLayer,
+			data.Collision.TileBehaviour);
 
 		(int distance, float angle) = FindTile();
 		
+		//TODO: check this
 		if (GoAirborne()) return;
 
 		if (distance < -MaxTolerance) return;
 		
-		Position += TileBehaviour switch
+		data.PlayerNode.Position += data.Collision.TileBehaviour switch
 		{
-			Constants.TileBehaviours.Floor => new Vector2(0f, distance),
-			Constants.TileBehaviours.RightWall => new Vector2(distance, 0f),
-			Constants.TileBehaviours.Ceiling => new Vector2(0f, -distance),
-			Constants.TileBehaviours.LeftWall => new Vector2(-distance, 0f),
+			TileBehaviours.Floor => new Vector2(0f, distance),
+			TileBehaviours.RightWall => new Vector2(distance, 0f),
+			TileBehaviours.Ceiling => new Vector2(0f, -distance),
+			TileBehaviours.LeftWall => new Vector2(-distance, 0f),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
-		Angle = SharedData.PhysicsType >= PhysicsTypes.S2 ? SnapFloorAngle(angle) : angle;
+		data.Rotation.Angle = SharedData.PhysicsType >= PhysicsCore.Types.S2 ? SnapFloorAngle(angle) : angle;
 	}
 
-	private Constants.TileBehaviours GetTileBehaviour() => Angle switch
+	private TileBehaviours GetTileBehaviour() => data.Rotation.Angle switch
 	{
-		<= 45 or >= 315 => Constants.TileBehaviours.Floor,
-		> 45 and < 135 => Constants.TileBehaviours.RightWall,
-		>= 135 and <= 225 => Constants.TileBehaviours.Ceiling,
-		_ => Constants.TileBehaviours.LeftWall
+		<= 45 or >= 315 => TileBehaviours.Floor,
+		> 45 and < 135 => TileBehaviours.RightWall,
+		>= 135 and <= 225 => TileBehaviours.Ceiling,
+		_ => TileBehaviours.LeftWall
 	};
 
-	private (int distance, float angle) FindTile() => TileBehaviour switch
+	private (int distance, float angle) FindTile()
 	{
-		Constants.TileBehaviours.Floor => TileCollider.FindClosestTile(
-			-Radius.X, Radius.Y, Radius.X, Radius.Y, 
-			true, Constants.Direction.Positive),
-			
-		Constants.TileBehaviours.RightWall => TileCollider.FindClosestTile(
-			Radius.Y, Radius.X, Radius.Y, -Radius.X, 
-			false, Constants.Direction.Positive),
-			
-		Constants.TileBehaviours.Ceiling => TileCollider.FindClosestTile(
-			Radius.X, -Radius.Y, -Radius.X, -Radius.Y, 
-			true, Constants.Direction.Negative),
-			
-		Constants.TileBehaviours.LeftWall => TileCollider.FindClosestTile(
-			-Radius.Y, -Radius.X, -Radius.Y, Radius.X, 
-			false, Constants.Direction.Negative),
-			
-		_ => throw new ArgumentOutOfRangeException()
-	};
+		Vector2I radius = data.Collision.Radius;
+		return data.Collision.TileBehaviour switch
+		{
+			TileBehaviours.Floor => data.TileCollider.FindClosestTile(
+				-radius.X, radius.Y, radius.X, radius.Y, true, Direction.Positive),
+
+			TileBehaviours.RightWall => data.TileCollider.FindClosestTile(
+				radius.Y, radius.X, radius.Y, -radius.X, false, Direction.Positive),
+
+			TileBehaviours.Ceiling => data.TileCollider.FindClosestTile(
+				radius.X, -radius.Y, -radius.X, -radius.Y, true, Direction.Negative),
+
+			TileBehaviours.LeftWall => data.TileCollider.FindClosestTile(
+				-radius.Y, -radius.X, -radius.Y, radius.X, false, Direction.Negative),
+
+			_ => throw new ArgumentOutOfRangeException()
+		};
+	}
 
 	private bool GoAirborne(int distance)
 	{
-		if (IsStickToConvex) return false;
+		if (data.Collision.IsStickToConvex) return false;
 		
-		float toleranceCheckSpeed = TileBehaviour switch
+		float toleranceCheckSpeed = data.Collision.TileBehaviour switch
 		{
-			Constants.TileBehaviours.Floor or Constants.TileBehaviours.Ceiling => Velocity.X,
-			Constants.TileBehaviours.RightWall or Constants.TileBehaviours.LeftWall => Velocity.Y,
-			_ => throw new ArgumentOutOfRangeException(TileBehaviour.ToString())
+			TileBehaviours.Floor or TileBehaviours.Ceiling => data.Physics.Velocity.X,
+			TileBehaviours.RightWall or TileBehaviours.LeftWall => data.Physics.Velocity.Y,
+			_ => throw new ArgumentOutOfRangeException(data.Collision.TileBehaviour.ToString())
 		};
 			
-		float tolerance = SharedData.PhysicsType < PhysicsTypes.S2 ? 
+		float tolerance = SharedData.PhysicsType < PhysicsCore.Types.S2 ? 
 			MaxTolerance : Math.Min(MinTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), MaxTolerance);
 
 		if (distance <= tolerance) return false;
 		
-		SetPushAnimationBy = null;
-		IsGrounded = false;
+		data.Visual.SetPushBy = null;
+		data.Physics.IsGrounded = false;
 						
-		OverrideAnimationFrame = 0;
+		data.Visual.OverrideFrame = 0;
 		return true;
 	}
 
 	private float SnapFloorAngle(float floorAngle)
 	{
-		float difference = Math.Abs(Angle % 180f - floorAngle % 180f);
-		return difference is < 45f or > 135f ? floorAngle : MathF.Round(Angle / 90f) % 4f * 90f;
+		float difference = Math.Abs(data.Rotation.Angle % 180f - floorAngle % 180f);
+		return difference is < 45f or > 135f ? floorAngle : MathF.Round(data.Rotation.Angle / 90f) % 4f * 90f;
 	}
 }

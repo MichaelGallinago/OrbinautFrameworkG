@@ -36,7 +36,7 @@ public class AcceleratedValue
         return result;
     }
     
-    public void Clamp(float min, float max)
+    public void SetClamp(float min, float max)
     {
         if (min > max)
         {
@@ -54,14 +54,14 @@ public class AcceleratedValue
     }
     
     //TODO: change to SetMax
-    public void Max(float value)
+    public void SetMax(float value)
     {
         if (_value >= value) return;
         Value = value;
     }
     
     //TODO: change to SetMin
-    public void Min(float value)
+    public void SetMin(float value)
     {
         if (_value <= value) return;
         Value = value;
@@ -74,8 +74,8 @@ public class AcceleratedValue
 		
         switch (sign)
         {
-            case  1: Max(0f); break;
-            case -1: Min(0f); break;
+            case  1: SetMax(0f); break;
+            case -1: SetMin(0f); break;
         }
     }
 }

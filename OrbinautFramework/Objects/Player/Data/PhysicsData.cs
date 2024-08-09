@@ -30,4 +30,9 @@ public class PhysicsData
         GroundSpeed.Value = 0f;
         GroundLockTimer = 0f;
     }
+    
+    public void ResetGravity(bool isUnderwater)
+    {
+        Gravity = isUnderwater ? GravityType.Underwater : GravityType.Default;
+    }
 }

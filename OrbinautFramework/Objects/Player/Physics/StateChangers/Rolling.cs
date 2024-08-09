@@ -2,38 +2,42 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
-public struct Rolling
+public struct Rolling(PlayerData data)
 {
     public void Start()
     {
-        if (!IsGrounded || IsSpinning || Action is Actions.SpinDash or Actions.HammerDash) return;
-        if (!IsForcedSpin && (Input.Down.Left || Input.Down.Right)) return;
+        if (data.State is States.SpinDash or States.HammerDash) return;
+        if (!data.Physics.IsGrounded || data.Physics.IsSpinning) return;
+        if (!data.Physics.IsForcedSpin && (data.Input.Down.Left || data.Input.Down.Right)) return;
 
-        if (!CheckSpinPossibility() && !IsForcedSpin) return;
+        if (!CheckSpinPossibility() && !data.Physics.IsForcedSpin) return;
 		
-        Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-        Radius = RadiusSpin;
-        IsSpinning = true;
-        Animation = Animations.Spin;
+        data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+        data.Collision.Radius = data.Collision.RadiusSpin;
+        data.Physics.IsSpinning = true;
+        data.Visual.Animation = Animations.Spin;
 		
         AudioPlayer.Sound.Play(SoundStorage.Roll);
     }
 
     private bool CheckSpinPossibility()
     {
-        if (!Input.Down.Down) return false;
+        if (!data.Input.Down.Down) return false;
 		
-        if (SharedData.PhysicsType != PhysicsTypes.SK)
+        if (SharedData.PhysicsType != PhysicsCore.Types.SK)
         {
-            return Math.Abs(GroundSpeed) >= 0.5f;
+            return Math.Abs(data.Physics.GroundSpeed) >= 0.5f;
         }
 
-        if (Math.Abs(GroundSpeed) >= 1f) return true;
+        if (Math.Abs(data.Physics.GroundSpeed) >= 1f) return true;
 
-        Animation = Animations.Duck;
+        data.Visual.Animation = Animations.Duck;
         return false;
     }
 }
