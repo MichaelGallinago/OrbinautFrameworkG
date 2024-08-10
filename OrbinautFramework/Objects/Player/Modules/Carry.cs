@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Physics;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
@@ -11,31 +12,31 @@ public struct Carry(PlayerData data)
 {
     public void Process()
     {
-        if (Type != Types.Tails) return;
+        if (data.PlayerNode.Type != PlayerNode.Types.Tails) return;
 
-        if (Timer > 0f)
+        if (data.Carry.Timer > 0f)
         {
-            Timer -= Scene.Instance.ProcessSpeed;
-            if (Timer > 0f) return;
+            data.Carry.Timer -= Scene.Instance.ProcessSpeed;
+            if (data.Carry.Timer > 0f) return;
         }
 	
-        if (Target != null)
+        if (data.Carry.Target != null)
         {
-            Target.OnAttached(this);
+            data.Carry.Target.OnAttached(this);
             return;
         }
 		
-        if (Action != Actions.Flight) return;
+        if (data.State != States.Flight) return;
 
         GrabAnotherPlayer();
     }
 
     private void GrabAnotherPlayer(PlayerNode carrier)
     {
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             if (player == carrier) continue;
-            if (player.Action is Actions.SpinDash or Actions.Carried) continue;
+            if (player.data.State is Actions.SpinDash or Actions.Carried) continue;
             if (!player.IsControlRoutineEnabled || !player.IsObjectInteractionEnabled) continue;
 
             Vector2 delta = (player.Position - Position).Abs();
@@ -45,8 +46,8 @@ public struct Carry(PlayerData data)
             AudioPlayer.Sound.Play(SoundStorage.Grab);
 				
             player.Animation = Animations.Grab;
-            player.Action = Actions.Carried;
-            Target = player;
+            player.data.State = Actions.Carried;
+            data.Carry.Target = player;
 
             player.AttachToCarrier(this);
         }

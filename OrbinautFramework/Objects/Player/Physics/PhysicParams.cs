@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
@@ -110,11 +110,11 @@ public struct PhysicParams(
     };
     
     public static void Get(
-	    bool isUnderwater, bool isSuper, Types playerType, float itemSpeedTimer, out PhysicParams physicParams)
+	    bool isUnderwater, bool isSuper, PlayerNode.Types playerType, float itemSpeedTimer, out PhysicParams physicParams)
     {
 	    physicParams = GetParams(GetType(isUnderwater, isSuper, playerType));
 	    
-	    if (playerType == Types.Knuckles)
+	    if (playerType == PlayerNode.Types.Knuckles)
 	    {
 		    physicParams.JumpSpeed += 0.5f;
 	    }
@@ -128,9 +128,9 @@ public struct PhysicParams(
 		    physicParams.AccelerationTop = 12f;
 	    }
 	    
-	    if (SharedData.PhysicsType < PhysicsTypes.SK)
+	    if (SharedData.PhysicsType < PhysicsCore.Types.SK)
 	    {
-		    if (playerType == Types.Tails)
+		    if (playerType == PlayerNode.Types.Tails)
 		    {
 			    physicParams.DecelerationRoll = physicParams.Deceleration / 4f;
 		    }
@@ -141,7 +141,7 @@ public struct PhysicParams(
 	    }
     }
 
-    private static Type GetType(bool isUnderwater, bool isSuper, Types playerType)
+    private static Type GetType(bool isUnderwater, bool isSuper, PlayerNode.Types playerType)
     {
 	    byte type = 0;
 	    
@@ -152,6 +152,6 @@ public struct PhysicParams(
 
 	    if (!isSuper) return (Type)type;
 
-	    return (Type)(playerType == Types.Sonic ? type + 2 : type + 1);
+	    return (Type)(playerType == PlayerNode.Types.Sonic ? type + 2 : type + 1);
     }
 }

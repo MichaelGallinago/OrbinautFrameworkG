@@ -3,10 +3,8 @@
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Default
+public struct Default(PlayerData data)
 {
-    public PlayerData Data { private get; init; }
-    
     public void Perform()
     {
         throw new System.NotImplementedException();

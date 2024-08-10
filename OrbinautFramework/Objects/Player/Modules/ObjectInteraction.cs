@@ -2,44 +2,45 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Objects.Player.Physics;
+using OrbinautFramework3.Objects.Player.Data;
 using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct ObjectInteraction
+//TODO: replace OrbinautNode by interface
+public struct ObjectInteraction(PlayerData data)
 {
 	private const int GripY = 4;
 	
-	private SolidObjectData _data;
+	private SolidObjectData _solidObjectData;
 	
-	public void ClearPush(OrbinautData target)
+	public void ClearPush(object target)
 	{
-		if (SetPushAnimationBy != target) return;
-		SetPushAnimationBy = null;
+		if (data.Visual.SetPushBy != target) return;
+		data.Visual.SetPushBy = null;
 		
-		if (Animation is not (Animations.Spin or Animations.SpinDash))
+		if (data.Visual.Animation is not (Animations.Spin or Animations.SpinDash))
 		{
-			Animation = Animations.Move;
+			data.Visual.Animation = Animations.Move;
 		}
 	}
 
-	public void ActSolid(OrbinautData orbinautData, SolidType type, bool isFullRoutine = true)
+	public void ActSolid(OrbinautNode node, SolidType type, bool isFullRoutine = true)
 	{
 		// Initialise flags for the player collision
-		TouchObjects.TryAdd(orbinautData, TouchState.None);
-		PushObjects.Add(orbinautData);
+		data.Collision.TouchObjects.TryAdd(node.SolidBox, TouchState.None);
+		data.Collision.PushObjects.Add(node.SolidBox);
 		
-		if (!IsObjectInteractionEnabled) return;
-		if (SolidBox.Radius.X <= 0 || SolidBox.Radius.Y <= 0) return;
-		if (orbinautData.SolidBox.Radius.X <= 0 || orbinautData.SolidBox.Radius.Y <= 0) return;
+		if (!data.Collision.IsObjectInteractionEnabled) return;
+		if (data.PlayerNode.SolidBox.Radius.X <= 0 || data.PlayerNode.SolidBox.Radius.Y <= 0) return;
+		if (node.SolidBox.Radius.X <= 0 || node.SolidBox.Radius.Y <= 0) return;
 		
-		_data = new SolidObjectData(orbinautData, type, GetExtraSize());
+		_solidObjectData = new SolidObjectData(node, type, GetExtraSize());
 		int slopeOffset = CalculateSlopeOffset();
 		
 		RegisterCollisionCheck();
 		
-		if (OnObject == orbinautData)
+		if (data.Collision.OnObject == node)
 		{
 			StandingOnObject(slopeOffset);
 			return;
@@ -51,7 +52,7 @@ public struct ObjectInteraction
 		{
 			CollideWithRegularObject(slopeOffset);
 		}
-		else if (Velocity.Y >= 0f)
+		else if (data.Physics.Velocity.Y >= 0f)
 		{
 			CollideWithPlatformObject();
 		}
@@ -59,10 +60,10 @@ public struct ObjectInteraction
 	
 	public bool CheckSolidCollision(SolidBox solidBox, CollisionSensor type)
 	{
-		if (!IsObjectInteractionEnabled) return false;
+		if (!data.Collision.IsObjectInteractionEnabled) return false;
 
 		// No solid collision data, exit collision check
-		if (!TouchObjects.TryGetValue(solidBox, out TouchState touchState)) return false;
+		if (!data.Collision.TouchObjects.TryGetValue(solidBox, out TouchState touchState)) return false;
 		
 		// Register collision check if debugging
 		//TODO: debug collision
@@ -102,26 +103,28 @@ public struct ObjectInteraction
 		}
 		*/
 		
-		return player.PushObjects.Contains(this);
+		return player.Collision.PushObjects.Contains(data.PlayerNode.SolidBox);
 	}
 	
 	private Vector2I GetExtraSize()
 	{
 		// Extend the radiuses for better & fair solid collision (if enabled)
-		return SharedData.BetterSolidCollision ? new Vector2I(SolidBox.Radius.X, GripY) : Vector2I.Zero;
+		return SharedData.BetterSolidCollision ? new Vector2I(data.PlayerNode.SolidBox.Radius.X, GripY) : Vector2I.Zero;
 	}
 	
 	private int CalculateSlopeOffset()
 	{
 		// Adjust slope offset based on height map
-		short[] heightMap = _data.Target.SolidBox.HeightMap;
+		short[] heightMap = _solidObjectData.Target.SolidBox.HeightMap;
 		
 		if (heightMap is not { Length: > 0 }) return 0;
 
-		int distance = Mathf.FloorToInt(Position.X - _data.Position.X) * (_data.Target.Scale.X >= 0 ? 1 : -1);
-		int index = Math.Clamp(distance + _data.Target.SolidBox.Radius.X, 0, heightMap.Length - 1);
+		int distance = 
+			Mathf.FloorToInt(data.PlayerNode.Position.X - _solidObjectData.Position.X) * (_solidObjectData.Target.Scale.X >= 0 ? 1 : -1);
 		
-		return (_data.Target.SolidBox.Radius.Y - heightMap[index]) * (int)_data.Target.Scale.Y;
+		int index = Math.Clamp(distance + _solidObjectData.Target.SolidBox.Radius.X, 0, heightMap.Length - 1);
+		
+		return (_solidObjectData.Target.SolidBox.Radius.Y - heightMap[index]) * (int)_solidObjectData.Target.Scale.Y;
 	}
 	
 	private void RegisterCollisionCheck()
@@ -150,43 +153,45 @@ public struct ObjectInteraction
 	
 	private void StandingOnObject(int slopeOffset)
 	{
-		TouchObjects[_data.Target] = TouchState.Top;
+		data.Collision.TouchObjects[_solidObjectData.Target] = TouchState.Top;
 		
 		// Adjust player's position
-		Position = _data.Position + new Vector2(
-			Position.X - _data.Target.PreviousPosition.X, 
-			slopeOffset - _data.Target.SolidBox.Radius.Y - SolidBox.Radius.Y - 1);
+		data.PlayerNode.Position = _solidObjectData.Position + new Vector2(
+			data.PlayerNode.Position.X - _solidObjectData.Target.PreviousPosition.X, 
+			slopeOffset - _solidObjectData.Target.SolidBox.Radius.Y - data.PlayerNode.SolidBox.Radius.Y - 1);
 
-		float relativeX = Math.Abs(MathF.Floor(Position.X - _data.Position.X)) - _data.Target.SolidBox.Radius.X;
+		float relativeX = 
+			Math.Abs(MathF.Floor(data.PlayerNode.Position.X - _solidObjectData.Position.X)) - _solidObjectData.Target.SolidBox.Radius.X;
 
-		if (_data.Type == SolidType.Top ? relativeX <= _data.ExtraSize.X : relativeX < SolidBox.Radius.X + 1)
+		if (_solidObjectData.Type == SolidType.Top ? 
+			    relativeX <= _solidObjectData.ExtraSize.X : relativeX < data.PlayerNode.SolidBox.Radius.X + 1)
 		{
 			return;
 		}
 			
 		// Reset touch flags and player's on-object status if they are out of bounds
-		TouchObjects[_data.Target] = TouchState.None;
-		OnObject = null;
+		data.Collision.TouchObjects[_solidObjectData.Target] = TouchState.None;
+		data.Collision.OnObject = null;
 	}
 	
 	private void CollideWithRegularObject(int slopeOffset)
 	{
 		// Calculate distances for collision detection
-		Vector2I combinedSize = _data.Target.SolidBox.Radius + SolidBox.Radius;
+		Vector2I combinedSize = _solidObjectData.Target.SolidBox.Radius + data.PlayerNode.SolidBox.Radius;
 		combinedSize.X++;
 		
-		Vector2I distance = (Vector2I)(Position - _data.Position) + combinedSize;
+		Vector2I distance = (Vector2I)(data.PlayerNode.Position - _solidObjectData.Position) + combinedSize;
 		distance.Y += GripY - slopeOffset;
 		
 		// Check if player is out of bounds
 		if (distance.X < 0 || distance.X > combinedSize.X * 2 || 
-		    distance.Y < 0 || distance.Y > combinedSize.Y * 2 + _data.ExtraSize.Y)
+		    distance.Y < 0 || distance.Y > combinedSize.Y * 2 + _solidObjectData.ExtraSize.Y)
 		{
-			ClearPush(_data.Target);
+			ClearPush(_solidObjectData.Target);
 			return;
 		}
 
-		Vector2I flooredDistance = (Vector2I)Position - (Vector2I)_data.Position;
+		Vector2I flooredDistance = (Vector2I)data.PlayerNode.Position - (Vector2I)_solidObjectData.Position;
 		
 		Vector2I clip = distance - new Vector2I(
 			flooredDistance.X < 0 ? 0 : combinedSize.X * 2, 
@@ -195,7 +200,7 @@ public struct ObjectInteraction
 		Vector2I clipAbsolute = clip.Abs();
 		bool isLimitedClip = clipAbsolute.Y <= 4;
 
-		bool isS3Physics = SharedData.PhysicsType >= PhysicsTypes.S3;
+		bool isS3Physics = SharedData.PhysicsType >= PhysicsCore.Types.S3;
 		if (clipAbsolute.X >= clipAbsolute.Y || isS3Physics && isLimitedClip)
 		{
 			if (CollideVertically(clip.Y, isS3Physics)) return;
@@ -208,31 +213,32 @@ public struct ObjectInteraction
 	{
 		if (!isS3Physics && isLimitedClip)
 		{
-			ClearPush(_data.Target); 
+			ClearPush(_solidObjectData.Target); 
 			return;
 		}
 		
-		TouchObjects[_data.Target] = flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
+		data.Collision.TouchObjects[_solidObjectData.Target] = flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
 
 		UpdatePushingStatus(clipX, flooredDistanceX);
 	}
 	
 	private void UpdatePushingStatus(int clipX, int flooredDistanceX)
 	{
-		SetPushAnimationBy = IsGrounded && Math.Sign((int)Facing) == Math.Sign(-flooredDistanceX) ? _data.Target : null;
+		data.Visual.SetPushBy = data.Physics.IsGrounded && 
+			Math.Sign((int)data.Visual.Facing) == Math.Sign(-flooredDistanceX) ? _solidObjectData.Target : null;
 		
-		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(Velocity.X))
+		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(data.Physics.Velocity.X))
 		{
-			GroundSpeed.Value = 0f;
-			Velocity.X = 0f;
+			data.Physics.GroundSpeed.Value = 0f;
+			data.Physics.Velocity.X = 0f;
 
-			if (IsGrounded)
+			if (data.Physics.IsGrounded)
 			{
-				PushObjects.Add(_data.Target);
+				data.Collision.PushObjects.Add(_solidObjectData.Target);
 			}
 		}
 
-		Position -= new Vector2(clipX, 0f);
+		data.PlayerNode.Position -= new Vector2(clipX, 0f);
 	}
 	
 	private bool CollideVertically(int clipY, bool isS3Physics)
@@ -240,23 +246,23 @@ public struct ObjectInteraction
 		switch (clipY)
 		{
 			case < 0: 
-				return CollideUpward(_data.Target, clipY, isS3Physics);
+				return CollideUpward(_solidObjectData.Target, clipY, isS3Physics);
 			
-			case < 16 when _data.Type != SolidType.Sides: 
+			case < 16 when _solidObjectData.Type != SolidType.Sides: 
 				CollideDownward(clipY);
 				return true;
 			
 			default: 
-				ClearPush(_data.Target);
+				ClearPush(_solidObjectData.Target);
 				return true;
 		}
 	}
 	
 	private bool CollideUpward(OrbinautData orbinautData, int clipY, bool isS3Physics)
 	{
-		if (_data.Type is SolidType.ItemBox or SolidType.Sides) return false;
+		if (_solidObjectData.Type is SolidType.ItemBox or SolidType.Sides) return false;
 
-		if (Velocity.Y == 0f && IsGrounded)
+		if (data.Physics.Velocity.Y == 0f && data.Physics.IsGrounded)
 		{
 			return CrushPlayer(clipY);
 		}
@@ -274,61 +280,62 @@ public struct ObjectInteraction
 	
 	private void HandleUpwardCollision(OrbinautData orbinautData, int clipY, bool isS3Physics)
 	{
-		if (Velocity.Y < 0f)
+		if (data.Physics.Velocity.Y < 0f)
 		{
-			if (isS3Physics && !IsGrounded)
+			if (isS3Physics && !data.Physics.IsGrounded)
 			{
-				GroundSpeed.Value = 0f;
+				data.Physics.GroundSpeed.Value = 0f;
 			}
-
-			Position = new Vector2(Position.X, Position.Y - clipY);
-			Velocity.Y = 0f;
+			
+			data.PlayerNode.Position -= new Vector2(0, clipY);
+			data.Physics.Velocity.Y = 0f;
 		}
 
-		TouchObjects[orbinautData] = TouchState.Bottom;
+		data.Collision.TouchObjects[orbinautData] = TouchState.Bottom;
 	}
 	
 	private void CollideDownward(int clipY)
 	{
-		if (Velocity.Y < 0f) return;
+		if (data.Physics.Velocity.Y < 0f) return;
 		
-		float relativeX = Math.Abs(MathF.Floor(Position.X - _data.Position.X));
-		if (relativeX > _data.Target.SolidBox.Radius.X + _data.ExtraSize.X) return;
+		float relativeX = Math.Abs(MathF.Floor(data.PlayerNode.Position.X - _solidObjectData.Position.X));
+		if (relativeX > _solidObjectData.Target.SolidBox.Radius.X + _solidObjectData.ExtraSize.X) return;
 		
-		TouchObjects[_data.Target] = TouchState.Top;
+		data.Collision.TouchObjects[_solidObjectData.Target] = TouchState.Top;
 		AttachToObject(clipY - GripY);
 	}
 	
 	private void CollideWithPlatformObject()
 	{
-		if (Math.Abs((int)(Position.X - _data.Position.X)) > _data.Target.SolidBox.Radius.X + _data.ExtraSize.X)
+		if ((int)Math.Abs(data.PlayerNode.Position.X - _solidObjectData.Position.X) > 
+		    _solidObjectData.Target.SolidBox.Radius.X + _solidObjectData.ExtraSize.X)
 		{
 			return;
 		}
 			
-		float clipY = MathF.Floor(_data.Position.Y - _data.Target.SolidBox.Radius.Y) - 
-		              MathF.Floor(Position.Y + SolidBox.Radius.Y) - GripY;
+		float clipY = MathF.Floor(_solidObjectData.Position.Y - _solidObjectData.Target.SolidBox.Radius.Y) - 
+		              MathF.Floor(data.PlayerNode.Position.Y + data.PlayerNode.SolidBox.Radius.Y) - GripY;
 			
 		if (clipY is < -16 or >= 0) return;
 			
-		TouchObjects[_data.Target] = TouchState.Top;
+		data.Collision.TouchObjects[_solidObjectData.Target] = TouchState.Top;
 		AttachToObject(-((int)clipY + GripY));
 	}
 	
 	private void AttachToObject(int distance)
 	{
-		if (_data.Type is SolidType.FullReset or SolidType.TopReset)
+		if (_solidObjectData.Type is SolidType.FullReset or SolidType.TopReset)
 		{
-			ResetState();
+			data.ResetState();
 		}
 
-		Position = Position with { Y = Position.Y - distance - 1 };
-		GroundSpeed.Value = Velocity.X;
-		OnObject = _data.Target;
-		Velocity.Y = 0f;
-		Angle = 0f;
+		data.PlayerNode.Position = data.PlayerNode.Position with { Y = data.PlayerNode.Position.Y - distance - 1 };
+		data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
+		data.Collision.OnObject = _solidObjectData.Target;
+		data.Physics.Velocity.Y = 0f;
+		data.Rotation.Angle = 0f;
 
-		if (IsGrounded) return;
+		if (data.Physics.IsGrounded) return;
 		Land();
 	}
 }

@@ -5,6 +5,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -15,21 +16,19 @@ public struct DropDash(PlayerData data)
 
 	private float _charge;
 	
-	public PlayerNode PlayerNode { private get; init; }
-	
     public void Perform()
     {
-	    if (PlayerNode.Data.IsGrounded || Cancel()) return;
+	    if (data.Physics.IsGrounded || Cancel()) return;
 		
-	    if (PlayerNode.Data.Input.Down.Abc)
+	    if (data.Input.Down.Abc)
 	    {
-		    PlayerNode.Data.IsAirLock = false;		
+		    data.Physics.IsAirLock = false;		
 		    _charge += Scene.Instance.ProcessSpeed;
 			
-		    if (_charge < MaxCharge || PlayerNode.Data.Animation == Animations.DropDash) return;
+		    if (_charge < MaxCharge || data.Visual.Animation == Animations.DropDash) return;
 			
 		    AudioPlayer.Sound.Play(SoundStorage.Charge3);
-		    PlayerNode.Data.Animation = Animations.DropDash;
+		    data.Visual.Animation = Animations.DropDash;
 		    return;
 	    }
 		
@@ -39,8 +38,8 @@ public struct DropDash(PlayerData data)
 			    return;
 			
 		    case >= MaxCharge:
-			    PlayerNode.Data.Animation = Animations.Spin;
-			    PlayerNode.Data.Action.Type = Actions.Types.None;
+			    data.Visual.Animation = Animations.Spin;
+			    data.State = States.Default;
 			    break;
 	    }
 		
@@ -53,62 +52,67 @@ public struct DropDash(PlayerData data)
     	
     	if (_charge < MaxCharge) return;
     	
-    	Position += new Vector2(0f, PlayerNode.Data.Radius.Y - PlayerNode.Data.RadiusSpin.Y);
-	    PlayerNode.Data.Radius = PlayerNode.Data.RadiusSpin;
+    	data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+	    data.Collision.Radius = data.Collision.RadiusSpin;
+
+	    SetGroundSpeed();
     	
-    	if (PlayerNode.Data.SuperData.IsSuper)
-    	{
-    		UpdateGroundSpeed(13f, 12f);
-    		if (IsCameraTarget(out ICamera camera))
-    		{
-    			camera.SetShakeTimer(6f);
-    		}
-    	}
-    	else
-    	{
-    		UpdateGroundSpeed(12f, 8f);
-    	}
+	    data.Visual.Animation = Animations.Spin;
+	    data.Physics.IsSpinning = true;
     	
-	    PlayerNode.Data.Animation = Animations.Spin;
-	    PlayerNode.Data.IsSpinning = true;
-    	
-    	SetCameraDelayX(8f);
+    	data.SetCameraDelayX(8f);
     		
     	//TODO: obj_dust_dropdash
     	//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
     	AudioPlayer.Sound.Stop(SoundStorage.Charge3);
     	AudioPlayer.Sound.Play(SoundStorage.Release);
     }
+
+    private void SetGroundSpeed()
+    {
+	    if (!data.Super.IsSuper)
+	    {
+		    UpdateGroundSpeed(12f, 8f);
+		    return;
+	    }
+	    
+	    UpdateGroundSpeed(13f, 12f);
+	    if (data.IsCameraTarget(out ICamera camera))
+	    {
+		    camera.SetShakeTimer(6f);
+	    }
+    }
     
     private void UpdateGroundSpeed(float limitSpeed, float force)
     {
-	    var sign = (float)PlayerNode.Data.Facing;
+	    var sign = (float)data.Visual.Facing;
 	    limitSpeed *= sign;
 	    force *= sign;
 	    
-	    if (PlayerNode.Data.Velocity.X * sign >= 0f)
+	    if (data.Physics.Velocity.X * sign >= 0f)
 	    {
-		    PlayerNode.Data.GroundSpeed.Value = MathF.Floor(PlayerNode.Data.GroundSpeed / 4f) + force;
-		    if (sign * PlayerNode.Data.GroundSpeed <= limitSpeed) return;
-		    PlayerNode.Data.GroundSpeed.Value = limitSpeed;
+		    AcceleratedValue groundSpeed = data.Physics.GroundSpeed;
+		    groundSpeed.Value = MathF.Floor(groundSpeed / 4f) + force;
+		    if (sign * groundSpeed <= limitSpeed) return;
+		    groundSpeed.Value = limitSpeed;
 		    return;
 	    }
     	
-	    PlayerNode.Data.GroundSpeed.Value = force;
-	    if (Mathf.IsZeroApprox(PlayerNode.Data.Angle)) return;
+	    data.Physics.GroundSpeed.Value = force;
+	    if (Mathf.IsZeroApprox(data.Rotation.Angle)) return;
     	
-	    PlayerNode.Data.GroundSpeed.Value += MathF.Floor(PlayerNode.Data.GroundSpeed / 2f);
+	    data.Physics.GroundSpeed.Value += MathF.Floor(data.Physics.GroundSpeed / 2f);
     }
 
     private bool Cancel()
     {
-    	if (!SharedData.DropDash || PlayerNode.Data.Action != Actions.Types.DropDash) return true;
+    	if (!SharedData.DropDash || data.State != States.DropDash) return true;
+	    
+    	if (data.PlayerNode.Shield.Type <= ShieldContainer.Types.Normal) return false; 
+	    if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return false;
     	
-    	if (Shield.Type <= ShieldContainer.Types.Normal || 
-	        PlayerNode.Data.SuperData.IsSuper || PlayerNode.Data.ItemInvincibilityTimer > 0f) return false;
-    	
-	    PlayerNode.Data.Animation = Animations.Spin;
-	    PlayerNode.Data.Action.Type = Actions.Types.Default;
+	    data.Visual.Animation = Animations.Spin;
+	    data.State = States.Default;
     	return true;
     }
 }

@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Objects.Player;
 public interface ICarrier
 {
     Velocity Velocity { get; }
-    Actions Action { get; }
+    ActionFsm.States State { get; }
     Vector2 Position { get; }
     Constants.Direction Facing { get; }
     float CarryTimer { get; set; }
@@ -15,6 +15,6 @@ public interface ICarrier
 
     private void Carry()
     {
-        CarryTarget.OnAttached(this);
+        CarryTarget.CarryTarget.OnAttached(this);
     }
 }

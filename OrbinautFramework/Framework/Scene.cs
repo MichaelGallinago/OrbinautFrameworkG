@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework;
 
@@ -82,15 +83,15 @@ public abstract partial class Scene : Node2D
         
         Culler.EarlyCull();
         
-        foreach (OrbinautData objects in Culler.ActiveObjects)
+        foreach (ICullable objects in Culler.ActiveObjects)
         {
             objects.PreviousPosition = objects.Position;
         }
         
-        foreach (PlayerNode player in Players.Values)
+        foreach (PlayerData player in Players.Values)
         {
-            player.TouchObjects.Clear();
-            player.PushObjects.Clear();
+            player.Collision.TouchObjects.Clear();
+            player.Collision.PushObjects.Clear();
         }
     }
     

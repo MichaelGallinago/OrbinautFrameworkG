@@ -6,35 +6,23 @@ using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct PhysicsCore
+public struct PhysicsCore(PlayerData data)
 {
 	public enum Types : byte
 	{
 		S1, CD, S2, S3, SK
 	}
-
-	private SlopeRepel _slopeRepel;
-	private SlopeResist _slopeResist;
-	private Movement _movement;
-	private Balancing _balancing;
-	private Collision _collision;
-	private Rolling _rolling;
-	private CameraBounds _cameraBounds;
-	private Position _position;
+	
+	private Rolling _rolling = new(data);
+	private Movement _movement = new(data);
+	private Position _position = new(data);
+	private Balancing _balancing = new(data);
+	private Collision _collision = new(data);
+	private SlopeRepel _slopeRepel = new(data);
+	private SlopeResist _slopeResist = new(data);
+	private CameraBounds _cameraBounds = new(data);
 	
 	private PhysicParams _physicParams;
-
-	public PhysicsCore(PlayerData data)
-	{
-		_slopeRepel = new SlopeRepel(data);
-		_slopeResist = new SlopeResist(data);
-		_movement = new Movement(data);
-		_balancing = new Balancing(data);
-		_collision = new Collision(data);
-		_rolling = new Rolling(data);
-		_cameraBounds = new CameraBounds(data);
-		_position = new Position(data);
-	}
 
 	public void UpdatePhysicParameters()
 	{

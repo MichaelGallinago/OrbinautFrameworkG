@@ -76,9 +76,8 @@ public struct Climb(PlayerData data)
 		data.Physics.IsJumping = true;
 		data.Physics.IsSpinning = true;
 		data.Physics.ResetGravity(data.Water.IsUnderwater);
-		data.Physics.Velocity.Vector = new Vector2(
-			3.5f * (float)data.Visual.Facing, 
-			PhysicParams.MinimalJumpSpeed);
+		data.Physics.Velocity.Vector = 
+			new Vector2(3.5f * (float)data.Visual.Facing, PhysicParams.MinimalJumpSpeed);
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	}

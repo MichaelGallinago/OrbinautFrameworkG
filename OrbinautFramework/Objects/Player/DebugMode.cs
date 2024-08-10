@@ -33,7 +33,7 @@ public class DebugMode
 	    
 	    switch (Scene.Instance)
 	    {
-		    case Stages.TSZ.StageTsz:
+		    case Scenes.Stages.TSZ.StageTsz:
 			    // TODO: debug objects
 			    _objects.AddRange(new List<Type>
 			    {

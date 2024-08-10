@@ -2,36 +2,35 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct Jump
+public struct Jump(PlayerData data)
 {
-	public PlayerData Data { private get; init; }
-
 	public bool Perform()
 	{
-		if (!IsJumping || IsGrounded) return false;
+		if (!data.Physics.IsJumping || data.Physics.IsGrounded) return false;
 		
-		if (!Input.Down.Abc)
+		if (!data.Input.Down.Abc)
 		{
-			Velocity.MaxY(PhysicParams.MinimalJumpSpeed);
+			data.Physics.Velocity.MaxY(PhysicParams.MinimalJumpSpeed);
 		}
 		
-		if (Velocity.Y < PhysicParams.MinimalJumpSpeed || CpuInputTimer == 0 && Id > 0) return false;
+		if (data.Physics.Velocity.Y < PhysicParams.MinimalJumpSpeed || CpuInputTimer == 0 && data.Id > 0) return false;
 
 		if (Transform()) return true;
 		
-		switch (Type)
+		switch (data.PlayerNode.Type)
 		{
-			case Types.Sonic: JumpSonic(); break;
-			case Types.Tails: JumpTails(); break;
-			case Types.Knuckles: JumpKnuckles(); break;
-			case Types.Amy: JumpAmy(); break;
+			case PlayerNode.Types.Sonic: JumpSonic(); break;
+			case PlayerNode.Types.Tails: JumpTails(); break;
+			case PlayerNode.Types.Knuckles: JumpKnuckles(); break;
+			case PlayerNode.Types.Amy: JumpAmy(); break;
 		}
 		
 		return false;
@@ -39,37 +38,37 @@ public struct Jump
 	
 	public bool Start()
 	{
-		if (Action is Actions.SpinDash or Actions.Dash || IsForcedSpin || !IsGrounded) return false;
+		if (data.State is States.SpinDash or States.Dash) return false;
+		if (data.Physics.IsForcedSpin || !data.Physics.IsGrounded) return false;
 		
-		if (!Input.Press.Abc || !CheckCeilingDistance()) return false;
+		if (!data.Input.Press.Abc || !CheckCeilingDistance()) return false;
 		
-		//TODO: check that Triangly fix "!global.player_physics != PHYSICS_CD"
-		if (!SharedData.FixJumpSize && SharedData.PlayerPhysics != PhysicsTypes.CD)
+		if (!SharedData.FixJumpSize && SharedData.PhysicsType != PhysicsCore.Types.CD)
 		{
 			// Why do they even do that?
-			Radius = RadiusNormal;
+			data.Collision.Radius = data.Collision.RadiusNormal;
 		}
 	
-		if (!IsSpinning)
+		if (!data.Physics.IsSpinning)
 		{
-			Position += new Vector2(0f, Radius.Y - RadiusSpin.Y);
-			Radius = RadiusSpin;
+			data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+			data.Collision.Radius = data.Collision.RadiusSpin;
 		}
-		else if (!SharedData.NoRollLock && SharedData.PlayerPhysics != PhysicsTypes.CD)
+		else if (!SharedData.NoRollLock && SharedData.PhysicsType != PhysicsCore.Types.CD)
 		{
-			IsAirLock = true;
+			data.Physics.IsAirLock = true;
 		}
 		
-		float radians = Mathf.DegToRad(Angle);
-		Velocity.Vector += PhysicParams.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+		float radians = Mathf.DegToRad(data.Rotation.Angle);
+		data.Physics.Velocity.Vector += PhysicParams.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
 		
-		IsSpinning = true;
-		IsJumping = true;
-		IsGrounded = false;
-		OnObject = null;
-		SetPushAnimationBy = null;
-		IsStickToConvex = false;
-		Animation = Animations.Spin;
+		data.Physics.IsSpinning = true;
+		data.Physics.IsJumping = true;
+		data.Physics.IsGrounded = false;
+		data.Collision.OnObject = null;
+		data.Visual.SetPushBy = null;
+		data.Collision.IsStickToConvex = false;
+		data.Visual.Animation = Animations.Spin;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	
@@ -81,20 +80,24 @@ public struct Jump
 	{
 		const int maxCeilingDistance = 6; 
 		
-		TileCollider.SetData((Vector2I)Position, TileLayer, TileBehaviour);
-		
-		int distance = TileBehaviour switch
+		data.TileCollider.SetData(
+			(Vector2I)data.PlayerNode.Position,
+			data.Collision.TileLayer,
+			data.Collision.TileBehaviour);
+
+		Vector2I radius = data.Collision.Radius;
+		int distance = data.Collision.TileBehaviour switch
 		{
-			Constants.TileBehaviours.Floor => TileCollider.FindClosestDistance(
-				-Radius.X, -Radius.Y, Radius.X, -Radius.Y,
+			Constants.TileBehaviours.Floor => data.TileCollider.FindClosestDistance(
+				-radius.X, -radius.Y, radius.X, -radius.Y,
 				true, Constants.Direction.Negative),
 			
-			Constants.TileBehaviours.RightWall => TileCollider.FindClosestDistance(
-				-Radius.Y, -Radius.X, Radius.Y, -Radius.X,
+			Constants.TileBehaviours.RightWall => data.TileCollider.FindClosestDistance(
+				-radius.Y, -radius.X, radius.Y, -radius.X,
 				false, Constants.Direction.Negative),
 			
-			Constants.TileBehaviours.LeftWall => TileCollider.FindClosestDistance(
-				-Radius.Y, Radius.X, Radius.Y, Radius.X,
+			Constants.TileBehaviours.LeftWall => data.TileCollider.FindClosestDistance(
+				-radius.Y, radius.X, radius.Y, radius.X,
 				false, Constants.Direction.Positive),
 			
 			Constants.TileBehaviours.Ceiling => maxCeilingDistance,
@@ -107,22 +110,22 @@ public struct Jump
 
 	private bool Transform()
 	{
-		if (!Input.Press.C || IsSuper || SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
+		if (!data.Input.Press.C || data.Super.IsSuper || SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 		
-		ResetState();
+		data.ResetState();
 		AudioPlayer.Sound.Play(SoundStorage.Transform);
 		AudioPlayer.Music.Play(MusicStorage.Super);
 		//TODO: instance_create obj_star_super
 		//instance_create(x, y, obj_star_super, { TargetPlayer: id });
 
-		IsControlRoutineEnabled = false;
-		IsObjectInteractionEnabled = false;			
-		InvincibilityTimer = 0;
-		SuperTimer = 1f;
-		Action = Actions.Transform;
-		Animation = Animations.Transform;
-		ActionValue = SharedData.PlayerPhysics >= PhysicsTypes.S3 ? 26f : 36f;
-		Visible = true;
+		data.Physics.IsControlRoutineEnabled = false;
+		data.Collision.IsObjectInteractionEnabled = false;			
+		data.Damage.InvincibilityTimer = 0f;
+		data.Super.Timer = 1f;
+		data.State = States.Transform;
+		data.Visual.Animation = Animations.Transform;
+		ActionValue = SharedData.PhysicsType >= PhysicsCore.Types.S3 ? 26f : 36f;
+		data.PlayerNode.Visible = true;
 			
 		// return player control routine
 		return true;
@@ -130,23 +133,24 @@ public struct Jump
 
 	private void JumpSonic()
 	{
-		if (SharedData.DropDash && Action == Actions.None && !Input.Down.Abc)
+		if (SharedData.DropDash && data.State == States.None && !data.Input.Down.Abc)
 		{
-			if (Shield.Type <= ShieldContainer.Types.Normal || IsSuper || ItemInvincibilityTimer > 0f)
+			if (data.PlayerNode.Shield.Type <= ShieldContainer.Types.Normal || 
+			    data.Super.IsSuper || data.Item.InvincibilityTimer > 0f)
 			{
-				Action = Actions.DropDash;
+				data.State = States.DropDash;
 				ActionValue = 0f;
 			}
 		}
 		
 		// Barrier abilities
-		if (!Input.Press.Abc || IsSuper || 
-		    Shield.State != ShieldContainer.States.None || ItemInvincibilityTimer != 0) return;
+		if (!data.Input.Press.Abc || data.Super.IsSuper) return; 
+		if (data.PlayerNode.Shield.State != ShieldContainer.States.None || data.Item.InvincibilityTimer > 0f) return;
 		
-		Shield.State = ShieldContainer.States.Active;
-		IsAirLock = false;
+		data.PlayerNode.Shield.State = ShieldContainer.States.Active;
+		data.Physics.IsAirLock = false;
 		
-		switch (Shield.Type)
+		switch (data.PlayerNode.Shield.Type)
 		{
 			case ShieldContainer.Types.None: JumpDoubleSpin(); break;
 			case ShieldContainer.Types.Bubble: JumpWaterBarrier(); break;
@@ -170,8 +174,8 @@ public struct Jump
 		}
 		*/
 		
-		Shield.State = ShieldContainer.States.DoubleSpin;
-				
+		data.PlayerNode.Shield.State = ShieldContainer.States.DoubleSpin;
+		
 		//TODO: obj_double_spin
 		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
 		AudioPlayer.Sound.Play(SoundStorage.DoubleSpin);
@@ -179,39 +183,39 @@ public struct Jump
 
 	private void JumpWaterBarrier()
 	{
-		Velocity.Vector = new Vector2(0f, 8f);
+		data.Physics.Velocity.Vector = new Vector2(0f, 8f);
 		//TODO: update shield animation
-		Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
+		data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 	}
 	
 	private void JumpFlameBarrier()
 	{
-		SetCameraDelayX(16f);
+		data.SetCameraDelayX(16f);
 				
-		IsAirLock = true;
-		Velocity.Vector = new Vector2(8f * (float)Facing, 0f);
+		data.Physics.IsAirLock = true;
+		data.Physics.Velocity.Vector = new Vector2(8f * (float)data.Visual.Facing, 0f);
 		
 		//TODO: update shield animation
-		if (Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)
+		if (data.PlayerNode.Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)
 		{
-			Shield.Frame = 0;
+			data.PlayerNode.Shield.Frame = 0;
 		}
 		else
 		{
-			Shield.AnimationType = ShieldContainer.AnimationTypes.FireDash;
+			data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.FireDash;
 		}
 		
-		//TODO: check ZIndex
-		ZIndex = -1;
+		//TODO: check data.PlayerNode.ZIndex
+		data.PlayerNode.ZIndex = -1;
 		
 		AudioPlayer.Sound.Play(SoundStorage.ShieldFire2);
 	}
 
 	private void JumpThunderBarrier()
 	{
-		Shield.State = ShieldContainer.States.Disabled;
-		Velocity.Y = -5.5f;
+		data.PlayerNode.Shield.State = ShieldContainer.States.Disabled;
+		data.Physics.Velocity.Y = -5.5f;
 				
 		for (var i = 0; i < 4; i++)
 		{
@@ -224,59 +228,59 @@ public struct Jump
 
 	private void JumpTails()
 	{
-		if (Action != Actions.None || !Input.Press.Abc) return;
+		if (data.State != States.Default || !data.Input.Press.Abc) return;
 		
-		IsAirLock = false;
-		IsSpinning = false;
-		IsJumping = false;
-		Gravity	= GravityType.TailsDown;
-		Action = Actions.Flight;
+		data.Physics.IsAirLock = false;
+		data.Physics.IsSpinning = false;
+		data.Physics.IsJumping = false;
+		data.Physics.Gravity = GravityType.TailsDown;
+		data.State = States.Flight;
 		ActionValue = 480f;
 		ActionValue2 = 0f;
-		Radius = RadiusNormal;
+		data.Collision.Radius = data.Collision.RadiusNormal;
 				
-		if (!IsUnderwater)
+		if (!data.Water.IsUnderwater)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 
-		Input.Down = Input.Down with { Abc = false };
-		Input.Press = Input.Press with { Abc = false };
+		data.Input.Down = data.Input.Down with { Abc = false };
+		data.Input.Press = data.Input.Press with { Abc = false };
 	}
 
 	private void JumpKnuckles()
 	{
-		if (Action != Actions.None || !Input.Press.Abc) return;
+		if (data.State != States.Default || !data.Input.Press.Abc) return;
 		
-		IsAirLock = false;
-		IsSpinning = false;
-		IsJumping = false;	
-		Animation = Animations.GlideAir;
-		Action = Actions.Glide;
+		data.Physics.IsAirLock = false;
+		data.Physics.IsSpinning = false;
+		data.Physics.IsJumping = false;	
+		data.Visual.Animation = Animations.GlideAir;
+		data.State = States.Glide;
 		ActionState = (int)GlideStates.Air;
-		ActionValue = Facing == Constants.Direction.Negative ? 0f : 180f;
-		Radius = new Vector2I(10, 10);
-		GroundSpeed.Value = 4f;
-		Velocity.X = 0f;
-		Velocity.Y += 2f; 
+		ActionValue = data.Visual.Facing == Constants.Direction.Negative ? 0f : 180f;
+		data.Collision.Radius = new Vector2I(10, 10);
+		data.Physics.GroundSpeed.Value = 4f;
+		data.Physics.Velocity.X = 0f;
+		data.Physics.Velocity.Y += 2f; 
 				
-		if (Velocity.Y < 0f)
+		if (data.Physics.Velocity.Y < 0f)
 		{
-			Velocity.Y = 0f;
+			data.Physics.Velocity.Y = 0f;
 		}
 	}
 
 	private void JumpAmy()
 	{
-		if (Action != Actions.None || !Input.Press.Abc) return;
+		if (data.State != States.Default || !data.Input.Press.Abc) return;
 		
 		if (SharedData.NoRollLock)
 		{
-			IsAirLock = false;
+			data.Physics.IsAirLock = false;
 		}
 		
-		Animation = Animations.HammerSpin;
-		Action = Actions.HammerSpin;
+		data.Visual.Animation = Animations.HammerSpin;
+		data.State = States.HammerSpin;
 		ActionValue = 0f;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Hammer);

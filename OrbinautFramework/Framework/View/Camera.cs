@@ -205,7 +205,7 @@ public partial class Camera : Camera2D, ICamera
 	{
 		const int shiftSpeedX = 2;
 		
-		if (Math.Abs(data.Physics.GroundSpeed) < 6f && data.ActionType != Actions.Types.SpinDash)
+		if (Math.Abs(data.Physics.GroundSpeed) < 6f && data.State != ActionFsm.States.SpinDash)
 		{
 			_bufferOffset.X = _bufferOffset.X.MoveToward(0f, shiftSpeedX * processSpeed);
 			return;

@@ -2,31 +2,33 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
-public struct Landing
+public struct Landing(PlayerData data)
 {
 	public event Action LandHandler;
 	
     public void Land()
     {
-    	ResetGravity();
+	    data.Physics.ResetGravity(data.Water.IsUnderwater);
     	
-    	IsGrounded = true;
+    	data.Physics.IsGrounded = true;
     
-    	switch (Action)
+    	switch (data.State)
     	{
-    		case Actions.Flight:
+    		case States.Flight:
     			AudioPlayer.Sound.Stop(SoundStorage.Flight);
     			AudioPlayer.Sound.Stop(SoundStorage.Flight2);
     			break;
     		
-    		case Actions.SpinDash or Actions.Dash:
-    			if (Action == Actions.Dash)
+    		case States.SpinDash or States.Dash:
+    			if (data.State == States.Dash)
     			{
-    				GroundSpeed.Value = ActionValue2;
+    				data.Physics.GroundSpeed.Value = ActionValue2;
     			}
     			return;
     	}
@@ -34,55 +36,55 @@ public struct Landing
     	if (WaterBarrierBounce()) return;
     	SetAnimation();
     
-    	if (IsHurt)
+    	if (data.Damage.IsHurt)
     	{
-    		GroundSpeed.Value = 0f;
+    		data.Physics.GroundSpeed.Value = 0f;
     	}
     
-    	IsAirLock = false;
-    	IsSpinning	= false;
-    	IsJumping = false;
-    	SetPushAnimationBy = null;
-    	IsHurt = false;
+    	data.Physics.IsAirLock = false;
+    	data.Physics.IsSpinning	= false;
+    	data.Physics.IsJumping = false;
+    	data.Visual.SetPushBy = null;
+    	data.Damage.IsHurt = false;
     
-    	Shield.State = ShieldContainer.States.None;
-    	ComboCounter = 0;
-    	TileBehaviour = Constants.TileBehaviours.Floor;
+    	data.PlayerNode.Shield.State = ShieldContainer.States.None;
+    	data.Item.ComboCounter = 0;
+    	data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
     
     	CpuState = CpuStates.Main;
 
     	LandHandler?.Invoke();
     
-    	if (Action != Actions.HammerDash)
+    	if (data.State != States.HammerDash)
     	{
-    		Action = Actions.None;
+    		data.State = States.None;
     	}
     	else
     	{
-    		GroundSpeed.Value = 6 * (int)Facing;
+    		data.Physics.GroundSpeed.Value = 6 * (int)data.Visual.Facing;
     	}
 
-    	if (IsSpinning) return;
-    	Position += new Vector2(0f, Radius.Y - RadiusNormal.Y);
+    	if (data.Physics.IsSpinning) return;
+    	data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
     	
-    	Radius = RadiusNormal;
+    	data.Collision.Radius = data.Collision.RadiusNormal;
     }
     
     private bool WaterBarrierBounce()
     {
-	    if (Shield.State != ShieldContainer.States.Active || 
+	    if (data.PlayerNode.Shield.State != ShieldContainer.States.Active || 
 	        SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
 		
-	    float force = IsUnderwater ? -4f : -7.5f;
-	    float radians = Mathf.DegToRad(Angle);
-	    Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
+	    float force = data.Water.IsUnderwater ? -4f : -7.5f;
+	    float radians = Mathf.DegToRad(data.Rotation.Angle);
+	    data.Physics.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
 	    
-	    Shield.State = ShieldContainer.States.None;
-	    OnObject = null;
-	    IsGrounded = false;
+	    data.PlayerNode.Shield.State = ShieldContainer.States.None;
+	    data.Collision.OnObject = null;
+	    data.Physics.IsGrounded = false;
 	    
 	    //TODO: replace animation
-	    Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
+	    data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 	    
 	    AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		
@@ -91,13 +93,15 @@ public struct Landing
 
     private void SetAnimation()
     {
-	    if (OnObject != null)
+	    if (data.Collision.OnObject != null)
 	    {
-		    Animation = Animations.Move;
+		    data.Visual.Animation = Animations.Move;
 		    return;
 	    }
 		
-	    if (Animation is Animations.Idle or Animations.Duck or Animations.HammerDash or Animations.GlideGround) return;
-	    Animation = Animations.Move;
+	    if (data.Visual.Animation is 
+	        Animations.Idle or Animations.Duck or Animations.HammerDash or Animations.GlideGround) return;
+	    
+	    data.Visual.Animation = Animations.Move;
     }
 }

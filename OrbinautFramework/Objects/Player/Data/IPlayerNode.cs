@@ -7,6 +7,7 @@ namespace OrbinautFramework3.Objects.Player.Data;
 
 public interface IPlayerNode : IPosition
 {
+    Vector2 PreviousPosition { get; }
     Vector2 Scale { get; set; }
     int ZIndex { get; set; }
     float RotationDegrees { get; set; }

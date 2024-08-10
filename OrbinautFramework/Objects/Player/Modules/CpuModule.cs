@@ -198,7 +198,7 @@ public class CpuModule(PlayerData data)
 		if (CheckRespawn()) return; // Exit if respawned
 		
 		if (!data.Collision.IsObjectInteractionEnabled || 
-		    data.Carry.Target != null || data.ActionType == Actions.Types.Carried) return;
+		    data.Carry.Target != null || data.State == ActionFsm.States.Carried) return;
 		
 		Target ??= _leadPlayer; // Follow lead player
 		
@@ -225,7 +225,7 @@ public class CpuModule(PlayerData data)
 	private void TryJump()
 	{
 		(Vector2 targetPosition, _inputPress, _inputDown, 
-			Constants.Direction direction, OrbinautNode isTargetPush) = Target.RecordedData[_delay];
+			Constants.Direction direction, object isTargetPush) = Target.RecordedData[_delay];
 
 		if (SharedData.Behaviour == Behaviours.S3 &&
 		    Math.Abs(Target.GroundSpeed) < 4f && Target.OnObject == null)

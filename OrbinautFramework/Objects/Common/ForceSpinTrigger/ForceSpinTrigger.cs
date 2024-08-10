@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.ForceSpinTrigger;
 
@@ -21,16 +22,16 @@ public abstract partial class ForceSpinTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             if (player.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
             
-            player.IsForcedSpin = !player.IsForcedSpin;
-            player.Action = Actions.None;
+            player.Physics.IsForcedSpin = !player.Physics.IsForcedSpin;
+            player.State = ActionFsm.States.None;
             
-            player.ResetGravity();
+            player.Physics.ResetGravity(player.Water.IsUnderwater);
         }
     }
     
-    protected abstract bool CheckForcePlayerSpin(PlayerNode playerNode);
+    protected abstract bool CheckForcePlayerSpin(PlayerData playerNode);
 }

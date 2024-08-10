@@ -11,33 +11,33 @@ public struct CollisionBoxes(PlayerData data)
 {
     public void Update()
     {
-        SolidBox.Set(RadiusNormal.X + 1, Radius.Y);
+        data.PlayerNode.SolidBox.Set(data.Collision.RadiusNormal.X + 1, data.Collision.Radius.Y);
         SetRegularHitBox();
         SetExtraHitBox();
     }
     
     private void SetRegularHitBox()
     {
-        if (Animation != Animations.Duck || SharedData.PhysicsType >= PhysicsTypes.S3)
+        if (data.Visual.Animation != Animations.Duck || SharedData.PhysicsType >= PhysicsCore.Types.S3)
         {
-            HitBox.Set(8, Radius.Y - 3);
+            data.PlayerNode.HitBox.Set(8, data.Collision.Radius.Y - 3);
             return;
         }
 
-        if (Type is Types.Tails or Types.Amy) return;
-        HitBox.Set(8, 10, 0, 6);
+        if (data.PlayerNode.Type is PlayerNode.Types.Tails or PlayerNode.Types.Amy) return;
+        data.PlayerNode.HitBox.Set(8, 10, 0, 6);
     }
 
     private void SetExtraHitBox()
     {
-        switch (Animation)
+        switch (data.Visual.Animation)
         {
             case Animations.HammerSpin:
-                HitBox.SetExtra(25, 25);
+                data.PlayerNode.HitBox.SetExtra(25, 25);
                 break;
 			
             case Animations.HammerDash:
-                (int radiusX, int radiusY, int offsetX, int offsetY) = (_sprite.Frame & 3) switch
+                (int radiusX, int radiusY, int offsetX, int offsetY) = (data.PlayerNode.Sprite.Frame & 3) switch
                 {
                     0 => (16, 16,  6,  0),
                     1 => (16, 16, -7,  0),
@@ -45,10 +45,10 @@ public struct CollisionBoxes(PlayerData data)
                     3 => (17, 21,  7, -5),
                     _ => throw new ArgumentOutOfRangeException()
                 };
-                HitBox.SetExtra(radiusX, radiusY, offsetX * (int)Facing, offsetY);
+                data.PlayerNode.HitBox.SetExtra(radiusX, radiusY, offsetX * (int)data.Visual.Facing, offsetY);
                 break;
             default:
-                HitBox.SetExtra(_shield.State == ShieldContainer.States.DoubleSpin ? 
+                data.PlayerNode.HitBox.SetExtra(data.PlayerNode.Shield.State == ShieldContainer.States.DoubleSpin ? 
                     new Vector2I(24, 24) : Vector2I.Zero);
                 break;
         }

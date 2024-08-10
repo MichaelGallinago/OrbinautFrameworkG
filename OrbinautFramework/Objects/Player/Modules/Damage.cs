@@ -6,6 +6,7 @@ using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
@@ -13,30 +14,30 @@ public struct Damage(PlayerData data)
 {
     public void Kill()
     {
-    	if (IsDead) return;
+    	if (data.Death.IsDead) return;
     	
-    	ResetState();
+	    data.ResetState();
     	AudioPlayer.Sound.Play(SoundStorage.Hurt);
 
-    	if (Id == 0)
+    	if (data.Id == 0)
     	{
     		Scene.Instance.State = Scene.States.StopObjects;
     		
     		SharedData.PlayerShield = ShieldContainer.Types.None;
     	}
     	
-    	ZIndex = (int)Constants.ZIndexes.AboveForeground;
-	    Visible = true;
+    	data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+	    data.PlayerNode.Visible = true;
 	    
-    	Action = Actions.None;
-    	Animation = Animations.Death;
-    	IsDead = true;
-    	IsObjectInteractionEnabled = false;
-    	Gravity = GravityType.Default;
-    	Velocity.Vector = new Vector2(0f, -7f);
-    	GroundSpeed.Value = 0f;
+    	data.State = States.Default;
+    	data.Visual.Animation = Animations.Death;
+    	data.Death.IsDead = true;
+    	data.Collision.IsObjectInteractionEnabled = false;
+    	data.Physics.Gravity = GravityType.Default;
+    	data.Physics.Velocity.Vector = new Vector2(0f, -7f);
+    	data.Physics.GroundSpeed.Value = 0f;
 
-    	if (IsCameraTarget(out ICamera camera))
+    	if (data.IsCameraTarget(out ICamera camera))
     	{
     		camera.IsMovementAllowed = false;
     	}
@@ -44,33 +45,35 @@ public struct Damage(PlayerData data)
     
     public void Hurt(float positionX = 0f)
     {
-    	if (IsInvincible || IsDebugMode) return;
+    	if (data.Damage.IsInvincible || IsDebugMode) return;
 
-    	if (Id == 0 && SharedData.PlayerRings == 0 && SharedData.PlayerShield == ShieldContainer.Types.None)
+    	if (data.Id == 0 && SharedData.PlayerRings == 0 && SharedData.PlayerShield == ShieldContainer.Types.None)
     	{
     		Kill();
     		return;
     	}
     	
-    	ResetState();
+    	data.ResetState();
 
     	const float velocityX = 2f, velocityY = 4f;
-    	Velocity.Vector = new Vector2(Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
-    	Gravity = GravityType.HurtFall;
-    	Animation = Animations.Hurt;
-    	IsHurt = true;
-    	IsAirLock = true;
-    	InvincibilityTimer = 120f;
+    	data.Physics.Velocity.Vector = 
+		    new Vector2(data.PlayerNode.Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
+	    
+    	data.Physics.Gravity = GravityType.HurtFall;
+    	data.Visual.Animation = Animations.Hurt;
+    	data.Damage.IsHurt = true;
+    	data.Physics.IsAirLock = true;
+    	data.Damage.InvincibilityTimer = 120f;
 
-    	if (IsUnderwater)
+    	if (data.Water.IsUnderwater)
     	{
-    		Velocity.Vector *= 0.5f;
-    		Gravity -= 0.15625f;
+    		data.Physics.Velocity.Vector *= 0.5f;
+    		data.Physics.Gravity -= 0.15625f;
     	}
     	
-    	if (Id > 0 || SharedData.PlayerShield > ShieldContainer.Types.None)
+    	if (data.Id > 0 || SharedData.PlayerShield > ShieldContainer.Types.None)
     	{
-    		if (Id == 0)
+    		if (data.Id == 0)
     		{
     			SharedData.PlayerShield = ShieldContainer.Types.None;
     		}

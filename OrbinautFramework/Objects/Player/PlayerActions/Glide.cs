@@ -4,32 +4,32 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-[FsmSourceGenerator.FsmState("Action")]
-public struct Glide
+[FsmSourceGenerator.FsmState("data.State")]
+public struct Glide(PlayerData data)
 {
-	public enum States : byte
+	public enum GlideStates : byte
 	{
 		Air, Ground, Fall
 	}
-	
-	public PlayerData Data { private get; init; }
 
-	private States _state;
+	private GlideStates _glideState;
 	private float _glideAngle;
-	// GroundSpeed - glide speed
+	// data.Physics.GroundSpeed - glide speed
 	
 	public void Perform()
     {
-	    if (_state == States.Fall) return;
+	    if (_glideState == GlideStates.Fall) return;
 		
-	    switch (_state)
+	    switch (_glideState)
 	    {
-		    case States.Air: GlideAir(); break;
-		    case States.Ground: GlideGround(); break;
+		    case GlideStates.Air: GlideAir(); break;
+		    case GlideStates.Ground: GlideGround(); break;
 	    }
     }
 
@@ -40,33 +40,33 @@ public struct Glide
 		UpdateGravityAndHorizontalVelocity();
 		UpdateAirAnimationFrame();
 		
-		if (Input.Down.Abc) return;
+		if (data.Input.Down.Abc) return;
 
 		Release();
-		Velocity.X *= 0.25f;
+		data.Physics.Velocity.X *= 0.25f;
 	}
 
 	private void UpdateSpeed()
 	{
 		const float glideAcceleration = 0.03125f;
 		
-		if (GroundSpeed < 4f)
+		if (data.Physics.GroundSpeed < 4f)
 		{
-			GroundSpeed.Acceleration = glideAcceleration;
+			data.Physics.GroundSpeed.Acceleration = glideAcceleration;
 			return;
 		}
 
 		if (_glideAngle % 180f != 0f) return;
-		GroundSpeed.Acceleration = PhysicParams.AccelerationGlide;
-		GroundSpeed.Min(24f);
+		data.Physics.GroundSpeed.Acceleration = PhysicParams.AccelerationGlide;
+		data.Physics.GroundSpeed.SetMin(24f);
 	}
 
 	private void UpdateGravityAndHorizontalVelocity()
 	{
 		const float glideGravity = 0.125f;
 
-		Velocity.X = GroundSpeed * -MathF.Cos(Mathf.DegToRad(_glideAngle));
-		Gravity = Velocity.Y < 0.5f ? glideGravity : -glideGravity;
+		data.Physics.Velocity.X = data.Physics.GroundSpeed * -MathF.Cos(Mathf.DegToRad(_glideAngle));
+		data.Physics.Gravity = data.Physics.Velocity.Y < 0.5f ? glideGravity : -glideGravity;
 	}
 
 	private void UpdateAirAnimationFrame()
@@ -75,14 +75,14 @@ public struct Glide
 		switch (angle)
 		{
 			case < 30f or > 150f:
-				OverrideAnimationFrame = 0;
+				data.Visual.OverrideFrame = 0;
 				break;
 			case < 60f or > 120f:
-				OverrideAnimationFrame = 1;
+				data.Visual.OverrideFrame = 1;
 				break;
 			default:
-				Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
-				OverrideAnimationFrame = 2;
+				data.Visual.Facing = angle < 90 ? Constants.Direction.Negative : Constants.Direction.Positive;
+				data.Visual.OverrideFrame = 2;
 				break;
 		}
 	}
@@ -92,14 +92,14 @@ public struct Glide
 		UpdateGroundVelocityX();
 		
 		// Stop sliding
-		if (Velocity.X == 0f)
+		if (data.Physics.Velocity.X == 0f)
 		{
 			Land();
-			OverrideAnimationFrame = 1;
+			data.Visual.OverrideFrame = 1;
 			
-			Animation = Animations.GlideGround;
-			GroundLockTimer = 16f;
-			GroundSpeed.Value = 0f;
+			data.Visual.Animation = Animations.GlideGround;
+			data.Physics.GroundLockTimer = 16f;
+			data.Physics.GroundSpeed.Value = 0f;
 			
 			return;
 		}
@@ -108,7 +108,7 @@ public struct Glide
 		if (_glideAngle % 4f < Scene.Instance.ProcessSpeed)
 		{
 			//TODO: obj_dust_skid
-			//instance_create(x, y + Radius.Y, obj_dust_skid);
+			//instance_create(x, y + data.Collision.Radius.Y, obj_dust_skid);
 		}
 				
 		if (_glideAngle > 0f && _glideAngle % 8f < Scene.Instance.ProcessSpeed)
@@ -121,27 +121,27 @@ public struct Glide
 
 	private void UpdateGroundVelocityX()
 	{
-		if (!Input.Down.Abc)
+		if (!data.Input.Down.Abc)
 		{
-			Velocity.X = 0f;
+			data.Physics.Velocity.X = 0f;
 			return;
 		}
 		
 		const float slideFriction = -0.09375f;
 		
-		float speedX = Velocity.X;
-		Velocity.AccelerationX = Math.Sign(Velocity.X) * slideFriction;
+		float speedX = data.Physics.Velocity.X;
+		data.Physics.Velocity.AccelerationX = Math.Sign(data.Physics.Velocity.X) * slideFriction;
 		switch (speedX)
 		{
-			case > 0f: Velocity.MaxX(0f); break;
-			case < 0f: Velocity.MinX(0f); break;
+			case > 0f: data.Physics.Velocity.MaxX(0f); break;
+			case < 0f: data.Physics.Velocity.MinX(0f); break;
 		}
 	}
 
 	private void TurnAroundAir()
 	{
 		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
-		if (Input.Down.Left && !Mathf.IsZeroApprox(_glideAngle))
+		if (data.Input.Down.Left && !Mathf.IsZeroApprox(_glideAngle))
 		{
 			if (_glideAngle > 0f)
 			{
@@ -157,7 +157,7 @@ public struct Glide
 			return;
 		}
 		
-		if (Input.Down.Right && !Mathf.IsEqualApprox(_glideAngle, 180f))
+		if (data.Input.Down.Right && !Mathf.IsEqualApprox(_glideAngle, 180f))
 		{
 			if (_glideAngle < 0f)
 			{
@@ -179,12 +179,12 @@ public struct Glide
 	
 	public void LatePerform()
 	{
-		var climbY = (int)Position.Y;
+		var climbY = (int)data.PlayerNode.Position.Y;
 		var collisionFlagWall = false;
-		int wallRadius = RadiusNormal.X + 1;
-		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(Velocity));
+		int wallRadius = data.Collision.RadiusNormal.X + 1;
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Physics.Velocity));
 
-		TileCollider.SetData((Vector2I)Position, TileLayer);
+		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
 		
 		if (moveQuadrant != Angles.Quadrant.Right)
 		{
@@ -211,25 +211,26 @@ public struct Glide
 	private bool CollideWalls(int wallRadius, Constants.Direction direction)
 	{
 		var sing = (int)direction;
-		int wallDistance = TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
+		int wallDistance = data.TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
 
 		if (wallDistance >= 0) return false;
 		
-		Position += new Vector2(sing * wallDistance, 0f);
-		TileCollider.Position = (Vector2I)Position;
-		Velocity.X = 0f;
+		data.PlayerNode.Position += new Vector2(sing * wallDistance, 0f);
+		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Physics.Velocity.X = 0f;
 		return true;
 	}
 
 	private bool CollideCeiling(int wallRadius, Angles.Quadrant moveQuadrant)
 	{
 		if (moveQuadrant == Angles.Quadrant.Down) return false;
-		
-		int roofDistance = TileCollider.FindClosestDistance(
-			-Radius.X, -Radius.Y, Radius.X, -Radius.Y, 
-			true, Constants.Direction.Negative);
+
+		Vector2I radius = data.Collision.Radius;
+		int roofDistance = data.TileCollider.FindClosestDistance(
+			-radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative);
 			
-		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && SharedData.PhysicsType >= PhysicsTypes.S3)
+		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && 
+		    SharedData.PhysicsType >= PhysicsCore.Types.S3)
 		{
 			// Perform right wall collision instead if moving mostly left and too far into the ceiling
 			return CollideWalls(wallRadius, Constants.Direction.Positive);
@@ -237,22 +238,22 @@ public struct Glide
 
 		if (roofDistance >= 0) return false;
 		
-		Position -= new Vector2(0f, roofDistance);
-		TileCollider.Position = (Vector2I)Position;
-		if (Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
+		data.PlayerNode.Position -= new Vector2(0f, roofDistance);
+		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		if (data.Physics.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
 		{
-			Velocity.Y = 0f;
+			data.Physics.Velocity.Y = 0f;
 		}
 		return false;
 	}
 
 	private bool CollideFloor()
 	{
-		(int floorDistance, float floorAngle) = TileCollider.FindClosestTile(
-			-Radius.X, Radius.Y, Radius.X, Radius.Y,
+		(int floorDistance, float floorAngle) = data.TileCollider.FindClosestTile(
+			-data.Collision.Radius.X, data.Collision.Radius.Y, data.Collision.Radius.X, data.Collision.Radius.Y,
 			true, Constants.Direction.Positive);
 	
-		if (_state == States.Ground)
+		if (_glideState == GlideStates.Ground)
 		{
 			if (floorDistance > 14)
 			{
@@ -260,42 +261,44 @@ public struct Glide
 				return false;
 			}
 			
-			Position += new Vector2(0f, floorDistance);
-			Angle = floorAngle;
+			data.PlayerNode.Position += new Vector2(0f, floorDistance);
+			data.Rotation.Angle = floorAngle;
 			return false;
 		}
 
 		if (floorDistance >= 0) return false;
 		
-		Position += new Vector2(0f, floorDistance);
-		TileCollider.Position = (Vector2I)Position;
-		Angle = floorAngle;
-		Velocity.Y = 0f;
+		data.PlayerNode.Position += new Vector2(0f, floorDistance);
+		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Rotation.Angle = floorAngle;
+		data.Physics.Velocity.Y = 0f;
 		return true;
 	}
 
 	private void LandWhenGlide()
 	{
-		switch (_state)
+		switch (_glideState)
 		{
-			case States.Air: LandAir(); break;
-			case States.Fall: LandFall(); break;
+			case GlideStates.Air: LandAir(); break;
+			case GlideStates.Fall: LandFall(); break;
 		}
 	}
 
 	private void LandAir()
 	{
-		if (Angles.GetQuadrant(Angle) != Angles.Quadrant.Down)
+		if (Angles.GetQuadrant(data.Rotation.Angle) != Angles.Quadrant.Down)
 		{
-			GroundSpeed.Value = Angle < 180 ? Velocity.X : -Velocity.X;
+			data.Physics.GroundSpeed.Value = data.Rotation.Angle < 180 ? 
+				data.Physics.Velocity.X : -data.Physics.Velocity.X;
+			
 			Land();
 			return;
 		}
 				
-		Animation = Animations.GlideGround;
-		_state = States.Ground;
+		data.Visual.Animation = Animations.GlideGround;
+		_glideState = GlideStates.Ground;
 		_glideAngle = 0f;
-		Gravity = 0f;
+		data.Physics.Gravity = 0f;
 	}
 
 	private void LandFall()
@@ -303,37 +306,37 @@ public struct Glide
 		AudioPlayer.Sound.Play(SoundStorage.Land);
 		Land();		
 		
-		if (Angles.GetQuadrant(Angle) != Angles.Quadrant.Down)
+		if (Angles.GetQuadrant(data.Rotation.Angle) != Angles.Quadrant.Down)
 		{
-			GroundSpeed.Value = Velocity.X;
+			data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
 			return;
 		}
 					
-		Animation = Animations.GlideLand;
-		GroundLockTimer = 16f;
-		GroundSpeed.Value = 0f;
-		Velocity.X = 0f;
+		data.Visual.Animation = Animations.GlideLand;
+		data.Physics.GroundLockTimer = 16f;
+		data.Physics.GroundSpeed.Value = 0f;
+		data.Physics.Velocity.X = 0f;
 	}
 
 	private void AttachToWall(int wallRadius, int climbY)
 	{
-		if (_state != (int)States.Air) return;
+		if (_glideState != (int)GlideStates.Air) return;
 
 		CheckCollisionOnAttaching(wallRadius, climbY);
 			
-		if (Facing == Constants.Direction.Negative)
+		if (data.Visual.Facing == Constants.Direction.Negative)
 		{
-			Position += Vector2.Right;
+			data.PlayerNode.Position += Vector2.Right;
 		}
 
-		bool isWallJump = SharedData.SuperstarsTweaks && (Input.Down.Up || Input.Down.Down);
-		_state = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal);
-		Action = Actions.Climb;
-		Animation = Animations.ClimbWall;
+		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
+		data.State = States.Climb;
+		_climbState = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal); //TODO: set state inside Climb
+		data.Visual.Animation = Animations.ClimbWall;
 		_glideAngle = 0f;
-		GroundSpeed.Value = 0f;
-		Velocity.Y = 0f;
-		Gravity	= 0f;
+		data.Physics.GroundSpeed.Value = 0f;
+		data.Physics.Velocity.Y = 0f;
+		data.Physics.Gravity = 0f;
 			
 		AudioPlayer.Sound.Play(SoundStorage.Grab);
 	}
@@ -342,17 +345,19 @@ public struct Glide
 	{
 		// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he
 		// is either inside the ceiling or above the floor edge
-		TileCollider.Position = TileCollider.Position with { Y = climbY - Radius.Y };
-		if (TileCollider.FindDistance(wallRadius * (int)Facing, 0, false, Facing) == 0) return;
+		data.TileCollider.Position = data.TileCollider.Position with { Y = climbY - data.Collision.Radius.Y };
+		
+		if (data.TileCollider.FindDistance(
+			    wallRadius * (int)data.Visual.Facing, 0, false, data.Visual.Facing) == 0) return;
 		
 		// The game casts a vertical sensor now in front of Knuckles, facing downwards. If the distance
 		// returned is negative, Knuckles is inside the ceiling, else he is above the edge
 			
 		// Note that tile behaviour here is set to Constants.TileBehaviours.Ceiling.
 		// LBR tiles are not ignored in this case
-		TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
-		int floorDistance = TileCollider.FindDistance(
-			(wallRadius + 1) * (int)Facing, -1, true, Constants.Direction.Positive);
+		data.TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
+		int floorDistance = data.TileCollider.FindDistance(
+			(wallRadius + 1) * (int)data.Visual.Facing, -1, true, Constants.Direction.Positive);
 				
 		if (floorDistance is < 0 or >= 12)
 		{
@@ -361,16 +366,16 @@ public struct Glide
 		}
 		
 		// Adjust Knuckles' y-position to place him just below the edge
-		Position += new Vector2(0f, floorDistance);
+		data.PlayerNode.Position += new Vector2(0f, floorDistance);
 	}
 
 	private void Release()
 	{
-		Animation = Animations.GlideFall;
-		_state = (int)States.Fall;
+		data.Visual.Animation = Animations.GlideFall;
+		_glideState = GlideStates.Fall;
 		_glideAngle = 0f;
-		Radius = RadiusNormal;
+		data.Collision.Radius = data.Collision.RadiusNormal;
 		
-		ResetGravity();
+		data.Physics.ResetGravity(data.Water.IsUnderwater);
 	}
 }
