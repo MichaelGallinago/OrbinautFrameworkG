@@ -1,4 +1,3 @@
-using System;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Player.Physics.Slopes;
@@ -21,13 +20,6 @@ public struct PhysicsCore(PlayerData data)
 	private SlopeRepel _slopeRepel = new(data);
 	private SlopeResist _slopeResist = new(data);
 	private CameraBounds _cameraBounds = new(data);
-	
-	private PhysicParams _physicParams;
-
-	public void UpdatePhysicParameters()
-	{
-		_physicParams = PhysicParams.Get(IsUnderwater, IsSuper, Type, ItemSpeedTimer);
-	}
 
 	public void ProcessCorePhysics()
 	{

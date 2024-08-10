@@ -9,9 +9,11 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 [FsmSourceGenerator.FsmState("Action")]
 public struct HammerSpin(PlayerData data)
 {
+    private float _charge;
+    
     public void Perform()
     {
-        if (data.Physics.IsGrounded) return;
+        if (data.Movement.IsGrounded) return;
         
         if (data.Input.Down.Abc)
         {
@@ -19,7 +21,7 @@ public struct HammerSpin(PlayerData data)
             return;
         }
 		
-        switch (ActionValue)
+        switch (_charge)
         {
             case <= 0f: return;
 			
@@ -29,17 +31,17 @@ public struct HammerSpin(PlayerData data)
                 break;
         }
 
-        ActionValue = 0f;
+        _charge = 0f;
     }
     
     public void OnLand()
     {
-        if (ActionValue < DropDash.MaxCharge) return;
+        if (_charge < DropDash.MaxCharge) return;
 
         data.State = States.HammerDash;
         data.Visual.Animation = Animations.HammerDash;
-        data.Physics.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
-        ActionValue = 0f;
+        data.Movement.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
+        _charge = 0f;
 		
         if (data.Super.IsSuper && data.IsCameraTarget(out ICamera camera))
         {
@@ -52,12 +54,12 @@ public struct HammerSpin(PlayerData data)
 
     private void Charge()
     {
-        ActionValue += Scene.Instance.ProcessSpeed;
-        if (ActionValue >= DropDash.MaxCharge)
+        _charge += Scene.Instance.ProcessSpeed;
+        if (_charge >= DropDash.MaxCharge)
         {
             AudioPlayer.Sound.Play(SoundStorage.Charge3);
         }
 
-        data.Physics.IsAirLock = false;
+        data.Movement.IsAirLock = false;
     }
 }

@@ -9,6 +9,8 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 public struct Dash(PlayerData data)
 {
+	private const float ChargeLimit = 30f;
+	
 	private float _charge;
 	private float _releaseSpeed;
 	
@@ -19,7 +21,7 @@ public struct Dash(PlayerData data)
     	
 	    StartDash();
     	
-	    if (data.State == States.Dash && data.Physics.IsGrounded) return !ChargeDash() && ReleaseDash();
+	    if (data.State == States.Dash && data.Movement.IsGrounded) return !ChargeDash() && ReleaseDash();
     	
 	    if (data.State != States.Dash)
 	    {
@@ -45,17 +47,17 @@ public struct Dash(PlayerData data)
     {
     	if (!data.Input.Down.Up) return false;
     	
-    	if (_charge < 30f)
+    	if (_charge < ChargeLimit)
     	{
     		_charge += Scene.Instance.ProcessSpeed;
     	}
 
     	float acceleration = 0.390625f * (float)data.Visual.Facing * Scene.Instance.ProcessSpeed;
-    	float launchSpeed = PhysicParams.AccelerationTop * 
-	                        (data.Item.SpeedTimer > 0f || data.Super.IsSuper ? 1.5f : 2f);
+    	float launchSpeed = 
+		    data.Physics.AccelerationTop * (data.Item.SpeedTimer > 0f || data.Super.IsSuper ? 1.5f : 2f);
 	    
     	_releaseSpeed = Math.Clamp(_releaseSpeed + acceleration, -launchSpeed, launchSpeed);
-    	data.Physics.GroundSpeed.Value = _releaseSpeed;
+    	data.Movement.GroundSpeed.Value = _releaseSpeed;
     	return true;
     }
 
@@ -64,9 +66,9 @@ public struct Dash(PlayerData data)
     	AudioPlayer.Sound.Stop(SoundStorage.Charge2);
     	data.State = States.Default;
     	
-    	if (_charge < 30f)
+    	if (_charge < ChargeLimit)
     	{
-    		data.Physics.GroundSpeed.Value = 0f;
+    		data.Movement.GroundSpeed.Value = 0f;
     		return false;
     	}
 
@@ -75,7 +77,7 @@ public struct Dash(PlayerData data)
     	AudioPlayer.Sound.Play(SoundStorage.Release2);	
     	
     	if (!SharedData.FixDashRelease) return true;
-    	data.Physics.Velocity.SetDirectionalValue(data.Physics.GroundSpeed, data.Rotation.Angle);
+    	data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     	return true;
     }
 }

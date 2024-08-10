@@ -67,7 +67,7 @@ public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 			Animations.Idle when _player.Type == PlayerNode.Types.Sonic => Animations.Wait,
 			Animations.Skid when
 				_player.Input.Down is { Left: false, Right: false } || 
-			    Math.Abs(_player.GroundSpeed) < PlayerConstants.SkidSpeedThreshold 
+			    Math.Abs(_player.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold
 					=> Animations.Move, 
 			_ => _player.Animation
 		};

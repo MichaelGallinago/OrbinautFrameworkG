@@ -12,13 +12,13 @@ public struct Position(PlayerData data)
 		
         if (data.Collision.IsStickToConvex)
         {
-            data.Physics.Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
+            data.Movement.Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
         }
 		
-        data.PlayerNode.Position = data.Physics.Velocity.CalculateNewPosition(data.PlayerNode.Position);
-        data.Physics.Velocity.ResetInstantVelocity();
+        data.PlayerNode.Position = data.Movement.Velocity.CalculateNewPosition(data.PlayerNode.Position);
+        data.Movement.Velocity.ResetInstantVelocity();
 		
-        if (data.Physics.IsGrounded) return;
-        data.Physics.Velocity.AccelerationY = data.Physics.Gravity;
+        if (data.Movement.IsGrounded) return;
+        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
     }
 }

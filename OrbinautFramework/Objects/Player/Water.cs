@@ -36,7 +36,7 @@ public struct Water(PlayerData data)
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
 		
-		data.Physics.Velocity.Vector *= new Vector2(0.5f, 0.25f);
+		data.Movement.Velocity.Vector *= new Vector2(0.5f, 0.25f);
 		
 		RemoveShieldUnderwater();
 		
@@ -47,7 +47,7 @@ public struct Water(PlayerData data)
 	{
 		if (data.State != States.Flight && (data.State != States.Glide || ActionState == (int)GlideStates.Fall))
 		{
-			data.Physics.ResetGravity(data.Water.IsUnderwater);
+			data.ResetGravity();
 		}
 	}
 
@@ -124,9 +124,9 @@ public struct Water(PlayerData data)
 		data.Visual.Animation = Animations.Drown;
 		data.Death.IsDead = true;
 		data.Collision.IsObjectInteractionEnabled = false;
-		data.Physics.Gravity	= GravityType.Underwater;
-		data.Physics.Velocity.Vector = Vector2.Zero;
-		data.Physics.GroundSpeed.Value = 0f;
+		data.Movement.Gravity	= GravityType.Underwater;
+		data.Movement.Velocity.Vector = Vector2.Zero;
+		data.Movement.GroundSpeed.Value = 0f;
 		
 		if (data.IsCameraTarget(out ICamera camera))
 		{
@@ -150,7 +150,7 @@ public struct Water(PlayerData data)
 			
 		if (data.Id == 0 && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
 		{
-			ResetMusic();
+			data.ResetMusic();
 		}
 		
 		AccelerateOnLeave();
@@ -158,14 +158,14 @@ public struct Water(PlayerData data)
 
 	private void AccelerateOnLeave()
 	{
-		if (SharedData.PhysicsType <= PhysicsCore.Types.S2 || data.Physics.Velocity.Y >= -4f)
+		if (SharedData.PhysicsType <= PhysicsCore.Types.S2 || data.Movement.Velocity.Y >= -4f)
 		{
-			data.Physics.Velocity.Y *= 2f;
+			data.Movement.Velocity.Y *= 2f;
 		}
 					
-		if (data.Physics.Velocity.Y < -16f)
+		if (data.Movement.Velocity.Y < -16f)
 		{
-			data.Physics.Velocity.Y = -16f;
+			data.Movement.Velocity.Y = -16f;
 		}
 	}
 

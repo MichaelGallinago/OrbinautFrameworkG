@@ -1,5 +1,4 @@
 ﻿using System;
-using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -10,17 +9,18 @@ public struct AngleRotation(PlayerData data)
     public void Process()
     {
         float visualAngle = CalculateVisualAngle();
-        data.Rotation.VisualAngle = visualAngle;
-        data.PlayerNode.RotationDegrees = data.Visual.Animation == Animations.Move ? 360f - visualAngle : 0f;
+        data.Visual.Angle = visualAngle;
+        data.PlayerNode.RotationDegrees = data.Visual.Animation is Animations.Move or Animations.HammerDash ? 
+            360f - visualAngle : 0f;
     }
 
     private float CalculateVisualAngle()
     {
         bool isSmoothRotation = SharedData.RotationMode > 0;
-        float angle = data.Rotation.Angle;
+        float angle = data.Movement.Angle;
         float visualAngle;
         
-        if (!data.Physics.IsGrounded)
+        if (!data.Movement.IsGrounded)
         {
             if (isSmoothRotation) return angle;
             visualAngle = angle;
@@ -36,7 +36,7 @@ public struct AngleRotation(PlayerData data)
 
     private float CalculateSmoothVisualAngle(float rangeAngle)
     {
-        float angleDifference = rangeAngle - data.Rotation.VisualAngle;
+        float angleDifference = rangeAngle - data.Visual.Angle;
 		
         float delta = Math.Abs(angleDifference);
         float clockwiseDelta = Math.Abs(angleDifference + 360f);
@@ -51,7 +51,7 @@ public struct AngleRotation(PlayerData data)
             angleDifference += 360f;
         }
 
-        float multiplier = Math.Abs(data.Physics.GroundSpeed) >= 6f ? 0.5f : 0.25f;
-        return (data.Rotation.VisualAngle + angleDifference * multiplier) % 360f;
+        float multiplier = Math.Abs(data.Movement.GroundSpeed) >= 6f ? 0.5f : 0.25f;
+        return (data.Visual.Angle + angleDifference * multiplier) % 360f;
     }
 }

@@ -14,7 +14,7 @@ public struct SpinDash(PlayerData data)
     
     public bool Perform()
     {
-	    if (!SharedData.SpinDash || !data.Physics.IsGrounded) return false;
+	    if (!SharedData.SpinDash || !data.Movement.IsGrounded) return false;
     	
 	    if (Start()) return false;
     	
@@ -35,15 +35,15 @@ public struct SpinDash(PlayerData data)
 	    data.Visual.Animation = Animations.Spin;
 	    data.State = States.None;
 	    data.Collision.Radius = data.Collision.RadiusSpin;
-	    data.Physics.IsSpinning = true;
+	    data.Movement.IsSpinning = true;
     	
-	    data.Physics.GroundSpeed.Value = ((data.Super.IsSuper ? 11f : 8f) + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
+	    data.Movement.GroundSpeed.Value = ((data.Super.IsSuper ? 11f : 8f) + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
     	
 	    AudioPlayer.Sound.Stop(SoundStorage.Charge);
 	    AudioPlayer.Sound.Play(SoundStorage.Release);
     	
 	    if (!SharedData.FixDashRelease) return;
-	    data.Physics.Velocity.SetDirectionalValue(data.Physics.GroundSpeed, data.Rotation.Angle);
+	    data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     }
 
     private bool Start()
@@ -56,7 +56,7 @@ public struct SpinDash(PlayerData data)
     	data.State = States.SpinDash;
 	    _charge = 0f;
     	_soundPitch = 1f; 
-	    data.Physics.Velocity.Vector = Vector2.Zero;
+	    data.Movement.Velocity.Vector = Vector2.Zero;
     		
     	// TODO: SpinDash dust 
     	//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });

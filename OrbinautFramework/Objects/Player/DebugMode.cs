@@ -4,6 +4,7 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player;
 

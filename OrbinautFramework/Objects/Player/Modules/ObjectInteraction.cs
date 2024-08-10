@@ -52,7 +52,7 @@ public struct ObjectInteraction(PlayerData data)
 		{
 			CollideWithRegularObject(slopeOffset);
 		}
-		else if (data.Physics.Velocity.Y >= 0f)
+		else if (data.Movement.Velocity.Y >= 0f)
 		{
 			CollideWithPlatformObject();
 		}
@@ -224,15 +224,15 @@ public struct ObjectInteraction(PlayerData data)
 	
 	private void UpdatePushingStatus(int clipX, int flooredDistanceX)
 	{
-		data.Visual.SetPushBy = data.Physics.IsGrounded && 
+		data.Visual.SetPushBy = data.Movement.IsGrounded && 
 			Math.Sign((int)data.Visual.Facing) == Math.Sign(-flooredDistanceX) ? _solidObjectData.Target : null;
 		
-		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(data.Physics.Velocity.X))
+		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(data.Movement.Velocity.X))
 		{
-			data.Physics.GroundSpeed.Value = 0f;
-			data.Physics.Velocity.X = 0f;
+			data.Movement.GroundSpeed.Value = 0f;
+			data.Movement.Velocity.X = 0f;
 
-			if (data.Physics.IsGrounded)
+			if (data.Movement.IsGrounded)
 			{
 				data.Collision.PushObjects.Add(_solidObjectData.Target);
 			}
@@ -262,7 +262,7 @@ public struct ObjectInteraction(PlayerData data)
 	{
 		if (_solidObjectData.Type is SolidType.ItemBox or SolidType.Sides) return false;
 
-		if (data.Physics.Velocity.Y == 0f && data.Physics.IsGrounded)
+		if (data.Movement.Velocity.Y == 0f && data.Movement.IsGrounded)
 		{
 			return CrushPlayer(clipY);
 		}
@@ -280,15 +280,15 @@ public struct ObjectInteraction(PlayerData data)
 	
 	private void HandleUpwardCollision(OrbinautData orbinautData, int clipY, bool isS3Physics)
 	{
-		if (data.Physics.Velocity.Y < 0f)
+		if (data.Movement.Velocity.Y < 0f)
 		{
-			if (isS3Physics && !data.Physics.IsGrounded)
+			if (isS3Physics && !data.Movement.IsGrounded)
 			{
-				data.Physics.GroundSpeed.Value = 0f;
+				data.Movement.GroundSpeed.Value = 0f;
 			}
 			
 			data.PlayerNode.Position -= new Vector2(0, clipY);
-			data.Physics.Velocity.Y = 0f;
+			data.Movement.Velocity.Y = 0f;
 		}
 
 		data.Collision.TouchObjects[orbinautData] = TouchState.Bottom;
@@ -296,7 +296,7 @@ public struct ObjectInteraction(PlayerData data)
 	
 	private void CollideDownward(int clipY)
 	{
-		if (data.Physics.Velocity.Y < 0f) return;
+		if (data.Movement.Velocity.Y < 0f) return;
 		
 		float relativeX = Math.Abs(MathF.Floor(data.PlayerNode.Position.X - _solidObjectData.Position.X));
 		if (relativeX > _solidObjectData.Target.SolidBox.Radius.X + _solidObjectData.ExtraSize.X) return;
@@ -330,12 +330,12 @@ public struct ObjectInteraction(PlayerData data)
 		}
 
 		data.PlayerNode.Position = data.PlayerNode.Position with { Y = data.PlayerNode.Position.Y - distance - 1 };
-		data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
+		data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
 		data.Collision.OnObject = _solidObjectData.Target;
-		data.Physics.Velocity.Y = 0f;
-		data.Rotation.Angle = 0f;
+		data.Movement.Velocity.Y = 0f;
+		data.Movement.Angle = 0f;
 
-		if (data.Physics.IsGrounded) return;
+		if (data.Movement.IsGrounded) return;
 		Land();
 	}
 }

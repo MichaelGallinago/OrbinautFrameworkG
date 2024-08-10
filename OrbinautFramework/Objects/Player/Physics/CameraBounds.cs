@@ -25,11 +25,12 @@ public struct CameraBounds(PlayerData data)
 
     private void ShiftToLeftBound(ICamera camera)
     {
-	    if (data.PlayerNode.Position.X + data.Physics.Velocity.X >= camera.Boundary.X + 16f) return;
+	    float leftBound = camera.Boundary.X + 16f;
+	    if (data.PlayerNode.Position.X + data.Movement.Velocity.X >= leftBound) return;
 	    
-	    data.Physics.GroundSpeed.Value = 0f;
-	    data.Physics.Velocity.X = 0f;
-	    data.PlayerNode.Position = new Vector2(camera.Boundary.X + 16f, data.PlayerNode.Position.Y);
+	    data.Movement.GroundSpeed.Value = 0f;
+	    data.Movement.Velocity.X = 0f;
+	    data.PlayerNode.Position = new Vector2(leftBound, data.PlayerNode.Position.Y);
     }
     
     private void ShiftToRightBound(ICamera camera)
@@ -38,38 +39,37 @@ public struct CameraBounds(PlayerData data)
     	
 	    // Allow player to walk past the right bound if they crossed Sign Post
 	    //TODO: replace instance_exists
-	    /*if (instance_exists(obj_signpost))
+	    /*if instance_exists(obj_signpost) && x >= obj_signpost.x
 	    {
-		    // TODO: There should be a better way?
-		    rightBound += 64;
+		    _right_bound += 64;
 	    }*/
-    	
-	    // Right bound
-	    if (data.PlayerNode.Position.X + data.Physics.Velocity.X <= rightBound) return;
 	    
-	    data.Physics.GroundSpeed.Value = 0f;
-	    data.Physics.Velocity.X = 0f;
+	    if (data.PlayerNode.Position.X + data.Movement.Velocity.X <= rightBound) return;
+	    
+	    data.Movement.GroundSpeed.Value = 0f;
+	    data.Movement.Velocity.X = 0f;
 	    data.PlayerNode.Position = new Vector2(rightBound, data.PlayerNode.Position.Y);
     }
 
     private void ShiftToTopBound(ICamera camera)
     {
+	    float topBound = camera.Boundary.Y + 16f;
 	    switch (data.State)
 	    {
 		    case States.Flight or States.Climb:
-			    if (data.PlayerNode.Position.Y + data.Physics.Velocity.Y >= camera.Boundary.Y + 16f) break;
+			    if (data.PlayerNode.Position.Y + data.Movement.Velocity.Y >= topBound) break;
     
 			    if (data.State == States.Flight)
 			    {
-				    data.Physics.Gravity = GravityType.TailsDown;
+				    data.Movement.Gravity = GravityType.TailsDown;
 			    }
 
-			    data.Physics.Velocity.Y = 0f;
-			    data.PlayerNode.Position = new Vector2(data.PlayerNode.Position.X, camera.Boundary.Y + 16f);
+			    data.Movement.Velocity.Y = 0f;
+			    data.PlayerNode.Position = new Vector2(data.PlayerNode.Position.X, topBound);
 			    break;
     		
-		    case States.Glide when data.PlayerNode.Position.Y < camera.Boundary.Y + 10f:
-			    data.Physics.GroundSpeed.Value = 0f;
+		    case States.Glide when data.PlayerNode.Position.Y < topBound - 6:
+			    data.Movement.GroundSpeed.Value = 0f;
 			    break;
 	    }
     }
@@ -77,7 +77,7 @@ public struct CameraBounds(PlayerData data)
     private void KillUnderBottomBound(ICamera camera)
     {
 	    if (data.Water.AirTimer <= 0f) return;
-	    if (data.PlayerNode.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return;
+	    if (data.PlayerNode.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; //TODO: check c_stage.bound_bottom[player_camera.index]
 	    
 	    Kill();
     }

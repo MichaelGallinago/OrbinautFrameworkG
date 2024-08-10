@@ -4,7 +4,6 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
-using OrbinautFramework3.Objects.Player.Physics;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
@@ -14,14 +13,14 @@ public struct Jump(PlayerData data)
 {
 	public bool Perform()
 	{
-		if (!data.Physics.IsJumping || data.Physics.IsGrounded) return false;
+		if (!data.Movement.IsJumping || data.Movement.IsGrounded) return false;
 		
 		if (!data.Input.Down.Abc)
 		{
-			data.Physics.Velocity.MaxY(PhysicParams.MinimalJumpSpeed);
+			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
 		}
 		
-		if (data.Physics.Velocity.Y < PhysicParams.MinimalJumpSpeed || CpuInputTimer == 0 && data.Id > 0) return false;
+		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed || CpuInputTimer == 0 && data.Id > 0) return false;
 
 		if (Transform()) return true;
 		
@@ -39,7 +38,7 @@ public struct Jump(PlayerData data)
 	public bool Start()
 	{
 		if (data.State is States.SpinDash or States.Dash) return false;
-		if (data.Physics.IsForcedSpin || !data.Physics.IsGrounded) return false;
+		if (data.Movement.IsForcedSpin || !data.Movement.IsGrounded) return false;
 		
 		if (!data.Input.Press.Abc || !CheckCeilingDistance()) return false;
 		
@@ -49,22 +48,23 @@ public struct Jump(PlayerData data)
 			data.Collision.Radius = data.Collision.RadiusNormal;
 		}
 	
-		if (!data.Physics.IsSpinning)
+		if (!data.Movement.IsSpinning)
 		{
 			data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
 			data.Collision.Radius = data.Collision.RadiusSpin;
 		}
 		else if (!SharedData.NoRollLock && SharedData.PhysicsType != PhysicsCore.Types.CD)
 		{
-			data.Physics.IsAirLock = true;
+			data.Movement.IsAirLock = true;
 		}
 		
-		float radians = Mathf.DegToRad(data.Rotation.Angle);
-		data.Physics.Velocity.Vector += PhysicParams.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+		float radians = Mathf.DegToRad(data.Movement.Angle);
+		data.Movement.Velocity.Vector += 
+			data.Physics.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
 		
-		data.Physics.IsSpinning = true;
-		data.Physics.IsJumping = true;
-		data.Physics.IsGrounded = false;
+		data.Movement.IsSpinning = true;
+		data.Movement.IsJumping = true;
+		data.Movement.IsGrounded = false;
 		data.Collision.OnObject = null;
 		data.Visual.SetPushBy = null;
 		data.Collision.IsStickToConvex = false;
@@ -118,7 +118,7 @@ public struct Jump(PlayerData data)
 		//TODO: instance_create obj_star_super
 		//instance_create(x, y, obj_star_super, { TargetPlayer: id });
 
-		data.Physics.IsControlRoutineEnabled = false;
+		data.Movement.IsControlRoutineEnabled = false;
 		data.Collision.IsObjectInteractionEnabled = false;			
 		data.Damage.InvincibilityTimer = 0f;
 		data.Super.Timer = 1f;
@@ -148,7 +148,7 @@ public struct Jump(PlayerData data)
 		if (data.PlayerNode.Shield.State != ShieldContainer.States.None || data.Item.InvincibilityTimer > 0f) return;
 		
 		data.PlayerNode.Shield.State = ShieldContainer.States.Active;
-		data.Physics.IsAirLock = false;
+		data.Movement.IsAirLock = false;
 		
 		switch (data.PlayerNode.Shield.Type)
 		{
@@ -183,7 +183,7 @@ public struct Jump(PlayerData data)
 
 	private void JumpWaterBarrier()
 	{
-		data.Physics.Velocity.Vector = new Vector2(0f, 8f);
+		data.Movement.Velocity.Vector = new Vector2(0f, 8f);
 		//TODO: update shield animation
 		data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
@@ -193,8 +193,8 @@ public struct Jump(PlayerData data)
 	{
 		data.SetCameraDelayX(16f);
 				
-		data.Physics.IsAirLock = true;
-		data.Physics.Velocity.Vector = new Vector2(8f * (float)data.Visual.Facing, 0f);
+		data.Movement.IsAirLock = true;
+		data.Movement.Velocity.Vector = new Vector2(8f * (float)data.Visual.Facing, 0f);
 		
 		//TODO: update shield animation
 		if (data.PlayerNode.Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)
@@ -215,7 +215,7 @@ public struct Jump(PlayerData data)
 	private void JumpThunderBarrier()
 	{
 		data.PlayerNode.Shield.State = ShieldContainer.States.Disabled;
-		data.Physics.Velocity.Y = -5.5f;
+		data.Movement.Velocity.Y = -5.5f;
 				
 		for (var i = 0; i < 4; i++)
 		{
@@ -230,10 +230,10 @@ public struct Jump(PlayerData data)
 	{
 		if (data.State != States.Default || !data.Input.Press.Abc) return;
 		
-		data.Physics.IsAirLock = false;
-		data.Physics.IsSpinning = false;
-		data.Physics.IsJumping = false;
-		data.Physics.Gravity = GravityType.TailsDown;
+		data.Movement.IsAirLock = false;
+		data.Movement.IsSpinning = false;
+		data.Movement.IsJumping = false;
+		data.Movement.Gravity = GravityType.TailsDown;
 		data.State = States.Flight;
 		ActionValue = 480f;
 		ActionValue2 = 0f;
@@ -252,21 +252,21 @@ public struct Jump(PlayerData data)
 	{
 		if (data.State != States.Default || !data.Input.Press.Abc) return;
 		
-		data.Physics.IsAirLock = false;
-		data.Physics.IsSpinning = false;
-		data.Physics.IsJumping = false;	
+		data.Movement.IsAirLock = false;
+		data.Movement.IsSpinning = false;
+		data.Movement.IsJumping = false;	
 		data.Visual.Animation = Animations.GlideAir;
 		data.State = States.Glide;
 		ActionState = (int)GlideStates.Air;
 		ActionValue = data.Visual.Facing == Constants.Direction.Negative ? 0f : 180f;
 		data.Collision.Radius = new Vector2I(10, 10);
-		data.Physics.GroundSpeed.Value = 4f;
-		data.Physics.Velocity.X = 0f;
-		data.Physics.Velocity.Y += 2f; 
+		data.Movement.GroundSpeed.Value = 4f;
+		data.Movement.Velocity.X = 0f;
+		data.Movement.Velocity.Y += 2f; 
 				
-		if (data.Physics.Velocity.Y < 0f)
+		if (data.Movement.Velocity.Y < 0f)
 		{
-			data.Physics.Velocity.Y = 0f;
+			data.Movement.Velocity.Y = 0f;
 		}
 	}
 
@@ -276,7 +276,7 @@ public struct Jump(PlayerData data)
 		
 		if (SharedData.NoRollLock)
 		{
-			data.Physics.IsAirLock = false;
+			data.Movement.IsAirLock = false;
 		}
 		
 		data.Visual.Animation = Animations.HammerSpin;

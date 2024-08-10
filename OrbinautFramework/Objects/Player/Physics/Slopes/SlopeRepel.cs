@@ -11,15 +11,15 @@ public struct SlopeRepel(PlayerData data)
 {
     public void Apply()
     {
-        if (!data.Physics.IsGrounded || data.Collision.IsStickToConvex || data.State == States.HammerDash) return;
+        if (!data.Movement.IsGrounded || data.Collision.IsStickToConvex || data.State == States.HammerDash) return;
 	
-        if (data.Physics.GroundLockTimer > 0f)
+        if (data.Movement.GroundLockTimer > 0f)
         {
-            data.Physics.GroundLockTimer -= Scene.Instance.ProcessSpeed;
+            data.Movement.GroundLockTimer -= Scene.Instance.ProcessSpeed;
             return;
         }
 
-        if (Math.Abs(data.Physics.GroundSpeed) >= 2.5f) return;
+        if (Math.Abs(data.Movement.GroundSpeed) >= 2.5f) return;
 
         if (SharedData.PhysicsType >= PhysicsCore.Types.S3)
         {
@@ -32,28 +32,28 @@ public struct SlopeRepel(PlayerData data)
     
     private void OriginalSlopeRepel()
     {
-        if (Angles.GetQuadrant(data.Rotation.Angle) == Angles.Quadrant.Down) return;
+        if (Angles.GetQuadrant(data.Movement.Angle) == Angles.Quadrant.Down) return;
         
-        data.Physics.GroundSpeed.Value = 0f;	
-        data.Physics.GroundLockTimer = 30f;
-        data.Physics.IsGrounded = false;
+        data.Movement.GroundSpeed.Value = 0f;	
+        data.Movement.GroundLockTimer = 30f;
+        data.Movement.IsGrounded = false;
     }
 
     private void NewSlopeRepel()
     {
-        switch (data.Rotation.Angle)
+        switch (data.Movement.Angle)
         {
             case <= 33.75f or > 326.25f: return;
 			
             case > 67.5f and <= 292.5f:
-                data.Physics.IsGrounded = false;
+                data.Movement.IsGrounded = false;
                 break;
 			
             default:
-                data.Physics.GroundSpeed.Acceleration = data.Rotation.Angle < 180f ? -0.5f : 0.5f;
+                data.Movement.GroundSpeed.Acceleration = data.Movement.Angle < 180f ? -0.5f : 0.5f;
                 break;
         }
 
-        data.Physics.GroundLockTimer = 30f;
+        data.Movement.GroundLockTimer = 30f;
     }
 }

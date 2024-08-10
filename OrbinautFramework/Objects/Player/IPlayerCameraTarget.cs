@@ -8,7 +8,7 @@ public interface IPlayerCameraTarget : IPosition
 {
     DeathData Death { get; }
     VisualData Visual { get; }
-    PhysicsData Physics { get; }
+    MovementData Movement { get; }
     IPlayerNode PlayerNode { get; }
     ActionFsm.States State { get; }
     CollisionData Collision { get; }

@@ -10,9 +10,9 @@ public struct Rolling(PlayerData data)
 {
     public void Roll()
     {
-        if (!data.Physics.IsGrounded || !data.Physics.IsSpinning) return;
+        if (!data.Movement.IsGrounded || !data.Movement.IsSpinning) return;
 		
-        if (data.Physics.GroundLockTimer <= 0f)
+        if (data.Movement.GroundLockTimer <= 0f)
         {
             if (data.Input.Down.Left)
             {
@@ -25,9 +25,9 @@ public struct Rolling(PlayerData data)
             }
         }
 
-        data.Physics.GroundSpeed.ApplyFriction(PhysicParams.FrictionRoll);
+        data.Movement.GroundSpeed.ApplyFriction(data.Physics.FrictionRoll);
 
-        if (data.Physics.IsForcedSpin)
+        if (data.Movement.IsForcedSpin)
         {
             ForceSpin();
         }
@@ -36,14 +36,14 @@ public struct Rolling(PlayerData data)
             StopSpinning();
         }
 	
-        data.Physics.Velocity.SetDirectionalValue(data.Physics.GroundSpeed, data.Rotation.Angle);
-        data.Physics.Velocity.ClampX(-16f, 16f);
+        data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
+        data.Movement.Velocity.ClampX(-16f, 16f);
     }
     
     private void RollOnGround(Constants.Direction direction)
     {
         var sign = (float)direction;
-        float absoluteSpeed = sign * data.Physics.GroundSpeed;
+        float absoluteSpeed = sign * data.Movement.GroundSpeed;
 		
         if (absoluteSpeed >= 0f)
         {
@@ -52,21 +52,21 @@ public struct Rolling(PlayerData data)
             return;
         }
 		
-        data.Physics.GroundSpeed.Acceleration = sign * PhysicParams.DecelerationRoll;
-        if (direction == Constants.Direction.Positive == data.Physics.GroundSpeed < 0f) return;
-        data.Physics.GroundSpeed.Value = sign * 0.5f;
+        data.Movement.GroundSpeed.Acceleration = sign * data.Physics.DecelerationRoll;
+        if (direction == Constants.Direction.Positive == data.Movement.GroundSpeed < 0f) return;
+        data.Movement.GroundSpeed.Value = sign * 0.5f;
     }
     
     private void StopSpinning()
     {
-        if (data.Physics.GroundSpeed != 0f)
+        if (data.Movement.GroundSpeed != 0f)
         {
-            if (SharedData.PhysicsType != PhysicsCore.Types.SK || Math.Abs(data.Physics.GroundSpeed) >= 0.5f) return;
+            if (SharedData.PhysicsType != PhysicsCore.Types.SK || Math.Abs(data.Movement.GroundSpeed) >= 0.5f) return;
         }
 		
         data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
 		
-        data.Physics.IsSpinning = false;
+        data.Movement.IsSpinning = false;
         data.Collision.Radius = data.Collision.RadiusNormal;
         data.Visual.Animation = Animations.Idle;
     }
@@ -75,15 +75,15 @@ public struct Rolling(PlayerData data)
     {
         if (SharedData.PhysicsType == PhysicsCore.Types.CD)
         {
-            if (data.Physics.GroundSpeed.Value is >= 0f and < 2f)
+            if (data.Movement.GroundSpeed.Value is >= 0f and < 2f)
             {
-                data.Physics.GroundSpeed.Value = 2f;
+                data.Movement.GroundSpeed.Value = 2f;
             }
             return;
         }
 		
-        if (data.Physics.GroundSpeed != 0f) return;
-        data.Physics.GroundSpeed.Value = 
+        if (data.Movement.GroundSpeed != 0f) return;
+        data.Movement.GroundSpeed.Value = 
             SharedData.PhysicsType == PhysicsCore.Types.S1 ? 2f : 4f * (float)data.Visual.Facing;
     }
 }

@@ -1,10 +1,7 @@
 ﻿using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
-using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Physics;
-using OrbinautFramework3.Objects.Player.PlayerActions;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
@@ -20,20 +17,20 @@ public struct CarryTarget(PlayerData data)
     		carrier.CarryTarget = null;
     		carrier.CarryTimer = 18f;
 		    
-		    data.Physics.IsSpinning = true;
-		    data.Physics.IsJumping = true;
+		    data.Movement.IsSpinning = true;
+		    data.Movement.IsJumping = true;
 		    data.State = States.Default;
 		    data.Visual.Animation = Animations.Spin;
 		    data.Collision.Radius = data.Collision.RadiusSpin;
-		    data.Physics.Velocity.Vector = new Vector2(0f, PhysicParams.MinimalJumpSpeed);
+		    data.Movement.Velocity.Vector = new Vector2(0f, data.Physics.MinimalJumpSpeed);
     				
     		if (data.Input.Down.Left)
     		{
-			    data.Physics.Velocity.X = -2f;
+			    data.Movement.Velocity.X = -2f;
     		}
     		else if (data.Input.Down.Right)
     		{
-			    data.Physics.Velocity.X = 2f;
+			    data.Movement.Velocity.X = 2f;
     		}
     		
     		AudioPlayer.Sound.Play(SoundStorage.Jump);
@@ -55,7 +52,7 @@ public struct CarryTarget(PlayerData data)
     public void AttachToCarrier(ICarrier carrier)
     {
 	    data.Visual.Facing = carrier.Facing;
-    	data.Physics.Velocity.Vector = carrier.Velocity.Vector;
+    	data.Movement.Velocity.Vector = carrier.Velocity.Vector;
 	    
 	    IPlayerNode player = data.PlayerNode;
 	    player.Position = carrier.Position + new Vector2(0f, 28f);

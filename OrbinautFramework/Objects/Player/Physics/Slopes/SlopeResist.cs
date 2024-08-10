@@ -11,7 +11,7 @@ public struct SlopeResist(PlayerData data)
 {
     public void Apply()
     {
-        if (data.Physics.IsSpinning)
+        if (data.Movement.IsSpinning)
         {
             ResistRoll();
             return;
@@ -22,26 +22,26 @@ public struct SlopeResist(PlayerData data)
     
     private void ResistWalk()
     {
-        if (!data.Physics.IsGrounded || data.Physics.IsSpinning || data.State is States.HammerDash or States.Dash) return;
-        if (data.Rotation.Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
+        if (!data.Movement.IsGrounded || data.Movement.IsSpinning || data.State is States.HammerDash or States.Dash) return;
+        if (data.Movement.Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
 		
-        float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(data.Rotation.Angle));
+        float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
 		
         // Decrease ground speed
-        if (data.Physics.GroundSpeed != 0f || 
+        if (data.Movement.GroundSpeed != 0f || 
             SharedData.PhysicsType >= PhysicsCore.Types.S3 && Math.Abs(slopeGravity) > 0.05078125f)
         {
-            data.Physics.GroundSpeed.Acceleration = -slopeGravity;
+            data.Movement.GroundSpeed.Acceleration = -slopeGravity;
         }
     }
     
     private void ResistRoll()
     {
-        if (!data.Physics.IsGrounded || !data.Physics.IsSpinning) return;
-        if (data.Rotation.Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
+        if (!data.Movement.IsGrounded || !data.Movement.IsSpinning) return;
+        if (data.Movement.Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
 	
-        float angleSine = MathF.Sin(Mathf.DegToRad(data.Rotation.Angle));
-        float slopeGravity = Math.Sign(data.Physics.GroundSpeed) == Math.Sign(angleSine) ? 0.078125f : 0.3125f;
-        data.Physics.GroundSpeed.Acceleration = -slopeGravity * angleSine;
+        float angleSine = MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
+        float slopeGravity = Math.Sign(data.Movement.GroundSpeed) == Math.Sign(angleSine) ? 0.078125f : 0.3125f;
+        data.Movement.GroundSpeed.Acceleration = -slopeGravity * angleSine;
     }
 }

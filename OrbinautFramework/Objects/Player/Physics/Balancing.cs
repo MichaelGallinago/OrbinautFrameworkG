@@ -12,8 +12,8 @@ public struct Balancing(PlayerData data)
 {
     public void Balance()
 	{
-		if (!data.Physics.IsGrounded || data.Physics.IsSpinning) return;
-		if (data.Physics.GroundSpeed != 0f || data.State is States.SpinDash or States.Dash) return;
+		if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
+		if (data.Movement.GroundSpeed != 0f || data.State is States.SpinDash or States.Dash) return;
 		
 		// Don't allow player to duck or look up
 		if (SharedData.PhysicsType == PhysicsCore.Types.SK && (data.Input.Down.Down || data.Input.Down.Up)) return;
@@ -51,7 +51,7 @@ public struct Balancing(PlayerData data)
 		
 		const Constants.Direction direction = Constants.Direction.Positive;	
 		
-		if (Angles.GetQuadrant(data.Rotation.Angle) > Angles.Quadrant.Down) return true;
+		if (Angles.GetQuadrant(data.Movement.Angle) > Angles.Quadrant.Down) return true;
 		data.TileCollider.SetData(
 			(Vector2I)data.PlayerNode.Position + new Vector2I(0, data.Collision.Radius.Y), 
 			data.Collision.TileLayer);

@@ -1,12 +1,16 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Objects.Player.Data;
 
-namespace OrbinautFramework3.Objects.Player.Modules;
+namespace OrbinautFramework3.Objects.Player.Data;
 
-public struct Music(PlayerData data)
+public static class PlayerDataUtilities
 {
-    public void Reset()
+    public static void ResetGravity(this PlayerData data)
+    {
+        data.Movement.Gravity = data.Water.IsUnderwater ? GravityType.Underwater : GravityType.Default;
+    }
+    
+    public static void ResetMusic(this PlayerData data)
     {
         if (data.Super.IsSuper)
         {

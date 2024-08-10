@@ -12,7 +12,7 @@ public struct Air(PlayerData data)
 {
 	public void Move()
 	{
-		if (data.Physics.IsGrounded || data.Death.IsDead) return;
+		if (data.Movement.IsGrounded || data.Death.IsDead) return;
 		if (data.State is States.Carried or States.Climb or States.SpinDash || 
 		    data.State == States.Glide && ActionState != (int)GlideStates.Fall) return;
 
@@ -25,27 +25,27 @@ public struct Air(PlayerData data)
 
 	private void RotateInAir()
 	{
-		if (Mathf.IsEqualApprox(data.Rotation.Angle, 0f)) return;
+		if (Mathf.IsEqualApprox(data.Movement.Angle, 0f)) return;
 		
 		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
-		data.Rotation.Angle += data.Rotation.Angle >= 180f ? speed : -speed;
+		data.Movement.Angle += data.Movement.Angle >= 180f ? speed : -speed;
 		
-		if (data.Rotation.Angle is < 0f or >= 360f)
+		if (data.Movement.Angle is < 0f or >= 360f)
 		{
-			data.Rotation.Angle = 0f;
+			data.Movement.Angle = 0f;
 		}
 	}
 
 	private void LimitVerticalVelocity()
 	{
-		if (!data.Physics.IsJumping && data.State != States.SpinDash && 
-		    !data.Physics.IsForcedSpin && data.Physics.Velocity.Y < -15.75f)
+		if (!data.Movement.IsJumping && data.State != States.SpinDash && 
+		    !data.Movement.IsForcedSpin && data.Movement.Velocity.Y < -15.75f)
 		{
-			data.Physics.Velocity.Y = -15.75f;
+			data.Movement.Velocity.Y = -15.75f;
 		}
-		else if (SharedData.PhysicsType == PhysicsCore.Types.CD && data.Physics.Velocity.Y > 16f)
+		else if (SharedData.PhysicsType == PhysicsCore.Types.CD && data.Movement.Velocity.Y > 16f)
 		{
-			data.Physics.Velocity.Y = 16f;
+			data.Movement.Velocity.Y = 16f;
 		}
 	}
 
@@ -67,32 +67,32 @@ public struct Air(PlayerData data)
 
 	private void MoveInAirHorizontally()
 	{
-		if (data.Physics.IsAirLock) return;
+		if (data.Movement.IsAirLock) return;
 		
 		if (data.Input.Down.Left)
 		{
-			if (data.Physics.Velocity.X > 0f)
+			if (data.Movement.Velocity.X > 0f)
 			{
-				data.Physics.Velocity.AccelerationX = -PhysicParams.AccelerationAir;
+				data.Movement.Velocity.AccelerationX = -data.Physics.AccelerationAir;
 			}
-			else if (!SharedData.NoSpeedCap || -data.Physics.Velocity.X < PhysicParams.AccelerationTop)
+			else if (!SharedData.NoSpeedCap || -data.Movement.Velocity.X < data.Physics.AccelerationTop)
 			{
-				data.Physics.Velocity.AccelerationX = -PhysicParams.AccelerationAir;
-				data.Physics.Velocity.MaxX(-PhysicParams.AccelerationTop);
+				data.Movement.Velocity.AccelerationX = -data.Physics.AccelerationAir;
+				data.Movement.Velocity.MaxX(-data.Physics.AccelerationTop);
 			}
 			
 			data.Visual.Facing = Constants.Direction.Negative;
 		}
 		else if (data.Input.Down.Right)
 		{
-			if (data.Physics.Velocity.X < 0f)
+			if (data.Movement.Velocity.X < 0f)
 			{
-				data.Physics.Velocity.AccelerationX = PhysicParams.AccelerationAir;
+				data.Movement.Velocity.AccelerationX = data.Physics.AccelerationAir;
 			}
-			else if (!SharedData.NoSpeedCap || data.Physics.Velocity.X < PhysicParams.AccelerationTop)
+			else if (!SharedData.NoSpeedCap || data.Movement.Velocity.X < data.Physics.AccelerationTop)
 			{
-				data.Physics.Velocity.AccelerationX = PhysicParams.AccelerationAir;
-				data.Physics.Velocity.MinX(PhysicParams.AccelerationTop);
+				data.Movement.Velocity.AccelerationX = data.Physics.AccelerationAir;
+				data.Movement.Velocity.MinX(data.Physics.AccelerationTop);
 			}
 			
 			data.Visual.Facing = Constants.Direction.Positive;
@@ -101,9 +101,9 @@ public struct Air(PlayerData data)
 
 	private void ApplyAirDrag()
 	{
-		if (!data.Damage.IsHurt && data.Physics.Velocity.Y is < 0f and > -4f)
+		if (!data.Damage.IsHurt && data.Movement.Velocity.Y is < 0f and > -4f)
 		{
-			data.Physics.Velocity.AccelerationX = MathF.Floor(data.Physics.Velocity.X * 8f) / -256f;
+			data.Movement.Velocity.AccelerationX = MathF.Floor(data.Movement.Velocity.X * 8f) / -256f;
 		}
 	}
 }

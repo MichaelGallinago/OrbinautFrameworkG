@@ -5,12 +5,12 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
-using OrbinautFramework3.Objects.Player.Physics;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-[FsmSourceGenerator.FsmState("data.State")]
+//TODO: check speed
+[FsmSourceGenerator.FsmState("Action")]
 public struct Glide(PlayerData data)
 {
 	public enum GlideStates : byte
@@ -20,6 +20,7 @@ public struct Glide(PlayerData data)
 
 	private GlideStates _glideState;
 	private float _glideAngle;
+	private float _glideValue;
 	// data.Physics.GroundSpeed - glide speed
 	
 	public void Perform()
@@ -43,30 +44,30 @@ public struct Glide(PlayerData data)
 		if (data.Input.Down.Abc) return;
 
 		Release();
-		data.Physics.Velocity.X *= 0.25f;
+		data.Movement.Velocity.X *= 0.25f;
 	}
 
 	private void UpdateSpeed()
 	{
 		const float glideAcceleration = 0.03125f;
 		
-		if (data.Physics.GroundSpeed < 4f)
+		if (data.Movement.GroundSpeed < 4f)
 		{
-			data.Physics.GroundSpeed.Acceleration = glideAcceleration;
+			data.Movement.GroundSpeed.Acceleration = glideAcceleration;
 			return;
 		}
 
 		if (_glideAngle % 180f != 0f) return;
-		data.Physics.GroundSpeed.Acceleration = PhysicParams.AccelerationGlide;
-		data.Physics.GroundSpeed.SetMin(24f);
+		data.Movement.GroundSpeed.Acceleration = data.Physics.AccelerationGlide;
+		data.Movement.GroundSpeed.SetMin(24f);
 	}
 
 	private void UpdateGravityAndHorizontalVelocity()
 	{
 		const float glideGravity = 0.125f;
 
-		data.Physics.Velocity.X = data.Physics.GroundSpeed * -MathF.Cos(Mathf.DegToRad(_glideAngle));
-		data.Physics.Gravity = data.Physics.Velocity.Y < 0.5f ? glideGravity : -glideGravity;
+		data.Movement.Velocity.X = data.Movement.GroundSpeed * -MathF.Cos(Mathf.DegToRad(_glideAngle));
+		data.Movement.Gravity = data.Movement.Velocity.Y < 0.5f ? glideGravity : -glideGravity;
 	}
 
 	private void UpdateAirAnimationFrame()
@@ -92,49 +93,49 @@ public struct Glide(PlayerData data)
 		UpdateGroundVelocityX();
 		
 		// Stop sliding
-		if (data.Physics.Velocity.X == 0f)
+		if (data.Movement.Velocity.X == 0f)
 		{
 			Land();
 			data.Visual.OverrideFrame = 1;
 			
 			data.Visual.Animation = Animations.GlideGround;
-			data.Physics.GroundLockTimer = 16f;
-			data.Physics.GroundSpeed.Value = 0f;
+			data.Movement.GroundLockTimer = 16f;
+			data.Movement.GroundSpeed.Value = 0f;
 			
 			return;
 		}
 
 		// Spawn dust particles
-		if (_glideAngle % 4f < Scene.Instance.ProcessSpeed)
+		if (_glideValue % 4f < Scene.Instance.ProcessSpeed)
 		{
 			//TODO: obj_dust_skid
 			//instance_create(x, y + data.Collision.Radius.Y, obj_dust_skid);
 		}
 				
-		if (_glideAngle > 0f && _glideAngle % 8f < Scene.Instance.ProcessSpeed)
+		if (_glideValue > 0f && _glideValue % 8f < Scene.Instance.ProcessSpeed)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Slide);
 		}
 					
-		_glideAngle += Scene.Instance.ProcessSpeed;
+		_glideValue += Scene.Instance.ProcessSpeed;
 	}
 
 	private void UpdateGroundVelocityX()
 	{
 		if (!data.Input.Down.Abc)
 		{
-			data.Physics.Velocity.X = 0f;
+			data.Movement.Velocity.X = 0f;
 			return;
 		}
 		
 		const float slideFriction = -0.09375f;
 		
-		float speedX = data.Physics.Velocity.X;
-		data.Physics.Velocity.AccelerationX = Math.Sign(data.Physics.Velocity.X) * slideFriction;
+		float speedX = data.Movement.Velocity.X;
+		data.Movement.Velocity.AccelerationX = Math.Sign(data.Movement.Velocity.X) * slideFriction;
 		switch (speedX)
 		{
-			case > 0f: data.Physics.Velocity.MaxX(0f); break;
-			case < 0f: data.Physics.Velocity.MinX(0f); break;
+			case > 0f: data.Movement.Velocity.MaxX(0f); break;
+			case < 0f: data.Movement.Velocity.MinX(0f); break;
 		}
 	}
 
@@ -182,7 +183,7 @@ public struct Glide(PlayerData data)
 		var climbY = (int)data.PlayerNode.Position.Y;
 		var collisionFlagWall = false;
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Physics.Velocity));
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
 
 		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
 		
@@ -217,7 +218,7 @@ public struct Glide(PlayerData data)
 		
 		data.PlayerNode.Position += new Vector2(sing * wallDistance, 0f);
 		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
-		data.Physics.Velocity.X = 0f;
+		data.Movement.Velocity.X = 0f;
 		return true;
 	}
 
@@ -240,9 +241,9 @@ public struct Glide(PlayerData data)
 		
 		data.PlayerNode.Position -= new Vector2(0f, roofDistance);
 		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
-		if (data.Physics.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
+		if (data.Movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
 		{
-			data.Physics.Velocity.Y = 0f;
+			data.Movement.Velocity.Y = 0f;
 		}
 		return false;
 	}
@@ -262,7 +263,7 @@ public struct Glide(PlayerData data)
 			}
 			
 			data.PlayerNode.Position += new Vector2(0f, floorDistance);
-			data.Rotation.Angle = floorAngle;
+			data.Movement.Angle = floorAngle;
 			return false;
 		}
 
@@ -270,8 +271,8 @@ public struct Glide(PlayerData data)
 		
 		data.PlayerNode.Position += new Vector2(0f, floorDistance);
 		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
-		data.Rotation.Angle = floorAngle;
-		data.Physics.Velocity.Y = 0f;
+		data.Movement.Angle = floorAngle;
+		data.Movement.Velocity.Y = 0f;
 		return true;
 	}
 
@@ -286,10 +287,10 @@ public struct Glide(PlayerData data)
 
 	private void LandAir()
 	{
-		if (Angles.GetQuadrant(data.Rotation.Angle) != Angles.Quadrant.Down)
+		if (Angles.GetQuadrant(data.Movement.Angle) != Angles.Quadrant.Down)
 		{
-			data.Physics.GroundSpeed.Value = data.Rotation.Angle < 180 ? 
-				data.Physics.Velocity.X : -data.Physics.Velocity.X;
+			data.Movement.GroundSpeed.Value = data.Movement.Angle < 180 ? 
+				data.Movement.Velocity.X : -data.Movement.Velocity.X;
 			
 			Land();
 			return;
@@ -298,7 +299,7 @@ public struct Glide(PlayerData data)
 		data.Visual.Animation = Animations.GlideGround;
 		_glideState = GlideStates.Ground;
 		_glideAngle = 0f;
-		data.Physics.Gravity = 0f;
+		data.Movement.Gravity = 0f;
 	}
 
 	private void LandFall()
@@ -306,16 +307,16 @@ public struct Glide(PlayerData data)
 		AudioPlayer.Sound.Play(SoundStorage.Land);
 		Land();		
 		
-		if (Angles.GetQuadrant(data.Rotation.Angle) != Angles.Quadrant.Down)
+		if (Angles.GetQuadrant(data.Movement.Angle) != Angles.Quadrant.Down)
 		{
-			data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
+			data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
 			return;
 		}
 					
 		data.Visual.Animation = Animations.GlideLand;
-		data.Physics.GroundLockTimer = 16f;
-		data.Physics.GroundSpeed.Value = 0f;
-		data.Physics.Velocity.X = 0f;
+		data.Movement.GroundLockTimer = 16f;
+		data.Movement.GroundSpeed.Value = 0f;
+		data.Movement.Velocity.X = 0f;
 	}
 
 	private void AttachToWall(int wallRadius, int climbY)
@@ -333,10 +334,10 @@ public struct Glide(PlayerData data)
 		data.State = States.Climb;
 		_climbState = (int)(isWallJump ? ClimbStates.WallJump : ClimbStates.Normal); //TODO: set state inside Climb
 		data.Visual.Animation = Animations.ClimbWall;
-		_glideAngle = 0f;
-		data.Physics.GroundSpeed.Value = 0f;
-		data.Physics.Velocity.Y = 0f;
-		data.Physics.Gravity = 0f;
+		_glideValue = 0f;
+		data.Movement.GroundSpeed.Value = 0f;
+		data.Movement.Velocity.Y = 0f;
+		data.Movement.Gravity = 0f;
 			
 		AudioPlayer.Sound.Play(SoundStorage.Grab);
 	}
@@ -376,6 +377,6 @@ public struct Glide(PlayerData data)
 		_glideAngle = 0f;
 		data.Collision.Radius = data.Collision.RadiusNormal;
 		
-		data.Physics.ResetGravity(data.Water.IsUnderwater);
+		data.ResetGravity();
 	}
 }

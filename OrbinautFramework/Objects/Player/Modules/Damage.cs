@@ -33,9 +33,9 @@ public struct Damage(PlayerData data)
     	data.Visual.Animation = Animations.Death;
     	data.Death.IsDead = true;
     	data.Collision.IsObjectInteractionEnabled = false;
-    	data.Physics.Gravity = GravityType.Default;
-    	data.Physics.Velocity.Vector = new Vector2(0f, -7f);
-    	data.Physics.GroundSpeed.Value = 0f;
+    	data.Movement.Gravity = GravityType.Default;
+    	data.Movement.Velocity.Vector = new Vector2(0f, -7f);
+    	data.Movement.GroundSpeed.Value = 0f;
 
     	if (data.IsCameraTarget(out ICamera camera))
     	{
@@ -56,19 +56,19 @@ public struct Damage(PlayerData data)
     	data.ResetState();
 
     	const float velocityX = 2f, velocityY = 4f;
-    	data.Physics.Velocity.Vector = 
+    	data.Movement.Velocity.Vector = 
 		    new Vector2(data.PlayerNode.Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
 	    
-    	data.Physics.Gravity = GravityType.HurtFall;
+    	data.Movement.Gravity = GravityType.HurtFall;
     	data.Visual.Animation = Animations.Hurt;
     	data.Damage.IsHurt = true;
-    	data.Physics.IsAirLock = true;
+    	data.Movement.IsAirLock = true;
     	data.Damage.InvincibilityTimer = 120f;
 
     	if (data.Water.IsUnderwater)
     	{
-    		data.Physics.Velocity.Vector *= 0.5f;
-    		data.Physics.Gravity -= 0.15625f;
+    		data.Movement.Velocity.Vector *= 0.5f;
+    		data.Movement.Gravity -= 0.15625f;
     	}
     	
     	if (data.Id > 0 || SharedData.PlayerShield > ShieldContainer.Types.None)

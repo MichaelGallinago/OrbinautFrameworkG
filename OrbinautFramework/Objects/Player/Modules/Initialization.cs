@@ -18,8 +18,7 @@ public readonly struct Initialization(PlayerData data)
         data.Water.Init();
         data.Damage.Init();
         data.Visual.Init();
-        data.Physics.Init();
-        data.Rotation.Init();
+        data.Movement.Init();
         
         data.State = ActionFsm.States.Default;
         

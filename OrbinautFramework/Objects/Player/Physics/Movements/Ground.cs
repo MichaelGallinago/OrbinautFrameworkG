@@ -9,14 +9,16 @@ namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
 public struct Ground(PlayerData data)
 {
+    public const float SkidSpeedThreshold = 4f;
+    
     public void Move()
     {
-        if (!data.Physics.IsGrounded || data.Physics.IsSpinning) return;
+        if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
         if (data.State is States.SpinDash or States.Dash or States.HammerDash) return;
 
         CancelGlideLandingAnimation();
 		
-        if (data.Physics.GroundLockTimer <= 0f)
+        if (data.Movement.GroundLockTimer <= 0f)
         {
             var doSkid = false;
 			
@@ -35,18 +37,18 @@ public struct Ground(PlayerData data)
 		
         if (data.Input.Down is { Left: false, Right: false })
         {
-            data.Physics.GroundSpeed.ApplyFriction(PhysicParams.Friction);
+            data.Movement.GroundSpeed.ApplyFriction(data.Physics.Friction);
         }
 		
-        data.Physics.Velocity.SetDirectionalValue(data.Physics.GroundSpeed, data.Rotation.Angle);
+        data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     }
 
     private void CancelGlideLandingAnimation()
     {
         if (data.Visual.Animation is Animations.GlideGround or Animations.GlideLand && 
-            (data.Input.Down.Down || data.Physics.GroundSpeed != 0))
+            (data.Input.Down.Down || data.Movement.GroundSpeed != 0))
         {
-            data.Physics.GroundLockTimer = 0f;
+            data.Movement.GroundLockTimer = 0f;
         }
     }
     
@@ -54,7 +56,7 @@ public struct Ground(PlayerData data)
     {
         SetPushAnimation();
 		
-        Angles.Quadrant quadrant = Angles.GetQuadrant(data.Rotation.Angle);
+        Angles.Quadrant quadrant = Angles.GetQuadrant(data.Movement.Angle);
         if (SetIdleAnimation(quadrant)) return;
 			
         if (data.Visual.Animation == Animations.Skid) return;
@@ -78,7 +80,7 @@ public struct Ground(PlayerData data)
     
     private bool SetIdleAnimation(Angles.Quadrant quadrant)
     {
-        if (quadrant != Angles.Quadrant.Down || data.Physics.GroundSpeed != 0f) return false;
+        if (quadrant != Angles.Quadrant.Down || data.Movement.GroundSpeed != 0f) return false;
 		
         if (data.Input.Down.Up)
         {
@@ -99,7 +101,7 @@ public struct Ground(PlayerData data)
 
     private void PerformSkid()
     {
-        if (Math.Abs(data.Physics.GroundSpeed) < PlayerConstants.SkidSpeedThreshold) return;
+        if (Math.Abs(data.Movement.GroundSpeed) < SkidSpeedThreshold) return;
 		
         data.Visual.DustTimer = 0f;
         data.Visual.Animation = Animations.Skid;
@@ -111,26 +113,26 @@ public struct Ground(PlayerData data)
     {
         var sign = (float)direction;
 		
-        if (data.Physics.GroundSpeed * sign < 0f)
+        if (data.Movement.GroundSpeed * sign < 0f)
         {
-            data.Physics.GroundSpeed.Acceleration = sign * PhysicParams.Deceleration;
-            if (direction == Constants.Direction.Positive == data.Physics.GroundSpeed >= 0f)
+            data.Movement.GroundSpeed.Acceleration = sign * data.Physics.Deceleration;
+            if (direction == Constants.Direction.Positive == data.Movement.GroundSpeed >= 0f)
             {
-                data.Physics.GroundSpeed.Value = 0.5f * sign;
+                data.Movement.GroundSpeed.Value = 0.5f * sign;
             }
 			
             return true;
         }
 
-        if (!SharedData.NoSpeedCap || data.Physics.GroundSpeed * sign < PhysicParams.AccelerationTop)
+        if (!SharedData.NoSpeedCap || data.Movement.GroundSpeed * sign < data.Physics.AccelerationTop)
         {
-            float acceleration = PhysicParams.Acceleration;
-            data.Physics.GroundSpeed.Acceleration = acceleration * (float)direction;
+            float acceleration = data.Physics.Acceleration;
+            data.Movement.GroundSpeed.Acceleration = acceleration * (float)direction;
 			
             switch (direction)
             {
-                case Constants.Direction.Positive: data.Physics.GroundSpeed.SetMin( PhysicParams.AccelerationTop); break;
-                case Constants.Direction.Negative: data.Physics.GroundSpeed.SetMax(-PhysicParams.AccelerationTop); break;
+                case Constants.Direction.Positive: data.Movement.GroundSpeed.SetMin( data.Physics.AccelerationTop); break;
+                case Constants.Direction.Negative: data.Movement.GroundSpeed.SetMax(-data.Physics.AccelerationTop); break;
             }
         }
 

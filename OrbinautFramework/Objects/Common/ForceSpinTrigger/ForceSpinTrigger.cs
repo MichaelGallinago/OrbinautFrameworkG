@@ -26,10 +26,10 @@ public abstract partial class ForceSpinTrigger : Trigger
         {
             if (player.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
             
-            player.Physics.IsForcedSpin = !player.Physics.IsForcedSpin;
+            player.Movement.IsForcedSpin = !player.Movement.IsForcedSpin;
             player.State = ActionFsm.States.None;
             
-            player.Physics.ResetGravity(player.Water.IsUnderwater);
+            player.ResetGravity();
         }
     }
     

@@ -14,9 +14,9 @@ public struct Landing(PlayerData data)
 	
     public void Land()
     {
-	    data.Physics.ResetGravity(data.Water.IsUnderwater);
+	    data.ResetGravity();
     	
-    	data.Physics.IsGrounded = true;
+    	data.Movement.IsGrounded = true;
     
     	switch (data.State)
     	{
@@ -28,7 +28,7 @@ public struct Landing(PlayerData data)
     		case States.SpinDash or States.Dash:
     			if (data.State == States.Dash)
     			{
-    				data.Physics.GroundSpeed.Value = ActionValue2;
+    				data.Movement.GroundSpeed.Value = DashCharge; //TODO set in Dash
     			}
     			return;
     	}
@@ -38,12 +38,12 @@ public struct Landing(PlayerData data)
     
     	if (data.Damage.IsHurt)
     	{
-    		data.Physics.GroundSpeed.Value = 0f;
+    		data.Movement.GroundSpeed.Value = 0f;
     	}
     
-    	data.Physics.IsAirLock = false;
-    	data.Physics.IsSpinning	= false;
-    	data.Physics.IsJumping = false;
+    	data.Movement.IsAirLock = false;
+    	data.Movement.IsSpinning	= false;
+    	data.Movement.IsJumping = false;
     	data.Visual.SetPushBy = null;
     	data.Damage.IsHurt = false;
     
@@ -57,14 +57,14 @@ public struct Landing(PlayerData data)
     
     	if (data.State != States.HammerDash)
     	{
-    		data.State = States.None;
+    		data.State = States.Default;
     	}
-    	else
+    	else if (Math.Sign(data.Movement.GroundSpeed) != (int)data.Visual.Facing)
     	{
-    		data.Physics.GroundSpeed.Value = 6 * (int)data.Visual.Facing;
+    		data.Movement.GroundSpeed.Value = -data.Movement.GroundSpeed;
     	}
 
-    	if (data.Physics.IsSpinning) return;
+    	if (data.Movement.IsSpinning) return;
     	data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
     	
     	data.Collision.Radius = data.Collision.RadiusNormal;
@@ -76,12 +76,12 @@ public struct Landing(PlayerData data)
 	        SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
 		
 	    float force = data.Water.IsUnderwater ? -4f : -7.5f;
-	    float radians = Mathf.DegToRad(data.Rotation.Angle);
-	    data.Physics.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
+	    float radians = Mathf.DegToRad(data.Movement.Angle);
+	    data.Movement.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
 	    
 	    data.PlayerNode.Shield.State = ShieldContainer.States.None;
 	    data.Collision.OnObject = null;
-	    data.Physics.IsGrounded = false;
+	    data.Movement.IsGrounded = false;
 	    
 	    //TODO: replace animation
 	    data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
@@ -93,15 +93,7 @@ public struct Landing(PlayerData data)
 
     private void SetAnimation()
     {
-	    if (data.Collision.OnObject != null)
-	    {
-		    data.Visual.Animation = Animations.Move;
-		    return;
-	    }
-		
-	    if (data.Visual.Animation is 
-	        Animations.Idle or Animations.Duck or Animations.HammerDash or Animations.GlideGround) return;
-	    
+	    if (data.Visual.Animation == Animations.HammerDash) return;
 	    data.Visual.Animation = Animations.Move;
     }
 }

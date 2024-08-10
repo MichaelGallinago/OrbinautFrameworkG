@@ -1,4 +1,5 @@
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
@@ -17,9 +18,8 @@ public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode 
 	public VisualData Visual { get; } = new();
 	public PlayerInput Input { get; } = new();
 	public PhysicsData Physics { get; } = new();
-	public RotationData Rotation { get; } = new();
+	public MovementData Movement { get; } = new();
 	public CollisionData Collision { get; } = new();
-	
 	public TileCollider TileCollider { get; } = new();
 
 	public ActionFsm.States State
@@ -34,9 +34,9 @@ public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode 
 		
 		Damage.IsHurt = false;
 		
-		Physics.IsJumping = false;
-		Physics.IsSpinning = false;
-		Physics.IsGrounded = false;
+		Movement.IsJumping = false;
+		Movement.IsSpinning = false;
+		Movement.IsGrounded = false;
 		
 		Visual.SetPushBy = null;
 		

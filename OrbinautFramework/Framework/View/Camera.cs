@@ -205,7 +205,7 @@ public partial class Camera : Camera2D, ICamera
 	{
 		const int shiftSpeedX = 2;
 		
-		if (Math.Abs(data.Physics.GroundSpeed) < 6f && data.State != ActionFsm.States.SpinDash)
+		if (Math.Abs(data.Movement.GroundSpeed) < 6f && data.State != ActionFsm.States.SpinDash)
 		{
 			_bufferOffset.X = _bufferOffset.X.MoveToward(0f, shiftSpeedX * processSpeed);
 			return;
@@ -213,8 +213,8 @@ public partial class Camera : Camera2D, ICamera
 		
 		if (_delay.X > 0f) return;
 		
-		int shiftSign = data.Physics.GroundSpeed != 0f ? 
-			Math.Sign(data.Physics.GroundSpeed) : (int)data.Visual.Facing;
+		int shiftSign = data.Movement.GroundSpeed != 0f ? 
+			Math.Sign(data.Movement.GroundSpeed) : (int)data.Visual.Facing;
 		
 		const int shiftDistanceX = 64;
 		_bufferOffset.X = _bufferOffset.X.MoveToward(shiftDistanceX * shiftSign, shiftSpeedX * processSpeed);
@@ -330,16 +330,16 @@ public partial class Camera : Camera2D, ICamera
 		
 		float distance = targetPosition - _rawPosition.Y;
 
-		if (data.Physics.IsGrounded)
+		if (data.Movement.IsGrounded)
 		{
-			if (data.Physics.IsSpinning)
+			if (data.Movement.IsSpinning)
 			{
 				int offset = data.Collision.RadiusNormal.Y - data.Collision.Radius.Y;
 				distance -= offset;
 				targetPosition -= offset;
 			}
 
-			float limit = processSpeed * (Math.Abs(data.Physics.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
+			float limit = processSpeed * (Math.Abs(data.Movement.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
 			
 			_rawPosition.Y = distance <= limit && distance >= -limit ? 
 				targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);

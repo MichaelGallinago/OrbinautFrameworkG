@@ -15,19 +15,19 @@ public struct Ground(PlayerData data)
 	
 	public void CollideWalls()
     {
-        if (!data.Physics.IsGrounded) return;
+        if (!data.Movement.IsGrounded) return;
 		
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
 		// and S3K physics are enabled
-		if (data.Rotation.Angle is > 90f and <= 270f && 
-		    (SharedData.PhysicsType < PhysicsCore.Types.SK || data.Rotation.Angle % 90f != 0f)) return;
+		if (data.Movement.Angle is > 90f and <= 270f && 
+		    (SharedData.PhysicsType < PhysicsCore.Types.SK || data.Movement.Angle % 90f != 0f)) return;
 
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		int offsetY = data.Rotation.Angle == 0f ? 8 : 0;
+		int offsetY = data.Movement.Angle == 0f ? 8 : 0;
 		
 		int sign;
 		Direction firstDirection, secondDirection;
-		switch (data.Physics.GroundSpeed.Value)
+		switch (data.Movement.GroundSpeed.Value)
 		{
 			case < 0f:
 				sign = (int)Direction.Positive;
@@ -46,11 +46,11 @@ public struct Ground(PlayerData data)
 		}
 		
 		data.TileCollider.SetData(
-			(Vector2I)data.Physics.Velocity.CalculateNewPosition(data.PlayerNode.Position), 
+			(Vector2I)data.Movement.Velocity.CalculateNewPosition(data.PlayerNode.Position), 
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
 		
-		int castQuadrant = data.Rotation.Angle switch
+		int castQuadrant = data.Movement.Angle switch
 		{
 			>= 45f and <= 128f => 1,
 			> 128f and < 225f => 2,
@@ -69,24 +69,24 @@ public struct Ground(PlayerData data)
 		
 		if (wallDistance >= 0) return;
 		
-		Angles.Quadrant quadrant = Angles.GetQuadrant(data.Rotation.Angle);
+		Angles.Quadrant quadrant = Angles.GetQuadrant(data.Movement.Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
 		float offset = wallDistance / Scene.Instance.ProcessSpeed;
 		
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				data.Physics.Velocity.Modify(new Vector2(-offset, 0f));
-				data.Physics.GroundSpeed.Value = 0f;
+				data.Movement.Velocity.Modify(new Vector2(-offset, 0f));
+				data.Movement.GroundSpeed.Value = 0f;
 				
-				if (data.Visual.Facing == firstDirection && !data.Physics.IsSpinning)
+				if (data.Visual.Facing == firstDirection && !data.Movement.IsSpinning)
 				{
 					data.Visual.SetPushBy = data.PlayerNode;
 				}
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				data.Physics.Velocity.Modify(new Vector2(0f, offset));
+				data.Movement.Velocity.Modify(new Vector2(0f, offset));
 				break;
 		}
     }
@@ -95,7 +95,7 @@ public struct Ground(PlayerData data)
 	// Since we're going to rotate player's sensors, "rotate" tile properties as well
 	public void CollideFloor()
 	{
-		if (!data.Physics.IsGrounded || data.Collision.OnObject != null) return;
+		if (!data.Movement.IsGrounded || data.Collision.OnObject != null) return;
 
 		data.Collision.TileBehaviour = GetTileBehaviour();
 		data.TileCollider.SetData(
@@ -119,10 +119,10 @@ public struct Ground(PlayerData data)
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
-		data.Rotation.Angle = SharedData.PhysicsType >= PhysicsCore.Types.S2 ? SnapFloorAngle(angle) : angle;
+		data.Movement.Angle = SharedData.PhysicsType >= PhysicsCore.Types.S2 ? SnapFloorAngle(angle) : angle;
 	}
 
-	private TileBehaviours GetTileBehaviour() => data.Rotation.Angle switch
+	private TileBehaviours GetTileBehaviour() => data.Movement.Angle switch
 	{
 		<= 45 or >= 315 => TileBehaviours.Floor,
 		> 45 and < 135 => TileBehaviours.RightWall,
@@ -157,8 +157,8 @@ public struct Ground(PlayerData data)
 		
 		float toleranceCheckSpeed = data.Collision.TileBehaviour switch
 		{
-			TileBehaviours.Floor or TileBehaviours.Ceiling => data.Physics.Velocity.X,
-			TileBehaviours.RightWall or TileBehaviours.LeftWall => data.Physics.Velocity.Y,
+			TileBehaviours.Floor or TileBehaviours.Ceiling => data.Movement.Velocity.X,
+			TileBehaviours.RightWall or TileBehaviours.LeftWall => data.Movement.Velocity.Y,
 			_ => throw new ArgumentOutOfRangeException(data.Collision.TileBehaviour.ToString())
 		};
 			
@@ -168,7 +168,7 @@ public struct Ground(PlayerData data)
 		if (distance <= tolerance) return false;
 		
 		data.Visual.SetPushBy = null;
-		data.Physics.IsGrounded = false;
+		data.Movement.IsGrounded = false;
 						
 		data.Visual.OverrideFrame = 0;
 		return true;
@@ -176,7 +176,7 @@ public struct Ground(PlayerData data)
 
 	private float SnapFloorAngle(float floorAngle)
 	{
-		float difference = Math.Abs(data.Rotation.Angle % 180f - floorAngle % 180f);
-		return difference is < 45f or > 135f ? floorAngle : MathF.Round(data.Rotation.Angle / 90f) % 4f * 90f;
+		float difference = Math.Abs(data.Movement.Angle % 180f - floorAngle % 180f);
+		return difference is < 45f or > 135f ? floorAngle : MathF.Round(data.Movement.Angle / 90f) % 4f * 90f;
 	}
 }

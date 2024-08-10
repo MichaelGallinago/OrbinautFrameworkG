@@ -11,10 +11,10 @@ public struct Air(PlayerData data)
 {
     public void Collide()
 	{
-		if (data.Physics.IsGrounded || data.Death.IsDead || data.State is States.Glide or States.Climb) return;
+		if (data.Movement.IsGrounded || data.Death.IsDead || data.State is States.Glide or States.Climb) return;
 		
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Physics.Velocity));
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
 		
 		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
 
@@ -39,10 +39,10 @@ public struct Air(PlayerData data)
 		if (wallDistance >= 0f) return false;
 		data.PlayerNode.Position += new Vector2(sign * wallDistance, 0f);
 		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
-		data.Physics.Velocity.X = 0f;
+		data.Movement.Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return false;
-		data.Physics.GroundSpeed.Value = data.Physics.Velocity.Y;
+		data.Movement.GroundSpeed.Value = data.Movement.Velocity.Y;
 		return true;
 	}
 
@@ -62,7 +62,7 @@ public struct Air(PlayerData data)
 			if (wallDist >= 0) return false;
 			
 			data.PlayerNode.Position += new Vector2(wallDist, 0f);
-			data.Physics.Velocity.X = 0f;
+			data.Movement.Velocity.X = 0f;
 			return true;
 		}
 		
@@ -72,22 +72,22 @@ public struct Air(PlayerData data)
 		if (moveQuadrant == Angles.Quadrant.Up && data.State != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
-			data.Rotation.Angle = roofAngle;
-			data.Physics.GroundSpeed.Value = roofAngle < 180f ? -data.Physics.Velocity.Y : data.Physics.Velocity.Y;
-			data.Physics.Velocity.Y = 0f;
+			data.Movement.Angle = roofAngle;
+			data.Movement.GroundSpeed.Value = roofAngle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
+			data.Movement.Velocity.Y = 0f;
 					
 			Land();
 			return true;
 		}
 		
-		if (data.Physics.Velocity.Y < 0f)
+		if (data.Movement.Velocity.Y < 0f)
 		{
-			data.Physics.Velocity.Y = 0f;
+			data.Movement.Velocity.Y = 0f;
 		}
 		
 		if (data.State == States.Flight)
 		{
-			data.Physics.Gravity = GravityType.TailsDown;
+			data.Movement.Gravity = GravityType.TailsDown;
 		}
 		
 		return true;
@@ -104,14 +104,14 @@ public struct Air(PlayerData data)
 		{
 			if (LandOnFeet(out distance, out angle)) return;
 		}
-		else if (data.Physics.Velocity.Y >= 0) // If moving mostly left or right, continue if our vertical velocity is positive
+		else if (data.Movement.Velocity.Y >= 0) // If moving mostly left or right, continue if our vertical velocity is positive
 		{
 			if (FallOnGround(out distance, out angle)) return;
 		}
 		else return;
 		
 		data.PlayerNode.Position += new Vector2(0f, distance);
-		data.Rotation.Angle = angle;
+		data.Movement.Angle = angle;
 		
 		Land();
 	}
@@ -138,28 +138,28 @@ public struct Air(PlayerData data)
 		// Exit if too far into the ground when BOTH sensors find it.
 		// So if we're landing on a ledge, it doesn't matter how far we're clipping into the ground
 		
-		float minClip = -(data.Physics.Velocity.Y + 8f);		
+		float minClip = -(data.Movement.Velocity.Y + 8f);		
 		if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return true;
 		
 		if (Angles.GetQuadrant(angle) != Angles.Quadrant.Down)
 		{
-			if (data.Physics.Velocity.Y > 15.75f)
+			if (data.Movement.Velocity.Y > 15.75f)
 			{
-				data.Physics.Velocity.Y = 15.75f;
+				data.Movement.Velocity.Y = 15.75f;
 			}
 			
-			data.Physics.GroundSpeed.Value = angle < 180f ? -data.Physics.Velocity.Y : data.Physics.Velocity.Y;
-			data.Physics.Velocity.X = 0f;
+			data.Movement.GroundSpeed.Value = angle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
+			data.Movement.Velocity.X = 0f;
 		}
 		else if (angle is > 22.5f and <= 337.5f)
 		{
-			data.Physics.GroundSpeed.Value = angle < 180f ? -data.Physics.Velocity.Y : data.Physics.Velocity.Y;
-			data.Physics.GroundSpeed.Value *= 0.5f;
+			data.Movement.GroundSpeed.Value = angle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
+			data.Movement.GroundSpeed.Value *= 0.5f;
 		}
 		else 
 		{
-			data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
-			data.Physics.Velocity.Y = 0f;
+			data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
+			data.Movement.Velocity.Y = 0f;
 		}
 		
 		return false;
@@ -177,8 +177,8 @@ public struct Air(PlayerData data)
 		
 		if (distance >= 0) return true;
 		
-		data.Physics.GroundSpeed.Value = data.Physics.Velocity.X;
-		data.Physics.Velocity.Y = 0f;
+		data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
+		data.Movement.Velocity.Y = 0f;
 		
 		return false;
 	}

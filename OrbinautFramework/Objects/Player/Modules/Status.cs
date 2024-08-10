@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
@@ -56,7 +57,7 @@ public struct Status(PlayerData data)
 
 		if (data.Id == 0 && AudioPlayer.Music.IsPlaying(itemMusic))
 		{
-			ResetMusic();
+			data.ResetMusic();
 		}
 		
 		return timer;
@@ -66,14 +67,14 @@ public struct Status(PlayerData data)
 	{
 		if (!data.Super.IsSuper) return;
 		
-		if (data.State == Actions.Transform)
+		if (data.State == States.Transform)
 		{
 			ActionValue -= Scene.Instance.ProcessSpeed;
 			if (ActionValue <= 0f)
 			{
 				data.Collision.IsObjectInteractionEnabled = true;
-				data.Physics.IsControlRoutineEnabled = true;
-				data.State = Actions.None;
+				data.Movement.IsControlRoutineEnabled = true;
+				data.State = States.None;
 			}
 		}
 
@@ -94,7 +95,7 @@ public struct Status(PlayerData data)
 		data.Damage.InvincibilityTimer = 1;
 		data.Super.Timer = 0f;
 		
-		ResetMusic();
+		data.ResetMusic();
 	}
 
 	private void KillPlayerOnTimeLimit()

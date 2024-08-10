@@ -18,11 +18,11 @@ public struct DropDash(PlayerData data)
 	
     public void Perform()
     {
-	    if (data.Physics.IsGrounded || Cancel()) return;
+	    if (data.Movement.IsGrounded || Cancel()) return;
 		
 	    if (data.Input.Down.Abc)
 	    {
-		    data.Physics.IsAirLock = false;		
+		    data.Movement.IsAirLock = false;		
 		    _charge += Scene.Instance.ProcessSpeed;
 			
 		    if (_charge < MaxCharge || data.Visual.Animation == Animations.DropDash) return;
@@ -58,7 +58,7 @@ public struct DropDash(PlayerData data)
 	    SetGroundSpeed();
     	
 	    data.Visual.Animation = Animations.Spin;
-	    data.Physics.IsSpinning = true;
+	    data.Movement.IsSpinning = true;
     	
     	data.SetCameraDelayX(8f);
     		
@@ -89,19 +89,19 @@ public struct DropDash(PlayerData data)
 	    limitSpeed *= sign;
 	    force *= sign;
 	    
-	    if (data.Physics.Velocity.X * sign >= 0f)
+	    if (data.Movement.Velocity.X * sign >= 0f)
 	    {
-		    AcceleratedValue groundSpeed = data.Physics.GroundSpeed;
+		    AcceleratedValue groundSpeed = data.Movement.GroundSpeed;
 		    groundSpeed.Value = MathF.Floor(groundSpeed / 4f) + force;
 		    if (sign * groundSpeed <= limitSpeed) return;
 		    groundSpeed.Value = limitSpeed;
 		    return;
 	    }
     	
-	    data.Physics.GroundSpeed.Value = force;
-	    if (Mathf.IsZeroApprox(data.Rotation.Angle)) return;
+	    data.Movement.GroundSpeed.Value = force;
+	    if (Mathf.IsZeroApprox(data.Movement.Angle)) return;
     	
-	    data.Physics.GroundSpeed.Value += MathF.Floor(data.Physics.GroundSpeed / 2f);
+	    data.Movement.GroundSpeed.Value += MathF.Floor(data.Movement.GroundSpeed / 2f);
     }
 
     private bool Cancel()

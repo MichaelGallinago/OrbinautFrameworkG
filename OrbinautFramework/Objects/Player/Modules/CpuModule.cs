@@ -110,12 +110,12 @@ public class CpuModule(PlayerData data)
 
 		if (SharedData.Behaviour == Behaviours.S3 && _leadPlayer.IsDead) return;
 
-		if (!data.Physics.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
+		if (!data.Movement.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
 		
 		State = States.Main;
 		data.Visual.Animation = Animations.Move;
 		data.Collision.IsObjectInteractionEnabled = true;
-		data.Physics.IsControlRoutineEnabled = true;
+		data.Movement.IsControlRoutineEnabled = true;
 	}
 
 	private void SetRespawnAnimation()
@@ -212,7 +212,7 @@ public class CpuModule(PlayerData data)
 		//TODO: check that ZIndex works
 		data.PlayerNode.ZIndex = _leadPlayer.ZIndex + data.Id;
 		
-		if (data.Physics.GroundLockTimer > 0f && data.Physics.GroundSpeed == 0f)
+		if (data.Movement.GroundLockTimer > 0f && data.Movement.GroundSpeed == 0f)
 		{
 			State = States.Stuck;
 		}
@@ -274,7 +274,7 @@ public class CpuModule(PlayerData data)
 			//TODO: instance_deactivate_object(id);
 		}
 					
-		data.Physics.IsControlRoutineEnabled = false;
+		data.Movement.IsControlRoutineEnabled = false;
 	}
 	
 	private void Push(float distanceX, Constants.Direction facing)
@@ -295,7 +295,7 @@ public class CpuModule(PlayerData data)
 			_inputDown.Right = _inputPress.Right = isMoveToRight;
 		}
 						
-		if (data.Physics.GroundSpeed != 0f && data.Physics.IsControlRoutineEnabled && (int)data.Visual.Facing == sign)
+		if (data.Movement.GroundSpeed != 0f && data.Movement.IsControlRoutineEnabled && (int)data.Visual.Facing == sign)
 		{
 			data.PlayerNode.Position += Vector2.Right * sign;
 		}
@@ -307,7 +307,7 @@ public class CpuModule(PlayerData data)
 		{
 			_inputDown.Abc = true;
 				 
-			if (!data.Physics.IsGrounded) return false;
+			if (!data.Movement.IsGrounded) return false;
 			
 			IsJumping = false;
 			return true;
@@ -322,7 +322,7 @@ public class CpuModule(PlayerData data)
 	{
 		if (CheckRespawn()) return;
 		
-		if (data.Physics.GroundLockTimer > 0f || InputTimer > 0f || data.Physics.GroundSpeed != 0f) return;
+		if (data.Movement.GroundLockTimer > 0f || InputTimer > 0f || data.Movement.GroundSpeed != 0f) return;
 		
 		if (data.Visual.Animation == Animations.Idle)
 		{
@@ -380,8 +380,8 @@ public class CpuModule(PlayerData data)
 		data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
 		State = States.RespawnInit;
-		data.Physics.IsControlRoutineEnabled = false;
+		data.Movement.IsControlRoutineEnabled = false;
 		data.Collision.IsObjectInteractionEnabled = false;
-		data.Physics.IsGrounded = false;
+		data.Movement.IsGrounded = false;
 	}
 }
