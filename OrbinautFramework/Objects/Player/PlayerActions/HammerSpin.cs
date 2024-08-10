@@ -2,6 +2,7 @@
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -23,24 +24,24 @@ public struct HammerSpin(PlayerData data)
             case <= 0f: return;
 			
             case >= DropDash.MaxCharge:
-                data.Animation = Animations.Spin;
-                data.Action = Actions.HammerSpinCancel;
+                data.Visual.Animation = Animations.Spin;
+                data.State = States.None;
                 break;
         }
 
-        PlayerNode.Data.ActionValue = 0f;
+        ActionValue = 0f;
     }
     
     public void OnLand()
     {
         if (ActionValue < DropDash.MaxCharge) return;
 
-        Animation = Animations.HammerDash;
-        Action = Actions.HammerDash;
+        data.State = States.HammerDash;
+        data.Visual.Animation = Animations.HammerDash;
+        data.Physics.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
         ActionValue = 0f;
-        GroundSpeed.Value = 6f * (float)Facing;
 		
-        if (IsSuper && IsCameraTarget(out ICamera camera))
+        if (data.Super.IsSuper && data.IsCameraTarget(out ICamera camera))
         {
             camera.SetShakeTimer(6f);
         }
@@ -51,12 +52,12 @@ public struct HammerSpin(PlayerData data)
 
     private void Charge()
     {
-        PlayerNode.Data.ActionValue += Scene.Instance.ProcessSpeed;
+        ActionValue += Scene.Instance.ProcessSpeed;
         if (ActionValue >= DropDash.MaxCharge)
         {
             AudioPlayer.Sound.Play(SoundStorage.Charge3);
         }
 
-        IsAirLock = false;
+        data.Physics.IsAirLock = false;
     }
 }
