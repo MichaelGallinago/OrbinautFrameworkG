@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Objects.Player.Spawner;
 
 public partial class PlayerSpawner : Sprite2D
 {
-    [Export] private Types[] _allowedTypes;
+    [Export] private PlayerNode.Types[] _allowedTypes;
     [Export] private Vector2 _cpuOffset;
 
     public override void _Ready()
@@ -19,7 +19,7 @@ public partial class PlayerSpawner : Sprite2D
     {
         if (Scene.Instance.Players.Count > 0) return;
 
-        Types type = SharedData.PlayerTypes.First();
+        PlayerNode.Types type = SharedData.PlayerTypes.First();
         if (!_allowedTypes.Contains(type)) return;
 
         Node spawnerParent = GetParent();
@@ -32,7 +32,7 @@ public partial class PlayerSpawner : Sprite2D
         }
     }
 
-    private static void SpawnPlayer(Types type, Node spawnerParent, Vector2 position)
+    private static void SpawnPlayer(PlayerNode.Types type, Node spawnerParent, Vector2 position)
     {
         PackedScene packedPlayer = Scene.Instance.PrefabStorage.GetPlayer(type);
         if (packedPlayer.Instantiate() is not PlayerNode player) return;

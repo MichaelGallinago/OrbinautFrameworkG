@@ -21,7 +21,7 @@ public readonly struct Initialization(PlayerData data)
         data.Physics.Init();
         data.Rotation.Init();
         
-        data.ActionType = Actions.Types.Default;
+        data.State = ActionFsm.States.Default;
         
         data.Input.Clear();
         data.Input.NoControl = false;

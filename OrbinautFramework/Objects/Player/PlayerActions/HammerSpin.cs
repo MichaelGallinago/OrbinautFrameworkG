@@ -10,21 +10,21 @@ public struct HammerSpin(PlayerData data)
 {
     public void Perform()
     {
-        if (PlayerNode.Data.IsGrounded) return;
+        if (data.Physics.IsGrounded) return;
         
-        if (PlayerNode.Data.Input.Down.Abc)
+        if (data.Input.Down.Abc)
         {
             Charge();
             return;
         }
 		
-        switch (PlayerNode.Data.ActionValue)
+        switch (ActionValue)
         {
             case <= 0f: return;
 			
             case >= DropDash.MaxCharge:
-                PlayerNode.Data.Animation = Animations.Spin;
-                PlayerNode.Data.Action = Actions.HammerSpinCancel;
+                data.Animation = Animations.Spin;
+                data.Action = Actions.HammerSpinCancel;
                 break;
         }
 

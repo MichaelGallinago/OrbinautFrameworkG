@@ -3,24 +3,23 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public struct SpinDash
+public struct SpinDash(PlayerData data)
 {
-	public PlayerData Data { private get; init; }
-
 	private float _charge;
 	private float _soundPitch;
     
     public bool Perform()
     {
-	    if (!SharedData.SpinDash || !Data.Physics.IsGrounded) return false;
+	    if (!SharedData.SpinDash || !data.Physics.IsGrounded) return false;
     	
 	    if (Start()) return false;
     	
 	    // Continue if Spin Dash is being performed
-	    if (Data.State != States.SpinDash) return false;
+	    if (data.State != States.SpinDash) return false;
     	
 	    if (Charge()) return false;
 
@@ -30,34 +29,34 @@ public struct SpinDash
 
     private void Release()
     {
-	    Data.SetCameraDelayX(16f);
+	    data.SetCameraDelayX(16f);
     	
-	    Data.PlayerNode.Position += new Vector2(0f, Data.Collision.Radius.Y - Data.Collision.RadiusSpin.Y);
-	    Data.Visual.Animation = Animations.Spin;
-	    Data.State = States.None;
-	    Data.Collision.Radius = Data.Collision.RadiusSpin;
-	    Data.Physics.IsSpinning = true;
+	    data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+	    data.Visual.Animation = Animations.Spin;
+	    data.State = States.None;
+	    data.Collision.Radius = data.Collision.RadiusSpin;
+	    data.Physics.IsSpinning = true;
     	
-	    Data.Physics.GroundSpeed.Value = ((Data.Super.IsSuper ? 11f : 8f) + MathF.Round(_charge) / 2f) * (float)Data.Visual.Facing;
+	    data.Physics.GroundSpeed.Value = ((data.Super.IsSuper ? 11f : 8f) + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
     	
 	    AudioPlayer.Sound.Stop(SoundStorage.Charge);
 	    AudioPlayer.Sound.Play(SoundStorage.Release);
     	
 	    if (!SharedData.FixDashRelease) return;
-	    Data.Physics.Velocity.SetDirectionalValue(Data.Physics.GroundSpeed, Data.Rotation.Angle);
+	    data.Physics.Velocity.SetDirectionalValue(data.Physics.GroundSpeed, data.Rotation.Angle);
     }
 
     private bool Start()
     {
-    	if (Data.State != States.Default) return false;
-	    if (Data.Visual.Animation is not (Animations.Duck or Animations.GlideLand)) return false;
-    	if (!Data.Input.Press.Abc || !Data.Input.Down.Down) return true;
+    	if (data.State != States.Default) return false;
+	    if (data.Visual.Animation is not (Animations.Duck or Animations.GlideLand)) return false;
+    	if (!data.Input.Press.Abc || !data.Input.Down.Down) return true;
     	
-    	Data.Visual.Animation = Animations.SpinDash;
-    	Data.State = States.SpinDash;
+    	data.Visual.Animation = Animations.SpinDash;
+    	data.State = States.SpinDash;
 	    _charge = 0f;
     	_soundPitch = 1f; 
-	    Data.Physics.Velocity.Vector = Vector2.Zero;
+	    data.Physics.Velocity.Vector = Vector2.Zero;
     		
     	// TODO: SpinDash dust 
     	//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });
@@ -68,9 +67,9 @@ public struct SpinDash
 
     private bool Charge()
     {
-    	if (!Data.Input.Down.Down) return false;
+    	if (!data.Input.Down.Down) return false;
     	
-    	if (!Data.Input.Press.Abc)
+    	if (!data.Input.Press.Abc)
     	{
     		//TODO: check math with ProcessSpeed
 		    _charge -= MathF.Floor(_charge * 8f) / 256f * Scene.Instance.ProcessSpeed;
@@ -83,7 +82,7 @@ public struct SpinDash
     	_soundPitch = changePitch ? Math.Min(_soundPitch + 0.1f, 1.5f) : 1f;
     			
     	AudioPlayer.Sound.PlayPitched(SoundStorage.Charge, _soundPitch);
-    	Data.Visual.OverrideFrame = 0;
+    	data.Visual.OverrideFrame = 0;
     	
     	return true;
     }

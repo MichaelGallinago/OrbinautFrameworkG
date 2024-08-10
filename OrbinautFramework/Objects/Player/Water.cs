@@ -1,14 +1,15 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
-using OrbinautFramework3.Objects.Player.Physics;
+using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public struct Water
+public struct Water(PlayerData data)
 {
     public void Process()
 	{
@@ -21,12 +22,12 @@ public struct Water
 
 	private bool Dive()
 	{
-		if (IsUnderwater) return false;
+		if (data.Water.IsUnderwater) return false;
 		
-		if ((int)Position.Y < Stage.Local.WaterLevel || IsHurt) return true;
+		if ((int)data.PlayerNode.Position.Y < Stage.Local.WaterLevel || data.Damage.IsHurt) return true;
 		
-		IsUnderwater = true;
-		AirTimer = Constants.DefaultAirTimer;
+		data.Water.IsUnderwater = true;
+		data.Water.AirTimer = Constants.DefaultAirTimer;
 
 		ResetGravityOnEdge();
 
@@ -35,7 +36,7 @@ public struct Water
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
 		
-		Velocity.Vector *= new Vector2(0.5f, 0.25f);
+		data.Physics.Velocity.Vector *= new Vector2(0.5f, 0.25f);
 		
 		RemoveShieldUnderwater();
 		
@@ -44,22 +45,22 @@ public struct Water
 
 	private void ResetGravityOnEdge()
 	{
-		if (Action != Actions.Flight && (Action != Actions.Glide || ActionState == (int)GlideStates.Fall))
+		if (data.State != States.Flight && (data.State != States.Glide || ActionState == (int)GlideStates.Fall))
 		{
-			ResetGravity();
+			data.Physics.ResetGravity(data.Water.IsUnderwater);
 		}
 	}
 
 	private void RemoveShieldUnderwater()
 	{
-		if (Id != 0 && _shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
+		if (data.Id != 0 && data.PlayerNode.Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
 		
-		if (_shield.Type == ShieldContainer.Types.Lightning)
+		if (data.PlayerNode.Shield.Type == ShieldContainer.Types.Lightning)
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
 		}
-		else if (_shield.Type == ShieldContainer.Types.Fire)
+		else if (data.PlayerNode.Shield.Type == ShieldContainer.Types.Fire)
 		{
 			//TODO: obj_explosion_dust
 			//instance_create(x, c_stage.water_level, obj_explosion_dust, { MakeSound: false });
@@ -75,24 +76,24 @@ public struct Water
 
 	private bool UpdateAirTimer()
 	{
-		if (_shield.Type == ShieldContainer.Types.Bubble) return false;
+		if (data.PlayerNode.Shield.Type == ShieldContainer.Types.Bubble) return false;
 
-		AirTimerStates previousState = GetAirTimerState(AirTimer);
-		if (AirTimer > 0f)
+		AirTimerStates previousState = GetAirTimerState(data.Water.AirTimer);
+		if (data.Water.AirTimer > 0f)
 		{
-			AirTimer -= Scene.Instance.ProcessSpeed;
+			data.Water.AirTimer -= Scene.Instance.ProcessSpeed;
 		}
 
-		AirTimerStates state = GetAirTimerState(AirTimer);
+		AirTimerStates state = GetAirTimerState(data.Water.AirTimer);
 		if (state == previousState) return false;
 		
 		switch (state)
 		{
-			case AirTimerStates.Alert1 or AirTimerStates.Alert2 or AirTimerStates.Alert3 when Id == 0:
+			case AirTimerStates.Alert1 or AirTimerStates.Alert2 or AirTimerStates.Alert3 when data.Id == 0:
 				AudioPlayer.Sound.Play(SoundStorage.Alert);
 				break;
 			
-			case AirTimerStates.Drowning when Id == 0:
+			case AirTimerStates.Drowning when data.Id == 0:
 				AudioPlayer.Music.Play(MusicStorage.Drowning);
 				break;
 			
@@ -117,17 +118,17 @@ public struct Water
 	private void ProcessDrown()
 	{
 		AudioPlayer.Sound.Play(SoundStorage.Drown);
-		ResetState();
+		data.ResetState();
 
-		ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		Animation = Animations.Drown;
-		IsDead = true;
-		IsObjectInteractionEnabled = false;
-		Gravity	= GravityType.Underwater;
-		Velocity.Vector = Vector2.Zero;
-		GroundSpeed.Value = 0f;
+		data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+		data.Visual.Animation = Animations.Drown;
+		data.Death.IsDead = true;
+		data.Collision.IsObjectInteractionEnabled = false;
+		data.Physics.Gravity	= GravityType.Underwater;
+		data.Physics.Velocity.Vector = Vector2.Zero;
+		data.Physics.GroundSpeed.Value = 0f;
 		
-		if (IsCameraTarget(out ICamera camera))
+		if (data.IsCameraTarget(out ICamera camera))
 		{
 			camera.IsMovementAllowed = false;
 		}
@@ -135,19 +136,19 @@ public struct Water
 
 	private void Leave()
 	{
-		if ((int)Position.Y >= Stage.Local.WaterLevel || IsHurt) return;
+		if ((int)data.PlayerNode.Position.Y >= Stage.Local.WaterLevel || data.Damage.IsHurt) return;
 
-		IsUnderwater = false;
+		data.Water.IsUnderwater = false;
 		ResetGravityOnEdge();
 		
 		SpawnSplash();
 		
-		if (Action == Actions.Flight)
+		if (data.State == States.Flight)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 			
-		if (Id == 0 && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
+		if (data.Id == 0 && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
 		{
 			ResetMusic();
 		}
@@ -157,21 +158,21 @@ public struct Water
 
 	private void AccelerateOnLeave()
 	{
-		if (SharedData.PhysicsType <= PhysicsTypes.S2 || Velocity.Y >= -4f)
+		if (SharedData.PhysicsType <= PhysicsCore.Types.S2 || data.Physics.Velocity.Y >= -4f)
 		{
-			Velocity.Y *= 2f;
+			data.Physics.Velocity.Y *= 2f;
 		}
 					
-		if (Velocity.Y < -16f)
+		if (data.Physics.Velocity.Y < -16f)
 		{
-			Velocity.Y = -16f;
+			data.Physics.Velocity.Y = -16f;
 		}
 	}
 
 	private void SpawnSplash()
 	{
-		if (Action == Actions.Climb || CpuState == CpuStates.Respawn ||
-		    Action == Actions.Glide && ActionState == (int)GlideStates.Fall) return;
+		if (data.State == States.Climb || CpuState == CpuStates.Respawn ||
+		    data.State == States.Glide && ActionState == (int)GlideStates.Fall) return;
 		
 		//TODO: obj_water_splash
 		//instance_create(x, c_stage.water_level, obj_water_splash);
