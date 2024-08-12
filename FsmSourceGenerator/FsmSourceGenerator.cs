@@ -91,15 +91,18 @@ public class FsmGenerator : IIncrementalGenerator
                 .Where(x => x!.Value.FsmName == name)
                 .Select(x => x!.Value.Struct)
                 .ToArray();
-            CreateFsmFile(sourceBuilder, fsm.Value, context, states);
+            CreateFsmFile(sourceBuilder, fsm.Value, context, states, data.Left.Compilation);
         }
     }
 
     private static void CreateFsmFile(
         StringBuilder sourceBuilder, FsmData fsmData, 
-        SourceProductionContext context, StructDeclarationSyntax[] structs)
+        SourceProductionContext context, StructDeclarationSyntax[] structs, Compilation compilation)
     {
-        List<string> namespaces = [];
+        HashSet<string> namespaces = [];
+        Dictionary<string, string> constructorTypes = [];
+        Dictionary<string, HashSet<string>> stateTypes = [];
+        
         foreach (StructDeclarationSyntax structDeclaration in structs)
         {
             switch (structDeclaration.Parent)
@@ -110,6 +113,33 @@ public class FsmGenerator : IIncrementalGenerator
                 case FileScopedNamespaceDeclarationSyntax fileScopedNamespaceDecl:
                     namespaces.Add(fileScopedNamespaceDecl.Name.ToString());
                     break;
+            }
+            
+            SemanticModel semanticModel = compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+            
+            SeparatedSyntaxList<ParameterSyntax>? parameters = structDeclaration.ParameterList?.Parameters;
+
+            if (parameters == null) continue;
+
+            string stateName = structDeclaration.Identifier.Text;
+            stateTypes.Add(structDeclaration.Identifier.Text, []);
+            foreach (ParameterSyntax parameter in parameters)
+            {
+                IParameterSymbol? parameterSymbol = semanticModel.GetDeclaredSymbol(parameter);
+                if (parameterSymbol == null) continue;
+                
+                stateTypes[stateName].Add(parameterSymbol.Name);
+                
+                if (!constructorTypes.ContainsKey(parameterSymbol.Name))
+                {
+                    constructorTypes.Add(parameterSymbol.Name, parameterSymbol.Type.Name);
+                }
+                
+                string typeNamespace = parameterSymbol.Type.ContainingNamespace.ToDisplayString();
+                if (!string.IsNullOrEmpty(typeNamespace))
+                {
+                    namespaces.Add(typeNamespace);
+                }
             }
         }
         
@@ -161,7 +191,24 @@ using System.Runtime.InteropServices;
 {
     [StructLayout(LayoutKind.Explicit)]
 """
-        ).Append("\n\tpublic struct ").Append(fsmData.Name).Append("Fsm(PlayerData data)\n").Append(
+        ).Append("\n\tpublic struct ").Append(fsmData.Name).Append("Fsm");
+        
+        if (constructorTypes.Count <= 0)
+        {
+            sourceBuilder.Append("\n");
+        }
+        else
+        {
+            sourceBuilder.Append('(');
+            foreach (KeyValuePair<string, string> constructorType in constructorTypes)
+            {
+                sourceBuilder.Append(constructorType.Value).Append(' ').Append(constructorType.Key).Append(", ");
+            }
+            sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
+            sourceBuilder.Append(")\n");
+        }
+        
+        sourceBuilder.Append(
 """
     {
         public enum States : 
@@ -207,8 +254,14 @@ using System.Runtime.InteropServices;
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append($"\n\t\t\t\t\tcase States.{name}: {name} = new {name} ");
-            sourceBuilder.Append("{ Data = _data }; break;");
+            sourceBuilder.Append($"\n\t\t\t\t\tcase States.{name}: {name} = new {name}(");
+
+            foreach (string parameter in stateTypes[name])
+            {
+                sourceBuilder.Append('_').Append(parameter).Append(", ");
+            }
+            sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
+            sourceBuilder.Append(");").Append(entersMethods.Contains(name) ? "Enter(); break;" : " break;");
         }
 
         sourceBuilder.Append('\n').Append(
@@ -220,14 +273,22 @@ using System.Runtime.InteropServices;
         }
         
         [FieldOffset(0)] private States _state = States.None;
-        [FieldOffset(8)] private PlayerData _data = data;
 """    
         );
+
+        const int offsetStep = 8;
+        int offset = offsetStep;
+        foreach (KeyValuePair<string, string> type in constructorTypes)
+        {
+            sourceBuilder.Append("\n\t\t[FieldOffset(").Append(offset).Append(")] private ").Append(type.Value).Append(" _")
+                .Append(type.Key).Append(" = ").Append(type.Key).Append(';');
+            offset += offsetStep;
+        }
         
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append($"\n\t\t[FieldOffset(16)] private {name} {name};");
+            sourceBuilder.Append($"\n\t\t[FieldOffset({offset})] private {name} {name};");
         }
         
         foreach (KeyValuePair<string, List<string>> method in otherMethods)
