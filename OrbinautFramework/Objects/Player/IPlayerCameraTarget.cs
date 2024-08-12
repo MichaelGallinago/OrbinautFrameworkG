@@ -9,13 +9,13 @@ public interface IPlayerCameraTarget : IPosition
     DeathData Death { get; }
     VisualData Visual { get; }
     MovementData Movement { get; }
-    IPlayerNode PlayerNode { get; }
+    IPlayerNode Node { get; }
     ActionFsm.States State { get; }
     CollisionData Collision { get; }
     
     Vector2 IPosition.Position
     {
-        get => PlayerNode.Position;
-        set => PlayerNode.Position = value;
+        get => Node.Position;
+        set => Node.Position = value;
     }
 }

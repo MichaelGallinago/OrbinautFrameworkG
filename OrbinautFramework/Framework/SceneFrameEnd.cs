@@ -1,20 +1,25 @@
-using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
-using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Framework.MultiTypeDelegate;
 
 namespace OrbinautFramework3.Framework;
 
-public partial class SceneLateUpdate : Node
+public partial class SceneFrameEnd : Node
 {
-    public event Action Update;
-    public SceneLateUpdate() => ProcessPriority = int.MaxValue;
-     
+    private readonly MultiTypeDelegate<ITypeDelegate> _process = new(256);
+    public IMultiTypeEvent<ITypeDelegate> Process { get; }
+    
+    public SceneFrameEnd()
+    {
+        Process = _process;
+        ProcessPriority = int.MaxValue;
+    }
+
     public override void _Process(double delta)
     {
         if (Scene.Instance.State == Scene.States.Paused) return;
         UpdateLiveRewards();
-        Update?.Invoke();
+        _process.Invoke();
     }
     
     private static void UpdateLiveRewards()

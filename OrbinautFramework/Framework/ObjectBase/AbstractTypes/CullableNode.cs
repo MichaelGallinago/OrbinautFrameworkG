@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-namespace OrbinautFramework3.Framework.ObjectBase;
+namespace OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 
 public partial class CullableNode : Node2D, ICullable, IPosition
 {

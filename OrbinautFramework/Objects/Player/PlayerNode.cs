@@ -3,6 +3,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player;
 

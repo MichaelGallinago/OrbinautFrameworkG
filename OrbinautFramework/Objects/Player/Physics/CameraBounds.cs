@@ -14,8 +14,8 @@ public struct CameraBounds(PlayerData data)
     	if (data.Death.IsDead) return;
     	
 	    //TODO: check this
-    	if (!data.PlayerNode.IsCameraTarget(out ICamera camera) && 
-	        !Scene.Instance.Players.First().PlayerNode.IsCameraTarget(out camera)) return;
+    	if (!data.Node.IsCameraTarget(out ICamera camera) && 
+	        !Scene.Instance.Players.First().Node.IsCameraTarget(out camera)) return;
 
 	    ShiftToLeftBound(camera);
 	    ShiftToRightBound(camera);
@@ -26,11 +26,11 @@ public struct CameraBounds(PlayerData data)
     private void ShiftToLeftBound(ICamera camera)
     {
 	    float leftBound = camera.Boundary.X + 16f;
-	    if (data.PlayerNode.Position.X + data.Movement.Velocity.X >= leftBound) return;
+	    if (data.Node.Position.X + data.Movement.Velocity.X >= leftBound) return;
 	    
 	    data.Movement.GroundSpeed.Value = 0f;
 	    data.Movement.Velocity.X = 0f;
-	    data.PlayerNode.Position = new Vector2(leftBound, data.PlayerNode.Position.Y);
+	    data.Node.Position = new Vector2(leftBound, data.Node.Position.Y);
     }
     
     private void ShiftToRightBound(ICamera camera)
@@ -44,11 +44,11 @@ public struct CameraBounds(PlayerData data)
 		    _right_bound += 64;
 	    }*/
 	    
-	    if (data.PlayerNode.Position.X + data.Movement.Velocity.X <= rightBound) return;
+	    if (data.Node.Position.X + data.Movement.Velocity.X <= rightBound) return;
 	    
 	    data.Movement.GroundSpeed.Value = 0f;
 	    data.Movement.Velocity.X = 0f;
-	    data.PlayerNode.Position = new Vector2(rightBound, data.PlayerNode.Position.Y);
+	    data.Node.Position = new Vector2(rightBound, data.Node.Position.Y);
     }
 
     private void ShiftToTopBound(ICamera camera)
@@ -57,7 +57,7 @@ public struct CameraBounds(PlayerData data)
 	    switch (data.State)
 	    {
 		    case States.Flight or States.Climb:
-			    if (data.PlayerNode.Position.Y + data.Movement.Velocity.Y >= topBound) break;
+			    if (data.Node.Position.Y + data.Movement.Velocity.Y >= topBound) break;
     
 			    if (data.State == States.Flight)
 			    {
@@ -65,10 +65,10 @@ public struct CameraBounds(PlayerData data)
 			    }
 
 			    data.Movement.Velocity.Y = 0f;
-			    data.PlayerNode.Position = new Vector2(data.PlayerNode.Position.X, topBound);
+			    data.Node.Position = new Vector2(data.Node.Position.X, topBound);
 			    break;
     		
-		    case States.Glide when data.PlayerNode.Position.Y < topBound - 6:
+		    case States.Glide when data.Node.Position.Y < topBound - 6:
 			    data.Movement.GroundSpeed.Value = 0f;
 			    break;
 	    }
@@ -77,7 +77,7 @@ public struct CameraBounds(PlayerData data)
     private void KillUnderBottomBound(ICamera camera)
     {
 	    if (data.Water.AirTimer <= 0f) return;
-	    if (data.PlayerNode.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; //TODO: check c_stage.bound_bottom[player_camera.index]
+	    if (data.Node.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; //TODO: check c_stage.bound_bottom[player_camera.index]
 	    
 	    Kill();
     }

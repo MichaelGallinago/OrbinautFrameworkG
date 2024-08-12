@@ -1,15 +1,14 @@
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
-using Player;
-
 public partial class SpikesHorizontal : Spikes
 {
-    protected override void CollideWithPlayer(PlayerNode playerNode)
+    protected override void CollideWithPlayer(PlayerData player)
     {
-        playerNode.ActSolid(this, Constants.SolidType.Full);
+        player.ActSolid(this, Constants.SolidType.Full);
     }
 
     protected override Vector2 GetRetractOffsetVector(float retractOffset) => new(retractOffset, 0f);

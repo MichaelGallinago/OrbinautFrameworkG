@@ -52,7 +52,7 @@ public struct DropDash(PlayerData data)
     	
     	if (_charge < MaxCharge) return;
     	
-    	data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+    	data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
 	    data.Collision.Radius = data.Collision.RadiusSpin;
 
 	    SetGroundSpeed();
@@ -108,7 +108,7 @@ public struct DropDash(PlayerData data)
     {
     	if (!SharedData.DropDash || data.State != States.DropDash) return true;
 	    
-    	if (data.PlayerNode.Shield.Type <= ShieldContainer.Types.Normal) return false; 
+    	if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return false; 
 	    if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return false;
     	
 	    data.Visual.Animation = Animations.Spin;

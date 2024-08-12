@@ -116,10 +116,11 @@ public partial class HitBox : Resource
 		return true;
 	}
     
-	public bool CheckPlayerCollision(PlayerData player, bool isExtraHitBox = false)
+	public bool CheckPlayerCollision(PlayerData player, Vector2I position, bool isExtraHitBox = false)
 	{
 		if (!player.Collision.IsObjectInteractionEnabled || player.Damage.IsHurt) return false;
-		return CheckCollision(player, isExtraHitBox);
+		IPlayerNode node = player.Node;
+		return CheckCollision(node.HitBox, (Vector2I)node.Position, position, isExtraHitBox);
 	}
 }
     

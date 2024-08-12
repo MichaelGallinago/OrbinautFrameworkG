@@ -24,7 +24,7 @@ public struct Water(PlayerData data)
 	{
 		if (data.Water.IsUnderwater) return false;
 		
-		if ((int)data.PlayerNode.Position.Y < Stage.Local.WaterLevel || data.Damage.IsHurt) return true;
+		if ((int)data.Node.Position.Y < Stage.Local.WaterLevel || data.Damage.IsHurt) return true;
 		
 		data.Water.IsUnderwater = true;
 		data.Water.AirTimer = Constants.DefaultAirTimer;
@@ -53,14 +53,14 @@ public struct Water(PlayerData data)
 
 	private void RemoveShieldUnderwater()
 	{
-		if (data.Id != 0 && data.PlayerNode.Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
+		if (data.Id != 0 && data.Node.Shield.Type is not (ShieldContainer.Types.Fire or ShieldContainer.Types.Lightning)) return;
 		
-		if (data.PlayerNode.Shield.Type == ShieldContainer.Types.Lightning)
+		if (data.Node.Shield.Type == ShieldContainer.Types.Lightning)
 		{
 			//TODO: obj_water_flash
 			//instance_create(x, y, obj_water_flash);
 		}
-		else if (data.PlayerNode.Shield.Type == ShieldContainer.Types.Fire)
+		else if (data.Node.Shield.Type == ShieldContainer.Types.Fire)
 		{
 			//TODO: obj_explosion_dust
 			//instance_create(x, c_stage.water_level, obj_explosion_dust, { MakeSound: false });
@@ -76,7 +76,7 @@ public struct Water(PlayerData data)
 
 	private bool UpdateAirTimer()
 	{
-		if (data.PlayerNode.Shield.Type == ShieldContainer.Types.Bubble) return false;
+		if (data.Node.Shield.Type == ShieldContainer.Types.Bubble) return false;
 
 		AirTimerStates previousState = GetAirTimerState(data.Water.AirTimer);
 		if (data.Water.AirTimer > 0f)
@@ -120,7 +120,7 @@ public struct Water(PlayerData data)
 		AudioPlayer.Sound.Play(SoundStorage.Drown);
 		data.ResetState();
 
-		data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		data.Visual.Animation = Animations.Drown;
 		data.Death.IsDead = true;
 		data.Collision.IsObjectInteractionEnabled = false;
@@ -136,7 +136,7 @@ public struct Water(PlayerData data)
 
 	private void Leave()
 	{
-		if ((int)data.PlayerNode.Position.Y >= Stage.Local.WaterLevel || data.Damage.IsHurt) return;
+		if ((int)data.Node.Position.Y >= Stage.Local.WaterLevel || data.Damage.IsHurt) return;
 
 		data.Water.IsUnderwater = false;
 		ResetGravityOnEdge();

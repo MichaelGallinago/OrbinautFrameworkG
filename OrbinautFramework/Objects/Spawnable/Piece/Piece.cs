@@ -1,6 +1,7 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using CullableNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.CullableNode;
 
 namespace OrbinautFramework3.Objects.Spawnable.Piece;
 

@@ -24,7 +24,7 @@ public struct Jump(PlayerData data)
 
 		if (Transform()) return true;
 		
-		switch (data.PlayerNode.Type)
+		switch (data.Node.Type)
 		{
 			case PlayerNode.Types.Sonic: JumpSonic(); break;
 			case PlayerNode.Types.Tails: JumpTails(); break;
@@ -50,7 +50,7 @@ public struct Jump(PlayerData data)
 	
 		if (!data.Movement.IsSpinning)
 		{
-			data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+			data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
 			data.Collision.Radius = data.Collision.RadiusSpin;
 		}
 		else if (!SharedData.NoRollLock && SharedData.PhysicsType != PhysicsCore.Types.CD)
@@ -81,7 +81,7 @@ public struct Jump(PlayerData data)
 		const int maxCeilingDistance = 6; 
 		
 		data.TileCollider.SetData(
-			(Vector2I)data.PlayerNode.Position,
+			(Vector2I)data.Node.Position,
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
 
@@ -125,7 +125,7 @@ public struct Jump(PlayerData data)
 		data.State = States.Transform;
 		data.Visual.Animation = Animations.Transform;
 		ActionValue = SharedData.PhysicsType >= PhysicsCore.Types.S3 ? 26f : 36f;
-		data.PlayerNode.Visible = true;
+		data.Node.Visible = true;
 			
 		// return player control routine
 		return true;
@@ -135,7 +135,7 @@ public struct Jump(PlayerData data)
 	{
 		if (SharedData.DropDash && data.State == States.None && !data.Input.Down.Abc)
 		{
-			if (data.PlayerNode.Shield.Type <= ShieldContainer.Types.Normal || 
+			if (data.Node.Shield.Type <= ShieldContainer.Types.Normal || 
 			    data.Super.IsSuper || data.Item.InvincibilityTimer > 0f)
 			{
 				data.State = States.DropDash;
@@ -145,12 +145,12 @@ public struct Jump(PlayerData data)
 		
 		// Barrier abilities
 		if (!data.Input.Press.Abc || data.Super.IsSuper) return; 
-		if (data.PlayerNode.Shield.State != ShieldContainer.States.None || data.Item.InvincibilityTimer > 0f) return;
+		if (data.Node.Shield.State != ShieldContainer.States.None || data.Item.InvincibilityTimer > 0f) return;
 		
-		data.PlayerNode.Shield.State = ShieldContainer.States.Active;
+		data.Node.Shield.State = ShieldContainer.States.Active;
 		data.Movement.IsAirLock = false;
 		
-		switch (data.PlayerNode.Shield.Type)
+		switch (data.Node.Shield.Type)
 		{
 			case ShieldContainer.Types.None: JumpDoubleSpin(); break;
 			case ShieldContainer.Types.Bubble: JumpWaterBarrier(); break;
@@ -174,7 +174,7 @@ public struct Jump(PlayerData data)
 		}
 		*/
 		
-		data.PlayerNode.Shield.State = ShieldContainer.States.DoubleSpin;
+		data.Node.Shield.State = ShieldContainer.States.DoubleSpin;
 		
 		//TODO: obj_double_spin
 		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
@@ -185,7 +185,7 @@ public struct Jump(PlayerData data)
 	{
 		data.Movement.Velocity.Vector = new Vector2(0f, 8f);
 		//TODO: update shield animation
-		data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
+		data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 	}
 	
@@ -197,24 +197,24 @@ public struct Jump(PlayerData data)
 		data.Movement.Velocity.Vector = new Vector2(8f * (float)data.Visual.Facing, 0f);
 		
 		//TODO: update shield animation
-		if (data.PlayerNode.Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)
+		if (data.Node.Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)
 		{
-			data.PlayerNode.Shield.Frame = 0;
+			data.Node.Shield.Frame = 0;
 		}
 		else
 		{
-			data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.FireDash;
+			data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.FireDash;
 		}
 		
 		//TODO: check data.PlayerNode.ZIndex
-		data.PlayerNode.ZIndex = -1;
+		data.Node.ZIndex = -1;
 		
 		AudioPlayer.Sound.Play(SoundStorage.ShieldFire2);
 	}
 
 	private void JumpThunderBarrier()
 	{
-		data.PlayerNode.Shield.State = ShieldContainer.States.Disabled;
+		data.Node.Shield.State = ShieldContainer.States.Disabled;
 		data.Movement.Velocity.Y = -5.5f;
 				
 		for (var i = 0; i < 4; i++)

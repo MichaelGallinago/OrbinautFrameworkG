@@ -29,14 +29,14 @@ public class Recorder(PlayerData data)
             1, _recordedData.Length - 1);
 		
         _recordedData[0] = new DataRecord(
-            data.PlayerNode.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
+            data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
     }
     
     public void Fill()
     {
         _recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
         var record = new DataRecord(
-            data.PlayerNode.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
+            data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
         
         Array.Fill(_recordedData, record);
     }
@@ -54,7 +54,7 @@ public class Recorder(PlayerData data)
 		
         var resizedData = new DataRecord[newLength];
         var record = new DataRecord(
-            data.PlayerNode.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
+            data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
 		
         Array.Copy(_recordedData, resizedData, oldLength);
         Array.Fill(resizedData, record,oldLength, newLength - oldLength);

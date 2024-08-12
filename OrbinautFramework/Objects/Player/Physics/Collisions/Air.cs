@@ -16,7 +16,7 @@ public struct Air(PlayerData data)
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
 		
-		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
+		data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 
 		var moveQuadrantValue = (int)moveQuadrant;
 
@@ -37,8 +37,8 @@ public struct Air(PlayerData data)
 		int wallDistance = data.TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
 		
 		if (wallDistance >= 0f) return false;
-		data.PlayerNode.Position += new Vector2(sign * wallDistance, 0f);
-		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Node.Position += new Vector2(sign * wallDistance, 0f);
+		data.TileCollider.Position = (Vector2I)data.Node.Position;
 		data.Movement.Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return false;
@@ -61,14 +61,14 @@ public struct Air(PlayerData data)
 
 			if (wallDist >= 0) return false;
 			
-			data.PlayerNode.Position += new Vector2(wallDist, 0f);
+			data.Node.Position += new Vector2(wallDist, 0f);
 			data.Movement.Velocity.X = 0f;
 			return true;
 		}
 		
 		if (roofDistance >= 0) return false;
 		
-		data.PlayerNode.Position -= new Vector2(0f, roofDistance);
+		data.Node.Position -= new Vector2(0f, roofDistance);
 		if (moveQuadrant == Angles.Quadrant.Up && data.State != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
@@ -110,7 +110,7 @@ public struct Air(PlayerData data)
 		}
 		else return;
 		
-		data.PlayerNode.Position += new Vector2(0f, distance);
+		data.Node.Position += new Vector2(0f, distance);
 		data.Movement.Angle = angle;
 		
 		Land();

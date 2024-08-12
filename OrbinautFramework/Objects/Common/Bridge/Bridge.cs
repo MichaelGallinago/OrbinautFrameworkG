@@ -2,22 +2,23 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using SolidNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.SolidNode;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
 using Player;
 
-public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : OrbinautData
+public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : SolidNode
 {
+	private int _width;
+	private int _maxDip;
+	private float _angle;
     private int _activeLogId;
-    private int _maxDip;
-    private float _angle;
-    private int _width;
 
     private Vector2[] _logPositions;
-    private int[] _dip;
     private int _logSizeHalf;
-
+    private int[] _dip;
+    
     public override void _Ready()
     {
         _width = logAmount * logSize;
@@ -36,8 +37,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
         SolidBox.NoBalance = true;
 
         // Properties
-        SetSolid(new Vector2I(logAmount * _logSizeHalf, _logSizeHalf));
-        Culling = CullingType.Reset;
+        SolidBox.Set(logAmount * _logSizeHalf, _logSizeHalf);
     }
     
     public override void _Process(double delta)

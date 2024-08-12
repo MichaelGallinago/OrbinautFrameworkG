@@ -5,6 +5,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player;
 

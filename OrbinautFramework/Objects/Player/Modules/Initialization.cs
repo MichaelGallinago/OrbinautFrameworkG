@@ -9,7 +9,7 @@ public readonly struct Initialization(PlayerData data)
 {
     public void Init()
     {
-        data.Collision.Init(data.PlayerNode.Type);
+        data.Collision.Init(data.Node.Type);
         
         data.Item.Init();
         data.Carry.Init();
@@ -25,30 +25,30 @@ public readonly struct Initialization(PlayerData data)
         data.Input.Clear();
         data.Input.NoControl = false;
 		
-        data.PlayerNode.Visible = true;
-        data.PlayerNode.Shield.State = ShieldContainer.States.None;
-        data.PlayerNode.RotationDegrees = 0f;
+        data.Node.Visible = true;
+        data.Node.Shield.State = ShieldContainer.States.None;
+        data.Node.RotationDegrees = 0f;
     }
 	
     public void Spawn()
     {
         if (SharedData.GiantRingData != null)
         {
-            data.PlayerNode.Position = SharedData.GiantRingData.Position;
+            data.Node.Position = SharedData.GiantRingData.Position;
         }
         else
         {
             if (SharedData.CheckpointData != null)
             {
-                data.PlayerNode.Position = SharedData.CheckpointData.Position;
+                data.Node.Position = SharedData.CheckpointData.Position;
             }
-            data.PlayerNode.Position -= new Vector2(0, data.Collision.Radius.Y + 1);
+            data.Node.Position -= new Vector2(0, data.Collision.Radius.Y + 1);
         }
 		
         if (data.Id == 0 && SharedData.PlayerShield != ShieldContainer.Types.None)
         {
             // TODO: create shield
-            data.PlayerNode.Shield.State = ShieldContainer.States.Active;
+            data.Node.Shield.State = ShieldContainer.States.Active;
             //instance_create(x, y, obj_shield, { TargetPlayer: id });
         }
     }

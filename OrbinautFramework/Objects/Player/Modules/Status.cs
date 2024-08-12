@@ -22,7 +22,7 @@ public struct Status(PlayerData data)
 
         DamageData damage = data.Damage;
         damage.IsInvincible = damage.InvincibilityTimer > 0f || data.Item.InvincibilityTimer > 0f || damage.IsHurt || 
-            data.Super.IsSuper || data.PlayerNode.Shield.State == ShieldContainer.States.DoubleSpin;
+            data.Super.IsSuper || data.Node.Shield.State == ShieldContainer.States.DoubleSpin;
 		
         KillPlayerOnTimeLimit();
     }
@@ -43,7 +43,7 @@ public struct Status(PlayerData data)
 	private void FlickAfterGettingHit()
 	{
 		if (data.Damage.InvincibilityTimer <= 0f || data.Damage.IsHurt) return;
-		data.PlayerNode.Visible = ((int)data.Damage.InvincibilityTimer & 4) > 0 || data.Damage.InvincibilityTimer <= 0f;
+		data.Node.Visible = ((int)data.Damage.InvincibilityTimer & 4) > 0 || data.Damage.InvincibilityTimer <= 0f;
 		data.Damage.InvincibilityTimer -= Scene.Instance.ProcessSpeed;
 	}
 	

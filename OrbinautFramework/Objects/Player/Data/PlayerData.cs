@@ -3,11 +3,11 @@ using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode playerNode) 
+public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode node) 
 	: IPlayerCameraTarget, IPlayerData, IPlayerCpuTarget
 {
 	public int Id { get; set; }
-	public IPlayerNode PlayerNode { get; } = playerNode;
+	public IPlayerNode Node { get; } = node;
 	
 	public ItemData Item { get; } = new();
 	public CarryData Carry { get; } = new();

@@ -4,6 +4,7 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -11,7 +12,7 @@ namespace OrbinautFramework3.Objects.Common.Bumper;
 
 using Player;
 
-public partial class Bumper : OrbinautData
+public partial class Bumper : InteractiveNode
 {
     private enum HitsLimit : sbyte
     {
@@ -25,22 +26,19 @@ public partial class Bumper : OrbinautData
     
     private int _state;
     private int _hitsLeft;
-
-    public Bumper() => SetHitBox(new Vector2I(8, 8));
     
     public override void _Ready()
     {
         base._Ready();
+        _hitsLeft = (int)_hitsLimit;
         _sprite.AnimationFinished += OnAnimationFinished;
     }
     
     public override void _Process(double delta) => CheckCollisionWithPlayers();
-    
-    protected override void Init() => _hitsLeft = (int)_hitsLimit;
 
     private void CheckCollisionWithPlayers()
     {
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             if (!CheckPlayerHitBoxCollision(player)) continue;
             
@@ -58,7 +56,7 @@ public partial class Bumper : OrbinautData
             
             //TODO: obj_score
             //instance_create(x, y, obj_score);
-            PlayerNode.IncreaseComboScore();
+            PlayerData.IncreaseComboScore();
             
             break;
         }
@@ -66,18 +64,18 @@ public partial class Bumper : OrbinautData
 
     private static void BumpPlayer(PlayerData player, Vector2 position)
     {
-        if (player.Action == Actions.Carried)
+        if (player.State == ActionFsm.States.Carried)
         {
-            player.Action = Actions.None;
+            player.State = ActionFsm.States.Default;
         }
         
-        player.IsJumping = false;
-        player.IsGrounded = false;
-        player.IsAirLock = false;
-        player.SetPushAnimationBy = null;
+        player.Movement.IsJumping = false;
+        player.Movement.IsGrounded = false;
+        player.Movement.IsAirLock = false;
+        player.Visual.SetPushBy = null;
         
-        float radians = Mathf.DegToRad(Angles.GetVector256(player.Position - position));
-        player.Velocity.Vector = Force * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+        float radians = Mathf.DegToRad(Angles.GetVector256(player.Node.Position - position));
+        player.Movement.Velocity.Vector = Force * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
     }
 
     private void OnAnimationFinished()

@@ -1,11 +1,10 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.ForceSpinTrigger;
-
-using Player;
 
 public abstract partial class ForceSpinTrigger : Trigger
 {

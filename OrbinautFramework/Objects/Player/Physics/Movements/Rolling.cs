@@ -64,7 +64,7 @@ public struct Rolling(PlayerData data)
             if (SharedData.PhysicsType != PhysicsCore.Types.SK || Math.Abs(data.Movement.GroundSpeed) >= 0.5f) return;
         }
 		
-        data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
+        data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
 		
         data.Movement.IsSpinning = false;
         data.Collision.Radius = data.Collision.RadiusNormal;

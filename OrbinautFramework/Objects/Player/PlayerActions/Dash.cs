@@ -16,7 +16,7 @@ public struct Dash(PlayerData data)
 	
     public bool Perform()
     {
-	    if (!SharedData.Dash || data.PlayerNode.Type != PlayerNode.Types.Sonic || 
+	    if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic || 
 	        data.Id > 0 && CpuInputTimer <= 0f) return false;
     	
 	    StartDash();

@@ -38,7 +38,7 @@ public struct CarryTarget(PlayerData data)
     	}
     	
     	if (data.State != States.Carried || carrier.State != States.Flight || 
-	        !data.PlayerNode.Position.IsEqualApprox(previousPosition))
+	        !data.Node.Position.IsEqualApprox(previousPosition))
     	{
     		carrier.CarryTarget = null;
     		carrier.CarryTimer = 60f;
@@ -54,7 +54,7 @@ public struct CarryTarget(PlayerData data)
 	    data.Visual.Facing = carrier.Facing;
     	data.Movement.Velocity.Vector = carrier.Velocity.Vector;
 	    
-	    IPlayerNode player = data.PlayerNode;
+	    IPlayerNode player = data.Node;
 	    player.Position = carrier.Position + new Vector2(0f, 28f);
 	    player.Scale = new Vector2(Math.Abs(player.Scale.X) * (float)carrier.Facing, player.Scale.Y);
     	

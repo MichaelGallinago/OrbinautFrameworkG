@@ -1,7 +1,6 @@
 using System;
 using Godot;
-using OrbinautFramework3.Objects.Player;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.MultiTypeDelegate;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -34,19 +33,22 @@ public abstract partial class Scene : Node2D
     public States State { get; set; } = States.Normal;
     public float Time { get; set; }
     
+    public IMultiTypeEvent<ITypeDelegate> FrameEndProcess { get; }
+    
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
-    private SceneLateUpdate _lateUpdate = new();
+    private SceneFrameEnd _frameEnd = new();
     private Debug _debug = new();
     
     protected Scene()
     {
+        FrameEndProcess = _frameEnd.Process;
         ProcessPriority = int.MinValue;
     }
 
     public override void _Ready()
     {
         AddChild(_sceneContinuousUpdate);
-        AddChild(_lateUpdate);
+        AddChild(_frameEnd);
         AddChild(_debug);
 
         Tree = GetTree();
@@ -82,11 +84,6 @@ public abstract partial class Scene : Node2D
         }
         
         Culler.EarlyCull();
-        
-        foreach (ICullable objects in Culler.ActiveObjects)
-        {
-            objects.PreviousPosition = objects.Position;
-        }
         
         foreach (PlayerData player in Players.Values)
         {

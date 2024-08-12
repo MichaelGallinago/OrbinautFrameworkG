@@ -33,7 +33,7 @@ public struct Climb(PlayerData data)
 
 	private void ClimbNormal()
 	{
-		if (!Mathf.IsEqualApprox(data.PlayerNode.Position.X, data.PlayerNode.PreviousPosition.X) || 
+		if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X) || 
 		    data.Movement.Velocity.X != 0f)
 		{
 			ReleaseClimb();
@@ -49,7 +49,7 @@ public struct Climb(PlayerData data)
 			radiusX++;
 		}
 		
-		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
+		data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 
 		if (data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
 		
@@ -114,7 +114,7 @@ public struct Climb(PlayerData data)
 			Constants.Direction.Negative);
 
 		if (ceilDistance >= 0) return false;
-		data.PlayerNode.Position -= new Vector2(0f, ceilDistance);
+		data.Node.Position -= new Vector2(0f, ceilDistance);
 		data.Movement.Velocity.Y = 0f;
 		return false;
 	}
@@ -145,7 +145,7 @@ public struct Climb(PlayerData data)
 
 		if (distance >= 0) return false;
 		
-		data.PlayerNode.Position += 
+		data.Node.Position += 
 			new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
 		data.Movement.Angle = angle;
 				
@@ -203,26 +203,26 @@ public struct Climb(PlayerData data)
 		if (data.Visual.Animation != Animations.ClimbLedge)
 		{
 			data.Visual.Animation = Animations.ClimbLedge;
-			data.PlayerNode.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
+			data.Node.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
 		}
-		else if (data.PlayerNode.Sprite.IsFrameChanged)
+		else if (data.Node.Sprite.IsFrameChanged)
 		{
-			switch (data.PlayerNode.Sprite.Frame)
+			switch (data.Node.Sprite.Frame)
 			{
-				case 1: data.PlayerNode.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
-				case 2: data.PlayerNode.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
+				case 1: data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
+				case 2: data.Node.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
 			}
 		}
-		else if (data.PlayerNode.Sprite.IsFinished)
+		else if (data.Node.Sprite.IsFinished)
 		{
 			Land();
 			data.Visual.Animation = Animations.Idle;
-			data.PlayerNode.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
+			data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
 
 			// Subtract that 1px that was applied when we attached to the wall
 			if (data.Visual.Facing == Constants.Direction.Negative)
 			{
-				data.PlayerNode.Position += Vector2.Left;
+				data.Node.Position += Vector2.Left;
 			}
 		}
 	}

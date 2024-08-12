@@ -1,5 +1,5 @@
 using Godot;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
@@ -36,9 +36,11 @@ public partial class BridgeSpawner : Node2D
         }
     }
 
+    [Export] private Texture2D _stampTexture;
+    [Export] private ICullable.Types _cullingType;
+    
     private byte _logAmount = 8;
     private short _logOffset;
-    [Export] private Texture2D _stampTexture;
     
     private Texture2D _logTexture;
     private Vector2 _stampSize;
@@ -120,7 +122,8 @@ public partial class BridgeSpawner : Node2D
             ProcessPriority = ProcessPriority,
             ZIndex = ZIndex,
         };
-        parent.CallDeferred("add_child", bridge);
+        bridge.CullingType = _cullingType;
+        parent.CallDeferred("add_child", bridge); //TODO: replace to AddChild() somehow
         
         if (_stampTexture == null) return;
 
@@ -136,6 +139,6 @@ public partial class BridgeSpawner : Node2D
             Texture = _stampTexture, 
             Position = Position + offset
         };
-        parent.CallDeferred("add_child", stamp);
+        parent.CallDeferred("add_child", stamp); //TODO: replace to AddChild() somehow
     }
 }

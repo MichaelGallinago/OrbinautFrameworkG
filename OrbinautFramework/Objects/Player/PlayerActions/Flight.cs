@@ -39,7 +39,7 @@ public struct Flight(PlayerData data)
     {
 	    if (data.Water.IsUnderwater) return;
     	if (!Scene.Instance.IsTimePeriodLooped(16f, 8f)) return;
-	    if (!data.PlayerNode.Sprite.CheckInCameras()) return;
+	    if (!data.Node.Sprite.CheckInCameras()) return;
 	    
     	if (_flightTimer > 0f)
     	{

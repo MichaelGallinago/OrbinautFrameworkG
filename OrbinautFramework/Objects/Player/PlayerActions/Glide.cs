@@ -180,12 +180,12 @@ public struct Glide(PlayerData data)
 	
 	public void LatePerform()
 	{
-		var climbY = (int)data.PlayerNode.Position.Y;
+		var climbY = (int)data.Node.Position.Y;
 		var collisionFlagWall = false;
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
 
-		data.TileCollider.SetData((Vector2I)data.PlayerNode.Position, data.Collision.TileLayer);
+		data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 		
 		if (moveQuadrant != Angles.Quadrant.Right)
 		{
@@ -216,8 +216,8 @@ public struct Glide(PlayerData data)
 
 		if (wallDistance >= 0) return false;
 		
-		data.PlayerNode.Position += new Vector2(sing * wallDistance, 0f);
-		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Node.Position += new Vector2(sing * wallDistance, 0f);
+		data.TileCollider.Position = (Vector2I)data.Node.Position;
 		data.Movement.Velocity.X = 0f;
 		return true;
 	}
@@ -239,8 +239,8 @@ public struct Glide(PlayerData data)
 
 		if (roofDistance >= 0) return false;
 		
-		data.PlayerNode.Position -= new Vector2(0f, roofDistance);
-		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Node.Position -= new Vector2(0f, roofDistance);
+		data.TileCollider.Position = (Vector2I)data.Node.Position;
 		if (data.Movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
 		{
 			data.Movement.Velocity.Y = 0f;
@@ -262,15 +262,15 @@ public struct Glide(PlayerData data)
 				return false;
 			}
 			
-			data.PlayerNode.Position += new Vector2(0f, floorDistance);
+			data.Node.Position += new Vector2(0f, floorDistance);
 			data.Movement.Angle = floorAngle;
 			return false;
 		}
 
 		if (floorDistance >= 0) return false;
 		
-		data.PlayerNode.Position += new Vector2(0f, floorDistance);
-		data.TileCollider.Position = (Vector2I)data.PlayerNode.Position;
+		data.Node.Position += new Vector2(0f, floorDistance);
+		data.TileCollider.Position = (Vector2I)data.Node.Position;
 		data.Movement.Angle = floorAngle;
 		data.Movement.Velocity.Y = 0f;
 		return true;
@@ -327,7 +327,7 @@ public struct Glide(PlayerData data)
 			
 		if (data.Visual.Facing == Constants.Direction.Negative)
 		{
-			data.PlayerNode.Position += Vector2.Right;
+			data.Node.Position += Vector2.Right;
 		}
 
 		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
@@ -367,7 +367,7 @@ public struct Glide(PlayerData data)
 		}
 		
 		// Adjust Knuckles' y-position to place him just below the edge
-		data.PlayerNode.Position += new Vector2(0f, floorDistance);
+		data.Node.Position += new Vector2(0f, floorDistance);
 	}
 
 	private void Release()

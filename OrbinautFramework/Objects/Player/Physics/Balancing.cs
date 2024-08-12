@@ -5,6 +5,7 @@ using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
+using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
@@ -33,7 +34,7 @@ public struct Balancing(PlayerData data)
 		const int panicOffset = 4;
 		
 		int rightEdge = onObject.SolidBox.Radius.X * 2 - leftEdge;
-		int playerX = Mathf.FloorToInt(onObject.SolidBox.Radius.X - onObject.Position.X + data.PlayerNode.Position.X);
+		int playerX = Mathf.FloorToInt(onObject.SolidBox.Radius.X - onObject.Position.X + data.Node.Position.X);
 		
 		if (playerX < leftEdge)
 		{
@@ -53,7 +54,7 @@ public struct Balancing(PlayerData data)
 		
 		if (Angles.GetQuadrant(data.Movement.Angle) > Angles.Quadrant.Down) return true;
 		data.TileCollider.SetData(
-			(Vector2I)data.PlayerNode.Position + new Vector2I(0, data.Collision.Radius.Y), 
+			(Vector2I)data.Node.Position + new Vector2I(0, data.Collision.Radius.Y), 
 			data.Collision.TileLayer);
 		
 		if (data.TileCollider.FindDistance(0, 0, true, direction) < 12) return true;
@@ -71,7 +72,7 @@ public struct Balancing(PlayerData data)
 
 	private void BalanceToDirection(Constants.Direction direction, bool isPanic)
 	{
-		switch (data.PlayerNode.Type)
+		switch (data.Node.Type)
 		{
 			case PlayerNode.Types.Amy or PlayerNode.Types.Tails:
 			case PlayerNode.Types.Sonic when data.Super.IsSuper:

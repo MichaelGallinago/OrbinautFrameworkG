@@ -80,7 +80,7 @@ public class CpuModule(PlayerData data)
 			if (!Scene.Instance.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
 		}
 		
-		data.PlayerNode.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
+		data.Node.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		State = States.Respawn;
 	}
@@ -90,7 +90,7 @@ public class CpuModule(PlayerData data)
 		if (CheckRespawn()) return;
 
 		SetRespawnAnimation();
-		if (data.PlayerNode.Type == PlayerNode.Types.Tails)
+		if (data.Node.Type == PlayerNode.Types.Tails)
 		{
 			PlayRespawnFlyingSound();
 		}
@@ -120,7 +120,7 @@ public class CpuModule(PlayerData data)
 
 	private void SetRespawnAnimation()
 	{
-		data.Visual.Animation = data.PlayerNode.Type switch
+		data.Visual.Animation = data.Node.Type switch
 		{
 			PlayerNode.Types.Sonic or PlayerNode.Types.Amy => Animations.Spin, 
 			PlayerNode.Types.Tails => data.Water.IsUnderwater ? Animations.Swim : Animations.Fly,
@@ -132,7 +132,7 @@ public class CpuModule(PlayerData data)
 	private void PlayRespawnFlyingSound()
 	{
 		if (SharedData.Behaviour != Behaviours.S3) return;
-		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.PlayerNode.Sprite.CheckInCameras()) return;
+		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.Node.Sprite.CheckInCameras()) return;
 		if (data.Water.IsUnderwater) return;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
@@ -141,8 +141,8 @@ public class CpuModule(PlayerData data)
 	private bool MoveToLeadPlayer(Vector2 targetPosition)
 	{
 		var distance = new Vector2I(
-			Mathf.FloorToInt(data.PlayerNode.Position.X - targetPosition.X),
-			Mathf.FloorToInt(targetPosition.Y - data.PlayerNode.Position.Y));
+			Mathf.FloorToInt(data.Node.Position.X - targetPosition.X),
+			Mathf.FloorToInt(targetPosition.Y - data.Node.Position.Y));
 
 		Vector2 positionOffset = Vector2.Zero;
 		if (distance.X != 0)
@@ -186,7 +186,7 @@ public class CpuModule(PlayerData data)
 			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.ProcessSpeed;
 		}
 
-		data.PlayerNode.Position += positionOffset;
+		data.Node.Position += positionOffset;
 		
 		return distance.X != 0 || distance.Y != 0;
 	}
@@ -210,7 +210,7 @@ public class CpuModule(PlayerData data)
 		}
 		
 		//TODO: check that ZIndex works
-		data.PlayerNode.ZIndex = _leadPlayer.ZIndex + data.Id;
+		data.Node.ZIndex = _leadPlayer.ZIndex + data.Id;
 		
 		if (data.Movement.GroundLockTimer > 0f && data.Movement.GroundSpeed == 0f)
 		{
@@ -241,7 +241,7 @@ public class CpuModule(PlayerData data)
 			return;
 		}
 		
-		int distanceX = Mathf.FloorToInt(targetPosition.X - data.PlayerNode.Position.X);
+		int distanceX = Mathf.FloorToInt(targetPosition.X - data.Node.Position.X);
 		Push(distanceX, direction);
 		if (CheckJump(distanceX, targetPosition.Y))
 		{
@@ -263,7 +263,7 @@ public class CpuModule(PlayerData data)
 		// Freeze or start flying (if we're Tails) if lead player has died
 		if (!_leadPlayer.IsDead) return;
 		
-		if (data.PlayerNode.Type == PlayerNode.Types.Tails)
+		if (data.Node.Type == PlayerNode.Types.Tails)
 		{
 			data.Visual.Animation = Animations.Fly;
 			State = States.Respawn;
@@ -297,7 +297,7 @@ public class CpuModule(PlayerData data)
 						
 		if (data.Movement.GroundSpeed != 0f && data.Movement.IsControlRoutineEnabled && (int)data.Visual.Facing == sign)
 		{
-			data.PlayerNode.Position += Vector2.Right * sign;
+			data.Node.Position += Vector2.Right * sign;
 		}
 	}
 	
@@ -315,7 +315,7 @@ public class CpuModule(PlayerData data)
 
 		const float jumpPeriod = JumpFrequency * 4f;
 		if (distanceX >= 64f && !Scene.Instance.IsTimePeriodLooped(jumpPeriod)) return false;
-		return targetPositionY - data.PlayerNode.Position.Y <= -32f;
+		return targetPositionY - data.Node.Position.Y <= -32f;
 	}
 	
 	private void ProcessStuck()
@@ -326,7 +326,7 @@ public class CpuModule(PlayerData data)
 		
 		if (data.Visual.Animation == Animations.Idle)
 		{
-			data.Visual.Facing = Target.Position.X >= data.PlayerNode.Position.X ? 
+			data.Visual.Facing = Target.Position.X >= data.Node.Position.X ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
@@ -347,9 +347,9 @@ public class CpuModule(PlayerData data)
 	private bool CheckRespawn()
 	{
 		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && 
-		                      camera.TargetBoundary.Z <= data.PlayerNode.Position.X;
+		                      camera.TargetBoundary.Z <= data.Node.Position.X;
 		
-		if (isBehindLeader || data.PlayerNode.Sprite != null && data.PlayerNode.Sprite.CheckInCameras())
+		if (isBehindLeader || data.Node.Sprite != null && data.Node.Sprite.CheckInCameras())
 		{
 			RespawnTimer = 0f;
 			return false;
@@ -376,8 +376,8 @@ public class CpuModule(PlayerData data)
 			return;
 		}
 		
-		data.PlayerNode.Position = new Vector2(sbyte.MaxValue, 0);
-		data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+		data.Node.Position = new Vector2(sbyte.MaxValue, 0);
+		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
 		State = States.RespawnInit;
 		data.Movement.IsControlRoutineEnabled = false;

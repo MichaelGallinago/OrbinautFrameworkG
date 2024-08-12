@@ -12,7 +12,7 @@ public struct Carry(PlayerData data)
 {
     public void Process()
     {
-        if (data.PlayerNode.Type != PlayerNode.Types.Tails) return;
+        if (data.Node.Type != PlayerNode.Types.Tails) return;
 
         if (data.Carry.Timer > 0f)
         {

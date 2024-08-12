@@ -1,18 +1,19 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
 public interface IPlayerCpuTarget : ICpuTarget
 {
-    IPlayerNode PlayerNode { get; }
+    IPlayerNode Node { get; }
     DeathData Death { get; }
     MovementData Movement { get; }
     VisualData Visual { get; }
     CollisionData Collision { get; }
     
-    int ICpuTarget.ZIndex => PlayerNode.ZIndex;
+    int ICpuTarget.ZIndex => Node.ZIndex;
     bool ICpuTarget.IsDead => Death.IsDead;
     Velocity ICpuTarget.Velocity => Movement.Velocity;
     Animations ICpuTarget.Animation => Visual.Animation;

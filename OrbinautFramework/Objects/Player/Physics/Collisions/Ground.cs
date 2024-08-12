@@ -46,7 +46,7 @@ public struct Ground(PlayerData data)
 		}
 		
 		data.TileCollider.SetData(
-			(Vector2I)data.Movement.Velocity.CalculateNewPosition(data.PlayerNode.Position), 
+			(Vector2I)data.Movement.Velocity.CalculateNewPosition(data.Node.Position), 
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
 		
@@ -81,7 +81,7 @@ public struct Ground(PlayerData data)
 				
 				if (data.Visual.Facing == firstDirection && !data.Movement.IsSpinning)
 				{
-					data.Visual.SetPushBy = data.PlayerNode;
+					data.Visual.SetPushBy = data.Node;
 				}
 				break;
 				
@@ -99,7 +99,7 @@ public struct Ground(PlayerData data)
 
 		data.Collision.TileBehaviour = GetTileBehaviour();
 		data.TileCollider.SetData(
-			(Vector2I)data.PlayerNode.Position,
+			(Vector2I)data.Node.Position,
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
 
@@ -110,7 +110,7 @@ public struct Ground(PlayerData data)
 
 		if (distance < -MaxTolerance) return;
 		
-		data.PlayerNode.Position += data.Collision.TileBehaviour switch
+		data.Node.Position += data.Collision.TileBehaviour switch
 		{
 			TileBehaviours.Floor => new Vector2(0f, distance),
 			TileBehaviours.RightWall => new Vector2(distance, 0f),

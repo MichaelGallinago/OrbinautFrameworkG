@@ -72,7 +72,7 @@ public struct Ground(PlayerData data)
 
     private void SetPushAnimation()
     {
-        if (data.Visual.SetPushBy != null && data.PlayerNode.Sprite.IsFrameChanged)
+        if (data.Visual.SetPushBy != null && data.Node.Sprite.IsFrameChanged)
         {
             data.Visual.Animation = Animations.Push;
         }

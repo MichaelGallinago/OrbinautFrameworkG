@@ -47,7 +47,7 @@ public struct Landing(PlayerData data)
     	data.Visual.SetPushBy = null;
     	data.Damage.IsHurt = false;
     
-    	data.PlayerNode.Shield.State = ShieldContainer.States.None;
+    	data.Node.Shield.State = ShieldContainer.States.None;
     	data.Item.ComboCounter = 0;
     	data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
     
@@ -65,26 +65,26 @@ public struct Landing(PlayerData data)
     	}
 
     	if (data.Movement.IsSpinning) return;
-    	data.PlayerNode.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
+    	data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
     	
     	data.Collision.Radius = data.Collision.RadiusNormal;
     }
     
     private bool WaterBarrierBounce()
     {
-	    if (data.PlayerNode.Shield.State != ShieldContainer.States.Active || 
+	    if (data.Node.Shield.State != ShieldContainer.States.Active || 
 	        SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
 		
 	    float force = data.Water.IsUnderwater ? -4f : -7.5f;
 	    float radians = Mathf.DegToRad(data.Movement.Angle);
 	    data.Movement.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
 	    
-	    data.PlayerNode.Shield.State = ShieldContainer.States.None;
+	    data.Node.Shield.State = ShieldContainer.States.None;
 	    data.Collision.OnObject = null;
 	    data.Movement.IsGrounded = false;
 	    
 	    //TODO: replace animation
-	    data.PlayerNode.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
+	    data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 	    
 	    AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		

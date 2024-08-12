@@ -22,7 +22,7 @@ public struct Death(PlayerData data)
     	// If drowned, wait until we're far enough off-screen
     	const int drownScreenOffset = 276;
     	if (data.Water.AirTimer == 0 && 
-	        (int)data.PlayerNode.Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
+	        (int)data.Node.Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
     	{
     		return;
     	}
@@ -36,7 +36,7 @@ public struct Death(PlayerData data)
     
     private void Wait(ICamera camera)
     {
-    	if ((int)data.PlayerNode.Position.Y <= 32f + (SharedData.PhysicsType < PhysicsCore.Types.S3 ? 
+    	if ((int)data.Node.Position.Y <= 32f + (SharedData.PhysicsType < PhysicsCore.Types.S3 ? 
     		    camera.Boundary.W : camera.DrawPosition.Y + SharedData.ViewSize.Y)) return;
 	    
     	SetNextState();

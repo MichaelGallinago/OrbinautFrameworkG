@@ -15,7 +15,7 @@ public struct Position(PlayerData data)
             data.Movement.Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
         }
 		
-        data.PlayerNode.Position = data.Movement.Velocity.CalculateNewPosition(data.PlayerNode.Position);
+        data.Node.Position = data.Movement.Velocity.CalculateNewPosition(data.Node.Position);
         data.Movement.Velocity.ResetInstantVelocity();
 		
         if (data.Movement.IsGrounded) return;

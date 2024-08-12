@@ -3,7 +3,9 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics;
 
@@ -11,7 +13,7 @@ namespace OrbinautFramework3.Objects.Common.Spikes;
 
 using Player;
 
-public abstract partial class Spikes : OrbinautData
+public abstract partial class Spikes : SolidNode
 {
     [Export] public bool IsMoving { get; set; }
     
@@ -34,8 +36,6 @@ public abstract partial class Spikes : OrbinautData
         _rectangle = _sprite.GetRect();
 
         Vector2 size = _rectangle.Size.Abs() * Scale;
-        
-        SetSolid((Vector2I)size / 2);
         GetDirectionSpecificData(size).Deconstruct(out _isFlipped, out _sensor, out _retractDistance);
     }
 
@@ -49,13 +49,13 @@ public abstract partial class Spikes : OrbinautData
         CollideWithPlayers();
     }
 
-    protected abstract void CollideWithPlayer(PlayerNode playerNode);
+    protected abstract void CollideWithPlayer(PlayerData playerNode);
     protected abstract Vector2 GetRetractOffsetVector(float retractOffset);
     protected abstract SpikesDto GetDirectionSpecificData(Vector2 size);
 
     private void CollideWithPlayers()
     {
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             CollideWithPlayer(player);
             if (!CheckSolidCollision(player, _sensor)) continue;
@@ -63,9 +63,9 @@ public abstract partial class Spikes : OrbinautData
         }
     }
 
-    private void HurtPlayer(PhysicsCore physicsCore)
+    private void HurtPlayer(PlayerData player)
     {
-        physicsCore.Hurt(Position.X);
+        player.Hurt(Position.X);
             
         if (!AudioPlayer.Sound.IsPlaying(SoundStorage.Hurt)) return;
             

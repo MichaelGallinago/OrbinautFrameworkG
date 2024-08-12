@@ -106,7 +106,7 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     private void RunControlRoutine()
     {
         _data.Physics.Update(
-            _data.Water.IsUnderwater, _data.Super.IsSuper, _data.PlayerNode.Type, _data.Item.SpeedTimer);
+            _data.Water.IsUnderwater, _data.Super.IsSuper, _data.Node.Type, _data.Item.SpeedTimer);
 		
         if (_spinDash.Perform()) return;
         if (_dash.Perform()) return;

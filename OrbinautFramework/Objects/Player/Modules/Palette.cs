@@ -6,7 +6,7 @@ namespace OrbinautFramework3.Objects.Player.Modules;
 
 public struct Palette(PlayerData data)
 {
-	private ReadOnlySpan<int> PlayerColourIds => data.PlayerNode.Type switch
+	private ReadOnlySpan<int> PlayerColourIds => data.Node.Type switch
 	{
 		PlayerNode.Types.Tails => [4, 5, 6],
 		PlayerNode.Types.Knuckles => [7, 8, 9],
@@ -27,7 +27,7 @@ public struct Palette(PlayerData data)
 
     private void UpdateSuper(int colour, out int colourLast, out int colourLoop, out int duration)
     {
-    	switch (data.PlayerNode.Type)
+    	switch (data.Node.Type)
     	{
     		case PlayerNode.Types.Sonic:
     			duration = colour switch
@@ -79,7 +79,7 @@ public struct Palette(PlayerData data)
     	
     	if (colour > 1)
     	{
-    		if (data.PlayerNode.Type == PlayerNode.Types.Sonic)
+    		if (data.Node.Type == PlayerNode.Types.Sonic)
     		{
     			colourLast = 21;
     			duration = 4;

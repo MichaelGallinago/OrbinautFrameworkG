@@ -26,8 +26,8 @@ public struct Damage(PlayerData data)
     		SharedData.PlayerShield = ShieldContainer.Types.None;
     	}
     	
-    	data.PlayerNode.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-	    data.PlayerNode.Visible = true;
+    	data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+	    data.Node.Visible = true;
 	    
     	data.State = States.Default;
     	data.Visual.Animation = Animations.Death;
@@ -57,7 +57,7 @@ public struct Damage(PlayerData data)
 
     	const float velocityX = 2f, velocityY = 4f;
     	data.Movement.Velocity.Vector = 
-		    new Vector2(data.PlayerNode.Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
+		    new Vector2(data.Node.Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
 	    
     	data.Movement.Gravity = GravityType.HurtFall;
     	data.Visual.Animation = Animations.Hurt;
