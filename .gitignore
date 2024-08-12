@@ -23,9 +23,9 @@ AudioStorageSourceGenerator/obj/
 AudioStorageSourceGenerator/.idea/
 
 # ActionSourceGenerator compilations ignores
-ActionSourceGenerator/bin/
-ActionSourceGenerator/obj/
-ActionSourceGenerator/.idea/
+FsmSourceGenerator/bin/
+FsmSourceGenerator/obj/
+FsmSourceGenerator/.idea/
 
 # Rider-specific ignores
 .idea/
