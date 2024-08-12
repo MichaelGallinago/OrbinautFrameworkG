@@ -261,7 +261,7 @@ using System.Runtime.InteropServices;
                 sourceBuilder.Append('_').Append(parameter).Append(", ");
             }
             sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
-            sourceBuilder.Append(");").Append(entersMethods.Contains(name) ? "Enter(); break;" : " break;");
+            sourceBuilder.Append(");").Append(entersMethods.Contains(name) ? $" {name}.Enter(); break;" : " break;");
         }
 
         sourceBuilder.Append('\n').Append(
