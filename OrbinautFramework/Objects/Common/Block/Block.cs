@@ -12,8 +12,8 @@ public partial class Block : SolidNode
         foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             // Combo counter and spin flag are cleared when player lands, so back them up
-            bool isSpinning = player.IsSpinning;
-            uint comboCount = player.ComboCounter;
+            bool isSpinning = player.Movement.IsSpinning;
+            uint comboCount = player.Item.ComboCounter;
 		    
             player.ActSolid(this, Constants.SolidType.FullReset);
             /*

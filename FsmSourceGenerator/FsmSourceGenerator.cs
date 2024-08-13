@@ -116,10 +116,10 @@ public class FsmGenerator : IIncrementalGenerator
             }
             
             SemanticModel semanticModel = compilation.GetSemanticModel(structDeclaration.SyntaxTree);
-            
-            SeparatedSyntaxList<ParameterSyntax>? parameters = structDeclaration.ParameterList?.Parameters;
 
-            if (parameters == null) continue;
+            if (structDeclaration.ParameterList == null) continue;
+            
+            SeparatedSyntaxList<ParameterSyntax> parameters = structDeclaration.ParameterList.Parameters;
 
             string stateName = structDeclaration.Identifier.Text;
             stateTypes.Add(structDeclaration.Identifier.Text, []);
@@ -256,11 +256,14 @@ using System.Runtime.InteropServices;
             string name = structDeclaration.Identifier.Text;
             sourceBuilder.Append($"\n\t\t\t\t\tcase States.{name}: {name} = new {name}(");
 
-            foreach (string parameter in stateTypes[name])
+            if (stateTypes.TryGetValue(name, out HashSet<string>? parameters) && parameters is { Count: > 0 })
             {
-                sourceBuilder.Append('_').Append(parameter).Append(", ");
+                foreach (string parameter in parameters)
+                {
+                    sourceBuilder.Append('_').Append(parameter).Append(", ");
+                }
+                sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
             }
-            sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
             sourceBuilder.Append(");").Append(entersMethods.Contains(name) ? $" {name}.Enter(); break;" : " break;");
         }
 
@@ -278,10 +281,11 @@ using System.Runtime.InteropServices;
 
         const int offsetStep = 8;
         int offset = offsetStep;
+        
         foreach (KeyValuePair<string, string> type in constructorTypes)
         {
-            sourceBuilder.Append("\n\t\t[FieldOffset(").Append(offset).Append(")] private ").Append(type.Value).Append(" _")
-                .Append(type.Key).Append(" = ").Append(type.Key).Append(';');
+            sourceBuilder.Append("\n\t\t[FieldOffset(").Append(offset).Append(")] private ").Append(type.Value)
+                .Append(" _").Append(type.Key).Append(" = ").Append(type.Key).Append(';');
             offset += offsetStep;
         }
         

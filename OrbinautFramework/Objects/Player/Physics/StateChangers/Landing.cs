@@ -42,7 +42,7 @@ public struct Landing(PlayerData data)
     	}
     
     	data.Movement.IsAirLock = false;
-    	data.Movement.IsSpinning	= false;
+    	data.Movement.IsSpinning = false;
     	data.Movement.IsJumping = false;
     	data.Visual.SetPushBy = null;
     	data.Damage.IsHurt = false;

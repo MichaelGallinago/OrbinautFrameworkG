@@ -8,7 +8,6 @@ public class MovementData
     public float Angle { get; set; }
     public float Gravity { get; set; }
     public bool IsAirLock { get; set; }
-    public bool IsJumping { get; set; }
     public bool IsGrounded { get; set; }
     public bool IsSpinning { get; set; }
     public bool IsForcedSpin { get; set; }
@@ -20,7 +19,6 @@ public class MovementData
     
     public void Init()
     {
-        IsJumping = false;
         IsGrounded = true;
         IsSpinning = false;
         IsForcedSpin = false;

@@ -9,39 +9,11 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
+[FsmSourceGenerator.FsmState("Action")]
 public struct Jump(PlayerData data)
 {
-	public bool Perform()
+	public void Enter() //TODO: move part of the code if not all of it is needed
 	{
-		if (!data.Movement.IsJumping || data.Movement.IsGrounded) return false;
-		
-		if (!data.Input.Down.Abc)
-		{
-			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
-		}
-		
-		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed || CpuInputTimer == 0 && data.Id > 0) return false;
-
-		if (Transform()) return true;
-		
-		switch (data.Node.Type)
-		{
-			case PlayerNode.Types.Sonic: JumpSonic(); break;
-			case PlayerNode.Types.Tails: JumpTails(); break;
-			case PlayerNode.Types.Knuckles: JumpKnuckles(); break;
-			case PlayerNode.Types.Amy: JumpAmy(); break;
-		}
-		
-		return false;
-	}
-	
-	public bool Start()
-	{
-		if (data.State is States.SpinDash or States.Dash) return false;
-		if (data.Movement.IsForcedSpin || !data.Movement.IsGrounded) return false;
-		
-		if (!data.Input.Press.Abc || !CheckCeilingDistance()) return false;
-		
 		if (!SharedData.FixJumpSize && SharedData.PhysicsType != PhysicsCore.Types.CD)
 		{
 			// Why do they even do that?
@@ -59,53 +31,43 @@ public struct Jump(PlayerData data)
 		}
 		
 		float radians = Mathf.DegToRad(data.Movement.Angle);
-		data.Movement.Velocity.Vector += 
-			data.Physics.JumpSpeed * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+		var velocity = new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+		data.Movement.Velocity.Vector += data.Physics.JumpSpeed * velocity;
 		
 		data.Movement.IsSpinning = true;
-		data.Movement.IsJumping = true;
 		data.Movement.IsGrounded = false;
+		
 		data.Collision.OnObject = null;
-		data.Visual.SetPushBy = null;
 		data.Collision.IsStickToConvex = false;
+		
+		data.Visual.SetPushBy = null;
 		data.Visual.Animation = Animations.Spin;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
-	
-		// Exit control routine
-		return true;
 	}
-
-	private bool CheckCeilingDistance()
+	
+	public bool Perform()
 	{
-		const int maxCeilingDistance = 6; 
+		if (data.Movement.IsGrounded) return false;
 		
-		data.TileCollider.SetData(
-			(Vector2I)data.Node.Position,
-			data.Collision.TileLayer,
-			data.Collision.TileBehaviour);
-
-		Vector2I radius = data.Collision.Radius;
-		int distance = data.Collision.TileBehaviour switch
+		if (!data.Input.Down.Abc)
 		{
-			Constants.TileBehaviours.Floor => data.TileCollider.FindClosestDistance(
-				-radius.X, -radius.Y, radius.X, -radius.Y,
-				true, Constants.Direction.Negative),
-			
-			Constants.TileBehaviours.RightWall => data.TileCollider.FindClosestDistance(
-				-radius.Y, -radius.X, radius.Y, -radius.X,
-				false, Constants.Direction.Negative),
-			
-			Constants.TileBehaviours.LeftWall => data.TileCollider.FindClosestDistance(
-				-radius.Y, radius.X, radius.Y, radius.X,
-				false, Constants.Direction.Positive),
-			
-			Constants.TileBehaviours.Ceiling => maxCeilingDistance,
-			
-			_ => throw new ArgumentOutOfRangeException()
-		};
+			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
+		}
 		
-		return distance >= maxCeilingDistance;
+		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed || CpuInputTimer == 0 && data.Id > 0) return false;
+		
+		if (Transform()) return true;
+		
+		switch (data.Node.Type)
+		{
+			case PlayerNode.Types.Sonic: JumpSonic(); break;
+			case PlayerNode.Types.Tails: JumpTails(); break;
+			case PlayerNode.Types.Knuckles: JumpKnuckles(); break;
+			case PlayerNode.Types.Amy: JumpAmy(); break;
+		}
+		
+		return false;
 	}
 
 	private bool Transform()
@@ -126,7 +88,7 @@ public struct Jump(PlayerData data)
 		data.Visual.Animation = Animations.Transform;
 		ActionValue = SharedData.PhysicsType >= PhysicsCore.Types.S3 ? 26f : 36f;
 		data.Node.Visible = true;
-			
+		
 		// return player control routine
 		return true;
 	}
