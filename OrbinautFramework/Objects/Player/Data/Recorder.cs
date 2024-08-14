@@ -6,9 +6,13 @@ namespace OrbinautFramework3.Objects.Player.Data;
 
 public class Recorder(PlayerData data)
 {
-    private const byte MinimalRecordLength = 32;
+    private const byte MinimalLength = 32;
     
     public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
+    
+    private DataRecord NewRecord => new(
+        data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
+    
     private DataRecord[] _recordedData;
     
     public static void ResizeAll()
@@ -28,22 +32,18 @@ public class Recorder(PlayerData data)
         Array.Copy(_recordedData, 0, _recordedData, 
             1, _recordedData.Length - 1);
 		
-        _recordedData[0] = new DataRecord(
-            data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
+        _recordedData[0] = NewRecord;
     }
     
     public void Fill()
     {
-        _recordedData = new DataRecord[Math.Max(MinimalRecordLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
-        var record = new DataRecord(
-            data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
-        
-        Array.Fill(_recordedData, record);
+        _recordedData = new DataRecord[Math.Max(MinimalLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
+        Array.Fill(_recordedData, NewRecord);
     }
     
     private void Resize(int playersCount)
     {
-        int newLength = Math.Max(MinimalRecordLength, CpuModule.DelayStep * playersCount);
+        int newLength = Math.Max(MinimalLength, CpuModule.DelayStep * playersCount);
         int oldLength = _recordedData.Length;
 		
         if (newLength <= oldLength)

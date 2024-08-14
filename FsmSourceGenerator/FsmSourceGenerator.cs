@@ -144,7 +144,7 @@ public class FsmGenerator : IIncrementalGenerator
         }
         
         List<string> entersMethods = [];
-        List<string> exitsMethods = [];
+        Dictionary<string, bool> exitsMethods = [];
         Dictionary<string, List<string>> otherMethods = [];
         foreach (StructDeclarationSyntax structDeclaration in structs)
         {
@@ -154,14 +154,30 @@ public class FsmGenerator : IIncrementalGenerator
                 .OfType<MethodDeclarationSyntax>()
                 .Where(method => method.Modifiers.Any(SyntaxKind.PublicKeyword));
             
-            
             foreach (MethodDeclarationSyntax? method in methods)
             {
                 string methodName = method.Identifier.Text;
                 switch (methodName)
                 {
                     case "Enter": entersMethods.Add(structName); break;
-                    case "Exit": exitsMethods.Add(structName); break;
+                    case "Exit":
+                        SeparatedSyntaxList<ParameterSyntax> parameters = method.ParameterList.Parameters;
+                        if (parameters.Count == 0)
+                        {
+                            exitsMethods.Add(structName, false);
+                        }
+                        else if (parameters.Count == 1)
+                        {
+                            SemanticModel semanticModel = compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+                            ITypeSymbol? parameterSymbol = semanticModel.GetTypeInfo(parameters.First().Type!).Type;
+                            if (parameterSymbol == null) continue;
+                            string name = parameterSymbol.Name;
+                            if (parameterSymbol.Name == "States" || name == $"{fsmData.Name}.States")
+                            {
+                                exitsMethods.Add(structName, true);
+                            }
+                        }
+                        break;
                     default:
                         if (otherMethods.ContainsKey(methodName))
                         {
@@ -240,7 +256,7 @@ using System.Runtime.InteropServices;
         if (exitsMethods.Count > 0)
         {
             sourceBuilder.Append(
-"\n                Exit();"
+"\n                Exit(value);"
             );
         }
         
@@ -297,12 +313,12 @@ using System.Runtime.InteropServices;
         
         foreach (KeyValuePair<string, List<string>> method in otherMethods)
         {
-            AddMethod(sourceBuilder, method.Key, method.Value);
+            AddMethod(sourceBuilder, method.Key, method.Value, true);
         }
         
         if (exitsMethods.Count > 0)
         {
-            AddMethod(sourceBuilder, "Exit", exitsMethods);
+            AddExit(sourceBuilder, exitsMethods);
         }
 
         sourceBuilder.Append('\n').Append(
@@ -317,9 +333,9 @@ using System.Runtime.InteropServices;
         sourceBuilder.Clear();
     }
 
-    private static void AddMethod(
-        StringBuilder sourceBuilder, string methodName, List<string> actions, string access = "public")
+    private static void AddMethod(StringBuilder sourceBuilder, string methodName, List<string> actions, bool isPublic)
     {
+        string access = isPublic ? "public" : "private";
         sourceBuilder.Append("\n\n\t\t").Append(access).Append(" void ").Append(methodName).Append("()\n").Append(
 """
         {
@@ -338,6 +354,30 @@ using System.Runtime.InteropServices;
             }
         }
 """
+        );
+    }
+    
+    private static void AddExit(StringBuilder sourceBuilder, Dictionary<string, bool> actions)
+    {
+        sourceBuilder.Append("\n\n\t\tprivate void Exit(States nextState)\n").Append(
+            """
+                    {
+                        switch (_state)
+                        {
+            """
+        );
+        
+        foreach (KeyValuePair<string, bool> action in actions)
+        {
+            string parameter = action.Value ? "nextState" : "";
+            sourceBuilder.Append($"\n\t\t\t\tcase States.{action.Key}: {action.Key}.Exit({parameter}); break;");
+        }
+
+        sourceBuilder.Append('\n').Append(
+            """
+                        }
+                    }
+            """
         );
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace OrbinautFramework3.Objects.Player;
+﻿namespace OrbinautFramework3.Objects.Player.Data;
 
 public class SuperData
 {

@@ -7,8 +7,25 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 [FsmSourceGenerator.FsmState("Action")]
 public struct Flight(PlayerData data)
 {
-	private float _flightTimer;
-	private float _ascendTimer;
+	private float _flightTimer = 480f;
+	private float _ascendTimer = 0f;
+
+	public void Enter()
+	{
+		data.Collision.Radius = data.Collision.RadiusNormal;
+		
+		data.Movement.Gravity = GravityType.TailsDown;
+		data.Movement.IsAirLock = false;
+		data.Movement.IsSpinning = false;
+		
+		if (!data.Water.IsUnderwater)
+		{
+			AudioPlayer.Sound.Play(SoundStorage.Flight);
+		}
+		
+		data.Input.Down = data.Input.Down with { Abc = false };
+		data.Input.Press = data.Input.Press with { Abc = false };
+	}
 	
     public void Perform()
     {
@@ -41,13 +58,7 @@ public struct Flight(PlayerData data)
     	if (!Scene.Instance.IsTimePeriodLooped(16f, 8f)) return;
 	    if (!data.Node.Sprite.CheckInCameras()) return;
 	    
-    	if (_flightTimer > 0f)
-    	{
-    		AudioPlayer.Sound.Play(SoundStorage.Flight);
-    		return;
-    	}
-    	
-    	AudioPlayer.Sound.Play(SoundStorage.Flight2);
+	    AudioPlayer.Sound.Play(_flightTimer > 0f ? SoundStorage.Flight : SoundStorage.Flight2);
     }
 
     private bool Ascend()

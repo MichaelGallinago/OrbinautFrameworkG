@@ -34,7 +34,6 @@ public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode 
 		
 		Damage.IsHurt = false;
 		
-		Movement.IsJumping = false;
 		Movement.IsSpinning = false;
 		Movement.IsGrounded = false;
 		

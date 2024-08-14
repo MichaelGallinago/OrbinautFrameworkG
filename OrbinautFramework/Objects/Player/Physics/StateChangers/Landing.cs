@@ -25,11 +25,11 @@ public struct Landing(PlayerData data)
     			AudioPlayer.Sound.Stop(SoundStorage.Flight2);
     			break;
     		
-    		case States.SpinDash or States.Dash:
-    			if (data.State == States.Dash)
-    			{
-    				data.Movement.GroundSpeed.Value = DashCharge; //TODO set in Dash
-    			}
+    		case States.SpinDash:
+			    return;
+		    
+			case States.Dash:
+    			data.Movement.GroundSpeed.Value = DashCharge; //TODO set in Dash
     			return;
     	}
     
@@ -43,7 +43,6 @@ public struct Landing(PlayerData data)
     
     	data.Movement.IsAirLock = false;
     	data.Movement.IsSpinning = false;
-    	data.Movement.IsJumping = false;
     	data.Visual.SetPushBy = null;
     	data.Damage.IsHurt = false;
     

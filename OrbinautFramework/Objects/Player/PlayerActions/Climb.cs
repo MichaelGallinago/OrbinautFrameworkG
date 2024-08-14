@@ -13,12 +13,18 @@ public struct Climb(PlayerData data)
 {
 	private enum ClimbStates : byte
 	{
-		Normal, Ledge, WallJump, Fall
+		Normal, Ledge, WallJump
 	}
+	
+	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 	
 	private ClimbStates _state = ClimbStates.Normal;
 	private float _animationValue;
-	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
+
+	public void Enter()
+	{
+		
+	}
 
 	public void Perform()
     {
@@ -71,13 +77,13 @@ public struct Climb(PlayerData data)
 		data.Visual.Animation = Animations.Spin;
 		data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
 		
-		data.State = States.Default;
+		data.State = States.Jump;
 		
 		data.ResetGravity();
-		data.Movement.IsJumping = true;
 		data.Movement.IsSpinning = true;
-		data.Movement.Velocity.Vector = 
-			new Vector2(3.5f * (float)data.Visual.Facing, data.Physics.MinimalJumpSpeed);
+		
+		var velocity = new Vector2(3.5f * (float)data.Visual.Facing, data.Physics.MinimalJumpSpeed);
+		data.Movement.Velocity.Vector = velocity;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	}
@@ -142,11 +148,11 @@ public struct Climb(PlayerData data)
 			data.Collision.RadiusNormal.Y, 
 			true, 
 			Constants.Direction.Positive);
-
+		
 		if (distance >= 0) return false;
 		
-		data.Node.Position += 
-			new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
+		var position = new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
+		data.Node.Position += position;
 		data.Movement.Angle = angle;
 				
 		Land();
@@ -188,14 +194,8 @@ public struct Climb(PlayerData data)
 
 	private void ReleaseClimb()
 	{
-		data.Visual.Animation = Animations.GlideFall;
-		data.State = States.Glide;
-		data.Collision.Radius = data.Collision.RadiusNormal;
-		
-		_state = ClimbStates.Fall;
-		_animationValue = 1f;
-		
-		data.ResetGravity();
+		data.State = States.GlideFall;
+		data.Visual.OverrideFrame = 1;
 	}
 
 	private void ClimbLedge()

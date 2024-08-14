@@ -23,6 +23,12 @@ public struct PhysicsCore(PlayerData data)
 
 	public void ProcessCorePhysics()
 	{
+		if (data.Movement.IsCorePhysicsSkipped)
+		{
+			data.Movement.IsCorePhysicsSkipped = false;
+			return;
+		}
+		
 		_slopeResist.Apply();
 		_movement.Move();
 		_balancing.Balance();

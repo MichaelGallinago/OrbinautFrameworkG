@@ -12,6 +12,7 @@ public class MovementData
     public bool IsSpinning { get; set; }
     public bool IsForcedSpin { get; set; }
     public float GroundLockTimer { get; set; }
+    public bool IsCorePhysicsSkipped { get; set; }
     public bool IsControlRoutineEnabled { get; set; }
     
     public Velocity Velocity { get; } = new();

@@ -9,9 +9,9 @@ public interface ICpuTarget : IPosition
 {
     int ZIndex { get; }
     bool IsDead { get; }
+    SolidBox OnObject { get; }
     Velocity Velocity { get; }
     Animations Animation { get; }
-    OrbinautNode OnObject { get; }
     AcceleratedValue GroundSpeed { get; }
     bool IsObjectInteractionEnabled { get; }
     ReadOnlySpan<DataRecord> RecordedData { get; }

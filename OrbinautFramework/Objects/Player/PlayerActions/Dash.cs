@@ -2,7 +2,6 @@
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Physics;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
@@ -18,7 +17,6 @@ public struct Dash(PlayerData data)
 	public void Enter()
 	{
 		data.Visual.Animation = Animations.Move;
-    		
 		AudioPlayer.Sound.Play(SoundStorage.Charge2);
 	}
 	
@@ -32,11 +30,8 @@ public struct Dash(PlayerData data)
 	    return false;
     }
 
-    public void Exit()
-    {
-	    AudioPlayer.Sound.Stop(SoundStorage.Charge2);
-    }
-
+    public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);
+    
     private bool Charge()
     {
     	if (!data.Input.Down.Up) return false;

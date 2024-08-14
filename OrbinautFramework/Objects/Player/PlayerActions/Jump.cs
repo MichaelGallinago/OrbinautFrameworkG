@@ -55,7 +55,8 @@ public struct Jump(PlayerData data)
 			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
 		}
 		
-		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed || CpuInputTimer == 0 && data.Id > 0) return false;
+		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed) return false; 
+		if (CpuInputTimer == 0 && data.Id > 0) return false;
 		
 		if (Transform()) return true;
 		
@@ -72,22 +73,11 @@ public struct Jump(PlayerData data)
 
 	private bool Transform()
 	{
-		if (!data.Input.Press.C || data.Super.IsSuper || SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
+		if (!data.Input.Press.C || data.Super.IsSuper) return false;
+		if (SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 		
 		data.ResetState();
-		AudioPlayer.Sound.Play(SoundStorage.Transform);
-		AudioPlayer.Music.Play(MusicStorage.Super);
-		//TODO: instance_create obj_star_super
-		//instance_create(x, y, obj_star_super, { TargetPlayer: id });
-
-		data.Movement.IsControlRoutineEnabled = false;
-		data.Collision.IsObjectInteractionEnabled = false;			
-		data.Damage.InvincibilityTimer = 0f;
-		data.Super.Timer = 1f;
 		data.State = States.Transform;
-		data.Visual.Animation = Animations.Transform;
-		ActionValue = SharedData.PhysicsType >= PhysicsCore.Types.S3 ? 26f : 36f;
-		data.Node.Visible = true;
 		
 		// return player control routine
 		return true;
@@ -101,7 +91,6 @@ public struct Jump(PlayerData data)
 			    data.Super.IsSuper || data.Item.InvincibilityTimer > 0f)
 			{
 				data.State = States.DropDash;
-				ActionValue = 0f;
 			}
 		}
 		
@@ -125,6 +114,7 @@ public struct Jump(PlayerData data)
 	{
 		if (!SharedData.DoubleSpin) return;
 		
+		data.Node.Shield.State = ShieldContainer.States.DoubleSpin;
 		//TODO: obj_double_spin
 		/*
 		with obj_double_spin
@@ -136,8 +126,6 @@ public struct Jump(PlayerData data)
 		}
 		*/
 		
-		data.Node.Shield.State = ShieldContainer.States.DoubleSpin;
-		
 		//TODO: obj_double_spin
 		//instance_create(x, y, obj_double_spin, { TargetPlayer: id });
 		AudioPlayer.Sound.Play(SoundStorage.DoubleSpin);
@@ -145,9 +133,9 @@ public struct Jump(PlayerData data)
 
 	private void JumpWaterBarrier()
 	{
+		data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 		data.Movement.Velocity.Vector = new Vector2(0f, 8f);
 		//TODO: update shield animation
-		data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 	}
 	
@@ -190,61 +178,22 @@ public struct Jump(PlayerData data)
 
 	private void JumpTails()
 	{
-		if (data.State != States.Default || !data.Input.Press.Abc) return;
+		if (!data.Input.Press.Abc) return;
 		
-		data.Movement.IsAirLock = false;
-		data.Movement.IsSpinning = false;
-		data.Movement.IsJumping = false;
-		data.Movement.Gravity = GravityType.TailsDown;
 		data.State = States.Flight;
-		ActionValue = 480f;
-		ActionValue2 = 0f;
-		data.Collision.Radius = data.Collision.RadiusNormal;
-				
-		if (!data.Water.IsUnderwater)
-		{
-			AudioPlayer.Sound.Play(SoundStorage.Flight);
-		}
-
-		data.Input.Down = data.Input.Down with { Abc = false };
-		data.Input.Press = data.Input.Press with { Abc = false };
 	}
 
 	private void JumpKnuckles()
 	{
-		if (data.State != States.Default || !data.Input.Press.Abc) return;
+		if (!data.Input.Press.Abc) return;
 		
-		data.Movement.IsAirLock = false;
-		data.Movement.IsSpinning = false;
-		data.Movement.IsJumping = false;	
-		data.Visual.Animation = Animations.GlideAir;
-		data.State = States.Glide;
-		ActionState = (int)GlideStates.Air;
-		ActionValue = data.Visual.Facing == Constants.Direction.Negative ? 0f : 180f;
-		data.Collision.Radius = new Vector2I(10, 10);
-		data.Movement.GroundSpeed.Value = 4f;
-		data.Movement.Velocity.X = 0f;
-		data.Movement.Velocity.Y += 2f; 
-				
-		if (data.Movement.Velocity.Y < 0f)
-		{
-			data.Movement.Velocity.Y = 0f;
-		}
+		data.State = States.GlideAir;
 	}
 
 	private void JumpAmy()
 	{
-		if (data.State != States.Default || !data.Input.Press.Abc) return;
+		if (!data.Input.Press.Abc) return;
 		
-		if (SharedData.NoRollLock)
-		{
-			data.Movement.IsAirLock = false;
-		}
-		
-		data.Visual.Animation = Animations.HammerSpin;
 		data.State = States.HammerSpin;
-		ActionValue = 0f;
-		
-		AudioPlayer.Sound.Play(SoundStorage.Hammer);
 	}
 }

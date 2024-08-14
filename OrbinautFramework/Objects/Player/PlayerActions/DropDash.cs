@@ -14,7 +14,7 @@ public struct DropDash(PlayerData data)
 {
 	public const byte MaxCharge = 22;
 
-	private float _charge;
+	private float _charge = 0f;
 	
     public void Perform()
     {

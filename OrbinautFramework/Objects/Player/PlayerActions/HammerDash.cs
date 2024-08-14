@@ -1,6 +1,8 @@
 ﻿using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
@@ -10,6 +12,20 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 public struct HammerDash(PlayerData data)
 {
     private float _timer;
+
+    public void Enter()
+    {
+        data.Visual.Animation = Animations.HammerDash;
+        data.Movement.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
+        
+        if (data.Super.IsSuper && data.IsCameraTarget(out ICamera camera))
+        {
+            camera.SetShakeTimer(6f);
+        }
+		
+        AudioPlayer.Sound.Stop(SoundStorage.Charge3);
+        AudioPlayer.Sound.Play(SoundStorage.Release);
+    }
     
     public void Perform()
     {
