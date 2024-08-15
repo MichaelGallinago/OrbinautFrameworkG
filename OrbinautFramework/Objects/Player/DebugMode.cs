@@ -4,88 +4,69 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player;
 
-//TODO: replace by prefabs
-public class DebugMode
+public class DebugMode(IEditor editor)
 {
-	private const byte AccelerationMultiplier = 4;
+#if DEBUG
 	private const float Acceleration = 0.046875f;
+#else
+	private const float Acceleration = 0.1875f;
+#endif
 	private const byte SpeedLimit = 16;
 
 	public bool IsEnabled { get; set; }
 	
+	private readonly PackedScene[] _prefabs = Scene.Instance.DebugModePrefabs;
+	
 	private int _index;
 	private float _speed;
-	private IEditor _editor;
-	private readonly List<Type> _objects;
-    
-    public DebugMode(IEditor editor)
-    {
-	    _editor = editor;
-	    
-	    _objects =
-	    [
-		    typeof(Common.Ring.Ring), typeof(Common.GiantRing.GiantRing), typeof(Common.ItemBox.ItemBox),
-		    typeof(Common.Springs.Spring), typeof(Common.Motobug.Motobug), typeof(Common.Signpost.Signpost)
-	    ];
-	    
-	    switch (Scene.Instance)
-	    {
-		    case Scenes.Stages.TSZ.StageTsz:
-			    // TODO: debug objects
-			    _objects.AddRange(new List<Type>
-			    {
-				    //typeof(obj_platform_swing_tsz), typeof(obj_platform_tsz),
-				    //typeof(obj_falling_floor_tsz), typeof(obj_block_tsz)
-			    });
-			    break;
-	    }
-    }
-    
-    public bool Update(IInputContainer input)
-    {
-		if (!SharedData.DevMode) return false;
 
-		bool debugButton = IsDebugButtonPressed(_editor.IsDebugMode, input.Press.B);
+	public bool Update(IInputContainer input)
+    {
+#if !DEBUG
+	    if (!SharedData.IsDebugModeEnabled) return false;  
+#endif
+
+		bool debugButton = IsDebugButtonPressed(IsEnabled, input.Press.B);
 		
 		if (debugButton)
 		{
-			if (!_editor.IsDebugMode)
+			if (!IsEnabled)
 			{
 				if (Scene.Instance.IsStage)
 				{
 					Scene.Instance.Players.First().ResetMusic();
 				}
 				
-				_speed = 0;
+				_speed = 0f;
 
 				Scene.Instance.State = Scene.States.Normal;
 				Scene.Instance.AllowPause = true;
 				
-				_editor.OnEnableEditMode();
-				_editor.IsDebugMode = true;
+				editor.OnEnableEditMode();
+				IsEnabled = true;
 			}
 			else
 			{
-				_editor.OnDisableEditMode();
-				_editor.IsDebugMode = false;
+				editor.OnDisableEditMode();
+				IsEnabled = false;
 			}
 		}
 		
 		// Continue if Debug mode is enabled
-		if (!_editor.IsDebugMode) return false;
+		if (!IsEnabled) return false;
 
 		// Update speed and position (move faster if in developer mode)
 		if (input.Down.Up || input.Down.Down || input.Down.Left || input.Down.Right)
 		{
-			_speed = MathF.Min(_speed + (SharedData.DevMode ? 
-				Acceleration * AccelerationMultiplier : Acceleration), SpeedLimit);
+			_speed = MathF.Min(_speed + Acceleration, SpeedLimit);
 			
-			Vector2 position = _editor.Position;
+			Vector2 position = editor.Position;
 
 			float speed = _speed * Scene.Instance.ProcessSpeed;
 			
@@ -94,7 +75,7 @@ public class DebugMode
 			if (input.Down.Left) position.X -= speed;
 			if (input.Down.Right) position.X += speed;
 
-			_editor.Position = position;
+			editor.Position = position;
 		}
 		else
 		{
@@ -105,24 +86,32 @@ public class DebugMode
 		{
 			if (--_index < 0)
 			{
-				_index = _objects.Count - 1;
+				_index = _prefabs.Length - 1;
 			}
 		}
 		else if (input.Press.A)
 		{
-			if (++_index >= _objects.Count)
+			if (++_index >= _prefabs.Length)
 			{
 				_index = 0;
 			}
 		}
 		else if (input.Press.C)
 		{
-			//TODO: replace by prefabs
-			if (Activator.CreateInstance(_objects[_index]) is not OrbinautNode newObject) return true;
+			Node node = _prefabs[_index].Instantiate();
 			
-			newObject.Scale = new Vector2(newObject.Scale.X * (int)_editor.Facing, newObject.Scale.Y);
-			newObject.CullingType = ICullable.Types.Delete;
-			Scene.Instance.AddChild(newObject);
+			if (node is ICullable cullable)
+			{
+				cullable.CullingType = ICullable.Types.Delete;
+			}
+
+			if (node is Node2D node2D)
+			{
+				node2D.Scale = new Vector2(node2D.Scale.X * (float)editor.Facing, node2D.Scale.Y);
+				node2D.Position = editor.Position;
+			}
+			
+			Scene.Instance.AddChild(node);
 		}
 		
 		return true;
@@ -130,16 +119,15 @@ public class DebugMode
 
     private static bool IsDebugButtonPressed(bool isDebugMode, bool isPressB)
     {
-	    // If in developer mode, remap debug button to SpaceBar
-	    if (!SharedData.DevMode) return isPressB;
-	    
-	    bool debugButton = InputUtilities.DebugButtonPress;
-			
+#if DEBUG
 	    if (isDebugMode)
 	    {
-		    return debugButton || isPressB;
+		    return InputUtilities.DebugButtonPress || isPressB;
 	    }
 
-	    return debugButton;
+	    return InputUtilities.DebugButtonPress;
+#else
+		return isPressB;
+#endif
     }
 }

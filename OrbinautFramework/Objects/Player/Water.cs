@@ -45,10 +45,8 @@ public struct Water(PlayerData data)
 
 	private void ResetGravityOnEdge()
 	{
-		if (data.State != States.Flight && (data.State != States.Glide || ActionState == (int)GlideStates.Fall))
-		{
-			data.ResetGravity();
-		}
+		if (data.State is States.Flight or States.GlideAir or States.GlideGround) return;
+		data.ResetGravity();
 	}
 
 	private void RemoveShieldUnderwater()
@@ -171,8 +169,8 @@ public struct Water(PlayerData data)
 
 	private void SpawnSplash()
 	{
-		if (data.State == States.Climb || CpuState == CpuStates.Respawn ||
-		    data.State == States.Glide && ActionState == (int)GlideStates.Fall) return;
+		if (data.State is States.Climb or States.GlideAir or States.GlideGround) return;
+		if (CpuState == CpuStates.Respawn) return;
 		
 		//TODO: obj_water_splash
 		//instance_create(x, c_stage.water_level, obj_water_splash);

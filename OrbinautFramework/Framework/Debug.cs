@@ -1,3 +1,4 @@
+#if DEBUG
 using Godot;
 
 namespace OrbinautFramework3.Framework;
@@ -19,8 +20,6 @@ public partial class Debug : Node
 	
 	public override void _Input(InputEvent input)
 	{
-		if (!SharedData.DevMode) return;
-		
 		if (input is not InputEventKey { Pressed: false } keyEvent) return;
 
 		switch ((DebugKeys)keyEvent.Keycode)
@@ -48,3 +47,4 @@ public partial class Debug : Node
 	private static void OnRestartGamePressed() => Scene.Instance.Tree.ChangeSceneToFile(StartupPath);
 	private static void OnDevMenuPressed() => Scene.Instance.Tree.ChangeSceneToFile(DevMenuPath);
 }
+#endif

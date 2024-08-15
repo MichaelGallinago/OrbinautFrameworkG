@@ -1,10 +1,9 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.PathSwapTrigger;
-
-using Player;
 
 public abstract partial class PathSwapTrigger : Trigger
 {
@@ -22,12 +21,12 @@ public abstract partial class PathSwapTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
-            if (_isGroundOnly && !player.IsGrounded || !player.IsObjectInteractionEnabled) continue;
+            if (_isGroundOnly && !player.Movement.IsGrounded || !player.Collision.IsObjectInteractionEnabled) continue;
             UpdatePlayerTileLayer(player);
         }
     }
     
-    protected abstract void UpdatePlayerTileLayer(PlayerNode playerNode);
+    protected abstract void UpdatePlayerTileLayer(PlayerData player);
 }

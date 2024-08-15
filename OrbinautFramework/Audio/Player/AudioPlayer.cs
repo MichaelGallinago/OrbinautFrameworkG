@@ -6,12 +6,13 @@ public partial class AudioPlayer : Node2D
 {
     [ExportGroup("AudioStreamPlayers")]
     [Export] private AudioStreamPlayer _jinglePlayer;
-    [Export] private Godot.Collections.Array<AudioStreamPlayer> _musicPlayers;
-    [Export] private Godot.Collections.Array<AudioStreamPlayer> _soundPlayers;
+    [Export] private AudioStreamPlayer[] _musicPlayers;
+    [Export] private AudioStreamPlayer[] _soundPlayers;
     
+    //TODO: singleton 
     public static MusicPlayerContainer Music { get; private set; }
     public static PlayerContainer Sound { get; private set; }
-
+    
     public override void _Ready()
     {
         Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer);

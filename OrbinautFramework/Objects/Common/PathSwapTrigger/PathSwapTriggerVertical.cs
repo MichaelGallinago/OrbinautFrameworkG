@@ -1,9 +1,8 @@
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.PathSwapTrigger;
-
-using Player;
 
 public partial class PathSwapTriggerVertical : PathSwapTrigger
 {
@@ -16,19 +15,19 @@ public partial class PathSwapTriggerVertical : PathSwapTrigger
         Borders += Vector2.One * Position.X;
     }
 
-    protected override void UpdatePlayerTileLayer(PlayerNode playerNode)
+    protected override void UpdatePlayerTileLayer(PlayerData player)
     {
-        var playerPosition = (Vector2I)playerNode.Position;
+        var playerPosition = (Vector2I)player.Node.Position;
         if (playerPosition.X < Borders.X || playerPosition.X >= Borders.Y) return;
             
-        var previousPositionY = (int)playerNode.PreviousPosition.Y;
+        var previousPositionY = (int)player.Node.PreviousPosition.Y;
         if (previousPositionY < Position.Y && playerPosition.Y >= Position.Y)
         {
-            playerNode.TileLayer = _layerBelow;
+            player.Collision.TileLayer = _layerBelow;
         }
         else if (previousPositionY >= Position.X && playerPosition.X < Position.X)
         {
-            playerNode.TileLayer = _layerAbove;
+            player.Collision.TileLayer = _layerAbove;
         }
     }
 }

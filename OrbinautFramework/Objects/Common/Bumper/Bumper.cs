@@ -3,14 +3,12 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
-using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
-
+using static OrbinautFramework3.Objects.Player.ActionFsm;
+    
 namespace OrbinautFramework3.Objects.Common.Bumper;
-
-using Player;
 
 public partial class Bumper : InteractiveNode
 {
@@ -56,7 +54,7 @@ public partial class Bumper : InteractiveNode
             
             //TODO: obj_score
             //instance_create(x, y, obj_score);
-            PlayerData.IncreaseComboScore();
+            SharedData.IncreaseComboScore();
             
             break;
         }
@@ -64,12 +62,11 @@ public partial class Bumper : InteractiveNode
 
     private static void BumpPlayer(PlayerData player, Vector2 position)
     {
-        if (player.State == ActionFsm.States.Carried)
+        if (player.State == States.Carried)
         {
-            player.State = ActionFsm.States.Default;
+            player.State = States.Default;
         }
         
-        player.Movement.IsJumping = false;
         player.Movement.IsGrounded = false;
         player.Movement.IsAirLock = false;
         player.Visual.SetPushBy = null;

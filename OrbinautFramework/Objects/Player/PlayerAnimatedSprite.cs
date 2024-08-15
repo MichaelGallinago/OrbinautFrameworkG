@@ -9,7 +9,7 @@ namespace OrbinautFramework3.Objects.Player;
 [Tool]
 public partial class PlayerAnimatedSprite : AdvancedAnimatedSprite
 {
-	[Export] private Godot.Collections.Array<AdvancedSpriteFrames> _spriteFrames;
+	[Export] private AdvancedSpriteFrames[] _spriteFrames;
 
 	public bool IsFrameChanged { get; private set; }
 	public bool IsFinished { get; private set; }

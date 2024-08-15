@@ -66,6 +66,9 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         
         _cpuModule = new CpuModule(_data);
         _landing.LandHandler += () => _actionFsm.OnLand();
+        
+        Recorder.ResizeAll();
+        Scene.Instance.Players.Add(_data);
     }
 
     public void Init()
@@ -74,6 +77,12 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         _initialization.Spawn();
         _cpuModule?.Init();
         _recorder.Fill();
+    }
+
+    public void ExitTree()
+    {
+        Scene.Instance.Players.Remove(_data);
+        Recorder.ResizeAll();
     }
 
     public void Process()

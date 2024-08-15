@@ -18,7 +18,8 @@ public abstract partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
-    [Export] public PrefabStorage PrefabStorage { get; init; }
+    [Export] public PlayerPrefabs PlayerPrefabs { get; init; }
+    [Export] public PackedScene[] DebugModePrefabs { get; init; }
     
     public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }
@@ -37,7 +38,10 @@ public abstract partial class Scene : Node2D
     
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
     private SceneFrameEnd _frameEnd = new();
+    
+#if DEBUG
     private Debug _debug = new();
+#endif
     
     protected Scene()
     {
@@ -49,11 +53,14 @@ public abstract partial class Scene : Node2D
     {
         AddChild(_sceneContinuousUpdate);
         AddChild(_frameEnd);
-        AddChild(_debug);
-
+        
         Tree = GetTree();
 
         AttachCamerasToPlayer();
+        
+#if DEBUG
+        AddChild(_debug);
+#endif
     }
     
     public override void _EnterTree()

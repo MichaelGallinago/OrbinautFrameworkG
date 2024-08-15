@@ -8,16 +8,19 @@ public static class InputUtilities
     private const byte KeyboardId = 0;
     private const byte BaseDeviceCount = 4;
     
-    public static List<Buttons> Down { get; } = [];
-    public static List<Buttons> Press { get; } = [];
-    public static List<bool> BlockInput { get; } = [];
+    public static List<Buttons> Down { get; } = new(BaseDeviceCount);
+    public static List<Buttons> Press { get; } = new(BaseDeviceCount);
+    public static List<bool> BlockInput { get; } = new(BaseDeviceCount);
     public static int DeviceCount { get; private set; } = BaseDeviceCount;
     public static bool GamepadVibration { get; set; } = true;
     
-    public static bool DebugButtonDown { get; private set; }
-    public static bool DebugButtonPress { get; private set; }
 
     private static Godot.Collections.Array<int> _gamepads;
+    
+#if DEBUG
+    public static bool DebugButtonDown { get; private set; }
+    public static bool DebugButtonPress { get; private set; }
+#endif
 
     private static List<KeyboardControl> KeyboardControl { get; set; } =
     [
@@ -125,7 +128,10 @@ public static class InputUtilities
     
     private static void KeyboardProcess(ref Buttons down)
     {
+#if DEBUG
         bool previousDebugButtonDownState = DebugButtonDown;
+        DebugButtonDown = false;
+#endif
         foreach (KeyboardControl control in KeyboardControl)
         {
             down.Up = down.Up || Input.IsPhysicalKeyPressed(control.Up);
@@ -136,10 +142,13 @@ public static class InputUtilities
             down.B = down.B || Input.IsPhysicalKeyPressed(control.B);
             down.C = down.C || Input.IsPhysicalKeyPressed(control.C);
             down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
-            DebugButtonDown = Input.IsPhysicalKeyPressed(control.Debug);
+#if DEBUG
+            DebugButtonDown |= Input.IsPhysicalKeyPressed(control.Debug);
+#endif
         }
-
+#if DEBUG
         DebugButtonPress = !previousDebugButtonDownState && DebugButtonDown;
+#endif
     }
 
     private static void GamepadProcess(int device, ref Buttons down)

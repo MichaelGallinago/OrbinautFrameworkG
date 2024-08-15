@@ -7,7 +7,7 @@ public interface ICullable
 {
     public enum Types : byte { None, NoBounds, Reset, ResetX, ResetY, Delete, Pause }
     
-    public Types CullingType { get; }
+    public Types CullingType { get; set; }
     public Vector2 Position { get; }
     public IMemento Memento => null;
     

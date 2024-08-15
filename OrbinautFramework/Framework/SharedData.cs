@@ -13,7 +13,6 @@ public static class SharedData
     private static Vector2I _viewSize = new(400, 224);
     public static byte WindowScale { get; set; } = 2;
     public static int TargetFps { get; set; } = 165;
-    public static bool DevMode { get; set; } = true;
     public static bool ShowSplash { get; set; } = false;
     public static float MusicVolume { get; set; } = 0.5f;
     public static float SoundVolume { get; set; } = 0.5f;

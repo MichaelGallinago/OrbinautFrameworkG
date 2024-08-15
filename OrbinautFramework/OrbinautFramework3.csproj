@@ -48,6 +48,7 @@
     <EmbeddedResource Remove="Stages\**" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Framework\Prefabs\" />
     <Folder Include="Objects\Resources\" />
   </ItemGroup>
 </Project>

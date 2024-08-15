@@ -34,18 +34,10 @@ public abstract partial class PlayerNode : OrbinautNode, ICarryTarget, IPlayerNo
 		_logic.Init();
 		Sprite.Animate(this);
 	}
-
-	public override void _EnterTree()
-	{
-		base._EnterTree();
-		Recorder.ResizeAll();
-		Scene.Instance.Players.Add(this);
-	}
 	
 	public override void _ExitTree()
 	{
-		Scene.Instance.Players.Remove(this);
-		Recorder.ResizeAll();
+		_logic.ExitTree();
 		base._ExitTree();
 	}
 	

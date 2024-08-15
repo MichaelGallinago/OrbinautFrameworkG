@@ -97,7 +97,7 @@ public partial class FallingFloorSpawner : Sprite2D
         };
         
         floor.AddChild(sprite);
-        floor.SetSolid(_collisionRadius);
+        floor.SolidBox.Set(_collisionRadius);
         
         parent.CallDeferred("add_child", floor);
     }

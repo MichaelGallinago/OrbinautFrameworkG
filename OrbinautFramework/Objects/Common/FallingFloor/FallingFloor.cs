@@ -1,14 +1,15 @@
 using Godot;
 using Godot.Collections;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Piece;
 
 namespace OrbinautFramework3.Objects.Common.FallingFloor;
 
 using Player;
 
-public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : OrbinautData
+public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : SolidNode
 {
     private enum States : byte
     {
@@ -48,7 +49,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
     private void HandlePlayerOnCollapse()
     {
         // When falling apart, act as solid only for the players already standing on the object
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             if (!CheckSolidCollision(player, Constants.CollisionSensor.Top)) continue;
             player.ActSolid(this, Constants.SolidType.Top);
@@ -61,11 +62,11 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
         }
 			
         // Release all players from this object
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
-            if (player.OnObject != this) continue;
-            player.OnObject = null;
-            player.IsGrounded = false;
+            if (player.Collision.OnObject != SolidBox) continue;
+            player.Movement.IsGrounded = false;
+            player.Collision.OnObject = null;
         }
 
         _state = States.Fallen;
@@ -73,7 +74,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
 
     private void CheckTarget()
     {
-        foreach (PlayerNode player in Scene.Instance.Players.Values)
+        foreach (PlayerData player in Scene.Instance.Players.Values)
         {
             player.ActSolid(this, Constants.SolidType.Top);
 			
@@ -105,7 +106,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
             }
         }
 
-        Culling = CullingType.Reset;
+        CullingType = ICullable.Types.Reset;
         //TODO: audio
         //AudioPlayer.PlaySound(SoundStorage.Break);
 		
