@@ -1,9 +1,7 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Physics;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
@@ -11,15 +9,9 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 [FsmSourceGenerator.FsmState("Action")]
 public struct Climb(PlayerData data)
 {
-	private enum ClimbStates : byte
-	{
-		Normal, Ledge, WallJump
-	}
-	
 	private const int StepsPerClimbFrame = 4;
 	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 	
-	private ClimbStates _state = ClimbStates.Normal;
 	private float _animationValue;
 
 	public void Enter()
@@ -29,44 +21,33 @@ public struct Climb(PlayerData data)
 
 	public void Perform()
     {
-	    switch (_state)
+	    if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X) || 
+	        data.Movement.Velocity.X != 0f)
 	    {
-		    case ClimbStates.Normal: ClimbNormal(); break;
-		    case ClimbStates.Ledge: ClimbLedge(); break;
-		    case ClimbStates.WallJump: ClimbJump(); break;
-		    default: throw new ArgumentOutOfRangeException(_state.ToString());
+		    ReleaseClimb();
+		    return;
 	    }
+		
+	    UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * StepsPerClimbFrame);
+		
+	    int radiusX = data.Collision.Radius.X;
+	    if (data.Visual.Facing == Constants.Direction.Negative)
+	    {
+		    radiusX++;
+	    }
+		
+	    data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+
+	    if (data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+		
+	    if (!data.Input.Press.Abc)
+	    {
+		    UpdateAnimationFrame();
+		    return;
+	    }
+
+	    ClimbJump();
     }
-
-	private void ClimbNormal()
-	{
-		if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X) || 
-		    data.Movement.Velocity.X != 0f)
-		{
-			ReleaseClimb();
-			return;
-		}
-		
-		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * StepsPerClimbFrame);
-		
-		int radiusX = data.Collision.Radius.X;
-		if (data.Visual.Facing == Constants.Direction.Negative)
-		{
-			radiusX++;
-		}
-		
-		data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
-
-		if (data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
-		
-		if (!data.Input.Press.Abc)
-		{
-			UpdateAnimationFrame();
-			return;
-		}
-
-		ClimbJump();
-	}
 
 	private void UpdateAnimationFrame()
 	{
@@ -86,6 +67,8 @@ public struct Climb(PlayerData data)
 		
 		var velocity = new Vector2(3.5f * (float)data.Visual.Facing, data.Physics.MinimalJumpSpeed);
 		data.Movement.Velocity.Vector = velocity;
+		
+		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	}
 
 	private bool ClimbUpOntoWall(int radiusX)
@@ -196,34 +179,5 @@ public struct Climb(PlayerData data)
 	{
 		data.State = States.GlideFall;
 		data.Visual.OverrideFrame = 1;
-	}
-
-	private void ClimbLedge()
-	{
-		if (data.Visual.Animation != Animations.ClimbLedge)
-		{
-			data.Visual.Animation = Animations.ClimbLedge;
-			data.Node.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
-		}
-		else if (data.Node.Sprite.IsFrameChanged)
-		{
-			switch (data.Node.Sprite.Frame)
-			{
-				case 1: data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
-				case 2: data.Node.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
-			}
-		}
-		else if (data.Node.Sprite.IsFinished)
-		{
-			Land();
-			data.Visual.Animation = Animations.Idle;
-			data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
-
-			// Subtract that 1px that was applied when we attached to the wall
-			if (data.Visual.Facing == Constants.Direction.Negative)
-			{
-				data.Node.Position += Vector2.Left;
-			}
-		}
 	}
 }

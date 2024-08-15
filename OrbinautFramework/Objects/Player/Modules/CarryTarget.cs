@@ -1,5 +1,6 @@
 ﻿using Godot;
 using System;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Objects.Player.Data;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
@@ -30,6 +31,8 @@ public struct CarryTarget(PlayerData data)
 		    }
 		    
 		    data.Movement.Velocity.Vector = new Vector2(velocityX, data.Physics.MinimalJumpSpeed);
+		    
+		    AudioPlayer.Sound.Play(SoundStorage.Jump);
     		return;
     	}
     	

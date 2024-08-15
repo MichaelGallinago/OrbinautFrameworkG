@@ -1,49 +1,44 @@
 ﻿using System;
 using Godot;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public struct Default(PlayerData data)
 {
-    public void EarlyPerform()
+    public States EarlyPerform()
     {
-        if (!data.Input.Press.Abc) return;
-        if (SpinDash()) return;
-        if (Dash()) return;
-        Jump();
+        if (!data.Input.Press.Abc) return States.Default;
+        if (SpinDash()) return States.SpinDash;
+        if (Dash()) return States.Dash;
+        if (Jump()) return States.Jump;
+        return States.Default;
     }
     
     private bool SpinDash()
     {
         if (!SharedData.SpinDash || !data.Movement.IsGrounded) return false;
-        if (data.Visual.Animation is not (Animations.Duck or Animations.GlideLand)) return false;
-        if (!data.Input.Down.Down) return false;
         
-        data.State = ActionFsm.States.SpinDash;
-        return true;
+        return data.Visual.Animation is Animations.Duck or Animations.GlideLand && data.Input.Down.Down;
     }
     
     private bool Dash()
     {
         if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
         if (data.Id > 0 && CpuInputTimer <= 0f) return false;
-        if (data.Visual.Animation != Animations.LookUp) return false;
-        if (!data.Input.Down.Up) return false;
         
-        data.State = ActionFsm.States.Dash;
-        return true;
+        return data.Visual.Animation == Animations.LookUp && data.Input.Down.Up;
     }
     
-    private void Jump()
+    private bool Jump()
     {
-        if (data.Movement.IsForcedSpin || !data.Movement.IsGrounded) return;
-        if (!CheckCeilingDistance()) return;
-        
-        data.State = ActionFsm.States.Jump;
+        if (data.Movement.IsForcedSpin || !data.Movement.IsGrounded) return false;
+        if (!CheckCeilingDistance()) return false;
         
         if (!SharedData.FixJumpSize && SharedData.PhysicsType != PhysicsCore.Types.CD)
         {
@@ -66,13 +61,16 @@ public struct Default(PlayerData data)
         data.Movement.Velocity.Vector += data.Physics.JumpSpeed * velocity;
         
         data.Movement.IsGrounded = false;
+        data.Movement.IsCorePhysicsSkipped = true;
 		
         data.Collision.OnObject = null;
         data.Collision.IsStickToConvex = false;
 		
         data.Visual.SetPushBy = null;
         
-        data.Movement.IsCorePhysicsSkipped = true;
+        AudioPlayer.Sound.Play(SoundStorage.Jump);
+
+        return true;
     }
     
     private bool CheckCeilingDistance()

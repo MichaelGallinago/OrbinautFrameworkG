@@ -20,15 +20,19 @@ public struct Dash(PlayerData data)
 		AudioPlayer.Sound.Play(SoundStorage.Charge2);
 	}
 	
-    public void Perform()
+    public States Perform()
     {
-	    if (!data.Movement.IsGrounded) return;
-	    if (data.Id > 0 && CpuInputTimer <= 0f) return;
+	    if (!data.Movement.IsGrounded) return States.Dash;
+	    if (data.Id > 0 && CpuInputTimer <= 0f) return States.Dash;
 
-	    if (!Charge() && Release())
+	    if (Charge()) return States.Dash;
+	    
+	    if (Release())
 	    {
 		    data.Movement.IsCorePhysicsSkipped = true;
 	    }
+	    
+	    return States.Default;
     }
 
     public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);
@@ -53,8 +57,6 @@ public struct Dash(PlayerData data)
 
     private bool Release()
     {
-    	data.State = States.Default;
-    	
     	if (_charge < ChargeLimit)
     	{
     		data.Movement.GroundSpeed.Value = 0f;

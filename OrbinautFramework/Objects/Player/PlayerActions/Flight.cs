@@ -29,11 +29,7 @@ public struct Flight(PlayerData data)
 	
     public void Perform()
     {
-        // Flight timer
-        if (_flightTimer > 0f)
-        {
-            _flightTimer -= Scene.Instance.ProcessSpeed;
-        }
+	    UpdateTimer();
 
         if (!Ascend())
         {
@@ -41,15 +37,15 @@ public struct Flight(PlayerData data)
         }
 
         PlayFlightSound();
+        SetAnimation();
+    }
 
-        if (data.Water.IsUnderwater)
-        {
-            data.Visual.Animation = _flightTimer > 0f ? Animations.Fly : Animations.FlyTired;
-        }
-        else
-        {
-            data.Visual.Animation = _flightTimer > 0f ? Animations.Swim : Animations.SwimTired;
-        }
+    private void UpdateTimer()
+    {
+	    if (_flightTimer > 0f)
+	    {
+		    _flightTimer -= Scene.Instance.ProcessSpeed;
+	    }
     }
     
     private void PlayFlightSound()
@@ -96,5 +92,17 @@ public struct Flight(PlayerData data)
     	{
     		data.Movement.Gravity *= 3f;
     	}
+    }
+
+    private void SetAnimation()
+    {
+	    if (data.Water.IsUnderwater)
+	    {
+		    data.Visual.Animation = _flightTimer > 0f ? Animations.Fly : Animations.FlyTired;
+	    }
+	    else
+	    {
+		    data.Visual.Animation = _flightTimer > 0f ? Animations.Swim : Animations.SwimTired;
+	    }
     }
 }

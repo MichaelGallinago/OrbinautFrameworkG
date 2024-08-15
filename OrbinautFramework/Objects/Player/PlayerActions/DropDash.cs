@@ -16,41 +16,32 @@ public struct DropDash(PlayerData data)
 
 	private float _charge = 0f;
 	
-    public void Perform()
+    public States Perform()
     {
-	    if (data.Movement.IsGrounded || Cancel()) return;
+	    if (data.Movement.IsGrounded) return States.DropDash;
+	    if (Cancel()) return States.Jump;
 		
 	    if (data.Input.Down.Abc)
 	    {
-		    data.Movement.IsAirLock = false;		
-		    _charge += Scene.Instance.ProcessSpeed;
-			
-		    if (_charge < MaxCharge || data.Visual.Animation == Animations.DropDash) return;
-			
-		    AudioPlayer.Sound.Play(SoundStorage.Charge3);
-		    data.Visual.Animation = Animations.DropDash;
-		    return;
+		    Charge();
+		    return States.DropDash;
 	    }
-		
-	    switch (_charge)
+
+	    if (_charge >= MaxCharge)
 	    {
-		    case <= 0f:
-			    return;
-			
-		    case >= MaxCharge:
-			    data.Visual.Animation = Animations.Spin;
-			    data.State = States.Default;
-			    break;
+		    data.Visual.Animation = Animations.Spin;
+		    return States.None;
 	    }
-		
-	    _charge = 0f;
+	    
+	    _charge = 0f; 
+	    return States.DropDash;
     }
     
-    public void OnLand()
+    public States OnLand()
     {
-    	if (Cancel()) return;
+    	if (Cancel()) return States.Default;
     	
-    	if (_charge < MaxCharge) return;
+    	if (_charge < MaxCharge) return States.Default;
     	
     	data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
 	    data.Collision.Radius = data.Collision.RadiusSpin;
@@ -66,6 +57,19 @@ public struct DropDash(PlayerData data)
     	//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
     	AudioPlayer.Sound.Stop(SoundStorage.Charge3);
     	AudioPlayer.Sound.Play(SoundStorage.Release);
+
+	    return States.Default;
+    }
+
+    private void Charge()
+    {
+	    data.Movement.IsAirLock = false;		
+	    _charge += Scene.Instance.ProcessSpeed;
+			
+	    if (_charge < MaxCharge || data.Visual.Animation == Animations.DropDash) return;
+			
+	    AudioPlayer.Sound.Play(SoundStorage.Charge3);
+	    data.Visual.Animation = Animations.DropDash;
     }
 
     private void SetGroundSpeed()
@@ -107,11 +111,6 @@ public struct DropDash(PlayerData data)
     private bool Cancel()
     {
     	if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return false; 
-	    if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return false;
-	    
-	    data.State = States.Jump;
-	    
-	    AudioPlayer.Sound.Stop(SoundStorage.Jump);
-    	return true;
+	    return !data.Super.IsSuper && !(data.Item.InvincibilityTimer > 0f);
     }
 }

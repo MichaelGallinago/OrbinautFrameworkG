@@ -23,34 +23,27 @@ public struct HammerSpin(PlayerData data)
         AudioPlayer.Sound.Play(SoundStorage.Hammer);
     }
     
-    public void Perform()
+    public States Perform()
     {
-        if (data.Movement.IsGrounded) return;
+        if (data.Movement.IsGrounded) return States.HammerSpin;
         
         if (data.Input.Down.Abc)
         {
             Charge();
-            return;
-        }
-		
-        switch (_charge)
-        {
-            case <= 0f: return;
-			
-            case >= DropDash.MaxCharge:
-                data.Visual.Animation = Animations.Spin;
-                data.State = States.None;
-                break;
+            return States.HammerSpin;
         }
 
-        _charge = 0f;
+        if (_charge >= DropDash.MaxCharge)
+        {
+            data.Visual.Animation = Animations.Spin;
+            return States.None;
+        }
+        
+        _charge = 0f; 
+        return States.HammerSpin;
     }
     
-    public void OnLand()
-    {
-        if (_charge < DropDash.MaxCharge) return;
-        data.State = States.HammerDash;
-    }
+    public States OnLand() => _charge < DropDash.MaxCharge ? States.Default : States.HammerDash;
 
     private void Charge()
     {

@@ -145,7 +145,7 @@ public class FsmGenerator : IIncrementalGenerator
         
         List<string> entersMethods = [];
         Dictionary<string, bool> exitsMethods = [];
-        Dictionary<string, List<string>> otherMethods = [];
+        Dictionary<string, Dictionary<string, bool>> otherMethods = [];
         foreach (StructDeclarationSyntax structDeclaration in structs)
         {
             string structName = structDeclaration.Identifier.Text;
@@ -172,20 +172,23 @@ public class FsmGenerator : IIncrementalGenerator
                             ITypeSymbol? parameterSymbol = semanticModel.GetTypeInfo(parameters.First().Type!).Type;
                             if (parameterSymbol == null) continue;
                             string name = parameterSymbol.Name;
-                            if (parameterSymbol.Name == "States" || name == $"{fsmData.Name}.States")
+                            if (name == "States" || name == $"{fsmData.Name}.States")
                             {
                                 exitsMethods.Add(structName, true);
                             }
                         }
                         break;
                     default:
+                        var typeName = method.ReturnType.ToString();
+                        bool isStateChanger = typeName == "States" || typeName == $"{fsmData.Name}.States";
+                        
                         if (otherMethods.ContainsKey(methodName))
                         {
-                            otherMethods[methodName].Add(structName);
+                            otherMethods[methodName].Add(structName, isStateChanger);
                             break;
                         }
                         
-                        otherMethods.Add(methodName, [structName]);
+                        otherMethods.Add(methodName, new Dictionary<string, bool> {{structName, isStateChanger}});
                         break;
                 }
             }
@@ -256,7 +259,11 @@ using System.Runtime.InteropServices;
         if (exitsMethods.Count > 0)
         {
             sourceBuilder.Append(
-"\n                Exit(value);"
+"""
+
+                if (value == _state) return;
+                Exit(value);
+"""
             );
         }
         
@@ -311,7 +318,7 @@ using System.Runtime.InteropServices;
             sourceBuilder.Append($"\n\t\t[FieldOffset({offset})] private {name} {name};");
         }
         
-        foreach (KeyValuePair<string, List<string>> method in otherMethods)
+        foreach (KeyValuePair<string, Dictionary<string, bool>> method in otherMethods)
         {
             AddMethod(sourceBuilder, method.Key, method.Value, true);
         }
@@ -333,7 +340,8 @@ using System.Runtime.InteropServices;
         sourceBuilder.Clear();
     }
 
-    private static void AddMethod(StringBuilder sourceBuilder, string methodName, List<string> actions, bool isPublic)
+    private static void AddMethod(
+        StringBuilder sourceBuilder, string methodName, Dictionary<string, bool> states, bool isPublic)
     {
         string access = isPublic ? "public" : "private";
         sourceBuilder.Append("\n\n\t\t").Append(access).Append(" void ").Append(methodName).Append("()\n").Append(
@@ -344,9 +352,11 @@ using System.Runtime.InteropServices;
 """
         );
         
-        foreach (string action in actions)
+        foreach (KeyValuePair<string, bool> state in states)
         {
-            sourceBuilder.Append($"\n\t\t\t\tcase States.{action}: {action}.{methodName}(); break;");
+            sourceBuilder.Append(state.Value
+                ? $"\n\t\t\t\tcase States.{state.Key}: State = {state.Key}.{methodName}(); break;"
+                : $"\n\t\t\t\tcase States.{state.Key}: {state.Key}.{methodName}(); break;");
         }
 
         sourceBuilder.Append('\n').Append(
