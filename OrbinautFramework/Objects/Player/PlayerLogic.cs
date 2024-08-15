@@ -45,7 +45,6 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         _data = new PlayerData(this, playerNode);
 
         _recorder = new Recorder(_data);
-        _debugMode = new DebugMode(_data); // Create only if allowed
         
         _dash = new Dash(_data);
         _jump = new Jump(_data);
@@ -69,6 +68,14 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         
         Recorder.ResizeAll();
         Scene.Instance.Players.Add(_data);
+        
+        if (_data.Id == 0)
+        {
+#if !DEBUG
+            if (!SharedData.IsDebugModeEnabled) return;
+#endif
+            _debugMode = new DebugMode(_data);
+        }
     }
 
     public void Init()
@@ -89,9 +96,9 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     {
         _data.Input.Update(_data.Id);
         
-        if (_data.Death.State == Death.States.Wait && _data.Id == 0 && SharedData.IsDebugModeEnabled)
+        if (_debugMode != null && _data.Death.State == Death.States.Wait)
         {
-            if (_debugMode.Update(this, _data.Input)) return;
+            if (_debugMode.Update(_data.Input)) return;
         }
 
         _cpuModule?.Process();
@@ -116,8 +123,7 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     
     private void RunControlRoutine()
     {
-        _data.Physics.Update(
-            _data.Water.IsUnderwater, _data.Super.IsSuper, _data.Node.Type, _data.Item.SpeedTimer);
+        _data.Physics.Update(_data.Water.IsUnderwater, _data.Super.IsSuper, _data.Node.Type, _data.Item.SpeedTimer);
         
         if (_spinDash.Perform()) return;
         if (_dash.Perform()) return;
@@ -194,26 +200,4 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         
         _data.State = ActionFsm.States.Dash;
     }
-
-    
-    /*
-    //TODO: update debug mode
-    public void OnEnableEditMode()
-    {
-        _data.ResetGravity();
-        ResetState();
-        //ResetZIndex();
-
-        Visible = true;
-        IsObjectInteractionEnabled = false;
-    }
-
-    public void OnDisableEditMode()
-    {
-        Velocity.Vector = Vector2.Zero;
-        GroundSpeed.Value = 0f;
-        Animation = Animations.Move;
-        IsObjectInteractionEnabled = true;
-        DeathState = DeathStates.Wait;
-    }*/
 }

@@ -1,10 +1,12 @@
+using OrbinautFramework3.Audio.Player;
+using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
 public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode node) 
-	: IPlayerCameraTarget, IPlayerData, IPlayerCpuTarget
+	: IPlayerCameraTarget, IPlayerData, IPlayerCpuTarget, IPlayerEditor
 {
 	public int Id { get; set; }
 	public IPlayerNode Node { get; } = node;
@@ -41,5 +43,30 @@ public class PlayerData(IStateHolder<ActionFsm.States> stateHolder, IPlayerNode 
 		
 		Collision.OnObject = null;
 		Collision.Radius = Collision.RadiusNormal;
+	}
+	
+	public void ResetGravity()
+	{
+		Movement.Gravity = Water.IsUnderwater ? GravityType.Underwater : GravityType.Default;
+	}
+    
+	public void ResetMusic()
+	{
+		if (Super.IsSuper)
+		{
+			AudioPlayer.Music.Play(MusicStorage.Super);
+		}
+		else if (Item.InvincibilityTimer > 0f)
+		{
+			AudioPlayer.Music.Play(MusicStorage.Invincibility);
+		}
+		else if (Item.SpeedTimer > 0f)
+		{
+			AudioPlayer.Music.Play(MusicStorage.HighSpeed);
+		}
+		else if (Stage.Local != null && Stage.Local.Music != null)
+		{
+			AudioPlayer.Music.Play(Stage.Local.Music);
+		}
 	}
 }
