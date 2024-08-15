@@ -1,6 +1,5 @@
-﻿using System;
-using Godot;
-using OrbinautFramework3.Audio.Player;
+﻿using Godot;
+using System;
 using OrbinautFramework3.Objects.Player.Data;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
@@ -17,23 +16,20 @@ public struct CarryTarget(PlayerData data)
     		carrier.CarryTarget = null;
     		carrier.CarryTimer = 18f;
 		    
-		    data.Movement.IsSpinning = true;
-		    data.Movement.IsJumping = true;
-		    data.State = States.Default;
-		    data.Visual.Animation = Animations.Spin;
+		    data.State = States.Jump;
 		    data.Collision.Radius = data.Collision.RadiusSpin;
-		    data.Movement.Velocity.Vector = new Vector2(0f, data.Physics.MinimalJumpSpeed);
-    				
-    		if (data.Input.Down.Left)
-    		{
-			    data.Movement.Velocity.X = -2f;
-    		}
-    		else if (data.Input.Down.Right)
-    		{
-			    data.Movement.Velocity.X = 2f;
-    		}
-    		
-    		AudioPlayer.Sound.Play(SoundStorage.Jump);
+
+		    var velocityX = 0f;
+		    if (data.Input.Down.Left)
+		    {
+			    velocityX = -2f;
+		    }
+		    else if (data.Input.Down.Right)
+		    {
+			    velocityX = 2f;
+		    }
+		    
+		    data.Movement.Velocity.Vector = new Vector2(velocityX, data.Physics.MinimalJumpSpeed);
     		return;
     	}
     	

@@ -16,6 +16,7 @@ public struct Climb(PlayerData data)
 		Normal, Ledge, WallJump
 	}
 	
+	private const int StepsPerClimbFrame = 4;
 	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 	
 	private ClimbStates _state = ClimbStates.Normal;
@@ -46,8 +47,7 @@ public struct Climb(PlayerData data)
 			return;
 		}
 		
-		const int stepsPerClimbFrame = 4;
-		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * stepsPerClimbFrame);
+		UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * StepsPerClimbFrame);
 		
 		int radiusX = data.Collision.Radius.X;
 		if (data.Visual.Facing == Constants.Direction.Negative)
@@ -61,31 +61,31 @@ public struct Climb(PlayerData data)
 		
 		if (!data.Input.Press.Abc)
 		{
-			// Update animation frame if still climbing
-			if (data.Movement.Velocity.Y != 0)
-			{
-				data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / stepsPerClimbFrame);
-			}
+			UpdateAnimationFrame();
 			return;
 		}
 
 		ClimbJump();
 	}
 
+	private void UpdateAnimationFrame()
+	{
+		if (data.Movement.Velocity.Y != 0)
+		{
+			data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / StepsPerClimbFrame);
+		}
+	}
+
 	private void ClimbJump()
 	{
-		data.Visual.Animation = Animations.Spin;
-		data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
-		
 		data.State = States.Jump;
 		
 		data.ResetGravity();
-		data.Movement.IsSpinning = true;
+		
+		data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
 		
 		var velocity = new Vector2(3.5f * (float)data.Visual.Facing, data.Physics.MinimalJumpSpeed);
 		data.Movement.Velocity.Vector = velocity;
-		
-		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	}
 
 	private bool ClimbUpOntoWall(int radiusX)

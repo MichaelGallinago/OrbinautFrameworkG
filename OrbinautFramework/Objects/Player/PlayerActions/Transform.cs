@@ -25,10 +25,17 @@ public struct Transform(PlayerData data)
         data.Super.Timer = 1f;
         data.Visual.Animation = Animations.Transform;
         data.Node.Visible = true;
+
+        LatePerform();
     }
     
-    public void Perform()
+    public void LatePerform()
     {
+        _timer -= Scene.Instance.ProcessSpeed;
+        if (_timer > 0f) return;
         
+        data.Collision.IsObjectInteractionEnabled = true;
+        data.Movement.IsControlRoutineEnabled = true;
+        data.State = States.Default;
     }
 }

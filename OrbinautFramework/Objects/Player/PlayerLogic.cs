@@ -1,10 +1,7 @@
-﻿using System;
-using Godot;
-using OrbinautFramework3.Framework;
+﻿using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics.StateChangers;
-using OrbinautFramework3.Objects.Player.PlayerActions;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -22,9 +19,7 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         get => _actionFsm.State;
         set => _actionFsm.State = value;
     }
-
-    private Dash _dash;
-    private Jump _jump;
+    
     private Carry _carry;
     private Death _death;
     private Water _water;
@@ -32,7 +27,6 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     private Status _status;
     private Landing _landing;
     private Palette _palette;
-    private SpinDash _spinDash;
     private ActionFsm _actionFsm;
     private PhysicsCore _physicsCore;
     private AngleRotation _angleRotation;
@@ -46,8 +40,6 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
 
         _recorder = new Recorder(_data);
         
-        _dash = new Dash(_data);
-        _jump = new Jump(_data);
         _carry = new Carry(_data);
         _death = new Death(_data);
         _water = new Water(_data);
@@ -55,7 +47,6 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         _status = new Status(_data);
         _landing = new Landing(_data);
         _palette = new Palette(_data);
-        _spinDash = new SpinDash(_data);
         _actionFsm = new ActionFsm(_data);
         _physicsCore = new PhysicsCore(_data);
         _angleRotation = new AngleRotation(_data);
@@ -100,7 +91,7 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         {
             if (_debugMode.Update(_data.Input)) return;
         }
-
+        
         _cpuModule?.Process();
         _death.Process();
 		
@@ -108,7 +99,7 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         {
             RunControlRoutine();
         }
-
+        
         if (!_data.Death.IsDead)
         {
             _water.Process();
@@ -125,79 +116,18 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     {
         _data.Physics.Update(_data.Water.IsUnderwater, _data.Super.IsSuper, _data.Node.Type, _data.Item.SpeedTimer);
         
-        if (_spinDash.Perform()) return;
-        if (_dash.Perform()) return;
-        if (_jump.Perform()) return;
-        if (_jump.Start()) return;
-		
+        _actionFsm.EarlyPerform();
         _actionFsm.Perform();
-		
+        
+        if (_data.Movement.IsCorePhysicsSkipped)
+        {
+            _data.Movement.IsCorePhysicsSkipped = false;
+            return;
+        }
+        
         _physicsCore.ProcessCorePhysics();
-
+        
         _actionFsm.LatePerform();
         _carry.Process();
-    }
-
-    private void DefaultUpdate()
-    {
-        
-    }
-    
-    private void RunJump()
-    {
-        if (_data.State is ActionFsm.States.SpinDash or ActionFsm.States.Dash) return;
-        if (_data.Movement.IsForcedSpin || !_data.Movement.IsGrounded) return;
-        if (!_data.Input.Press.Abc || !CheckCeilingDistance()) return;
-        
-        // Exit control routine
-        return true;
-    }
-    
-    private bool CheckCeilingDistance()
-    {
-        const int maxCeilingDistance = 6; 
-		
-        _data.TileCollider.SetData(
-            (Vector2I)_data.Node.Position,
-            _data.Collision.TileLayer,
-            _data.Collision.TileBehaviour);
-
-        Vector2I radius = _data.Collision.Radius;
-        int distance = _data.Collision.TileBehaviour switch
-        {
-            Constants.TileBehaviours.Floor => _data.TileCollider.FindClosestDistance(
-                -radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative),
-			
-            Constants.TileBehaviours.RightWall => _data.TileCollider.FindClosestDistance(
-                -radius.Y, -radius.X, radius.Y, -radius.X, false, Constants.Direction.Negative),
-			
-            Constants.TileBehaviours.LeftWall => _data.TileCollider.FindClosestDistance(
-                -radius.Y, radius.X, radius.Y, radius.X, false, Constants.Direction.Positive),
-			
-            Constants.TileBehaviours.Ceiling => maxCeilingDistance,
-			
-            _ => throw new ArgumentOutOfRangeException()
-        };
-		
-        return distance >= maxCeilingDistance;
-    }
-
-    private void RunSpinDash()
-    {
-        if (!SharedData.SpinDash || !_data.Movement.IsGrounded) return;
-        if (_data.Visual.Animation is not (Animations.Duck or Animations.GlideLand)) return;
-        if (!_data.Input.Press.Abc || !_data.Input.Down.Down) return;
-        
-        _data.State = ActionFsm.States.SpinDash;
-    }
-    
-    private void RunDash()
-    {
-        if (!SharedData.Dash || _data.Node.Type != PlayerNode.Types.Sonic) return;
-        if (_data.Id > 0 && CpuInputTimer <= 0f) return;
-        if (_data.Visual.Animation != Animations.LookUp) return;
-        if (!_data.Input.Down.Up || !_data.Input.Press.Abc) return;
-        
-        _data.State = ActionFsm.States.Dash;
     }
 }

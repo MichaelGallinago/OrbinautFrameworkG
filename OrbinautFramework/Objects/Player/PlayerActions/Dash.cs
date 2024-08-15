@@ -20,14 +20,15 @@ public struct Dash(PlayerData data)
 		AudioPlayer.Sound.Play(SoundStorage.Charge2);
 	}
 	
-    public bool Perform()
+    public void Perform()
     {
-	    if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
-	    if (data.Id > 0 && CpuInputTimer <= 0f) return false;
-    	
-	    if (data.Movement.IsGrounded) return !Charge() && Release();
-	    
-	    return false;
+	    if (!data.Movement.IsGrounded) return;
+	    if (data.Id > 0 && CpuInputTimer <= 0f) return;
+
+	    if (!Charge() && Release())
+	    {
+		    data.Movement.IsCorePhysicsSkipped = true;
+	    }
     }
 
     public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);

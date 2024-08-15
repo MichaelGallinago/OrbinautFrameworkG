@@ -1,10 +1,8 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
-using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
@@ -66,17 +64,6 @@ public struct Status(PlayerData data)
 	private void UpdateSuperForm()
 	{
 		if (!data.Super.IsSuper) return;
-		
-		if (data.State == States.Transform)
-		{
-			ActionValue -= Scene.Instance.ProcessSpeed;
-			if (ActionValue <= 0f)
-			{
-				data.Collision.IsObjectInteractionEnabled = true;
-				data.Movement.IsControlRoutineEnabled = true;
-				data.State = States.None;
-			}
-		}
 
 		float newSuperTimer = data.Super.Timer - Scene.Instance.ProcessSpeed;
 		if (newSuperTimer > 0f)
@@ -92,7 +79,7 @@ public struct Status(PlayerData data)
 		}
 		
 		SharedData.PlayerRings = 0;
-		data.Damage.InvincibilityTimer = 1;
+		data.Damage.InvincibilityTimer = 1f;
 		data.Super.Timer = 0f;
 		
 		data.ResetMusic();

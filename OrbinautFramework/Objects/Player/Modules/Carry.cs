@@ -1,9 +1,7 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Physics;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
@@ -22,7 +20,7 @@ public struct Carry(PlayerData data)
 	
         if (data.Carry.Target != null)
         {
-            data.Carry.Target.OnAttached(this);
+            data.Carry.Target.CarryTarget.OnAttached(data);
             return;
         }
 		
@@ -31,22 +29,22 @@ public struct Carry(PlayerData data)
         GrabAnotherPlayer();
     }
 
-    private void GrabAnotherPlayer(PlayerNode carrier)
+    private void GrabAnotherPlayer()
     {
         foreach (PlayerData player in Scene.Instance.Players.Values)
         {
-            if (player == carrier) continue;
-            if (player.data.State is Actions.SpinDash or Actions.Carried) continue;
-            if (!player.IsControlRoutineEnabled || !player.IsObjectInteractionEnabled) continue;
+            if (player == data) continue;
+            if (player.State is States.SpinDash or States.Carried) continue;
+            if (!player.Movement.IsControlRoutineEnabled || !player.Collision.IsObjectInteractionEnabled) continue;
 
-            Vector2 delta = (player.Position - Position).Abs();
+            Vector2 delta = (player.Node.Position - data.Node.Position).Abs();
             if (delta.X >= 16f || delta.Y >= 48f) continue;
 				
             player.ResetState();
             AudioPlayer.Sound.Play(SoundStorage.Grab);
 				
-            player.Animation = Animations.Grab;
-            player.data.State = Actions.Carried;
+            player.Visual.Animation = Animations.Grab;
+            player.State = States.Carried;
             data.Carry.Target = player;
 
             player.AttachToCarrier(this);

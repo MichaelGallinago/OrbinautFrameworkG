@@ -106,13 +106,12 @@ public struct DropDash(PlayerData data)
 
     private bool Cancel()
     {
-    	if (!SharedData.DropDash || data.State != States.DropDash) return true;
-	    
     	if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return false; 
 	    if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return false;
-    	
-	    data.Visual.Animation = Animations.Spin;
-	    data.State = States.Default;
+	    
+	    data.State = States.Jump;
+	    
+	    AudioPlayer.Sound.Stop(SoundStorage.Jump);
     	return true;
     }
 }

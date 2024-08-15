@@ -23,18 +23,18 @@ public struct SpinDash(PlayerData data)
 		AudioPlayer.Sound.Play(SoundStorage.Charge);
 	}
     
-    public bool Perform()
+    public void Perform()
     {
-	    if (!SharedData.SpinDash || !data.Movement.IsGrounded) return false;
+	    if (!data.Movement.IsGrounded) return;
 	    
 	    if (data.Input.Down.Down)
 	    {
 		    Charge();
-		    return false;
+		    return;
 	    }
 
 	    Release();
-	    return true;
+	    data.Movement.IsCorePhysicsSkipped = true;
     }
 
     private void Release()
