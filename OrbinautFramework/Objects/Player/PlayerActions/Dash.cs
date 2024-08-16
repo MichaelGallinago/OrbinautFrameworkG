@@ -35,8 +35,14 @@ public struct Dash(PlayerData data)
 	    return States.Default;
     }
 
-    public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);
-    
+    public void Exit(States nextState)
+    {
+	    AudioPlayer.Sound.Stop(SoundStorage.Charge2);
+	    
+	    if (nextState != States.Land) return;
+	    data.Movement.GroundSpeed.Value = _charge;
+    }
+
     private bool Charge()
     {
     	if (!data.Input.Down.Up) return false;

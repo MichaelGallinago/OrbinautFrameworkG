@@ -15,7 +15,9 @@ public class FsmGenerator : IIncrementalGenerator
     private const string GeneratorNamespace = nameof(FsmSourceGenerator);
     private const string AttributeName = nameof(FsmAttribute);
     private const string StateAttributeName = nameof(FsmStateAttribute);
+    private const string StateSwitcherAttributeName = nameof(FsmStateSwitcherAttribute);
     private const string FullStateAttributeName = $"{GeneratorNamespace}.{StateAttributeName}";
+    private const string FullStateSwitcherAttributeName = $"{GeneratorNamespace}.{StateSwitcherAttributeName}";
     private const string FullAttributeName = $"{GeneratorNamespace}.{AttributeName}";
     
     private const int FieldOffsetStep = 8;
@@ -36,8 +38,18 @@ public class FsmGenerator : IIncrementalGenerator
                     static (ctx, _) => GetStatesTargetForGeneration(ctx))
                 .Where(result => result is { FsmName: not null })
                 .Collect();
+        
+        IncrementalValueProvider<ImmutableArray<StateSwitcherData?>> stateSwitchersProvider =
+            context.SyntaxProvider.ForAttributeWithMetadataName(
+                    FullStateSwitcherAttributeName,
+                    static (node, _) => node is MethodDeclarationSyntax,
+                    static (ctx, _) => GetStateSwitchersTargetForGeneration(ctx))
+                .Where(result => result is { FsmName: not null })
+                .Collect();
 
-        context.RegisterSourceOutput(context.CompilationProvider.Combine(provider).Combine(statesProvider), Build);
+        context.RegisterSourceOutput(
+            context.CompilationProvider.Combine(provider).Combine(statesProvider).Combine(stateSwitchersProvider), 
+            Build);
     }
     
     private static FsmData? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
@@ -65,23 +77,31 @@ public class FsmGenerator : IIncrementalGenerator
         return new StateData(structDeclaration, fsmNameArgument!);
     }
     
-    private readonly record struct FsmData(string Name, string Namespace)
+    private static StateSwitcherData? GetStateSwitchersTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
-        public readonly string Name = Name;
-        public readonly string Namespace = Namespace;
-    }
-    
-    private readonly record struct StateData(StructDeclarationSyntax Struct, string FsmName)
-    {
-        public readonly StructDeclarationSyntax Struct = Struct;
-        public readonly string? FsmName = FsmName;
-    }
-    
-    private static void Build(SourceProductionContext context, (
-        (Compilation Compilation, ImmutableArray<FsmData?> Fsms) Left, ImmutableArray<StateData?> States) data)
-    {
-        ImmutableArray<FsmData?> fsms = data.Left.Fsms;
+        AttributeData? attribute = context.Attributes
+            .FirstOrDefault(a => a.AttributeClass?.Name == StateSwitcherAttributeName);
         
+        if (attribute == null) return null;
+        var fsmNameArgument = attribute.ConstructorArguments.First().Value as string;
+
+        var methodDeclaration = (MethodDeclarationSyntax)context.TargetNode;
+        return new StateSwitcherData(methodDeclaration, fsmNameArgument!);
+    }
+
+    private record struct FsmData(string Name, string Namespace);
+    private record struct StateData(StructDeclarationSyntax Struct, string FsmName);
+    private record struct StateSwitcherData(MethodDeclarationSyntax Method, string FsmName);
+    
+    private static void Build(
+        SourceProductionContext context, 
+        (((Compilation Compilation, 
+            ImmutableArray<FsmData?> Fsms) Left, 
+            ImmutableArray<StateData?> States) Left, 
+            ImmutableArray<StateSwitcherData?> StateSwitchers) data)
+    {
+        ImmutableArray<FsmData?> fsms = data.Left.Left.Fsms;
+
         if (fsms.IsDefaultOrEmpty) return;
         var sourceBuilder = new StringBuilder();
 
@@ -89,26 +109,36 @@ public class FsmGenerator : IIncrementalGenerator
         {
             if (fsm == null) continue;
             string name = fsm.Value.Name;
-            StructDeclarationSyntax[] states = data.States
+            
+            StructDeclarationSyntax[] states = data.Left.States
                 .Where(x => x!.Value.FsmName == name)
                 .Select(x => x!.Value.Struct)
                 .ToArray();
-            CreateFsmFile(sourceBuilder, fsm.Value, context, states, data.Left.Compilation);
+            
+            MethodDeclarationSyntax[] stateSwitchers = data.StateSwitchers
+                .Where(x => x!.Value.FsmName == name)
+                .Select(x => x!.Value.Method)
+                .ToArray();
+            
+            CreateFsmFile(sourceBuilder, fsm.Value, context, states, stateSwitchers, data.Left.Left.Compilation);
         }
     }
 
     private static void CreateFsmFile(
         StringBuilder sourceBuilder, FsmData fsmData, 
-        SourceProductionContext context, StructDeclarationSyntax[] structs, Compilation compilation)
+        SourceProductionContext context, StructDeclarationSyntax[] states, 
+        MethodDeclarationSyntax[] stateSwitchers, Compilation compilation)
     {
         string fsmName = fsmData.Name + "Fsm";
-
-        GetDependencyData(structs, compilation, 
+        
+        stateSwitchers = FilterStateSwitchers(stateSwitchers, states);
+        
+        GetDependencyData(states, compilation, 
             out HashSet<string> namespaces,
             out Dictionary<string, string> constructorTypes, 
             out Dictionary<string, HashSet<string>> stateTypes);
 
-        GetMethods(structs, compilation, fsmName, 
+        GetMethods(states, compilation, fsmName, 
             out HashSet<string> entersMethods, 
             out Dictionary<string, bool> exitsMethods, 
             out Dictionary<string, Dictionary<string, bool>> otherMethods);
@@ -131,13 +161,25 @@ public class FsmGenerator : IIncrementalGenerator
         {
             
 """);
-
-        foreach (StructDeclarationSyntax? structDeclaration in structs)
+        var index = 0;
+        foreach (StructDeclarationSyntax state in states)
         {
-            sourceBuilder.Append(structDeclaration.Identifier.Text).Append(", ");
+            sourceBuilder.Append(state.Identifier.Text).Append(", ");
+            if (++index != 6) continue;
+            sourceBuilder.Append("\n\t\t\t");
+            index = 0;
+        }
+        
+        foreach (MethodDeclarationSyntax stateSwitcher in stateSwitchers)
+        {
+            sourceBuilder.Append(stateSwitcher.Identifier.Text).Append(", ");
+            if (++index != 6) continue;
+            sourceBuilder.Append("\n\t\t\t");
+            index = 0;
         }
 
-        if (structs.All(x => x.Identifier.Text != "None"))
+        if (states.All(x => x.Identifier.Text != "None") &&
+            stateSwitchers.All(x => x.Identifier.Text != "None"))
         {
             sourceBuilder.Append("None");
         }
@@ -168,7 +210,8 @@ public class FsmGenerator : IIncrementalGenerator
                 switch (value)
                 {
 """);
-        AddInitializationCases(sourceBuilder, structs, stateTypes, entersMethods);
+        AddStateSwitchers(sourceBuilder, stateSwitchers);
+        AddInitializationCases(sourceBuilder, states, stateTypes, entersMethods);
 
         sourceBuilder.AppendLine().Append(
 """             
@@ -183,7 +226,7 @@ public class FsmGenerator : IIncrementalGenerator
         
         int offset = FieldOffsetStep;
         AddDependencyFields(sourceBuilder, constructorTypes, ref offset);
-        AddStatesFields(sourceBuilder, structs, offset);
+        AddStatesFields(sourceBuilder, states, offset);
 
         foreach (KeyValuePair<string, Dictionary<string, bool>> method in otherMethods)
         {
@@ -204,6 +247,13 @@ public class FsmGenerator : IIncrementalGenerator
         
         context.AddSource("ActionFsm.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
         sourceBuilder.Clear();
+    }
+
+    private static MethodDeclarationSyntax[] FilterStateSwitchers(
+        MethodDeclarationSyntax[] stateSwitchers, StructDeclarationSyntax[] states)
+    {
+        IEnumerable<string> structNames = states.Select(s => s.Identifier.Text);
+        return stateSwitchers.Where(m => !structNames.Contains(m.Identifier.Text)).ToArray();
     }
 
     private static void AddUsings(StringBuilder sourceBuilder, HashSet<string> namespaces)
@@ -364,6 +414,45 @@ using System.Runtime.InteropServices;
         }
         sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
         sourceBuilder.Append(")\n");
+    }
+
+    private static void AddStateSwitchers(StringBuilder sourceBuilder, MethodDeclarationSyntax[] stateSwitchers)
+    {
+        foreach (MethodDeclarationSyntax stateSwitcher in stateSwitchers)
+        {
+            if (!IsMethodStatic(stateSwitcher)) continue;
+            sourceBuilder.Append("\n\t\t\t\t\tcase States.").Append(stateSwitcher.Identifier.Text)
+                .Append(": State = ").Append(GetFullMethodPath(stateSwitcher)).Append("(); return;");
+        }
+    }
+    
+    private static bool IsMethodStatic(MethodDeclarationSyntax methodDeclaration)
+    {
+        return methodDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword);
+    }
+
+    private static string GetFullMethodPath(MethodDeclarationSyntax methodDeclaration)
+    {
+        TypeDeclarationSyntax? typeDeclaration = methodDeclaration.Ancestors()
+            .OfType<TypeDeclarationSyntax>()
+            .FirstOrDefault();
+        
+        FileScopedNamespaceDeclarationSyntax? fileScopedNamespace = methodDeclaration.Ancestors()
+            .OfType<FileScopedNamespaceDeclarationSyntax>()
+            .FirstOrDefault();
+        
+        NamespaceDeclarationSyntax? namespaceDeclaration = methodDeclaration.Ancestors()
+            .OfType<NamespaceDeclarationSyntax>()
+            .FirstOrDefault();
+        
+        string namespaceName = fileScopedNamespace != null 
+            ? fileScopedNamespace.Name.ToString() 
+            : namespaceDeclaration?.Name.ToString() ?? string.Empty;
+        
+        string typeName = typeDeclaration != null ? typeDeclaration.Identifier.Text : string.Empty;
+        string methodName = methodDeclaration.Identifier.Text;
+
+        return namespaceName == string.Empty ? $"{typeName}.{methodName}" : $"{namespaceName}.{typeName}.{methodName}";
     }
 
     private static void AddInitializationCases(

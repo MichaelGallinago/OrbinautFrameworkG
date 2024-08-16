@@ -40,6 +40,12 @@ public struct Flight(PlayerData data)
         SetAnimation();
     }
 
+    public static void Exit()
+    {
+	    AudioPlayer.Sound.Stop(SoundStorage.Flight);
+	    AudioPlayer.Sound.Stop(SoundStorage.Flight2);
+    }
+
     private void UpdateTimer()
     {
 	    if (_flightTimer > 0f)

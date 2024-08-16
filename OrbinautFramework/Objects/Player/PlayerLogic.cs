@@ -2,6 +2,7 @@
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Player.Physics.StateChangers;
+using OrbinautFramework3.Objects.Player.PlayerActions;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -25,7 +26,6 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     private Water _water;
     private Damage _damage;
     private Status _status;
-    private Landing _landing;
     private Palette _palette;
     private ActionFsm _actionFsm;
     private PhysicsCore _physicsCore;
@@ -45,7 +45,6 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         _water = new Water(_data);
         _damage = new Damage(_data);
         _status = new Status(_data);
-        _landing = new Landing(_data);
         _palette = new Palette(_data);
         _actionFsm = new ActionFsm(_data);
         _physicsCore = new PhysicsCore(_data);
@@ -55,7 +54,7 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
         _objectInteraction = new ObjectInteraction(_data);
         
         _cpuModule = new CpuModule(_data);
-        _landing.LandHandler += () => _actionFsm.OnLand();
+        LandHandler += () => _actionFsm.OnLand();
         
         Recorder.ResizeAll();
         Scene.Instance.Players.Add(_data);
