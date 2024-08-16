@@ -23,18 +23,18 @@ public struct SpinDash(PlayerData data)
 		AudioPlayer.Sound.Play(SoundStorage.Charge);
 	}
     
-    public void Perform()
+    public States Perform()
     {
-	    if (!data.Movement.IsGrounded) return;
+	    if (!data.Movement.IsGrounded) return States.SpinDash;
 	    
 	    if (data.Input.Down.Down)
 	    {
 		    Charge();
-		    return;
+		    return States.SpinDash;
 	    }
 
 	    Release();
-	    data.Movement.IsCorePhysicsSkipped = true;
+	    return States.Default;
     }
 
     private void Release()
@@ -54,6 +54,8 @@ public struct SpinDash(PlayerData data)
 	    AudioPlayer.Sound.Stop(SoundStorage.Charge);
 	    AudioPlayer.Sound.Play(SoundStorage.Release);
     	
+	    data.Movement.IsCorePhysicsSkipped = true;
+	    
 	    if (!SharedData.FixDashRelease) return;
 	    data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     }

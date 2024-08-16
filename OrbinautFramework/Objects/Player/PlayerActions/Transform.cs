@@ -29,13 +29,13 @@ public struct Transform(PlayerData data)
         LatePerform();
     }
     
-    public void LatePerform()
+    public States LatePerform()
     {
         _timer -= Scene.Instance.ProcessSpeed;
-        if (_timer > 0f) return;
+        if (_timer > 0f) return States.Transform;
         
         data.Collision.IsObjectInteractionEnabled = true;
         data.Movement.IsControlRoutineEnabled = true;
-        data.State = States.Default;
+        return States.Default;
     }
 }

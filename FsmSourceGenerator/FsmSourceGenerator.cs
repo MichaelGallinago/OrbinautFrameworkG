@@ -18,6 +18,8 @@ public class FsmGenerator : IIncrementalGenerator
     private const string FullStateAttributeName = $"{GeneratorNamespace}.{StateAttributeName}";
     private const string FullAttributeName = $"{GeneratorNamespace}.{AttributeName}";
     
+    private const int FieldOffsetStep = 8;
+    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValueProvider<ImmutableArray<FsmData?>> provider = 
@@ -99,9 +101,134 @@ public class FsmGenerator : IIncrementalGenerator
         StringBuilder sourceBuilder, FsmData fsmData, 
         SourceProductionContext context, StructDeclarationSyntax[] structs, Compilation compilation)
     {
-        HashSet<string> namespaces = [];
-        Dictionary<string, string> constructorTypes = [];
-        Dictionary<string, HashSet<string>> stateTypes = [];
+        string fsmName = fsmData.Name + "Fsm";
+
+        GetDependencyData(structs, compilation, 
+            out HashSet<string> namespaces,
+            out Dictionary<string, string> constructorTypes, 
+            out Dictionary<string, HashSet<string>> stateTypes);
+
+        GetMethods(structs, compilation, fsmName, 
+            out HashSet<string> entersMethods, 
+            out Dictionary<string, bool> exitsMethods, 
+            out Dictionary<string, Dictionary<string, bool>> otherMethods);
+
+        AddUsings(sourceBuilder, namespaces);
+        
+        sourceBuilder.Append("\nnamespace ").AppendLine(fsmData.Namespace).Append(
+"""
+{
+    [StructLayout(LayoutKind.Explicit)]
+    public struct 
+""").Append(fsmName);
+        
+        AddFsmConstructorParameters(sourceBuilder, constructorTypes);
+        
+        sourceBuilder.Append(
+"""
+    {
+        public enum States
+        {
+            
+""");
+
+        foreach (StructDeclarationSyntax? structDeclaration in structs)
+        {
+            sourceBuilder.Append(structDeclaration.Identifier.Text).Append(", ");
+        }
+
+        if (structs.All(x => x.Identifier.Text != "None"))
+        {
+            sourceBuilder.Append("None");
+        }
+
+        sourceBuilder.AppendLine().Append(
+"""
+        }
+        
+        public States State
+        {
+            get => _state;
+            set
+            {
+""");
+        
+        if (exitsMethods.Count > 0)
+        {
+            sourceBuilder.Append(
+"""
+
+                if (value == _state) return;
+                Exit(value);
+""");
+        }
+        
+        sourceBuilder.AppendLine().Append(
+"""
+                switch (value)
+                {
+""");
+        AddInitializationCases(sourceBuilder, structs, stateTypes, entersMethods);
+
+        sourceBuilder.AppendLine().Append(
+"""             
+                    default: throw new ArgumentOutOfRangeException();
+                }
+                _state = value;
+            }
+        }
+        
+        [FieldOffset(0)] private States _state = States.None;
+""");
+        
+        int offset = FieldOffsetStep;
+        AddDependencyFields(sourceBuilder, constructorTypes, ref offset);
+        AddStatesFields(sourceBuilder, structs, offset);
+
+        foreach (KeyValuePair<string, Dictionary<string, bool>> method in otherMethods)
+        {
+            AddMethod(sourceBuilder, method.Key, method.Value, true);
+        }
+        
+        if (exitsMethods.Count > 0)
+        {
+            AddExit(sourceBuilder, exitsMethods);
+        }
+
+        sourceBuilder.AppendLine().Append(
+"""
+    }
+}
+
+""");
+        
+        context.AddSource("ActionFsm.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+        sourceBuilder.Clear();
+    }
+
+    private static void AddUsings(StringBuilder sourceBuilder, HashSet<string> namespaces)
+    {
+        foreach (string? namespaceName in namespaces.Distinct())
+        {
+            sourceBuilder.Append("using ").Append(namespaceName).AppendLine(";");
+        }
+
+        sourceBuilder.Append(
+"""
+using System;
+using System.Runtime.InteropServices;
+
+""");
+    }
+
+    private static void GetDependencyData(StructDeclarationSyntax[] structs, Compilation compilation,
+        out HashSet<string> namespaces, 
+        out Dictionary<string, string> constructorTypes,
+        out Dictionary<string, HashSet<string>> stateTypes)
+    {
+        namespaces = [];
+        constructorTypes = [];
+        stateTypes = [];
         
         foreach (StructDeclarationSyntax structDeclaration in structs)
         {
@@ -125,27 +252,43 @@ public class FsmGenerator : IIncrementalGenerator
             stateTypes.Add(structDeclaration.Identifier.Text, []);
             foreach (ParameterSyntax parameter in parameters)
             {
-                IParameterSymbol? parameterSymbol = semanticModel.GetDeclaredSymbol(parameter);
-                if (parameterSymbol == null) continue;
-                
-                stateTypes[stateName].Add(parameterSymbol.Name);
-                
-                if (!constructorTypes.ContainsKey(parameterSymbol.Name))
-                {
-                    constructorTypes.Add(parameterSymbol.Name, parameterSymbol.Type.Name);
-                }
-                
-                string typeNamespace = parameterSymbol.Type.ContainingNamespace.ToDisplayString();
-                if (!string.IsNullOrEmpty(typeNamespace))
-                {
-                    namespaces.Add(typeNamespace);
-                }
+                FillDependencyData(parameter, semanticModel, stateName, stateTypes, constructorTypes, namespaces);
             }
         }
+    }
+
+    private static void FillDependencyData(
+        ParameterSyntax parameter, SemanticModel semanticModel, 
+        string stateName, Dictionary<string, HashSet<string>> stateTypes,
+        Dictionary<string, string> constructorTypes, HashSet<string> namespaces)
+    {
+        IParameterSymbol? parameterSymbol = semanticModel.GetDeclaredSymbol(parameter);
+        if (parameterSymbol == null) return;
+                
+        stateTypes[stateName].Add(parameterSymbol.Name);
+                
         
-        List<string> entersMethods = [];
-        Dictionary<string, bool> exitsMethods = [];
-        Dictionary<string, Dictionary<string, bool>> otherMethods = [];
+        if (!constructorTypes.ContainsKey(parameterSymbol.Name))
+        {
+            constructorTypes.Add(parameterSymbol.Name, parameterSymbol.Type.Name);
+        }
+                
+        string typeNamespace = parameterSymbol.Type.ContainingNamespace.ToDisplayString();
+        if (!string.IsNullOrEmpty(typeNamespace))
+        {
+            namespaces.Add(typeNamespace);
+        }
+    }
+
+    private static void GetMethods(StructDeclarationSyntax[] structs, Compilation compilation, string fsmName,
+        out HashSet<string> entersMethods, 
+        out Dictionary<string, bool> exitsMethods,
+        out Dictionary<string, Dictionary<string, bool>> otherMethods)
+    {
+        entersMethods = [];
+        exitsMethods = [];
+        otherMethods = [];
+        
         foreach (StructDeclarationSyntax structDeclaration in structs)
         {
             string structName = structDeclaration.Identifier.Text;
@@ -156,124 +299,77 @@ public class FsmGenerator : IIncrementalGenerator
             
             foreach (MethodDeclarationSyntax? method in methods)
             {
-                string methodName = method.Identifier.Text;
-                switch (methodName)
-                {
-                    case "Enter": entersMethods.Add(structName); break;
-                    case "Exit":
-                        SeparatedSyntaxList<ParameterSyntax> parameters = method.ParameterList.Parameters;
-                        if (parameters.Count == 0)
-                        {
-                            exitsMethods.Add(structName, false);
-                        }
-                        else if (parameters.Count == 1)
-                        {
-                            SemanticModel semanticModel = compilation.GetSemanticModel(structDeclaration.SyntaxTree);
-                            ITypeSymbol? parameterSymbol = semanticModel.GetTypeInfo(parameters.First().Type!).Type;
-                            if (parameterSymbol == null) continue;
-                            string name = parameterSymbol.Name;
-                            if (name == "States" || name == $"{fsmData.Name}.States")
-                            {
-                                exitsMethods.Add(structName, true);
-                            }
-                        }
-                        break;
-                    default:
-                        var typeName = method.ReturnType.ToString();
-                        bool isStateChanger = typeName == "States" || typeName == $"{fsmData.Name}.States";
-                        
-                        if (otherMethods.ContainsKey(methodName))
-                        {
-                            otherMethods[methodName].Add(structName, isStateChanger);
-                            break;
-                        }
-                        
-                        otherMethods.Add(methodName, new Dictionary<string, bool> {{structName, isStateChanger}});
-                        break;
-                }
+                SelectMethod(method, structName, structDeclaration, entersMethods, 
+                    exitsMethods, otherMethods, compilation, fsmName);
             }
         }
-        
-        foreach (string? namespaceName in namespaces.Distinct())
+    }
+
+    private static void SelectMethod(
+        MethodDeclarationSyntax method, string structName, StructDeclarationSyntax structDeclaration, 
+        HashSet<string> entersMethods, Dictionary<string, bool> exitsMethods, 
+        Dictionary<string, Dictionary<string, bool>> otherMethods,
+        Compilation compilation, string fsmName)
+    {
+        string methodName = method.Identifier.Text;
+        switch (methodName)
         {
-            sourceBuilder.Append($"using {namespaceName};\n");
+            case "Enter": entersMethods.Add(structName); break;
+            case "Exit":
+                SeparatedSyntaxList<ParameterSyntax> parameters = method.ParameterList.Parameters;
+                if (parameters.Count == 0)
+                {
+                    exitsMethods.Add(structName, false);
+                }
+                else if (parameters.Count == 1)
+                {
+                    SemanticModel semanticModel = compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+                    ITypeSymbol? parameterSymbol = semanticModel.GetTypeInfo(parameters.First().Type!).Type;
+                    if (parameterSymbol == null) break;
+                    string name = parameterSymbol.Name;
+                    if (name == "States" || name == $"{fsmName}.States")
+                    {
+                        exitsMethods.Add(structName, true);
+                    }
+                }
+                break;
+            default:
+                var typeName = method.ReturnType.ToString();
+                bool isStateChanger = typeName == "States" || typeName == $"{fsmName}.States";
+                        
+                if (otherMethods.ContainsKey(methodName))
+                {
+                    otherMethods[methodName].Add(structName, isStateChanger);
+                    break;
+                }
+                        
+                otherMethods.Add(methodName, new Dictionary<string, bool> {{structName, isStateChanger}});
+                break;
         }
+    }
 
-        sourceBuilder.Append(
-"""
-using System;
-using System.Runtime.InteropServices;
-
-"""
-        ).Append("\nnamespace ").Append(fsmData.Namespace).Append('\n').Append(
-"""
-{
-    [StructLayout(LayoutKind.Explicit)]
-"""
-        ).Append("\n\tpublic struct ").Append(fsmData.Name).Append("Fsm");
-        
+    private static void AddFsmConstructorParameters(
+        StringBuilder sourceBuilder, Dictionary<string, string> constructorTypes)
+    {
         if (constructorTypes.Count <= 0)
         {
             sourceBuilder.Append("\n");
-        }
-        else
-        {
-            sourceBuilder.Append('(');
-            foreach (KeyValuePair<string, string> constructorType in constructorTypes)
-            {
-                sourceBuilder.Append(constructorType.Value).Append(' ').Append(constructorType.Key).Append(", ");
-            }
-            sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
-            sourceBuilder.Append(")\n");
+            return;
         }
         
-        sourceBuilder.Append(
-"""
+        sourceBuilder.Append('(');
+        foreach (KeyValuePair<string, string> constructorType in constructorTypes)
+        {
+            sourceBuilder.Append(constructorType.Value).Append(' ').Append(constructorType.Key).Append(", ");
+        }
+        sourceBuilder.Remove(sourceBuilder.Length - 2, 2);
+        sourceBuilder.Append(")\n");
+    }
+
+    private static void AddInitializationCases(
+        StringBuilder sourceBuilder, StructDeclarationSyntax[] structs,  
+        Dictionary<string, HashSet<string>> stateTypes, HashSet<string> entersMethods)
     {
-        public enum States : 
-"""
-        ).Append("int").Append("\n\t\t{\n\t\t\t");
-
-        foreach (StructDeclarationSyntax? structDeclaration in structs)
-        {
-            sourceBuilder.Append(structDeclaration.Identifier.Text).Append(", ");
-        }
-
-        if (structs.All(x => x.Identifier.Text != "None"))
-        {
-            sourceBuilder.Append("None");
-        }
-
-        sourceBuilder.Append('\n').Append(
-"""
-        }
-        
-        public States State
-        {
-            get => _state;
-            set
-            {
-"""
-        );
-        
-        if (exitsMethods.Count > 0)
-        {
-            sourceBuilder.Append(
-"""
-
-                if (value == _state) return;
-                Exit(value);
-"""
-            );
-        }
-        
-        sourceBuilder.Append('\n').Append(
-"""
-                switch (value)
-                {
-"""
-        );
-        
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
@@ -289,57 +385,29 @@ using System.Runtime.InteropServices;
             }
             sourceBuilder.Append(");").Append(entersMethods.Contains(name) ? $" {name}.Enter(); break;" : " break;");
         }
+    }
 
-        sourceBuilder.Append('\n').Append(
-"""             
-                    default: throw new ArgumentOutOfRangeException();
-                }
-                _state = value;
-            }
-        }
-        
-        [FieldOffset(0)] private States _state = States.None;
-"""    
-        );
-
-        const int offsetStep = 8;
-        int offset = offsetStep;
-        
+    private static void AddDependencyFields(
+        StringBuilder sourceBuilder, Dictionary<string, string> constructorTypes, ref int offset)
+    {
         foreach (KeyValuePair<string, string> type in constructorTypes)
         {
             sourceBuilder.Append("\n\t\t[FieldOffset(").Append(offset).Append(")] private ").Append(type.Value)
                 .Append(" _").Append(type.Key).Append(" = ").Append(type.Key).Append(';');
-            offset += offsetStep;
+            offset += FieldOffsetStep;
         }
-        
+    }
+
+    private static void AddStatesFields(StringBuilder sourceBuilder, StructDeclarationSyntax[] structs, int offset)
+    {
+        var line = $"\n\t\t[FieldOffset({offset.ToString()})] private ";
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append($"\n\t\t[FieldOffset({offset})] private {name} {name};");
+            sourceBuilder.Append(line).Append(name).Append(' ').Append(name).Append(";");
         }
-        
-        foreach (KeyValuePair<string, Dictionary<string, bool>> method in otherMethods)
-        {
-            AddMethod(sourceBuilder, method.Key, method.Value, true);
-        }
-        
-        if (exitsMethods.Count > 0)
-        {
-            AddExit(sourceBuilder, exitsMethods);
-        }
-
-        sourceBuilder.Append('\n').Append(
-"""
     }
-}
-
-"""
-        );
-        
-        context.AddSource("ActionFsm.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
-        sourceBuilder.Clear();
-    }
-
+    
     private static void AddMethod(
         StringBuilder sourceBuilder, string methodName, Dictionary<string, bool> states, bool isPublic)
     {

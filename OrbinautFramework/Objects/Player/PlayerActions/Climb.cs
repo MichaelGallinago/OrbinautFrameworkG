@@ -19,15 +19,11 @@ public struct Climb(PlayerData data)
 		
 	}
 
-	public void Perform()
+	public States Perform()
     {
-	    if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X) || 
-	        data.Movement.Velocity.X != 0f)
-	    {
-		    ReleaseClimb();
-		    return;
-	    }
-		
+	    if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X)) return Release(); 
+	    if (data.Movement.Velocity.X != 0f) return Release();
+	    
 	    UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * StepsPerClimbFrame);
 		
 	    int radiusX = data.Collision.Radius.X;
@@ -38,29 +34,21 @@ public struct Climb(PlayerData data)
 		
 	    data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 
-	    if (data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX)) return;
+	    States state = data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX);
+	    if (state != States.Climb) return state;
 		
-	    if (!data.Input.Press.Abc)
+	    if (data.Input.Press.Abc)
 	    {
-		    UpdateAnimationFrame();
-		    return;
+		    Jump();
+		    return States.Jump;
 	    }
 
-	    ClimbJump();
+	    UpdateAnimationFrame();
+	    return States.Climb;
     }
-
-	private void UpdateAnimationFrame()
+	
+	private void Jump()
 	{
-		if (data.Movement.Velocity.Y != 0)
-		{
-			data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / StepsPerClimbFrame);
-		}
-	}
-
-	private void ClimbJump()
-	{
-		data.State = States.Jump;
-		
 		data.ResetGravity();
 		
 		data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
@@ -70,8 +58,17 @@ public struct Climb(PlayerData data)
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	}
+	
+	private void UpdateAnimationFrame()
+	{
+		if (data.Movement.Velocity.Y != 0)
+		{
+			data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / StepsPerClimbFrame);
+		}
+	}
 
-	private bool ClimbUpOntoWall(int radiusX)
+
+	private States ClimbUpOntoWall(int radiusX)
 	{
 		// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
 		int wallDistance = data.TileCollider.FindDistance(
@@ -82,11 +79,9 @@ public struct Climb(PlayerData data)
 		
 		if (wallDistance >= 4)
 		{
-			_state = ClimbStates.Ledge;
-			_animationValue = 0f;
 			data.Movement.Velocity.Y = 0f;
 			data.Movement.Gravity = 0f;
-			return true;
+			return States.ClimbLedge;
 		}
 
 		// If Knuckles has encountered a small dip in the wall, cancel climb movement
@@ -95,6 +90,12 @@ public struct Climb(PlayerData data)
 			data.Movement.Velocity.Y = 0f;
 		}
 
+		CollideCeiling(radiusX);
+		return States.Climb;
+	}
+
+	private void CollideCeiling(int radiusX)
+	{
 		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
 		int ceilDistance = data.TileCollider.FindDistance(
 			radiusX * (int)data.Visual.Facing, 
@@ -102,29 +103,24 @@ public struct Climb(PlayerData data)
 			true, 
 			Constants.Direction.Negative);
 
-		if (ceilDistance >= 0) return false;
+		if (ceilDistance >= 0) return;
 		data.Node.Position -= new Vector2(0f, ceilDistance);
 		data.Movement.Velocity.Y = 0f;
-		return false;
 	}
 
-	private bool ReleaseClimbing(int radiusX)
+	private States ReleaseClimbing(int radiusX)
 	{
 		// If Knuckles is no longer against the wall, make him let go
-		if (data.TileCollider.FindDistance(
-			    radiusX * (int)data.Visual.Facing, 
-			    data.Collision.Radius.Y + 1, 
-			    false, 
-			    data.Visual.Facing) == 0)
-		{
-			return LandAfterClimbing(radiusX);
-		}
+		int wallDistance = data.TileCollider.FindDistance(
+			radiusX * (int)data.Visual.Facing,
+			data.Collision.Radius.Y + 1,
+			false,
+			data.Visual.Facing);
 		
-		ReleaseClimb();
-		return true;
+		return wallDistance == 0 ? LandAfterClimbing(radiusX) : Release();
 	}
 
-	private bool LandAfterClimbing(int radiusX)
+	private States LandAfterClimbing(int radiusX)
 	{
 		(int distance, float angle) = data.TileCollider.FindTile(
 			radiusX * (int)data.Visual.Facing, 
@@ -132,18 +128,18 @@ public struct Climb(PlayerData data)
 			true, 
 			Constants.Direction.Positive);
 		
-		if (distance >= 0) return false;
+		if (distance >= 0) return States.Climb;
 		
 		var position = new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
 		data.Node.Position += position;
 		data.Movement.Angle = angle;
 				
-		Land();
+		var state = Land();
 
 		data.Visual.Animation = Animations.Idle;
 		data.Movement.Velocity.Y = 0f;
 				
-		return true;
+		return state;
 	}
 
 	private void UpdateVerticalSpeedOnClimb(int maxValue)
@@ -175,9 +171,9 @@ public struct Climb(PlayerData data)
 		data.Movement.Velocity.Y = 0f;
 	}
 
-	private void ReleaseClimb()
+	private States Release()
 	{
-		data.State = States.GlideFall;
 		data.Visual.OverrideFrame = 1;
+		return States.GlideFall;
 	}
 }

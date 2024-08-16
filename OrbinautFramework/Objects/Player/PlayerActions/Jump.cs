@@ -32,8 +32,7 @@ public struct Jump(PlayerData data)
 
 		if (data.Node.Type == PlayerNode.Types.Sonic)
 		{
-			JumpSonic();
-			return States.Jump;
+			return JumpSonic();
 		}
 		
 		return data.Node.Type switch
@@ -56,21 +55,22 @@ public struct Jump(PlayerData data)
 		return true;
 	}
 
-	private void JumpSonic()
+	private States JumpSonic()
 	{
 		if (SharedData.DropDash && !data.Input.Down.Abc)
 		{
 			if (data.Node.Shield.Type <= ShieldContainer.Types.Normal ||
 			    data.Super.IsSuper || data.Item.InvincibilityTimer > 0f)
 			{
-				data.State = States.DropDash;
+				return States.DropDash;
 			}
-			return;
+			return States.Jump;
 		}
 
 		PerformBarrierAbility();
+		return States.Jump;
 	}
-
+	
 	private void PerformBarrierAbility()
 	{
 		if (!data.Input.Press.Abc || data.Super.IsSuper) return;
