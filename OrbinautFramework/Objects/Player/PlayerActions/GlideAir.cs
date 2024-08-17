@@ -34,17 +34,17 @@ public struct GlideAir(PlayerData data)
 		}
 	}
 	
-	public void Perform()
+	public States Perform()
 	{
 		UpdateSpeed();
 		TurnAroundAir();
 		UpdateGravityAndHorizontalVelocity();
 		UpdateAirAnimationFrame();
 		
-		if (data.Input.Down.Abc) return;
-
-		data.State = States.GlideFall;
+		if (data.Input.Down.Abc) return States.GlideAir;
+		
 		data.Movement.Velocity.X *= 0.25f;
+		return States.GlideFall;
 	}
 
 	private void UpdateSpeed()
@@ -267,7 +267,7 @@ public struct GlideAir(PlayerData data)
 		data.Movement.Velocity.X = 0f;
 	}
 
-	private void AttachToWall(int wallRadius, int climbY)
+	private States AttachToWall(int wallRadius, int climbY)
 	{
 		if (_glideState != (int)GlideStates.Air) return;
 
@@ -279,7 +279,6 @@ public struct GlideAir(PlayerData data)
 		}
 
 		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
-		data.State = isWallJump ? States.ClimbWallJump : States.Climb;
 		
 		data.Visual.Animation = Animations.ClimbWall;
 		data.Movement.GroundSpeed.Value = 0f;
@@ -287,8 +286,10 @@ public struct GlideAir(PlayerData data)
 		data.Movement.Gravity = 0f;
 			
 		AudioPlayer.Sound.Play(SoundStorage.Grab);
+		
+		return isWallJump ? States.ClimbWallJump : States.Climb;
 	}
-
+	
 	private void CheckCollisionOnAttaching(int wallRadius, int climbY)
 	{
 		// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he

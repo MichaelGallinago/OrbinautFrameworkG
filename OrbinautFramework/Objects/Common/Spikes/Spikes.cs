@@ -2,16 +2,11 @@ using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
-using OrbinautFramework3.Objects.Player.Physics;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
-
-using Player;
 
 public abstract partial class Spikes : SolidNode
 {

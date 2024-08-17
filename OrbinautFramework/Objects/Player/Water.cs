@@ -9,7 +9,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public struct Water(PlayerData data)
+public struct Water(PlayerData data, IPlayerLogic logic)
 {
     public void Process()
 	{
@@ -45,7 +45,7 @@ public struct Water(PlayerData data)
 
 	private void ResetGravityOnEdge()
 	{
-		if (data.State is States.Flight or States.GlideAir or States.GlideGround) return;
+		if (logic.Action is States.Flight or States.GlideAir or States.GlideGround) return;
 		data.ResetGravity();
 	}
 
@@ -116,8 +116,8 @@ public struct Water(PlayerData data)
 	private void ProcessDrown()
 	{
 		AudioPlayer.Sound.Play(SoundStorage.Drown);
-		data.ResetState();
-		data.State = States.Default;
+		logic.ResetState();
+		logic.Action = States.Default;
 
 		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		data.Visual.Animation = Animations.Drown;
@@ -142,7 +142,7 @@ public struct Water(PlayerData data)
 		
 		SpawnSplash();
 		
-		if (data.State == States.Flight)
+		if (logic.Action == States.Flight)
 		{
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
@@ -170,8 +170,8 @@ public struct Water(PlayerData data)
 
 	private void SpawnSplash()
 	{
-		if (data.State is States.Climb or States.GlideAir or States.GlideGround) return;
-		if (CpuState == CpuStates.Respawn) return;
+		if (logic.Action is States.Climb or States.GlideAir or States.GlideGround) return;
+		if (data.Cpu.State == CpuModule.States.Respawn) return;
 		
 		//TODO: obj_water_splash
 		//instance_create(x, c_stage.water_level, obj_water_splash);

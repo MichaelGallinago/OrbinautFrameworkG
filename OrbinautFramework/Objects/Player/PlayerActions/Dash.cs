@@ -23,7 +23,7 @@ public struct Dash(PlayerData data)
     public States Perform()
     {
 	    if (!data.Movement.IsGrounded) return States.Dash;
-	    if (data.Id > 0 && CpuInputTimer <= 0f) return States.Dash;
+	    if (data.Id > 0 && data.Cpu.InputTimer <= 0f) return States.Dash;
 
 	    if (Charge()) return States.Dash;
 	    
@@ -35,13 +35,8 @@ public struct Dash(PlayerData data)
 	    return States.Default;
     }
 
-    public void Exit(States nextState)
-    {
-	    AudioPlayer.Sound.Stop(SoundStorage.Charge2);
-	    
-	    if (nextState != States.Land) return;
-	    data.Movement.GroundSpeed.Value = _charge;
-    }
+    public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);
+    public void OnLand() => data.Movement.GroundSpeed.Value = _charge; //TODO: check this
 
     private bool Charge()
     {

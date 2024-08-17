@@ -43,8 +43,8 @@ public class PlayerLogic : IPlayer
         
         _carry = new Carry(Data);
         _death = new Death(Data);
-        _water = new Water(Data);
-        _status = new Status(Data);
+        _water = new Water(Data, this);
+        _status = new Status(Data, this);
         _palette = new Palette(Data);
         _actionFsm = new ActionFsm(Data);
         _physicsCore = new PhysicsCore(Data);
@@ -57,7 +57,7 @@ public class PlayerLogic : IPlayer
 
         if (Data.Id > 0)
         {
-            _cpuModule = new CpuModule(Data);
+            _cpuModule = new CpuModule(Data, this);
         }
         else
         {
@@ -80,6 +80,7 @@ public class PlayerLogic : IPlayer
         _initialization.Init();
         _initialization.Spawn();
         Recorder.Fill();
+        Data.Node.Sprite.Animate(this);
     }
 
     public void ExitTree()
@@ -115,6 +116,8 @@ public class PlayerLogic : IPlayer
         Recorder.Record();
         _angleRotation.Process();
         _palette.Process();
+        
+        Data.Node.Sprite.Animate(this);
     }
     
     private void RunControlRoutine()

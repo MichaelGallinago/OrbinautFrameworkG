@@ -9,7 +9,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public class CpuModule(PlayerData data)
+public class CpuModule(PlayerData data, IPlayerLogic logic)
 {
 	public enum States : byte
 	{
@@ -182,7 +182,7 @@ public class CpuModule(PlayerData data)
 		if (CheckRespawn()) return; // Exit if respawned
 		
 		if (!data.Collision.IsObjectInteractionEnabled || 
-		    data.Carry.Target != null || data.State == ActionFsm.States.Carried) return;
+		    data.Carry.Target != null || logic.Action == ActionFsm.States.Carried) return;
 		
 		data.Cpu.Target ??= _leadPlayer; // Follow lead player
 		
@@ -251,8 +251,8 @@ public class CpuModule(PlayerData data)
 		{
 			data.Visual.Animation = Animations.Fly;
 			data.Cpu.State = States.Respawn;
-			data.ResetState();
-			data.State = States.Default;
+			logic.ResetState();
+			logic.Action = ActionFsm.States.Default;
 		}
 		else
 		{

@@ -36,8 +36,7 @@ public partial class PlayerSpawner : Sprite2D
     {
         PackedScene packedPlayer = Scene.Instance.PlayerPrefabs.Get(type);
         if (packedPlayer.Instantiate() is not PlayerNode player) return;
-
-        Scene.Instance.Players.Add(player);
+        
         spawnerParent.AddChild(player);
         player.Position = position;
     }

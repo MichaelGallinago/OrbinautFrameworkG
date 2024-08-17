@@ -7,7 +7,7 @@ using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.Orbin
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PlayerNode : OrbinautNode, ICarryTarget, IPlayerNode
+public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 {
 	public enum Types : byte
 	{
@@ -29,23 +29,15 @@ public abstract partial class PlayerNode : OrbinautNode, ICarryTarget, IPlayerNo
 		Init();
 	}
 	
-	public void Init()
-	{
-		_playerLogic.Init();
-		Sprite.Animate(this);
-	}
-	
+	public void Init() => _playerLogic.Init();
+
 	public override void _ExitTree()
 	{
 		_playerLogic.ExitTree();
 		base._ExitTree();
 	}
 	
-	public override void _Process(double delta)
-	{
-		_playerLogic.Process();
-		Sprite.Animate(this);
-	}
+	public override void _Process(double delta) => _playerLogic.Process();
 
 	public bool IsInstanceValid() => GodotObject.IsInstanceValid(this);
 }

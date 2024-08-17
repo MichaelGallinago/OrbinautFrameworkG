@@ -8,7 +8,7 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 [FsmSourceGenerator.FsmState("Action")]
 public struct ClimbWallJump(PlayerData data)
 {
-    public void Enter()
+    public States Process()
     {
         data.ResetGravity();
 		
@@ -17,6 +17,6 @@ public struct ClimbWallJump(PlayerData data)
         var velocity = new Vector2(3.5f * (float)data.Visual.Facing, data.Physics.MinimalJumpSpeed);
         data.Movement.Velocity.Vector = velocity;
         
-        data.State = States.Jump;
+        return States.Jump;
     }
 }

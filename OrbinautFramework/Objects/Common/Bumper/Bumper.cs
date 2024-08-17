@@ -36,7 +36,7 @@ public partial class Bumper : InteractiveNode
 
     private void CheckCollisionWithPlayers()
     {
-        foreach (PlayerData player in Scene.Instance.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             if (!CheckPlayerHitBoxCollision(player)) continue;
             
@@ -60,19 +60,22 @@ public partial class Bumper : InteractiveNode
         }
     }
 
-    private static void BumpPlayer(PlayerData player, Vector2 position)
+    private static void BumpPlayer(IPlayer player, Vector2 position)
     {
-        if (player.State == States.Carried)
+        if (player.Action == States.Carried)
         {
-            player.State = States.Default;
+            player.Action = States.Default;
         }
+
+        PlayerData data = player.Data;
+        MovementData movement = data.Movement;
         
-        player.Movement.IsGrounded = false;
-        player.Movement.IsAirLock = false;
-        player.Visual.SetPushBy = null;
+        movement.IsGrounded = false;
+        movement.IsAirLock = false;
+        data.Visual.SetPushBy = null;
         
-        float radians = Mathf.DegToRad(Angles.GetVector256(player.Node.Position - position));
-        player.Movement.Velocity.Vector = Force * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
+        float radians = Mathf.DegToRad(Angles.GetVector256(data.Node.Position - position));
+        movement.Velocity.Vector = Force * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
     }
 
     private void OnAnimationFinished()

@@ -11,11 +11,11 @@ public partial class ForceSpinTriggerHorizontal : ForceSpinTrigger
         Borders += Vector2.One * Position.Y;
     }
 
-    protected override bool CheckForcePlayerSpin(PlayerData player)
+    protected override bool CheckForcePlayerSpin(IPlayer player)
     {
-        var playerPosition = (Vector2I)player.Node.Position;
+        var playerPosition = (Vector2I)player.Data.Node.Position;
         
         if (playerPosition.Y < Borders.X || playerPosition.Y >= Borders.Y) return false;
-        return (int)player.Node.PreviousPosition.X >= Position.X != playerPosition.X >= Position.X;
+        return (int)player.Data.Node.PreviousPosition.X >= Position.X != playerPosition.X >= Position.X;
     }
 }

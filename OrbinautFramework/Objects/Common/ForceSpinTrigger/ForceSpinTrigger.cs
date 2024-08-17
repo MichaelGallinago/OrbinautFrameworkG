@@ -21,16 +21,16 @@ public abstract partial class ForceSpinTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        foreach (PlayerData player in Scene.Instance.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             if (player.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
             
-            player.Movement.IsForcedSpin = !player.Movement.IsForcedSpin;
-            player.State = ActionFsm.States.None;
+            player.Data.Movement.IsForcedSpin = !player.Data.Movement.IsForcedSpin;
+            player.Action = ActionFsm.States.Default;
             
             player.ResetGravity();
         }
     }
     
-    protected abstract bool CheckForcePlayerSpin(PlayerData playerNode);
+    protected abstract bool CheckForcePlayerSpin(IPlayer playerNode);
 }
