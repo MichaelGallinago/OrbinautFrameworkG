@@ -6,9 +6,12 @@ namespace OrbinautFramework3.Objects.Common.Spikes;
 
 public partial class SpikesVertical : Spikes
 {
-    protected override void CollideWithPlayer(PlayerData player)
+    protected override void CollideWithPlayer(IPlayer player)
     {
-        player.ActSolid(this, player.Damage.IsInvincible ? Constants.SolidType.Full : Constants.SolidType.FullReset);
+        Constants.SolidType solidType = player.Data.Damage.IsInvincible ? 
+            Constants.SolidType.Full : Constants.SolidType.FullReset;
+        
+        player.ActSolid(this, solidType);
     }
 
     protected override Vector2 GetRetractOffsetVector(float retractOffset) => new(0f, retractOffset);

@@ -31,20 +31,21 @@ public struct Carry(PlayerData data)
 
     private void GrabAnotherPlayer()
     {
-        foreach (PlayerData player in Scene.Instance.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player == data) continue;
-            if (player.State is States.SpinDash or States.Carried) continue;
-            if (!player.Movement.IsControlRoutineEnabled || !player.Collision.IsObjectInteractionEnabled) continue;
+            if (player.Data == data) continue;
+            if (player.Action is States.SpinDash or States.Carried) continue;
+            if (!player.Data.Movement.IsControlRoutineEnabled) continue; 
+            if (!player.Data.Collision.IsObjectInteractionEnabled) continue;
 
-            Vector2 delta = (player.Node.Position - data.Node.Position).Abs();
+            Vector2 delta = (player.Data.Node.Position - data.Node.Position).Abs();
             if (delta.X >= 16f || delta.Y >= 48f) continue;
 				
             player.ResetState();
             AudioPlayer.Sound.Play(SoundStorage.Grab);
 				
-            player.Visual.Animation = Animations.Grab;
-            player.State = States.Carried;
+            player.Data.Visual.Animation = Animations.Grab;
+            player.Action = States.Carried;
             data.Carry.Target = player;
 
             player.AttachToCarrier(this);

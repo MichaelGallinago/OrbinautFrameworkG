@@ -82,8 +82,7 @@ public abstract partial class Scene : Node2D
 
     public override void _Process(double deltaTime)
     {
-        ProcessSpeed = Engine.MaxFps > 60 || Engine.MaxFps == 0 ? 
-            Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate)) : 1f;
+        ProcessSpeed = Engine.MaxFps is <= 60 and > 0 ? 1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
         
         if (State != States.Paused)
         {
@@ -92,10 +91,10 @@ public abstract partial class Scene : Node2D
         
         Culler.EarlyCull();
         
-        foreach (PlayerData player in Players.Values)
+        foreach (IPlayer player in Players.Values)
         {
-            player.Collision.TouchObjects.Clear();
-            player.Collision.PushObjects.Clear();
+            player.Data.Collision.TouchObjects.Clear();
+            player.Data.Collision.PushObjects.Clear();
         }
     }
     
@@ -108,7 +107,7 @@ public abstract partial class Scene : Node2D
         int count = Math.Min(cameras.Length, Players.Count);
         for (var i = 0; i < count; i++)
         {
-            cameras[i].Target = Players.Values[i];
+            cameras[i].Target = Players.Values[i].Data;
         }
     }
 }

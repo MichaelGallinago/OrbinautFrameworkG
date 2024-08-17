@@ -8,23 +8,23 @@ namespace OrbinautFramework3;
 
 public readonly struct PlayerList()
 {
-    public ReadOnlySpan<PlayerData> Values => CollectionsMarshal.AsSpan(_players);
+    public ReadOnlySpan<IPlayer> Values => CollectionsMarshal.AsSpan(_players);
     public int Count => _players.Count;
     
-    private readonly List<PlayerData> _players = [];
+    private readonly List<IPlayer> _players = new(4);
     
-    public void Add(PlayerData data)
+    public void Add(IPlayer logic)
     {
-        data.Id = _players.Count;
-        _players.Add(data);
+        logic.Data.Id = _players.Count;
+        _players.Add(logic);
     }
     
-    public void Remove(PlayerData data)
+    public void Remove(IPlayer logic)
     {
-        _players.Remove(data);
-        for (int i = data.Id; i < _players.Count; i++)
+        _players.Remove(logic);
+        for (int i = logic.Data.Id; i < _players.Count; i++)
         {
-            _players[i].Id--;
+            _players[i].Data.Id--;
         }
     }
 
@@ -35,15 +35,15 @@ public readonly struct PlayerList()
             throw new IndexOutOfRangeException();
         }
 
-        PlayerData firstPlayer = _players[fromIndex];
-        PlayerData secondPlayer = _players[toIndex];
+        IPlayer firstPlayer = _players[fromIndex];
+        IPlayer secondPlayer = _players[toIndex];
 
-        firstPlayer.Id = toIndex;
-        secondPlayer.Id = fromIndex;
+        firstPlayer.Data.Id = toIndex;
+        secondPlayer.Data.Id = fromIndex;
 
         _players[toIndex] = firstPlayer;
         _players[fromIndex] = secondPlayer;
     }
 
-    public PlayerData First() => _players[0];
+    public IPlayer First() => _players[0];
 }

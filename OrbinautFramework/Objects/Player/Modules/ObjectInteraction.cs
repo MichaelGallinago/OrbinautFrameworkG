@@ -7,7 +7,7 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct ObjectInteraction(PlayerData data)
+public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 {
 	private const int GripY = 4;
 	
@@ -271,7 +271,7 @@ public struct ObjectInteraction(PlayerData data)
 	private bool CrushPlayer(int clipY)
 	{
 		if (Math.Abs(clipY) < 16) return false;
-		Kill();
+		logic.Kill();
 		return true;
 	}
 	
@@ -323,7 +323,8 @@ public struct ObjectInteraction(PlayerData data)
 	{
 		if (_solidObjectData.Type is SolidType.FullReset or SolidType.TopReset)
 		{
-			data.ResetState();
+			logic.ResetState();
+			logic.Action = ActionFsm.States.Default;
 		}
 
 		data.Node.Position = data.Node.Position with { Y = data.Node.Position.Y - distance - 1 };
@@ -333,6 +334,6 @@ public struct ObjectInteraction(PlayerData data)
 		data.Movement.Angle = 0f;
 
 		if (data.Movement.IsGrounded) return;
-		Land();
+		logic.Land();
 	}
 }

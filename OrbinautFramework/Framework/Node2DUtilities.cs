@@ -1,4 +1,5 @@
 ﻿using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Framework;

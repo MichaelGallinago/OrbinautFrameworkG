@@ -49,13 +49,13 @@ public abstract partial class Spikes : SolidNode
         CollideWithPlayers();
     }
 
-    protected abstract void CollideWithPlayer(PlayerData playerNode);
+    protected abstract void CollideWithPlayer(IPlayer playerNode);
     protected abstract Vector2 GetRetractOffsetVector(float retractOffset);
     protected abstract SpikesDto GetDirectionSpecificData(Vector2 size);
 
     private void CollideWithPlayers()
     {
-        foreach (PlayerData player in Scene.Instance.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             CollideWithPlayer(player);
             if (!CheckSolidCollision(player, _sensor)) continue;
@@ -63,7 +63,7 @@ public abstract partial class Spikes : SolidNode
         }
     }
 
-    private void HurtPlayer(PlayerData player)
+    private void HurtPlayer(IPlayer player)
     {
         player.Hurt(Position.X);
             

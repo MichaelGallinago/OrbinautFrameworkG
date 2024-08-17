@@ -19,11 +19,11 @@ public class Recorder(PlayerData data)
     {
         if (Scene.Instance.Time == 0f) return;
 
-        ReadOnlySpan<PlayerData> players = Scene.Instance.Players.Values;
+        ReadOnlySpan<IPlayer> players = Scene.Instance.Players.Values;
         int playersCount = players.Length + 1;
-        foreach (PlayerData player in players)
+        foreach (IPlayer player in players)
         {
-            Resize(playersCount);
+            player.Recorder.Resize(playersCount);
         }
     }
     

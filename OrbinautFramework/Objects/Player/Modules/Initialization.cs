@@ -11,6 +11,7 @@ public readonly struct Initialization(PlayerData data)
     {
         data.Collision.Init(data.Node.Type);
         
+        data.Cpu.Init();
         data.Item.Init();
         data.Carry.Init();
         data.Death.Init();
@@ -19,8 +20,6 @@ public readonly struct Initialization(PlayerData data)
         data.Damage.Init();
         data.Visual.Init();
         data.Movement.Init();
-        
-        data.State = ActionFsm.States.Default;
         
         data.Input.Clear();
         data.Input.NoControl = false;

@@ -1,30 +1,27 @@
 ﻿using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Modules;
-using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public class PlayerLogic : IStateHolder<ActionFsm.States>
+public class PlayerLogic : IPlayer
 {
-    public CarryTarget CarryTarget { get; } = new();
+    public PlayerData Data { get; }
+    public Recorder Recorder { get; }
+    public CarryTarget CarryTarget { get; }
     
-    private readonly Recorder _recorder;
-    private readonly DebugMode _debugMode;
+    public Damage Damage { get; }
+    public Landing Landing { get; }
+    public DataUtilities DataUtilities { get; }
+    public ObjectInteraction ObjectInteraction { get; }
+    
     private readonly CpuModule _cpuModule;
-    private readonly PlayerData _data;
-    
-    public ActionFsm.States State
-    {
-        get => _actionFsm.State;
-        set => _actionFsm.State = value;
-    }
+    private readonly DebugMode _debugMode;
     
     private Carry _carry;
     private Death _death;
     private Water _water;
-    private Damage _damage;
     private Status _status;
     private Palette _palette;
     private ActionFsm _actionFsm;
@@ -32,95 +29,104 @@ public class PlayerLogic : IStateHolder<ActionFsm.States>
     private AngleRotation _angleRotation;
     private CollisionBoxes _collisionBoxes;
     private Initialization _initialization;
-    private ObjectInteraction _objectInteraction;
-
+    
     public PlayerLogic(IPlayerNode playerNode)
     {
-        _data = new PlayerData(this, playerNode);
-
-        _recorder = new Recorder(_data);
+        Data = new PlayerData(playerNode);
+        Recorder = new Recorder(Data);
+        CarryTarget = new CarryTarget(Data);
         
-        _carry = new Carry(_data);
-        _death = new Death(_data);
-        _water = new Water(_data);
-        _damage = new Damage(_data);
-        _status = new Status(_data);
-        _palette = new Palette(_data);
-        _actionFsm = new ActionFsm(_data);
-        _physicsCore = new PhysicsCore(_data);
-        _angleRotation = new AngleRotation(_data);
-        _collisionBoxes = new CollisionBoxes(_data);
-        _initialization = new Initialization(_data);
-        _objectInteraction = new ObjectInteraction(_data);
+        Damage = new Damage(Data, this);
+        DataUtilities = new DataUtilities(Data);
+        ObjectInteraction = new ObjectInteraction(Data, this);
+        Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
-        _cpuModule = new CpuModule(_data);
-        LandHandler += () => _actionFsm.OnLand();
+        _carry = new Carry(Data);
+        _death = new Death(Data);
+        _water = new Water(Data);
+        _status = new Status(Data);
+        _palette = new Palette(Data);
+        _actionFsm = new ActionFsm(Data);
+        _physicsCore = new PhysicsCore(Data);
+        _angleRotation = new AngleRotation(Data);
+        _collisionBoxes = new CollisionBoxes(Data);
+        _initialization = new Initialization(Data);
         
         Recorder.ResizeAll();
-        Scene.Instance.Players.Add(_data);
-        
-        if (_data.Id == 0)
+        Scene.Instance.Players.Add(this);
+
+        if (Data.Id > 0)
+        {
+            _cpuModule = new CpuModule(Data);
+        }
+        else
         {
 #if !DEBUG
             if (!SharedData.IsDebugModeEnabled) return;
 #endif
-            _debugMode = new DebugMode(_data);
+            _debugMode = new DebugMode(this);
         }
+    }
+    
+    public ActionFsm.States Action
+    {
+        get => _actionFsm.State;
+        set => _actionFsm.State = value;
     }
 
     public void Init()
     {
+        _actionFsm.State = ActionFsm.States.Default;
         _initialization.Init();
         _initialization.Spawn();
-        _cpuModule?.Init();
-        _recorder.Fill();
+        Recorder.Fill();
     }
 
     public void ExitTree()
     {
-        Scene.Instance.Players.Remove(_data);
+        Scene.Instance.Players.Remove(this);
         Recorder.ResizeAll();
     }
 
     public void Process()
     {
-        _data.Input.Update(_data.Id);
+        Data.Input.Update(Data.Id);
         
-        if (_debugMode != null && _data.Death.State == Death.States.Wait)
+        if (_debugMode != null && Data.Death.State == Death.States.Wait)
         {
-            if (_debugMode.Update(_data.Input)) return;
+            if (_debugMode.Update(Data.Input)) return;
         }
         
         _cpuModule?.Process();
         _death.Process();
 		
-        if (_data.Movement.IsControlRoutineEnabled)
+        if (Data.Movement.IsControlRoutineEnabled)
         {
             RunControlRoutine();
         }
         
-        if (!_data.Death.IsDead)
+        if (!Data.Death.IsDead)
         {
             _water.Process();
             _status.Update();
             _collisionBoxes.Update();
         }
 		
-        _recorder.Record();
+        Recorder.Record();
         _angleRotation.Process();
         _palette.Process();
     }
     
     private void RunControlRoutine()
     {
-        _data.Physics.Update(_data.Water.IsUnderwater, _data.Super.IsSuper, _data.Node.Type, _data.Item.SpeedTimer);
+        Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
         
         _actionFsm.EarlyPerform();
         _actionFsm.Perform();
         
-        if (_data.Movement.IsCorePhysicsSkipped)
+        if (Data.Movement.IsCorePhysicsSkipped)
         {
-            _data.Movement.IsCorePhysicsSkipped = false;
+            Data.Movement.IsCorePhysicsSkipped = false;
             return;
         }
         

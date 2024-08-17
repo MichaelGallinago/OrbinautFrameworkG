@@ -117,6 +117,7 @@ public struct Water(PlayerData data)
 	{
 		AudioPlayer.Sound.Play(SoundStorage.Drown);
 		data.ResetState();
+		data.State = States.Default;
 
 		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		data.Visual.Animation = Animations.Drown;

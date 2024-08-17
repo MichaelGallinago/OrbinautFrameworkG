@@ -3,23 +3,23 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Modules;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
-public static class LandStateSwitcher
+public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 {
-	[FsmSourceGenerator.FsmStateSwitcher("Action")]
-	public static States Land(States currentState, PlayerData data)
+	public void Land()
 	{
 		data.ResetGravity();
 		data.Movement.IsGrounded = true;
     
-		if (currentState is States.SpinDash or States.Dash) return currentState;
-		if (WaterBarrierBounce(data)) return currentState;
+		if (logic.Action is States.SpinDash or States.Dash) return;
+		if (WaterBarrierBounce()) return;
 		
-		SetAnimation(data);
+		SetAnimation();
     
 		if (data.Damage.IsHurt)
 		{
@@ -35,13 +35,13 @@ public static class LandStateSwitcher
 		data.Item.ComboCounter = 0;
 		data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
     
-		CpuState = CpuStates.Main;
+		data.Cpu.State = CpuModule.States.Main;
 
-		LandHandler?.Invoke();
-    
-		if (data.State != States.HammerDash)
+		landAction();
+		
+		if (logic.Action != States.HammerDash)
 		{
-			data.State = States.Default;
+			logic.Action = States.Default;
 		}
 		else if (Math.Sign(data.Movement.GroundSpeed) != (int)data.Visual.Facing)
 		{
@@ -50,14 +50,13 @@ public static class LandStateSwitcher
 
 		if (data.Movement.IsSpinning) return;
 		data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
-    	
 		data.Collision.Radius = data.Collision.RadiusNormal;
 	}
     
-	private static bool WaterBarrierBounce(PlayerData data)
+	private bool WaterBarrierBounce()
 	{
-		if (data.Node.Shield.State != ShieldContainer.States.Active || 
-		    SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
+		if (data.Node.Shield.State != ShieldContainer.States.Active) return false;
+		if (SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
 		
 		float force = data.Water.IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(data.Movement.Angle);
@@ -75,7 +74,7 @@ public static class LandStateSwitcher
 		return true;
 	}
 
-	private static void SetAnimation(PlayerData data)
+	private void SetAnimation()
 	{
 		if (data.Visual.Animation == Animations.HammerDash) return;
 		data.Visual.Animation = Animations.Move;

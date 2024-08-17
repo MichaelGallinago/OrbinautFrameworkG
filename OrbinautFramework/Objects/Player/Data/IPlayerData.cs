@@ -1,7 +1,16 @@
-﻿namespace OrbinautFramework3.Objects.Player.Data;
+﻿using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 
-public interface IPlayerData
+namespace OrbinautFramework3.Objects.Player.Data;
+
+public interface IPlayerData : IPosition
 {
-    public int Id { get; set; }
-    ActionFsm.States State { get; }
+    int Id { get; }
+    IPlayerNode Node { get; }
+
+    Vector2 IPosition.Position
+    {
+        get => Node.Position;
+        set => Node.Position = value;
+    }
 }

@@ -24,27 +24,11 @@ public class CpuModule(PlayerData data)
 	public const int DelayStep = 16;
 	private const int JumpFrequency = 64;
 	
-    public States State { get; set; }
-    public float RespawnTimer { get; set; }
-    public float InputTimer { get; set; }
-    public bool IsJumping { get; set; }
-    public bool IsRespawn { get; set; }
-    public ICpuTarget Target { get; set; }
-    
-    private bool _canReceiveInput;
-	private ICpuTarget _leadPlayer;
+	private int _delay;
 	private Buttons _inputDown;
 	private Buttons _inputPress;
-	private int _delay;
-
-	public void Init()
-	{
-		Target = null;
-		State = States.Main;
-		RespawnTimer = 0f;
-		InputTimer = 0f;
-		IsJumping = false;
-	}
+	private bool _canReceiveInput;
+	private ICpuTarget _leadPlayer;
 	
     public void Process()
     {
@@ -59,10 +43,10 @@ public class CpuModule(PlayerData data)
 		if (_canReceiveInput && 
 		    data.Input.Down is not { Abc: false, Up: false, Down: false, Left: false, Right: false })
 		{
-			InputTimer = 600f;
+			data.Cpu.InputTimer = 600f;
 		}
 		
-		switch (State)
+		switch (data.Cpu.State)
 		{
 			case States.RespawnInit: InitRespawn(); break;
 			case States.Respawn: ProcessRespawn(); break;
@@ -82,7 +66,7 @@ public class CpuModule(PlayerData data)
 		
 		data.Node.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
-		State = States.Respawn;
+		data.Cpu.State = States.Respawn;
 	}
 
 	private void ProcessRespawn()
@@ -112,7 +96,7 @@ public class CpuModule(PlayerData data)
 
 		if (!data.Movement.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
 		
-		State = States.Main;
+		data.Cpu.State = States.Main;
 		data.Visual.Animation = Animations.Move;
 		data.Collision.IsObjectInteractionEnabled = true;
 		data.Movement.IsControlRoutineEnabled = true;
@@ -200,12 +184,12 @@ public class CpuModule(PlayerData data)
 		if (!data.Collision.IsObjectInteractionEnabled || 
 		    data.Carry.Target != null || data.State == ActionFsm.States.Carried) return;
 		
-		Target ??= _leadPlayer; // Follow lead player
+		data.Cpu.Target ??= _leadPlayer; // Follow lead player
 		
 		// Exit if CPU logic is disabled
-		if (InputTimer > 0f)
+		if (data.Cpu.InputTimer > 0f)
 		{
-			InputTimer -= Scene.Instance.ProcessSpeed;
+			data.Cpu.InputTimer -= Scene.Instance.ProcessSpeed;
 			if (!data.Input.NoControl) return;
 		}
 		
@@ -214,7 +198,7 @@ public class CpuModule(PlayerData data)
 		
 		if (data.Movement.GroundLockTimer > 0f && data.Movement.GroundSpeed == 0f)
 		{
-			State = States.Stuck;
+			data.Cpu.State = States.Stuck;
 		}
 
 		TryJump();
@@ -225,10 +209,10 @@ public class CpuModule(PlayerData data)
 	private void TryJump()
 	{
 		(Vector2 targetPosition, _inputPress, _inputDown, 
-			Constants.Direction direction, object isTargetPush) = Target.RecordedData[_delay];
+			Constants.Direction direction, object isTargetPush) = data.Cpu.Target.RecordedData[_delay];
 
 		if (SharedData.Behaviour == Behaviours.S3 &&
-		    Math.Abs(Target.GroundSpeed) < 4f && Target.OnObject == null)
+		    Math.Abs(data.Cpu.Target.GroundSpeed) < 4f && data.Cpu.Target.OnObject == null)
 		{
 			targetPosition.X -= 32f;
 		}
@@ -251,11 +235,11 @@ public class CpuModule(PlayerData data)
 
 	private void Jump()
 	{
-		if (data.Visual.Animation == Animations.Duck || Target.Animation == Animations.Wait) return;
+		if (data.Visual.Animation == Animations.Duck || data.Cpu.Target.Animation == Animations.Wait) return;
 		if (!Scene.Instance.IsTimePeriodLooped(JumpFrequency)) return;
 		
 		_inputPress.Abc = _inputDown.Abc = true;
-		IsJumping = true;
+		data.Cpu.IsJumping = true;
 	}
 
 	private void FreezeOrFlyIfLeaderDied()
@@ -266,8 +250,9 @@ public class CpuModule(PlayerData data)
 		if (data.Node.Type == PlayerNode.Types.Tails)
 		{
 			data.Visual.Animation = Animations.Fly;
-			State = States.Respawn;
+			data.Cpu.State = States.Respawn;
 			data.ResetState();
+			data.State = States.Default;
 		}
 		else
 		{
@@ -303,13 +288,13 @@ public class CpuModule(PlayerData data)
 	
 	private bool CheckJump(float distanceX, float targetPositionY)
 	{
-		if (IsJumping)
+		if (data.Cpu.IsJumping)
 		{
 			_inputDown.Abc = true;
 				 
 			if (!data.Movement.IsGrounded) return false;
 			
-			IsJumping = false;
+			data.Cpu.IsJumping = false;
 			return true;
 		}
 
@@ -322,11 +307,11 @@ public class CpuModule(PlayerData data)
 	{
 		if (CheckRespawn()) return;
 		
-		if (data.Movement.GroundLockTimer > 0f || InputTimer > 0f || data.Movement.GroundSpeed != 0f) return;
+		if (data.Movement.GroundLockTimer > 0f || data.Cpu.InputTimer > 0f || data.Movement.GroundSpeed != 0f) return;
 		
 		if (data.Visual.Animation == Animations.Idle)
 		{
-			data.Visual.Facing = Target.Position.X >= data.Node.Position.X ? 
+			data.Visual.Facing = data.Cpu.Target.Position.X >= data.Node.Position.X ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
@@ -341,7 +326,7 @@ public class CpuModule(PlayerData data)
 		
 		data.Input.Down = data.Input.Down with { Down = false };
 		data.Input.Press = data.Input.Press with { Abc = false };
-		State = States.Main;
+		data.Cpu.State = States.Main;
 	}
 	
 	private bool CheckRespawn()
@@ -351,12 +336,12 @@ public class CpuModule(PlayerData data)
 		
 		if (isBehindLeader || data.Node.Sprite != null && data.Node.Sprite.CheckInCameras())
 		{
-			RespawnTimer = 0f;
+			data.Cpu.RespawnTimer = 0f;
 			return false;
 		}
 		
-		RespawnTimer += Scene.Instance.ProcessSpeed;
-		if (RespawnTimer < 300f)
+		data.Cpu.RespawnTimer += Scene.Instance.ProcessSpeed;
+		if (data.Cpu.RespawnTimer < 300f)
 		{
 			if (data.Collision.OnObject == null || GodotObject.IsInstanceValid(data.Collision.OnObject)) return false;
 		}
@@ -367,7 +352,7 @@ public class CpuModule(PlayerData data)
 
 	private void Respawn()
 	{
-		Init();
+		data.Cpu.Init();
 		
 		if (data.IsCameraTarget(out ICamera camera))
 		{
@@ -379,7 +364,7 @@ public class CpuModule(PlayerData data)
 		data.Node.Position = new Vector2(sbyte.MaxValue, 0);
 		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		
-		State = States.RespawnInit;
+		data.Cpu.State = States.RespawnInit;
 		data.Movement.IsControlRoutineEnabled = false;
 		data.Collision.IsObjectInteractionEnabled = false;
 		data.Movement.IsGrounded = false;

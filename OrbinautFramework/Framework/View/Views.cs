@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.View;

@@ -10,13 +10,13 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct Damage(PlayerData data)
+public struct Damage(PlayerData data, IPlayerLogic logic)
 {
     public void Kill()
     {
     	if (data.Death.IsDead) return;
     	
-	    data.ResetState();
+	    logic.ResetState();
     	AudioPlayer.Sound.Play(SoundStorage.Hurt);
 
     	if (data.Id == 0)
@@ -29,7 +29,7 @@ public struct Damage(PlayerData data)
     	data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 	    data.Node.Visible = true;
 	    
-    	data.State = States.Default;
+	    logic.Action = States.Default;
     	data.Visual.Animation = Animations.Death;
     	data.Death.IsDead = true;
     	data.Collision.IsObjectInteractionEnabled = false;
@@ -53,7 +53,8 @@ public struct Damage(PlayerData data)
     		return;
     	}
     	
-    	data.ResetState();
+    	logic.ResetState();
+	    logic.Action = States.Default;
 
     	const float velocityX = 2f, velocityY = 4f;
     	data.Movement.Velocity.Vector = 
@@ -121,7 +122,7 @@ public struct Damage(PlayerData data)
 	
 	    SharedData.PlayerRings = 0;
 	    SharedData.LifeRewards = SharedData.LifeRewards with { X = 100 };
-			
+	    
 	    AudioPlayer.Sound.Play(SoundStorage.RingLoss);
     }
 }

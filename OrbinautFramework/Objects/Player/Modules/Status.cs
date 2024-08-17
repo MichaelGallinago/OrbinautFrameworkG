@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Modules;
 
-public struct Status(PlayerData data)
+public struct Status(PlayerData data, IPlayerLogic logic)
 {
     public void Update()
     {
@@ -89,7 +89,7 @@ public struct Status(PlayerData data)
 	{
 		if (data.Id == 0 && Scene.Instance.Time >= 36000f)
 		{
-			Kill();
+			logic.Kill();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-namespace OrbinautFramework3.Framework;
+namespace OrbinautFramework3.Framework.ObjectBase;
 
 public interface IPosition
 {
