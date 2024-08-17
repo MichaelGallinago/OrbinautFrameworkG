@@ -25,46 +25,47 @@ public struct HammerDash(PlayerData data)
 		
         AudioPlayer.Sound.Stop(SoundStorage.Charge3);
         AudioPlayer.Sound.Play(SoundStorage.Release);
+
+        Perform();
     }
     
-    public void Perform()
+    public States Perform()
     {
         // Note that ACTION_HAMMERDASH is used for movement logic only so the respective animation
         // is NOT cleared alongside the action flag. All checks for a Hammer Dash action should refer to its animation
 		
-        if (!data.Input.Down.Abc)
-        {
-            data.State = States.Default;
-            return;
-        }
+        if (!data.Input.Down.Abc) return States.Default;
 		
         _timer += Scene.Instance.ProcessSpeed;
-        if (_timer >= 60f)
-        {
-            data.State = States.Default;
-            return;
-        }
+        if (_timer >= 60f) return States.Default;
 
-        if (data.Movement.GroundSpeed == 0f || data.Visual.SetPushBy != null ||
-            MathF.Cos(Mathf.DegToRad(data.Movement.Angle)) <= 0f)
-        {
-            data.State = States.Default;
-        }
-		
-        // Overwrite ground movement. Air movement is not overwritten completely
-        if (!data.Movement.IsGrounded) return;
-
+        MovementData movement = data.Movement;
+        
+        if (movement.GroundSpeed == 0f || data.Visual.SetPushBy != null) return States.Default; 
+        if (MathF.Cos(Mathf.DegToRad(movement.Angle)) <= 0f) return States.Default;
+        
         TurnAround();
-		
-        data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
+        data.Visual.Animation = Animations.HammerDash;
+        SetSpeedAndVelocity();
+        
+        return States.HammerDash;
     }
 
     private void TurnAround()
     {
-        if ((!data.Input.Press.Left || data.Movement.GroundSpeed <= 0f) &&
-            (!data.Input.Press.Right || data.Movement.GroundSpeed >= 0f)) return;
+        bool isPositive = data.Visual.Facing == Constants.Direction.Positive;
+        if (isPositive && data.Input.Press.Left || !isPositive && data.Input.Press.Right)
+        {
+            data.Visual.Facing = isPositive ? Constants.Direction.Negative : Constants.Direction.Positive;
+        }
+    }
+
+    private void SetSpeedAndVelocity()
+    {
+        const float hammerDashSpeed = 6f;
+        data.Movement.GroundSpeed.Value = hammerDashSpeed * (float)data.Visual.Facing;
         
-        data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
-        data.Movement.GroundSpeed.Value = -data.Movement.GroundSpeed;
+        if (!data.Movement.IsGrounded) return;
+        data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     }
 }

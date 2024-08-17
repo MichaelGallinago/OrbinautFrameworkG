@@ -7,11 +7,12 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Collisions;
 
-public struct Air(PlayerData data)
+public struct Air(PlayerData data, IPlayerLogic logic)
 {
     public void Collide()
 	{
-		if (data.Movement.IsGrounded || data.Death.IsDead || data.State is States.Glide or States.Climb) return;
+		if (data.Movement.IsGrounded || data.Death.IsDead) return;
+		if (logic.Action is States.GlideAir or States.GlideFall or States.GlideGround or States.Climb) return;
 		
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
@@ -69,14 +70,14 @@ public struct Air(PlayerData data)
 		if (roofDistance >= 0) return false;
 		
 		data.Node.Position -= new Vector2(0f, roofDistance);
-		if (moveQuadrant == Angles.Quadrant.Up && data.State != States.Flight && 
+		if (moveQuadrant == Angles.Quadrant.Up && logic.Action != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
 			data.Movement.Angle = roofAngle;
 			data.Movement.GroundSpeed.Value = roofAngle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
 			data.Movement.Velocity.Y = 0f;
 					
-			Land();
+			logic.Land();
 			return true;
 		}
 		
@@ -85,7 +86,7 @@ public struct Air(PlayerData data)
 			data.Movement.Velocity.Y = 0f;
 		}
 		
-		if (data.State == States.Flight)
+		if (logic.Action == States.Flight)
 		{
 			data.Movement.Gravity = GravityType.TailsDown;
 		}
@@ -113,7 +114,7 @@ public struct Air(PlayerData data)
 		data.Node.Position += new Vector2(0f, distance);
 		data.Movement.Angle = angle;
 		
-		Land();
+		logic.Land();
 	}
 
 	private bool LandOnFeet(out int distance, out float angle)

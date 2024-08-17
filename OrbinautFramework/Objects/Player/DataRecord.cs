@@ -10,5 +10,8 @@ public readonly record struct DataRecord(
     Buttons InputPress,
     Buttons InputDown,
     Constants.Direction Facing,
-    object SetPushAnimationBy //TODO: replace OrbinautNode with interface
+    object SetPushAnimationBy,
+    bool IsJumping,
+    bool IsGrounded,
+    ActionFsm.States Action
 );

@@ -69,7 +69,8 @@ public partial class Bumper : InteractiveNode
 
         PlayerData data = player.Data;
         MovementData movement = data.Movement;
-        
+
+        movement.IsJumping = false;
         movement.IsGrounded = false;
         movement.IsAirLock = false;
         data.Visual.SetPushBy = null;

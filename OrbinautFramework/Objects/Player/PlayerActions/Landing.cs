@@ -16,7 +16,12 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		data.ResetGravity();
 		data.Movement.IsGrounded = true;
     
-		if (logic.Action is States.SpinDash or States.Dash) return;
+		switch (logic.Action)
+		{
+			case States.SpinDash: return;
+			case States.Dash: landAction(); return;
+		}
+
 		if (WaterBarrierBounce()) return;
 		
 		SetAnimation();
@@ -25,9 +30,10 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		{
 			data.Movement.GroundSpeed.Value = 0f;
 		}
-    
+		
+		data.Visual.Animation
 		data.Movement.IsAirLock = false;
-		data.Movement.IsSpinning = false;
+		data.Movement.IsJumping = false;
 		data.Visual.SetPushBy = null;
 		data.Damage.IsHurt = false;
     

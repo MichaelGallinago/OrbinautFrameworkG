@@ -8,13 +8,13 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
-public struct Air(PlayerData data)
+public struct Air(PlayerData data, IPlayerLogic logic)
 {
 	public void Move()
 	{
 		if (data.Movement.IsGrounded || data.Death.IsDead) return;
-		if (data.State is States.Carried or States.Climb or States.SpinDash || 
-		    data.State == States.Glide && ActionState != (int)GlideStates.Fall) return;
+		if (logic.Action is States.Carried or States.Climb or 
+		    States.SpinDash or States.GlideAir or States.GlideFall) return;
 
 		RotateInAir();
 		LimitVerticalVelocity();
@@ -38,7 +38,7 @@ public struct Air(PlayerData data)
 
 	private void LimitVerticalVelocity()
 	{
-		if (!data.Movement.IsJumping && data.State != States.SpinDash && 
+		if (!data.Movement.IsJumping && logic.Action != States.SpinDash && 
 		    !data.Movement.IsForcedSpin && data.Movement.Velocity.Y < -15.75f)
 		{
 			data.Movement.Velocity.Y = -15.75f;
@@ -51,7 +51,7 @@ public struct Air(PlayerData data)
 
 	private bool ChangeHammerDashFacingInAir()
 	{
-		if (data.State != States.HammerDash) return false;
+		if (logic.Action != States.HammerDash) return false;
 		
 		if (data.Input.Down.Left)
 		{

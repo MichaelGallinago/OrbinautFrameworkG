@@ -4,14 +4,18 @@ using OrbinautFramework3.Objects.Player.Modules;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class Recorder(PlayerData data)
+public class Recorder(PlayerData data, IPlayerLogic logic)
 {
     private const byte MinimalLength = 32;
     
     public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
     
     private DataRecord NewRecord => new(
-        data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
+        data.Node.Position, 
+        data.Input.Press, data.Input.Down, 
+        data.Visual.Facing, data.Visual.SetPushBy, 
+        data.Movement.IsJumping, data.Movement.IsGrounded, 
+        logic.Action);
     
     private DataRecord[] _recordedData;
     
@@ -51,13 +55,11 @@ public class Recorder(PlayerData data)
             Array.Resize(ref _recordedData, newLength);
             return;
         }
-		
+        
         var resizedData = new DataRecord[newLength];
-        var record = new DataRecord(
-            data.Node.Position, data.Input.Press, data.Input.Down, data.Visual.Facing, data.Visual.SetPushBy);
 		
         Array.Copy(_recordedData, resizedData, oldLength);
-        Array.Fill(resizedData, record,oldLength, newLength - oldLength);
+        Array.Fill(resizedData, NewRecord,oldLength, newLength - oldLength);
         _recordedData = resizedData;
     }
 }

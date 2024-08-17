@@ -7,14 +7,14 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
-public struct Ground(PlayerData data)
+public struct Ground(PlayerData data, IPlayerLogic logic)
 {
     public const float SkidSpeedThreshold = 4f;
     
     public void Move()
     {
         if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
-        if (data.State is States.SpinDash or States.Dash or States.HammerDash) return;
+        if (logic.Action is States.SpinDash or States.Dash or States.HammerDash) return;
 
         CancelGlideLandingAnimation();
 		
