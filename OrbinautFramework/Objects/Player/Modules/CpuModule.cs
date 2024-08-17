@@ -247,19 +247,12 @@ public class CpuModule(PlayerData data, IPlayerLogic logic)
 		// Freeze or start flying (if we're Tails) if lead player has died
 		if (!_leadPlayer.IsDead) return;
 		
-		if (data.Node.Type == PlayerNode.Types.Tails)
-		{
-			data.Visual.Animation = Animations.Fly;
-			data.Cpu.State = States.Respawn;
-			logic.ResetState();
-			logic.Action = ActionFsm.States.Default;
-		}
-		else
-		{
-			//TODO: instance_deactivate_object(id);
-		}
-					
+		logic.ResetState();
+		logic.Action = ActionFsm.States.Default;
+		
+		data.Cpu.State = States.Respawn;
 		data.Movement.IsControlRoutineEnabled = false;
+		data.Collision.IsObjectInteractionEnabled = false;
 	}
 	
 	private void Push(float distanceX, Constants.Direction facing)
