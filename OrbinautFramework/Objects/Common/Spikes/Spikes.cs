@@ -53,7 +53,7 @@ public abstract partial class Spikes : SolidNode
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             CollideWithPlayer(player);
-            if (!CheckSolidCollision(player, _sensor)) continue;
+            if (!player.CheckSolidCollision(SolidBox, _sensor)) continue;
             HurtPlayer(player);
         }
     }

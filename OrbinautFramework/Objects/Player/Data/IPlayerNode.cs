@@ -18,8 +18,7 @@ public interface IPlayerNode : IPosition
     HitBox HitBox { get; }
     SolidBox SolidBox { get; }
     ShieldContainer Shield { get; }
-    PlayerAnimatedSprite Sprite { get; }
+    Sprite.SpriteNode SpriteNode { get; }
     
     void Init();
-    bool IsInstanceValid();
 }

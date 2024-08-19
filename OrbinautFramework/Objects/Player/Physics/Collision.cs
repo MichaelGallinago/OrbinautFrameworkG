@@ -1,11 +1,12 @@
 ﻿using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Physics.Collisions;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Collision(PlayerData data)
+public struct Collision(PlayerData data, IPlayerLogic logic)
 {
-	private Air _air = new(data);
+	private Air _air = new(data, logic);
 	private Ground _ground = new(data);
 
 	public void CollideAir() => _air.Collide();

@@ -1,6 +1,7 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -14,15 +15,15 @@ public struct ClimbLedge(PlayerData data)
             data.Visual.Animation = Animations.ClimbLedge;
             data.Node.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
         }
-        else if (data.Node.Sprite.IsFrameChanged)
+        else if (data.Node.SpriteNode.IsFrameChanged)
         {
-            switch (data.Node.Sprite.Frame)
+            switch (data.Node.SpriteNode.Frame)
             {
                 case 1: data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
                 case 2: data.Node.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
             }
         }
-        else if (data.Node.Sprite.IsFinished)
+        else if (data.Node.SpriteNode.IsFinished)
         {
             Land();
             data.Visual.Animation = Animations.Idle;

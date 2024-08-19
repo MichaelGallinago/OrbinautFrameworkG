@@ -2,12 +2,12 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Slopes;
 
-public struct SlopeResist(PlayerData data)
+public struct SlopeResist(PlayerData data, IPlayerLogic logic)
 {
     public void Apply()
     {
@@ -22,8 +22,9 @@ public struct SlopeResist(PlayerData data)
     
     private void ResistWalk()
     {
-        if (!data.Movement.IsGrounded || data.Movement.IsSpinning || data.State is States.HammerDash or States.Dash) return;
-        if (data.Movement.Angle is >= 135f and < 225f) return; // Exit if we're on ceiling
+        if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
+        if (logic.Action is States.HammerDash or States.Dash) return;
+        if (data.Movement.Angle is >= 135f and < 225f) return;
 		
         float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
 		

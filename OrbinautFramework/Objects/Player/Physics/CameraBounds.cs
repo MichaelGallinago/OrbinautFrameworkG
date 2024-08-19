@@ -3,11 +3,12 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct CameraBounds(PlayerData data)
+public struct CameraBounds(PlayerData data, IPlayerLogic logic)
 {
     public void Match()
     {
@@ -15,7 +16,7 @@ public struct CameraBounds(PlayerData data)
     	
 	    //TODO: check this
     	if (!data.Node.IsCameraTarget(out ICamera camera) && 
-	        !Scene.Instance.Players.First().Node.IsCameraTarget(out camera)) return;
+	        !Scene.Instance.Players.First().Data.Node.IsCameraTarget(out camera)) return;
 
 	    ShiftToLeftBound(camera);
 	    ShiftToRightBound(camera);
@@ -54,12 +55,12 @@ public struct CameraBounds(PlayerData data)
     private void ShiftToTopBound(ICamera camera)
     {
 	    float topBound = camera.Boundary.Y + 16f;
-	    switch (data.State)
+	    switch (logic.Action)
 	    {
 		    case States.Flight or States.Climb:
 			    if (data.Node.Position.Y + data.Movement.Velocity.Y >= topBound) break;
     
-			    if (data.State == States.Flight)
+			    if (logic.Action == States.Flight)
 			    {
 				    data.Movement.Gravity = GravityType.TailsDown;
 			    }
@@ -68,7 +69,7 @@ public struct CameraBounds(PlayerData data)
 			    data.Node.Position = new Vector2(data.Node.Position.X, topBound);
 			    break;
     		
-		    case States.Glide when data.Node.Position.Y < topBound - 6:
+		    case States.GlideAir or States.GlideFall or States.GlideGround when data.Node.Position.Y < topBound - 6:
 			    data.Movement.GroundSpeed.Value = 0f;
 			    break;
 	    }
@@ -77,8 +78,8 @@ public struct CameraBounds(PlayerData data)
     private void KillUnderBottomBound(ICamera camera)
     {
 	    if (data.Water.AirTimer <= 0f) return;
-	    if (data.Node.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; //TODO: check c_stage.bound_bottom[player_camera.index]
+	    if (data.Node.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; 
 	    
-	    Kill();
+	    logic.Kill();
     }
 }

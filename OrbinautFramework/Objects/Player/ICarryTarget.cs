@@ -1,8 +1,8 @@
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player;
 
 public interface ICarryTarget
 {
-    public CarryTarget CarryTarget { get; }
+    public CarryTargetLogic CarryTargetLogic { get; }
 }

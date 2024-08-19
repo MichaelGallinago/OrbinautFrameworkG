@@ -1,4 +1,5 @@
 ﻿using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 

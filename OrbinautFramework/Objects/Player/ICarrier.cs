@@ -15,6 +15,6 @@ public interface ICarrier
 
     private void Carry()
     {
-        CarryTarget.CarryTarget.OnAttached(this);
+        CarryTarget.CarryTargetLogic.OnAttached(this);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
@@ -33,21 +33,21 @@ public class Recorder(PlayerData data, IPlayerLogic logic)
     
     public void Record()
     {
-        Array.Copy(_recordedData, 0, _recordedData, 
-            1, _recordedData.Length - 1);
+        int length = _recordedData.Length - 1;
+        Array.Copy(_recordedData, 0, _recordedData, 1, length);
 		
         _recordedData[0] = NewRecord;
     }
     
     public void Fill()
     {
-        _recordedData = new DataRecord[Math.Max(MinimalLength, CpuModule.DelayStep * Scene.Instance.Players.Count)];
+        _recordedData = new DataRecord[Math.Max(MinimalLength, CpuLogic.DelayStep * Scene.Instance.Players.Count)];
         Array.Fill(_recordedData, NewRecord);
     }
     
     private void Resize(int playersCount)
     {
-        int newLength = Math.Max(MinimalLength, CpuModule.DelayStep * playersCount);
+        int newLength = Math.Max(MinimalLength, CpuLogic.DelayStep * playersCount);
         int oldLength = _recordedData.Length;
 		
         if (newLength <= oldLength)

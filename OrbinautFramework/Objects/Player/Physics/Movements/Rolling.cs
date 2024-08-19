@@ -2,7 +2,8 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 

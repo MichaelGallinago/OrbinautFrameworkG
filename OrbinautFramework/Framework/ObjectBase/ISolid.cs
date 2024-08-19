@@ -8,4 +8,6 @@ public interface ISolid
     Vector2 Position { get; }
     Vector2 PreviousPosition { get; }
     Vector2 Scale { get; }
+
+    bool IsInstanceValid();
 }

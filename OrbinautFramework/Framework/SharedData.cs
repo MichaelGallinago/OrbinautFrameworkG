@@ -2,7 +2,7 @@
 using Godot;
 using OrbinautFramework3.Objects.Common.GiantRing;
 using OrbinautFramework3.Objects.Player;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Framework;
@@ -26,7 +26,7 @@ public static class SharedData
 	
     // Originals differences
     public static PhysicsCore.Types PhysicsType { get; set; } = PhysicsCore.Types.S2;
-    public static CpuModule.Behaviours Behaviour { get; set; } = CpuModule.Behaviours.S3;
+    public static CpuLogic.Behaviours Behaviour { get; set; } = CpuLogic.Behaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool Dash { get; set; } = true;
     public static bool DropDash { get; set; } = true;
@@ -52,6 +52,7 @@ public static class SharedData
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
+    public static int RealPlayerCount { get; set; } = 1;
     public static PlayerNode.Types[] PlayerTypes { get; set; } = [PlayerNode.Types.Sonic, PlayerNode.Types.Tails];
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;

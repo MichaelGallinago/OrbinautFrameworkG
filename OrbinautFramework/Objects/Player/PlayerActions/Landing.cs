@@ -3,7 +3,8 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
@@ -23,25 +24,23 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		}
 
 		if (WaterBarrierBounce()) return;
-		
-		SetAnimation();
     
 		if (data.Damage.IsHurt)
 		{
 			data.Movement.GroundSpeed.Value = 0f;
 		}
 		
-		data.Visual.Animation
 		data.Movement.IsAirLock = false;
 		data.Movement.IsJumping = false;
+		
 		data.Visual.SetPushBy = null;
+		data.Visual.Animation = Animations.Move;
+		
+		data.Cpu.State = CpuLogic.States.Main;
 		data.Damage.IsHurt = false;
-    
 		data.Node.Shield.State = ShieldContainer.States.None;
 		data.Item.ComboCounter = 0;
 		data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
-    
-		data.Cpu.State = CpuModule.States.Main;
 
 		landAction();
 		
@@ -49,12 +48,8 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		{
 			logic.Action = States.Default;
 		}
-		else if (Math.Sign(data.Movement.GroundSpeed) != (int)data.Visual.Facing)
-		{
-			data.Movement.GroundSpeed.Value = -data.Movement.GroundSpeed;
-		}
 
-		if (data.Movement.IsSpinning) return;
+		if (data.Visual.Animation == Animations.Spin) return;
 		data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
 		data.Collision.Radius = data.Collision.RadiusNormal;
 	}
@@ -78,11 +73,5 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		
 		return true;
-	}
-
-	private void SetAnimation()
-	{
-		if (data.Visual.Animation == Animations.HammerDash) return;
-		data.Visual.Animation = Animations.Move;
 	}
 }

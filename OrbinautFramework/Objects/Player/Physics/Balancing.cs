@@ -3,18 +3,19 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Balancing(PlayerData data)
+public struct Balancing(PlayerData data, IPlayerLogic logic)
 {
     public void Balance()
 	{
 		if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
-		if (data.Movement.GroundSpeed != 0f || data.State is States.SpinDash or States.Dash) return;
+		if (data.Movement.GroundSpeed != 0f || logic.Action is States.SpinDash or States.Dash) return;
 		
 		// Don't allow player to duck or look up
 		if (SharedData.PhysicsType == PhysicsCore.Types.SK && (data.Input.Down.Down || data.Input.Down.Up)) return;
@@ -25,10 +26,9 @@ public struct Balancing(PlayerData data)
 	
 	private void BalanceOnObject()
 	{
-		OrbinautNode onObject = data.Collision.OnObject;
-		if (onObject == null) return;
-		// TODO: check IsInstanceValid == instance_exist
-		if (!GodotObject.IsInstanceValid(onObject) || onObject.SolidBox.NoBalance) return;
+		ISolid onObject = data.Collision.OnObject;
+		if (!onObject.IsInstanceValid()) return;
+		if (onObject.SolidBox.NoBalance) return;
 		
 		const int leftEdge = 2;
 		const int panicOffset = 4;
@@ -53,19 +53,19 @@ public struct Balancing(PlayerData data)
 		const Constants.Direction direction = Constants.Direction.Positive;	
 		
 		if (Angles.GetQuadrant(data.Movement.Angle) > Angles.Quadrant.Down) return true;
-		data.TileCollider.SetData(
+		logic.TileCollider.SetData(
 			(Vector2I)data.Node.Position + new Vector2I(0, data.Collision.Radius.Y), 
 			data.Collision.TileLayer);
 		
-		if (data.TileCollider.FindDistance(0, 0, true, direction) < 12) return true;
+		if (logic.TileCollider.FindDistance(0, 0, true, direction) < 12) return true;
 		
-		(_, float angleLeft) = data.TileCollider.FindTile(-data.Collision.Radius.X, 0, true, direction);
-		(_, float angleRight) = data.TileCollider.FindTile(data.Collision.Radius.X, 0, true, direction);
+		(_, float angleLeft) = logic.TileCollider.FindTile(-data.Collision.Radius.X, 0, true, direction);
+		(_, float angleRight) = logic.TileCollider.FindTile(data.Collision.Radius.X, 0, true, direction);
 		
 		if (float.IsNaN(angleLeft) == float.IsNaN(angleRight)) return true;
 		
 		int sign = float.IsNaN(angleLeft) ? -1 : 1;
-		bool isPanic = data.TileCollider.FindDistance(-6 * sign, 0, true, direction) >= 12;
+		bool isPanic = logic.TileCollider.FindDistance(-6 * sign, 0, true, direction) >= 12;
 		BalanceToDirection((Constants.Direction)sign, isPanic);
 		return true;
 	}

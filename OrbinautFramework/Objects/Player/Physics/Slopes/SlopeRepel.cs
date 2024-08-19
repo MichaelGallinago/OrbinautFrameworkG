@@ -2,16 +2,16 @@
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Slopes;
 
-public struct SlopeRepel(PlayerData data)
+public struct SlopeRepel(PlayerData data, IPlayerLogic logic)
 {
     public void Apply()
     {
-        if (!data.Movement.IsGrounded || data.Collision.IsStickToConvex || data.State == States.HammerDash) return;
+        if (!data.Movement.IsGrounded || data.Collision.IsStickToConvex || logic.Action == States.HammerDash) return;
 	
         if (data.Movement.GroundLockTimer > 0f)
         {

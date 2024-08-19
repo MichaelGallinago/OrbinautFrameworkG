@@ -3,7 +3,7 @@ using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Framework.View;
 
@@ -164,8 +164,8 @@ public partial class Camera : Camera2D, ICamera
 			FollowTargetX(processSpeed, targetPosition.X);
 		}
 
-		bool doShiftDown = data.Visual.Animation == Objects.Player.Animations.Duck;
-		bool doShiftUp = data.Visual.Animation == Objects.Player.Animations.LookUp;
+		bool doShiftDown = data.Visual.Animation == Objects.Player.Sprite.Animations.Duck;
+		bool doShiftUp = data.Visual.Animation == Objects.Player.Sprite.Animations.LookUp;
 
 		if (doShiftDown || doShiftUp)
 		{

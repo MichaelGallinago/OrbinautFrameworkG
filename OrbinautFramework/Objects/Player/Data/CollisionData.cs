@@ -16,7 +16,7 @@ public class CollisionData
     public Constants.TileLayers TileLayer { get; set; }
     public Constants.TileBehaviours TileBehaviour { get; set; }
     
-    public SolidBox OnObject { get; set; }
+    public ISolid OnObject { get; set; }
     public bool IsObjectInteractionEnabled { get; set; }
     public HashSet<SolidBox> PushObjects { get; } = [];
     public Dictionary<SolidBox, Constants.TouchState> TouchObjects { get; } = [];

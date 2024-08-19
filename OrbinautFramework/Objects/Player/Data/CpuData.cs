@@ -1,4 +1,4 @@
-﻿using OrbinautFramework3.Objects.Player.Modules;
+﻿using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
@@ -8,11 +8,11 @@ public class CpuData
     public float InputTimer { get; set; }
     public ICpuTarget Target { get; set; }
     public float RespawnTimer { get; set; }
-    public CpuModule.States State { get; set; }
+    public CpuLogic.States State { get; set; }
     
     public void Init()
     {
-        State = CpuModule.States.Main;
+        State = CpuLogic.States.Main;
         Target = null;
         IsJumping = false;
         InputTimer = 0f;

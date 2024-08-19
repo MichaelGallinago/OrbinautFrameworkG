@@ -100,7 +100,7 @@ public partial class Views : Control
     
     private void AttachCamerasToPlayers()
     {
-        ReadOnlySpan<PlayerData> players = Scene.Instance.Players.Values;
+        ReadOnlySpan<IPlayer> players = Scene.Instance.Players.Values;
         int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {

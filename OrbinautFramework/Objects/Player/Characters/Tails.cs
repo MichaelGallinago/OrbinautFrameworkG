@@ -4,7 +4,7 @@ namespace OrbinautFramework3.Objects.Player.Characters;
 
 public partial class Tails : PlayerNode//TODO: ICarrier
 {
-    [Export] private Tail _tail;
+    [Export] private Sprite.Tail _tail;
     
     public override void _Process(double delta)
     {

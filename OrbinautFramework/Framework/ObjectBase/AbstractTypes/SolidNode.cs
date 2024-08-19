@@ -19,4 +19,6 @@ public partial class SolidNode : CullableNode, IPreviousPosition, ISolid
         base._ExitTree();
         Scene.Instance.FrameEndProcess.Unsubscribe(this);
     }
+
+    public bool IsInstanceValid() => IsInstanceValid(this);
 }

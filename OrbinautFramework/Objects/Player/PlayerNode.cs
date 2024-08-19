@@ -2,6 +2,7 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
@@ -15,7 +16,7 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 	}
 	
 	[Export] public ShieldContainer Shield { get; init; }
-	[Export] public PlayerAnimatedSprite Sprite { get; init; }
+	[Export] public Sprite.SpriteNode SpriteNode { get; init; }
 	[Export] public Types Type { get; init; }
 	
 	public IMemento Memento { get; }
@@ -26,10 +27,9 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 	{
 		_playerLogic = new PlayerLogic(this);
 		Memento = new PlayerMemento(this);
+		SpriteNode.SetPlayer(_playerLogic);
 		Init();
 	}
-	
-	public void Init() => _playerLogic.Init();
 
 	public override void _ExitTree()
 	{
@@ -38,6 +38,6 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 	}
 	
 	public override void _Process(double delta) => _playerLogic.Process();
-
-	public bool IsInstanceValid() => GodotObject.IsInstanceValid(this);
+	
+	public void Init() => _playerLogic.Init();
 }

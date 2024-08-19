@@ -2,11 +2,10 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player.Data;
 using SolidNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.SolidNode;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
-
-using Player;
 
 public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : SolidNode
 {
@@ -45,11 +44,11 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
 
-	    foreach (PlayerNode player in Scene.Instance.Players.Values)
+	    foreach (IPlayer player in Scene.Instance.Players.Values)
 	    {
 		    player.ActSolid(this, Constants.SolidType.Top);
 		    
-		    if (!CheckSolidCollision(player, Constants.CollisionSensor.Top)) continue;
+		    if (!player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top)) continue;
 			
 		    isPlayerTouch = true;
 			

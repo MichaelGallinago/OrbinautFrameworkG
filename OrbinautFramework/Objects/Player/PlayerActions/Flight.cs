@@ -1,6 +1,7 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -58,7 +59,7 @@ public struct Flight(PlayerData data)
     {
 	    if (data.Water.IsUnderwater) return;
     	if (!Scene.Instance.IsTimePeriodLooped(16f, 8f)) return;
-	    if (!data.Node.Sprite.CheckInCameras()) return;
+	    if (!data.Node.SpriteNode.CheckInCameras()) return;
 	    
 	    AudioPlayer.Sound.Play(_flightTimer > 0f ? SoundStorage.Flight : SoundStorage.Flight2);
     }

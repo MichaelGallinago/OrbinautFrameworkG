@@ -3,16 +3,17 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Modules;
+using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
-public struct Rolling(PlayerData data)
+public struct Rolling(PlayerData data, IPlayerLogic logic)
 {
     public void Start()
     {
-        if (data.State is States.SpinDash or States.HammerDash) return;
+        if (logic.Action is States.SpinDash or States.HammerDash) return;
         if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
         if (!data.Movement.IsForcedSpin && (data.Input.Down.Left || data.Input.Down.Right)) return;
 

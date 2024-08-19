@@ -1,22 +1,18 @@
-﻿using System;
-using Godot;
-using OrbinautFramework3.Framework;
+﻿using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public interface IPlayer : IPlayerLogic, ICpuTarget, IEditor
+public interface IPlayer : IPlayerLogic, IPlayerCpuTarget, IPlayerEditor, ICarryTarget
 {
-    PlayerData Data { get; }
-    
     Vector2 IPosition.Position
     {
         get => Data.Node.Position;
         set => Data.Node.Position = value;
     }
     
-    Constants.Direction IEditor.Facing => Data.Visual.Facing;
-
     void IEditor.OnEnableEditMode()
     {
         ResetGravity();
@@ -34,15 +30,8 @@ public interface IPlayer : IPlayerLogic, ICpuTarget, IEditor
         Data.Movement.GroundSpeed.Value = 0f;
         Data.Visual.Animation = Animations.Move;
         Data.Collision.IsObjectInteractionEnabled = true;
-        Data.Death.State = Modules.Death.States.Wait;
+        Data.Death.State = Death.States.Wait;
     }
-    
-    int ICpuTarget.ZIndex => Data.Node.ZIndex;
-    bool ICpuTarget.IsDead => Data.Death.IsDead;
-    Velocity ICpuTarget.Velocity => Data.Movement.Velocity;
-    SolidBox ICpuTarget.OnObject => Data.Collision.OnObject;
-    Animations ICpuTarget.Animation => Data.Visual.Animation;
-    AcceleratedValue ICpuTarget.GroundSpeed => Data.Movement.GroundSpeed;
-    ReadOnlySpan<DataRecord> ICpuTarget.RecordedData => Recorder.RecordedData;
-    bool ICpuTarget.IsObjectInteractionEnabled => Data.Collision.IsObjectInteractionEnabled;
+
+    bool IsCpu { get; }
 }

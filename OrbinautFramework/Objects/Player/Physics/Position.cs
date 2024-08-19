@@ -1,14 +1,15 @@
 ﻿using Godot;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Position(PlayerData data)
+public struct Position(PlayerData data, IPlayerLogic logic)
 {
     public void Update()
     {
-        if (data.State == States.Carried) return;
+        if (logic.Action == States.Carried) return;
 		
         if (data.Collision.IsStickToConvex)
         {

@@ -3,6 +3,8 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
@@ -72,7 +74,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 
     private void SetPushAnimation()
     {
-        if (data.Visual.SetPushBy != null && data.Node.Sprite.IsFrameChanged)
+        if (data.Visual.SetPushBy != null && data.Node.SpriteNode.IsFrameChanged)
         {
             data.Visual.Animation = Animations.Push;
         }
