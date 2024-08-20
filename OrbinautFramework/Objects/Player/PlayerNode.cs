@@ -21,31 +21,31 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 	
 	public IMemento Memento { get; }
 
-	private readonly PlayerLogic _playerLogic;
+	protected readonly PlayerLogic PlayerLogic;
 
 	protected PlayerNode()
 	{
-		_playerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
+		PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
 		Memento = new PlayerMemento(this);
-		SpriteNode.SetPlayer(_playerLogic);
+		SpriteNode.SetPlayer(PlayerLogic);
 		Init();
 	}
 
 	public override void _ExitTree()
 	{
-		_playerLogic.ExitTree();
+		PlayerLogic.ExitTree();
 		base._ExitTree();
 	}
 	
 	public override void _Process(double delta)
 	{
-		_playerLogic.Process();
+		PlayerLogic.Process();
 		SpriteNode.Process();
 	}
 
 	public void Init()
 	{
-		_playerLogic.Init();
+		PlayerLogic.Init();
 		SpriteNode.Process();
 	}
 }

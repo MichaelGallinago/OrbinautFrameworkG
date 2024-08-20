@@ -11,12 +11,11 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
     public ISpriteNode Node { get; private set; }
     protected IPlayer Player { get; private set; }
     
-    public IPlayerSprite SetPlayer(IPlayer player, ISpriteNode spriteNode)
+    public void SetPlayer(IPlayer player, ISpriteNode spriteNode)
     {
         Player = player;
         Node = spriteNode;
         Data = new SpriteData();
-        return this;
     }
 
     public void Process()
@@ -88,7 +87,7 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
 
     private void UpdateScale()
     {
-        if (Player.Animation == Animations.Spin && !Data.IsFrameChanged) return;
+        if (Data.Animation == Animations.Spin && !Data.IsFrameChanged) return;
         Node.Scale = new Vector2(Math.Abs(Node.Scale.X) * (float)Player.Facing, Node.Scale.Y);
     }
 }

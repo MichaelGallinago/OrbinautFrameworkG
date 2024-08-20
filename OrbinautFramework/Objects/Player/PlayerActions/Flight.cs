@@ -59,7 +59,7 @@ public struct Flight(PlayerData data)
     {
 	    if (data.Water.IsUnderwater) return;
     	if (!Scene.Instance.IsTimePeriodLooped(16f, 8f)) return;
-	    if (!data.Node.SpriteNode.CheckInCameras()) return;
+	    if (!data.Sprite.CheckInCameras()) return;
 	    
 	    AudioPlayer.Sound.Play(_flightTimer > 0f ? SoundStorage.Flight : SoundStorage.Flight2);
     }

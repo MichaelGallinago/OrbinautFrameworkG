@@ -7,7 +7,8 @@ public interface IPlayerSprite
     protected SpriteData Data { get; }
     protected ISpriteNode Node { get; }
 
-    int Frame => Node.Frame; 
+    int Frame => Node.Frame;
+    int FrameCount => Data.FrameCount;
     bool IsFinished => Data.IsFinished;
     bool IsFrameChanged => Data.IsFrameChanged;
     

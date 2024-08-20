@@ -2,6 +2,7 @@
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
@@ -9,7 +10,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Jump(PlayerData data)
+public struct Jump(PlayerData data, IPlayerLogic logic)
 {
 	public void Enter()
 	{
@@ -51,7 +52,7 @@ public struct Jump(PlayerData data)
 		if (!data.Input.Press.C || data.Super.IsSuper) return false;
 		if (SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 
-		data.ResetState();
+		logic.ResetState();
 		data.Movement.IsCorePhysicsSkipped = true;
 		return true;
 	}

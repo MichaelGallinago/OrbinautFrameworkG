@@ -2,37 +2,38 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Sprite;
 
 [Tool]
-public partial class Tail : AdvancedAnimatedSprite
+public partial class Tail : AdvancedAnimatedSprite //TODO: refactor this
 {
-	public void Animate(ITailed data)
+	public void Animate(IPlayer player)
 	{
 		if (Scene.Instance.State == Scene.States.Paused) return;
 		
 		Offset = Vector2.Zero;
 		
-		switch (data.Animation)
+		switch (player.Animation)
 		{
 			case Animations.Idle or Animations.Duck or Animations.LookUp:
 				SetAnimation("Idle");
 				break;
 			
 			case Animations.Fly or Animations.FlyTired:
-				float speed = data.Velocity.Y >= 0f || data.Animation == Animations.FlyTired ? 0.5f : 1f;
+				float speed = player.Velocity.Y >= 0f || player.Animation == Animations.FlyTired ? 0.5f : 1f;
 				SetAnimation("Fly", speed);
 				break;
 			
 			case Animations.Push or Animations.Skid or Animations.Spin or 
 				Animations.Grab or Animations.Balance or Animations.SpinDash:
 				var offset = new Vector2I(-23, 0);
-				if (data.Animation is Animations.SpinDash or Animations.Grab)
+				if (player.Animation is Animations.SpinDash or Animations.Grab)
 				{
 					offset.X += 5;
 				}
-				else if (data.Animation != Animations.Spin)
+				else if (player.Animation != Animations.Spin)
 				{
 					offset += new Vector2I(7, 5);
 				}
@@ -46,19 +47,19 @@ public partial class Tail : AdvancedAnimatedSprite
 				break;
 		}
 		
-		RotationDegrees = GetTailAngle(data);
-		ChangeDirection(data);
+		RotationDegrees = GetTailAngle(player.Data);
+		ChangeDirection(player.Data);
 	}
 	
-	private static float GetTailAngle(ITailed data)
+	private static float GetTailAngle(PlayerData data)
 	{
-		if (!data.IsSpinning) return data.RotationDegrees;
+		if (!data.Movement.IsSpinning) return data.Node.RotationDegrees;
 		
-		if (data.IsGrounded) return data.VisualAngle;
+		if (data.Movement.IsGrounded) return data.Visual.Angle;
 		
-		float angle = Mathf.RadToDeg(MathF.Atan2(data.Velocity.Y, data.Velocity.X));
+		float angle = Mathf.RadToDeg(MathF.Atan2(data.Movement.Velocity.Y, data.Movement.Velocity.X));
 			
-		if (data.Scale.X < 0f)
+		if (data.Node.Scale.X < 0f)
 		{
 			angle += 180f;
 		}
@@ -68,9 +69,9 @@ public partial class Tail : AdvancedAnimatedSprite
 		return MathF.Ceiling((angle - 22.5f) / 45f) * 45f;
 	}
 	
-	private void ChangeDirection(ITailed data)
+	private void ChangeDirection(PlayerData data)
 	{
-		Scale = Scale with { X = data.IsSpinning && data.IsGrounded ? 
-			data.GroundSpeed.Value >= 0f ? 1f : -1f : data.Scale.X };
+		Scale = Scale with { X = data.Movement.IsSpinning && data.Movement.IsGrounded ? 
+			data.Movement.GroundSpeed.Value >= 0f ? 1f : -1f : data.Node.Scale.X };
 	}
 }

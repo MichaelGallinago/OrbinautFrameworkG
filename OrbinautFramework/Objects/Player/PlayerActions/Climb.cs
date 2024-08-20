@@ -12,7 +12,6 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 public struct Climb(PlayerData data, IPlayerLogic logic)
 {
 	private const int StepsPerClimbFrame = 4;
-	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
 	
 	private float _animationValue;
 
@@ -26,7 +25,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 	    if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X)) return Release(); 
 	    if (data.Movement.Velocity.X != 0f) return Release();
 	    
-	    UpdateVerticalSpeedOnClimb(ClimbAnimationFrameNumber * StepsPerClimbFrame);
+	    UpdateVerticalSpeedOnClimb(data.Sprite.FrameCount * StepsPerClimbFrame);
 		
 	    int radiusX = data.Collision.Radius.X;
 	    if (data.Visual.Facing == Constants.Direction.Negative)
@@ -136,12 +135,12 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 		data.Node.Position += position;
 		data.Movement.Angle = angle;
 				
-		var state = Land();
+		logic.Land();
 
 		data.Sprite.Animation = Animations.Idle;
 		data.Movement.Velocity.Y = 0f;
 				
-		return state;
+		return States.Default;
 	}
 
 	private void UpdateVerticalSpeedOnClimb(int maxValue)

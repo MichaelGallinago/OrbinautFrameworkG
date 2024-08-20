@@ -2,12 +2,13 @@
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct GlideGround(PlayerData data)
+public struct GlideGround(PlayerData data, IPlayerLogic logic)
 {
     private float _dustTimer;
     
@@ -42,7 +43,7 @@ public struct GlideGround(PlayerData data)
     {
         if (data.Movement.Velocity.X != 0f) return false;
         
-        Land();
+        logic.Land();
         data.Visual.OverrideFrame = 1;
 			
         data.Sprite.Animation = Animations.GlideGround;

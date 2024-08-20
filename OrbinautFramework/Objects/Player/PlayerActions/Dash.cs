@@ -37,7 +37,12 @@ public struct Dash(PlayerData data)
     }
 
     public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);
-    public void OnLand() => data.Movement.GroundSpeed.Value = _charge; //TODO: check this
+    public States OnLand()
+    {
+	    data.Movement.GroundSpeed.Value = _charge;
+	    return States.Default;
+	    //TODO: check this
+    }
 
     private bool Charge()
     {

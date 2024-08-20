@@ -16,15 +16,15 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 	{
 		data.ResetGravity();
 		data.Movement.IsGrounded = true;
-    
+		
 		switch (logic.Action)
 		{
 			case States.SpinDash: return;
 			case States.Dash: landAction(); return;
 		}
-
+		
 		if (WaterBarrierBounce()) return;
-    
+		
 		if (data.Damage.IsHurt)
 		{
 			data.Movement.GroundSpeed.Value = 0f;
@@ -41,15 +41,10 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		data.Node.Shield.State = ShieldContainer.States.None;
 		data.Item.ComboCounter = 0;
 		data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
-
+		
 		landAction();
 		
-		if (logic.Action != States.HammerDash)
-		{
-			logic.Action = States.Default;
-		}
-
-		if (data.Sprite.Animation == Animations.Spin) return;
+		if (data.Movement.IsSpinning) return;
 		data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
 		data.Collision.Radius = data.Collision.RadiusNormal;
 	}

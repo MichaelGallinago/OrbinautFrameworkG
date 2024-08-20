@@ -57,8 +57,8 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
 	    logic.Action = States.Default;
 
     	const float velocityX = 2f, velocityY = 4f;
-    	data.Movement.Velocity.Vector = 
-		    new Vector2(data.Node.Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
+	    float velocity = data.Node.Position.X - positionX < 0f ? -velocityX : velocityX;
+    	data.Movement.Velocity.Vector = new Vector2(velocity, velocityY);
 	    
     	data.Movement.Gravity = GravityType.HurtFall;
     	data.Sprite.Animation = Animations.Hurt;
@@ -130,7 +130,10 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
     {
 	    if (!logic.ControlType.IsCpu)
 	    {
-		    camera_data.allow_movement = true;
+		    if (data.IsCameraTarget(out ICamera camera))
+		    {
+			    camera.IsMovementAllowed = true;
+		    }
 		    data.Damage.InvincibilityTimer = 60f;
 		    return;
 	    }
@@ -138,7 +141,6 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
 	    data.Node.Position = new Vector2(byte.MaxValue, 0f);
 	    data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
 	    data.Cpu.State = CpuLogic.States.RespawnInit;
-	    state = PLAYER_STATE_NO_CONTROL;
 	    data.Movement.IsGrounded = false;
     }
 }

@@ -243,7 +243,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			data.Movement.GroundSpeed.Value = data.Movement.Angle < 180 ? 
 				data.Movement.Velocity.X : -data.Movement.Velocity.X;
 			
-			Land();
+			logic.Land();
 			return;
 		}
 				
@@ -255,7 +255,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 	private void LandFall()
 	{
 		AudioPlayer.Sound.Play(SoundStorage.Land);
-		Land();		
+		logic.Land();
 		
 		if (Angles.GetQuadrant(data.Movement.Angle) != Angles.Quadrant.Down)
 		{
