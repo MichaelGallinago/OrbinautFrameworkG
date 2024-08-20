@@ -9,12 +9,12 @@ public class PlayerLogic : IPlayer
 {
     public PlayerData Data { get; }
     public Recorder Recorder { get; }
+    public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
     public CarryTargetLogic CarryTargetLogic { get; }
     
     public Damage Damage { get; }
     public Landing Landing { get; }
-    public ControlType ControlType { get; }
     public DataUtilities DataUtilities { get; }
     public ObjectInteraction ObjectInteraction { get; }
     
@@ -32,18 +32,19 @@ public class PlayerLogic : IPlayer
     public PlayerLogic(IPlayerNode playerNode)
     {
         Data = new PlayerData(playerNode);
-        Recorder = new Recorder(Data, this);
-        CarryTargetLogic = new CarryTargetLogic(Data, this);
-        TileCollider = new TileCollider();
         
         Scene.Instance.Players.Add(this);
         Recorder.ResizeAll(); //TODO: check correct value
+        
+        Recorder = new Recorder(Data, this);
+        CarryTargetLogic = new CarryTargetLogic(Data, this);
+        ControlType = new ControlType(this) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
+        TileCollider = new TileCollider();
         
         Damage = new Damage(Data, this);
         DataUtilities = new DataUtilities(Data);
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
-        ControlType = new ControlType(this) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         
         _carry = new Carry(Data, this);
         _death = new Death(Data, this);
@@ -82,7 +83,7 @@ public class PlayerLogic : IPlayer
     {
         Data.Input.Update(Data.Id);
         
-        ControlType.Process();
+        if (ControlType.Process()) return;
         _death.Process();
 		
         if (Data.Movement.IsControlRoutineEnabled)

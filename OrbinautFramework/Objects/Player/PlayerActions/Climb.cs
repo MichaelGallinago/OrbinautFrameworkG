@@ -2,13 +2,14 @@
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Climb(PlayerData data)
+public struct Climb(PlayerData data, IPlayerLogic logic)
 {
 	private const int StepsPerClimbFrame = 4;
 	private const int ClimbAnimationFrameNumber = 6; // TODO: remove somehow? Or not...
@@ -33,7 +34,7 @@ public struct Climb(PlayerData data)
 		    radiusX++;
 	    }
 		
-	    data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+	    logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 
 	    States state = data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : ReleaseClimbing(radiusX);
 	    if (state != States.Climb) return state;
@@ -72,7 +73,7 @@ public struct Climb(PlayerData data)
 	private States ClimbUpOntoWall(int radiusX)
 	{
 		// If the wall is far away from Knuckles then he must have reached a ledge, make him climb up onto it
-		int wallDistance = data.TileCollider.FindDistance(
+		int wallDistance = logic.TileCollider.FindDistance(
 			radiusX * (int)data.Visual.Facing, 
 			-data.Collision.Radius.Y - 1, 
 			false, 
@@ -98,7 +99,7 @@ public struct Climb(PlayerData data)
 	private void CollideCeiling(int radiusX)
 	{
 		// If Knuckles has bumped into the ceiling, cancel climb movement and push him out
-		int ceilDistance = data.TileCollider.FindDistance(
+		int ceilDistance = logic.TileCollider.FindDistance(
 			radiusX * (int)data.Visual.Facing, 
 			1 - data.Collision.RadiusNormal.Y, 
 			true, 
@@ -112,7 +113,7 @@ public struct Climb(PlayerData data)
 	private States ReleaseClimbing(int radiusX)
 	{
 		// If Knuckles is no longer against the wall, make him let go
-		int wallDistance = data.TileCollider.FindDistance(
+		int wallDistance = logic.TileCollider.FindDistance(
 			radiusX * (int)data.Visual.Facing,
 			data.Collision.Radius.Y + 1,
 			false,
@@ -123,7 +124,7 @@ public struct Climb(PlayerData data)
 
 	private States LandAfterClimbing(int radiusX)
 	{
-		(int distance, float angle) = data.TileCollider.FindTile(
+		(int distance, float angle) = logic.TileCollider.FindTile(
 			radiusX * (int)data.Visual.Facing, 
 			data.Collision.RadiusNormal.Y, 
 			true, 

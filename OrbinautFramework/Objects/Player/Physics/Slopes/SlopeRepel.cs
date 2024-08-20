@@ -21,26 +21,12 @@ public struct SlopeRepel(PlayerData data, IPlayerLogic logic)
 
         if (Math.Abs(data.Movement.GroundSpeed) >= 2.5f) return;
 
-        if (SharedData.PhysicsType >= PhysicsCore.Types.S3)
-        {
-            NewSlopeRepel();
-            return;
-        }
-
-        OriginalSlopeRepel();
-    }
-    
-    private void OriginalSlopeRepel()
-    {
-        if (Angles.GetQuadrant(data.Movement.Angle) == Angles.Quadrant.Down) return;
-        
-        data.Movement.GroundSpeed.Value = 0f;	
-        data.Movement.GroundLockTimer = 30f;
-        data.Movement.IsGrounded = false;
+        Process();
     }
 
-    private void NewSlopeRepel()
+    private void Process()
     {
+#if S3_PHYSICS || SK_PHYSICS
         switch (data.Movement.Angle)
         {
             case <= 33.75f or > 326.25f: return;
@@ -55,5 +41,12 @@ public struct SlopeRepel(PlayerData data, IPlayerLogic logic)
         }
 
         data.Movement.GroundLockTimer = 30f;
+#else
+        if (Angles.GetQuadrant(data.Movement.Angle) == Angles.Quadrant.Down) return;
+        
+        data.Movement.GroundSpeed.Value = 0f;	
+        data.Movement.GroundLockTimer = 30f;
+        data.Movement.IsGrounded = false;
+#endif
     }
 }

@@ -12,7 +12,7 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 //TODO: check speed
 [FsmSourceGenerator.FsmState("Action")]
-public struct GlideAir(PlayerData data)
+public struct GlideAir(PlayerData data, IPlayerLogic logic)
 {
 	private float _glideAngle = data.Visual.Facing == Constants.Direction.Negative ? 0f : 180f;
 	// data.Physics.GroundSpeed - glide speed
@@ -135,7 +135,7 @@ public struct GlideAir(PlayerData data)
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
 
-		data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 		
 		if (moveQuadrant != Angles.Quadrant.Right)
 		{
@@ -162,12 +162,12 @@ public struct GlideAir(PlayerData data)
 	private bool CollideWalls(int wallRadius, Constants.Direction direction)
 	{
 		var sing = (int)direction;
-		int wallDistance = data.TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
+		int wallDistance = logic.TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
 
 		if (wallDistance >= 0) return false;
 		
 		data.Node.Position += new Vector2(sing * wallDistance, 0f);
-		data.TileCollider.Position = (Vector2I)data.Node.Position;
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
 		data.Movement.Velocity.X = 0f;
 		return true;
 	}
@@ -177,20 +177,21 @@ public struct GlideAir(PlayerData data)
 		if (moveQuadrant == Angles.Quadrant.Down) return false;
 
 		Vector2I radius = data.Collision.Radius;
-		int roofDistance = data.TileCollider.FindClosestDistance(
+		int roofDistance = logic.TileCollider.FindClosestDistance(
 			-radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative);
-			
-		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14 && 
-		    SharedData.PhysicsType >= PhysicsCore.Types.S3)
+
+#if S3_PHYSICS || SK_PHYSICS
+		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14)
 		{
 			// Perform right wall collision instead if moving mostly left and too far into the ceiling
 			return CollideWalls(wallRadius, Constants.Direction.Positive);
 		}
+#endif
 
 		if (roofDistance >= 0) return false;
 		
 		data.Node.Position -= new Vector2(0f, roofDistance);
-		data.TileCollider.Position = (Vector2I)data.Node.Position;
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
 		if (data.Movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
 		{
 			data.Movement.Velocity.Y = 0f;
@@ -200,7 +201,7 @@ public struct GlideAir(PlayerData data)
 
 	private bool CollideFloor()
 	{
-		(int floorDistance, float floorAngle) = data.TileCollider.FindClosestTile(
+		(int floorDistance, float floorAngle) = logic.TileCollider.FindClosestTile(
 			-data.Collision.Radius.X, data.Collision.Radius.Y, data.Collision.Radius.X, data.Collision.Radius.Y,
 			true, Constants.Direction.Positive);
 	
@@ -220,7 +221,7 @@ public struct GlideAir(PlayerData data)
 		if (floorDistance >= 0) return false;
 		
 		data.Node.Position += new Vector2(0f, floorDistance);
-		data.TileCollider.Position = (Vector2I)data.Node.Position;
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
 		data.Movement.Angle = floorAngle;
 		data.Movement.Velocity.Y = 0f;
 		return true;
@@ -295,9 +296,9 @@ public struct GlideAir(PlayerData data)
 	{
 		// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he
 		// is either inside the ceiling or above the floor edge
-		data.TileCollider.Position = data.TileCollider.Position with { Y = climbY - data.Collision.Radius.Y };
+		logic.TileCollider.Position = logic.TileCollider.Position with { Y = climbY - data.Collision.Radius.Y };
 		
-		if (data.TileCollider.FindDistance(
+		if (logic.TileCollider.FindDistance(
 			    wallRadius * (int)data.Visual.Facing, 0, false, data.Visual.Facing) == 0) return;
 		
 		// The game casts a vertical sensor now in front of Knuckles, facing downwards. If the distance
@@ -305,8 +306,8 @@ public struct GlideAir(PlayerData data)
 			
 		// Note that tile behaviour here is set to Constants.TileBehaviours.Ceiling.
 		// LBR tiles are not ignored in this case
-		data.TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
-		int floorDistance = data.TileCollider.FindDistance(
+		logic.TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
+		int floorDistance = logic.TileCollider.FindDistance(
 			(wallRadius + 1) * (int)data.Visual.Facing, -1, true, Constants.Direction.Positive);
 				
 		if (floorDistance is < 0 or >= 12)

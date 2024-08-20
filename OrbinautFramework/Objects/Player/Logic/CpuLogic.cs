@@ -16,11 +16,6 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		RespawnInit, Respawn, Main, Fly, Stuck
 	}
 	
-	public enum Behaviours : byte
-	{
-		S2, S3
-	}
-	
 	public const int DelayStep = 16;
 	private const int JumpFrequency = 64;
 	
@@ -74,27 +69,31 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		if (CheckRespawn()) return;
 
 		SetRespawnAnimation();
+		
+#if S3_CPU
 		if (data.Node.Type == PlayerNode.Types.Tails)
 		{
 			PlayRespawnFlyingSound();
 		}
+#endif
 		
-		DataRecord followDataRecord = _leadPlayer.RecordedData[_delay];
-		Vector2 targetPosition = followDataRecord.Position;
+		Vector2 recordedPosition = _leadPlayer.RecordedData[_delay].Position;
+		Vector2 targetPosition = recordedPosition;
 
-		if (SharedData.Behaviour == Behaviours.S2)
+#if S2_CPU
+		if (Stage.Local != null && Stage.Local.IsWaterEnabled)
 		{
-			if (Stage.Local != null && Stage.Local.IsWaterEnabled)
-			{
-				targetPosition.Y = Math.Min(Stage.Local.WaterLevel - 16, targetPosition.Y);
-			}
+			targetPosition.Y = Math.Min(Stage.Local.WaterLevel - 16, targetPosition.Y);
 		}
+#endif
 		
 		if (MoveToLeadPlayer(targetPosition)) return;
 
-		if (SharedData.Behaviour == Behaviours.S3 && _leadPlayer.IsDead) return;
+#if S3_CPU
+		if (_leadPlayer.IsDead) return;
+#endif
 
-		if (!data.Movement.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, followDataRecord.Position.Y)) return;
+		if (!data.Movement.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, recordedPosition.Y)) return;
 		
 		data.Cpu.State = States.Main;
 		data.Visual.Animation = Animations.Move;
@@ -112,15 +111,16 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
-
+	
+#if S3_CPU
 	private void PlayRespawnFlyingSound()
 	{
-		if (SharedData.Behaviour != Behaviours.S3) return;
 		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.Node.SpriteNode.CheckInCameras()) return;
 		if (data.Water.IsUnderwater) return;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
 	}
+#endif
 
 	private bool MoveToLeadPlayer(Vector2 targetPosition)
 	{
@@ -210,12 +210,13 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	{
 		(Vector2 targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush) = 
 			data.Cpu.Target.RecordedData[_delay];
-
-		if (SharedData.Behaviour == Behaviours.S3 &&
-		    Math.Abs(data.Cpu.Target.GroundSpeed) < 4f && data.Cpu.Target.OnObject == null)
+		
+#if S3_CPU
+		if (Math.Abs(data.Cpu.Target.GroundSpeed) < 4f && data.Cpu.Target.OnObject == null)
 		{
 			targetPosition.X -= 32f;
 		}
+#endif
 		
 		// Copy (and modify) inputs if we are not pushing anything or if the followed player
 		// was pushing something a few frames ago
@@ -263,7 +264,11 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 		
-		int maxDistanceX = SharedData.PhysicsType == PhysicsCore.Types.S3 ? 48 : 16;
+#if S3_CPU
+		const float maxDistanceX = 48f;
+#else
+		const float maxDistanceX = 16f;
+#endif
 
 		bool isMoveToRight = distanceX > 0f;
 		int sign = isMoveToRight ? 1 : -1;

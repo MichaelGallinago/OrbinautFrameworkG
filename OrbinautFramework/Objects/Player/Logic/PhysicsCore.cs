@@ -7,11 +7,6 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public struct PhysicsCore(PlayerData data, IPlayerLogic logic)
 {
-	public enum Types : byte
-	{
-		S1, CD, S2, S3, SK
-	}
-	
 	private Rolling _rolling = new(data, logic);
 	private Movement _movement = new(data, logic);
 	private Position _position = new(data, logic);

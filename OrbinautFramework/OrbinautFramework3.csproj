@@ -3,6 +3,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- S2_CPU S3_CPU -->
+    <!-- S1_PHYSICS CD_PHYSICS S2_PHYSICS S3_PHYSICS SK_PHYSICS -->
+    <DefineConstants>S3_CPU;S2_PHYSICS</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.6.1-beta.1">
       <PrivateAssets>all</PrivateAssets>

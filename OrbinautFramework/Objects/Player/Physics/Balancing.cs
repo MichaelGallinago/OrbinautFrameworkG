@@ -17,8 +17,10 @@ public struct Balancing(PlayerData data, IPlayerLogic logic)
 		if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
 		if (data.Movement.GroundSpeed != 0f || logic.Action is States.SpinDash or States.Dash) return;
 		
+#if SK_PHYSICS
 		// Don't allow player to duck or look up
-		if (SharedData.PhysicsType == PhysicsCore.Types.SK && (data.Input.Down.Down || data.Input.Down.Up)) return;
+		if (data.Input.Down.Down || data.Input.Down.Up) return;
+#endif
 		
 		if (BalanceOnTiles()) return;
 		BalanceOnObject();

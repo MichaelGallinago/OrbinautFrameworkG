@@ -5,7 +5,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct ControlType(IPlayer player)
+public class ControlType(IPlayer player)
 {
     public bool IsDebugMode => _debugMode is { IsEnabled: true };
     
@@ -31,14 +31,11 @@ public struct ControlType(IPlayer player)
     private CpuLogic _cpuLogic;
     private DebugMode _debugMode;
 
-    public void Process()
+    public bool Process()
     {
-        if (IsCpu)
-        {
-            _cpuLogic.Process();
-            return;
-        }
-
-        _debugMode?.Update();
+        if (!IsCpu) return _debugMode != null && _debugMode.Update();
+        
+        _cpuLogic.Process();
+        return false;
     }
 }

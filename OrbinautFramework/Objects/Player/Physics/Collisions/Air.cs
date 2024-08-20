@@ -17,14 +17,18 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
 		
-		data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 
 		var moveQuadrantValue = (int)moveQuadrant;
 
 		if (CollideWalls(wallRadius, moveQuadrantValue, Constants.Direction.Negative)) return;
 		if (CollideWalls(wallRadius, moveQuadrantValue, Constants.Direction.Positive)) return;
-
+		
+#if S3_PHYSICS || SK_PHYSICS
 		if (CollideCeiling(wallRadius, moveQuadrant)) return;
+#else
+		if (CollideCeiling(moveQuadrant)) return;
+#endif
 
 		CollideFloor(moveQuadrant);
 	}
@@ -35,11 +39,11 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 		
 		if (moveQuadrantValue == (int)Angles.Quadrant.Up + sign) return false;
 		
-		int wallDistance = data.TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
+		int wallDistance = logic.TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
 		
 		if (wallDistance >= 0f) return false;
 		data.Node.Position += new Vector2(sign * wallDistance, 0f);
-		data.TileCollider.Position = (Vector2I)data.Node.Position;
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
 		data.Movement.Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return false;
@@ -47,18 +51,23 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 		return true;
 	}
 
+#if S3_PHYSICS || SK_PHYSICS
 	private bool CollideCeiling(int wallRadius, Angles.Quadrant moveQuadrant)
+#else
+	private bool CollideCeiling(Angles.Quadrant moveQuadrant)
+#endif
 	{
 		if (moveQuadrant == Angles.Quadrant.Down) return false;
-		
-		(int roofDistance, float roofAngle) = data.TileCollider.FindClosestTile(
-			-data.Collision.Radius.X, -data.Collision.Radius.Y, data.Collision.Radius.X, -data.Collision.Radius.Y,
-			true, Constants.Direction.Negative);
-			
-		if (moveQuadrant == Angles.Quadrant.Up && SharedData.PhysicsType >= PhysicsCore.Types.S3 && roofDistance <= -14f)
+
+		Vector2I radius = data.Collision.Radius;
+		(int roofDistance, float roofAngle) = logic.TileCollider.FindClosestTile(
+			-radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative);
+
+#if S3_PHYSICS || SK_PHYSICS
+		if (moveQuadrant == Angles.Quadrant.Up && roofDistance <= -14f)
 		{
 			// Perform right wall collision if moving mostly left and too far into the ceiling
-			int wallDist = data.TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);
+			int wallDist = logic.TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);
 
 			if (wallDist >= 0) return false;
 			
@@ -66,6 +75,7 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 			data.Movement.Velocity.X = 0f;
 			return true;
 		}
+#endif
 		
 		if (roofDistance >= 0) return false;
 		
@@ -119,10 +129,10 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 
 	private bool LandOnFeet(out int distance, out float angle)
 	{
-		(int distanceL, float angleL) = data.TileCollider.FindTile(
+		(int distanceL, float angleL) = logic.TileCollider.FindTile(
 			-data.Collision.Radius.X, data.Collision.Radius.Y, true, Constants.Direction.Positive);
 			
-		(int distanceR, float angleR) = data.TileCollider.FindTile(
+		(int distanceR, float angleR) = logic.TileCollider.FindTile(
 			data.Collision.Radius.X, data.Collision.Radius.Y, true, Constants.Direction.Positive);
 
 		if (distanceL > distanceR)
@@ -168,7 +178,7 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 
 	private bool FallOnGround(out int distance, out float angle)
 	{
-		(distance, angle) = data.TileCollider.FindClosestTile(
+		(distance, angle) = logic.TileCollider.FindClosestTile(
 			-data.Collision.Radius.X, 
 			data.Collision.Radius.Y, 
 			data.Collision.Radius.X, 

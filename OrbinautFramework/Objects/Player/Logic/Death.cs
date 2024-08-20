@@ -36,9 +36,12 @@ public struct Death(PlayerData data, IPlayerLogic logic)
     
     private void Wait(ICamera camera)
     {
-    	if ((int)data.Node.Position.Y <= 32f + (SharedData.PhysicsType < PhysicsCore.Types.S3 ? 
-    		    camera.Boundary.W : camera.DrawPosition.Y + SharedData.ViewSize.Y)) return;
-	    
+#if S3_PHYSICS || SK_PHYSICS
+	    float bound = camera.DrawPosition.Y + SharedData.ViewSize.Y;
+#else
+	    float bound = camera.Boundary.W;
+#endif
+    	if ((int)data.Node.Position.Y <= 32f + bound) return;
     	SetNextState();
     }
 

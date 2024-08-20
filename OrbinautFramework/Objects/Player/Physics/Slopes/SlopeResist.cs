@@ -25,15 +25,20 @@ public struct SlopeResist(PlayerData data, IPlayerLogic logic)
         if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
         if (logic.Action is States.HammerDash or States.Dash) return;
         if (data.Movement.Angle is >= 135f and < 225f) return;
-		
+
+        DecreaseGroundSpeed();
+    }
+
+    private void DecreaseGroundSpeed()
+    {
+#if S3_PHYSICS || SK_PHYSICS
         float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
-		
-        // Decrease ground speed
-        if (data.Movement.GroundSpeed != 0f || 
-            SharedData.PhysicsType >= PhysicsCore.Types.S3 && Math.Abs(slopeGravity) > 0.05078125f)
-        {
-            data.Movement.GroundSpeed.Acceleration = -slopeGravity;
-        }
+        if (data.Movement.GroundSpeed == 0f && Math.Abs(slopeGravity) <= 0.05078125f) return;
+#else
+        if (data.Movement.GroundSpeed == 0f) return;
+        float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
+#endif
+        data.Movement.GroundSpeed.Acceleration = -slopeGravity;
     }
     
     private void ResistRoll()

@@ -32,6 +32,4 @@ public interface IPlayer : IPlayerLogic, IPlayerCpuTarget, IPlayerEditor, ICarry
         Data.Collision.IsObjectInteractionEnabled = true;
         Data.Death.State = Death.States.Wait;
     }
-
-    bool IsCpu { get; }
 }

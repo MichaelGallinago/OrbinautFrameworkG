@@ -10,13 +10,14 @@ public interface IPlayerLogic : IRecorderStorage
 {
     ActionFsm.States Action { get; set; }
     TileCollider TileCollider { get; }
+    ControlType ControlType { get; }
     
     Damage Damage { get; }
     Landing Landing { get; }
     DataUtilities DataUtilities { get; }
     public ObjectInteraction ObjectInteraction { get; }
-
-    void Respawn();
+    
+    void Respawn() => Damage.Respawn();
     void Hurt(float positionX = 0f) => Damage.Hurt(positionX);
     void Kill() => Damage.Kill();
     void Land() => Landing.Land();

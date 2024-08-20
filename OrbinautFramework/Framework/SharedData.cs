@@ -25,8 +25,6 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
 	
     // Originals differences
-    public static PhysicsCore.Types PhysicsType { get; set; } = PhysicsCore.Types.S2;
-    public static CpuLogic.Behaviours Behaviour { get; set; } = CpuLogic.Behaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool Dash { get; set; } = true;
     public static bool DropDash { get; set; } = true;
@@ -41,7 +39,6 @@ public static class SharedData
     public static bool NoSpeedCap { get; set; } = true;
     public static bool FixJumpSize { get; set; } = true;
     public static bool FixDashRelease { get; set; } = true;
-    public static bool FlightCancel { get; set; } = true;
     public static bool BetterSolidCollision { get; set; } = false;
     public static bool NoCameraCap { get; set; } = false;
     

@@ -41,18 +41,18 @@ public class PhysicsData
 	    {
 		    JumpSpeed += 0.5f;
 	    }
-	    
-	    if (SharedData.PhysicsType < PhysicsCore.Types.SK)
-	    {
-		    if (playerType == PlayerNode.Types.Tails)
-		    {
-			    DecelerationRoll = Deceleration / 4f;
-		    }
-	    }
-	    else if (isSuper)
+
+#if SK_PHYSICS
+	    if (isSuper)
 	    {
 		    FrictionRoll = 0.0234375f;
 	    }
+#else
+	    if (playerType == PlayerNode.Types.Tails)
+	    {
+		    DecelerationRoll = Deceleration / 4f;
+	    }
+#endif
     }
 
     private static Types GetType(bool isSpeedUp, bool isUnderwater, bool isSuper, PlayerNode.Types playerType)

@@ -1,6 +1,5 @@
 ﻿using System;
 using Godot;
-using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
@@ -18,7 +17,10 @@ public struct CollisionBoxes(PlayerData data)
     
     private void SetRegularHitBox()
     {
-        if (data.Visual.Animation != Animations.Duck || SharedData.PhysicsType >= PhysicsCore.Types.S3)
+#if S3_PHYSICS || SK_PHYSICS
+        data.Node.HitBox.Set(8, data.Collision.Radius.Y - 3);
+#else
+        if (data.Visual.Animation != Animations.Duck)
         {
             data.Node.HitBox.Set(8, data.Collision.Radius.Y - 3);
             return;
@@ -26,6 +28,7 @@ public struct CollisionBoxes(PlayerData data)
 
         if (data.Node.Type is PlayerNode.Types.Tails or PlayerNode.Types.Amy) return;
         data.Node.HitBox.Set(8, 10, 0, 6);
+#endif
     }
 
     private void SetExtraHitBox()

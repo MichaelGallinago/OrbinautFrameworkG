@@ -10,7 +10,11 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 [FsmSourceGenerator.FsmState("Action")]
 public struct Transform(PlayerData data)
 {
-    private float _timer = SharedData.PhysicsType >= PhysicsCore.Types.S3 ? 26f : 36f;
+#if S3_PHYSICS || SK_PHYSICS
+    private float _timer = 26f;
+#else
+    private float _timer = 36f;
+#endif
     
     public void Enter()
     {

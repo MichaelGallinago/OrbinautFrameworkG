@@ -10,7 +10,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Default(PlayerData data)
+public struct Default(PlayerData data, IPlayerLogic logic)
 {
     public States EarlyPerform()
     {
@@ -31,7 +31,7 @@ public struct Default(PlayerData data)
     private bool Dash()
     {
         if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
-        if (data.Id > 0 && CpuInputTimer <= 0f) return false;
+        if (data.Id > 0 && data.Cpu.InputTimer <= 0f) return false;
         
         return data.Visual.Animation == Animations.LookUp && data.Input.Down.Up;
     }
@@ -41,21 +41,25 @@ public struct Default(PlayerData data)
         if (data.Movement.IsForcedSpin || !data.Movement.IsGrounded) return false;
         if (!CheckCeilingDistance()) return false;
         
-        if (!SharedData.FixJumpSize && SharedData.PhysicsType != PhysicsCore.Types.CD)
+#if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
+        if (!SharedData.FixJumpSize)
         {
             // Why do they even do that?
             data.Collision.Radius = data.Collision.RadiusNormal;
         }
+#endif
 	
         if (!data.Movement.IsSpinning)
         {
             data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
             data.Collision.Radius = data.Collision.RadiusSpin;
         }
-        else if (!SharedData.NoRollLock && SharedData.PhysicsType != PhysicsCore.Types.CD)
+#if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
+        else if (!SharedData.NoRollLock)
         {
             data.Movement.IsAirLock = true;
         }
+#endif
 		
         float radians = Mathf.DegToRad(data.Movement.Angle);
         var velocity = new Vector2(MathF.Sin(radians), MathF.Cos(radians));
@@ -76,20 +80,21 @@ public struct Default(PlayerData data)
     
     private bool CheckCeilingDistance()
     {
-        const int maxCeilingDistance = 6; 
-		
-        data.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer, data.Collision.TileBehaviour);
+        const int maxCeilingDistance = 6;
 
-        Vector2I radius = data.Collision.Radius;
-        int distance = data.Collision.TileBehaviour switch
+        CollisionData collision = data.Collision;
+        logic.TileCollider.SetData((Vector2I)data.Node.Position, collision.TileLayer, collision.TileBehaviour);
+
+        Vector2I radius = collision.Radius;
+        int distance = collision.TileBehaviour switch
         {
-            Constants.TileBehaviours.Floor => data.TileCollider.FindClosestDistance(
+            Constants.TileBehaviours.Floor => logic.TileCollider.FindClosestDistance(
                 -radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative),
 			
-            Constants.TileBehaviours.RightWall => data.TileCollider.FindClosestDistance(
+            Constants.TileBehaviours.RightWall => logic.TileCollider.FindClosestDistance(
                 -radius.Y, -radius.X, radius.Y, -radius.X, false, Constants.Direction.Negative),
 			
-            Constants.TileBehaviours.LeftWall => data.TileCollider.FindClosestDistance(
+            Constants.TileBehaviours.LeftWall => logic.TileCollider.FindClosestDistance(
                 -radius.Y, radius.X, radius.Y, radius.X, false, Constants.Direction.Positive),
 			
             Constants.TileBehaviours.Ceiling => maxCeilingDistance,

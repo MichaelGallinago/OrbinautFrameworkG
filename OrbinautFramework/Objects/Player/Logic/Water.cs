@@ -157,10 +157,12 @@ public struct Water(PlayerData data, IPlayerLogic logic)
 
 	private void AccelerateOnLeave()
 	{
-		if (SharedData.PhysicsType <= PhysicsCore.Types.S2 || data.Movement.Velocity.Y >= -4f)
+#if (S1_PHYSICS || CD_PHYSICS || S2_PHYSICS)
+		if (data.Movement.Velocity.Y >= -4f)
 		{
 			data.Movement.Velocity.Y *= 2f;
 		}
+#endif
 					
 		if (data.Movement.Velocity.Y < -16f)
 		{

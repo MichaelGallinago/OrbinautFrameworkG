@@ -43,10 +43,13 @@ public struct Air(PlayerData data, IPlayerLogic logic)
 		{
 			data.Movement.Velocity.Y = -15.75f;
 		}
-		else if (SharedData.PhysicsType == PhysicsCore.Types.CD && data.Movement.Velocity.Y > 16f)
+
+#if CD_PHYSICS
+		if (data.Movement.Velocity.Y > 16f)
 		{
 			data.Movement.Velocity.Y = 16f;
 		}
+#endif
 	}
 
 	private bool ChangeHammerDashFacingInAir()

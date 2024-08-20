@@ -92,7 +92,7 @@ public struct Flight(PlayerData data)
     		//TODO: check that this works
     		_ascendTimer = 1f;
     	}
-    		
+	    
     	data.Movement.Gravity = GravityType.TailsDown;
     	
     	if (SharedData.SuperstarsTweaks && data.Input.Down.Down)

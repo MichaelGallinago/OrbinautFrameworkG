@@ -8,7 +8,7 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Collisions;
 
-public struct Ground(PlayerData data)
+public struct Ground(PlayerData data, IPlayerLogic logic)
 {
 	private const int MinTolerance = 4;
 	private const int MaxTolerance = 14;
@@ -16,11 +16,14 @@ public struct Ground(PlayerData data)
 	public void CollideWalls()
     {
         if (!data.Movement.IsGrounded) return;
-		
+        
+#if SK_PHYSICS
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
-		// and S3K physics are enabled
-		if (data.Movement.Angle is > 90f and <= 270f && 
-		    (SharedData.PhysicsType < PhysicsCore.Types.SK || data.Movement.Angle % 90f != 0f)) return;
+	    if (data.Movement.Angle is > 90f and <= 270f && data.Movement.Angle % 90f != 0f) return;
+#else
+	    // Exit collision while on a left wall or a ceiling
+	    if (data.Movement.Angle is > 90f and <= 270f) return;
+#endif
 
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		int offsetY = data.Movement.Angle == 0f ? 8 : 0;
@@ -45,7 +48,7 @@ public struct Ground(PlayerData data)
 			default: return;
 		}
 		
-		data.TileCollider.SetData(
+		logic.TileCollider.SetData(
 			(Vector2I)data.Movement.Velocity.CalculateNewPosition(data.Node.Position), 
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
@@ -60,10 +63,10 @@ public struct Ground(PlayerData data)
 		
 		int wallDistance = castQuadrant switch
 		{
-			0 => data.TileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
-			1 => data.TileCollider.FindDistance(0, wallRadius, true, secondDirection),
-			2 => data.TileCollider.FindDistance(wallRadius, 0, false, secondDirection),
-			3 => data.TileCollider.FindDistance(0, -wallRadius, true, firstDirection),
+			0 => logic.TileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
+			1 => logic.TileCollider.FindDistance(0, wallRadius, true, secondDirection),
+			2 => logic.TileCollider.FindDistance(wallRadius, 0, false, secondDirection),
+			3 => logic.TileCollider.FindDistance(0, -wallRadius, true, firstDirection),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
@@ -98,7 +101,7 @@ public struct Ground(PlayerData data)
 		if (!data.Movement.IsGrounded || data.Collision.OnObject != null) return;
 
 		data.Collision.TileBehaviour = GetTileBehaviour();
-		data.TileCollider.SetData(
+		logic.TileCollider.SetData(
 			(Vector2I)data.Node.Position,
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
@@ -118,8 +121,12 @@ public struct Ground(PlayerData data)
 			TileBehaviours.LeftWall => new Vector2(-distance, 0f),
 			_ => throw new ArgumentOutOfRangeException()
 		};
-		
-		data.Movement.Angle = SharedData.PhysicsType >= PhysicsCore.Types.S2 ? SnapFloorAngle(angle) : angle;
+
+#if S3_PHYSICS || SK_PHYSICS
+		data.Movement.Angle = SnapFloorAngle(angle);
+#else
+		data.Movement.Angle = angle;
+#endif
 	}
 
 	private TileBehaviours GetTileBehaviour() => data.Movement.Angle switch
@@ -135,16 +142,16 @@ public struct Ground(PlayerData data)
 		Vector2I radius = data.Collision.Radius;
 		return data.Collision.TileBehaviour switch
 		{
-			TileBehaviours.Floor => data.TileCollider.FindClosestTile(
+			TileBehaviours.Floor => logic.TileCollider.FindClosestTile(
 				-radius.X, radius.Y, radius.X, radius.Y, true, Direction.Positive),
 
-			TileBehaviours.RightWall => data.TileCollider.FindClosestTile(
+			TileBehaviours.RightWall => logic.TileCollider.FindClosestTile(
 				radius.Y, radius.X, radius.Y, -radius.X, false, Direction.Positive),
 
-			TileBehaviours.Ceiling => data.TileCollider.FindClosestTile(
+			TileBehaviours.Ceiling => logic.TileCollider.FindClosestTile(
 				radius.X, -radius.Y, -radius.X, -radius.Y, true, Direction.Negative),
 
-			TileBehaviours.LeftWall => data.TileCollider.FindClosestTile(
+			TileBehaviours.LeftWall => logic.TileCollider.FindClosestTile(
 				-radius.Y, -radius.X, -radius.Y, radius.X, false, Direction.Negative),
 
 			_ => throw new ArgumentOutOfRangeException()
@@ -161,11 +168,13 @@ public struct Ground(PlayerData data)
 			TileBehaviours.RightWall or TileBehaviours.LeftWall => data.Movement.Velocity.Y,
 			_ => throw new ArgumentOutOfRangeException(data.Collision.TileBehaviour.ToString())
 		};
-			
-		float tolerance = SharedData.PhysicsType < PhysicsCore.Types.S2 ? 
-			MaxTolerance : Math.Min(MinTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), MaxTolerance);
 
+#if S1_PHYSICS || CD_PHYSICS
+		if (distance <= MaxTolerance) return false;
+#else
+		float tolerance = Math.Min(MinTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), MaxTolerance);
 		if (distance <= tolerance) return false;
+#endif
 		
 		data.Visual.SetPushBy = null;
 		data.Movement.IsGrounded = false;
@@ -173,10 +182,12 @@ public struct Ground(PlayerData data)
 		data.Visual.OverrideFrame = 0;
 		return true;
 	}
-
+	
+#if S3_PHYSICS || SK_PHYSICS
 	private float SnapFloorAngle(float floorAngle)
 	{
 		float difference = Math.Abs(data.Movement.Angle % 180f - floorAngle % 180f);
 		return difference is < 45f or > 135f ? floorAngle : MathF.Round(data.Movement.Angle / 90f) % 4f * 90f;
 	}
+#endif
 }

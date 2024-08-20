@@ -45,7 +45,7 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
     
     public void Hurt(float positionX = 0f)
     {
-    	if (data.Damage.IsInvincible || IsDebugMode) return;
+    	if (data.Damage.IsInvincible || logic.ControlType.IsDebugMode) return;
 
     	if (data.Id == 0 && SharedData.PlayerRings == 0 && SharedData.PlayerShield == ShieldContainer.Types.None)
     	{
@@ -128,19 +128,17 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
 
     public void Respawn()
     {
-	    if player_is_cpu(id)
-	    {
-		    x = 127;
-		    y = 0;
-		    depth = RENDERER_DEPTH_HIGHEST;	
-		    cpu_state = CPU_STATE_RESPAWN_INIT;
-		    state = PLAYER_STATE_NO_CONTROL;
-		    is_grounded = false;
-	    }
-	    else
+	    if (!logic.ControlType.IsCpu)
 	    {
 		    camera_data.allow_movement = true;
-		    inv_frames = 60;
+		    data.Damage.InvincibilityTimer = 60f;
+		    return;
 	    }
+
+	    data.Node.Position = new Vector2(byte.MaxValue, 0f);
+	    data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
+	    data.Cpu.State = CpuLogic.States.RespawnInit;
+	    state = PLAYER_STATE_NO_CONTROL;
+	    data.Movement.IsGrounded = false;
     }
 }
