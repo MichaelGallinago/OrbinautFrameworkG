@@ -45,7 +45,7 @@ public struct Carry(PlayerData data, IPlayerLogic logic)
             player.ResetState();
             AudioPlayer.Sound.Play(SoundStorage.Grab);
 				
-            player.Data.Visual.Animation = Animations.Grab;
+            player.Data.Sprite.Animation = Animations.Grab;
             player.Action = States.Carried;
             data.Carry.Target = player;
 

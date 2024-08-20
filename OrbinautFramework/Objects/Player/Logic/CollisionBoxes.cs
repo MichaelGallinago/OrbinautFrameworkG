@@ -20,7 +20,7 @@ public struct CollisionBoxes(PlayerData data)
 #if S3_PHYSICS || SK_PHYSICS
         data.Node.HitBox.Set(8, data.Collision.Radius.Y - 3);
 #else
-        if (data.Visual.Animation != Animations.Duck)
+        if (data.Sprite.Animation != Animations.Duck)
         {
             data.Node.HitBox.Set(8, data.Collision.Radius.Y - 3);
             return;
@@ -33,14 +33,14 @@ public struct CollisionBoxes(PlayerData data)
 
     private void SetExtraHitBox()
     {
-        switch (data.Visual.Animation)
+        switch (data.Sprite.Animation)
         {
             case Animations.HammerSpin:
                 data.Node.HitBox.SetExtra(25, 25);
                 break;
 			
             case Animations.HammerDash:
-                (int radiusX, int radiusY, int offsetX, int offsetY) = (data.Node.SpriteNode.Frame & 3) switch
+                (int radiusX, int radiusY, int offsetX, int offsetY) = (data.Sprite.Frame & 3) switch
                 {
                     0 => (16, 16,  6,  0),
                     1 => (16, 16, -7,  0),

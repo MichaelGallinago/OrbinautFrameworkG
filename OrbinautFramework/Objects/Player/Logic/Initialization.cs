@@ -1,6 +1,7 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
@@ -27,6 +28,8 @@ public readonly struct Initialization(PlayerData data)
         data.Node.Visible = true;
         data.Node.Shield.State = ShieldContainer.States.None;
         data.Node.RotationDegrees = 0f;
+        
+        data.Sprite.Animation = Animations.Idle;
     }
 	
     public void Spawn()

@@ -16,7 +16,7 @@ public struct HammerDash(PlayerData data)
 
     public void Enter()
     {
-        data.Visual.Animation = Animations.HammerDash;
+        data.Sprite.Animation = Animations.HammerDash;
         data.Movement.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
         
         if (data.Super.IsSuper && data.IsCameraTarget(out ICamera camera))
@@ -46,7 +46,7 @@ public struct HammerDash(PlayerData data)
         if (MathF.Cos(Mathf.DegToRad(movement.Angle)) <= 0f) return States.Default;
         
         TurnAround();
-        data.Visual.Animation = Animations.HammerDash;
+        data.Sprite.Animation = Animations.HammerDash;
         SetSpeedAndVelocity();
         
         return States.HammerDash;

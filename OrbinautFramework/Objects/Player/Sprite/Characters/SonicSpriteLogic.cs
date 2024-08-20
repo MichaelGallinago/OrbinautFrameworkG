@@ -12,21 +12,21 @@ public partial class SonicSpriteLogic : SpriteLogic
         if (!Player.Data.Super.IsSuper || Data.Type != Animations.Walk) return;
         
         if (Scene.Instance.Time % 4d >= 2d) return;
-        int frame = (Data.Node.Frame + Data.FrameCount / 2) % Data.FrameCount;
-        Data.Node.SetFrameAndProgress(frame, Data.Node.FrameProgress);
+        int frame = (Node.Frame + Data.FrameCount / 2) % Data.FrameCount;
+        Node.SetFrameAndProgress(frame, Node.FrameProgress);
     }
 
     public override void OnFinished()
     {
         Data.IsFinished = true;
-        Player.Data.Visual.Animation = Player.Data.Visual.Animation switch
+        Data.Animation = Data.Animation switch
         {
             Animations.Bounce or Animations.Breathe or Animations.Flip or Animations.Transform => Animations.Move,
             Animations.Idle => Animations.Wait,
             Animations.Skid when
                 Player.Data.Input.Down is { Left: false, Right: false } || 
                 Math.Abs(Player.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold => Animations.Move, 
-            _ => Player.Data.Visual.Animation
+            _ => Data.Animation
         };
     }
     

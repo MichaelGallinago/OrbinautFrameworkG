@@ -6,7 +6,7 @@ public partial class KnucklesSpriteLogic : SpriteLogic
     {
         if (Player.Animation == Animations.GlideFall)
         {
-            int frame = Player.Data.Visual.OverrideFrame ?? Data.Node.Frame; //TODO: check this
+            int frame = Player.Data.Visual.OverrideFrame ?? Node.Frame; //TODO: check this
             SetType(Data.Type, frame, Data.Speed);
             return;
         }

@@ -105,11 +105,11 @@ public struct Flight(PlayerData data)
     {
 	    if (data.Water.IsUnderwater)
 	    {
-		    data.Visual.Animation = _flightTimer > 0f ? Animations.Fly : Animations.FlyTired;
+		    data.Sprite.Animation = _flightTimer > 0f ? Animations.Swim : Animations.SwimTired;
 	    }
 	    else
 	    {
-		    data.Visual.Animation = _flightTimer > 0f ? Animations.Swim : Animations.SwimTired;
+		    data.Sprite.Animation = _flightTimer > 0f ? Animations.Fly : Animations.FlyTired;
 	    }
     }
 }

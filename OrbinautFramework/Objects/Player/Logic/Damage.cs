@@ -30,7 +30,7 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
 	    data.Node.Visible = true;
 	    
 	    logic.Action = States.Default;
-    	data.Visual.Animation = Animations.Death;
+    	data.Sprite.Animation = Animations.Death;
     	data.Death.IsDead = true;
     	data.Collision.IsObjectInteractionEnabled = false;
     	data.Movement.Gravity = GravityType.Default;
@@ -61,7 +61,7 @@ public struct Damage(PlayerData data, IPlayerLogic logic)
 		    new Vector2(data.Node.Position.X - positionX < 0f ? -velocityX : velocityX, velocityY);
 	    
     	data.Movement.Gravity = GravityType.HurtFall;
-    	data.Visual.Animation = Animations.Hurt;
+    	data.Sprite.Animation = Animations.Hurt;
     	data.Damage.IsHurt = true;
     	data.Movement.IsAirLock = true;
     	data.Damage.InvincibilityTimer = 120f;

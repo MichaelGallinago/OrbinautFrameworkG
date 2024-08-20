@@ -11,7 +11,7 @@ public struct AngleRotation(PlayerData data)
     {
         float visualAngle = CalculateVisualAngle();
         data.Visual.Angle = visualAngle;
-        data.Node.RotationDegrees = data.Visual.Animation is Animations.Move or Animations.HammerDash ? 
+        data.Node.RotationDegrees = data.Sprite.Animation is Animations.Move or Animations.HammerDash ? 
             360f - visualAngle : 0f;
     }
 

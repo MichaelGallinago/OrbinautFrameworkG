@@ -19,7 +19,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 
 	public void Enter()
 	{
-		data.Visual.Animation = Animations.GlideAir;
+		data.Sprite.Animation = Animations.GlideAir;
 		data.Collision.Radius = new Vector2I(10, 10);
 
 		MovementData movement = data.Movement;
@@ -247,7 +247,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 				
-		data.Visual.Animation = Animations.GlideGround;
+		data.Sprite.Animation = Animations.GlideGround;
 		data.State = States.GlideGround;
 		data.Movement.Gravity = 0f;
 	}
@@ -263,7 +263,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 					
-		data.Visual.Animation = Animations.GlideLand;
+		data.Sprite.Animation = Animations.GlideLand;
 		data.Movement.GroundLockTimer = 16f;
 		data.Movement.GroundSpeed.Value = 0f;
 		data.Movement.Velocity.X = 0f;
@@ -282,7 +282,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 
 		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
 		
-		data.Visual.Animation = Animations.ClimbWall;
+		data.Sprite.Animation = Animations.ClimbWall;
 		data.Movement.GroundSpeed.Value = 0f;
 		data.Movement.Velocity.Y = 0f;
 		data.Movement.Gravity = 0f;

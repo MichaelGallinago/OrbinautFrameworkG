@@ -28,7 +28,7 @@ public struct Transform(PlayerData data)
         data.Collision.IsObjectInteractionEnabled = false;			
         data.Damage.InvincibilityTimer = 0f;
         data.Super.Timer = 1f;
-        data.Visual.Animation = Animations.Transform;
+        data.Sprite.Animation = Animations.Transform;
         data.Node.Visible = true;
 
         LatePerform();

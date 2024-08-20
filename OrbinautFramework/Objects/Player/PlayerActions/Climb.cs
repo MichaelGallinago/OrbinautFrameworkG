@@ -138,7 +138,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 				
 		var state = Land();
 
-		data.Visual.Animation = Animations.Idle;
+		data.Sprite.Animation = Animations.Idle;
 		data.Movement.Velocity.Y = 0f;
 				
 		return state;

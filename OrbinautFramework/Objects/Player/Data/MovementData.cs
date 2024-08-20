@@ -10,6 +10,7 @@ public class MovementData
     public bool IsAirLock { get; set; }
     public bool IsJumping { get; set; }
     public bool IsGrounded { get; set; }
+    public bool IsSpinning { get; set; }
     public bool IsForcedSpin { get; set; }
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }

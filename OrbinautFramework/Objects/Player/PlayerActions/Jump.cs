@@ -14,7 +14,7 @@ public struct Jump(PlayerData data)
 	public void Enter()
 	{
 		data.Movement.IsSpinning = true;
-		data.Visual.Animation = Animations.Spin;
+		data.Sprite.Animation = Animations.Spin;
 	}
 
 	public States Perform()
@@ -27,7 +27,7 @@ public struct Jump(PlayerData data)
 		}
 
 		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed) return States.Jump;
-		if (CpuInputTimer == 0 && data.Id > 0) return States.Jump;
+		if (data.Cpu.InputTimer == 0f && data.Id > 0) return States.Jump;
 
 		if (Transform()) return States.Transform;
 

@@ -9,6 +9,8 @@ namespace OrbinautFramework3.Objects.Player.Sprite;
 public abstract partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
 {
 	[Export] private SpriteLogic _spriteLogic;
+	
+	public IPlayerSprite PlayerSprite => _spriteLogic;
 
 	public override void _Ready()
 	{
@@ -22,7 +24,7 @@ public abstract partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
 	
 	public void Process() => _spriteLogic.Process();
 
-	public SpriteData SetPlayer(IPlayer player) => _spriteLogic.SetPlayer(player, this);
+	public void SetPlayer(IPlayer player) => _spriteLogic.SetPlayer(player, this);
 	
 	public int GetAnimationFrameCount(Animations animation)
 	{

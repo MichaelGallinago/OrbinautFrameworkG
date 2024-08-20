@@ -11,7 +11,7 @@ public interface IPlayerCpuTarget : ICpuTarget, IPlayerDataStorage, IRecorderSto
     bool ICpuTarget.IsDead => Data.Death.IsDead;
     Velocity ICpuTarget.Velocity => Data.Movement.Velocity;
     ISolid ICpuTarget.OnObject => Data.Collision.OnObject;
-    Animations ICpuTarget.Animation => Data.Visual.Animation;
+    Animations ICpuTarget.Animation => Data.Sprite.Animation;
     AcceleratedValue ICpuTarget.GroundSpeed => Data.Movement.GroundSpeed;
     ReadOnlySpan<DataRecord> ICpuTarget.RecordedData => Recorder.RecordedData;
     bool ICpuTarget.IsObjectInteractionEnabled => Data.Collision.IsObjectInteractionEnabled;

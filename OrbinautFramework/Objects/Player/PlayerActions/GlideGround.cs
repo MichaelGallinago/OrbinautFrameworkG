@@ -45,7 +45,7 @@ public struct GlideGround(PlayerData data)
         Land();
         data.Visual.OverrideFrame = 1;
 			
-        data.Visual.Animation = Animations.GlideGround;
+        data.Sprite.Animation = Animations.GlideGround;
         data.Movement.GroundLockTimer = 16f;
         data.Movement.GroundSpeed.Value = 0f;
 			

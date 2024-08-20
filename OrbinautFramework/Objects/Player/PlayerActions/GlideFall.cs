@@ -8,7 +8,7 @@ public struct GlideFall(PlayerData data)
 {
     public void Enter()
     {
-        data.Visual.Animation = Animations.GlideFall;
+        data.Sprite.Animation = Animations.GlideFall;
         data.Collision.Radius = data.Collision.RadiusNormal;
 		
         data.ResetGravity();

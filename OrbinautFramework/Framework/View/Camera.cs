@@ -40,7 +40,7 @@ public partial class Camera : Camera2D, ICamera
 			
 			_target = value;
 			_viewTimer = MaxViewTime;
-			_isTargetPlayer = value is IPlayerCameraTarget;
+			_isTargetPlayer = value is IPlayer;
 			_godotObjectTarget = value as GodotObject;
 			
 			if (value == null) return;
@@ -148,24 +148,24 @@ public partial class Camera : Camera2D, ICamera
 		return position >= ActiveRegion.Position.Y && position < ActiveRegion.Position.Y + ActiveRegion.Size.Y;
 	}
 	
-	private void FollowPlayer(float processSpeed, Vector2 targetPosition, IPlayerCameraTarget data)
+	private void FollowPlayer(float processSpeed, Vector2 targetPosition, IPlayer player)
 	{
-		if (Scene.Instance.State == Scene.States.Paused && data.Death.State == Death.States.Wait) return;
-		if (data.Death.IsDead) return;
+		if (Scene.Instance.State == Scene.States.Paused && player.Data.Death.State == Death.States.Wait) return;
+		if (player.Data.Death.IsDead) return;
 		
-		FollowPlayerY(processSpeed, targetPosition.Y, data);
+		FollowPlayerY(processSpeed, targetPosition.Y, player);
 		if (SharedData.CdCamera)
 		{
 			FollowTargetCdX(processSpeed, targetPosition.X);
-			UpdateCdCamera(data, processSpeed);
+			UpdateCdCamera(player, processSpeed);
 		}
 		else
 		{
 			FollowTargetX(processSpeed, targetPosition.X);
 		}
 
-		bool doShiftDown = data.Visual.Animation == Objects.Player.Sprite.Animations.Duck;
-		bool doShiftUp = data.Visual.Animation == Objects.Player.Sprite.Animations.LookUp;
+		bool doShiftDown = player.Data.Sprite.Animation == Objects.Player.Sprite.Animations.Duck;
+		bool doShiftUp = player.Data.Sprite.Animation == Objects.Player.Sprite.Animations.LookUp;
 
 		if (doShiftDown || doShiftUp)
 		{
@@ -202,11 +202,12 @@ public partial class Camera : Camera2D, ICamera
 		return true;
 	}
 	
-	private void UpdateCdCamera(IPlayerCameraTarget data, float processSpeed)
+	private void UpdateCdCamera(IPlayer player, float processSpeed)
 	{
 		const int shiftSpeedX = 2;
-		
-		if (Math.Abs(data.Movement.GroundSpeed) < 6f && data.State != ActionFsm.States.SpinDash)
+		PlayerData data = player.Data;
+		float groundSpeed = data.Movement.GroundSpeed.Value;
+		if (Math.Abs(groundSpeed) < 6f && player.Action != ActionFsm.States.SpinDash)
 		{
 			_bufferOffset.X = _bufferOffset.X.MoveToward(0f, shiftSpeedX * processSpeed);
 			return;
@@ -214,8 +215,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		if (_delay.X > 0f) return;
 		
-		int shiftSign = data.Movement.GroundSpeed != 0f ? 
-			Math.Sign(data.Movement.GroundSpeed) : (int)data.Visual.Facing;
+		int shiftSign = groundSpeed != 0f ? Math.Sign(groundSpeed) : (int)data.Visual.Facing;
 		
 		const int shiftDistanceX = 64;
 		_bufferOffset.X = _bufferOffset.X.MoveToward(shiftDistanceX * shiftSign, shiftSpeedX * processSpeed);
@@ -252,7 +252,7 @@ public partial class Camera : Camera2D, ICamera
 		Vector2 targetPosition = _target.Position - SharedData.ViewSize / 2;
 		if (_isTargetPlayer)
 		{
-			FollowPlayer(processSpeed, targetPosition, Target as IPlayerCameraTarget);
+			FollowPlayer(processSpeed, targetPosition, Target as IPlayer);
 			return;
 		}
 		
@@ -321,7 +321,7 @@ public partial class Camera : Camera2D, ICamera
 		};
 	}
 	
-	private void FollowPlayerY(float processSpeed, float targetPosition, IPlayerCameraTarget data)
+	private void FollowPlayerY(float processSpeed, float targetPosition, IPlayer player)
 	{
 		if (_delay.Y > 0f)
 		{
@@ -331,16 +331,18 @@ public partial class Camera : Camera2D, ICamera
 		
 		float distance = targetPosition - _rawPosition.Y;
 
-		if (data.Movement.IsGrounded)
+		MovementData movement = player.Data.Movement;
+		if (movement.IsGrounded)
 		{
-			if (data.Movement.IsSpinning)
+			if (movement.IsSpinning)
 			{
-				int offset = data.Collision.RadiusNormal.Y - data.Collision.Radius.Y;
+				CollisionData collision = player.Data.Collision;
+				int offset = collision.RadiusNormal.Y - collision.Radius.Y;
 				distance -= offset;
 				targetPosition -= offset;
 			}
 
-			float limit = processSpeed * (Math.Abs(data.Movement.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
+			float limit = processSpeed * (Math.Abs(movement.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
 			
 			_rawPosition.Y = distance <= limit && distance >= -limit ? 
 				targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);

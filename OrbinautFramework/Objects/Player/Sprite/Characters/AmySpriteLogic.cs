@@ -6,7 +6,7 @@ public partial class AmySpriteLogic : SpriteLogic
     {
         if (Player.Animation == Animations.HammerSpin)
         {
-            SetType(Data.Type, Data.Node.Frame, Data.Speed);
+            SetType(Data.Type, Node.Frame, Data.Speed);
             return;
         }
 

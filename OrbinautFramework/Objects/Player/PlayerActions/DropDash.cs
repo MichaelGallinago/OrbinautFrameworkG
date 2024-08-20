@@ -30,7 +30,7 @@ public struct DropDash(PlayerData data)
 
 	    if (_charge >= MaxCharge)
 	    {
-		    data.Visual.Animation = Animations.Spin;
+		    data.Sprite.Animation = Animations.Spin;
 		    return States.None;
 	    }
 	    
@@ -49,7 +49,7 @@ public struct DropDash(PlayerData data)
 
 	    SetGroundSpeed();
     	
-	    data.Visual.Animation = Animations.Spin;
+	    data.Sprite.Animation = Animations.Spin;
 	    data.Movement.IsSpinning = true;
     	
     	data.SetCameraDelayX(8f);
@@ -67,10 +67,10 @@ public struct DropDash(PlayerData data)
 	    data.Movement.IsAirLock = false;		
 	    _charge += Scene.Instance.ProcessSpeed;
 			
-	    if (_charge < MaxCharge || data.Visual.Animation == Animations.DropDash) return;
+	    if (_charge < MaxCharge || data.Sprite.Animation == Animations.DropDash) return;
 			
 	    AudioPlayer.Sound.Play(SoundStorage.Charge3);
-	    data.Visual.Animation = Animations.DropDash;
+	    data.Sprite.Animation = Animations.DropDash;
     }
 
     private void SetGroundSpeed()

@@ -78,18 +78,18 @@ public struct Balancing(PlayerData data, IPlayerLogic logic)
 		{
 			case PlayerNode.Types.Amy or PlayerNode.Types.Tails:
 			case PlayerNode.Types.Sonic when data.Super.IsSuper:
-				data.Visual.Animation = Animations.Balance;
+				data.Sprite.Animation = Animations.Balance;
 				data.Visual.Facing = direction;
 				break;
 			
 			case PlayerNode.Types.Knuckles:
 				if (data.Visual.Facing == direction)
 				{
-					data.Visual.Animation = Animations.Balance;
+					data.Sprite.Animation = Animations.Balance;
 				}
-				else if (data.Visual.Animation != Animations.BalanceFlip)
+				else if (data.Sprite.Animation != Animations.BalanceFlip)
 				{
-					data.Visual.Animation = Animations.BalanceFlip;
+					data.Sprite.Animation = Animations.BalanceFlip;
 					data.Visual.Facing = direction;
 				}
 				break;
@@ -97,16 +97,16 @@ public struct Balancing(PlayerData data, IPlayerLogic logic)
 			case PlayerNode.Types.Sonic:
 				if (!isPanic)
 				{
-					data.Visual.Animation = data.Visual.Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+					data.Sprite.Animation = data.Visual.Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 				}
 				else if (data.Visual.Facing != direction)
 				{
-					data.Visual.Animation = Animations.BalanceTurn;
+					data.Sprite.Animation = Animations.BalanceTurn;
 					data.Visual.Facing = direction;
 				}
-				else if (data.Visual.Animation != Animations.BalanceTurn)
+				else if (data.Sprite.Animation != Animations.BalanceTurn)
 				{
-					data.Visual.Animation = Animations.BalancePanic;
+					data.Sprite.Animation = Animations.BalancePanic;
 				}
 				break;
 		}

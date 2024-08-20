@@ -28,7 +28,7 @@ public interface IPlayer : IPlayerLogic, IPlayerCpuTarget, IPlayerEditor, ICarry
     {
         Data.Movement.Velocity.Vector = Vector2.Zero;
         Data.Movement.GroundSpeed.Value = 0f;
-        Data.Visual.Animation = Animations.Move;
+        Data.Sprite.Animation = Animations.Move;
         Data.Collision.IsObjectInteractionEnabled = true;
         Data.Death.State = Death.States.Wait;
     }

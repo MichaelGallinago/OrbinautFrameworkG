@@ -25,7 +25,7 @@ public struct Default(PlayerData data, IPlayerLogic logic)
     {
         if (!SharedData.SpinDash || !data.Movement.IsGrounded) return false;
         
-        return data.Visual.Animation is Animations.Duck or Animations.GlideLand && data.Input.Down.Down;
+        return data.Sprite.Animation is Animations.Duck or Animations.GlideLand && data.Input.Down.Down;
     }
     
     private bool Dash()
@@ -33,7 +33,7 @@ public struct Default(PlayerData data, IPlayerLogic logic)
         if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
         if (data.Id > 0 && data.Cpu.InputTimer <= 0f) return false;
         
-        return data.Visual.Animation == Animations.LookUp && data.Input.Down.Up;
+        return data.Sprite.Animation == Animations.LookUp && data.Input.Down.Up;
     }
     
     private bool Jump()

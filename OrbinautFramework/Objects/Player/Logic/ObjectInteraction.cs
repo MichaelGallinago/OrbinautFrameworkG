@@ -20,9 +20,9 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		if (visual.SetPushBy != target) return;
 		visual.SetPushBy = null;
 		
-		if (visual.Animation is not (Animations.Spin or Animations.SpinDash))
+		if (data.Sprite.Animation is not (Animations.Spin or Animations.SpinDash))
 		{
-			visual.Animation = Animations.Move;
+			data.Sprite.Animation = Animations.Move;
 		}
 	}
 
@@ -196,23 +196,36 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 
 		Vector2I clipAbsolute = clip.Abs();
 		bool isLimitedClip = clipAbsolute.Y <= 4;
-
-		bool isS3Physics = SharedData.PhysicsType >= PhysicsCore.Types.S3;
-		if (clipAbsolute.X >= clipAbsolute.Y || isS3Physics && isLimitedClip)
+		
+#if S3_PHYSICS || SK_PHYSICS
+		if (isLimitedClip || clipAbsolute.X >= clipAbsolute.Y)
 		{
-			if (CollideVertically(clip.Y, isS3Physics)) return;
+			if (CollideVertically(clip.Y)) return;
 		}
-
-		CollideHorizontally(isLimitedClip, flooredDistance.X, clip.X, isS3Physics);
+		
+		CollideHorizontally(flooredDistance.X, clip.X);
+#else
+		if (clipAbsolute.X >= clipAbsolute.Y)
+		{
+			if (CollideVertically(clip.Y)) return;
+		}
+		
+		CollideHorizontally(isLimitedClip, flooredDistance.X, clip.X);
+#endif
 	}
 
-	private void CollideHorizontally(bool isLimitedClip, int flooredDistanceX, int clipX, bool isS3Physics)
+#if S3_PHYSICS || SK_PHYSICS
+	private void CollideHorizontally(int flooredDistanceX, int clipX)
 	{
-		if (!isS3Physics && isLimitedClip)
+#else
+	private void CollideHorizontally(bool isLimitedClip, int flooredDistanceX, int clipX)
+	{
+		if (isLimitedClip)
 		{
 			ClearPush(_solidObjectData.Target); 
 			return;
 		}
+#endif
 		
 		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = 
 			flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
@@ -239,12 +252,12 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		data.Node.Position -= new Vector2(clipX, 0f);
 	}
 	
-	private bool CollideVertically(int clipY, bool isS3Physics)
+	private bool CollideVertically(int clipY)
 	{
 		switch (clipY)
 		{
 			case < 0: 
-				return CollideUpward(_solidObjectData.Target.SolidBox, clipY, isS3Physics);
+				return CollideUpward(_solidObjectData.Target.SolidBox, clipY);
 			
 			case < 16 when _solidObjectData.Type != SolidType.Sides: 
 				CollideDownward(clipY);
@@ -256,7 +269,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		}
 	}
 	
-	private bool CollideUpward(SolidBox box, int clipY, bool isS3Physics)
+	private bool CollideUpward(SolidBox box, int clipY)
 	{
 		if (_solidObjectData.Type is SolidType.ItemBox or SolidType.Sides) return false;
 
@@ -265,7 +278,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			return CrushPlayer(clipY);
 		}
 
-		HandleUpwardCollision(box, clipY, isS3Physics);
+		HandleUpwardCollision(box, clipY);
 		return true;
 	}
 	
@@ -276,15 +289,16 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		return true;
 	}
 	
-	private void HandleUpwardCollision(SolidBox box, int clipY, bool isS3Physics)
+	private void HandleUpwardCollision(SolidBox box, int clipY)
 	{
 		if (data.Movement.Velocity.Y < 0f)
 		{
-			if (isS3Physics && !data.Movement.IsGrounded)
+#if S3_PHYSICS || SK_PHYSICS
+			if (!data.Movement.IsGrounded)
 			{
 				data.Movement.GroundSpeed.Value = 0f;
 			}
-			
+#endif
 			data.Node.Position -= new Vector2(0, clipY);
 			data.Movement.Velocity.Y = 0f;
 		}

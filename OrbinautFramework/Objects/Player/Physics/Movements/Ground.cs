@@ -47,7 +47,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 
     private void CancelGlideLandingAnimation()
     {
-        if (data.Visual.Animation is Animations.GlideGround or Animations.GlideLand && 
+        if (data.Sprite.Animation is Animations.GlideGround or Animations.GlideLand && 
             (data.Input.Down.Down || data.Movement.GroundSpeed != 0))
         {
             data.Movement.GroundLockTimer = 0f;
@@ -61,11 +61,11 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
         Angles.Quadrant quadrant = Angles.GetQuadrant(data.Movement.Angle);
         if (SetIdleAnimation(quadrant)) return;
 			
-        if (data.Visual.Animation == Animations.Skid) return;
+        if (data.Sprite.Animation == Animations.Skid) return;
 		
-        if (data.Visual.Animation is not (Animations.Push or Animations.Skid))
+        if (data.Sprite.Animation is not (Animations.Push or Animations.Skid))
         {
-            data.Visual.Animation = Animations.Move;
+            data.Sprite.Animation = Animations.Move;
         }
         
         if (!doSkid || quadrant != Angles.Quadrant.Down) return;
@@ -74,9 +74,9 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 
     private void SetPushAnimation()
     {
-        if (data.Visual.SetPushBy != null && data.Node.SpriteNode.IsFrameChanged)
+        if (data.Visual.SetPushBy != null && data.Sprite.IsFrameChanged)
         {
-            data.Visual.Animation = Animations.Push;
+            data.Sprite.Animation = Animations.Push;
         }
     }
     
@@ -86,15 +86,15 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 		
         if (data.Input.Down.Up)
         {
-            data.Visual.Animation = Animations.LookUp;
+            data.Sprite.Animation = Animations.LookUp;
         }
         else if (data.Input.Down.Down)
         {
-            data.Visual.Animation = Animations.Duck;
+            data.Sprite.Animation = Animations.Duck;
         }
-        else if (data.Visual.Animation != Animations.Wait)
+        else if (data.Sprite.Animation != Animations.Wait)
         {
-            data.Visual.Animation = Animations.Idle;
+            data.Sprite.Animation = Animations.Idle;
         }
 			
         data.Visual.SetPushBy = null;
@@ -106,7 +106,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
         if (Math.Abs(data.Movement.GroundSpeed) < SkidSpeedThreshold) return;
 		
         data.Visual.DustTimer = 0f;
-        data.Visual.Animation = Animations.Skid;
+        data.Sprite.Animation = Animations.Skid;
 		
         AudioPlayer.Sound.Play(SoundStorage.Skid);
     }
@@ -146,15 +146,15 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 
     private void CancelSkidAnimation()
     {
-        if (data.Visual.Animation != Animations.Skid) return;
-        data.Visual.Animation = Animations.Move;
+        if (data.Sprite.Animation != Animations.Skid) return;
+        data.Sprite.Animation = Animations.Move;
     }
 
     private void TurnAround(Constants.Direction direction)
     {
         if (data.Visual.Facing == direction) return;
 		
-        data.Visual.Animation = Animations.Move;
+        data.Sprite.Animation = Animations.Move;
         data.Visual.Facing = direction;
         data.Visual.SetPushBy = null;
         data.Visual.OverrideFrame = 0;

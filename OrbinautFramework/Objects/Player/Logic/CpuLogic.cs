@@ -96,14 +96,14 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		if (!data.Movement.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, recordedPosition.Y)) return;
 		
 		data.Cpu.State = States.Main;
-		data.Visual.Animation = Animations.Move;
+		data.Sprite.Animation = Animations.Move;
 		data.Collision.IsObjectInteractionEnabled = true;
 		data.Movement.IsControlRoutineEnabled = true;
 	}
 
 	private void SetRespawnAnimation()
 	{
-		data.Visual.Animation = data.Node.Type switch
+		data.Sprite.Animation = data.Node.Type switch
 		{
 			PlayerNode.Types.Sonic or PlayerNode.Types.Amy => Animations.Spin, 
 			PlayerNode.Types.Tails => data.Water.IsUnderwater ? Animations.Swim : Animations.Fly,
@@ -115,7 +115,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 #if S3_CPU
 	private void PlayRespawnFlyingSound()
 	{
-		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.Node.SpriteNode.CheckInCameras()) return;
+		if (!Scene.Instance.IsTimePeriodLooped(16f, 8f) || !data.Sprite.CheckInCameras()) return;
 		if (data.Water.IsUnderwater) return;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Flight);
@@ -236,7 +236,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 
 	private void Jump()
 	{
-		if (data.Visual.Animation == Animations.Duck || data.Cpu.Target.Animation == Animations.Wait) return;
+		if (data.Sprite.Animation == Animations.Duck || data.Cpu.Target.Animation == Animations.Wait) return;
 		if (!Scene.Instance.IsTimePeriodLooped(JumpFrequency)) return;
 		
 		_inputPress.Abc = _inputDown.Abc = true;
@@ -307,7 +307,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		
 		if (data.Movement.GroundLockTimer > 0f || data.Cpu.InputTimer > 0f || data.Movement.GroundSpeed != 0f) return;
 		
-		if (data.Visual.Animation == Animations.Idle)
+		if (data.Sprite.Animation == Animations.Idle)
 		{
 			data.Visual.Facing = data.Cpu.Target.Position.X >= data.Node.Position.X ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
@@ -332,7 +332,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && 
 		                      camera.TargetBoundary.Z <= data.Node.Position.X;
 		
-		if (isBehindLeader || data.Node.SpriteNode != null && data.Node.SpriteNode.CheckInCameras())
+		if (isBehindLeader || data.Sprite != null && data.Sprite.CheckInCameras())
 		{
 			data.Cpu.RespawnTimer = 0f;
 			return false;

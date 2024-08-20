@@ -16,7 +16,7 @@ public struct SpinDash(PlayerData data)
 	
 	public void Enter()
 	{
-		data.Visual.Animation = Animations.SpinDash;
+		data.Sprite.Animation = Animations.SpinDash;
 		data.Movement.Velocity.Vector = Vector2.Zero;
 		
 		// TODO: SpinDash dust 
@@ -40,12 +40,10 @@ public struct SpinDash(PlayerData data)
 
     private void Release()
     {
-	    data.State = States.Default;
-	    
 	    data.SetCameraDelayX(16f);
     	
 	    data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
-	    data.Visual.Animation = Animations.Spin;
+	    data.Sprite.Animation = Animations.Spin;
 	    data.Collision.Radius = data.Collision.RadiusSpin;
 	    data.Movement.IsSpinning = true;
 

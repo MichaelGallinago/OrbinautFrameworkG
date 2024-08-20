@@ -34,7 +34,7 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 		data.Movement.IsJumping = false;
 		
 		data.Visual.SetPushBy = null;
-		data.Visual.Animation = Animations.Move;
+		data.Sprite.Animation = Animations.Move;
 		
 		data.Cpu.State = CpuLogic.States.Main;
 		data.Damage.IsHurt = false;
@@ -49,7 +49,7 @@ public struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 			logic.Action = States.Default;
 		}
 
-		if (data.Visual.Animation == Animations.Spin) return;
+		if (data.Sprite.Animation == Animations.Spin) return;
 		data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
 		data.Collision.Radius = data.Collision.RadiusNormal;
 	}

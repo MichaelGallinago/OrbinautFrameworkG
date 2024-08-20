@@ -19,7 +19,7 @@ public struct HammerSpin(PlayerData data)
             data.Movement.IsAirLock = false;
         }
 		
-        data.Visual.Animation = Animations.HammerSpin;
+        data.Sprite.Animation = Animations.HammerSpin;
 		
         AudioPlayer.Sound.Play(SoundStorage.Hammer);
     }
@@ -36,7 +36,7 @@ public struct HammerSpin(PlayerData data)
 
         if (_charge >= DropDash.MaxCharge)
         {
-            data.Visual.Animation = Animations.Spin;
+            data.Sprite.Animation = Animations.Spin;
             return States.None;
         }
         

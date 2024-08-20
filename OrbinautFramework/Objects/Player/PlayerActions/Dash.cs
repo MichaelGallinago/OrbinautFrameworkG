@@ -17,7 +17,7 @@ public struct Dash(PlayerData data)
 	
 	public void Enter()
 	{
-		data.Visual.Animation = Animations.Move;
+		data.Sprite.Animation = Animations.Move;
 		AudioPlayer.Sound.Play(SoundStorage.Charge2);
 	}
 	

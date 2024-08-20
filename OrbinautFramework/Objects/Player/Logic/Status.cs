@@ -28,7 +28,7 @@ public struct Status(PlayerData data, IPlayerLogic logic)
 
 	private void CreateSkidDust()
 	{
-		if (data.Visual.Animation != Animations.Skid) return;
+		if (data.Sprite.Animation != Animations.Skid) return;
 		
 		//TODO: fix loop on stutter (maybe PreviousProcessSpeed?)
 		if (data.Visual.DustTimer % 4f < Scene.Instance.ProcessSpeed)

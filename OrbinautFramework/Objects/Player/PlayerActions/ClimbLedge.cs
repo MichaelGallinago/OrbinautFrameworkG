@@ -1,32 +1,33 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct ClimbLedge(PlayerData data)
+public struct ClimbLedge(PlayerData data, IPlayerLogic logic)
 {
     public void Perform()
     {
-        if (data.Visual.Animation != Animations.ClimbLedge)
+        if (data.Sprite.Animation != Animations.ClimbLedge)
         {
-            data.Visual.Animation = Animations.ClimbLedge;
+            data.Sprite.Animation = Animations.ClimbLedge;
             data.Node.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
         }
-        else if (data.Node.SpriteNode.IsFrameChanged)
+        else if (data.Sprite.IsFrameChanged)
         {
-            switch (data.Node.SpriteNode.Frame)
+            switch (data.Sprite.Frame)
             {
                 case 1: data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
                 case 2: data.Node.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
             }
         }
-        else if (data.Node.SpriteNode.IsFinished)
+        else if (data.Sprite.IsFinished)
         {
             Land();
-            data.Visual.Animation = Animations.Idle;
+            data.Sprite.Animation = Animations.Idle;
             data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
 
             // Subtract that 1px that was applied when we attached to the wall

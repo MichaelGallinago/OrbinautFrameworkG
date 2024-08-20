@@ -2,6 +2,7 @@
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.PlayerActions;
+using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
@@ -29,9 +30,9 @@ public class PlayerLogic : IPlayer
     private CollisionBoxes _collisionBoxes;
     private Initialization _initialization;
     
-    public PlayerLogic(IPlayerNode playerNode)
+    public PlayerLogic(IPlayerNode playerNode, IPlayerSprite sprite)
     {
-        Data = new PlayerData(playerNode);
+        Data = new PlayerData(playerNode, sprite);
         
         Scene.Instance.Players.Add(this);
         Recorder.ResizeAll(); //TODO: check correct value
@@ -51,7 +52,7 @@ public class PlayerLogic : IPlayer
         _water = new Water(Data, this);
         _status = new Status(Data, this);
         _palette = new Palette(Data);
-        _actionFsm = new ActionFsm(Data);
+        _actionFsm = new ActionFsm(Data, this);
         _physicsCore = new PhysicsCore(Data, this);
         _angleRotation = new AngleRotation(Data);
         _collisionBoxes = new CollisionBoxes(Data);
@@ -70,7 +71,6 @@ public class PlayerLogic : IPlayer
         _initialization.Init();
         _initialization.Spawn();
         Recorder.Fill();
-        Data.Node.SpriteNode.Process();
     }
 
     public void ExitTree()
@@ -101,8 +101,6 @@ public class PlayerLogic : IPlayer
         Recorder.Record();
         _angleRotation.Process();
         _palette.Process();
-        
-        Data.Node.SpriteNode.Process();
     }
     
     private void RunControlRoutine()

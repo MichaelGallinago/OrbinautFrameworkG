@@ -60,31 +60,33 @@ public struct Rolling(PlayerData data)
     
     private void StopSpinning()
     {
-        if (data.Movement.GroundSpeed != 0f)
-        {
-            if (SharedData.PhysicsType != PhysicsCore.Types.SK || Math.Abs(data.Movement.GroundSpeed) >= 0.5f) return;
-        }
+#if SK_PHYSICS
+        if (data.Movement.GroundSpeed != 0f && Math.Abs(data.Movement.GroundSpeed) >= 0.5f) return;
+#else
+        if (data.Movement.GroundSpeed != 0f) return;
+#endif
 		
         data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
 		
         data.Movement.IsSpinning = false;
         data.Collision.Radius = data.Collision.RadiusNormal;
-        data.Visual.Animation = Animations.Idle;
+        data.Sprite.Animation = Animations.Idle;
     }
 	
     private void ForceSpin()
     {
-        if (SharedData.PhysicsType == PhysicsCore.Types.CD)
+#if CD_PHYSICS
+        if (data.Movement.GroundSpeed.Value is >= 0f and < 2f)
         {
-            if (data.Movement.GroundSpeed.Value is >= 0f and < 2f)
-            {
-                data.Movement.GroundSpeed.Value = 2f;
-            }
-            return;
+            data.Movement.GroundSpeed.Value = 2f;
         }
-		
+#else
         if (data.Movement.GroundSpeed != 0f) return;
-        data.Movement.GroundSpeed.Value = 
-            SharedData.PhysicsType == PhysicsCore.Types.S1 ? 2f : 4f * (float)data.Visual.Facing;
+#if S1_PHYSICS
+        data.Movement.GroundSpeed.Value = 2f;
+#else
+        data.Movement.GroundSpeed.Value = 4f * (float)data.Visual.Facing; //TODO: check Triangly
+#endif
+#endif
     }
 }

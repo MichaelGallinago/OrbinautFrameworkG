@@ -15,9 +15,9 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 		Sonic, Tails, Knuckles, Amy
 	}
 	
-	[Export] public ShieldContainer Shield { get; init; }
-	[Export] public Sprite.SpriteNode SpriteNode { get; init; }
 	[Export] public Types Type { get; init; }
+	[Export] public ShieldContainer Shield { get; init; }
+	[Export] private Sprite.SpriteNode SpriteNode { get; init; }
 	
 	public IMemento Memento { get; }
 
@@ -25,7 +25,7 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 
 	protected PlayerNode()
 	{
-		_playerLogic = new PlayerLogic(this);
+		_playerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
 		Memento = new PlayerMemento(this);
 		SpriteNode.SetPlayer(_playerLogic);
 		Init();
@@ -37,7 +37,15 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 		base._ExitTree();
 	}
 	
-	public override void _Process(double delta) => _playerLogic.Process();
-	
-	public void Init() => _playerLogic.Init();
+	public override void _Process(double delta)
+	{
+		_playerLogic.Process();
+		SpriteNode.Process();
+	}
+
+	public void Init()
+	{
+		_playerLogic.Init();
+		SpriteNode.Process();
+	}
 }

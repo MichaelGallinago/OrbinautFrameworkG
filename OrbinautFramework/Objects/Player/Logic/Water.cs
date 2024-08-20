@@ -120,7 +120,7 @@ public struct Water(PlayerData data, IPlayerLogic logic)
 		logic.Action = States.Default;
 
 		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		data.Visual.Animation = Animations.Drown;
+		data.Sprite.Animation = Animations.Drown;
 		data.Death.IsDead = true;
 		data.Collision.IsObjectInteractionEnabled = false;
 		data.Movement.Gravity	= GravityType.Underwater;
