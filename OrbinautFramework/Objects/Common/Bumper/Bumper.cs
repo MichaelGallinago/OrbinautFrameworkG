@@ -38,7 +38,7 @@ public partial class Bumper : InteractiveNode
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (!CheckPlayerHitBoxCollision(player)) continue;
+            if (!HitBox.CheckPlayerCollision(player.Data, (Vector2I)Position)) continue;
             
             if (_sprite.Animation == "Default")
             {
