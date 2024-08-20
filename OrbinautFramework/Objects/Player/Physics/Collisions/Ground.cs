@@ -108,9 +108,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 
 		(int distance, float angle) = FindTile();
 		
-		//TODO: check this
-		if (GoAirborne()) return;
-
+		if (GoAirborne(distance)) return;
 		if (distance < -MaxTolerance) return;
 		
 		data.Node.Position += data.Collision.TileBehaviour switch

@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Objects.Player.Physics;
 public struct Collision(PlayerData data, IPlayerLogic logic)
 {
 	private Air _air = new(data, logic);
-	private Ground _ground = new(data);
+	private Ground _ground = new(data, logic);
 
 	public void CollideAir() => _air.Collide();
 	public void CollideFloorGround() => _ground.CollideFloor();

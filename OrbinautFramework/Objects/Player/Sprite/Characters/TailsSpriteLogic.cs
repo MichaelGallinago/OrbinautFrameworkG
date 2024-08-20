@@ -2,15 +2,12 @@
 
 public partial class TailsSpriteLogic : SpriteLogic
 {
-    private float _speed;
-    private Animations _type;
-    
     protected override void Animate()
     {
         SetType(Data.Type, Data.Speed);
 		
         if (Data.Type != Animations.FlyCarry) return;
-        Data.Node.Frame = Player.Velocity.Y < 0f ? 1 : 0;
+        Node.Frame = Player.Velocity.Y < 0f ? 1 : 0;
     }
     
     protected override void UpdateType() => Data.Type = Player.Animation switch
