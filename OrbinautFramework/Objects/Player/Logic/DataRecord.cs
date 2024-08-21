@@ -10,7 +10,5 @@ public readonly record struct DataRecord(
     Buttons InputDown,
     Constants.Direction Facing,
     object SetPushAnimationBy,
-    bool IsJumping,
-    bool IsGrounded,
-    ActionFsm.States Action
+    bool IsGrounded
 );

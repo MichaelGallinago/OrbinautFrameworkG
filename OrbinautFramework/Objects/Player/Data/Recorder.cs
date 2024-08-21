@@ -4,7 +4,7 @@ using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class Recorder(PlayerData data, IPlayerLogic logic)
+public class Recorder(PlayerData data)
 {
     private const byte MinimalLength = 32;
     
@@ -14,8 +14,7 @@ public class Recorder(PlayerData data, IPlayerLogic logic)
         data.Node.Position, 
         data.Input.Press, data.Input.Down, 
         data.Visual.Facing, data.Visual.SetPushBy, 
-        data.Movement.IsJumping, data.Movement.IsGrounded, 
-        logic.Action);
+        data.Movement.IsGrounded);
     
     private DataRecord[] _recordedData;
     

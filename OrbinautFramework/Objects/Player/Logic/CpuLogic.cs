@@ -77,8 +77,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		}
 #endif
 		
-		Vector2 recordedPosition = _leadPlayer.RecordedData[_delay].Position;
-		Vector2 targetPosition = recordedPosition;
+		Vector2 targetPosition = _leadPlayer.RecordedData[_delay].Position;
+		float recordedY = targetPosition.Y;
 
 #if S2_CPU
 		if (Stage.Local != null && Stage.Local.IsWaterEnabled)
@@ -93,7 +93,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		if (_leadPlayer.IsDead) return;
 #endif
 
-		if (!data.Movement.IsGrounded || !Mathf.IsEqualApprox(targetPosition.Y, recordedPosition.Y)) return;
+		if (!_leadPlayer.RecordedData[_delay].IsGrounded) return;
+		if (!Mathf.IsEqualApprox(targetPosition.Y, recordedY)) return;
 		
 		data.Cpu.State = States.Main;
 		data.Sprite.Animation = Animations.Move;
@@ -208,7 +209,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 
 	private void TryJump()
 	{
-		(Vector2 targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush) = 
+		(Vector2 targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush, _) = 
 			data.Cpu.Target.RecordedData[_delay];
 		
 #if S3_CPU
@@ -218,8 +219,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		}
 #endif
 		
-		// Copy (and modify) inputs if we are not pushing anything or if the followed player
-		// was pushing something a few frames ago
+		// Jump if we are not pushing anything or if the followed player was pushing something a few frames ago
 		if (data.Visual.SetPushBy != null && isTargetPush == null)
 		{
 			Jump();
@@ -234,6 +234,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		}
 	}
 
+	// Copy (and modify) inputs
 	private void Jump()
 	{
 		if (data.Sprite.Animation == Animations.Duck || data.Cpu.Target.Animation == Animations.Wait) return;

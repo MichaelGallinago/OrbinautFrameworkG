@@ -37,7 +37,7 @@ public class PlayerLogic : IPlayer
         Scene.Instance.Players.Add(this);
         Recorder.ResizeAll(); //TODO: check correct value
         
-        Recorder = new Recorder(Data, this);
+        Recorder = new Recorder(Data);
         CarryTargetLogic = new CarryTargetLogic(Data, this);
         ControlType = new ControlType(this) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
