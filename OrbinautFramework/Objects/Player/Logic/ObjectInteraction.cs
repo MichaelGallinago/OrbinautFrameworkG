@@ -117,14 +117,14 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	private int CalculateSlopeOffset()
 	{
 		// Adjust slope offset based on height map
-		Array<short> heightMap = _solidObjectData.Target.SolidBox.HeightMap;
+		short[] heightMap = _solidObjectData.Target.SolidBox.HeightMap;
 		
-		if (heightMap is not { Count: > 0 }) return 0;
+		if (heightMap is not { Length: > 0 }) return 0;
 
 		int distance = 
 			Mathf.FloorToInt(data.Node.Position.X - _solidObjectData.Position.X) * (_solidObjectData.Target.Scale.X >= 0 ? 1 : -1);
 		
-		int index = Math.Clamp(distance + _solidObjectData.Target.SolidBox.Radius.X, 0, heightMap.Count - 1);
+		int index = Math.Clamp(distance + _solidObjectData.Target.SolidBox.Radius.X, 0, heightMap.Length - 1);
 		
 		return (_solidObjectData.Target.SolidBox.Radius.Y - heightMap[index]) * (int)_solidObjectData.Target.Scale.Y;
 	}

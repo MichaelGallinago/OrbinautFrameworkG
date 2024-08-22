@@ -13,10 +13,11 @@ public partial class PlayerSpawner : Sprite2D
         Sonic = 1 << Types.Sonic,
         Tails = 1 << Types.Tails,
         Knuckles = 1 << Types.Knuckles,
-        Amy = 1 << Types.Amy
+        Amy = 1 << Types.Amy,
+        All = Sonic | Tails | Knuckles | Amy
     }
-    
-    [Export] private AllowedTypes _allowedTypes;
+
+    [Export] private AllowedTypes _allowedTypes = AllowedTypes.All;
     [Export] private Vector2 _cpuOffset;
 
     public override void _Ready()

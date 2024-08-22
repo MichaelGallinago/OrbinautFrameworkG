@@ -7,7 +7,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct Carry(PlayerData data, IPlayerLogic logic) //TODO: carry
+public readonly struct Carry(PlayerData data, IPlayerLogic logic) //TODO: carry
 {
     /*
     public void Process()

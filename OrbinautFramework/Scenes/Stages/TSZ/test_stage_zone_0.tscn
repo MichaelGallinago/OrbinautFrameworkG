@@ -54,18 +54,16 @@ region = Rect2(48, 0, 16, 16)
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
-[node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
+[node name="StageTSZ" type="Node2D"]
 process_priority = -1
 texture_filter = 1
 script = ExtResource("1_hkdi5")
-CollisionTileMapMain = NodePath("TileMaps/CollisionTileMapMain")
-CollisionTileMapSecondary = NodePath("TileMaps/CollisionTIleMapSecondary")
-Views = NodePath("Views")
 PlayerPrefabs = null
 DebugModePrefabs = null
 
 [node name="Views" parent="." instance=ExtResource("3_8004u")]
 _number = null
+_packedViewContainer = null
 
 [node name="PlayerSpawner" parent="." instance=ExtResource("21_cuvbg")]
 position = Vector2(176, 880)
@@ -174,7 +172,7 @@ script = ExtResource("5_movty")
 position = Vector2(2432, 960)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal2" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(2560, 1032)
@@ -187,7 +185,7 @@ _isGroundOnly = null
 position = Vector2(11776, 1088)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal4" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(11888, 1152)
@@ -207,13 +205,13 @@ _isGroundOnly = null
 position = Vector2(4096, 832)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal7" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(9856, 1216)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal8" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(10112, 1296)
@@ -226,19 +224,19 @@ _isGroundOnly = null
 position = Vector2(15360, 1088)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal10" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13184, 320)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal11" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13184, 576)
-_layerLeft = 0
-_layerRight = 1
-_isGroundOnly = true
+_layerLeft = null
+_layerRight = null
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal12" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13440, 1216)
@@ -256,8 +254,8 @@ _isGroundOnly = null
 [node name="PathSwapTriggerHorizontal14" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17640, 832)
 scale = Vector2(1, 2)
-_layerLeft = 0
-_layerRight = 1
+_layerLeft = null
+_layerRight = null
 _isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal15" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
@@ -271,7 +269,7 @@ _isGroundOnly = null
 position = Vector2(17152, 1984)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal17" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 2032)
@@ -284,13 +282,13 @@ _isGroundOnly = null
 position = Vector2(17280, 1600)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal19" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 192)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal20" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17408, 288)
@@ -303,7 +301,7 @@ _isGroundOnly = null
 position = Vector2(19328, 1088)
 _layerLeft = null
 _layerRight = null
-_isGroundOnly = true
+_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal22" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(19520, 1152)
@@ -325,13 +323,13 @@ _isGroundOnly = null
 position = Vector2(17920, 1344)
 scale = Vector2(4, 1)
 _layerAbove = null
-_layerBelow = 1
+_layerBelow = null
 _isGroundOnly = null
 
 [node name="PathSwapTriggerVertical2" parent="Triggers/PathSwapVertical" instance=ExtResource("18_0iln7")]
 position = Vector2(17360, 1504)
-_layerAbove = 0
-_layerBelow = 1
+_layerAbove = null
+_layerBelow = null
 _isGroundOnly = null
 
 [node name="ForceSpinHorizontal" type="Node" parent="Triggers"]
@@ -339,41 +337,32 @@ _isGroundOnly = null
 [node name="ForceSpinTriggerHorizontal" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(7296, 1008)
 
-[node name="ForceSpinTriggerHorizontal2" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal2" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(7552, 1264)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal3" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal3" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(11136, 1392)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal4" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal4" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(11392, 1648)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal5" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal5" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(12288, 624)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal6" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal6" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(12544, 880)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal7" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal7" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(15360, 2160)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal8" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal8" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(15648, 1904)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal9" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal9" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(18432, 368)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
-[node name="ForceSpinTriggerHorizontal10" parent="Triggers/ForceSpinHorizontal" node_paths=PackedStringArray("Sprite") instance=ExtResource("16_p2jm1")]
+[node name="ForceSpinTriggerHorizontal10" parent="Triggers/ForceSpinHorizontal" instance=ExtResource("16_p2jm1")]
 position = Vector2(18688, 624)
-Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 
 [node name="Camera" type="Node" parent="Triggers"]
 
@@ -381,20 +370,21 @@ Sprite = NodePath("../ForceSpinTriggerHorizontal/Sprite2D")
 position = Vector2(1040, 786)
 scale = Vector2(1, 24.563)
 _boundSpeed = null
+_direction = null
 _triggerWithin = null
 
-[node name="CameraTrigger2" parent="Triggers/Camera" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_7s6he")]
+[node name="CameraTrigger2" parent="Triggers/Camera" instance=ExtResource("13_7s6he")]
 position = Vector2(11000, 1152)
 scale = Vector2(1, 36)
-_sprite = NodePath("../CameraTrigger/Sprite2D")
-_boundSpeed = 4
+_boundSpeed = null
+_direction = null
 _triggerWithin = null
 
-[node name="CameraTrigger3" parent="Triggers/Camera" node_paths=PackedStringArray("_sprite") instance=ExtResource("13_7s6he")]
+[node name="CameraTrigger3" parent="Triggers/Camera" instance=ExtResource("13_7s6he")]
 position = Vector2(21112, 1160)
 scale = Vector2(1, 4.75)
-_sprite = NodePath("../CameraTrigger/Sprite2D")
-_boundSpeed = 2
+_boundSpeed = null
+_direction = null
 _triggerWithin = null
 
 [node name="Common" type="Node" parent="."]
@@ -952,6 +942,7 @@ CullingType = null
 position = Vector2(15344, 1968)
 rotation = 3.14159
 scale = Vector2(1, -1)
+IsMoving = null
 SolidBox = null
 CullingType = null
 
@@ -959,6 +950,7 @@ CullingType = null
 position = Vector2(15344, 1936)
 rotation = 3.14159
 scale = Vector2(1, -1)
+IsMoving = null
 SolidBox = null
 CullingType = null
 
@@ -966,6 +958,7 @@ CullingType = null
 position = Vector2(15344, 1904)
 rotation = 3.14159
 scale = Vector2(1, -1)
+IsMoving = null
 SolidBox = null
 CullingType = null
 
@@ -974,86 +967,51 @@ CullingType = null
 [node name="BridgeTSZ" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(6144, 1160)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ2" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(6784, 1096)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ3" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(8512, 1416)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ4" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(1280, 904)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ5" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(5376, 840)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ6" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(6016, 808)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ7" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(6272, 808)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ8" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(6784, 872)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ9" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(12800, 1512)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ10" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(17344, 968)
 LogAmount = 12
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ11" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(18752, 648)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="BridgeTSZ12" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 z_index = 0
 position = Vector2(19968, 1000)
-LogAmount = 8
-LogOffset = 0
-_cullingType = 0
 
 [node name="Bumpers" type="Node" parent="Common"]
 

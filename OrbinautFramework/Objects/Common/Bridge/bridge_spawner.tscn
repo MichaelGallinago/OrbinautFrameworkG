@@ -8,4 +8,7 @@
 z_index = -4
 script = ExtResource("1_1v833")
 LogTexture = ExtResource("2_0ed77")
+LogAmount = 8
+LogOffset = 0
 _stampTexture = ExtResource("3_jxdwb")
+_cullingType = 0

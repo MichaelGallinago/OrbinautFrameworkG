@@ -1,7 +1,6 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Data;
 using SolidNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.SolidNode;
 
@@ -17,6 +16,8 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
     private Vector2[] _logPositions;
     private int _logSizeHalf;
     private int[] _dip;
+
+    public Bridge() : this(null, 0, 0) {}
     
     public override void _Ready()
     {

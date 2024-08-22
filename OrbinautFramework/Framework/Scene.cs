@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework;
 
-public abstract partial class Scene : Node2D
+public partial class Scene : Node2D
 {
     public enum States : byte
     {

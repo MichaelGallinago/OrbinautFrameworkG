@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://cmxwbaa0wb1ga"]
+
+[ext_resource type="Script" path="res://Framework/Scene.cs" id="1_me8ew"]
+[ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="2_wagxm"]
+
+[node name="StageTSZ" type="Node2D"]
+script = ExtResource("1_me8ew")
+PlayerPrefabs = null
+DebugModePrefabs = null
+
+[node name="Views" parent="." instance=ExtResource("2_wagxm")]
+_number = null
+_packedViewContainer = null

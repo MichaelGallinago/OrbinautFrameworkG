@@ -1,14 +1,22 @@
+using System.Linq;
 using Godot;
 using Godot.Collections;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public partial class SolidBox(bool isInteract, Vector2I radius, Vector2I offset, Array<short> heightMap) : Resource
+public partial class SolidBox(bool isInteract, Vector2I radius, Vector2I offset, short[] heightMap) : Resource
 {
     [Export] public bool NoBalance { get; set; } = isInteract;
     [Export] public Vector2I Radius { get; private set; } = radius;
     [Export] public Vector2I Offset { get; private set; } = offset;
-    [Export] public Array<short> HeightMap { get; private set; } = heightMap;
+
+    [Export] private Array<short> HeightMapArray //TODO: remove this?
+    {
+        get => new(HeightMap);
+        set => HeightMap = value.ToArray();
+    }
+
+    public short[] HeightMap { get; private set; } = heightMap;
 
     public SolidBox() : this(false, default, default, null) {}
 
