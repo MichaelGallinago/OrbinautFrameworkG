@@ -4,7 +4,7 @@ namespace OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 
 public partial class SolidNode : CullableNode, IPreviousPosition, ISolid
 {
-    [Export] public SolidBox SolidBox { get; init; }
+    [Export] public SolidBox SolidBox { get; private set; }
     
     public Vector2 PreviousPosition { get; set; }
     

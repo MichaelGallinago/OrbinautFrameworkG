@@ -1,10 +1,11 @@
+using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Spawnable.Shield;
-using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player;
 
@@ -15,9 +16,9 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 		Sonic, Tails, Knuckles, Amy
 	}
 	
-	[Export] public Types Type { get; init; }
-	[Export] public ShieldContainer Shield { get; init; }
-	[Export] private Sprite.SpriteNode SpriteNode { get; init; }
+	[Export] public Types Type { get; private set; }
+	[Export] public ShieldContainer Shield { get; private set; }
+	[Export] private Sprite.SpriteNode _spriteNode;
 	
 	public IMemento Memento { get; }
 
@@ -25,9 +26,9 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 
 	protected PlayerNode()
 	{
-		PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
+		PlayerLogic = new PlayerLogic(this, _spriteNode.PlayerSprite);
 		Memento = new PlayerMemento(this);
-		SpriteNode.SetPlayer(PlayerLogic);
+		_spriteNode.SetPlayer(PlayerLogic);
 		Init();
 	}
 
@@ -40,12 +41,12 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 	public override void _Process(double delta)
 	{
 		PlayerLogic.Process();
-		SpriteNode.Process();
+		_spriteNode.Process();
 	}
 
 	public void Init()
 	{
 		PlayerLogic.Init();
-		SpriteNode.Process();
+		_spriteNode.Process();
 	}
 }

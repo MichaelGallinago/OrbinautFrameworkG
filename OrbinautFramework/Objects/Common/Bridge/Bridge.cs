@@ -31,7 +31,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
             _logPositions[i] = new Vector2(logSize * i - halfWidth, 0f);
             _dip[i] = (i < logAmount / 2 ? i + 1 : logAmount - i) * 2;
         }
-
+        
         // Player should not balance on this object
         SolidBox.NoBalance = true;
 

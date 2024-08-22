@@ -8,7 +8,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct CameraBounds(PlayerData data, IPlayerLogic logic)
+public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 {
     public void Match()
     {

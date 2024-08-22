@@ -4,5 +4,5 @@ namespace OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 
 public partial class InteractiveNode : CullableNode
 {
-    [Export] public HitBox HitBox { get; init; }
+    [Export] public HitBox HitBox { get; private set; }
 }

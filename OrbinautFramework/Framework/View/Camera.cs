@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
@@ -14,6 +15,16 @@ public partial class Camera : Camera2D, ICamera
 	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
 	
+	[Export] private CullableNode TargetNode
+	{
+		get => Target as CullableNode;
+		set
+		{
+			if (value == null) return;
+			Target = value;
+		}
+	}
+	
 	public Rect2I ActiveRegion
 	{
 		get => _activeRegion;
@@ -25,8 +36,8 @@ public partial class Camera : Camera2D, ICamera
 	}
 	private Rect2I _activeRegion;
 	public bool IsActiveRegionChanged { get; private set; }
-    
-	[Export] public IPosition Target
+	
+	public IPosition Target
 	{
 		get => _target;
 		set

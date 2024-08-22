@@ -1,12 +1,22 @@
+using System;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
+using static OrbinautFramework3.Objects.Player.PlayerNode;
 
 namespace OrbinautFramework3.Objects.Player.Spawner;
 
 public partial class PlayerSpawner : Sprite2D
 {
-    [Export] private PlayerNode.Types[] _allowedTypes;
+    [Flags] public enum AllowedTypes : byte
+    {
+        Sonic = 1 << Types.Sonic,
+        Tails = 1 << Types.Tails,
+        Knuckles = 1 << Types.Knuckles,
+        Amy = 1 << Types.Amy
+    }
+    
+    [Export] private AllowedTypes _allowedTypes;
     [Export] private Vector2 _cpuOffset;
 
     public override void _Ready()
@@ -19,8 +29,8 @@ public partial class PlayerSpawner : Sprite2D
     {
         if (Scene.Instance.Players.Count > 0) return;
 
-        PlayerNode.Types type = SharedData.PlayerTypes.First();
-        if (!_allowedTypes.Contains(type)) return;
+        Types type = SharedData.PlayerTypes.First();
+        if (!_allowedTypes.HasFlag((AllowedTypes)(1 << (int)type))) return;
 
         Node spawnerParent = GetParent();
         SpawnPlayer(type, spawnerParent, Position);
@@ -32,7 +42,7 @@ public partial class PlayerSpawner : Sprite2D
         }
     }
 
-    private static void SpawnPlayer(PlayerNode.Types type, Node spawnerParent, Vector2 position)
+    private static void SpawnPlayer(Types type, Node spawnerParent, Vector2 position)
     {
         PackedScene packedPlayer = Scene.Instance.PlayerPrefabs.Get(type);
         if (packedPlayer.Instantiate() is not PlayerNode player) return;

@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct CollisionBoxes(PlayerData data)
+public readonly struct CollisionBoxes(PlayerData data)
 {
     public void Update()
     {

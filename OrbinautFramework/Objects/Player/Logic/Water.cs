@@ -9,7 +9,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct Water(PlayerData data, IPlayerLogic logic)
+public readonly struct Water(PlayerData data, IPlayerLogic logic)
 {
     public void Process()
 	{

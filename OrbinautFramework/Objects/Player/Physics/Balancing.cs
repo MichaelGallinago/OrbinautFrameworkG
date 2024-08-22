@@ -10,7 +10,7 @@ using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.Orbin
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Balancing(PlayerData data, IPlayerLogic logic)
+public readonly struct Balancing(PlayerData data, IPlayerLogic logic)
 {
     public void Balance()
 	{

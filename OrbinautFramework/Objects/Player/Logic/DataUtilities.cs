@@ -4,7 +4,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct DataUtilities(PlayerData data)
+public readonly struct DataUtilities(PlayerData data)
 {
     public void ResetState()
     {

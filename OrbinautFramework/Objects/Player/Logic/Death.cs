@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Player.Data;
 namespace OrbinautFramework3.Objects.Player.Logic;
 
 //TODO: check this
-public struct Death(PlayerData data, IPlayerLogic logic)
+public readonly struct Death(PlayerData data, IPlayerLogic logic)
 {
 	public enum States : byte
 	{

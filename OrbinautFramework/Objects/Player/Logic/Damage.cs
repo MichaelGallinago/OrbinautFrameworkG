@@ -10,7 +10,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct Damage(PlayerData data, IPlayerLogic logic)
+public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 {
     public void Kill()
     {

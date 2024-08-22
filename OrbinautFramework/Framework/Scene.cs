@@ -18,8 +18,8 @@ public abstract partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
-    [Export] public PlayerPrefabs PlayerPrefabs { get; init; }
-    [Export] public PackedScene[] DebugModePrefabs { get; init; }
+    [Export] public PlayerPrefabs PlayerPrefabs { get; private set; }
+    [Export] public PackedScene[] DebugModePrefabs { get; private set; }
     
     public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }

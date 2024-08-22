@@ -13,3 +13,5 @@ shader_parameter/u_type = null
 material = SubResource("ShaderMaterial_da42i")
 script = ExtResource("1_5grtg")
 _nextScene = ExtResource("3_ojb80")
+PlayerPrefabs = null
+DebugModePrefabs = null

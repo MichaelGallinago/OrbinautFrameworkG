@@ -5,7 +5,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct AngleRotation(PlayerData data)
+public readonly struct AngleRotation(PlayerData data)
 {
     public void Process()
     {

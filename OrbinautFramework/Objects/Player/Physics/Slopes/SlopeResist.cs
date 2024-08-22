@@ -7,7 +7,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Slopes;
 
-public struct SlopeResist(PlayerData data, IPlayerLogic logic)
+public readonly struct SlopeResist(PlayerData data, IPlayerLogic logic)
 {
     public void Apply()
     {

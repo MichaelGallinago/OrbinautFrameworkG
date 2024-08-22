@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
-public struct Rolling(PlayerData data)
+public readonly struct Rolling(PlayerData data)
 {
     public void Roll()
     {
