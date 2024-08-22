@@ -20,8 +20,6 @@ public class FsmGenerator : IIncrementalGenerator
     private const string FullStateSwitcherAttributeName = $"{GeneratorNamespace}.{StateSwitcherAttributeName}";
     private const string FullAttributeName = $"{GeneratorNamespace}.{AttributeName}";
     
-    private const int FieldOffsetStep = 8;
-    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValueProvider<ImmutableArray<FsmData?>> provider = 
@@ -148,7 +146,6 @@ public class FsmGenerator : IIncrementalGenerator
         sourceBuilder.Append("\nnamespace ").AppendLine(fsmData.Namespace).Append(
 """
 {
-    [StructLayout(LayoutKind.Explicit)]
     public struct 
 """).Append(fsmName);
         
@@ -221,12 +218,11 @@ public class FsmGenerator : IIncrementalGenerator
             }
         }
         
-        [FieldOffset(0)] private States _state = States.None;
+        private States _state = States.None;
 """);
         
-        int offset = FieldOffsetStep;
-        AddDependencyFields(sourceBuilder, constructorTypes, ref offset);
-        AddStatesFields(sourceBuilder, states, offset);
+        AddDependencyFields(sourceBuilder, constructorTypes);
+        AddStatesFields(sourceBuilder, states);
 
         foreach (KeyValuePair<string, Dictionary<string, bool>> method in otherMethods)
         {
@@ -477,23 +473,21 @@ using System.Runtime.InteropServices;
     }
 
     private static void AddDependencyFields(
-        StringBuilder sourceBuilder, Dictionary<string, string> constructorTypes, ref int offset)
+        StringBuilder sourceBuilder, Dictionary<string, string> constructorTypes)
     {
         foreach (KeyValuePair<string, string> type in constructorTypes)
         {
-            sourceBuilder.Append("\n\t\t[FieldOffset(").Append(offset).Append(")] private ").Append(type.Value)
+            sourceBuilder.Append("\n\t\tprivate ").Append(type.Value)
                 .Append(" _").Append(type.Key).Append(" = ").Append(type.Key).Append(';');
-            offset += FieldOffsetStep;
         }
     }
 
-    private static void AddStatesFields(StringBuilder sourceBuilder, StructDeclarationSyntax[] structs, int offset)
+    private static void AddStatesFields(StringBuilder sourceBuilder, StructDeclarationSyntax[] structs)
     {
-        var line = $"\n\t\t[FieldOffset({offset.ToString()})] private ";
         foreach (StructDeclarationSyntax? structDeclaration in structs)
         {
             string name = structDeclaration.Identifier.Text;
-            sourceBuilder.Append(line).Append(name).Append(' ').Append(name).Append(";");
+            sourceBuilder.Append("\n\t\tprivate ").Append(name).Append(' ').Append(name).Append(";");
         }
     }
     

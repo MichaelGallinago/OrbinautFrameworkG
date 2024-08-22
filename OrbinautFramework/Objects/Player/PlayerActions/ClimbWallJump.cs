@@ -6,7 +6,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct ClimbWallJump(PlayerData data)
+public readonly struct ClimbWallJump(PlayerData data)
 {
     public States Process()
     {

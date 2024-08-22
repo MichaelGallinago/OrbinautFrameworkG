@@ -1,23 +1,48 @@
 ﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public struct GlideGround(PlayerData data, IPlayerLogic logic)
 {
+    private readonly GlideCollisionLogic _collision = new(data, logic);
     private float _dustTimer;
     
-    public void Perform()
+    public States Perform()
     {
         UpdateGroundVelocityX();
         
-        if (StopSliding()) return;
+        if (StopSliding()) return States.Default;
         SpawnDustParticles();
+        return States.GlideGround;
+    }
+    
+    public States LatePerform()
+    {
+        _collision.CollideWallsAndCeiling(out Angles.Quadrant moveQuadrant);
+
+        return moveQuadrant != Angles.Quadrant.Up && !SlideOnFloor() ? States.GlideFall : States.GlideGround;
+    }
+    
+    private bool SlideOnFloor()
+    {
+        Vector2I radius = data.Collision.Radius;
+        (int floorDistance, float floorAngle) = logic.TileCollider.FindClosestTile(
+            -radius.X, radius.Y, radius.X, radius.Y, true, Constants.Direction.Positive);
+	
+        if (floorDistance > 14) return false;
+			
+        data.Node.Position += new Vector2(0f, floorDistance);
+        data.Movement.Angle = floorAngle;
+        return true;
     }
     
     private void UpdateGroundVelocityX()

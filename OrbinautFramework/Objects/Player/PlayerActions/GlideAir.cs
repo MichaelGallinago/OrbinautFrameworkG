@@ -14,8 +14,10 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 [FsmSourceGenerator.FsmState("Action")]
 public struct GlideAir(PlayerData data, IPlayerLogic logic)
 {
+	private readonly GlideCollisionLogic _collision = new(data, logic);
+	
 	private float _glideAngle = data.Visual.Facing == Constants.Direction.Negative ? 0f : 180f;
-	// data.Physics.GroundSpeed - glide speed
+	//TODO: data.Physics.GroundSpeed - glide speed
 
 	public void Enter()
 	{
@@ -50,17 +52,17 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 
 	private void UpdateSpeed()
 	{
-		const float glideAcceleration = 0.03125f;
-		
-		if (data.Movement.GroundSpeed < 4f)
+		AcceleratedValue groundSpeed = data.Movement.GroundSpeed;
+		if (groundSpeed < 4f)
 		{
-			data.Movement.GroundSpeed.Acceleration = glideAcceleration;
+			const float glideAcceleration = 0.03125f;
+			groundSpeed.Acceleration = glideAcceleration;
 			return;
 		}
 
 		if (_glideAngle % 180f != 0f) return;
-		data.Movement.GroundSpeed.Acceleration = data.Physics.AccelerationGlide;
-		data.Movement.GroundSpeed.SetMin(24f);
+		groundSpeed.Acceleration = data.Physics.AccelerationGlide;
+		groundSpeed.SetMin(24f);
 	}
 	
 	private void TurnAroundAir()
@@ -90,7 +92,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			}
 			
 			_glideAngle += speed;
-
+			
 			if (_glideAngle > 180f)
 			{
 				_glideAngle = 180f;
@@ -128,152 +130,37 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		}
 	}
 	
-	public void LatePerform()
+	public States LatePerform()
 	{
-		var climbY = (int)data.Node.Position.Y;
-		var collisionFlagWall = false;
-		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
-
-		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+		(bool isWallCollided, int wallRadius) = _collision.CollideWallsAndCeiling(out Angles.Quadrant moveQuadrant);
 		
-		if (moveQuadrant != Angles.Quadrant.Right)
+		if (moveQuadrant != Angles.Quadrant.Up && _collision.CollideFloor())
 		{
-			collisionFlagWall |= CollideWalls(wallRadius, Constants.Direction.Negative);
+			Land();
+			return States.GlideGround;
 		}
 		
-		if (moveQuadrant != Angles.Quadrant.Left)
-		{
-			collisionFlagWall |= CollideWalls(wallRadius, Constants.Direction.Positive);
-		}
-		
-		collisionFlagWall |= CollideCeiling(wallRadius, moveQuadrant);
-		
-		if (moveQuadrant != Angles.Quadrant.Up && CollideFloor())
-		{
-			LandWhenGlide();
-		}
-		else if (collisionFlagWall)
-		{
-			AttachToWall(wallRadius, climbY);
-		}
+		return isWallCollided ? AttachToWall(wallRadius, (int)data.Node.Position.Y) : States.Default;
 	}
-
-	private bool CollideWalls(int wallRadius, Constants.Direction direction)
-	{
-		var sing = (int)direction;
-		int wallDistance = logic.TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
-
-		if (wallDistance >= 0) return false;
-		
-		data.Node.Position += new Vector2(sing * wallDistance, 0f);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		data.Movement.Velocity.X = 0f;
-		return true;
-	}
-
-	private bool CollideCeiling(int wallRadius, Angles.Quadrant moveQuadrant)
-	{
-		if (moveQuadrant == Angles.Quadrant.Down) return false;
-
-		Vector2I radius = data.Collision.Radius;
-		int roofDistance = logic.TileCollider.FindClosestDistance(
-			-radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative);
-
-#if S3_PHYSICS || SK_PHYSICS
-		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14)
-		{
-			// Perform right wall collision instead if moving mostly left and too far into the ceiling
-			return CollideWalls(wallRadius, Constants.Direction.Positive);
-		}
-#endif
-
-		if (roofDistance >= 0) return false;
-		
-		data.Node.Position -= new Vector2(0f, roofDistance);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		if (data.Movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
-		{
-			data.Movement.Velocity.Y = 0f;
-		}
-		return false;
-	}
-
-	private bool CollideFloor()
-	{
-		(int floorDistance, float floorAngle) = logic.TileCollider.FindClosestTile(
-			-data.Collision.Radius.X, data.Collision.Radius.Y, data.Collision.Radius.X, data.Collision.Radius.Y,
-			true, Constants.Direction.Positive);
 	
-		if (_glideState == GlideStates.Ground)
-		{
-			if (floorDistance > 14)
-			{
-				data.State = States.GlideFall;
-				return false;
-			}
-			
-			data.Node.Position += new Vector2(0f, floorDistance);
-			data.Movement.Angle = floorAngle;
-			return false;
-		}
-
-		if (floorDistance >= 0) return false;
-		
-		data.Node.Position += new Vector2(0f, floorDistance);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		data.Movement.Angle = floorAngle;
-		data.Movement.Velocity.Y = 0f;
-		return true;
-	}
-
-	private void LandWhenGlide()
+	private void Land()
 	{
-		switch (_glideState)
+		MovementData movement = data.Movement;
+		if (Angles.GetQuadrant(movement.Angle) != Angles.Quadrant.Down)
 		{
-			case GlideStates.Air: LandAir(); break;
-			case GlideStates.Fall: LandFall(); break;
-		}
-	}
-
-	private void LandAir()
-	{
-		if (Angles.GetQuadrant(data.Movement.Angle) != Angles.Quadrant.Down)
-		{
-			data.Movement.GroundSpeed.Value = data.Movement.Angle < 180 ? 
-				data.Movement.Velocity.X : -data.Movement.Velocity.X;
+			movement.GroundSpeed.Value = movement.Angle < 180 ? movement.Velocity.X : -movement.Velocity.X;
 			
 			logic.Land();
 			return;
 		}
 				
 		data.Sprite.Animation = Animations.GlideGround;
-		data.State = States.GlideGround;
-		data.Movement.Gravity = 0f;
-	}
-
-	private void LandFall()
-	{
-		AudioPlayer.Sound.Play(SoundStorage.Land);
-		logic.Land();
-		
-		if (Angles.GetQuadrant(data.Movement.Angle) != Angles.Quadrant.Down)
-		{
-			data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
-			return;
-		}
-					
-		data.Sprite.Animation = Animations.GlideLand;
-		data.Movement.GroundLockTimer = 16f;
-		data.Movement.GroundSpeed.Value = 0f;
-		data.Movement.Velocity.X = 0f;
+		movement.Gravity = 0f;
 	}
 
 	private States AttachToWall(int wallRadius, int climbY)
 	{
-		if (_glideState != (int)GlideStates.Air) return;
-
-		CheckCollisionOnAttaching(wallRadius, climbY);
+		if (CheckCollisionOnAttaching(wallRadius, climbY)) return States.GlideFall;
 			
 		if (data.Visual.Facing == Constants.Direction.Negative)
 		{
@@ -292,14 +179,14 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		return isWallJump ? States.ClimbWallJump : States.Climb;
 	}
 	
-	private void CheckCollisionOnAttaching(int wallRadius, int climbY)
+	private bool CheckCollisionOnAttaching(int wallRadius, int climbY)
 	{
 		// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he
 		// is either inside the ceiling or above the floor edge
 		logic.TileCollider.Position = logic.TileCollider.Position with { Y = climbY - data.Collision.Radius.Y };
-		
-		if (logic.TileCollider.FindDistance(
-			    wallRadius * (int)data.Visual.Facing, 0, false, data.Visual.Facing) == 0) return;
+
+		Constants.Direction facing = data.Visual.Facing;
+		if (logic.TileCollider.FindDistance(wallRadius * (int)facing, 0, false, facing) == 0) return false;
 		
 		// The game casts a vertical sensor now in front of Knuckles, facing downwards. If the distance
 		// returned is negative, Knuckles is inside the ceiling, else he is above the edge
@@ -308,15 +195,12 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		// LBR tiles are not ignored in this case
 		logic.TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
 		int floorDistance = logic.TileCollider.FindDistance(
-			(wallRadius + 1) * (int)data.Visual.Facing, -1, true, Constants.Direction.Positive);
-				
-		if (floorDistance is < 0 or >= 12)
-		{
-			data.State = States.GlideFall;
-			return;
-		}
-		
+			(wallRadius + 1) * (int)facing, -1, true, Constants.Direction.Positive);
+
+		if (floorDistance is < 0 or >= 12) return true;
+
 		// Adjust Knuckles' y-position to place him just below the edge
 		data.Node.Position += new Vector2(0f, floorDistance);
+		return false;
 	}
 }
