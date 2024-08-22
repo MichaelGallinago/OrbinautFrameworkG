@@ -3,7 +3,7 @@
 namespace OrbinautFramework3.Objects.Player.PlayerActions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Carried(PlayerData data)
+public struct Carried(PlayerData data) //TODO: carry
 {
     
 }

@@ -19,7 +19,7 @@ public class PlayerLogic : IPlayer
     public DataUtilities DataUtilities { get; }
     public ObjectInteraction ObjectInteraction { get; }
     
-    private Carry _carry;
+    //private Carry _carry; //TODO: carry
     private Death _death;
     private Water _water;
     private Status _status;
@@ -47,7 +47,7 @@ public class PlayerLogic : IPlayer
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
-        _carry = new Carry(Data, this);
+        //_carry = new Carry(Data, this); //TODO: carry
         _death = new Death(Data, this);
         _water = new Water(Data, this);
         _status = new Status(Data, this);
@@ -119,6 +119,6 @@ public class PlayerLogic : IPlayer
         _physicsCore.ProcessCorePhysics();
         
         _actionFsm.LatePerform();
-        _carry.Process();
+        //_carry.Process(); TODO: carry
     }
 }

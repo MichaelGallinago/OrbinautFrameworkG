@@ -8,7 +8,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
-public struct Air(PlayerData data, IPlayerLogic logic)
+public readonly struct Air(PlayerData data, IPlayerLogic logic)
 {
 	public void Move()
 	{
