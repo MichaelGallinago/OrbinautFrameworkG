@@ -166,8 +166,6 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		{
 			data.Node.Position += Vector2.Right;
 		}
-
-		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
 		
 		data.Sprite.Animation = Animations.ClimbWall;
 		data.Movement.GroundSpeed.Value = 0f;
@@ -176,6 +174,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			
 		AudioPlayer.Sound.Play(SoundStorage.Grab);
 		
+		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
 		return isWallJump ? States.ClimbWallJump : States.Climb;
 	}
 	

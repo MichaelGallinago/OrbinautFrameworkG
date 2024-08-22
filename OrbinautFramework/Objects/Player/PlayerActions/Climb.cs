@@ -12,14 +12,9 @@ namespace OrbinautFramework3.Objects.Player.PlayerActions;
 public struct Climb(PlayerData data, IPlayerLogic logic)
 {
 	private const int StepsPerClimbFrame = 4;
+
+	private float _animationValue = 0f;
 	
-	private float _animationValue;
-
-	public void Enter()
-	{
-		
-	}
-
 	public States Perform()
     {
 	    if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X)) return Release(); 
