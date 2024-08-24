@@ -4,9 +4,11 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <PropertyGroup>
+    <!-- Physics and CPU type constants. Select only one per group -->
+    <!-- DO NOT REMOVE "$(DefineConstants);", otherwise the Godot constants will be overwritten -->
     <!-- S2_CPU S3_CPU -->
     <!-- S1_PHYSICS CD_PHYSICS S2_PHYSICS S3_PHYSICS SK_PHYSICS -->
-    <DefineConstants>S3_CPU;S2_PHYSICS</DefineConstants>
+    <DefineConstants>$(DefineConstants);S3_CPU;S2_PHYSICS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.6.1-beta.1">
