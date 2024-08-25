@@ -50,7 +50,7 @@ public partial class FallingFloorSpawner : Sprite2D
         Scale = new Vector2(((Vector2)value).X >= 0f ? 1f : -1f, 1f);
         return true;
     }
-
+    
     public override string[] _GetConfigurationWarnings() => Texture == null ? ["Please set `Texture`."] : [];
 
     private void CreatePiecesTextures()
@@ -97,7 +97,7 @@ public partial class FallingFloorSpawner : Sprite2D
         };
         
         floor.AddChild(sprite);
-        floor.SetSolid(_collisionRadius);
+        floor.SolidBox.Set(_collisionRadius);
         
         parent.CallDeferred("add_child", floor);
     }

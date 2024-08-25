@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Framework;
 
 public abstract partial class Stage : Scene
 {
-    public new static Stage Local { get; private set; }
+    public static Stage Local { get; private set; } //TODO: singleton
     
     public string ZoneName { get; set; } = "UNKNOWN";
     public byte ActId { get; set; }

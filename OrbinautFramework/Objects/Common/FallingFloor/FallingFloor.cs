@@ -1,14 +1,15 @@
 using Godot;
 using Godot.Collections;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Piece;
 
 namespace OrbinautFramework3.Objects.Common.FallingFloor;
 
 using Player;
 
-public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : BaseObject
+public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : SolidNode
 {
     private enum States : byte
     {
@@ -38,7 +39,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
                 
         if (!_isTouched || _stateTimer > 0f)
         {
-            _stateTimer -= Scene.Local.ProcessSpeed;
+            _stateTimer -= Scene.Instance.ProcessSpeed;
             return;
         }
         
@@ -48,24 +49,24 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
     private void HandlePlayerOnCollapse()
     {
         // When falling apart, act as solid only for the players already standing on the object
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (!CheckSolidCollision(player, Constants.CollisionSensor.Top)) continue;
+            if (!player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top)) continue;
             player.ActSolid(this, Constants.SolidType.Top);
         }
-			
+        
         if (_stateTimer > 0f)
         {
-            _stateTimer -= Scene.Local.ProcessSpeed;
+            _stateTimer -= Scene.Instance.ProcessSpeed;
             return;
         }
 			
         // Release all players from this object
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player.OnObject != this) continue;
-            player.OnObject = null;
-            player.IsGrounded = false;
+            if (player.Data.Collision.OnObject != SolidBox) continue;
+            player.Data.Movement.IsGrounded = false;
+            player.Data.Collision.OnObject = null;
         }
 
         _state = States.Fallen;
@@ -73,12 +74,12 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
 
     private void CheckTarget()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             player.ActSolid(this, Constants.SolidType.Top);
 			
             if (_isTouched) continue;
-            _isTouched = CheckSolidCollision(player, Constants.CollisionSensor.Top);
+            _isTouched = player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top);
         }
     }
 
@@ -105,7 +106,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
             }
         }
 
-        Culling = CullingType.Reset;
+        CullingType = ICullable.Types.Reset;
         //TODO: audio
         //AudioPlayer.PlaySound(SoundStorage.Break);
 		

@@ -24,10 +24,10 @@ public partial class SceneContinuousUpdate : Node
 
     private void UpdatePause()
     {
-        if (!Scene.Local.AllowPause || !InputUtilities.Press[0].Start) return;
+        if (!Scene.Instance.AllowPause || !InputUtilities.Press[0].Start) return;
         
-        bool isPause = Scene.Local.State != Scene.States.Paused;
-        Scene.Local.State = isPause ? Scene.States.Paused : Scene.States.Normal;
+        bool isPause = Scene.Instance.State != Scene.States.Paused;
+        Scene.Instance.State = isPause ? Scene.States.Paused : Scene.States.Normal;
         _sceneTree.Paused = isPause;
         AudioPlayer.SetPauseState(isPause);
     }

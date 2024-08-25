@@ -1,8 +1,7 @@
 using Godot;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.ForceSpinTrigger;
-
-using Player;
 
 public partial class ForceSpinTriggerVertical : ForceSpinTrigger
 {
@@ -12,11 +11,11 @@ public partial class ForceSpinTriggerVertical : ForceSpinTrigger
         Borders += Vector2.One * Position.X;
     }
     
-    protected override bool CheckForcePlayerSpin(Player player)
+    protected override bool CheckForcePlayerSpin(IPlayer player)
     {
-        var playerPosition = (Vector2I)player.Position;
+        var playerPosition = (Vector2I)player.Data.Node.Position;
 		
         if (playerPosition.X < Borders.X || playerPosition.X >= Borders.Y) return false;
-        return (int)player.PreviousPosition.Y >= Position.Y != playerPosition.Y >= Position.Y;
+        return (int)player.Data.Node.PreviousPosition.Y >= Position.Y != playerPosition.Y >= Position.Y;
     }
 }

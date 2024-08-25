@@ -1,0 +1,91 @@
+﻿using Godot;
+using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
+
+namespace OrbinautFramework3.Objects.Player.PlayerActions;
+
+public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) //TODO: refactor this somehow????
+{
+	public bool CollideFloor()
+	{
+		Vector2I radius = data.Collision.Radius;
+		(int floorDistance, float floorAngle) = logic.TileCollider.FindClosestTile(
+			-radius.X, radius.Y, radius.X, radius.Y, true, Constants.Direction.Positive);
+
+		if (floorDistance >= 0) return false;
+		
+		data.Node.Position += new Vector2(0f, floorDistance);
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
+		data.Movement.Angle = floorAngle;
+		data.Movement.Velocity.Y = 0f;
+		return true;
+	}
+	
+    public (bool, int) CollideWallsAndCeiling(out Angles.Quadrant moveQuadrant)
+	{
+		var isWallCollided = false;
+		int wallRadius = data.Collision.RadiusNormal.X + 1;
+		moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
+
+		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+		
+		if (moveQuadrant != Angles.Quadrant.Right)
+		{
+			isWallCollided |= CollideWalls(wallRadius, Constants.Direction.Negative);
+		}
+		
+		if (moveQuadrant != Angles.Quadrant.Left)
+		{
+			isWallCollided |= CollideWalls(wallRadius, Constants.Direction.Positive);
+		}
+
+		if (moveQuadrant == Angles.Quadrant.Down) return (isWallCollided, wallRadius);
+		
+		int roofDistance = GetRoofDistance();
+#if S3_PHYSICS || SK_PHYSICS
+		if (moveQuadrant == Angles.Quadrant.Left && roofDistance <= -14)
+		{
+			// Perform right wall collision instead if moving mostly left and too far into the ceiling
+			isWallCollided |= CollideWalls(wallRadius, Constants.Direction.Positive);
+			return (isWallCollided, wallRadius);
+		}
+#endif
+		CollideCeiling(roofDistance, moveQuadrant);
+
+		return (isWallCollided, wallRadius);
+	}
+
+	private bool CollideWalls(int wallRadius, Constants.Direction direction)
+	{
+		var sing = (int)direction;
+		int wallDistance = logic.TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
+
+		if (wallDistance >= 0) return false;
+		
+		data.Node.Position += new Vector2(sing * wallDistance, 0f);
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
+		data.Movement.Velocity.X = 0f;
+		return true;
+	}
+	
+	private void CollideCeiling(int roofDistance, Angles.Quadrant moveQuadrant)
+	{
+		if (roofDistance >= 0) return;
+		
+		data.Node.Position -= new Vector2(0f, roofDistance);
+		logic.TileCollider.Position = (Vector2I)data.Node.Position;
+		if (data.Movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
+		{
+			data.Movement.Velocity.Y = 0f;
+		}
+	}
+
+	private int GetRoofDistance()
+	{
+		Vector2I radius = data.Collision.Radius;
+		return logic.TileCollider.FindClosestDistance(
+			-radius.X, -radius.Y, radius.X, -radius.Y, true, Constants.Direction.Negative);
+	}
+}

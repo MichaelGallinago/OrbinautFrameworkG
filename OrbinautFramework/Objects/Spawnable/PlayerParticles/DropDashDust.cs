@@ -1,15 +1,13 @@
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Spawnable.PlayerParticles;
 
-public partial class DropDashDust : BaseObject
+public partial class DropDashDust : OrbinautNode
 {
     [Export] private AnimatedSprite2D _sprite;
     
-    public override void _Ready()
-    {
-        //TODO: setup
-        _sprite.AnimationFinished += QueueFree;
-    }
+    //TODO: setup
+    public override void _Ready() => _sprite.AnimationFinished += QueueFree;
 }

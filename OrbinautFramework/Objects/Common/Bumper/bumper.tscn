@@ -1,9 +1,17 @@
-[gd_scene load_steps=9 format=3 uid="uid://b8uvs02jxyk0t"]
+[gd_scene load_steps=11 format=3 uid="uid://b8uvs02jxyk0t"]
 
 [ext_resource type="Script" path="res://Objects/Common/Bumper/Bumper.cs" id="1_ur7uk"]
+[ext_resource type="Script" path="res://Framework/ObjectBase/HitBox.cs" id="2_idqse"]
 [ext_resource type="Texture2D" uid="uid://ecpnf5viy4s1" path="res://Objects/Common/Bumper/bumper.png" id="3_3buyg"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="4_thiwj"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedAnimatedSprite.cs" id="5_wqvxw"]
+
+[sub_resource type="Resource" id="Resource_2gt8y"]
+script = ExtResource("2_idqse")
+Radius = Vector2i(8, 8)
+Offset = Vector2i(0, 0)
+RadiusExtra = Vector2i(0, 0)
+OffsetExtra = Vector2i(0, 0)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q0eh2"]
 atlas = ExtResource("3_3buyg")
@@ -50,7 +58,8 @@ _cullSize = Vector2i(0, 0)
 z_index = -1
 script = ExtResource("1_ur7uk")
 _sprite = NodePath("AdvancedAnimatedSprite")
-Culling = 6
+HitBox = SubResource("Resource_2gt8y")
+CullingType = 6
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_mun1y")

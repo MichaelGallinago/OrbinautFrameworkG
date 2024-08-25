@@ -20,3 +20,15 @@ Generated/
 # AudioStorageSourceGenerator compilations ignores
 AudioStorageSourceGenerator/bin/
 AudioStorageSourceGenerator/obj/
+AudioStorageSourceGenerator/.idea/
+
+# ActionSourceGenerator compilations ignores
+FsmSourceGenerator/bin/
+FsmSourceGenerator/obj/
+FsmSourceGenerator/.idea/
+
+# Rider-specific ignores
+.idea/
+
+# VisualStudio-specific ignores
+.vs/

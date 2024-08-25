@@ -1,24 +1,26 @@
 using System;
 using Godot;
-using OrbinautFramework3.Objects.Player;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.MultiTypeDelegate;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework;
 
-public abstract partial class Scene : Node2D
+public partial class Scene : Node2D
 {
     public enum States : byte
     {
         Normal, StopObjects, Paused
     }
     
-    public static Scene Local { get; private set; }
+    public static Scene Instance { get; private set; }
     
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
-
+    [Export] public PlayerPrefabs PlayerPrefabs { get; private set; }
+    [Export] public PackedScene[] DebugModePrefabs { get; private set; }
+    
     public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }
     
@@ -32,30 +34,55 @@ public abstract partial class Scene : Node2D
     public States State { get; set; } = States.Normal;
     public float Time { get; set; }
     
+    public IMultiTypeEvent<ITypeDelegate> FrameEndProcess { get; }
+    
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
-    private SceneLateUpdate _lateUpdate = new();
+    private SceneFrameEnd _frameEnd = new();
+    
+#if DEBUG
     private Debug _debug = new();
+#endif
     
-    protected Scene() => ProcessPriority = int.MinValue;
-    
+    protected Scene()
+    {
+        FrameEndProcess = _frameEnd.Process;
+        ProcessPriority = int.MinValue;
+    }
+
     public override void _Ready()
     {
         AddChild(_sceneContinuousUpdate);
-        AddChild(_lateUpdate);
-        AddChild(_debug);
-
+        AddChild(_frameEnd);
+        
         Tree = GetTree();
 
         AttachCamerasToPlayer();
+        
+#if DEBUG
+        AddChild(_debug);
+#endif
     }
     
-    public override void _EnterTree() => Local = this;
-    public override void _ExitTree() => Local = null;
+    public override void _EnterTree()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            return;
+        }
+        
+        QueueFree();
+    }
+
+    public override void _ExitTree()
+    {
+        if (Instance != this) return;
+        Instance = null;
+    }
 
     public override void _Process(double deltaTime)
     {
-        ProcessSpeed = Engine.MaxFps > 60 || Engine.MaxFps == 0 ? 
-            Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate)) : 1f;
+        ProcessSpeed = Engine.MaxFps is <= 60 and > 0 ? 1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
         
         if (State != States.Paused)
         {
@@ -64,15 +91,10 @@ public abstract partial class Scene : Node2D
         
         Culler.EarlyCull();
         
-        foreach (BaseObject objects in Culler.ActiveObjects)
+        foreach (IPlayer player in Players.Values)
         {
-            objects.PreviousPosition = objects.Position;
-        }
-        
-        foreach (Player player in Players.Values)
-        {
-            player.TouchObjects.Clear();
-            player.PushObjects.Clear();
+            player.Data.Collision.TouchObjects.Clear();
+            player.Data.Collision.PushObjects.Clear();
         }
     }
     
@@ -85,7 +107,7 @@ public abstract partial class Scene : Node2D
         int count = Math.Min(cameras.Length, Players.Count);
         for (var i = 0; i < count; i++)
         {
-            cameras[i].Target = Players.Values[i];
+            cameras[i].Target = Players.Values[i].Data;
         }
     }
 }

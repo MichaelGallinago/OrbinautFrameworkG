@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFramework3.Objects.Common.GiantRing;
 using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Framework;
@@ -12,7 +13,6 @@ public static class SharedData
     private static Vector2I _viewSize = new(400, 224);
     public static byte WindowScale { get; set; } = 2;
     public static int TargetFps { get; set; } = 165;
-    public static bool DevMode { get; set; } = true;
     public static bool ShowSplash { get; set; } = false;
     public static float MusicVolume { get; set; } = 0.5f;
     public static float SoundVolume { get; set; } = 0.5f;
@@ -25,8 +25,6 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
 	
     // Originals differences
-    public static PhysicsTypes PlayerPhysics { get; set; } = PhysicsTypes.S2;
-    public static CpuBehaviours CpuBehaviour { get; set; } = CpuBehaviours.S3;
     public static bool SpinDash { get; set; } = true;
     public static bool Dash { get; set; } = true;
     public static bool DropDash { get; set; } = true;
@@ -41,7 +39,6 @@ public static class SharedData
     public static bool NoSpeedCap { get; set; } = true;
     public static bool FixJumpSize { get; set; } = true;
     public static bool FixDashRelease { get; set; } = true;
-    public static bool FlightCancel { get; set; } = true;
     public static bool BetterSolidCollision { get; set; } = false;
     public static bool NoCameraCap { get; set; } = false;
     
@@ -52,8 +49,8 @@ public static class SharedData
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
-    public static Types PlayerType { get; set; } = Types.Sonic;
-    public static Types PlayerTypeCpu { get; set; } = Types.Tails;
+    public static int RealPlayerCount { get; set; } = 1;
+    public static PlayerNode.Types[] PlayerTypes { get; set; } = [PlayerNode.Types.Sonic, PlayerNode.Types.Tails];
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;
     
@@ -106,5 +103,11 @@ public static class SharedData
 	    PlayerShield = ShieldContainer.Types.None;
 	    PlayerRings = 0;
 	    LifeRewards = Vector2I.Zero;
+    }
+    
+    private static ReadOnlySpan<uint> ComboScoreValues => [10, 100, 200, 500, 1000, 10000];
+    public static void IncreaseComboScore(int comboCounter = 0)
+    {
+	    ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
     }
 }

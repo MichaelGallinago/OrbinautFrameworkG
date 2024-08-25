@@ -1,23 +1,24 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player.Data;
+using SolidNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.SolidNode;
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
-using Player;
-
-public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : BaseObject
+public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : SolidNode
 {
+	private int _width;
+	private int _maxDip;
+	private float _angle;
     private int _activeLogId;
-    private int _maxDip;
-    private float _angle;
-    private int _width;
 
     private Vector2[] _logPositions;
-    private int[] _dip;
     private int _logSizeHalf;
+    private int[] _dip;
 
+    public Bridge() : this(null, 0, 0) {}
+    
     public override void _Ready()
     {
         _width = logAmount * logSize;
@@ -31,13 +32,12 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
             _logPositions[i] = new Vector2(logSize * i - halfWidth, 0f);
             _dip[i] = (i < logAmount / 2 ? i + 1 : logAmount - i) * 2;
         }
-
+        
         // Player should not balance on this object
-        SolidData.NoBalance = true;
+        SolidBox.NoBalance = true;
 
         // Properties
-        SetSolid(new Vector2I(logAmount * _logSizeHalf, _logSizeHalf));
-        Culling = CullingType.Reset;
+        SolidBox.Set(logAmount * _logSizeHalf, _logSizeHalf);
     }
     
     public override void _Process(double delta)
@@ -45,11 +45,11 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
 
-	    foreach (Player player in Scene.Local.Players.Values)
+	    foreach (IPlayer player in Scene.Instance.Players.Values)
 	    {
 		    player.ActSolid(this, Constants.SolidType.Top);
 		    
-		    if (!CheckSolidCollision(player, Constants.CollisionSensor.Top)) continue;
+		    if (!player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top)) continue;
 			
 		    isPlayerTouch = true;
 			
@@ -66,12 +66,12 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 			    maxDip = _maxDip;
 		    }
 			
-		    player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))) + 1f);
+		    player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))));
 	    }
 
 	    UpdateLogPositions();
 
-	    UpdateAngle(isPlayerTouch, Scene.Local.ProcessSpeed);
+	    UpdateAngle(isPlayerTouch, Scene.Instance.ProcessSpeed);
 		
 	    QueueRedraw();
     }

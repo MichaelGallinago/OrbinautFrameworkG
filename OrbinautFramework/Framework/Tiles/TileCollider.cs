@@ -4,7 +4,7 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Framework.Tiles;
 
-public struct TileCollider
+public class TileCollider
 {
 	private const string BinariesPath = "res://Collisions/Binaries/";
 	private const int MaxDistance = TileSize * 2;
@@ -27,8 +27,8 @@ public struct TileCollider
 	    {
 		    _tileMap = value switch
 		    {
-			    TileLayers.Main => Scene.Local.CollisionTileMapMain,
-			    TileLayers.Secondary => Scene.Local.CollisionTileMapSecondary,
+			    TileLayers.Main => Scene.Instance.CollisionTileMapMain,
+			    TileLayers.Secondary => Scene.Instance.CollisionTileMapSecondary,
 			    _ => null
 		    };
 	    }

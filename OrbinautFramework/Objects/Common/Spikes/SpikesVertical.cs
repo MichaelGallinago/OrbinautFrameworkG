@@ -1,15 +1,17 @@
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
-using Player;
-
 public partial class SpikesVertical : Spikes
 {
-    protected override void CollideWithPlayer(Player player)
+    protected override void CollideWithPlayer(IPlayer player)
     {
-        player.ActSolid(this, player.IsInvincible ? Constants.SolidType.Full : Constants.SolidType.FullReset);
+        Constants.SolidType solidType = player.Data.Damage.IsInvincible ? 
+            Constants.SolidType.Full : Constants.SolidType.FullReset;
+        
+        player.ActSolid(this, solidType);
     }
 
     protected override Vector2 GetRetractOffsetVector(float retractOffset) => new(0f, retractOffset);

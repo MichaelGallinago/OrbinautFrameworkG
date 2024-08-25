@@ -1,9 +1,10 @@
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using CullableNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.CullableNode;
 
 namespace OrbinautFramework3.Objects.Common.AirBubbler;
 
-public partial class AirBubbler : BaseObject
+public partial class AirBubbler : CullableNode
 {
     private int _state;
     private byte _waitTime;

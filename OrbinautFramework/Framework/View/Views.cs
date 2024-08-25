@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.View;
 
 public partial class Views : Control
 {
-    public static Views Local => Scene.Local.Views;
+    public static Views Instance => Scene.Instance.Views;
 
     public event Action<int> OnViewNumberChanged;
     
@@ -28,7 +28,7 @@ public partial class Views : Control
     [Export] private PackedScene _packedViewContainer;
     
     public ReadOnlySpan<ICamera> Cameras => _cameras;
-    public Dictionary<BaseObject, ICamera> TargetedCameras { get; } = [];
+    public Dictionary<IPosition, ICamera> TargetedCameras { get; } = [];
     public ICamera BottomCamera { get; private set; }
     
     private Camera[] _cameras;
@@ -39,11 +39,11 @@ public partial class Views : Control
     {
         CreateViews();
         AttachCamerasToPlayers();
-        
-        // TODO: check for memory leak
-        SharedData.ViewSizeChanged += OnViewSizeChanged;
         OnViewSizeChanged(SharedData.ViewSize);
     }
+    
+    public override void _EnterTree() => SharedData.ViewSizeChanged += OnViewSizeChanged;
+    public override void _ExitTree() => SharedData.ViewSizeChanged -= OnViewSizeChanged;
 
     private void OnViewSizeChanged(Vector2I viewSize)
     {
@@ -100,7 +100,7 @@ public partial class Views : Control
     
     private void AttachCamerasToPlayers()
     {
-        ReadOnlySpan<Player> players = Scene.Local.Players.Values;
+        ReadOnlySpan<IPlayer> players = Scene.Instance.Players.Values;
         int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {
@@ -140,7 +140,7 @@ public partial class Views : Control
             var viewContainer = _packedViewContainer.Instantiate<ViewContainer>();
             _cameras[i] = viewContainer.Camera;
             _containers[i] = viewContainer;
-            viewContainer.SubViewport.SetWorld2D(Scene.Local.GetWorld2D());
+            viewContainer.SubViewport.SetWorld2D(Scene.Instance.GetWorld2D());
             boxContainer.AddChild(viewContainer);
         }
     }

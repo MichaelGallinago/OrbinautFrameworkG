@@ -17,12 +17,11 @@ public class PlayerContainer
     private readonly int _busIndex;
     private float _busMuteSpeed;
 
-    public PlayerContainer(ICollection<AudioStreamPlayer> players, byte playersLimit)
+    public PlayerContainer(IEnumerable<AudioStreamPlayer> players, byte playersLimit)
     {
         _freePlayers = new Stack<AudioStreamPlayer>(players);
         _volumeChangeList = new Dictionary<AudioStreamPlayer, (float speed, bool stop)>(_freePlayers.Count);
         _activePlayers = new Dictionary<AudioStream, AudioStreamPlayer>(_freePlayers.Count);
-        players.Clear();
         
         foreach (AudioStreamPlayer soundPlayer in _freePlayers)
         {
@@ -121,7 +120,7 @@ public class PlayerContainer
         foreach (AudioStreamPlayer player in _volumeChangeList.Keys)
         {
             (float speed, bool stop) data = _volumeChangeList[player];
-            player.VolumeDb += Scene.Local.ProcessSpeed * data.speed;
+            player.VolumeDb += Scene.Instance.ProcessSpeed * data.speed;
             
             switch (player.VolumeDb)
             {

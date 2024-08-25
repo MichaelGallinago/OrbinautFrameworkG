@@ -2,14 +2,13 @@ using System;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
-using Player;
-
-public abstract partial class Spikes : BaseObject
+public abstract partial class Spikes : SolidNode
 {
     [Export] public bool IsMoving { get; set; }
     
@@ -32,8 +31,6 @@ public abstract partial class Spikes : BaseObject
         _rectangle = _sprite.GetRect();
 
         Vector2 size = _rectangle.Size.Abs() * Scale;
-        
-        SetSolid((Vector2I)size / 2);
         GetDirectionSpecificData(size).Deconstruct(out _isFlipped, out _sensor, out _retractDistance);
     }
 
@@ -47,21 +44,21 @@ public abstract partial class Spikes : BaseObject
         CollideWithPlayers();
     }
 
-    protected abstract void CollideWithPlayer(Player player);
+    protected abstract void CollideWithPlayer(IPlayer playerNode);
     protected abstract Vector2 GetRetractOffsetVector(float retractOffset);
     protected abstract SpikesDto GetDirectionSpecificData(Vector2 size);
 
     private void CollideWithPlayers()
     {
-        foreach (Player player in Scene.Local.Players.Values)
+        foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             CollideWithPlayer(player);
-            if (!CheckSolidCollision(player, _sensor)) continue;
+            if (!player.CheckSolidCollision(SolidBox, _sensor)) continue;
             HurtPlayer(player);
         }
     }
 
-    private void HurtPlayer(BasicPhysicalPlayer player)
+    private void HurtPlayer(IPlayer player)
     {
         player.Hurt(Position.X);
             
@@ -81,8 +78,8 @@ public abstract partial class Spikes : BaseObject
     {
         if (_retractTimer > 0f)
         {
-            _retractTimer -= Scene.Local.ProcessSpeed;
-            if (_retractTimer <= 0f && Views.Local.CheckRectInCameras(_rectangle))
+            _retractTimer -= Scene.Instance.ProcessSpeed;
+            if (_retractTimer <= 0f && Views.Instance.CheckRectInCameras(_rectangle))
             {
                 AudioPlayer.Sound.Play(SoundStorage.SpikesMove);
             }

@@ -1,3 +1,4 @@
+#if DEBUG
 using Godot;
 
 namespace OrbinautFramework3.Framework;
@@ -19,8 +20,6 @@ public partial class Debug : Node
 	
 	public override void _Input(InputEvent input)
 	{
-		if (!SharedData.DevMode) return;
-		
 		if (input is not InputEventKey { Pressed: false } keyEvent) return;
 
 		switch ((DebugKeys)keyEvent.Keycode)
@@ -44,7 +43,8 @@ public partial class Debug : Node
 		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? SharedData.TargetFps : DebugFrameLimit;
 	}
 	
-	private static void OnRestartRoomPressed() => Scene.Local.Tree.ReloadCurrentScene();
-	private static void OnRestartGamePressed() => Scene.Local.Tree.ChangeSceneToFile(StartupPath);
-	private static void OnDevMenuPressed() => Scene.Local.Tree.ChangeSceneToFile(DevMenuPath);
+	private static void OnRestartRoomPressed() => Scene.Instance.Tree.ReloadCurrentScene();
+	private static void OnRestartGamePressed() => Scene.Instance.Tree.ChangeSceneToFile(StartupPath);
+	private static void OnDevMenuPressed() => Scene.Instance.Tree.ChangeSceneToFile(DevMenuPath);
 }
+#endif

@@ -18,15 +18,15 @@ public class AcceleratedValue
     
     public float Acceleration
     {
-        set => _value += value * Scene.Local.ProcessSpeed;
+        set => _value += value * Scene.Instance.ProcessSpeed;
     }
 
     public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
     public float Sum(float value)
     {
-        return value + ((Scene.Local.ProcessSpeed - 1f) * _instantValue + 
-                        (Scene.Local.ProcessSpeed + 1f) * _value) * 0.5f;
+        return value + ((Scene.Instance.ProcessSpeed - 1f) * _instantValue + 
+                        (Scene.Instance.ProcessSpeed + 1f) * _value) * 0.5f;
     }
 
     public float Add(float value)
@@ -36,7 +36,7 @@ public class AcceleratedValue
         return result;
     }
     
-    public void Clamp(float min, float max)
+    public void SetClamp(float min, float max)
     {
         if (min > max)
         {
@@ -53,15 +53,29 @@ public class AcceleratedValue
         }
     }
     
-    public void Max(float value)
+    //TODO: change to SetMax
+    public void SetMax(float value)
     {
         if (_value >= value) return;
         Value = value;
     }
     
-    public void Min(float value)
+    //TODO: change to SetMin
+    public void SetMin(float value)
     {
         if (_value <= value) return;
         Value = value;
+    }
+    
+    public void ApplyFriction(float friction)
+    {
+        int sign = Math.Sign(_value);
+        Acceleration = -sign * friction;
+		
+        switch (sign)
+        {
+            case  1: SetMax(0f); break;
+            case -1: SetMin(0f); break;
+        }
     }
 }

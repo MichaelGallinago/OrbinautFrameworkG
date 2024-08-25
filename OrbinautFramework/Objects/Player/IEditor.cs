@@ -1,13 +1,12 @@
-using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public interface IEditor
+public interface IEditor : IPosition
 {
-    bool IsDebugMode { get; set; }
-    Vector2 Position { get; set; }
     Constants.Direction Facing { get; }
+    IInputContainer Input { get; }
     
     void OnEnableEditMode();
     void OnDisableEditMode();
