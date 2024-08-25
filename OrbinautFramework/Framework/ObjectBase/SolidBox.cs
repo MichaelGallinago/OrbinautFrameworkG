@@ -4,11 +4,12 @@ using Godot.Collections;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public partial class SolidBox(bool isInteract, Vector2I radius, Vector2I offset, short[] heightMap) : Resource
+[GlobalClass]
+public partial class SolidBox : Resource
 {
-    [Export] public bool NoBalance { get; set; } = isInteract;
-    [Export] public Vector2I Radius { get; private set; } = radius;
-    [Export] public Vector2I Offset { get; private set; } = offset;
+    [Export] public bool NoBalance { get; set; }
+    [Export] public Vector2I Radius { get; private set; }
+    [Export] public Vector2I Offset { get; private set; }
 
     [Export] private Array<short> HeightMapArray //TODO: remove this?
     {
@@ -16,14 +17,21 @@ public partial class SolidBox(bool isInteract, Vector2I radius, Vector2I offset,
         set => HeightMap = value.ToArray();
     }
 
-    public short[] HeightMap { get; private set; } = heightMap;
+    public short[] HeightMap { get; private set; }
 
-    public SolidBox() : this(false, default, default, null) {}
-
-    public void Set(Vector2I radius, Vector2I offset = default)
+    public SolidBox() {}
+    public SolidBox(bool isInteract, Vector2I radius, Vector2I offset, short[] heightMap) : this()
     {
-        Offset = offset;
+        NoBalance = isInteract;
         Radius = radius;
+        Offset = offset;
+        HeightMap = heightMap;
+    }
+
+    public void Set(Vector2I newRadius, Vector2I newOffset = default)
+    {
+        Offset = newOffset;
+        Radius = newRadius;
         HeightMap = null;
     }
 	

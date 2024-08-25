@@ -1,0 +1,50 @@
+[gd_scene load_steps=11 format=3 uid="uid://bjpxjpcb7l7qb"]
+
+[ext_resource type="PackedScene" uid="uid://b2q2gooc40jhe" path="res://Objects/Spawnable/Shield/shield_container.tscn" id="1_6n60m"]
+[ext_resource type="Script" path="res://Objects/Player/Characters/Tails/Tails.cs" id="1_xibjp"]
+[ext_resource type="SpriteFrames" uid="uid://b00rdxd033mnj" path="res://Objects/Player/Characters/Tails/sprite_frames.tres" id="2_sktql"]
+[ext_resource type="Script" path="res://Framework/ObjectBase/HitBox.cs" id="2_sxdr1"]
+[ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="3_0q4p1"]
+[ext_resource type="PackedScene" uid="uid://b46pvg72ijr8s" path="res://Objects/Player/Characters/Tails/Tail/tail.tscn" id="3_sqcg0"]
+[ext_resource type="Script" path="res://Objects/Player/Characters/Tails/TailsSpriteLogic.cs" id="4_xsj61"]
+[ext_resource type="Script" path="res://Objects/Player/Sprite/SpriteNode.cs" id="6_lva7x"]
+
+[sub_resource type="Resource" id="Resource_kg2po"]
+script = ExtResource("2_sxdr1")
+Radius = Vector2i(0, 0)
+Offset = Vector2i(0, 0)
+RadiusExtra = Vector2i(0, 0)
+OffsetExtra = Vector2i(0, 0)
+
+[sub_resource type="Resource" id="Resource_8saop"]
+script = ExtResource("3_0q4p1")
+NoBalance = false
+Radius = Vector2i(0, 0)
+Offset = Vector2i(0, 0)
+HeightMapArray = null
+
+[node name="Tails" type="Node2D" node_paths=PackedStringArray("_tail", "Shield", "_spriteNode")]
+process_priority = -1
+z_index = -2
+script = ExtResource("1_xibjp")
+_tail = NodePath("Tail")
+Type = 1
+Shield = NodePath("ShieldContainer")
+_spriteNode = NodePath("Sprite")
+HitBox = SubResource("Resource_kg2po")
+SolidBox = SubResource("Resource_8saop")
+
+[node name="ShieldContainer" parent="." instance=ExtResource("1_6n60m")]
+FrameLoop = 0
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 16)
+sprite_frames = ExtResource("2_sktql")
+animation = &"None"
+offset = Vector2(0, -16)
+script = ExtResource("4_xsj61")
+
+[node name="Tail" parent="." instance=ExtResource("3_sqcg0")]
+animation = &"Hidden"
+script = ExtResource("6_lva7x")
+_spriteLogic = null

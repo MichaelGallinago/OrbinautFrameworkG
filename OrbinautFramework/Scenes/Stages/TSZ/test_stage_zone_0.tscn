@@ -1,11 +1,16 @@
-[gd_scene load_steps=30 format=4 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=36 format=4 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Scenes/Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
+[ext_resource type="PackedScene" uid="uid://b1d20f5ei38br" path="res://Objects/Player/Characters/Amy/prefab.tscn" id="2_asbr0"]
+[ext_resource type="PackedScene" uid="uid://dl707w72scv17" path="res://Objects/Player/Characters/Knuckles/prefab.tscn" id="3_0ak31"]
 [ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="3_8004u"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
+[ext_resource type="PackedScene" uid="uid://csxcjab0db8n0" path="res://Objects/Player/Characters/Sonic/prefab.tscn" id="4_s8iav"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="5_movty"]
+[ext_resource type="PackedScene" uid="uid://bjpxjpcb7l7qb" path="res://Objects/Player/Characters/Tails/prefab.tscn" id="5_p0js0"]
+[ext_resource type="Script" path="res://Framework/PlayerPrefabs.cs" id="6_wcvhr"]
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Scenes/Stages/TSZ/Graphics/background_layer0.png" id="9_m4ybp"]
 [ext_resource type="PackedScene" uid="uid://djgcqtur5n565" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_horizontal.tscn" id="11_1127g"]
 [ext_resource type="PackedScene" uid="uid://cr02pmwqgey42" path="res://Objects/Common/Bridge/tsz_bridge.tscn" id="12_ncrh2"]
@@ -21,6 +26,13 @@
 [ext_resource type="PackedScene" uid="uid://1gciguema0rh" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_vertical.tscn" id="18_0iln7"]
 [ext_resource type="TileSet" uid="uid://dvuwhwecgwu0r" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_b.tres" id="18_5sdh5"]
 [ext_resource type="PackedScene" uid="uid://bwifksf6vle21" path="res://Objects/Player/Spawner/player_spawner.tscn" id="21_cuvbg"]
+
+[sub_resource type="Resource" id="Resource_mh47n"]
+script = ExtResource("6_wcvhr")
+Sonic = ExtResource("4_s8iav")
+Tails = ExtResource("5_p0js0")
+Knuckles = ExtResource("3_0ak31")
+Amy = ExtResource("2_asbr0")
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0gqu0"]
 atlas = ExtResource("15_ve5v6")
@@ -54,21 +66,19 @@ region = Rect2(48, 0, 16, 16)
 atlas = ExtResource("15_ve5v6")
 region = Rect2(48, 16, 16, 16)
 
-[node name="StageTSZ" type="Node2D"]
+[node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
 process_priority = -1
 texture_filter = 1
 script = ExtResource("1_hkdi5")
-PlayerPrefabs = null
-DebugModePrefabs = null
+CollisionTileMapMain = NodePath("TileMaps/CollisionTIleMapSecondary")
+CollisionTileMapSecondary = NodePath("TileMaps/CollisionTileMapMain")
+Views = NodePath("Views")
+PlayerPrefabs = SubResource("Resource_mh47n")
 
 [node name="Views" parent="." instance=ExtResource("3_8004u")]
-_number = null
-_packedViewContainer = null
 
 [node name="PlayerSpawner" parent="." instance=ExtResource("21_cuvbg")]
 position = Vector2(176, 880)
-_allowedTypes = null
-_cpuOffset = null
 
 [node name="Parallax2D" type="Parallax2D" parent="."]
 visible = false
@@ -81,60 +91,30 @@ position = Vector2(0, 0)
 texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 0, 512, 64)
-AnimationDuration = null
-Factor = null
-Scroll = null
-InclineHeight = null
-InclineFactor = null
-ScaleTarget = null
 
 [node name="BackgroundLayer2" parent="Parallax2D" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 64)
 texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 64, 512, 64)
-AnimationDuration = null
-Factor = null
-Scroll = null
-InclineHeight = null
-InclineFactor = null
-ScaleTarget = null
 
 [node name="BackgroundLayer3" parent="Parallax2D" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 128)
 texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 128, 512, 64)
-AnimationDuration = null
-Factor = null
-Scroll = null
-InclineHeight = null
-InclineFactor = null
-ScaleTarget = null
 
 [node name="BackgroundLayer4" parent="Parallax2D" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 192)
 texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 192, 512, 64)
-AnimationDuration = null
-Factor = null
-Scroll = null
-InclineHeight = null
-InclineFactor = null
-ScaleTarget = null
 
 [node name="BackgroundLayer5" parent="Parallax2D" instance=ExtResource("4_e23pr")]
 position = Vector2(0, 256)
 texture = ExtResource("9_m4ybp")
 region_enabled = true
 region_rect = Rect2(0, 256, 512, 64)
-AnimationDuration = null
-Factor = null
-Scroll = null
-InclineHeight = null
-InclineFactor = null
-ScaleTarget = null
 
 [node name="TileMaps" type="Node" parent="."]
 
@@ -170,167 +150,92 @@ script = ExtResource("5_movty")
 
 [node name="PathSwapTriggerHorizontal" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(2432, 960)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal2" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(2560, 1032)
 scale = Vector2(1, 2.75)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal3" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(11776, 1088)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal4" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(11888, 1152)
 scale = Vector2(1, 3)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal5" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(4224, 976)
 scale = Vector2(1, 4.5)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal6" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(4096, 832)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal7" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(9856, 1216)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal8" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(10112, 1296)
 scale = Vector2(1, 3.5)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal9" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(15360, 1088)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal10" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13184, 320)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal11" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13184, 576)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal12" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13440, 1216)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal13" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(13632, 1290)
 scale = Vector2(1, 3.313)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal14" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17640, 832)
 scale = Vector2(1, 2)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal15" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(18200, 832)
 scale = Vector2(1, 2)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal16" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17152, 1984)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal17" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 2032)
 scale = Vector2(1, 3.5)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal18" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 1600)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal19" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17280, 192)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal20" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(17408, 288)
 scale = Vector2(1, 3)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal21" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(19328, 1088)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal22" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(19520, 1152)
 scale = Vector2(1, 2)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerHorizontal23" parent="Triggers/PathSwapHorizontal" instance=ExtResource("11_1127g")]
 position = Vector2(15488, 1168)
 scale = Vector2(1, 2.5)
-_layerLeft = null
-_layerRight = null
-_isGroundOnly = null
 
 [node name="PathSwapVertical" type="Node" parent="Triggers"]
 
 [node name="PathSwapTriggerVertical" parent="Triggers/PathSwapVertical" instance=ExtResource("18_0iln7")]
 position = Vector2(17920, 1344)
 scale = Vector2(4, 1)
-_layerAbove = null
-_layerBelow = null
-_isGroundOnly = null
 
 [node name="PathSwapTriggerVertical2" parent="Triggers/PathSwapVertical" instance=ExtResource("18_0iln7")]
 position = Vector2(17360, 1504)
-_layerAbove = null
-_layerBelow = null
-_isGroundOnly = null
 
 [node name="ForceSpinHorizontal" type="Node" parent="Triggers"]
 
@@ -369,23 +274,17 @@ position = Vector2(18688, 624)
 [node name="CameraTrigger" parent="Triggers/Camera" instance=ExtResource("13_7s6he")]
 position = Vector2(1040, 786)
 scale = Vector2(1, 24.563)
-_boundSpeed = null
-_direction = null
-_triggerWithin = null
+_direction = 0
 
 [node name="CameraTrigger2" parent="Triggers/Camera" instance=ExtResource("13_7s6he")]
 position = Vector2(11000, 1152)
 scale = Vector2(1, 36)
-_boundSpeed = null
-_direction = null
-_triggerWithin = null
+_direction = 0
 
 [node name="CameraTrigger3" parent="Triggers/Camera" instance=ExtResource("13_7s6he")]
 position = Vector2(21112, 1160)
 scale = Vector2(1, 4.75)
-_boundSpeed = null
-_direction = null
-_triggerWithin = null
+_direction = 0
 
 [node name="Common" type="Node" parent="."]
 
@@ -395,538 +294,280 @@ _triggerWithin = null
 
 [node name="SpikesVertical" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(4336, 1072)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical2" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(4304, 1072)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical3" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(5064, 1008)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical4" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(8768, 1360)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical5" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(9984, 1104)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical6" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10480, 1072)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical7" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10160, 688)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical8" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10752, 720)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical9" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(10096, 240)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical10" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(9624, 176)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical11" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13656, 1712)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical12" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14640, 2096)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical13" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(15056, 1808)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical14" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14896, 1648)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical15" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14928, 1648)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical16" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16288, 1936)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical17" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16352, 1936)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical18" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13936, 1200)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical19" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(12912, 464)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical20" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13168, 848)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical21" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13136, 848)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical22" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16304, 784)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical23" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16272, 784)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical24" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16240, 784)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical25" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16208, 688)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical26" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16240, 688)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical27" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16272, 688)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical28" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16304, 688)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical29" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16176, 656)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical30" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16336, 656)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical31" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16048, 688)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical32" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16528, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical33" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16560, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical34" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16592, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical35" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16624, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical36" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16656, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical37" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16688, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical38" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical39" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 560)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical40" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16656, 144)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical41" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16688, 144)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical42" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 144)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical43" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 144)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical44" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16784, 144)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical45" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16848, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical46" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16880, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical47" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16912, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical48" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16944, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical49" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16976, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical50" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17008, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical51" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17040, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical52" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17072, 336)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical53" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17744, 496)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical54" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17776, 496)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical55" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17808, 496)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical56" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18032, 496)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical57" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18064, 496)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical58" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18096, 496)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical59" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17872, 528)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical60" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17904, 528)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical61" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17936, 528)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical62" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17968, 528)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical63" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18000, 512)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical64" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17840, 512)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical65" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19248, 784)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical66" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19152, 816)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical67" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19696, 720)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical68" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19664, 720)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical69" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19632, 720)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical70" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19600, 720)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical71" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19920, 976)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical72" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(20144, 976)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical73" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(20592, 1328)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical74" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18544, 1616)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical75" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18576, 1616)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical76" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18032, 2032)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical77" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17936, 2032)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical78" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17520, 2160)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical79" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 2032)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical80" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16848, 1872)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical81" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17040, 1712)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical82" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17008, 1712)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical83" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 1584)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical84" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 1584)
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical85" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14928, 2064)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="SpikesVertical86" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17584, 944)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="Horizontal" type="Node" parent="Common/Spikes"]
 
@@ -934,33 +575,24 @@ CullingType = null
 position = Vector2(16752, 336)
 rotation = -3.14159
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
 
 [node name="MovingSpikesHorizontal" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1968)
 rotation = 3.14159
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
+IsMoving = false
 
 [node name="MovingSpikesHorizontal2" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1936)
 rotation = 3.14159
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
+IsMoving = false
 
 [node name="MovingSpikesHorizontal3" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1904)
 rotation = 3.14159
 scale = Vector2(1, -1)
-IsMoving = null
-SolidBox = null
-CullingType = null
+IsMoving = false
 
 [node name="Bridges" type="Node" parent="Common"]
 
@@ -1017,97 +649,51 @@ position = Vector2(19968, 1000)
 
 [node name="Bumper" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(264, 816)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper2" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(16320, 1728)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper3" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17920, 892)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper4" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17892, 840)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper5" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17848, 868)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper6" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(18512, 1008)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper7" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17992, 868)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper8" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17948, 840)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper9" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17808, 316)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper10" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17852, 288)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper11" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(17988, 288)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper12" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(18032, 316)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper13" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(19120, 1008)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper14" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(14544, 2256)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="Bumper15" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(14576, 2256)
-_hitsLimit = null
-HitBox = null
-CullingType = null
 
 [node name="FallingFloors" type="Node" parent="Common"]
 
 [node name="FallingFloorSpawner" parent="Common/FallingFloors" instance=ExtResource("14_d1km8")]
 position = Vector2(800, 840)
-_piecesSize = Vector2i(16, 16)
 _piecesTextures = [SubResource("AtlasTexture_0gqu0"), SubResource("AtlasTexture_tlei8"), SubResource("AtlasTexture_udt1h"), SubResource("AtlasTexture_gl3et"), SubResource("AtlasTexture_eqew6"), SubResource("AtlasTexture_2ggey"), SubResource("AtlasTexture_irqyr"), SubResource("AtlasTexture_ibw10")]

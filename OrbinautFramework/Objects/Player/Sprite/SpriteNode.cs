@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Player.Extensions;
 namespace OrbinautFramework3.Objects.Player.Sprite;
 
 [Tool]
-public abstract partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
+public partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
 {
 	[Export] private SpriteLogic _spriteLogic;
 	

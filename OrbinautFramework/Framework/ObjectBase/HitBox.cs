@@ -3,6 +3,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
+[GlobalClass]
 public partial class HitBox : Resource
 {
     public bool IsInteract { get; private set; }

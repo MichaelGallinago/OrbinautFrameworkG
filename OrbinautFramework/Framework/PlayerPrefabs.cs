@@ -3,6 +3,7 @@ using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Framework;
 
+[GlobalClass]
 public partial class PlayerPrefabs : Resource
 {
     [Export] public PackedScene Sonic { get; private set; }
