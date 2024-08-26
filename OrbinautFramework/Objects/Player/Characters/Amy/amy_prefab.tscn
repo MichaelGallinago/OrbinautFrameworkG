@@ -1,20 +1,20 @@
 [gd_scene load_steps=9 format=3 uid="uid://b1d20f5ei38br"]
 
+[ext_resource type="Script" path="res://Objects/Player/Characters/Amy/AmyNode.cs" id="1_1unfw"]
 [ext_resource type="PackedScene" uid="uid://b2q2gooc40jhe" path="res://Objects/Spawnable/Shield/shield_container.tscn" id="1_48jnd"]
-[ext_resource type="Script" path="res://Objects/Player/Characters/Amy/Amy.cs" id="1_nkkn3"]
 [ext_resource type="Script" path="res://Framework/ObjectBase/HitBox.cs" id="2_bh2pw"]
 [ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="3_njvl8"]
-[ext_resource type="SpriteFrames" uid="uid://ives1jru75cc" path="res://Objects/Player/Characters/Amy/sprite_frames.tres" id="3_sd4hi"]
+[ext_resource type="SpriteFrames" uid="uid://ives1jru75cc" path="res://Objects/Player/Characters/Amy/amy_sprite_frames.tres" id="3_sd4hi"]
 [ext_resource type="Script" path="res://Objects/Player/Sprite/SpriteNode.cs" id="4_pt5uh"]
 
-[sub_resource type="Resource" id="Resource_iivbu"]
+[sub_resource type="Resource" id="Resource_rl2vy"]
 script = ExtResource("2_bh2pw")
 Radius = Vector2i(0, 0)
 Offset = Vector2i(0, 0)
 RadiusExtra = Vector2i(0, 0)
 OffsetExtra = Vector2i(0, 0)
 
-[sub_resource type="Resource" id="Resource_56md1"]
+[sub_resource type="Resource" id="Resource_pmxxj"]
 script = ExtResource("3_njvl8")
 NoBalance = false
 Radius = Vector2i(0, 0)
@@ -24,12 +24,12 @@ HeightMapArray = null
 [node name="Amy" type="Node2D" node_paths=PackedStringArray("Shield", "_spriteNode")]
 process_priority = -1
 z_index = -2
-script = ExtResource("1_nkkn3")
+script = ExtResource("1_1unfw")
 Type = 3
 Shield = NodePath("ShieldContainer")
 _spriteNode = NodePath("Sprite")
-HitBox = SubResource("Resource_iivbu")
-SolidBox = SubResource("Resource_56md1")
+HitBox = SubResource("Resource_rl2vy")
+SolidBox = SubResource("Resource_pmxxj")
 
 [node name="ShieldContainer" parent="." instance=ExtResource("1_48jnd")]
 FrameLoop = 0

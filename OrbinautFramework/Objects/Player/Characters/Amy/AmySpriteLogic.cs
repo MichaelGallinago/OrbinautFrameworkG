@@ -1,6 +1,7 @@
 ﻿using Godot;
+using OrbinautFramework3.Objects.Player.Sprite;
 
-namespace OrbinautFramework3.Objects.Player.Sprite.Characters;
+namespace OrbinautFramework3.Objects.Player.Characters.Amy;
 
 [GlobalClass]
 public partial class AmySpriteLogic : SpriteLogic

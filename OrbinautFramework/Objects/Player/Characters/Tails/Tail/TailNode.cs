@@ -3,11 +3,12 @@ using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Sprite;
 
-namespace OrbinautFramework3.Objects.Player.Sprite;
+namespace OrbinautFramework3.Objects.Player.Characters.Tails.Tail;
 
 [Tool]
-public partial class Tail : AdvancedAnimatedSprite //TODO: refactor this
+public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 {
 	public void Animate(IPlayer player)
 	{

@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://3si7gmx3l372"]
+[gd_scene load_steps=5 format=3 uid="uid://3si7gmx3l372"]
 
 [ext_resource type="Script" path="res://Objects/Common/Bridge/Bridge.cs" id="1_phedy"]
-[ext_resource type="Texture2D" uid="uid://dp50tdepf8pnw" path="res://Objects/Common/Bridge/Sprites/log.png" id="2_ekkn3"]
 [ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="2_o6ejk"]
 [ext_resource type="Script" path="res://Objects/Common/Bridge/BridgeEditor.cs" id="3_b23gm"]
 
@@ -21,4 +20,3 @@ CullingType = 6
 
 [node name="BridgeEditor" type="Node2D" parent="."]
 script = ExtResource("3_b23gm")
-LogTexture = ExtResource("2_ekkn3")

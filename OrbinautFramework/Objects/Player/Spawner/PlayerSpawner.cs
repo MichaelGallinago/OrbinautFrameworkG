@@ -19,8 +19,8 @@ public partial class PlayerSpawner : Sprite2D
 
     [Export] private AllowedTypes _allowedTypes = AllowedTypes.All;
     [Export] private Vector2 _cpuOffset;
-
-    public override void _Ready()
+    
+    public override void _Process(double delta)
     {
         SpawnPlayers();
         QueueFree();
@@ -32,23 +32,23 @@ public partial class PlayerSpawner : Sprite2D
 
         Types type = SharedData.PlayerTypes.First();
         if (!_allowedTypes.HasFlag((AllowedTypes)(1 << (int)type))) return;
-
-        Node spawnerParent = GetParent();
-        SpawnPlayer(type, spawnerParent, Position);
+        
+        SpawnPlayer(type, Position);
 
         Vector2 offsetPosition = Position + _cpuOffset;
         for (var i = 1; i < SharedData.PlayerTypes.Length; i++)
         {
-            SpawnPlayer(type, spawnerParent, offsetPosition);
+            SpawnPlayer(type, offsetPosition);
         }
     }
 
-    private static void SpawnPlayer(Types type, Node spawnerParent, Vector2 position)
+    private static void SpawnPlayer(Types type, Vector2 position)
     {
         PackedScene packedPlayer = Scene.Instance.PlayerPrefabs.Get(type);
         if (packedPlayer.Instantiate() is not PlayerNode player) return;
         
-        spawnerParent.AddChild(player);
         player.Position = position;
+        Scene.Instance.AddChild(player);
+        //Scene.Instance.CallDeferred("add_child", player);
     }
 }

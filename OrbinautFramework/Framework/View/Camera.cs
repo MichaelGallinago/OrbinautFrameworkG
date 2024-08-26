@@ -257,8 +257,9 @@ public partial class Camera : Camera2D, ICamera
 		if (_godotObjectTarget != null && !IsInstanceValid(_godotObjectTarget))
 		{
 			Target = null;
-			return;
 		}
+
+		if (Target == null) return;
 		
 		Vector2 targetPosition = _target.Position - SharedData.ViewSize / 2;
 		if (_isTargetPlayer)
