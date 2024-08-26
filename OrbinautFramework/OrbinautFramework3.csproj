@@ -31,6 +31,7 @@
     <AdditionalFiles Remove="Framework\Input\**" />
     <AdditionalFiles Remove=".godot\**" />
     <AdditionalFiles Remove="Stages\**" />
+    <AdditionalFiles Remove="Objects\Resources\**" />
   </ItemGroup>
   <PropertyGroup>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
@@ -46,6 +47,7 @@
     <Compile Remove="Framework\Input\**" />
     <Compile Remove=".godot\**" />
     <Compile Remove="Stages\**" />
+    <Compile Remove="Objects\Resources\**" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Framework\Camera\**" />
@@ -53,9 +55,9 @@
     <EmbeddedResource Remove="Framework\Input\**" />
     <EmbeddedResource Remove=".godot\**" />
     <EmbeddedResource Remove="Stages\**" />
+    <EmbeddedResource Remove="Objects\Resources\**" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Framework\Prefabs\" />
-    <Folder Include="Objects\Resources\" />
   </ItemGroup>
 </Project>

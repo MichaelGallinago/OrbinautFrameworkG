@@ -1,12 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cr02pmwqgey42"]
+[gd_scene load_steps=3 format=3 uid="uid://cr02pmwqgey42"]
 
-[ext_resource type="PackedScene" uid="uid://3si7gmx3l372" path="res://Objects/Common/Bridge/bridge_spawner.tscn" id="1_o7buq"]
-[ext_resource type="Texture2D" uid="uid://d00v3s7p0t6in" path="res://Objects/Common/Bridge/tsz_log.png" id="2_erxjm"]
-[ext_resource type="Texture2D" uid="uid://c1cfw06rmleka" path="res://Objects/Common/Bridge/tsz_stamp.png" id="3_b2mn1"]
+[ext_resource type="PackedScene" uid="uid://3si7gmx3l372" path="res://Objects/Common/Bridge/bridge.tscn" id="1_o7buq"]
+[ext_resource type="Texture2D" uid="uid://d00v3s7p0t6in" path="res://Objects/Common/Bridge/Sprites/tsz_log.png" id="2_erxjm"]
 
 [node name="BridgeTSZ" instance=ExtResource("1_o7buq")]
+
+[node name="BridgeEditor" parent="." index="0"]
 LogTexture = ExtResource("2_erxjm")
-LogAmount = 8
-LogOffset = 0
-_stampTexture = ExtResource("3_b2mn1")
-_cullingType = 0

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfapqkhdpa6gs"
-path="res://.godot/imported/stamp.png-a1cdd9a50039db7168cd112acce2a6de.ctex"
+uid="uid://c1cfw06rmleka"
+path="res://.godot/imported/tsz_stump.png-facf5f0c4fe05a995f33762c3fffd49e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Common/Bridge/stamp.png"
-dest_files=["res://.godot/imported/stamp.png-a1cdd9a50039db7168cd112acce2a6de.ctex"]
+source_file="res://Objects/Common/Bridge/Stump/tsz_stump.png"
+dest_files=["res://.godot/imported/tsz_stump.png-facf5f0c4fe05a995f33762c3fffd49e.ctex"]
 
 [params]
 

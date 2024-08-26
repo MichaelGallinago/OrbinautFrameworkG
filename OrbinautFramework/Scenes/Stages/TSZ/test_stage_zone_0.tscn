@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=4 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=37 format=4 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Scenes/Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" uid="uid://1gciguema0rh" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_vertical.tscn" id="18_0iln7"]
 [ext_resource type="TileSet" uid="uid://dvuwhwecgwu0r" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_b.tres" id="18_5sdh5"]
 [ext_resource type="PackedScene" uid="uid://bwifksf6vle21" path="res://Objects/Player/Spawner/player_spawner.tscn" id="21_cuvbg"]
+[ext_resource type="PackedScene" uid="uid://cblfy0r4gctwc" path="res://Objects/Common/Bridge/Stump/tsz_stump.tscn" id="27_5j4pt"]
 
 [sub_resource type="Resource" id="Resource_mh47n"]
 script = ExtResource("6_wcvhr")
@@ -597,52 +598,42 @@ IsMoving = false
 [node name="Bridges" type="Node" parent="Common"]
 
 [node name="BridgeTSZ" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(6144, 1160)
 
 [node name="BridgeTSZ2" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(6784, 1096)
 
 [node name="BridgeTSZ3" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(8512, 1416)
 
 [node name="BridgeTSZ4" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(1280, 904)
 
 [node name="BridgeTSZ5" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(5376, 840)
 
 [node name="BridgeTSZ6" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(6016, 808)
 
 [node name="BridgeTSZ7" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(6272, 808)
 
 [node name="BridgeTSZ8" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(6784, 872)
 
 [node name="BridgeTSZ9" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(12800, 1512)
 
 [node name="BridgeTSZ10" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(17344, 968)
+
+[node name="BridgeEditor" parent="Common/Bridges/BridgeTSZ10" index="0"]
 LogAmount = 12
 
 [node name="BridgeTSZ11" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(18752, 648)
 
 [node name="BridgeTSZ12" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-z_index = 0
 position = Vector2(19968, 1000)
 
 [node name="Bumpers" type="Node" parent="Common"]
@@ -697,3 +688,79 @@ position = Vector2(14576, 2256)
 [node name="FallingFloorSpawner" parent="Common/FallingFloors" instance=ExtResource("14_d1km8")]
 position = Vector2(800, 840)
 _piecesTextures = [SubResource("AtlasTexture_0gqu0"), SubResource("AtlasTexture_tlei8"), SubResource("AtlasTexture_udt1h"), SubResource("AtlasTexture_gl3et"), SubResource("AtlasTexture_eqew6"), SubResource("AtlasTexture_2ggey"), SubResource("AtlasTexture_irqyr"), SubResource("AtlasTexture_ibw10")]
+
+[node name="Stump" type="Node" parent="Common"]
+
+[node name="Stump" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(1272, 888)
+
+[node name="Stump2" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(1416, 888)
+
+[node name="Stump3" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(5368, 824)
+
+[node name="Stump4" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(5512, 824)
+
+[node name="Stump5" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6008, 792)
+
+[node name="Stump6" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6152, 792)
+
+[node name="Stump7" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6264, 792)
+
+[node name="Stump8" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6408, 792)
+
+[node name="Stump9" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6136, 1144)
+
+[node name="Stump10" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6280, 1144)
+
+[node name="Stump11" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6776, 1080)
+
+[node name="Stump12" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6920, 1080)
+
+[node name="Stump13" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6776, 856)
+
+[node name="Stump14" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(6920, 856)
+
+[node name="Stump15" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(8504, 1400)
+
+[node name="Stump16" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(8648, 1400)
+
+[node name="Stump17" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(12792, 1496)
+
+[node name="Stump18" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(12936, 1496)
+
+[node name="Stump19" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(19960, 984)
+
+[node name="Stump20" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(20104, 984)
+
+[node name="Stump21" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(18744, 632)
+
+[node name="Stump22" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(18888, 632)
+
+[node name="Stump23" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(17336, 952)
+
+[node name="Stump24" parent="Common/Stump" instance=ExtResource("27_5j4pt")]
+position = Vector2(17544, 952)
+
+[editable path="Common/Bridges/BridgeTSZ10"]
