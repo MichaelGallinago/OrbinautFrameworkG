@@ -35,6 +35,15 @@ public partial class Bridge : SolidNode
 	    _logHalfWidth = (byte)(_logWidth / 2);
 	    _logPositions = new Vector2[_logAmount];
 	    _dip = new int[_logAmount];
+	    
+	    int halfWidth = _logAmount * _logHalfWidth - _logHalfWidth;
+	    for (var i = 0; i < _logAmount; i++)
+	    {
+		    _logPositions[i] = new Vector2(_logWidth * i - halfWidth, 0f);
+		    _dip[i] = (i < _logAmount / 2 ? i + 1 : _logAmount - i) * 2;
+	    }
+        
+	    SolidBox.Set(_logAmount * _logHalfWidth, _logHalfWidth);
     }
 
     public override void _Process(double delta)
@@ -75,23 +84,12 @@ public partial class Bridge : SolidNode
 
     public override void _Draw()
     {
+	    if (_logTexture == null) return;
+	    
         for (var i = 0; i < _logAmount; i++)
         {
             DrawTexture(_logTexture, _logPositions[i]);
         }
-    }
-    
-    private void UpdateData()
-    {
-	    int halfWidth = _logAmount * _logHalfWidth - _logHalfWidth;
-	    for (var i = 0; i < _logAmount; i++)
-	    {
-		    _logPositions[i] = new Vector2(_logWidth * i - halfWidth, 0f);
-		    _dip[i] = (i < _logAmount / 2 ? i + 1 : _logAmount - i) * 2;
-	    }
-        
-	    SolidBox.Set(_logAmount * _logHalfWidth, _logHalfWidth);
-	    QueueRedraw();
     }
     
     private void UpdateLogPositions()

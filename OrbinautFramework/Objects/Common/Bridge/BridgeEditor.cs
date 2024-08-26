@@ -5,13 +5,13 @@ namespace OrbinautFramework3.Objects.Common.Bridge;
 [Tool]
 public partial class BridgeEditor : Node2D
 {
+#if TOOLS
     [Export] public Texture2D LogTexture 
     {
         get => _logTexture;
         private set
         {
             _logTexture = value;
-            UpdateConfigurationWarnings();
             QueueRedraw();
         }
     }
@@ -51,4 +51,9 @@ public partial class BridgeEditor : Node2D
             x += _logWidth;
         }
     }
+#else
+    [Export] public Texture2D LogTexture { get; private set; }
+    [Export] public byte LogAmount { get; private set; }
+    [Export] public byte LogWidth { get; private set; }
+#endif
 }
