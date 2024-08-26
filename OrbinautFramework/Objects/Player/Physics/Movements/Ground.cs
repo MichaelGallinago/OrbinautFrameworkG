@@ -9,7 +9,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
-public struct Ground(PlayerData data, IPlayerLogic logic)
+public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 {
     public const float SkidSpeedThreshold = 4f;
     

@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct Status(PlayerData data, IPlayerLogic logic)
+public readonly struct Status(PlayerData data, IPlayerLogic logic)
 {
     public void Update()
     {

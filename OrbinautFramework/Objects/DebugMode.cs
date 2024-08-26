@@ -50,7 +50,7 @@ public class DebugMode(IEditor editor)
 
 		if (Scene.Instance.IsStage)
 		{
-			Scene.Instance.Players.First().ResetMusic();
+			Scene.Instance.Players.FirstOrDefault().ResetMusic();
 		}
 			
 		_speed = 0f;

@@ -1,12 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://bifod3tgod01h"]
+[gd_scene load_steps=5 format=3 uid="uid://bifod3tgod01h"]
 
 [ext_resource type="Texture2D" uid="uid://bmv43haxsvefj" path="res://Objects/Common/Spikes/spikes_vertical.png" id="1_k5w7w"]
 [ext_resource type="Script" path="res://Objects/Common/Spikes/SpikesVertical.cs" id="1_oj876"]
+[ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="2_18ug1"]
+
+[sub_resource type="Resource" id="Resource_vxly0"]
+script = ExtResource("2_18ug1")
+NoBalance = false
+Radius = Vector2i(16, 16)
+Offset = Vector2i(0, 0)
+HeightMapArray = null
 
 [node name="SpikesVertical" type="Node2D" node_paths=PackedStringArray("_sprite")]
 script = ExtResource("1_oj876")
 _sprite = NodePath("Sprite2D")
-Culling = 6
+SolidBox = SubResource("Resource_vxly0")
+CullingType = 6
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_k5w7w")

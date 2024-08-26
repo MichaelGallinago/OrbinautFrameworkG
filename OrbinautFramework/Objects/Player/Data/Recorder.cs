@@ -18,18 +18,6 @@ public class Recorder(PlayerData data)
     
     private DataRecord[] _recordedData;
     
-    public static void ResizeAll()
-    {
-        if (Scene.Instance.Time == 0f) return;
-
-        ReadOnlySpan<IPlayer> players = Scene.Instance.Players.Values;
-        int playersCount = players.Length + 1;
-        foreach (IPlayer player in players)
-        {
-            player.Recorder.Resize(playersCount);
-        }
-    }
-    
     public void Record()
     {
         int length = _recordedData.Length - 1;
@@ -44,7 +32,7 @@ public class Recorder(PlayerData data)
         Array.Fill(_recordedData, NewRecord);
     }
     
-    private void Resize(int playersCount)
+    public void Resize(int playersCount)
     {
         int newLength = Math.Max(MinimalLength, CpuLogic.DelayStep * playersCount);
         int oldLength = _recordedData.Length;

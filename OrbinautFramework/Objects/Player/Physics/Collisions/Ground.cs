@@ -8,7 +8,7 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Collisions;
 
-public struct Ground(PlayerData data, IPlayerLogic logic)
+public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 {
 	private const int MinTolerance = 4;
 	private const int MaxTolerance = 14;

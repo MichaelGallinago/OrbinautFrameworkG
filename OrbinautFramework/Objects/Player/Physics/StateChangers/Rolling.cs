@@ -9,7 +9,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
-public struct Rolling(PlayerData data, IPlayerLogic logic)
+public readonly struct Rolling(PlayerData data, IPlayerLogic logic)
 {
     public void Start()
     {

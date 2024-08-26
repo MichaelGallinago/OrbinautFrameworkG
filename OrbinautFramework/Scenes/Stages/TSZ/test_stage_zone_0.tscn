@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=4 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=27 format=4 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Scenes/Stages/TSZ/StageTsz.cs" id="1_hkdi5"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
@@ -16,9 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://cr02pmwqgey42" path="res://Objects/Common/Bridge/tsz_bridge.tscn" id="12_ncrh2"]
 [ext_resource type="PackedScene" uid="uid://dtlx4fu2pgj4d" path="res://Objects/Common/CameraTrigger/camera_trigger.tscn" id="13_7s6he"]
 [ext_resource type="PackedScene" uid="uid://b8uvs02jxyk0t" path="res://Objects/Common/Bumper/bumper.tscn" id="13_qd0sa"]
-[ext_resource type="PackedScene" uid="uid://cps57gwcr3a6o" path="res://Objects/Common/FallingFloor/falling_floor_spawner.tscn" id="14_d1km8"]
 [ext_resource type="PackedScene" uid="uid://bjiphfdgqv734" path="res://Objects/Common/Spikes/spikes_horizontal.tscn" id="15_ekqnw"]
-[ext_resource type="Texture2D" uid="uid://b5wsb23sxlkx8" path="res://Objects/Common/FallingFloor/basic.png" id="15_ve5v6"]
 [ext_resource type="PackedScene" uid="uid://dx3syhqnbbgmd" path="res://Objects/Common/Spikes/moving_spikes_horizontal.tscn" id="16_bdqn7"]
 [ext_resource type="PackedScene" uid="uid://c77b22svl3edt" path="res://Objects/Common/ForceSpinTrigger/force_spin_trigger_horizontal.tscn" id="16_p2jm1"]
 [ext_resource type="PackedScene" uid="uid://bifod3tgod01h" path="res://Objects/Common/Spikes/spikes_vertical.tscn" id="16_x5qvi"]
@@ -34,38 +32,6 @@ Sonic = ExtResource("4_s8iav")
 Tails = ExtResource("5_p0js0")
 Knuckles = ExtResource("3_0ak31")
 Amy = ExtResource("2_asbr0")
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0gqu0"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(0, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_tlei8"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(0, 16, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_udt1h"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(16, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_gl3et"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(16, 16, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_eqew6"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(32, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_2ggey"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(32, 16, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_irqyr"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(48, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ibw10"]
-atlas = ExtResource("15_ve5v6")
-region = Rect2(48, 16, 16, 16)
 
 [node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
 process_priority = -1
@@ -581,19 +547,16 @@ scale = Vector2(1, -1)
 position = Vector2(15344, 1968)
 rotation = 3.14159
 scale = Vector2(1, -1)
-IsMoving = false
 
 [node name="MovingSpikesHorizontal2" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1936)
 rotation = 3.14159
 scale = Vector2(1, -1)
-IsMoving = false
 
 [node name="MovingSpikesHorizontal3" parent="Common/Spikes/Horizontal" instance=ExtResource("16_bdqn7")]
 position = Vector2(15344, 1904)
 rotation = 3.14159
 scale = Vector2(1, -1)
-IsMoving = false
 
 [node name="Bridges" type="Node" parent="Common"]
 
@@ -684,10 +647,6 @@ position = Vector2(14544, 2256)
 position = Vector2(14576, 2256)
 
 [node name="FallingFloors" type="Node" parent="Common"]
-
-[node name="FallingFloorSpawner" parent="Common/FallingFloors" instance=ExtResource("14_d1km8")]
-position = Vector2(800, 840)
-_piecesTextures = [SubResource("AtlasTexture_0gqu0"), SubResource("AtlasTexture_tlei8"), SubResource("AtlasTexture_udt1h"), SubResource("AtlasTexture_gl3et"), SubResource("AtlasTexture_eqew6"), SubResource("AtlasTexture_2ggey"), SubResource("AtlasTexture_irqyr"), SubResource("AtlasTexture_ibw10")]
 
 [node name="Stump" type="Node" parent="Common"]
 

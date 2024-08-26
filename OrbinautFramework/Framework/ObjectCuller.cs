@@ -127,7 +127,7 @@ public class ObjectCuller
 	    
 	    _activeObjects.Remove(target);
 	    target.SetProcess(false);
-
+	    
 	    var respawnPosition = (Vector2I)target.Memento.Position;
 	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {

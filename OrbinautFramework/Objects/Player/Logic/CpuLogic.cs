@@ -29,7 +29,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
     {
 		if (data.Damage.IsHurt || data.Death.IsDead || data.Id == 0) return;
 		
-		_leadPlayer = Scene.Instance.Players.First();
+		_leadPlayer = Scene.Instance.Players.FirstOrDefault();
 		_delay = DelayStep * data.Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it

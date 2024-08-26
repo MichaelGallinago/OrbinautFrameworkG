@@ -5,16 +5,16 @@ using OrbinautFramework3.Objects.Player.Physics.StateChangers;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct PhysicsCore(PlayerData data, IPlayerLogic logic)
+public readonly struct PhysicsCore(PlayerData data, IPlayerLogic logic)
 {
-	private Rolling _rolling = new(data, logic);
-	private Movement _movement = new(data, logic);
-	private Position _position = new(data, logic);
-	private Balancing _balancing = new(data, logic);
-	private Collision _collision = new(data, logic);
-	private SlopeRepel _slopeRepel = new(data, logic);
-	private SlopeResist _slopeResist = new(data, logic);
-	private CameraBounds _cameraBounds = new(data, logic);
+	private readonly Rolling _rolling = new(data, logic);
+	private readonly Movement _movement = new(data, logic);
+	private readonly Position _position = new(data, logic);
+	private readonly Balancing _balancing = new(data, logic);
+	private readonly Collision _collision = new(data, logic);
+	private readonly SlopeRepel _slopeRepel = new(data, logic);
+	private readonly SlopeResist _slopeResist = new(data, logic);
+	private readonly CameraBounds _cameraBounds = new(data, logic);
 
 	public void ProcessCorePhysics()
 	{

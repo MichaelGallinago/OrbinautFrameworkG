@@ -1,10 +1,11 @@
 ﻿using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Sprite;
 
-namespace OrbinautFramework3.Objects.Player.Sprite.Characters;
+namespace OrbinautFramework3.Objects.Player.Characters.Sonic;
 
-[GlobalClass]
+[Tool, GlobalClass]
 public partial class SonicSpriteLogic : SpriteLogic
 {
     protected override void Animate()
