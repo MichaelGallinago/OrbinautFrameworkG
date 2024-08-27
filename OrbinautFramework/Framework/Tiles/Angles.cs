@@ -43,7 +43,8 @@ public static class Angles
     
     public static Quadrant GetQuadrant(float angle)
     {
-        return (Quadrant)(Mathf.FloorToInt(angle % 360f + 45f - Constants.AngleIncrement) / 90 & 3);
+        angle = angle % 360f + (angle < 0f ? 405f : 45f);
+        return (Quadrant)(Mathf.FloorToInt(angle - Constants.AngleIncrement) / 90 & 3);
     }
     
     public static float GetVector256(Vector2 distance)

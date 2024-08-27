@@ -16,9 +16,10 @@ public partial class PlayerSpawner : Sprite2D
         Amy = 1 << Types.Amy,
         All = Sonic | Tails | Knuckles | Amy
     }
-
+    
     [Export] private AllowedTypes _allowedTypes = AllowedTypes.All;
     [Export] private Vector2 _cpuOffset;
+    [Export] private PlayerPrefabs _playerPrefabs;
     
     public override void _Process(double delta)
     {
@@ -41,14 +42,12 @@ public partial class PlayerSpawner : Sprite2D
             SpawnPlayer(type, offsetPosition);
         }
     }
-
-    private static void SpawnPlayer(Types type, Vector2 position)
+    
+    private void SpawnPlayer(Types type, Vector2 position)
     {
-        PackedScene packedPlayer = Scene.Instance.PlayerPrefabs.Get(type);
-        if (packedPlayer.Instantiate() is not PlayerNode player) return;
+        if (_playerPrefabs.Get(type).Instantiate() is not PlayerNode player) return;
         
         player.Position = position;
         Scene.Instance.AddChild(player);
-        //Scene.Instance.CallDeferred("add_child", player);
     }
 }

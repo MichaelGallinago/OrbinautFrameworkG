@@ -12,17 +12,18 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 {
-    public void Kill()
+	public void Kill() => Kill(SoundStorage.Hurt);
+	
+    public void Kill(AudioStream sound)
     {
     	if (data.Death.IsDead) return;
     	
 	    logic.ResetState();
-    	AudioPlayer.Sound.Play(SoundStorage.Hurt);
-
+    	AudioPlayer.Sound.Play(sound);
+	    
     	if (data.Id == 0)
     	{
     		Scene.Instance.State = Scene.States.StopObjects;
-    		
     		SharedData.PlayerShield = ShieldContainer.Types.None;
     	}
     	
@@ -42,14 +43,16 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
     		camera.IsMovementAllowed = false;
     	}
     }
+
+    public void Hurt(float positionX) => Hurt(positionX, SoundStorage.Hurt);
     
-    public void Hurt(float positionX = 0f)
+    public void Hurt(float positionX, AudioStream sound)
     {
     	if (data.Damage.IsInvincible || logic.ControlType.IsDebugMode) return;
 
     	if (data.Id == 0 && SharedData.PlayerRings == 0 && SharedData.PlayerShield == ShieldContainer.Types.None)
     	{
-    		Kill();
+    		Kill(sound);
     		return;
     	}
     	
@@ -79,7 +82,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
     			SharedData.PlayerShield = ShieldContainer.Types.None;
     		}
     		
-    		AudioPlayer.Sound.Play(SoundStorage.Hurt);
+    		AudioPlayer.Sound.Play(sound);
     		return;
     	}
     	

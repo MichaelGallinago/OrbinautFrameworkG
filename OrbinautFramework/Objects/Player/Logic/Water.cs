@@ -79,7 +79,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 		AirTimerStates previousState = GetAirTimerState(data.Water.AirTimer);
 		if (data.Water.AirTimer > 0f)
 		{
-			data.Water.AirTimer -= Scene.Instance.ProcessSpeed;
+			data.Water.AirTimer -= Scene.Instance.Speed;
 		}
 
 		AirTimerStates state = GetAirTimerState(data.Water.AirTimer);

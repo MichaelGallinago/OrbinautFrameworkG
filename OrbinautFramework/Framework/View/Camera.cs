@@ -236,7 +236,7 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (!IsMovementAllowed || Scene.Instance.State == Scene.States.Paused) return;
 		
-		float processSpeed = Scene.Instance.ProcessSpeed;
+		float processSpeed = Scene.Instance.Speed;
 
 		FollowTarget(processSpeed);
 		UpdateShakeOffset(processSpeed);

@@ -80,7 +80,7 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
     	// Wait 60 steps, then restart
     	if (data.Death.RestartTimer > 0f)
     	{
-    		data.Death.RestartTimer -= Scene.Instance.ProcessSpeed;
+    		data.Death.RestartTimer -= Scene.Instance.Speed;
     		if (data.Death.RestartTimer > 0f) return;
     		AudioPlayer.Music.StopAllWithMute(0.5f);
     				

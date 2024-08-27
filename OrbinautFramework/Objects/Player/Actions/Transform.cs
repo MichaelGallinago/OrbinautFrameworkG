@@ -36,7 +36,7 @@ public struct Transform(PlayerData data)
     
     public States LatePerform()
     {
-        _timer -= Scene.Instance.ProcessSpeed;
+        _timer -= Scene.Instance.Speed;
         if (_timer > 0f) return States.Transform;
         
         data.Collision.IsObjectInteractionEnabled = true;

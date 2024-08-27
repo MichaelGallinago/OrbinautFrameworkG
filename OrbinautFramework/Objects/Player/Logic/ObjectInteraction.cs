@@ -121,8 +121,8 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		
 		if (heightMap is not { Length: > 0 }) return 0;
 
-		int distance = 
-			Mathf.FloorToInt(data.Node.Position.X - _solidObjectData.Position.X) * (_solidObjectData.Target.Scale.X >= 0 ? 1 : -1);
+		int sign = _solidObjectData.Target.Scale.X >= 0 ? 1 : -1;
+		int distance = sign * Mathf.FloorToInt(data.Node.Position.X - _solidObjectData.Position.X);
 		
 		int index = Math.Clamp(distance + _solidObjectData.Target.SolidBox.Radius.X, 0, heightMap.Length - 1);
 		

@@ -77,7 +77,7 @@ public partial class Bridge : SolidNode
 
 	    UpdateLogPositions();
 
-	    UpdateAngle(isPlayerTouch, Scene.Instance.ProcessSpeed);
+	    UpdateAngle(isPlayerTouch, Scene.Instance.Speed);
 		
 	    QueueRedraw();
     }

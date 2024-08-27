@@ -114,4 +114,4 @@ _offsets = {
 "Fly": Vector2(-6, -16),
 "Idle": Vector2(-14, 5)
 }
-_cullSize = Vector2i(0, 0)
+CullSize = Vector2i(0, 0)

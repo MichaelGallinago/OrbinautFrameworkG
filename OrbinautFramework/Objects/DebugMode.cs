@@ -123,7 +123,7 @@ public class DebugMode(IEditor editor)
 		
 		Vector2 position = editor.Position;
 
-		float speed = _speed * Scene.Instance.ProcessSpeed;
+		float speed = _speed * Scene.Instance.Speed;
 
 		if (input.Up) position.Y -= speed;
 		if (input.Down) position.Y += speed;

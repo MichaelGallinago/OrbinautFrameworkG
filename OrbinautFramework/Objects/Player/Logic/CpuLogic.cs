@@ -133,7 +133,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		if (distance.X != 0)
 		{
 			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
-			velocityX *= Scene.Instance.ProcessSpeed;
+			velocityX *= Scene.Instance.Speed;
 			
 			//TODO: check this
 			if (distance.X >= 0)
@@ -168,7 +168,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 
 		if (distance.Y != 0)
 		{
-			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.ProcessSpeed;
+			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.Speed;
 		}
 
 		data.Node.Position += positionOffset;
@@ -190,7 +190,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		// Exit if CPU logic is disabled
 		if (data.Cpu.InputTimer > 0f)
 		{
-			data.Cpu.InputTimer -= Scene.Instance.ProcessSpeed;
+			data.Cpu.InputTimer -= Scene.Instance.Speed;
 			if (!data.Input.NoControl) return;
 		}
 		
@@ -339,7 +339,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			return false;
 		}
 		
-		data.Cpu.RespawnTimer += Scene.Instance.ProcessSpeed;
+		data.Cpu.RespawnTimer += Scene.Instance.Speed;
 		if (data.Cpu.RespawnTimer < 300f)
 		{
 			if (!data.Collision.OnObject.IsInstanceValid()) return false;

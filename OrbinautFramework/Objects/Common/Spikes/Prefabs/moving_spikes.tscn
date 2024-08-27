@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://b4m4b401guh28"]
+
+[ext_resource type="PackedScene" uid="uid://bifod3tgod01h" path="res://Objects/Common/Spikes/Prefabs/spikes.tscn" id="1_ale6i"]
+[ext_resource type="Script" path="res://Objects/Common/Spikes/MovingSpikes.cs" id="2_wbepg"]
+
+[node name="MovingSpikes" instance=ExtResource("1_ale6i")]
+script = ExtResource("2_wbepg")
+_isMoving = true
+_retractDistance = 32
+CullingType = 2

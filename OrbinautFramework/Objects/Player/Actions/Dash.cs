@@ -50,10 +50,10 @@ public struct Dash(PlayerData data)
     	
     	if (_charge < ChargeLimit)
     	{
-    		_charge += Scene.Instance.ProcessSpeed;
+    		_charge += Scene.Instance.Speed;
     	}
 
-    	float acceleration = 0.390625f * (float)data.Visual.Facing * Scene.Instance.ProcessSpeed;
+    	float acceleration = 0.390625f * (float)data.Visual.Facing * Scene.Instance.Speed;
 	    float launchSpeed = data.Item.SpeedTimer > 0f || data.Super.IsSuper ? 1.5f : 2f;
     	launchSpeed *= data.Physics.AccelerationTop;
 	    

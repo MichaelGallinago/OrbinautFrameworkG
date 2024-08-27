@@ -9,9 +9,7 @@ public partial class AdvancedSpriteFrames : SpriteFrames
 {
     [Export] private Godot.Collections.Dictionary<StringName, int> _frameLoops = [];
     [Export] private Godot.Collections.Dictionary<StringName, Vector2> _offsets = [];
-    [Export] private Vector2I _cullSize = Vector2I.Zero;
-    
-    public Vector2I CullSize => _cullSize;
+    [Export] public Vector2I CullSize { get; private set; } = Vector2I.Zero;
 
     public void RemoveAnimationOffset(StringName animation)
     {
@@ -76,8 +74,8 @@ public partial class AdvancedSpriteFrames : SpriteFrames
 
     private void RefreshCullSize()
     {
-        int width = _cullSize.X;
-        int height = _cullSize.Y;
+        int width = CullSize.X;
+        int height = CullSize.Y;
            
         Parallel.ForEach(Animations, animation =>
         {
@@ -93,6 +91,6 @@ public partial class AdvancedSpriteFrames : SpriteFrames
             }
         });
         
-        _cullSize = new Vector2I(width, height);
+        CullSize = new Vector2I(width, height);
     }
 }

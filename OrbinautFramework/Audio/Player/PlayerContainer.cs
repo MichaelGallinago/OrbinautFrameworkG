@@ -120,7 +120,7 @@ public class PlayerContainer
         foreach (AudioStreamPlayer player in _volumeChangeList.Keys)
         {
             (float speed, bool stop) data = _volumeChangeList[player];
-            player.VolumeDb += Scene.Instance.ProcessSpeed * data.speed;
+            player.VolumeDb += Scene.Instance.Speed * data.speed;
             
             switch (player.VolumeDb)
             {

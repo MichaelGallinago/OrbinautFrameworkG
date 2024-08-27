@@ -74,7 +74,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		
 		Angles.Quadrant quadrant = Angles.GetQuadrant(data.Movement.Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
-		float offset = wallDistance / Scene.Instance.ProcessSpeed;
+		float offset = wallDistance / Scene.Instance.Speed;
 		
 		switch (quadrant)
 		{

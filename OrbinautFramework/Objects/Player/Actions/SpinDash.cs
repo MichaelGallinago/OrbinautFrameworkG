@@ -64,7 +64,7 @@ public struct SpinDash(PlayerData data)
     	if (!data.Input.Press.Abc)
     	{
     		//TODO: check math with ProcessSpeed
-		    _charge -= MathF.Floor(_charge * 8f) / 256f * Scene.Instance.ProcessSpeed;
+		    _charge -= MathF.Floor(_charge * 8f) / 256f * Scene.Instance.Speed;
     		return;
     	}
     	

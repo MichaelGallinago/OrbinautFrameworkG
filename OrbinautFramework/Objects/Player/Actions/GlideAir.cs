@@ -67,7 +67,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 	
 	private void TurnAroundAir()
 	{
-		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Instance.Speed;
 		if (data.Input.Down.Left && !Mathf.IsZeroApprox(_glideAngle))
 		{
 			if (_glideAngle > 0f)

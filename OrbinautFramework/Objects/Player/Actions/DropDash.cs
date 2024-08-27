@@ -65,7 +65,7 @@ public struct DropDash(PlayerData data)
     private void Charge()
     {
 	    data.Movement.IsAirLock = false;		
-	    _charge += Scene.Instance.ProcessSpeed;
+	    _charge += Scene.Instance.Speed;
 			
 	    if (_charge < MaxCharge || data.Sprite.Animation == Animations.DropDash) return;
 			

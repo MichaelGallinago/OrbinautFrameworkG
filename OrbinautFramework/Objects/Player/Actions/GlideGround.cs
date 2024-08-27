@@ -80,17 +80,17 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
 
     private void SpawnDustParticles()
     {
-        if (_dustTimer % 4f < Scene.Instance.ProcessSpeed)
+        if (_dustTimer % 4f < Scene.Instance.Speed)
         {
             //TODO: obj_dust_skid
             //instance_create(x, y + data.Collision.Radius.Y, obj_dust_skid);
         }
 				
-        if (_dustTimer > 0f && _dustTimer % 8f < Scene.Instance.ProcessSpeed)
+        if (_dustTimer > 0f && _dustTimer % 8f < Scene.Instance.Speed)
         {
             AudioPlayer.Sound.Play(SoundStorage.Slide);
         }
 					
-        _dustTimer += Scene.Instance.ProcessSpeed;
+        _dustTimer += Scene.Instance.Speed;
     }
 }

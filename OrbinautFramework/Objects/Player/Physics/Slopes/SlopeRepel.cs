@@ -15,7 +15,7 @@ public readonly struct SlopeRepel(PlayerData data, IPlayerLogic logic)
 	
         if (data.Movement.GroundLockTimer > 0f)
         {
-            data.Movement.GroundLockTimer -= Scene.Instance.ProcessSpeed;
+            data.Movement.GroundLockTimer -= Scene.Instance.Speed;
             return;
         }
 
