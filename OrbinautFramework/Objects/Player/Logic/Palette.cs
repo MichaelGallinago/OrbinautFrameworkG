@@ -4,7 +4,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct Palette(PlayerData data)
+public readonly struct Palette(PlayerData data)
 {
 	private ReadOnlySpan<int> PlayerColourIds => data.Node.Type switch
 	{

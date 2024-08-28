@@ -37,7 +37,7 @@ public struct HammerDash(PlayerData data)
 		
         if (!data.Input.Down.Abc) return States.Default;
 		
-        _timer += Scene.Instance.ProcessSpeed;
+        _timer += Scene.Instance.Speed;
         if (_timer >= 60f) return States.Default;
 
         MovementData movement = data.Movement;

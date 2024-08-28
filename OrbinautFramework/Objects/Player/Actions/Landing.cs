@@ -8,7 +8,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
 {

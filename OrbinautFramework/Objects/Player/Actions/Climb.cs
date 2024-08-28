@@ -142,7 +142,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Input.Down.Up)
 		{
-			_animationValue += Scene.Instance.ProcessSpeed;
+			_animationValue += Scene.Instance.Speed;
 			if (_animationValue > maxValue)
 			{
 				_animationValue = 0f;
@@ -154,7 +154,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 		
 		if (data.Input.Down.Down)
 		{
-			_animationValue -= Scene.Instance.ProcessSpeed;
+			_animationValue -= Scene.Instance.Speed;
 			if (_animationValue < 0f)
 			{
 				_animationValue = maxValue;

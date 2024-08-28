@@ -9,7 +9,7 @@ public partial class Piece(Texture2D texture, float waitTimer, float gravity, Ve
 {
     public override void _Process(double delta)
     {
-        waitTimer -= Scene.Instance.ProcessSpeed;
+        waitTimer -= Scene.Instance.Speed;
         if (waitTimer > 0f) return;
 
         Fall();
@@ -20,9 +20,9 @@ public partial class Piece(Texture2D texture, float waitTimer, float gravity, Ve
     private void Fall()
     {
         //TODO: fix this
-        float halfAcceleration = gravity * Scene.Instance.ProcessSpeed * 0.5f;
+        float halfAcceleration = gravity * Scene.Instance.Speed * 0.5f;
         speed.Y += halfAcceleration;
-        Position += speed * Scene.Instance.ProcessSpeed;
+        Position += speed * Scene.Instance.Speed;
         speed.Y += halfAcceleration;
     }
 }

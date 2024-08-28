@@ -19,7 +19,6 @@ public partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
 		if (Engine.IsEditorHint()) return;
 #endif
 		AnimationFinished += _spriteLogic.OnFinished;
-		AnimationChanged += _spriteLogic.UpdateData;
 	}
 	
 	public void Process() => _spriteLogic.Process();

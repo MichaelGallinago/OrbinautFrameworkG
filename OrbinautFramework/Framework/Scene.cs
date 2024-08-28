@@ -18,8 +18,8 @@ public partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
-    [Export] public PlayerPrefabs PlayerPrefabs { get; private set; }
     [Export] public PackedScene[] DebugModePrefabs { get; private set; }
+    [Export] public Vector2I InitialSize { get; private set; }
     
     public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }
@@ -28,7 +28,7 @@ public partial class Scene : Node2D
     public World2D World2D { get; private set; }
     public bool IsStage { get; protected set; }
     public ObjectCuller Culler { get; } = new();
-    public float ProcessSpeed { get; private set; }
+    public float Speed { get; private set; }
     public float RingSpillTimer { get; set; }
     public bool AllowPause { get; set; }
     public States State { get; set; } = States.Normal;
@@ -55,7 +55,7 @@ public partial class Scene : Node2D
         AddChild(_frameEnd);
         
         Tree = GetTree();
-
+        
         AttachCamerasToPlayer();
         
 #if DEBUG
@@ -82,11 +82,11 @@ public partial class Scene : Node2D
 
     public override void _Process(double deltaTime)
     {
-        ProcessSpeed = Engine.MaxFps is <= 60 and > 0 ? 1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
+        Speed = Engine.MaxFps is <= 60 and > 0 ? 1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
         
         if (State != States.Paused)
         {
-            Time += ProcessSpeed;
+            Time += Speed;
         }
         
         Culler.EarlyCull();
@@ -98,8 +98,8 @@ public partial class Scene : Node2D
         }
     }
     
-    public bool IsTimePeriodLooped(float period) => Time % period - ProcessSpeed < 0f;
-    public bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - ProcessSpeed < 0f;
+    public bool IsTimePeriodLooped(float period) => Time % period - Speed < 0f;
+    public bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - Speed < 0f;
 
     private void AttachCamerasToPlayer()
     {

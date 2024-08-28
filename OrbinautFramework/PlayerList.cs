@@ -1,34 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
-using OrbinautFramework3.Objects.Player;
+using OrbinautFramework3.Framework.MultiTypeDelegate;
 using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3;
 
-public readonly struct PlayerList()
+public readonly struct PlayerList
 {
+    private const byte BasePlayerCapacity = 4;
+    
     public ReadOnlySpan<IPlayer> Values => CollectionsMarshal.AsSpan(_players);
+    public IMultiTypeEvent<IPlayerCountObserver> CountChanged { get; }
     public int Count => _players.Count;
     
-    private readonly List<IPlayer> _players = new(4);
-    
-    public void Add(IPlayer logic)
+    private readonly MultiTypeDelegate<IPlayerCountObserver, int> _countChanged = new(BasePlayerCapacity);
+    private readonly List<IPlayer> _players = new(BasePlayerCapacity);
+
+    public PlayerList()
     {
-        logic.Data.Id = _players.Count;
-        _players.Add(logic);
+        CountChanged = _countChanged;
     }
     
-    public void Remove(IPlayer logic)
+    public void Add(IPlayer player)
     {
-        _players.Remove(logic);
-        for (int i = logic.Data.Id; i < _players.Count; i++)
+        player.Data.Id = _players.Count;
+        _players.Add(player);
+        _countChanged.Invoke(_players.Count);
+    }
+    
+    public void Remove(IPlayer player)
+    {
+        _players.Remove(player);
+        for (int i = player.Data.Id; i < _players.Count; i++)
         {
             _players[i].Data.Id--;
         }
+        _countChanged.Invoke(_players.Count);
     }
 
-    public void MovePlayer(int fromIndex, int toIndex)
+    public void MovePlayer(int fromIndex, int toIndex) //TODO: use this
     {
         if (fromIndex >= _players.Count || toIndex >= _players.Count)
         {
@@ -45,5 +57,5 @@ public readonly struct PlayerList()
         _players[fromIndex] = secondPlayer;
     }
 
-    public IPlayer First() => _players[0];
+    public IPlayer FirstOrDefault() => _players.FirstOrDefault();
 }

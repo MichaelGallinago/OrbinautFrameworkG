@@ -51,7 +51,7 @@ public struct Flight(PlayerData data)
     {
 	    if (_flightTimer > 0f)
 	    {
-		    _flightTimer -= Scene.Instance.ProcessSpeed;
+		    _flightTimer -= Scene.Instance.Speed;
 	    }
     }
     
@@ -76,7 +76,7 @@ public struct Flight(PlayerData data)
     	
     	data.Movement.Gravity = GravityType.TailsUp;
     			
-    	_ascendTimer += Scene.Instance.ProcessSpeed;
+    	_ascendTimer += Scene.Instance.Speed;
     	if (_ascendTimer >= 31f)
     	{
     		_ascendTimer = 0f;

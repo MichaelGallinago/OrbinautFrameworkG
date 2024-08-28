@@ -6,40 +6,46 @@ using SolidNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.SolidNod
 
 namespace OrbinautFramework3.Objects.Common.Bridge;
 
-public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) : SolidNode
+public partial class Bridge : SolidNode
 {
+	[Export] private BridgeEditor _editor;
+	
+	private Texture2D _logTexture;
+	private byte _logAmount;
+	private byte _logWidth;
+	private short _logHalfWidth;
+	
 	private int _width;
 	private int _maxDip;
 	private float _angle;
     private int _activeLogId;
 
     private Vector2[] _logPositions;
-    private int _logSizeHalf;
     private int[] _dip;
 
-    public Bridge() : this(null, 0, 0) {}
-    
     public override void _Ready()
     {
-        _width = logAmount * logSize;
-        _logPositions = new Vector2[logAmount];
-        _dip = new int[logAmount];
+	    _logAmount = _editor.LogAmount;
+	    _logWidth = _editor.LogWidth;
+	    _logTexture = _editor.LogTexture;
+	    
+	    _editor.QueueFree();
+	    
+	    _width = _logWidth * _logAmount;
+	    _logHalfWidth = (byte)(_logWidth / 2);
+	    _logPositions = new Vector2[_logAmount];
+	    _dip = new int[_logAmount];
+	    
+	    int halfWidth = _logAmount * _logHalfWidth - _logHalfWidth;
+	    for (var i = 0; i < _logAmount; i++)
+	    {
+		    _logPositions[i] = new Vector2(_logWidth * i - halfWidth, 0f);
+		    _dip[i] = (i < _logAmount / 2 ? i + 1 : _logAmount - i) * 2;
+	    }
         
-        _logSizeHalf = logSize / 2;
-        int halfWidth = logAmount * _logSizeHalf - _logSizeHalf;
-        for (var i = 0; i < logAmount; i++)
-        {
-            _logPositions[i] = new Vector2(logSize * i - halfWidth, 0f);
-            _dip[i] = (i < logAmount / 2 ? i + 1 : logAmount - i) * 2;
-        }
-        
-        // Player should not balance on this object
-        SolidBox.NoBalance = true;
-
-        // Properties
-        SolidBox.Set(logAmount * _logSizeHalf, _logSizeHalf);
+	    SolidBox.Set(_logAmount * _logHalfWidth, _logHalfWidth);
     }
-    
+
     public override void _Process(double delta)
     {
 	    var maxDip = 0;
@@ -54,7 +60,7 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 		    isPlayerTouch = true;
 			
 		    int activeLogId = Math.Clamp(
-			    ((int)(player.Position.X - Position.X) + logAmount * _logSizeHalf) / logSize + 1, 1, logAmount);
+			    ((int)(player.Position.X - Position.X) + _logAmount * _logHalfWidth) / _logWidth + 1, 1, _logAmount);
 				
 		    int dip = _dip[activeLogId - 1];
 		    if (dip > maxDip)
@@ -71,29 +77,31 @@ public partial class Bridge(Texture2D logTexture, byte logAmount, int logSize) :
 
 	    UpdateLogPositions();
 
-	    UpdateAngle(isPlayerTouch, Scene.Instance.ProcessSpeed);
+	    UpdateAngle(isPlayerTouch, Scene.Instance.Speed);
 		
 	    QueueRedraw();
     }
 
     public override void _Draw()
     {
-        for (var i = 0; i < logAmount; i++)
+	    if (_logTexture == null) return;
+	    
+        for (var i = 0; i < _logAmount; i++)
         {
-            DrawTexture(logTexture, _logPositions[i]);
+            DrawTexture(_logTexture, _logPositions[i]);
         }
     }
     
     private void UpdateLogPositions()
     {
 	    float sine = MathF.Sin(Mathf.DegToRad(_angle));
-	    for (var i = 0; i < logAmount; i++)
+	    for (var i = 0; i < _logAmount; i++)
 	    {
 		    float logDifference = Math.Abs(i - _activeLogId + 1);
-		    float logDistance = 1f - logDifference / (i < _activeLogId ? _activeLogId : logAmount - _activeLogId + 1);
-			
-		    _logPositions[i].Y = -_logSizeHalf +
-				MathF.Round(_maxDip * MathF.Sin(Mathf.DegToRad(90 * logDistance)) * sine);
+		    float logDistance = 1f - logDifference / (i < _activeLogId ? _activeLogId : _logAmount - _activeLogId + 1);
+
+		    float dip = MathF.Round(_maxDip * MathF.Sin(Mathf.DegToRad(90f * logDistance)) * sine);
+		    _logPositions[i].Y = -_logHalfWidth + dip;
 	    }
     }
 

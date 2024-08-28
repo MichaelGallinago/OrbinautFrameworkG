@@ -15,9 +15,14 @@ public interface IPlayerSprite
     Animations Animation
     {
         get => Data.Animation; //TODO: remove this somehow?
-        set => Data.Animation = value; 
+        set
+        {
+            Data.Animation = value;
+            OnAnimationChanged(value);
+        }
     }
-    
+
     bool CheckInCamera(ICamera camera) => Node.CheckInCamera(camera);
     bool CheckInCameras() => Node.CheckInCameras();
+    protected void OnAnimationChanged(Animations animation);
 }

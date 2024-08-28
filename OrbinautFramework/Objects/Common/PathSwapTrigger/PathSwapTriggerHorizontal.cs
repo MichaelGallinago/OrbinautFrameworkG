@@ -15,20 +15,13 @@ public partial class PathSwapTriggerHorizontal : PathSwapTrigger
         Borders += Vector2.One * Position.Y;
     }
 
-    protected override void UpdatePlayerTileLayer(PlayerData player)
+    protected override Constants.TileLayers? GetTileLayer(Vector2I position, Vector2I previousPosition)
     {
-        var playerPosition = (Vector2I)player.Node.Position;
+        if (position.Y < Borders.X || position.Y >= Borders.Y) return null;
         
-        if (playerPosition.Y < Borders.X || playerPosition.Y >= Borders.Y) return;
+        if (previousPosition.X < Position.X && position.X >= Position.X) return _layerRight;
+        if (previousPosition.X >= Position.X && position.X < Position.X) return _layerLeft;
         
-        var previousPositionX = (int)player.Node.PreviousPosition.X;
-        if (previousPositionX < Position.X && playerPosition.X >= Position.X)
-        {
-            player.Collision.TileLayer = _layerRight;
-        }
-        else if (previousPositionX >= Position.X && playerPosition.X < Position.X)
-        {
-            player.Collision.TileLayer = _layerLeft;
-        }
+        return null;
     }
 }

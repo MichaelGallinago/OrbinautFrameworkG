@@ -29,13 +29,6 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
         Data.IsFinished = false;
     }
     
-    public void UpdateData()
-    {
-        UpdateSpeed();
-        UpdateType();
-        Data.FrameCount = Node.SpriteFrames.GetFrameCount(Node.Animation);
-    }
-    
     public virtual void OnFinished()
     {
         Data.IsFinished = true;
@@ -47,6 +40,13 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
                 Math.Abs(Player.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold => Animations.Move, 
             _ => Data.Animation
         };
+    }
+
+    public void OnAnimationChanged(Animations animation)
+    {
+        UpdateSpeed();
+        UpdateType();
+        Data.FrameCount = Node.SpriteFrames.GetFrameCount(Data.Type.ToStringFast());
     }
     
     protected abstract void Animate();

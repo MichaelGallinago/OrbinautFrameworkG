@@ -27,7 +27,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 	{
 		if (Mathf.IsEqualApprox(data.Movement.Angle, 0f)) return;
 		
-		float speed = Angles.ByteAngleStep * Scene.Instance.ProcessSpeed;
+		float speed = Angles.ByteAngleStep * Scene.Instance.Speed;
 		data.Movement.Angle += data.Movement.Angle >= 180f ? speed : -speed;
 		
 		if (data.Movement.Angle is < 0f or >= 360f)

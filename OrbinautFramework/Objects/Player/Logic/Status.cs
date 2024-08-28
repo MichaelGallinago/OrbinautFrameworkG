@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public struct Status(PlayerData data, IPlayerLogic logic)
+public readonly struct Status(PlayerData data, IPlayerLogic logic)
 {
     public void Update()
     {
@@ -31,25 +31,25 @@ public struct Status(PlayerData data, IPlayerLogic logic)
 		if (data.Sprite.Animation != Animations.Skid) return;
 		
 		//TODO: fix loop on stutter (maybe PreviousProcessSpeed?)
-		if (data.Visual.DustTimer % 4f < Scene.Instance.ProcessSpeed)
+		if (data.Visual.DustTimer % 4f < Scene.Instance.Speed)
 		{
 			// TODO: make obj_dust_skid
 			//instance_create(x, y + Radius.Y, obj_dust_skid);
 		}
-		data.Visual.DustTimer += Scene.Instance.ProcessSpeed;
+		data.Visual.DustTimer += Scene.Instance.Speed;
 	}
 
 	private void FlickAfterGettingHit()
 	{
 		if (data.Damage.InvincibilityTimer <= 0f || data.Damage.IsHurt) return;
 		data.Node.Visible = ((int)data.Damage.InvincibilityTimer & 4) > 0 || data.Damage.InvincibilityTimer <= 0f;
-		data.Damage.InvincibilityTimer -= Scene.Instance.ProcessSpeed;
+		data.Damage.InvincibilityTimer -= Scene.Instance.Speed;
 	}
 	
 	private float UpdateItemTimer(float timer, AudioStream itemMusic)
 	{
 		if (timer <= 0f) return 0f;
-		timer -= Scene.Instance.ProcessSpeed;
+		timer -= Scene.Instance.Speed;
 		
 		if (timer > 0f) return timer;
 		timer = 0f;
@@ -66,7 +66,7 @@ public struct Status(PlayerData data, IPlayerLogic logic)
 	{
 		if (!data.Super.IsSuper) return;
 
-		float newSuperTimer = data.Super.Timer - Scene.Instance.ProcessSpeed;
+		float newSuperTimer = data.Super.Timer - Scene.Instance.Speed;
 		if (newSuperTimer > 0f)
 		{
 			data.Super.Timer = newSuperTimer;

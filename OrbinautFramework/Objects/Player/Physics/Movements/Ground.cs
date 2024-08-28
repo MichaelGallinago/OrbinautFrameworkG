@@ -1,4 +1,5 @@
 ﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
@@ -9,7 +10,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
 
-public struct Ground(PlayerData data, IPlayerLogic logic)
+public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 {
     public const float SkidSpeedThreshold = 4f;
     
@@ -17,7 +18,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
     {
         if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
         if (logic.Action is States.SpinDash or States.Dash or States.HammerDash) return;
-
+        
         CancelGlideLandingAnimation();
 		
         if (data.Movement.GroundLockTimer <= 0f)
@@ -114,7 +115,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
     private bool WalkOnGround(Constants.Direction direction)
     {
         var sign = (float)direction;
-		
+        
         if (data.Movement.GroundSpeed * sign < 0f)
         {
             data.Movement.GroundSpeed.Acceleration = sign * data.Physics.Deceleration;
@@ -125,12 +126,12 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 			
             return true;
         }
-
+        
         if (!SharedData.NoSpeedCap || data.Movement.GroundSpeed * sign < data.Physics.AccelerationTop)
         {
             float acceleration = data.Physics.Acceleration;
             data.Movement.GroundSpeed.Acceleration = acceleration * (float)direction;
-			
+            
             switch (direction)
             {
                 case Constants.Direction.Positive: data.Movement.GroundSpeed.SetMin( data.Physics.AccelerationTop); break;

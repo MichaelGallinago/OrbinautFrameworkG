@@ -48,7 +48,7 @@ public struct HammerSpin(PlayerData data)
 
     private void Charge()
     {
-        _charge += Scene.Instance.ProcessSpeed;
+        _charge += Scene.Instance.Speed;
         if (_charge >= DropDash.MaxCharge)
         {
             AudioPlayer.Sound.Play(SoundStorage.Charge3);

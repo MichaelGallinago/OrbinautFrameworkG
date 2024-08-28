@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://3si7gmx3l372"]
+
+[ext_resource type="Script" path="res://Objects/Common/Bridge/Bridge.cs" id="1_phedy"]
+[ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="2_o6ejk"]
+[ext_resource type="Script" path="res://Objects/Common/Bridge/BridgeEditor.cs" id="3_b23gm"]
+
+[sub_resource type="Resource" id="Resource_bqiux"]
+script = ExtResource("2_o6ejk")
+NoBalance = true
+Radius = Vector2i(0, 0)
+Offset = Vector2i(0, 0)
+HeightMapArray = null
+
+[node name="Bridge" type="Node2D" node_paths=PackedStringArray("_editor")]
+z_index = -4
+script = ExtResource("1_phedy")
+_editor = NodePath("BridgeEditor")
+SolidBox = SubResource("Resource_bqiux")
+CullingType = 6
+
+[node name="BridgeEditor" type="Node2D" parent="."]
+script = ExtResource("3_b23gm")

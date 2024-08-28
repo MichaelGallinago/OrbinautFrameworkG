@@ -1,12 +1,14 @@
-﻿using OrbinautFramework3.Framework;
+﻿using Godot;
+using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Actions;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public class PlayerLogic : IPlayer
+public class PlayerLogic : IPlayer, IPlayerCountObserver
 {
     public PlayerData Data { get; }
     public Recorder Recorder { get; }
@@ -19,23 +21,21 @@ public class PlayerLogic : IPlayer
     public DataUtilities DataUtilities { get; }
     public ObjectInteraction ObjectInteraction { get; }
     
-    //private Carry _carry; //TODO: carry
-    private Death _death;
-    private Water _water;
-    private Status _status;
-    private Palette _palette;
     private ActionFsm _actionFsm;
-    private PhysicsCore _physicsCore;
-    private AngleRotation _angleRotation;
-    private CollisionBoxes _collisionBoxes;
-    private Initialization _initialization;
+    
+    //private Carry _carry; //TODO: carry
+    private readonly Death _death;
+    private readonly Water _water;
+    private readonly Status _status;
+    private readonly Palette _palette;
+    private readonly PhysicsCore _physicsCore;
+    private readonly AngleRotation _angleRotation;
+    private readonly CollisionBoxes _collisionBoxes;
+    private readonly Initialization _initialization;
     
     public PlayerLogic(IPlayerNode playerNode, IPlayerSprite sprite)
     {
         Data = new PlayerData(playerNode, sprite);
-        
-        Scene.Instance.Players.Add(this);
-        Recorder.ResizeAll(); //TODO: check correct value
         
         Recorder = new Recorder(Data);
         CarryTargetLogic = new CarryTargetLogic(Data, this);
@@ -47,12 +47,13 @@ public class PlayerLogic : IPlayer
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
+        _actionFsm = new ActionFsm(Data, this);
+        
         //_carry = new Carry(Data, this); //TODO: carry
         _death = new Death(Data, this);
         _water = new Water(Data, this);
         _status = new Status(Data, this);
         _palette = new Palette(Data);
-        _actionFsm = new ActionFsm(Data, this);
         _physicsCore = new PhysicsCore(Data, this);
         _angleRotation = new AngleRotation(Data);
         _collisionBoxes = new CollisionBoxes(Data);
@@ -71,12 +72,6 @@ public class PlayerLogic : IPlayer
         _initialization.Init();
         _initialization.Spawn();
         Recorder.Fill();
-    }
-
-    public void ExitTree()
-    {
-        Scene.Instance.Players.Remove(this);
-        Recorder.ResizeAll();
     }
 
     public void Process()
@@ -121,4 +116,6 @@ public class PlayerLogic : IPlayer
         _actionFsm.LatePerform();
         //_carry.Process(); TODO: carry
     }
+
+    public void OnPlayerCountChanged(int count) => Recorder.Resize(count);
 }

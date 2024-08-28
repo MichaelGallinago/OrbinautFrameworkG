@@ -4,11 +4,11 @@ using OrbinautFramework3.Objects.Player.Physics.Movements;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public struct Movement(PlayerData data, IPlayerLogic logic)
+public readonly struct Movement(PlayerData data, IPlayerLogic logic)
 {
-	private Ground _ground = new(data, logic);
-	private Rolling _rolling = new(data);
-	private Air _air = new(data, logic);
+	private readonly Ground _ground = new(data, logic);
+	private readonly Rolling _rolling = new(data);
+	private readonly Air _air = new(data, logic);
 
 	public void Move()
 	{

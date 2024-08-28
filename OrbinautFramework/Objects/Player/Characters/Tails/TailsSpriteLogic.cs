@@ -1,8 +1,9 @@
 using Godot;
+using OrbinautFramework3.Objects.Player.Sprite;
 
-namespace OrbinautFramework3.Objects.Player.Sprite.Characters;
+namespace OrbinautFramework3.Objects.Player.Characters.Tails;
 
-[GlobalClass]
+[Tool, GlobalClass]
 public partial class TailsSpriteLogic : SpriteLogic
 {
     protected override void Animate()

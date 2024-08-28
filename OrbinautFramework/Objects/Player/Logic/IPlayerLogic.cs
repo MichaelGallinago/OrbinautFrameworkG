@@ -1,6 +1,8 @@
-﻿using OrbinautFramework3.Framework;
+﻿using Godot;
+using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Objects.Player.Actions;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.PlayerActions;
 
@@ -18,7 +20,8 @@ public interface IPlayerLogic : IRecorderStorage
     public ObjectInteraction ObjectInteraction { get; }
     
     void Respawn() => Damage.Respawn();
-    void Hurt(float positionX = 0f) => Damage.Hurt(positionX);
+    void Hurt(float positionX) => Damage.Hurt(positionX);
+    void Hurt(float positionX, AudioStream sound) => Damage.Hurt(positionX, sound);
     void Kill() => Damage.Kill();
     void Land() => Landing.Land();
     void ResetState() => DataUtilities.ResetState();

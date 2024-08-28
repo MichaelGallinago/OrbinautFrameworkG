@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://bwifksf6vle21"]
+[gd_scene load_steps=4 format=3 uid="uid://bwifksf6vle21"]
 
 [ext_resource type="Texture2D" uid="uid://dq75qrva0tkb8" path="res://Objects/Player/Spawner/spawner.png" id="1_615eg"]
 [ext_resource type="Script" path="res://Objects/Player/Spawner/PlayerSpawner.cs" id="2_a3xen"]
+[ext_resource type="Resource" uid="uid://bqx3fytcbnuy5" path="res://Objects/Player/Characters/player_prefabs.tres" id="3_hftic"]
 
 [node name="PlayerSpawner" type="Sprite2D"]
 texture = ExtResource("1_615eg")
 script = ExtResource("2_a3xen")
+_playerPrefabs = ExtResource("3_hftic")

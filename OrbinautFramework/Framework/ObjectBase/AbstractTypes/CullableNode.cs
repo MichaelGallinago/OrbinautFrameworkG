@@ -9,14 +9,14 @@ public partial class CullableNode : Node2D, ICullable, IPosition
         get => _culling;
         set
         {
-            switch (_culling)
+            switch (_culling) //TODO: remove this?
             {
                 case ICullable.Types.None:
-                    ObjectCuller.Local.AddToCulling(this);
+                    ObjectCuller.Local.Add(this);
                     break;
                 default:
                     if (value != ICullable.Types.None) break;
-                    ObjectCuller.Local.RemoveFromCulling(this);
+                    ObjectCuller.Local.Remove(this);
                     break;
             }
 
@@ -40,7 +40,7 @@ public partial class CullableNode : Node2D, ICullable, IPosition
     {
         if (CullingType != ICullable.Types.None)
         {
-            ObjectCuller.Local.AddToCulling(this);
+            ObjectCuller.Local.Add(this);
         }
     }
     
@@ -48,7 +48,7 @@ public partial class CullableNode : Node2D, ICullable, IPosition
     {
         if (CullingType != ICullable.Types.None)
         {
-            ObjectCuller.Local.RemoveFromCulling(this);
+            ObjectCuller.Local.Remove(this);
         }
     }
 }

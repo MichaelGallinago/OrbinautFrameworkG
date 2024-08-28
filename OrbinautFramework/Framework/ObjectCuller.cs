@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Common.Spikes;
 
 namespace OrbinautFramework3.Framework;
 
@@ -12,15 +13,15 @@ public class ObjectCuller
 	private bool _isCullToggled = true;
 	private readonly HashSet<ICullable> _hiddenObjectsInView = [];
 	private readonly HashSet<ICullable> _stoppedObjects = [];
-	public HashSet<ICullable> ActiveObjects { get; } = [];
+	private readonly HashSet<ICullable> _activeObjects = [];
 	
-	public void RemoveFromCulling(ICullable target)
+	public void Remove(ICullable target)
 	{
-		if (ActiveObjects.Remove(target)) return;
+		if (_activeObjects.Remove(target)) return;
 		_stoppedObjects.Remove(target);
 	}
 
-	public void AddToCulling(ICullable target) => ActiveObjects.Add(target);
+	public void Add(ICullable target) => _activeObjects.Add(target);
 	
 	public void EarlyCull()
 	{
@@ -42,13 +43,13 @@ public class ObjectCuller
     {
 	    if (Scene.Instance.State != Scene.States.Paused) return false;
 	    
-	    foreach (ICullable target in ActiveObjects)
+	    foreach (ICullable target in _activeObjects)
 	    {
 		    _stoppedObjects.Add(target);
 		    target.SetProcess(false);
 	    }
 
-	    ActiveObjects.Clear();
+	    _activeObjects.Clear();
 
 	    _isCullToggled = true;
 	    return true;
@@ -65,7 +66,7 @@ public class ObjectCuller
 		    {
 			    if (!camera.CheckPositionInActiveRegion(position)) continue;
 				_stoppedObjects.Remove(target);
-			    ActiveObjects.Add(target);
+			    _activeObjects.Add(target);
 			    target.SetProcess(true);
 			    break;
 		    }
@@ -88,7 +89,7 @@ public class ObjectCuller
 		    }
 	    }
 	    
-	    foreach (ICullable target in ActiveObjects)
+	    foreach (ICullable target in _activeObjects)
 	    {
 		    StopObjectByBehaviour(target);
 	    }
@@ -125,9 +126,9 @@ public class ObjectCuller
 		    if (camera.CheckPositionInActiveRegion(position)) return;
 	    }
 	    
-	    ActiveObjects.Remove(target);
+	    _activeObjects.Remove(target);
 	    target.SetProcess(false);
-
+	    
 	    var respawnPosition = (Vector2I)target.Memento.Position;
 	    foreach (ICamera camera in Views.Instance.Cameras)
 	    {
@@ -149,7 +150,7 @@ public class ObjectCuller
 		    if (camera.CheckXInActiveRegion(position)) return;
 	    }
 
-	    ActiveObjects.Remove(target);
+	    _activeObjects.Remove(target);
 	    target.SetProcess(false);
 	    
 	    var respawnPosition = (int)target.Memento.Position.X;
@@ -173,7 +174,7 @@ public class ObjectCuller
 		    if (camera.CheckYInActiveRegion(position)) return;
 	    }
 	    
-	    ActiveObjects.Remove(target);
+	    _activeObjects.Remove(target);
 	    target.SetProcess(false);
 
 	    var respawnPosition = (int)target.Memento.Position.Y;
@@ -198,7 +199,7 @@ public class ObjectCuller
 	    }
 	    
 	    target.SetProcess(false);
-	    ActiveObjects.Remove(target);
+	    _activeObjects.Remove(target);
 	    _stoppedObjects.Add(target);
     }
 }

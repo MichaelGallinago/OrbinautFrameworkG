@@ -8,7 +8,7 @@ using static OrbinautFramework3.Framework.Constants;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Collisions;
 
-public struct Ground(PlayerData data, IPlayerLogic logic)
+public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 {
 	private const int MinTolerance = 4;
 	private const int MaxTolerance = 14;
@@ -74,7 +74,7 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 		
 		Angles.Quadrant quadrant = Angles.GetQuadrant(data.Movement.Angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
-		float offset = wallDistance / Scene.Instance.ProcessSpeed;
+		float offset = wallDistance / Scene.Instance.Speed;
 		
 		switch (quadrant)
 		{
@@ -99,13 +99,13 @@ public struct Ground(PlayerData data, IPlayerLogic logic)
 	public void CollideFloor()
 	{
 		if (!data.Movement.IsGrounded || data.Collision.OnObject != null) return;
-
+		
 		data.Collision.TileBehaviour = GetTileBehaviour();
 		logic.TileCollider.SetData(
 			(Vector2I)data.Node.Position,
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
-
+		
 		(int distance, float angle) = FindTile();
 		
 		if (GoAirborne(distance)) return;

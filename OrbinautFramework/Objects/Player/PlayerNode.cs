@@ -8,7 +8,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
+public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 {
 	public enum Types : byte //TODO: remove this somehow
 	{
@@ -23,18 +23,27 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
 
 	protected PlayerLogic PlayerLogic;
 
-	public override void _Ready()
+	public override void _EnterTree()
 	{
+		base._EnterTree();
 		PlayerLogic = new PlayerLogic(this, _spriteNode.PlayerSprite);
+		Scene.Instance.Players.Add(PlayerLogic);
+		
 		Memento = new PlayerMemento(this);
 		_spriteNode.SetPlayer(PlayerLogic);
+	}
+
+	public override void _Ready()
+	{
 		Init();
+		Scene.Instance.Players.CountChanged.Subscribe(PlayerLogic);
 	}
 	
 	public override void _ExitTree()
 	{
-		PlayerLogic.ExitTree();
 		base._ExitTree();
+		Scene.Instance.Players.Remove(PlayerLogic);
+		Scene.Instance.Players.CountChanged.Unsubscribe(PlayerLogic);
 	}
 	
 	public override void _Process(double delta)
