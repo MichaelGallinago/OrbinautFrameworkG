@@ -14,7 +14,6 @@ public readonly struct Rolling(PlayerData data, IPlayerLogic logic)
     public void Start()
     {
         if (logic.Action is States.SpinDash or States.HammerDash) return;
-        if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
         if (!data.Movement.IsForcedSpin && (data.Input.Down.Left || data.Input.Down.Right)) return;
 
         if (!CheckSpinPossibility() && !data.Movement.IsForcedSpin) return;

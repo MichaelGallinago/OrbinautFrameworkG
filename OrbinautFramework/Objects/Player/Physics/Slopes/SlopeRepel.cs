@@ -11,7 +11,7 @@ public readonly struct SlopeRepel(PlayerData data, IPlayerLogic logic)
 {
     public void Apply()
     {
-        if (!data.Movement.IsGrounded || data.Collision.IsStickToConvex || logic.Action == States.HammerDash) return;
+        if (data.Collision.IsStickToConvex || logic.Action == States.HammerDash) return;
 	
         if (data.Movement.GroundLockTimer > 0f)
         {

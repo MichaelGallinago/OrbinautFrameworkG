@@ -18,15 +18,33 @@ public readonly struct PhysicsCore(PlayerData data, IPlayerLogic logic)
 
 	public void ProcessCorePhysics()
 	{
-		_slopeResist.Apply();
-		_movement.Move();
-		_balancing.Balance();
-		_collision.CollideWallsGround();
-		_rolling.Start();
+		if (!data.Movement.IsGrounded)
+		{
+			_movement.Air.Move();
+			_cameraBounds.Match();
+			_position.UpdateAir();
+			_collision.Air.Collide();
+			return;
+		}
+
+		if (data.Movement.IsSpinning)
+		{
+			_slopeResist.ResistRoll();
+			_movement.Rolling.Roll();
+			_collision.Ground.CollideWalls();
+		}
+		else
+		{
+			_slopeResist.ResistWalk();
+			_movement.Ground.Move();
+			_balancing.Balance();
+			_collision.Ground.CollideWalls();
+			_rolling.Start();
+		}
+		
 		_cameraBounds.Match();
-		_position.Update();
-		_collision.CollideFloorGround();
+		_position.UpdateGround();
+		_collision.Ground.CollideFloor();
 		_slopeRepel.Apply();
-		_collision.CollideAir();
 	}
 }

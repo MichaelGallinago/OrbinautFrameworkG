@@ -16,7 +16,6 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
     
     public void Move()
     {
-        if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
         if (logic.Action is States.SpinDash or States.Dash or States.HammerDash) return;
         
         CancelGlideLandingAnimation();

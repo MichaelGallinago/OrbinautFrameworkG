@@ -12,7 +12,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 {
 	public void Move()
 	{
-		if (data.Movement.IsGrounded || data.Death.IsDead) return;
+		if (data.Death.IsDead) return;
 		if (logic.Action is States.Carried or States.Climb or 
 		    States.SpinDash or States.GlideAir or States.GlideFall) return;
 

@@ -7,7 +7,16 @@ namespace OrbinautFramework3.Objects.Player.Physics;
 
 public readonly struct Position(PlayerData data, IPlayerLogic logic)
 {
-    public void Update()
+    public void UpdateAir()
+    {
+        Update();
+
+        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
+    }
+    
+    public void UpdateGround() => Update();
+    
+    private void Update()
     {
         if (logic.Action == States.Carried) return;
 		
@@ -18,8 +27,5 @@ public readonly struct Position(PlayerData data, IPlayerLogic logic)
 		
         data.Node.Position = data.Movement.Velocity.CalculateNewPosition(data.Node.Position);
         data.Movement.Velocity.ResetInstantVelocity();
-		
-        if (data.Movement.IsGrounded) return;
-        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
     }
 }
