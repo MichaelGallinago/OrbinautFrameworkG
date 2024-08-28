@@ -8,7 +8,7 @@ using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player;
 
-public abstract partial class PlayerNode : OrbinautNode, IPlayerNode
+public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 {
 	public enum Types : byte //TODO: remove this somehow
 	{

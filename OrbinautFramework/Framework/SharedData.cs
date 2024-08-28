@@ -50,7 +50,7 @@ public static class SharedData
     public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
     public static int RealPlayerCount { get; set; } = 1;
-    public static PlayerNode.Types[] PlayerTypes { get; set; } = [PlayerNode.Types.Sonic, PlayerNode.Types.Tails];
+    public static PlayerNode.Types[] PlayerTypes { get; set; } = [PlayerNode.Types.Sonic]; //[PlayerNode.Types.Sonic, PlayerNode.Types.Tails]; TODO: menu and CPU
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;
     

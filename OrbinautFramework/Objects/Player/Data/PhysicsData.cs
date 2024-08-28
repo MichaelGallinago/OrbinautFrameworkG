@@ -1,4 +1,5 @@
 using System;
+using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Logic;
 
@@ -31,7 +32,7 @@ public class PhysicsData
     public void Update(bool isUnderwater, bool isSuper, PlayerNode.Types playerType, float itemSpeedTimer)
     {
 	    Types type = GetType(itemSpeedTimer > 0f, isUnderwater, isSuper, playerType);
-	    
+	    GD.Print(type);
 	    if (_type == type) return;
 	    _type = type;
 	    
@@ -57,7 +58,7 @@ public class PhysicsData
 
     private static Types GetType(bool isSpeedUp, bool isUnderwater, bool isSuper, PlayerNode.Types playerType)
     {
-	    byte type = 0;
+	    byte type = 1;
 	    
 	    if (isUnderwater)
 	    {

@@ -19,6 +19,7 @@ public partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
     [Export] public PackedScene[] DebugModePrefabs { get; private set; }
+    [Export] public Vector2I InitialSize { get; private set; }
     
     public PlayerList Players { get; } = new();
     public int PlayerCount { get; set; }
@@ -54,7 +55,7 @@ public partial class Scene : Node2D
         AddChild(_frameEnd);
         
         Tree = GetTree();
-
+        
         AttachCamerasToPlayer();
         
 #if DEBUG

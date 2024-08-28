@@ -41,6 +41,8 @@ public partial class PlayerSpawner : Sprite2D
         {
             SpawnPlayer(type, offsetPosition);
         }
+
+        Scene.Instance.Views.AttachCamerasToPlayers();
     }
     
     private void SpawnPlayer(Types type, Vector2 position)

@@ -98,7 +98,7 @@ public partial class Views : Control
         return CollectionsMarshal.AsSpan(_camerasWithUpdatedRegions);
     }
     
-    private void AttachCamerasToPlayers()
+    public void AttachCamerasToPlayers()
     {
         ReadOnlySpan<IPlayer> players = Scene.Instance.Players.Values;
         int number = Math.Min(_cameras.Length, players.Length);

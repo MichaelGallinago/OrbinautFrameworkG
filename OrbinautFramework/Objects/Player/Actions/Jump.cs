@@ -47,6 +47,8 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 		};
 	}
 
+	public States OnLand() => States.Default; //TODO: add static support
+
 	private bool Transform()
 	{
 		if (!data.Input.Press.C || data.Super.IsSuper) return false;
