@@ -99,13 +99,13 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 	public void CollideFloor()
 	{
 		if (!data.Movement.IsGrounded || data.Collision.OnObject != null) return;
-
+		
 		data.Collision.TileBehaviour = GetTileBehaviour();
 		logic.TileCollider.SetData(
 			(Vector2I)data.Node.Position,
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
-
+		
 		(int distance, float angle) = FindTile();
 		
 		if (GoAirborne(distance)) return;
