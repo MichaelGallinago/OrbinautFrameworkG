@@ -32,7 +32,7 @@ public class PhysicsData
     public void Update(bool isUnderwater, bool isSuper, PlayerNode.Types playerType, float itemSpeedTimer)
     {
 	    Types type = GetType(itemSpeedTimer > 0f, isUnderwater, isSuper, playerType);
-	    GD.Print(type);
+	    
 	    if (_type == type) return;
 	    _type = type;
 	    
