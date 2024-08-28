@@ -20,8 +20,6 @@ public partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
 #endif
 		AnimationFinished += _spriteLogic.OnFinished;
 	}
-	
-	public void Process() => _spriteLogic.Process();
 
 	public void SetPlayer(IPlayer player) => _spriteLogic.SetPlayer(player, this);
 	

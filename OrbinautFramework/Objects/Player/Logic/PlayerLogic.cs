@@ -72,6 +72,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _initialization.Init();
         _initialization.Spawn();
         Recorder.Fill();
+        Data.Sprite.Process();
     }
 
     public void Process()
@@ -92,10 +93,12 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
             _status.Update();
             _collisionBoxes.Update();
         }
-		
-        Recorder.Record();
+        
         _angleRotation.Process();
+        Data.Sprite.Process();
+        
         _palette.Process();
+        Recorder.Record();
     }
     
     private void RunControlRoutine()
