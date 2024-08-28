@@ -1,7 +1,6 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
-using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework;
 

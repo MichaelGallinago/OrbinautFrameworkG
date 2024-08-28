@@ -2,8 +2,8 @@
 
 namespace OrbinautFramework3.Framework.ObjectBase;
 
-public interface IResetable
+public interface IResetable : ICullable
 {
-    Vector2 Position { get; set; }
+    new Vector2 Position { get; set; }
     void Reset();
 }

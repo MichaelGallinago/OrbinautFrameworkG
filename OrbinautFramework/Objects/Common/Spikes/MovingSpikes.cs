@@ -2,26 +2,35 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
 
 namespace OrbinautFramework3.Objects.Common.Spikes;
 
-public partial class MovingSpikes : Spikes
+public partial class MovingSpikes : Spikes, IResetable
 {
     [Export] private bool _isMoving = true;
     [Export] private int _retractDistance = 32;
     
+    private Vector2 _initialPosition;
+    private Vector2 _retractMultiplier;
+    
     private float _retractTimer;
     private float _retractOffset;
     private float _retractTarget;
-    private Vector2 _initialPosition;
-    private Vector2 _retractMultiplier;
+
+    public IMemento Memento { get; private set; }
     
     public override void _Ready()
     {
         base._Ready();
+        
+        Memento = new ResetMemento(this);
+        
         _retractMultiplier = new Vector2(MathF.Sin(Rotation), MathF.Cos(Rotation));
         _initialPosition = Position;
+        
+        _retractTarget = _retractDistance;
     }
 
     public override void _Process(double delta)
@@ -32,6 +41,13 @@ public partial class MovingSpikes : Spikes
         }
         
         base._Process(delta);
+    }
+    
+    public void Reset()
+    {
+        _retractTimer = 0f;
+        _retractOffset = 0f;
+        _retractTarget = _retractDistance;
     }
     
     private void Move()
