@@ -31,8 +31,11 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 	    if (data.Water.AirTimer <= 0f)
 	    {
 		    if ((int)data.Node.Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset) return;
-		    
-		    Scene.Instance.State = Scene.States.StopObjects;
+
+		    if (!logic.ControlType.IsCpu)
+		    {
+			    Scene.Instance.State = Scene.States.StopObjects;
+		    }
 	    }
 	    
 #if S3_PHYSICS || SK_PHYSICS
