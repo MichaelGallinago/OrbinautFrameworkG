@@ -174,8 +174,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			
 		AudioPlayer.Sound.Play(SoundStorage.Grab);
 		
-		bool isWallJump = SharedData.SuperstarsTweaks && (data.Input.Down.Up || data.Input.Down.Down);
-		return isWallJump ? States.ClimbWallJump : States.Climb;
+		return States.Climb;
 	}
 	
 	private bool CheckCollisionOnAttaching(int wallRadius, int climbY)

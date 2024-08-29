@@ -31,7 +31,6 @@ public static class SharedData
     public static bool DoubleSpin { get; set; } = true;
     public static bool CdTimer { get; set; } = false;
     public static bool CdCamera { get; set; } = true;
-    public static bool SuperstarsTweaks { get; set; } = true;
 	
     // Orbinaut improvements
     public static byte RotationMode { get; set; } = 1;

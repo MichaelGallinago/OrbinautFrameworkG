@@ -94,11 +94,6 @@ public struct Flight(PlayerData data)
     	}
 	    
     	data.Movement.Gravity = GravityType.TailsDown;
-    	
-    	if (SharedData.SuperstarsTweaks && data.Input.Down.Down)
-    	{
-    		data.Movement.Gravity *= 3f;
-    	}
     }
 
     private void SetAnimation()
