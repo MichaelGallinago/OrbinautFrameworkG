@@ -7,7 +7,6 @@ public class DamageData
 
     public void Init()
     {
-        IsHurt = false;
         IsInvincible = false;
         InvincibilityTimer = 0f;
     }

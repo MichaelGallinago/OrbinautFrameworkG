@@ -16,9 +16,9 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	
     public void Kill(AudioStream sound)
     {
-    	if (data.Death.IsDead) return;
+    	if (data.State == PlayerStates.Death) return;
     	
-	    logic.ResetState();
+	    logic.ResetData();
     	AudioPlayer.Sound.Play(sound);
 	    
     	if (data.Id == 0)
@@ -32,8 +32,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    
 	    logic.Action = States.Default;
     	data.Sprite.Animation = Animations.Death;
-    	data.Death.IsDead = true;
-    	data.Collision.IsObjectInteractionEnabled = false;
+	    data.State = PlayerStates.Death;
     	data.Movement.Gravity = GravityType.Default;
     	data.Movement.Velocity.Vector = new Vector2(0f, -7f);
     	data.Movement.GroundSpeed.Value = 0f;
@@ -48,7 +47,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
     
     public void Hurt(float positionX, AudioStream sound)
     {
-    	if (data.Damage.IsInvincible || logic.ControlType.IsDebugMode) return;
+    	if (data.Damage.IsInvincible || data.State != PlayerStates.Control) return;
 
     	if (data.Id == 0 && SharedData.PlayerRings == 0 && SharedData.PlayerShield == ShieldContainer.Types.None)
     	{
@@ -56,8 +55,9 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
     		return;
     	}
     	
-    	logic.ResetState();
+    	logic.ResetData();
 	    logic.Action = States.Default;
+	    data.State = PlayerStates.Hurt;
 
     	const float velocityX = 2f, velocityY = 4f;
 	    float velocity = data.Node.Position.X - positionX < 0f ? -velocityX : velocityX;
@@ -65,7 +65,6 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    
     	data.Movement.Gravity = GravityType.HurtFall;
     	data.Sprite.Animation = Animations.Hurt;
-    	data.Damage.IsHurt = true;
     	data.Movement.IsAirLock = true;
     	data.Damage.InvincibilityTimer = 120f;
 
@@ -129,8 +128,10 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    AudioPlayer.Sound.Play(SoundStorage.RingLoss);
     }
 
-    public void Respawn()
+    public void Respawn() //TODO: remove repeat in CPU
     {
+	    logic.Init();
+	    
 	    if (!logic.ControlType.IsCpu)
 	    {
 		    if (data.IsCameraTarget(out ICamera camera))

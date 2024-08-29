@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public readonly struct Default(PlayerData data, IPlayerLogic logic)
@@ -31,7 +31,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
     private bool Dash()
     {
         if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
-        if (data.Id > 0 && data.Cpu.InputTimer <= 0f) return false;
+        if (logic.ControlType.IsCpu && data.Cpu.InputTimer <= 0f) return false;
         
         return data.Sprite.Animation == Animations.LookUp && data.Input.Down.Up;
     }

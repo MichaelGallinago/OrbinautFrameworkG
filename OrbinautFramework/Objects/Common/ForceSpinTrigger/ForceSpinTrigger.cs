@@ -23,7 +23,8 @@ public abstract partial class ForceSpinTrigger : Trigger
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player.ControlType.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
+            if (!player.Data.State.IsObjectInteractable()) continue;
+            if (!CheckForcePlayerSpin(player)) continue;
             
             player.Data.Movement.IsForcedRoll = !player.Data.Movement.IsForcedRoll;
             player.Action = ActionFsm.States.Default;

@@ -6,7 +6,7 @@ public class CpuData
 {
     public bool IsJumping { get; set; }
     public float InputTimer { get; set; }
-    public ICpuTarget Target { get; set; }
+    public IPlayer Target { get; set; }
     public float RespawnTimer { get; set; }
     public CpuLogic.States State { get; set; }
     

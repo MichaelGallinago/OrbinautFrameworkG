@@ -43,7 +43,12 @@ public static class Constants
 
 	public enum SolidType : byte
 	{
-		Full, FullReset, Top, TopReset, Sides, ItemBox
+		Full, Top, Sides, ItemBox
+	}
+	
+	public enum AttachType
+	{
+		Default, None, ResetPlayer
 	}
 
 	public enum FadeState : byte

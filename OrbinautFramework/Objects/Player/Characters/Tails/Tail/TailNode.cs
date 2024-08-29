@@ -16,25 +16,26 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 		
 		Offset = Vector2.Zero;
 		
-		switch (player.Animation)
+		switch (player.Data.Sprite.Animation)
 		{
 			case Animations.Idle or Animations.Duck or Animations.LookUp:
 				SetAnimation("Idle");
 				break;
 			
 			case Animations.Fly or Animations.FlyTired:
-				float speed = player.Velocity.Y >= 0f || player.Animation == Animations.FlyTired ? 0.5f : 1f;
+				float speed = player.Data.Movement.Velocity.Y >= 0f || 
+				              player.Data.Sprite.Animation == Animations.FlyTired ? 0.5f : 1f;
 				SetAnimation("Fly", speed);
 				break;
 			
 			case Animations.Push or Animations.Skid or Animations.Spin or 
 				Animations.Grab or Animations.Balance or Animations.SpinDash:
 				var offset = new Vector2I(-23, 0);
-				if (player.Animation is Animations.SpinDash or Animations.Grab)
+				if (player.Data.Sprite.Animation is Animations.SpinDash or Animations.Grab)
 				{
 					offset.X += 5;
 				}
-				else if (player.Animation != Animations.Spin)
+				else if (player.Data.Sprite.Animation != Animations.Spin)
 				{
 					offset += new Vector2I(7, 5);
 				}

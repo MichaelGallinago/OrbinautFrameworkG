@@ -8,7 +8,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public struct DropDash(PlayerData data)
@@ -40,8 +40,6 @@ public struct DropDash(PlayerData data)
     
     public States OnLand()
     {
-    	if (Cancel()) return States.Default;
-    	
     	if (_charge < MaxCharge) return States.Default;
     	
     	data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
@@ -53,7 +51,7 @@ public struct DropDash(PlayerData data)
 	    data.Movement.IsSpinning = true;
     	
     	data.SetCameraDelayX(8f);
-    		
+	    
     	//TODO: obj_dust_dropdash
     	//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
     	AudioPlayer.Sound.Stop(SoundStorage.Charge3);
@@ -112,6 +110,6 @@ public struct DropDash(PlayerData data)
     private bool Cancel()
     {
     	if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return false; 
-	    return !data.Super.IsSuper && !(data.Item.InvincibilityTimer > 0f);
+	    return !data.Super.IsSuper && data.Item.InvincibilityTimer <= 0f;
     }
 }

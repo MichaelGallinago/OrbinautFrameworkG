@@ -6,16 +6,15 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public readonly struct DataUtilities(PlayerData data)
 {
-    public void ResetState()
+    public void ResetData()
     {
-        data.Damage.IsHurt = false;
-		
         data.Movement.IsSpinning = false;
         data.Movement.IsGrounded = false;
+        data.Movement.IsJumping = false;
 		
         data.Visual.SetPushBy = null;
-		
         data.Collision.OnObject = null;
+        
         data.Collision.Radius = data.Collision.RadiusNormal;
     }
 	

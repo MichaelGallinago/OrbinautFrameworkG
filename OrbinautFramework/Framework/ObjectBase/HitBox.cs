@@ -119,7 +119,7 @@ public partial class HitBox : Resource
     
 	public bool CheckPlayerCollision(PlayerData player, Vector2I position, bool isExtraHitBox = false)
 	{
-		if (!player.Collision.IsObjectInteractionEnabled || player.Damage.IsHurt) return false;
+		if (player.State != PlayerStates.Control) return false;
 		IPlayerNode node = player.Node;
 		return CheckCollision(node.HitBox, (Vector2I)node.Position, position, isExtraHitBox);
 	}

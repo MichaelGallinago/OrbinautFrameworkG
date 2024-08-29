@@ -24,7 +24,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Water.IsUnderwater) return false;
 		
-		if ((int)data.Node.Position.Y < Stage.Local.WaterLevel || data.Damage.IsHurt) return true;
+		if ((int)data.Node.Position.Y < Stage.Local.WaterLevel) return true;
 		
 		data.Water.IsUnderwater = true;
 		data.Water.AirTimer = Constants.DefaultAirTimer;
@@ -116,13 +116,12 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	private void ProcessDrown()
 	{
 		AudioPlayer.Sound.Play(SoundStorage.Drown);
-		logic.ResetState();
+		logic.ResetData();
 		logic.Action = States.Default;
 
 		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
 		data.Sprite.Animation = Animations.Drown;
-		data.Death.IsDead = true;
-		data.Collision.IsObjectInteractionEnabled = false;
+		data.State = PlayerStates.Death;
 		data.Movement.Gravity	= GravityType.Underwater;
 		data.Movement.Velocity.Vector = Vector2.Zero;
 		data.Movement.GroundSpeed.Value = 0f;
@@ -135,7 +134,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 
 	private void Leave()
 	{
-		if ((int)data.Node.Position.Y >= Stage.Local.WaterLevel || data.Damage.IsHurt) return;
+		if ((int)data.Node.Position.Y >= Stage.Local.WaterLevel) return;
 
 		data.Water.IsUnderwater = false;
 		ResetGravityOnEdge();

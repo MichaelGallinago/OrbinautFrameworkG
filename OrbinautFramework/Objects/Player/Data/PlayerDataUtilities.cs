@@ -24,9 +24,15 @@ public static class PlayerDataUtilities
         {
             AudioPlayer.Music.Play(MusicStorage.HighSpeed);
         }
-        else if (Stage.Local != null && Stage.Local.Music != null)
+        else if (Stage.Local != null)
         {
-            AudioPlayer.Music.Play(Stage.Local.Music);
+            if (Stage.Local.Music != null)
+            {
+                AudioPlayer.Music.Play(Stage.Local.Music);
+                return;
+            }
+            
+            AudioPlayer.Music.StopAll();
         }
     }
 }

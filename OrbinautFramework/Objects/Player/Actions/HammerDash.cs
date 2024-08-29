@@ -1,13 +1,11 @@
-﻿using System;
-using Godot;
-using OrbinautFramework3.Audio.Player;
+﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public struct HammerDash(PlayerData data)
@@ -32,27 +30,20 @@ public struct HammerDash(PlayerData data)
     
     public States Perform()
     {
-        // Note that ACTION_HAMMERDASH is used for movement logic only so the respective animation
-        // is NOT cleared alongside the action flag. All checks for a Hammer Dash action should refer to its animation
-		
-        if (!data.Input.Down.Abc) return States.Default;
-		
+        // Note that the animation IS NOT cleared, so all Hammer Dash checks are referring to ANI_HAMMERDASH
+        if (data.Movement.GroundSpeed == 0f && _timer > 0f) return States.Default;
+        
         _timer += Scene.Instance.Speed;
         if (_timer >= 60f) return States.Default;
 
-        MovementData movement = data.Movement;
-        
-        if (movement.GroundSpeed == 0f || data.Visual.SetPushBy != null) return States.Default; 
-        if (MathF.Cos(Mathf.DegToRad(movement.Angle)) <= 0f) return States.Default;
+        if (!data.Input.Down.Abc || data.Visual.SetPushBy != null) return States.Default;
+        if (data.Movement.Angle is >= 90f and <= 270f) return States.Default;
         
         TurnAround();
-        data.Sprite.Animation = Animations.HammerDash;
         SetSpeedAndVelocity();
         
         return States.HammerDash;
     }
-
-    public States OnLand() => Perform();
 
     private void TurnAround()
     {
@@ -65,10 +56,10 @@ public struct HammerDash(PlayerData data)
 
     private void SetSpeedAndVelocity()
     {
+        if (!data.Movement.IsGrounded) return;
+        
         const float hammerDashSpeed = 6f;
         data.Movement.GroundSpeed.Value = hammerDashSpeed * (float)data.Visual.Facing;
-        
-        if (!data.Movement.IsGrounded) return;
         data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     }
 }

@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public struct SpinDash(PlayerData data)
@@ -43,8 +43,8 @@ public struct SpinDash(PlayerData data)
 	    data.SetCameraDelayX(16f);
     	
 	    data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
-	    data.Sprite.Animation = Animations.Spin;
 	    data.Collision.Radius = data.Collision.RadiusSpin;
+	    data.Sprite.Animation = Animations.Spin;
 	    data.Movement.IsSpinning = true;
 
 	    float baseSpeed = data.Super.IsSuper ? 11f : 8f;
@@ -62,8 +62,7 @@ public struct SpinDash(PlayerData data)
     private void Charge()
     {
     	if (!data.Input.Press.Abc)
-    	{
-    		//TODO: check math with ProcessSpeed
+	    {
 		    _charge -= MathF.Floor(_charge * 8f) / 256f * Scene.Instance.Speed;
     		return;
     	}
@@ -71,7 +70,7 @@ public struct SpinDash(PlayerData data)
 	    _charge = Math.Min(_charge + 2f, 8f);
 
 	    bool changePitch = AudioPlayer.Sound.IsPlaying(SoundStorage.Charge) && _charge > 0f;
-    	_soundPitch = changePitch ? Math.Min(_soundPitch + 0.1f, 1.5f) : 1f;
+    	_soundPitch = changePitch ? Math.Min(_soundPitch + 0.1f * Scene.Instance.Speed, 1.5f) : 1f;
     			
     	AudioPlayer.Sound.PlayPitched(SoundStorage.Charge, _soundPitch);
     	data.Visual.OverrideFrame = 0;

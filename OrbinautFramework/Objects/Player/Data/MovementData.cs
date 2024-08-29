@@ -23,7 +23,6 @@ public class MovementData
         IsGrounded = true;
         IsJumping = false;
         IsForcedRoll = false;
-        IsControlRoutineEnabled = true;
         
         Gravity = GravityType.Default;
         Velocity.Vector = Vector2.Zero;

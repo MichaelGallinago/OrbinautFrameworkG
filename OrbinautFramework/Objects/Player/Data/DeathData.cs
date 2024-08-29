@@ -10,7 +10,6 @@ public class DeathData
     public void Init()
     {
         State = Death.States.Wait;
-        IsDead = false;
         RestartTimer = 0f;
     }
 }

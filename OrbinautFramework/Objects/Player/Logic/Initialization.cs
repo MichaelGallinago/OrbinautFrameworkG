@@ -30,6 +30,8 @@ public readonly struct Initialization(PlayerData data)
         data.Node.RotationDegrees = 0f;
         
         data.Sprite.Animation = Animations.Idle;
+        
+        data.State = PlayerStates.Control;
     }
 	
     public void Spawn()

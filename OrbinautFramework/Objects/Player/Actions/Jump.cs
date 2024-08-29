@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public readonly struct Jump(PlayerData data, IPlayerLogic logic)
@@ -36,10 +36,11 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 		{
 			return JumpSonic();
 		}
+
+		if (!data.Input.Press.Abc) return States.Jump;
 		
 		return data.Node.Type switch
 		{
-			_ when !data.Input.Press.Abc => States.Jump,
 			PlayerNode.Types.Tails => States.Flight,
 			PlayerNode.Types.Knuckles => States.GlideAir,
 			PlayerNode.Types.Amy => States.HammerSpin,
@@ -54,7 +55,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 		if (!data.Input.Press.C || data.Super.IsSuper) return false;
 		if (SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 
-		logic.ResetState();
+		logic.ResetData();
 		data.Movement.IsCorePhysicsSkipped = true;
 		return true;
 	}

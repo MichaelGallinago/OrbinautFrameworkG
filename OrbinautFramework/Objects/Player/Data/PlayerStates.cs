@@ -2,5 +2,13 @@
 
 public enum PlayerStates : byte
 {
-    Control, NoControl, Hurt, Death, DebugMode
+    Control, Hurt, NoControl, Death, DebugMode
+}
+
+public static class PlayerStatesUtilities
+{
+    public static bool IsObjectInteractable(this PlayerStates state)
+    {
+        return state is PlayerStates.Control or PlayerStates.Hurt;
+    }
 }

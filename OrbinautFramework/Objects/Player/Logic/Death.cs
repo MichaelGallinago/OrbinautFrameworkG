@@ -10,30 +10,31 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 {
 	public enum States : byte
 	{
-		Wait, Restart
+		Wait, Restart, GameOver
 	}
 	
     public void Process()
     {
-    	ICamera camera = Views.Instance.BottomCamera;
-    	
-    	// If drowned, wait until we're far enough off-screen
-    	const int drownScreenOffset = 276;
-    	if (data.Water.AirTimer == 0 && 
-	        (int)data.Node.Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset)
-    	{
-    		return;
-    	}
-    	
     	switch (data.Death.State)
     	{
-    		case States.Wait: Wait(camera); break;
+    		case States.Wait: Wait(); break;
     		case States.Restart: Restart(); break;
     	}
     }
     
-    private void Wait(ICamera camera)
+    private void Wait()
     {
+	    ICamera camera = Views.Instance.BottomCamera;
+	    
+	    // If drowned, wait until we're far enough off-screen
+	    const int drownScreenOffset = 276;
+	    if (data.Water.AirTimer <= 0f)
+	    {
+		    if ((int)data.Node.Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset) return;
+		    
+		    Scene.Instance.State = Scene.States.StopObjects;
+	    }
+	    
 #if S3_PHYSICS || SK_PHYSICS
 	    float bound = camera.DrawPosition.Y + SharedData.ViewSize.Y;
 #else
@@ -45,13 +46,12 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 
     private void SetNextState()
     {
-    	// If CPU, respawn
-    	if (data.Id == 0)
+    	if (logic.ControlType.IsCpu)
     	{
 		    logic.Respawn();
     		return;
     	}
-    	
+	    
     	//TODO: gui hud
     	/*if (instance_exists(obj_gui_hud))
     	{
@@ -65,12 +65,10 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
     	}
     	else
     	{
-    		data.Death.State = States.Wait;
-    			
     		//TODO: gui gameover
-    		//instance_create_depth(0, 0, RENDERER_DEPTH_HUD, obj_gui_gameover);				
-    		AudioPlayer.Music.Play(MusicStorage.GameOver);
-    	}
+    		//instance_create_depth(0, 0, RENDERER_DEPTH_HUD, obj_gui_gameover);
+		    data.Death.State = States.GameOver;
+	    }
     }
 
     private void Restart()
@@ -88,7 +86,8 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
     			
     	// TODO: fade
     	//if (c_framework.fade.state != FADESTATE.PLAINCOLOUR) break;
-
+		
+	    SharedData.Clear();
     	Scene.Instance.Tree.ReloadCurrentScene();
     }
 }

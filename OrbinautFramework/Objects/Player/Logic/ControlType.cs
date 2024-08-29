@@ -29,7 +29,7 @@ public class ControlType(IPlayer player)
     private CpuLogic _cpuLogic;
     private DebugMode _debugMode;
 
-    public void SwitchDebugMode() => _debugMode?.Switch();
+    public bool SwitchDebugMode() => _debugMode != null && _debugMode.Switch();
     public void UpdateDebugMode() => _debugMode?.Update();
     public void UpdateCpu() => _cpuLogic?.Process();
 }

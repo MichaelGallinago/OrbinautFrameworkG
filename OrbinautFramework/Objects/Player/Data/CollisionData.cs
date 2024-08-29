@@ -17,13 +17,11 @@ public class CollisionData
     public Constants.TileBehaviours TileBehaviour { get; set; }
     
     public ISolid OnObject { get; set; }
-    public bool IsObjectInteractionEnabled { get; set; }
     public HashSet<SolidBox> PushObjects { get; } = [];
     public Dictionary<SolidBox, Constants.TouchState> TouchObjects { get; } = [];
 
     public void Init(PlayerNode.Types type)
     {
-        IsObjectInteractionEnabled = true;
         IsStickToConvex = false;
         TileBehaviour = Constants.TileBehaviours.Floor;
         TileLayer = Constants.TileLayers.Main;

@@ -18,12 +18,13 @@ public interface IPlayerLogic : IRecorderStorage
     DataUtilities DataUtilities { get; }
     public ObjectInteraction ObjectInteraction { get; }
     
+    void Init();
     void Respawn() => Damage.Respawn();
     void Hurt(float positionX) => Damage.Hurt(positionX);
     void Hurt(float positionX, AudioStream sound) => Damage.Hurt(positionX, sound);
     void Kill() => Damage.Kill();
     void Land() => Landing.Land();
-    void ResetState() => DataUtilities.ResetState();
+    void ResetData() => DataUtilities.ResetData();
     void ResetMusic() => DataUtilities.ResetMusic();
     void ResetGravity() => DataUtilities.ResetGravity();
     void ClearPush(object target) => ObjectInteraction.ClearPush(target);
@@ -34,8 +35,9 @@ public interface IPlayerLogic : IRecorderStorage
         return ObjectInteraction.CheckSolidCollision(solidBox, type);
     }
     
-    void ActSolid(ISolid target, Constants.SolidType type, bool isFullRoutine = true)
+    void ActSolid(ISolid target, Constants.SolidType type, 
+        Constants.AttachType attachType = Constants.AttachType.Default)
     {
-        ObjectInteraction.ActSolid(target, type, isFullRoutine);
+        ObjectInteraction.ActSolid(target, type, attachType);
     }
 }

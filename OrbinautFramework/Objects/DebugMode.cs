@@ -22,15 +22,15 @@ public class DebugMode(IEditor editor)
 	private int _index;
 	private float _speed;
 
-	public void Switch()
+	public bool Switch()
 	{
 #if !DEBUG
 	    if (!SharedData.IsDebugModeEnabled) return false;  
 #endif
-		if (IsDebugButtonPressed(IsEnabled, editor.Input.Press.B))
-		{
-			SwitchMode();
-		}
+		if (!IsDebugButtonPressed(IsEnabled, editor.Input.Press.B)) return false;
+		
+		SwitchMode();
+		return true;
 	}
 
 	public void Update()
@@ -47,14 +47,9 @@ public class DebugMode(IEditor editor)
 			IsEnabled = false;
 			return;
 		}
-
-		if (Scene.Instance.IsStage)
-		{
-			Scene.Instance.Players.FirstOrDefault().ResetMusic();
-		}
 			
 		_speed = 0f;
-
+		
 		Scene.Instance.State = Scene.States.Normal;
 		Scene.Instance.AllowPause = true;
 			

@@ -1,5 +1,6 @@
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using static OrbinautFramework3.Framework.Constants;
 using SolidNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.SolidNode;
 
 namespace OrbinautFramework3.Objects.Common.Block;
@@ -14,8 +15,9 @@ public partial class Block : SolidNode
             // Combo counter and spin flag are cleared when player lands, so back them up
             bool isSpinning = player.Data.Movement.IsSpinning;
             uint comboCount = player.Data.Item.ComboCounter;
-		    
-            player.ActSolid(this, Constants.SolidType.FullReset);
+
+            AttachType attachType = player.Data.Movement.IsSpinning ? AttachType.None : AttachType.Default;
+            player.ActSolid(this, SolidType.Full, attachType);
             /*
             if (!isSpinning || !obj_check_collision(_player, COL_SOLID_U)) continue;
             

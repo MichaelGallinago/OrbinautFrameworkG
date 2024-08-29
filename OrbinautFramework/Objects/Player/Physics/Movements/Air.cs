@@ -39,7 +39,8 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 
 	private void LimitVerticalVelocity()
 	{
-		if (!data.Movement.IsJumping && !data.Movement.IsForcedRoll && data.Movement.Velocity.Y < -15.75f)
+		if (!data.Movement.IsJumping && logic.Action != States.SpinDash && 
+		    !data.Movement.IsForcedRoll && data.Movement.Velocity.Y < -15.75f)
 		{
 			data.Movement.Velocity.Y = -15.75f;
 		}

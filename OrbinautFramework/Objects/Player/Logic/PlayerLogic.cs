@@ -54,7 +54,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _palette = new Palette(Data);
         _physicsCore = new PhysicsCore(Data, this);
         _angleRotation = new AngleRotation(Data);
-        _collisionBoxes = new CollisionBoxes(Data);
+        _collisionBoxes = new CollisionBoxes(Data, this);
         _initialization = new Initialization(Data);
     }
     
@@ -77,11 +77,21 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     {
         Data.Input.Update(Data.Id);
         
+        ProcessState();
+        
+        _collisionBoxes.Update();
+        _palette.Process();
+    }
+
+    private void ProcessState()
+    {
+        if (ControlType.SwitchDebugMode()) return;
+        
         switch (Data.State)
         {
             case PlayerStates.Control or PlayerStates.NoControl:
-                ControlType.UpdateCpu();
                 Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
+                ControlType.UpdateCpu();
                 
                 if (Data.State == PlayerStates.Control)
                 {
@@ -117,9 +127,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
                 ControlType.UpdateDebugMode();
                 break;
         }
-        
-        _collisionBoxes.Update();
-        _palette.Process();
     }
     
     private void RunControlRoutine()

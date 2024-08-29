@@ -18,10 +18,9 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
         data.Item.InvincibilityTimer = UpdateItemTimer(data.Item.InvincibilityTimer, MusicStorage.Invincibility);
 
         UpdateSuperForm();
-
-        DamageData damage = data.Damage;
-        damage.IsInvincible = damage.InvincibilityTimer > 0f || data.Item.InvincibilityTimer > 0f || damage.IsHurt || 
-            data.Super.IsSuper || data.Node.Shield.State == ShieldContainer.States.DoubleSpin;
+        
+        data.Damage.IsInvincible = data.Damage.InvincibilityTimer > 0f || data.Item.InvincibilityTimer > 0f ||
+                                   data.Super.IsSuper || data.Node.Shield.State == ShieldContainer.States.DoubleSpin;
 		
         KillPlayerOnTimeLimit();
     }
@@ -41,7 +40,7 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
 
 	private void FlickAfterGettingHit()
 	{
-		if (data.Damage.InvincibilityTimer <= 0f || data.Damage.IsHurt) return;
+		if (data.Damage.InvincibilityTimer <= 0f) return;
 		data.Node.Visible = ((int)data.Damage.InvincibilityTimer & 4) > 0 || data.Damage.InvincibilityTimer <= 0f;
 		data.Damage.InvincibilityTimer -= Scene.Instance.Speed;
 	}

@@ -4,49 +4,49 @@ using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class Recorder(PlayerData data)
+public class Recorder(PlayerData playerData)
 {
     private const byte MinimalLength = 32;
     
-    public ReadOnlySpan<DataRecord> RecordedData => _recordedData;
+    public ReadOnlySpan<DataRecord> Data => _data;
     
     private DataRecord NewRecord => new(
-        data.Node.Position, 
-        data.Input.Press, data.Input.Down, 
-        data.Visual.Facing, data.Visual.SetPushBy, 
-        data.Movement.IsGrounded);
+        playerData.Node.Position, 
+        playerData.Input.Press, playerData.Input.Down, 
+        playerData.Visual.Facing, playerData.Visual.SetPushBy, 
+        playerData.Movement.IsGrounded);
     
-    private DataRecord[] _recordedData;
+    private DataRecord[] _data;
     
     public void Record()
     {
-        int length = _recordedData.Length - 1;
-        Array.Copy(_recordedData, 0, _recordedData, 1, length);
+        int length = _data.Length - 1;
+        Array.Copy(_data, 0, _data, 1, length);
 		
-        _recordedData[0] = NewRecord;
+        _data[0] = NewRecord;
     }
     
     public void Fill()
     {
-        _recordedData = new DataRecord[Math.Max(MinimalLength, CpuLogic.DelayStep * Scene.Instance.Players.Count)];
-        Array.Fill(_recordedData, NewRecord);
+        _data = new DataRecord[Math.Max(MinimalLength, CpuLogic.DelayStep * Scene.Instance.Players.Count)];
+        Array.Fill(_data, NewRecord);
     }
     
     public void Resize(int playersCount)
     {
         int newLength = Math.Max(MinimalLength, CpuLogic.DelayStep * playersCount);
-        int oldLength = _recordedData.Length;
+        int oldLength = _data.Length;
 		
         if (newLength <= oldLength)
         {
-            Array.Resize(ref _recordedData, newLength);
+            Array.Resize(ref _data, newLength);
             return;
         }
         
         var resizedData = new DataRecord[newLength];
 		
-        Array.Copy(_recordedData, resizedData, oldLength);
+        Array.Copy(_data, resizedData, oldLength);
         Array.Fill(resizedData, NewRecord,oldLength, newLength - oldLength);
-        _recordedData = resizedData;
+        _data = resizedData;
     }
 }
