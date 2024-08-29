@@ -38,7 +38,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
     
     private bool Jump()
     {
-        if (data.Movement.IsForcedSpin || !data.Movement.IsGrounded) return false;
+        if (data.Movement.IsForcedRoll || !data.Movement.IsGrounded) return false;
         if (!CheckCeilingDistance()) return false;
         
 #if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS

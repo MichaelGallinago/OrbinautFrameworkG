@@ -25,7 +25,7 @@ public abstract partial class ForceSpinTrigger : Trigger
         {
             if (player.ControlType.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
             
-            player.Data.Movement.IsForcedSpin = !player.Data.Movement.IsForcedSpin;
+            player.Data.Movement.IsForcedRoll = !player.Data.Movement.IsForcedRoll;
             player.Action = ActionFsm.States.Default;
             
             player.ResetGravity();

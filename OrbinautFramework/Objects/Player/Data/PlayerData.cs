@@ -7,6 +7,7 @@ public class PlayerData(IPlayerNode node, IPlayerSprite sprite) : IPlayerData //
 	public int Id { get; set; }
 	public IPlayerNode Node { get; } = node;
 	public IPlayerSprite Sprite { get; } = sprite;
+	public PlayerStates State { get; set; }
 	
 	public CpuData Cpu { get; } = new();
 	public ItemData Item { get; } = new();

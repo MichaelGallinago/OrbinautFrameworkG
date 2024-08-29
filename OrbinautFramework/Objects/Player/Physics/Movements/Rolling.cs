@@ -24,7 +24,7 @@ public readonly struct Rolling(PlayerData data)
 
         data.Movement.GroundSpeed.ApplyFriction(data.Physics.FrictionRoll);
 
-        if (data.Movement.IsForcedSpin)
+        if (data.Movement.IsForcedRoll)
         {
             ForceSpin();
         }

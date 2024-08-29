@@ -11,10 +11,9 @@ public class MovementData
     public bool IsJumping { get; set; }
     public bool IsGrounded { get; set; }
     public bool IsSpinning { get; set; }
-    public bool IsForcedSpin { get; set; }
+    public bool IsForcedRoll { get; set; }
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }
-    public bool IsControlRoutineEnabled { get; set; }
     
     public Velocity Velocity { get; } = new();
     public AcceleratedValue GroundSpeed { get; } = new();
@@ -23,7 +22,7 @@ public class MovementData
     {
         IsGrounded = true;
         IsJumping = false;
-        IsForcedSpin = false;
+        IsForcedRoll = false;
         IsControlRoutineEnabled = true;
         
         Gravity = GravityType.Default;

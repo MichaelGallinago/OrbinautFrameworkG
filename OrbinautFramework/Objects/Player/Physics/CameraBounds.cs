@@ -12,8 +12,6 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 {
     public void Match()
     {
-    	if (data.Death.IsDead) return;
-    	
 	    //TODO: check this
 	    bool isTarget = data.Node.IsCameraTarget(out ICamera camera);
     	if (!isTarget && !Scene.Instance.Players.FirstOrDefault().Data.Node.IsCameraTarget(out camera)) return;

@@ -15,8 +15,6 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 	
     public void Process()
     {
-    	if (!data.Death.IsDead) return;
-
     	ICamera camera = Views.Instance.BottomCamera;
     	
     	// If drowned, wait until we're far enough off-screen

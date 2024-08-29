@@ -12,18 +12,19 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 {
 	public void Move()
 	{
-		if (data.Death.IsDead) return;
 		if (logic.Action is States.Carried or States.Climb or 
 		    States.SpinDash or States.GlideAir or States.GlideFall) return;
-
-		RotateInAir();
+		
+		Rotate();
 		LimitVerticalVelocity();
-		if (ChangeHammerDashFacingInAir()) return;
-		MoveInAirHorizontally();
-		ApplyAirDrag();
+		
+		if (logic.Action == States.HammerDash) return;
+		
+		MoveHorizontally();
+		ApplyDrag();
 	}
 
-	private void RotateInAir()
+	private void Rotate()
 	{
 		if (Mathf.IsEqualApprox(data.Movement.Angle, 0f)) return;
 		
@@ -38,12 +39,11 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 
 	private void LimitVerticalVelocity()
 	{
-		if (!data.Movement.IsJumping && logic.Action != States.SpinDash && 
-		    !data.Movement.IsForcedSpin && data.Movement.Velocity.Y < -15.75f)
+		if (!data.Movement.IsJumping && !data.Movement.IsForcedRoll && data.Movement.Velocity.Y < -15.75f)
 		{
 			data.Movement.Velocity.Y = -15.75f;
 		}
-
+		
 #if CD_PHYSICS
 		if (data.Movement.Velocity.Y > 16f)
 		{
@@ -52,61 +52,44 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 #endif
 	}
 
-	private bool ChangeHammerDashFacingInAir()
-	{
-		if (logic.Action != States.HammerDash) return false;
-		
-		if (data.Input.Down.Left)
-		{
-			data.Visual.Facing = Constants.Direction.Negative;
-		}
-		else if (data.Input.Down.Right)
-		{
-			data.Visual.Facing = Constants.Direction.Positive;
-		}
-		
-		return true;
-	}
-
-	private void MoveInAirHorizontally()
+	private void MoveHorizontally()
 	{
 		if (data.Movement.IsAirLock) return;
 		
 		if (data.Input.Down.Left)
 		{
-			if (data.Movement.Velocity.X > 0f)
-			{
-				data.Movement.Velocity.AccelerationX = -data.Physics.AccelerationAir;
-			}
-			else if (!SharedData.NoSpeedCap || -data.Movement.Velocity.X < data.Physics.AccelerationTop)
-			{
-				data.Movement.Velocity.AccelerationX = -data.Physics.AccelerationAir;
-				data.Movement.Velocity.MaxX(-data.Physics.AccelerationTop);
-			}
-			
-			data.Visual.Facing = Constants.Direction.Negative;
+			MoveTo(Constants.Direction.Negative);
 		}
 		else if (data.Input.Down.Right)
 		{
-			if (data.Movement.Velocity.X < 0f)
-			{
-				data.Movement.Velocity.AccelerationX = data.Physics.AccelerationAir;
-			}
-			else if (!SharedData.NoSpeedCap || data.Movement.Velocity.X < data.Physics.AccelerationTop)
-			{
-				data.Movement.Velocity.AccelerationX = data.Physics.AccelerationAir;
-				data.Movement.Velocity.MinX(data.Physics.AccelerationTop);
-			}
-			
-			data.Visual.Facing = Constants.Direction.Positive;
+			MoveTo(Constants.Direction.Positive);
 		}
 	}
 
-	private void ApplyAirDrag()
+	private void MoveTo(Constants.Direction direction)
 	{
-		if (!data.Damage.IsHurt && data.Movement.Velocity.Y is < 0f and > -4f)
+		var sign = (int)direction;
+		float velocity = sign * data.Movement.Velocity.X;
+		float acceleration = sign * data.Physics.AccelerationAir;
+		
+		if (velocity < 0f)
 		{
-			data.Movement.Velocity.AccelerationX = MathF.Floor(data.Movement.Velocity.X * 8f) / -256f;
+			data.Movement.Velocity.AccelerationX = acceleration;
+		}
+		else if (!SharedData.NoSpeedCap || velocity < data.Physics.AccelerationTop)
+		{
+			data.Movement.Velocity.AccelerationX = acceleration;
+			data.Movement.Velocity.LimitX(sign * data.Physics.AccelerationTop, direction);
+		}
+		
+		data.Visual.Facing = direction;
+	}
+
+	private void ApplyDrag()
+	{
+		if (data.Movement.Velocity.Y is < 0f and > -4f)
+		{
+			data.Movement.Velocity.AccelerationX = MathF.Floor(data.Movement.Velocity.X * 8f) * -0.00390625f;
 		}
 	}
 }

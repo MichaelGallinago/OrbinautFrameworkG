@@ -11,7 +11,6 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 {
     public void Collide()
 	{
-		if (data.Death.IsDead) return;
 		if (logic.Action is States.GlideAir or States.GlideFall or States.GlideGround or States.Climb) return;
 		
 		int wallRadius = data.Collision.RadiusNormal.X + 1;

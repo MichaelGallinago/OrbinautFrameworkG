@@ -14,9 +14,9 @@ public readonly struct Rolling(PlayerData data, IPlayerLogic logic)
     public void Start()
     {
         if (logic.Action is States.SpinDash or States.HammerDash) return;
-        if (!data.Movement.IsForcedSpin && (data.Input.Down.Left || data.Input.Down.Right)) return;
+        if (!data.Movement.IsForcedRoll && (data.Input.Down.Left || data.Input.Down.Right)) return;
 
-        if (!CheckSpinPossibility() && !data.Movement.IsForcedSpin) return;
+        if (!CheckSpinPossibility() && !data.Movement.IsForcedRoll) return;
 		
         data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
         data.Collision.Radius = data.Collision.RadiusSpin;

@@ -22,8 +22,8 @@ public class DebugMode(IEditor editor)
 	private int _index;
 	private float _speed;
 
-	public bool Update()
-    {
+	public void Switch()
+	{
 #if !DEBUG
 	    if (!SharedData.IsDebugModeEnabled) return false;  
 #endif
@@ -31,12 +31,12 @@ public class DebugMode(IEditor editor)
 		{
 			SwitchMode();
 		}
-		
+	}
 
-		if (!IsEnabled) return false;
-		
+	public void Update()
+    {
+		if (!IsEnabled) return;
 		Process();
-		return true;
 	}
 
 	private void SwitchMode()
@@ -136,12 +136,7 @@ public class DebugMode(IEditor editor)
     private static bool IsDebugButtonPressed(bool isDebugMode, bool isPressB)
     {
 #if DEBUG
-	    if (isDebugMode)
-	    {
-		    return InputUtilities.DebugButtonPress || isPressB;
-	    }
-
-	    return InputUtilities.DebugButtonPress;
+	    return isDebugMode && isPressB || InputUtilities.DebugButtonPress;
 #else
 		return isPressB;
 #endif

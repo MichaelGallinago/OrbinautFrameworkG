@@ -2,7 +2,6 @@
 
 public class DamageData
 {
-    public bool IsHurt { get; set; }
     public bool IsInvincible { get; set; }
     public float InvincibilityTimer { get; set; }
 
