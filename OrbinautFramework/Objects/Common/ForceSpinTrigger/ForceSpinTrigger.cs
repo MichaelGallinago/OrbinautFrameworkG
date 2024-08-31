@@ -18,14 +18,15 @@ public abstract partial class ForceSpinTrigger : Trigger
         float size = Sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
         Borders = new Vector2(-size, size);
     }
-
+    
     public override void _Process(double delta)
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player.ControlType.IsDebugMode || !CheckForcePlayerSpin(player)) continue;
+            if (!player.Data.State.IsObjectInteractable()) continue;
+            if (!CheckForcePlayerSpin(player)) continue;
             
-            player.Data.Movement.IsForcedSpin = !player.Data.Movement.IsForcedSpin;
+            player.Data.Movement.IsForcedRoll = !player.Data.Movement.IsForcedRoll;
             player.Action = ActionFsm.States.Default;
             
             player.ResetGravity();

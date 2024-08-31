@@ -7,11 +7,11 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Slopes;
 
-public readonly struct SlopeRepel(PlayerData data, IPlayerLogic logic)
+public readonly struct SlopeRepel(PlayerData data)
 {
     public void Apply()
     {
-        if (!data.Movement.IsGrounded || data.Collision.IsStickToConvex || logic.Action == States.HammerDash) return;
+        if (data.Collision.IsStickToConvex) return;
 	
         if (data.Movement.GroundLockTimer > 0f)
         {

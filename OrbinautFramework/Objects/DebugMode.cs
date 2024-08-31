@@ -2,6 +2,7 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player;
 
 namespace OrbinautFramework3.Objects;
@@ -22,50 +23,45 @@ public class DebugMode(IEditor editor)
 	private int _index;
 	private float _speed;
 
-	public bool Update()
-    {
+	public bool Switch()
+	{
 #if !DEBUG
 	    if (!SharedData.IsDebugModeEnabled) return false;  
 #endif
-		if (IsDebugButtonPressed(IsEnabled, editor.Input.Press.B))
-		{
-			SwitchMode();
-		}
+		if (!IsDebugButtonPressed(IsEnabled, editor.Input.Press.B)) return false;
 		
-
-		if (!IsEnabled) return false;
-		
-		Process();
+		SwitchMode();
 		return true;
+	}
+
+	public void Update()
+    {
+		if (!IsEnabled) return;
+		Process();
 	}
 
 	private void SwitchMode()
 	{
+		_speed = 0f;
+		
 		if (IsEnabled)
 		{
-			editor.OnDisableEditMode();
+			editor.OnDisableDebugMode();
 			IsEnabled = false;
 			return;
 		}
-
-		if (Scene.Instance.IsStage)
-		{
-			Scene.Instance.Players.FirstOrDefault().ResetMusic();
-		}
-			
-		_speed = 0f;
-
+		
 		Scene.Instance.State = Scene.States.Normal;
 		Scene.Instance.AllowPause = true;
-			
-		editor.OnEnableEditMode();
+		
+		editor.OnEnableDebugMode();
 		IsEnabled = true;
 	}
 
 	private void Process()
 	{
 		UpdateSpeedAndPosition();
-
+		
 		if (SwapPrefab() || !editor.Input.Press.C) return;
 		
 		SpawnPrefab();
@@ -98,7 +94,7 @@ public class DebugMode(IEditor editor)
 			
 		if (node is ICullable cullable)
 		{
-			cullable.CullingType = ICullable.Types.Delete;
+			cullable.CullingType = ICullable.Types.Remove;
 		}
 
 		if (node is Node2D node2D)
@@ -130,18 +126,19 @@ public class DebugMode(IEditor editor)
 		if (input.Left) position.X -= speed;
 		if (input.Right) position.X += speed;
 
+		if (editor.IsCameraTarget(out ICamera camera))
+		{
+			Vector4 boundary = camera.Boundary;
+			position = position.Clamp(new Vector2(boundary.X, boundary.Y), new Vector2(boundary.Z, boundary.W));
+		}
+		
 		editor.Position = position;
 	}
 
     private static bool IsDebugButtonPressed(bool isDebugMode, bool isPressB)
     {
 #if DEBUG
-	    if (isDebugMode)
-	    {
-		    return InputUtilities.DebugButtonPress || isPressB;
-	    }
-
-	    return InputUtilities.DebugButtonPress;
+	    return isDebugMode && isPressB || InputUtilities.DebugButtonPress;
 #else
 		return isPressB;
 #endif

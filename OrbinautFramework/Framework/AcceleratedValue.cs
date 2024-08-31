@@ -53,14 +53,12 @@ public class AcceleratedValue
         }
     }
     
-    //TODO: change to SetMax
     public void SetMax(float value)
     {
         if (_value >= value) return;
         Value = value;
     }
     
-    //TODO: change to SetMin
     public void SetMin(float value)
     {
         if (_value <= value) return;

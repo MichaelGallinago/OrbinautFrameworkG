@@ -11,7 +11,6 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 {
     public void Collide()
 	{
-		if (data.Movement.IsGrounded || data.Death.IsDead) return;
 		if (logic.Action is States.GlideAir or States.GlideFall or States.GlideGround or States.Climb) return;
 		
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
@@ -78,27 +77,29 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 #endif
 		
 		if (roofDistance >= 0) return false;
+
+		MovementData movement = data.Movement;
 		
 		data.Node.Position -= new Vector2(0f, roofDistance);
 		if (moveQuadrant == Angles.Quadrant.Up && logic.Action != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
-			data.Movement.Angle = roofAngle;
-			data.Movement.GroundSpeed.Value = roofAngle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
-			data.Movement.Velocity.Y = 0f;
+			movement.Angle = roofAngle;
+			movement.GroundSpeed.Value = roofAngle < 180f ? -movement.Velocity.Y : movement.Velocity.Y;
+			movement.Velocity.Y = 0f;
 					
 			logic.Land();
 			return true;
 		}
 		
-		if (data.Movement.Velocity.Y < 0f)
+		if (movement.Velocity.Y < 0f)
 		{
-			data.Movement.Velocity.Y = 0f;
+			movement.Velocity.Y = 0f;
 		}
 		
 		if (logic.Action == States.Flight)
 		{
-			data.Movement.Gravity = GravityType.TailsDown;
+			movement.Gravity = GravityType.TailsDown;
 		}
 		
 		return true;
@@ -110,7 +111,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		
 		int distance;
 		float angle;
-
+		
 		if (moveQuadrant == Angles.Quadrant.Down)
 		{
 			if (LandOnFeet(out distance, out angle)) return;
@@ -126,54 +127,66 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		
 		logic.Land();
 	}
-
+	
 	private bool LandOnFeet(out int distance, out float angle)
 	{
-		(int distanceL, float angleL) = logic.TileCollider.FindTile(
-			-data.Collision.Radius.X, data.Collision.Radius.Y, true, Constants.Direction.Positive);
-			
-		(int distanceR, float angleR) = logic.TileCollider.FindTile(
-			data.Collision.Radius.X, data.Collision.Radius.Y, true, Constants.Direction.Positive);
-
-		if (distanceL > distanceR)
+		Vector2I radius = data.Collision.Radius;
+		
+		(int distanceLeft, float angleLeft) = logic.TileCollider.FindTile(
+			-radius.X, radius.Y, true, Constants.Direction.Positive);
+		
+		(int distanceRight, float angleRight) = logic.TileCollider.FindTile(
+			radius.X, radius.Y, true, Constants.Direction.Positive);
+		
+		if (distanceLeft > distanceRight)
 		{
-			distance = distanceR;
-			angle = angleR;
+			distance = distanceRight;
+			angle = angleRight;
 		}
 		else
 		{
-			distance = distanceL;
-			angle = angleL;
+			distance = distanceLeft;
+			angle = angleLeft;
 		}
 		
-		// Exit if too far into the ground when BOTH sensors find it.
-		// So if we're landing on a ledge, it doesn't matter how far we're clipping into the ground
+		// Exit if BOTH sensors are way too far into the surface. This means the game doesn't care
+		// how far we're clipping into the ground if we're landing on a ledge
 		
-		float minClip = -(data.Movement.Velocity.Y + 8f);		
-		if (distance >= 0 || minClip >= distanceL && minClip >= distanceR) return true;
+		if (distance >= 0) return true;
+		float minimalClip = -(data.Movement.Velocity.Y + 8f);
+		if (minimalClip >= distanceLeft && minimalClip >= distanceRight) return true;
+		
+		SetLandingSpeedAndVelocity(angle);
+		
+		return false;
+	}
+	
+	private void SetLandingSpeedAndVelocity(float angle)
+	{
+		MovementData movement = data.Movement;
+		Velocity velocity = movement.Velocity;
+		AcceleratedValue groundSpeed = movement.GroundSpeed;
 		
 		if (Angles.GetQuadrant(angle) != Angles.Quadrant.Down)
 		{
-			if (data.Movement.Velocity.Y > 15.75f)
+			if (velocity.Y > 15.75f)
 			{
-				data.Movement.Velocity.Y = 15.75f;
+				velocity.Y = 15.75f;
 			}
 			
-			data.Movement.GroundSpeed.Value = angle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
-			data.Movement.Velocity.X = 0f;
+			groundSpeed.Value = angle < 180f ? -velocity.Y : velocity.Y;
+			velocity.X = 0f;
 		}
 		else if (angle is > 22.5f and <= 337.5f)
 		{
-			data.Movement.GroundSpeed.Value = angle < 180f ? -data.Movement.Velocity.Y : data.Movement.Velocity.Y;
-			data.Movement.GroundSpeed.Value *= 0.5f;
+			groundSpeed.Value = angle < 180f ? -velocity.Y : velocity.Y;
+			groundSpeed.Value *= 0.5f;
 		}
-		else 
+		else
 		{
-			data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
-			data.Movement.Velocity.Y = 0f;
+			groundSpeed.Value = velocity.X;
+			velocity.Y = 0f;
 		}
-		
-		return false;
 	}
 
 	private bool FallOnGround(out int distance, out float angle)

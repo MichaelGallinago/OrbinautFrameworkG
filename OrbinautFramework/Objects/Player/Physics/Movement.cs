@@ -6,14 +6,7 @@ namespace OrbinautFramework3.Objects.Player.Physics;
 
 public readonly struct Movement(PlayerData data, IPlayerLogic logic)
 {
-	private readonly Ground _ground = new(data, logic);
-	private readonly Rolling _rolling = new(data);
-	private readonly Air _air = new(data, logic);
-
-	public void Move()
-	{
-		_ground.Move();
-		_rolling.Roll();
-		_air.Move();
-	}
+	public readonly Ground Ground = new(data, logic);
+	public readonly Rolling Rolling = new(data);
+	public readonly Air Air = new(data, logic);
 }

@@ -14,18 +14,18 @@ public readonly struct Palette(PlayerData data)
 		_ => [0, 1, 2, 3]
 	};
 	
-    public void Process()
+    public void Process() // TODO: use once per player type
     {
     	ReadOnlySpan<int> colours = PlayerColourIds;
     	
     	int colour = PaletteUtilities.Index[colours[0]];
-    	UpdateSuper(colour, out int colourLast, out int colourLoop, out int duration);
+    	UpdateSuper(colour, out int colourLoop, out int colourLast, out int duration);
     	UpdateRegular(colour, ref colourLoop, ref colourLast, ref duration);
 	    
     	PaletteUtilities.SetRotation(colours, colourLoop, colourLast, duration);
     }
 
-    private void UpdateSuper(int colour, out int colourLast, out int colourLoop, out int duration)
+    private void UpdateSuper(int colour, out int colourLoop, out int colourLast, out int duration)
     {
     	switch (data.Node.Type)
     	{
@@ -72,25 +72,23 @@ public readonly struct Palette(PlayerData data)
     			break;
     	}
     }
-
+    
     private void UpdateRegular(int colour, ref int colourLoop, ref int colourLast, ref int duration)
     {
     	if (data.Super.IsSuper) return;
     	
-    	if (colour > 1)
+	    colourLoop = 1;
+	    
+    	if (colour <= 1)
     	{
-    		if (data.Node.Type == PlayerNode.Types.Sonic)
-    		{
-    			colourLast = 21;
-    			duration = 4;
-    		}
+		    colourLast = 1;
+		    duration = 0;
+		    return;
     	}
-    	else
-    	{
-    		colourLast = 1;
-    		duration = 0;
-    	}
-    
-    	colourLoop = 1;
+
+	    if (data.Node.Type != PlayerNode.Types.Sonic) return;
+	    
+	    colourLast = 21;
+	    duration = 4;
     }
 }

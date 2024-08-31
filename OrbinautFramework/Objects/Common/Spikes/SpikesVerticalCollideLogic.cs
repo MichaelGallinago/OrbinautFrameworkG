@@ -10,7 +10,7 @@ public partial class SpikesVerticalCollideLogic : SpikesCollideLogic
 {
     public override void CollideWithPlayer(ISolid spikes, IPlayer player)
     {
-        SolidType solidType = player.Data.Damage.IsInvincible ? SolidType.Full : SolidType.FullReset;
-        player.ActSolid(spikes, solidType);
+        AttachType attachType = player.Data.Damage.IsInvincible ? AttachType.Default : AttachType.ResetPlayer;
+        player.ActSolid(spikes, SolidType.Full, attachType);
     }
 }

@@ -1,7 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://cblfy0r4gctwc"]
-
-[ext_resource type="PackedScene" uid="uid://ccbh6mwdu2hc5" path="res://Objects/Common/Bridge/Stump/stump.tscn" id="1_molol"]
-[ext_resource type="Texture2D" uid="uid://c1cfw06rmleka" path="res://Objects/Common/Bridge/Stump/tsz_stump.png" id="2_pwsii"]
-
-[node name="Stump" instance=ExtResource("1_molol")]
-texture = ExtResource("2_pwsii")

@@ -6,7 +6,6 @@ using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
-using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
@@ -14,7 +13,6 @@ public readonly struct Balancing(PlayerData data, IPlayerLogic logic)
 {
     public void Balance()
 	{
-		if (!data.Movement.IsGrounded || data.Movement.IsSpinning) return;
 		if (data.Movement.GroundSpeed != 0f || logic.Action is States.SpinDash or States.Dash) return;
 		
 #if SK_PHYSICS

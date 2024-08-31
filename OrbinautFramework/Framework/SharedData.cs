@@ -2,7 +2,7 @@
 using Godot;
 using OrbinautFramework3.Objects.Common.GiantRing;
 using OrbinautFramework3.Objects.Player;
-using OrbinautFramework3.Objects.Player.Logic;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Framework;
@@ -31,7 +31,6 @@ public static class SharedData
     public static bool DoubleSpin { get; set; } = true;
     public static bool CdTimer { get; set; } = false;
     public static bool CdCamera { get; set; } = true;
-    public static bool SuperstarsTweaks { get; set; } = true;
 	
     // Orbinaut improvements
     public static byte RotationMode { get; set; } = 1;
@@ -56,8 +55,8 @@ public static class SharedData
     
     public static uint ScoreCount { get; set; }
     public static uint PlayerRings { get; set; }
+    public static ShieldContainer.Types[] SavedShields { get; set; }
     public static uint LifeCount { get; set; }
-    public static ShieldContainer.Types PlayerShield { get; set; } = ShieldContainer.Types.None;
 
     public static event Action<Vector2I> ViewSizeChanged;
     public static Vector2I ViewSize
@@ -100,7 +99,14 @@ public static class SharedData
 
     public static void Clear()
     {
-	    PlayerShield = ShieldContainer.Types.None;
+	    if (SavedShields != null)
+	    {
+		    for (var i = 0; i < SavedShields.Length; i++)
+		    {
+			    SavedShields[i] = ShieldContainer.Types.None;
+		    }
+	    }
+	    
 	    PlayerRings = 0;
 	    LifeRewards = Vector2I.Zero;
     }

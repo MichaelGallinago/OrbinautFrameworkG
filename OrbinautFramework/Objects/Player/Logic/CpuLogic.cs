@@ -23,12 +23,10 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	private Buttons _inputDown;
 	private Buttons _inputPress;
 	private bool _canReceiveInput;
-	private ICpuTarget _leadPlayer;
+	private IPlayer _leadPlayer;
 	
     public void Process()
     {
-		if (data.Damage.IsHurt || data.Death.IsDead || data.Id == 0) return;
-		
 		_leadPlayer = Scene.Instance.Players.FirstOrDefault();
 		_delay = DelayStep * data.Id;
 		
@@ -56,7 +54,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		// to respawn or do not respawn at all unless holding down any button
 		if (_canReceiveInput && data.Input.Down is { Abc: false, Start: false })
 		{
-			if (!Scene.Instance.IsTimePeriodLooped(64f) || !_leadPlayer.IsObjectInteractionEnabled) return;
+			if (!Scene.Instance.IsTimePeriodLooped(64f)) return;
 		}
 		
 		data.Node.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
@@ -77,8 +75,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		}
 #endif
 		
-		Vector2 targetPosition = _leadPlayer.RecordedData[_delay].Position;
-		float recordedY = targetPosition.Y;
+		Vector2I targetPosition = _leadPlayer.Recorder.Data[_delay].Position;
 
 #if S2_CPU
 		if (Stage.Local != null && Stage.Local.IsWaterEnabled)
@@ -88,18 +85,14 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 #endif
 		
 		if (MoveToLeadPlayer(targetPosition)) return;
-
 #if S3_CPU
-		if (_leadPlayer.IsDead) return;
+		if (_leadPlayer.Data.State == PlayerStates.Death) return;
 #endif
-
-		if (!_leadPlayer.RecordedData[_delay].IsGrounded) return;
-		if (!Mathf.IsEqualApprox(targetPosition.Y, recordedY)) return;
+		if (!_leadPlayer.Recorder.Data[_delay].IsGrounded) return;
 		
 		data.Cpu.State = States.Main;
 		data.Sprite.Animation = Animations.Move;
-		data.Collision.IsObjectInteractionEnabled = true;
-		data.Movement.IsControlRoutineEnabled = true;
+		data.State = PlayerStates.Control;
 	}
 
 	private void SetRespawnAnimation()
@@ -123,16 +116,17 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	}
 #endif
 
-	private bool MoveToLeadPlayer(Vector2 targetPosition)
+	private bool MoveToLeadPlayer(Vector2I targetPosition)
 	{
 		var distance = new Vector2I(
-			Mathf.FloorToInt(data.Node.Position.X - targetPosition.X),
-			Mathf.FloorToInt(targetPosition.Y - data.Node.Position.Y));
+			(int)data.Node.Position.X - targetPosition.X, 
+			targetPosition.Y - (int)data.Node.Position.Y);
 
 		Vector2 positionOffset = Vector2.Zero;
 		if (distance.X != 0)
 		{
-			float velocityX = Math.Abs(_leadPlayer.Velocity.X) + Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
+			float velocityX = Math.Abs(_leadPlayer.Data.Movement.Velocity.X);
+			velocityX += Math.Min(Math.Abs(distance.X) / 16, 12) + 1f;
 			velocityX *= Scene.Instance.Speed;
 			
 			//TODO: check this
@@ -178,12 +172,15 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	
 	private void ProcessMain()
 	{
+		//TODO: check that ZIndex works
+		data.Node.ZIndex = _leadPlayer.Data.Node.ZIndex + data.Id;
+		
 		FreezeOrFlyIfLeaderDied();
 		
 		if (CheckRespawn()) return; // Exit if respawned
 		
-		if (!data.Collision.IsObjectInteractionEnabled || 
-		    data.Carry.Target != null || logic.Action == ActionFsm.States.Carried) return;
+		if (data.State == PlayerStates.NoControl) return; 
+		if (data.Carry.Target != null || logic.Action == ActionFsm.States.Carried) return;
 		
 		data.Cpu.Target ??= _leadPlayer; // Follow lead player
 		
@@ -193,9 +190,6 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			data.Cpu.InputTimer -= Scene.Instance.Speed;
 			if (!data.Input.NoControl) return;
 		}
-		
-		//TODO: check that ZIndex works
-		data.Node.ZIndex = _leadPlayer.ZIndex + data.Id;
 		
 		if (data.Movement.GroundLockTimer > 0f && data.Movement.GroundSpeed == 0f)
 		{
@@ -209,13 +203,14 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 
 	private void TryJump()
 	{
-		(Vector2 targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush, _) = 
-			data.Cpu.Target.RecordedData[_delay];
+		IPlayer target = data.Cpu.Target;
+		(Vector2I targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush, _) = 
+			target.Recorder.Data[_delay];
 		
 #if S3_CPU
-		if (Math.Abs(data.Cpu.Target.GroundSpeed) < 4f && data.Cpu.Target.OnObject == null)
+		if (Math.Abs(target.Data.Movement.GroundSpeed) < 4f && target.Data.Collision.OnObject == null)
 		{
-			targetPosition.X -= 32f;
+			targetPosition.X -= 32;
 		}
 #endif
 		
@@ -226,7 +221,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 		
-		int distanceX = Mathf.FloorToInt(targetPosition.X - data.Node.Position.X);
+		int distanceX = targetPosition.X - (int)data.Node.Position.X;
 		Push(distanceX, direction);
 		if (CheckJump(distanceX, targetPosition.Y))
 		{
@@ -237,7 +232,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	// Copy (and modify) inputs
 	private void Jump()
 	{
-		if (data.Sprite.Animation == Animations.Duck || data.Cpu.Target.Animation == Animations.Wait) return;
+		if (data.Sprite.Animation == Animations.Duck) return;
+		if (data.Cpu.Target.Data.Sprite.Animation == Animations.Wait) return;
 		if (!Scene.Instance.IsTimePeriodLooped(JumpFrequency)) return;
 		
 		_inputPress.Abc = _inputDown.Abc = true;
@@ -247,31 +243,30 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	private void FreezeOrFlyIfLeaderDied()
 	{
 		// Freeze or start flying (if we're Tails) if lead player has died
-		if (!_leadPlayer.IsDead) return;
+		if (_leadPlayer.Data.State != PlayerStates.Death) return;
 		
-		logic.ResetState();
+		logic.ResetData();
 		logic.Action = ActionFsm.States.Default;
 		
 		data.Cpu.State = States.Respawn;
-		data.Movement.IsControlRoutineEnabled = false;
-		data.Collision.IsObjectInteractionEnabled = false;
+		data.State = PlayerStates.NoControl;
 	}
 	
-	private void Push(float distanceX, Constants.Direction facing)
+	private void Push(int distanceX, Constants.Direction facing)
 	{
-		if (distanceX == 0f)
+		if (distanceX == 0)
 		{
 			data.Visual.Facing = facing;
 			return;
 		}
 		
 #if S3_CPU
-		const float maxDistanceX = 48f;
+		const int maxDistanceX = 48;
 #else
 		const float maxDistanceX = 16f;
 #endif
 
-		bool isMoveToRight = distanceX > 0f;
+		bool isMoveToRight = distanceX > 0;
 		int sign = isMoveToRight ? 1 : -1;
 		if (sign * distanceX > maxDistanceX)
 		{
@@ -279,13 +274,13 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			_inputDown.Right = _inputPress.Right = isMoveToRight;
 		}
 						
-		if (data.Movement.GroundSpeed != 0f && data.Movement.IsControlRoutineEnabled && (int)data.Visual.Facing == sign)
+		if (data.Movement.GroundSpeed != 0f && (int)data.Visual.Facing == sign)
 		{
 			data.Node.Position += Vector2.Right * sign;
 		}
 	}
 	
-	private bool CheckJump(float distanceX, float targetPositionY)
+	private bool CheckJump(int distanceX, int targetPositionY)
 	{
 		if (data.Cpu.IsJumping)
 		{
@@ -298,8 +293,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		}
 
 		const float jumpPeriod = JumpFrequency * 4f;
-		if (distanceX >= 64f && !Scene.Instance.IsTimePeriodLooped(jumpPeriod)) return false;
-		return targetPositionY - data.Node.Position.Y <= -32f;
+		if (distanceX >= 64 && !Scene.Instance.IsTimePeriodLooped(jumpPeriod)) return false;
+		return targetPositionY - (int)data.Node.Position.Y <= -32;
 	}
 	
 	private void ProcessStuck()
@@ -310,7 +305,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		
 		if (data.Sprite.Animation == Animations.Idle)
 		{
-			data.Visual.Facing = data.Cpu.Target.Position.X >= data.Node.Position.X ? 
+			data.Visual.Facing = (int)data.Cpu.Target.Position.X >= (int)data.Node.Position.X ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
@@ -330,7 +325,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	
 	private bool CheckRespawn()
 	{
-		bool isBehindLeader = _leadPlayer.IsCameraTarget(out ICamera camera) && 
+		bool isBehindLeader = _leadPlayer.Data.Node.IsCameraTarget(out ICamera camera) && 
 		                      camera.TargetBoundary.Z <= data.Node.Position.X;
 		
 		if (isBehindLeader || data.Sprite != null && data.Sprite.CheckInCameras())
@@ -345,27 +340,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 			if (!data.Collision.OnObject.IsInstanceValid()) return false;
 		}
 		
-		Respawn();
+		logic.Respawn();
 		return true;
-	}
-
-	private void Respawn()
-	{
-		data.Cpu.Init();
-		
-		if (data.IsCameraTarget(out ICamera camera))
-		{
-			camera.IsMovementAllowed = true;
-			data.Damage.InvincibilityTimer = 60f;
-			return;
-		}
-		
-		data.Node.Position = new Vector2(sbyte.MaxValue, 0);
-		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		
-		data.Cpu.State = States.RespawnInit;
-		data.Movement.IsControlRoutineEnabled = false;
-		data.Collision.IsObjectInteractionEnabled = false;
-		data.Movement.IsGrounded = false;
 	}
 }

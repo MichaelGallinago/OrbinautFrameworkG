@@ -17,7 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://1gciguema0rh" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_vertical.tscn" id="18_0iln7"]
 [ext_resource type="TileSet" uid="uid://dvuwhwecgwu0r" path="res://Scenes/Stages/TSZ/Graphics/graphics_tile_set_b.tres" id="18_5sdh5"]
 [ext_resource type="PackedScene" uid="uid://bwifksf6vle21" path="res://Objects/Player/Spawner/player_spawner.tscn" id="21_cuvbg"]
-[ext_resource type="PackedScene" uid="uid://cblfy0r4gctwc" path="res://Objects/Common/Bridge/Stump/tsz_stump.tscn" id="27_5j4pt"]
+[ext_resource type="PackedScene" uid="uid://cblfy0r4gctwc" path="res://Objects/Common/Bridge/Stump/tsz_abutment.tscn" id="27_5j4pt"]
 
 [node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
 process_priority = -1

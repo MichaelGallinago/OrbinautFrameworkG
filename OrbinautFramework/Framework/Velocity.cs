@@ -5,6 +5,9 @@ namespace OrbinautFramework3.Framework;
 
 public class Velocity
 {
+    private const byte AxisX = 0;
+    private const byte AxisY = 0;
+    
     private Vector2 _velocity;
     private Vector2 _instantVector;
     
@@ -90,41 +93,63 @@ public class Velocity
 
     public void ResetInstantVelocity() => _instantVector = _velocity;
 
-    public void ClampX(float min, float max) => ClampAxis(ref _velocity.X, ref _instantVector.X, min, max);
-    public void ClampY(float min, float max) => ClampAxis(ref _velocity.Y, ref _instantVector.Y, min, max);
-    public void MinX(float value) => MinAxis(ref _velocity.X, ref _instantVector.X, value);
-    public void MaxX(float value) => MaxAxis(ref _velocity.X, ref _instantVector.X, value);
-    public void MinY(float value) => MinAxis(ref _velocity.Y, ref _instantVector.Y, value);
-    public void MaxY(float value) => MaxAxis(ref _velocity.Y, ref _instantVector.Y, value);
+    public void ClampX(float min, float max) => ClampAxis(AxisX, min, max);
+    public void ClampY(float min, float max) => ClampAxis(AxisY, min, max);
+    public void MinX(float value) => MinAxis(AxisX, value);
+    public void MaxX(float value) => MaxAxis(AxisX, value);
+    public void MinY(float value) => MinAxis(AxisY, value);
+    public void MaxY(float value) => MaxAxis(AxisY, value);
+
+    public void LimitX(float value, Constants.Direction direction)
+    {
+        if (direction == Constants.Direction.Positive)
+        {
+            MinX(value);
+            return;
+        }
+        
+        MaxX(value);
+    }
     
-    private static void ClampAxis(ref float axis, ref float instantValue, float min, float max)
+    public void LimitY(float value, Constants.Direction direction)
+    {
+        if (direction == Constants.Direction.Positive)
+        {
+            MinY(value);
+            return;
+        }
+        
+        MaxY(value);
+    }
+    
+    private void ClampAxis(byte index, float min, float max)
     {
         if (min > max)
         {
             throw new ArgumentException("max should be no less than min");
         }
         
-        if (axis < min)
+        if (_velocity[index] < min)
         {
-            axis = instantValue = min;
+            _velocity[index] = _instantVector[index] = min;
         }
-        else if (axis > max)
+        else if (_velocity[index] > max)
         {
-            axis = instantValue = max;
+            _velocity[index] = _instantVector[index] = max;
         }
     }
 
-    private static void MaxAxis(ref float axis, ref float instantValue, float value)
+    private void MaxAxis(byte index, float value)
     {
-        if (axis >= value) return;
-        axis = value;
-        instantValue = value;
+        if (_velocity[index] >= value) return;
+        _velocity[index] = value;
+        _instantVector[index] = value;
     }
     
-    private static void MinAxis(ref float axis, ref float instantValue, float value)
+    private void MinAxis(byte index, float value)
     {
-        if (axis <= value) return;
-        axis = value;
-        instantValue = value;
+        if (_velocity[index] <= value) return;
+        _velocity[index] = value;
+        _instantVector[index] = value;
     }
 }

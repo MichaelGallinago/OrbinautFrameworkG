@@ -1,8 +1,6 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Physics.Movements;
@@ -11,8 +9,6 @@ public readonly struct Rolling(PlayerData data)
 {
     public void Roll()
     {
-        if (!data.Movement.IsGrounded || !data.Movement.IsSpinning) return;
-		
         if (data.Movement.GroundLockTimer <= 0f)
         {
             if (data.Input.Down.Left)
@@ -28,7 +24,7 @@ public readonly struct Rolling(PlayerData data)
 
         data.Movement.GroundSpeed.ApplyFriction(data.Physics.FrictionRoll);
 
-        if (data.Movement.IsForcedSpin)
+        if (data.Movement.IsForcedRoll)
         {
             ForceSpin();
         }

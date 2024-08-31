@@ -5,10 +5,10 @@ using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Transform(PlayerData data)
+public struct Transform(PlayerData data, IPlayerLogic logic)
 {
 #if S3_PHYSICS || SK_PHYSICS
     private float _timer = 26f;
@@ -20,16 +20,14 @@ public struct Transform(PlayerData data)
     {
         AudioPlayer.Sound.Play(SoundStorage.Transform);
         AudioPlayer.Music.Play(MusicStorage.Super);
+
+        data.State = PlayerStates.NoControl;
         
-        //TODO: instance_create obj_star_super
-        //instance_create(x, y, obj_star_super, { TargetPlayer: id });
-        
-        data.Movement.IsControlRoutineEnabled = false;
-        data.Collision.IsObjectInteractionEnabled = false;			
-        data.Damage.InvincibilityTimer = 0f;
-        data.Super.Timer = 1f;
         data.Sprite.Animation = Animations.Transform;
         data.Node.Visible = true;
+        
+        data.Damage.InvincibilityTimer = 0f;
+        data.Super.Timer = 1f;
 
         LatePerform();
     }
@@ -38,9 +36,11 @@ public struct Transform(PlayerData data)
     {
         _timer -= Scene.Instance.Speed;
         if (_timer > 0f) return States.Transform;
-        
-        data.Collision.IsObjectInteractionEnabled = true;
-        data.Movement.IsControlRoutineEnabled = true;
+
+        data.State = PlayerStates.Control;
+        logic.ResetData();
+        //TODO: obj_star_super
+        //instance_create(x, y, obj_star_super, { TargetPlayer: id });
         return States.Default;
     }
 }

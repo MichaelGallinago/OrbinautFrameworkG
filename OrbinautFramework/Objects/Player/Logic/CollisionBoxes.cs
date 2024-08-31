@@ -3,10 +3,11 @@ using Godot;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
+using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct CollisionBoxes(PlayerData data)
+public readonly struct CollisionBoxes(PlayerData data, IPlayerLogic logic)
 {
     public void Update()
     {
@@ -33,27 +34,34 @@ public readonly struct CollisionBoxes(PlayerData data)
 
     private void SetExtraHitBox()
     {
-        switch (data.Sprite.Animation)
+        if (logic.Action == States.HammerSpin)
         {
-            case Animations.HammerSpin:
-                data.Node.HitBox.SetExtra(25, 25);
-                break;
-			
-            case Animations.HammerDash:
-                (int radiusX, int radiusY, int offsetX, int offsetY) = (data.Sprite.Frame & 3) switch
-                {
-                    0 => (16, 16,  6,  0),
-                    1 => (16, 16, -7,  0),
-                    2 => (14, 20, -4, -4),
-                    3 => (17, 21,  7, -5),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-                data.Node.HitBox.SetExtra(radiusX, radiusY, offsetX * (int)data.Visual.Facing, offsetY);
-                break;
-            default:
-                data.Node.HitBox.SetExtra(data.Node.Shield.State == ShieldContainer.States.DoubleSpin ? 
-                    new Vector2I(24, 24) : Vector2I.Zero);
-                break;
+            data.Node.HitBox.SetExtra(25, 25);
         }
+        else if (data.Sprite.Animation == Animations.HammerDash)
+        {
+            SetHammerDashExtraHitBox();
+        }
+        else if (data.Node.Shield.State == ShieldContainer.States.DoubleSpin)
+        {
+            data.Node.HitBox.SetExtra(24, 24);
+        }
+        else
+        {
+            data.Node.HitBox.SetExtra(Vector2I.Zero);
+        }
+    }
+
+    private void SetHammerDashExtraHitBox()
+    {
+        (int radiusX, int radiusY, int offsetX, int offsetY) = (data.Sprite.Frame & 3) switch
+        {
+            0 => (16, 16,  6,  0),
+            1 => (16, 16, -7,  0),
+            2 => (14, 20, -4, -4),
+            3 => (17, 21,  7, -5),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        data.Node.HitBox.SetExtra(radiusX, radiusY, offsetX * (int)data.Visual.Facing, offsetY);
     }
 }

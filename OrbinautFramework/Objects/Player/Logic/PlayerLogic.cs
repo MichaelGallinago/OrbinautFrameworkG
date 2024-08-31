@@ -1,9 +1,7 @@
-﻿using Godot;
-using OrbinautFramework3.Framework;
+﻿using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Actions;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.PlayerActions;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
@@ -56,7 +54,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _palette = new Palette(Data);
         _physicsCore = new PhysicsCore(Data, this);
         _angleRotation = new AngleRotation(Data);
-        _collisionBoxes = new CollisionBoxes(Data);
+        _collisionBoxes = new CollisionBoxes(Data, this);
         _initialization = new Initialization(Data);
     }
     
@@ -72,36 +70,67 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _initialization.Init();
         _initialization.Spawn();
         Recorder.Fill();
+        Data.Sprite.Process();
     }
 
     public void Process()
     {
         Data.Input.Update(Data.Id);
         
-        if (ControlType.Process()) return;
-        _death.Process();
-		
-        if (Data.Movement.IsControlRoutineEnabled)
-        {
-            RunControlRoutine();
-        }
+        ProcessState();
         
-        if (!Data.Death.IsDead)
-        {
-            _water.Process();
-            _status.Update();
-            _collisionBoxes.Update();
-        }
-		
-        Recorder.Record();
-        _angleRotation.Process();
+        _collisionBoxes.Update();
         _palette.Process();
+    }
+
+    private void ProcessState()
+    {
+        if (Data.Death.State == Death.States.Wait && ControlType.SwitchDebugMode()) return;
+        
+        switch (Data.State)
+        {
+            case PlayerStates.Control or PlayerStates.NoControl:
+                Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
+                ControlType.UpdateCpu();
+                
+                if (Data.State == PlayerStates.Control)
+                {
+                    RunControlRoutine();
+                }
+                
+                //_carry.Process(); TODO: carry
+                _water.Process();
+                _status.Update();
+                _angleRotation.Process();
+                Data.Sprite.Process();
+                Recorder.Record();
+                break;
+            
+            case PlayerStates.Hurt:
+                _physicsCore.CameraBounds.Match();
+                _physicsCore.Position.UpdateAir();
+                _physicsCore.Collision.Air.Collide();
+                _angleRotation.Process();
+                Data.Sprite.Process();
+                Recorder.Record();
+                break;
+            
+            case PlayerStates.Death:
+                _death.Process();
+                _physicsCore.Position.UpdateAir();
+                _angleRotation.Process();
+                Data.Sprite.Process();
+                Recorder.Record();
+                break;
+            
+            case PlayerStates.DebugMode:
+                ControlType.UpdateDebugMode();
+                break;
+        }
     }
     
     private void RunControlRoutine()
     {
-        Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
-        
         _actionFsm.EarlyPerform();
         _actionFsm.Perform();
         
@@ -114,7 +143,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _physicsCore.ProcessCorePhysics();
         
         _actionFsm.LatePerform();
-        //_carry.Process(); TODO: carry
     }
 
     public void OnPlayerCountChanged(int count) => Recorder.Resize(count);

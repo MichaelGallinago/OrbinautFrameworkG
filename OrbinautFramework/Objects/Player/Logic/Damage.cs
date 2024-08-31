@@ -16,29 +16,31 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	
     public void Kill(AudioStream sound)
     {
-    	if (data.Death.IsDead) return;
+    	if (data.State == PlayerStates.Death) return;
     	
-	    logic.ResetState();
+	    logic.ResetData();
     	AudioPlayer.Sound.Play(sound);
 	    
-    	if (data.Id == 0)
+    	if (!logic.ControlType.IsCpu)
     	{
     		Scene.Instance.State = Scene.States.StopObjects;
-    		SharedData.PlayerShield = ShieldContainer.Types.None;
     	}
-    	
-    	data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-	    data.Node.Visible = true;
+
+	    IPlayerNode node = data.Node;
+	    node.Shield.Type = ShieldContainer.Types.None;
+	    node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+	    node.Visible = true;
+	    
+	    MovementData movement = data.Movement;
+	    movement.Gravity = GravityType.Default;
+	    movement.Velocity.Vector = new Vector2(0f, -7f);
+	    movement.GroundSpeed.Value = 0f;
 	    
 	    logic.Action = States.Default;
     	data.Sprite.Animation = Animations.Death;
-    	data.Death.IsDead = true;
-    	data.Collision.IsObjectInteractionEnabled = false;
-    	data.Movement.Gravity = GravityType.Default;
-    	data.Movement.Velocity.Vector = new Vector2(0f, -7f);
-    	data.Movement.GroundSpeed.Value = 0f;
+	    data.State = PlayerStates.Death;
 
-    	if (data.IsCameraTarget(out ICamera camera))
+    	if (data.Node.IsCameraTarget(out ICamera camera))
     	{
     		camera.IsMovementAllowed = false;
     	}
@@ -48,43 +50,45 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
     
     public void Hurt(float positionX, AudioStream sound)
     {
-    	if (data.Damage.IsInvincible || logic.ControlType.IsDebugMode) return;
+    	if (data.Damage.IsInvincible || data.State != PlayerStates.Control) return;
 
-    	if (data.Id == 0 && SharedData.PlayerRings == 0 && SharedData.PlayerShield == ShieldContainer.Types.None)
+    	if (!logic.ControlType.IsCpu && SharedData.PlayerRings == 0 && 
+	        data.Node.Shield.Type == ShieldContainer.Types.None)
     	{
     		Kill(sound);
     		return;
     	}
     	
-    	logic.ResetState();
+    	logic.ResetData();
 	    logic.Action = States.Default;
-
-    	const float velocityX = 2f, velocityY = 4f;
-	    float velocity = data.Node.Position.X - positionX < 0f ? -velocityX : velocityX;
-    	data.Movement.Velocity.Vector = new Vector2(velocity, velocityY);
 	    
-    	data.Movement.Gravity = GravityType.HurtFall;
-    	data.Sprite.Animation = Animations.Hurt;
-    	data.Damage.IsHurt = true;
-    	data.Movement.IsAirLock = true;
-    	data.Damage.InvincibilityTimer = 120f;
-
+	    data.State = PlayerStates.Hurt;
+	    data.Sprite.Animation = Animations.Hurt;
+	    data.Damage.InvincibilityTimer = 120f;
+	    
+    	const float velocityX = 2f, velocityY = 4f;
+	    float velocity = (int)data.Node.Position.X < (int)positionX ? -velocityX : velocityX;
+	    
+	    MovementData movement = data.Movement;
+	    movement.Velocity.Vector = new Vector2(velocity, velocityY);
+	    movement.GroundSpeed.Value = 0f;
+	    movement.Gravity = GravityType.HurtFall;
+	    movement.IsAirLock = true;
+	    
     	if (data.Water.IsUnderwater)
     	{
-    		data.Movement.Velocity.Vector *= 0.5f;
-    		data.Movement.Gravity -= 0.15625f;
+		    movement.Velocity.Vector *= 0.5f;
+		    movement.Gravity -= 0.15625f;
     	}
     	
-    	if (data.Id > 0 || SharedData.PlayerShield > ShieldContainer.Types.None)
+    	if (data.Node.Shield.Type > ShieldContainer.Types.None)
     	{
-    		if (data.Id == 0)
-    		{
-    			SharedData.PlayerShield = ShieldContainer.Types.None;
-    		}
-    		
+		    data.Node.Shield.Type = ShieldContainer.Types.None;
     		AudioPlayer.Sound.Play(sound);
     		return;
     	}
+	    
+	    if (logic.ControlType.IsCpu) return;
     	
     	DropRings();
     }
@@ -131,19 +135,20 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 
     public void Respawn()
     {
-	    if (!logic.ControlType.IsCpu)
+	    logic.Init();
+
+	    if (data.Node.IsCameraTarget(out ICamera camera))
 	    {
-		    if (data.IsCameraTarget(out ICamera camera))
-		    {
-			    camera.IsMovementAllowed = true;
-		    }
+		    camera.IsMovementAllowed = true;
 		    data.Damage.InvincibilityTimer = 60f;
 		    return;
 	    }
 
 	    data.Node.Position = new Vector2(byte.MaxValue, 0f);
 	    data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
+	    
 	    data.Cpu.State = CpuLogic.States.RespawnInit;
+	    data.State = PlayerStates.NoControl;
 	    data.Movement.IsGrounded = false;
     }
 }

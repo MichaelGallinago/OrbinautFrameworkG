@@ -7,4 +7,3 @@
 script = ExtResource("2_wbepg")
 _isMoving = true
 _retractDistance = 32
-CullingType = 2

@@ -7,8 +7,6 @@ using OrbinautFramework3.Objects.Spawnable.Piece;
 
 namespace OrbinautFramework3.Objects.Common.FallingFloor;
 
-using Player;
-
 public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTextures, Vector2I piecesSize) : SolidNode
 {
     private enum States : byte
@@ -64,7 +62,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
         // Release all players from this object
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player.Data.Collision.OnObject != SolidBox) continue;
+            if (player.Data.Collision.OnObject.SolidBox != SolidBox) continue;
             player.Data.Movement.IsGrounded = false;
             player.Data.Collision.OnObject = null;
         }
@@ -106,7 +104,7 @@ public partial class FallingFloor(Sprite2D sprite, Array<AtlasTexture> piecesTex
             }
         }
 
-        CullingType = ICullable.Types.Reset;
+        CullingType = ICullable.Types.Respawn;
         //TODO: audio
         //AudioPlayer.PlaySound(SoundStorage.Break);
 		

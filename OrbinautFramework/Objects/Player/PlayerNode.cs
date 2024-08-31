@@ -49,12 +49,7 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 	public override void _Process(double delta)
 	{
 		PlayerLogic.Process();
-		_spriteNode.Process();
 	}
 
-	public void Init()
-	{
-		PlayerLogic.Init();
-		_spriteNode.Process();
-	}
+	public void Init() => PlayerLogic.Init();
 }

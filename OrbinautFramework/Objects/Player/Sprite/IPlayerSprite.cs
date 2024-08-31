@@ -25,4 +25,5 @@ public interface IPlayerSprite
     bool CheckInCamera(ICamera camera) => Node.CheckInCamera(camera);
     bool CheckInCameras() => Node.CheckInCameras();
     protected void OnAnimationChanged(Animations animation);
+    void Process();
 }

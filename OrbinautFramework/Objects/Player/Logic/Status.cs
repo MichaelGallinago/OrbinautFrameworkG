@@ -18,10 +18,9 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
         data.Item.InvincibilityTimer = UpdateItemTimer(data.Item.InvincibilityTimer, MusicStorage.Invincibility);
 
         UpdateSuperForm();
-
-        DamageData damage = data.Damage;
-        damage.IsInvincible = damage.InvincibilityTimer > 0f || data.Item.InvincibilityTimer > 0f || damage.IsHurt || 
-            data.Super.IsSuper || data.Node.Shield.State == ShieldContainer.States.DoubleSpin;
+        
+        data.Damage.IsInvincible = data.Damage.InvincibilityTimer > 0f || data.Item.InvincibilityTimer > 0f ||
+                                   data.Super.IsSuper || data.Node.Shield.State == ShieldContainer.States.DoubleSpin;
 		
         KillPlayerOnTimeLimit();
     }
@@ -41,9 +40,14 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
 
 	private void FlickAfterGettingHit()
 	{
-		if (data.Damage.InvincibilityTimer <= 0f || data.Damage.IsHurt) return;
-		data.Node.Visible = ((int)data.Damage.InvincibilityTimer & 4) > 0 || data.Damage.InvincibilityTimer <= 0f;
-		data.Damage.InvincibilityTimer -= Scene.Instance.Speed;
+		DamageData damage = data.Damage;
+		if (damage.InvincibilityTimer <= 0f) return;
+		
+		data.Node.Visible = ((int)damage.InvincibilityTimer & 4) > 0;
+		damage.InvincibilityTimer -= Scene.Instance.Speed;
+		
+		if (damage.InvincibilityTimer > 0f) return;
+		data.Node.Visible = true;
 	}
 	
 	private float UpdateItemTimer(float timer, AudioStream itemMusic)
@@ -54,7 +58,7 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
 		if (timer > 0f) return timer;
 		timer = 0f;
 
-		if (data.Id == 0 && AudioPlayer.Music.IsPlaying(itemMusic))
+		if (AudioPlayer.Music.IsPlaying(itemMusic))
 		{
 			data.ResetMusic();
 		}
@@ -83,12 +87,15 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
 		data.Damage.InvincibilityTimer = 1f;
 		data.Super.Timer = 0f;
 		
-		data.ResetMusic();
+		if (!AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
+		{
+			data.ResetMusic();
+		}
 	}
 
 	private void KillPlayerOnTimeLimit()
 	{
-		if (data.Id == 0 && Scene.Instance.Time >= 36000f)
+		if (!logic.ControlType.IsCpu && Scene.Instance.Time >= 36000f)
 		{
 			logic.Kill();
 		}

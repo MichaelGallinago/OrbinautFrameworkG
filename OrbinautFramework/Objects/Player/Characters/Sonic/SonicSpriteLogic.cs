@@ -28,12 +28,13 @@ public partial class SonicSpriteLogic : SpriteLogic
             Animations.Idle => Animations.Wait,
             Animations.Skid when
                 Player.Data.Input.Down is { Left: false, Right: false } || 
-                Math.Abs(Player.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold => Animations.Move, 
+                Math.Abs(Player.Data.Movement.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold 
+                    => Animations.Move, 
             _ => Data.Animation
         };
     }
     
-    protected override void UpdateSpeed() => Data.Speed = Player.Animation switch
+    protected override void UpdateSpeed() => Data.Speed = Data.Animation switch
     {
         Animations.Move => GetGroundSpeed(9f),
         Animations.Push => GetGroundSpeed(9f),
@@ -41,11 +42,11 @@ public partial class SonicSpriteLogic : SpriteLogic
         _ => 1f
     };
 	
-    protected override void UpdateType() => Data.Type = Player.Animation switch
+    protected override void UpdateType() => Data.Type = Data.Animation switch
     {
         Animations.Move => Player.Data.Super.IsSuper ? 
             GetMoveAnimation(false, 8f) :
             GetMoveAnimation(SharedData.Dash, 6f),
-        _ => Player.Animation
+        _ => Data.Animation
     };
 }

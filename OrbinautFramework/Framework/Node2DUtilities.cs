@@ -1,6 +1,7 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework;
 
@@ -18,5 +19,18 @@ public static class Node2DUtilities
         {
             camera.SetCameraDelayX(delay);
         }
+    }
+
+    //TODO: check this
+    public static bool IsInCamera(this PlayerData data, out ICamera camera)
+    {
+        if (data.Node.IsCameraTarget(out camera)) return true;
+        
+        if (data.Cpu.Target != null)
+        {
+            if (data.Cpu.Target.Data.Node.IsCameraTarget(out camera)) return true;
+        }
+
+        return Scene.Instance.Players.FirstOrDefault().Data.Node.IsCameraTarget(out camera);
     }
 }

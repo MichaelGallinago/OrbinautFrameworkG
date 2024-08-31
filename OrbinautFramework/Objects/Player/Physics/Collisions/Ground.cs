@@ -15,8 +15,6 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 	
 	public void CollideWalls()
     {
-        if (!data.Movement.IsGrounded) return;
-        
 #if SK_PHYSICS
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
 	    if (data.Movement.Angle is > 90f and <= 270f && data.Movement.Angle % 90f != 0f) return;
@@ -98,7 +96,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 	// Since we're going to rotate player's sensors, "rotate" tile properties as well
 	public void CollideFloor()
 	{
-		if (!data.Movement.IsGrounded || data.Collision.OnObject != null) return;
+		if (data.Collision.OnObject != null) return;
 		
 		data.Collision.TileBehaviour = GetTileBehaviour();
 		logic.TileCollider.SetData(

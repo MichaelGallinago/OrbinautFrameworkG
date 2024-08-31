@@ -4,7 +4,7 @@ using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) //TODO: refactor this somehow????
 {

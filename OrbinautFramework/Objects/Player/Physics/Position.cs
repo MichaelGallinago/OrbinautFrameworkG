@@ -1,16 +1,21 @@
 ﻿using Godot;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Logic;
-using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Physics;
 
-public readonly struct Position(PlayerData data, IPlayerLogic logic)
+public readonly struct Position(PlayerData data)
 {
-    public void Update()
+    public void UpdateAir()
     {
-        if (logic.Action == States.Carried) return;
-		
+        Update();
+
+        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
+    }
+    
+    public void UpdateGround() => Update();
+    
+    private void Update()
+    {
         if (data.Collision.IsStickToConvex)
         {
             data.Movement.Velocity.Clamp(-16f * Vector2.One, 16f * Vector2.One);
@@ -18,8 +23,5 @@ public readonly struct Position(PlayerData data, IPlayerLogic logic)
 		
         data.Node.Position = data.Movement.Velocity.CalculateNewPosition(data.Node.Position);
         data.Movement.Velocity.ResetInstantVelocity();
-		
-        if (data.Movement.IsGrounded) return;
-        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
     }
 }

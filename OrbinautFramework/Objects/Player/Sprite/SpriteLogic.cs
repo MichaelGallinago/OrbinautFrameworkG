@@ -37,7 +37,8 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
             Animations.Bounce or Animations.Breathe or Animations.Flip or Animations.Transform => Animations.Move,
             Animations.Skid when
                 Player.Data.Input.Down is { Left: false, Right: false } || 
-                Math.Abs(Player.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold => Animations.Move, 
+                Math.Abs(Player.Data.Movement.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold 
+                    => Animations.Move, 
             _ => Data.Animation
         };
     }
@@ -57,7 +58,7 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
     {
         const float dashThreshold = 10f;
 		
-        float speed = Math.Abs(Player.GroundSpeed);
+        float speed = Math.Abs(Player.Data.Movement.GroundSpeed);
 
         if (speed < runThreshold) return Animations.Walk;
         return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
@@ -65,7 +66,7 @@ public abstract partial class SpriteLogic : Resource, IPlayerSprite
 	
     protected float GetGroundSpeed(float speedBound)
     {
-        return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(Player.GroundSpeed)));
+        return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(Player.Data.Movement.GroundSpeed)));
     }
 
     protected void SetType(Animations type, float speed)

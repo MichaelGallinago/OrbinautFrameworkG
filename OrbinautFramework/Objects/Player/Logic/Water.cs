@@ -24,7 +24,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Water.IsUnderwater) return false;
 		
-		if ((int)data.Node.Position.Y < Stage.Local.WaterLevel || data.Damage.IsHurt) return true;
+		if ((int)data.Node.Position.Y < Stage.Local.WaterLevel) return true;
 		
 		data.Water.IsUnderwater = true;
 		data.Water.AirTimer = Constants.DefaultAirTimer;
@@ -64,7 +64,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 			//instance_create(x, c_stage.water_level, obj_explosion_dust, { MakeSound: false });
 		}
 
-		SharedData.PlayerShield = ShieldContainer.Types.None;
+		data.Node.Shield.Type = ShieldContainer.Types.None;
 	}
 
 	private enum AirTimerStates : byte
@@ -87,11 +87,11 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 		
 		switch (state)
 		{
-			case AirTimerStates.Alert1 or AirTimerStates.Alert2 or AirTimerStates.Alert3 when data.Id == 0:
+			case AirTimerStates.Alert1 or AirTimerStates.Alert2 or AirTimerStates.Alert3 when !logic.ControlType.IsCpu:
 				AudioPlayer.Sound.Play(SoundStorage.Alert);
 				break;
 			
-			case AirTimerStates.Drowning when data.Id == 0:
+			case AirTimerStates.Drowning when !logic.ControlType.IsCpu:
 				AudioPlayer.Music.Play(MusicStorage.Drowning);
 				break;
 			
@@ -116,18 +116,21 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	private void ProcessDrown()
 	{
 		AudioPlayer.Sound.Play(SoundStorage.Drown);
-		logic.ResetState();
+		logic.ResetData();
 		logic.Action = States.Default;
 
 		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		data.Sprite.Animation = Animations.Drown;
-		data.Death.IsDead = true;
-		data.Collision.IsObjectInteractionEnabled = false;
-		data.Movement.Gravity	= GravityType.Underwater;
-		data.Movement.Velocity.Vector = Vector2.Zero;
-		data.Movement.GroundSpeed.Value = 0f;
+		data.Node.Visible = true;
 		
-		if (data.IsCameraTarget(out ICamera camera))
+		data.Sprite.Animation = Animations.Drown;
+		data.State = PlayerStates.Death;
+
+		MovementData movement = data.Movement;
+		movement.Gravity = GravityType.Underwater;
+		movement.Velocity.Vector = Vector2.Zero;
+		movement.GroundSpeed.Value = 0f;
+		
+		if (data.Node.IsCameraTarget(out ICamera camera))
 		{
 			camera.IsMovementAllowed = false;
 		}
@@ -135,7 +138,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 
 	private void Leave()
 	{
-		if ((int)data.Node.Position.Y >= Stage.Local.WaterLevel || data.Damage.IsHurt) return;
+		if ((int)data.Node.Position.Y >= Stage.Local.WaterLevel) return;
 
 		data.Water.IsUnderwater = false;
 		ResetGravityOnEdge();
@@ -147,7 +150,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 			
-		if (data.Id == 0 && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
+		if (!logic.ControlType.IsCpu && AudioPlayer.Music.IsPlaying(MusicStorage.Drowning))
 		{
 			data.ResetMusic();
 		}
@@ -173,7 +176,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	private void SpawnSplash()
 	{
 		if (logic.Action is States.Climb or States.GlideAir or States.GlideGround) return;
-		if (data.Cpu.State == CpuLogic.States.Respawn) return;
+		if (data.Cpu.State == CpuLogic.States.Respawn || data.Movement.Velocity.Y == 0f) return;
 		
 		//TODO: obj_water_splash
 		//instance_create(x, c_stage.water_level, obj_water_splash);

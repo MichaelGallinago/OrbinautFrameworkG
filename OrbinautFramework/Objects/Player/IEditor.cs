@@ -8,6 +8,6 @@ public interface IEditor : IPosition
     Constants.Direction Facing { get; }
     IInputContainer Input { get; }
     
-    void OnEnableEditMode();
-    void OnDisableEditMode();
+    void OnEnableDebugMode();
+    void OnDisableDebugMode();
 }

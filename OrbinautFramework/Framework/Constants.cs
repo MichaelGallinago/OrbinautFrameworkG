@@ -8,8 +8,7 @@ public static class Constants
 
 	// Input (keyboard and first gamepad slot are treated as one device)
 	public const byte MaxInputDevices = 4;
-
-	public const float AngleIncrement = 1.40625f;
+	
 	public const ushort TileLimit = 256;
 	public const byte TileSize = 16;
 	public const byte DoubleTileSize = TileSize * 2;
@@ -43,7 +42,12 @@ public static class Constants
 
 	public enum SolidType : byte
 	{
-		Full, FullReset, Top, TopReset, Sides, ItemBox
+		Full, Top, Sides, ItemBox
+	}
+	
+	public enum AttachType
+	{
+		Default, None, ResetPlayer
 	}
 
 	public enum FadeState : byte

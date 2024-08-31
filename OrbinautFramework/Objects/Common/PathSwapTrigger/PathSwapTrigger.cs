@@ -24,7 +24,7 @@ public abstract partial class PathSwapTrigger : Trigger
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
             if (_isGroundOnly && !player.Data.Movement.IsGrounded) continue;
-            if (!player.Data.Collision.IsObjectInteractionEnabled) continue;
+            if (!player.Data.State.IsObjectInteractable()) continue;
             
             IPlayerNode node = player.Data.Node;
             Constants.TileLayers? layer = GetTileLayer((Vector2I)node.Position, (Vector2I)node.PreviousPosition);

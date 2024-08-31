@@ -6,17 +6,28 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public readonly struct DataUtilities(PlayerData data)
 {
-    public void ResetState()
+    public void ResetData()
     {
-        data.Damage.IsHurt = false;
+        MovementData movement = data.Movement;
+        movement.IsSpinning = false;
+        movement.IsGrounded = false;
+        movement.IsJumping = false;
+        movement.IsForcedRoll = false;
 		
-        data.Movement.IsSpinning = false;
-        data.Movement.IsGrounded = false;
-		
-        data.Visual.SetPushBy = null;
-		
-        data.Collision.OnObject = null;
-        data.Collision.Radius = data.Collision.RadiusNormal;
+        CollisionData collision = data.Collision;
+        collision.OnObject = null;
+        collision.Radius = data.Collision.RadiusNormal;
+
+        VisualData visual = data.Visual;
+        visual.SetPushBy = null;
+        visual.Angle = 0f;
+        
+        ClearCarryData(); //TODO: carry
+    }
+
+    public void ClearCarryData() //TODO: carry
+    {
+        
     }
 	
     public void ResetGravity()

@@ -19,25 +19,26 @@ public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAc
 		
 		switch (logic.Action)
 		{
-			case States.SpinDash: return;
+			case States.SpinDash or States.HammerDash: return;
 			case States.Dash: landAction(); return;
 		}
 		
 		if (WaterBarrierBounce()) return;
 		
-		if (data.Damage.IsHurt)
+		if (data.State == PlayerStates.Hurt)
 		{
 			data.Movement.GroundSpeed.Value = 0f;
 		}
 		
 		data.Movement.IsAirLock = false;
 		data.Movement.IsJumping = false;
+		data.Movement.IsSpinning = false;
 		
 		data.Visual.SetPushBy = null;
 		data.Sprite.Animation = Animations.Move;
 		
+		data.State = PlayerStates.Control;
 		data.Cpu.State = CpuLogic.States.Main;
-		data.Damage.IsHurt = false;
 		data.Node.Shield.State = ShieldContainer.States.None;
 		data.Item.ComboCounter = 0;
 		data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
@@ -51,8 +52,8 @@ public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAc
     
 	private bool WaterBarrierBounce()
 	{
-		if (data.Node.Shield.State != ShieldContainer.States.Active) return false;
-		if (SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
+		ShieldContainer shield = data.Node.Shield;
+		if (shield.State != ShieldContainer.States.Active || shield.Type != ShieldContainer.Types.Bubble) return false;
 		
 		float force = data.Water.IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(data.Movement.Angle);

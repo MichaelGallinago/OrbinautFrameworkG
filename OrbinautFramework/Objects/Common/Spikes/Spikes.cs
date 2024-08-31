@@ -34,10 +34,10 @@ public partial class Spikes : SolidNode
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            SolidType solidType = _isHorizontal || player.Data.Damage.IsInvincible ? 
-                SolidType.Full : SolidType.FullReset; //TODO: optimize this????
+            AttachType attachType = _isHorizontal || player.Data.Damage.IsInvincible ? 
+                AttachType.Default : AttachType.ResetPlayer; //TODO: optimize this????
             
-            player.ActSolid(this, solidType);
+            player.ActSolid(this, SolidType.Full, attachType);
             if (!player.CheckSolidCollision(SolidBox, _sensorToDamage)) continue;
             player.Hurt(Position.X, SoundStorage.SpikesHurt);
         }

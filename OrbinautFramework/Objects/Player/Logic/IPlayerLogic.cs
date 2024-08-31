@@ -4,7 +4,6 @@ using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Actions;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.PlayerActions;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
@@ -17,14 +16,17 @@ public interface IPlayerLogic : IRecorderStorage
     Damage Damage { get; }
     Landing Landing { get; }
     DataUtilities DataUtilities { get; }
-    public ObjectInteraction ObjectInteraction { get; }
     
+    protected ObjectInteraction ObjectInteraction { get; } //TODO: check encapsulation?
+    
+    void Init();
     void Respawn() => Damage.Respawn();
     void Hurt(float positionX) => Damage.Hurt(positionX);
     void Hurt(float positionX, AudioStream sound) => Damage.Hurt(positionX, sound);
     void Kill() => Damage.Kill();
+    void Kill(AudioStream sound) => Damage.Kill(sound);
     void Land() => Landing.Land();
-    void ResetState() => DataUtilities.ResetState();
+    void ResetData() => DataUtilities.ResetData();
     void ResetMusic() => DataUtilities.ResetMusic();
     void ResetGravity() => DataUtilities.ResetGravity();
     void ClearPush(object target) => ObjectInteraction.ClearPush(target);
@@ -35,8 +37,9 @@ public interface IPlayerLogic : IRecorderStorage
         return ObjectInteraction.CheckSolidCollision(solidBox, type);
     }
     
-    void ActSolid(ISolid target, Constants.SolidType type, bool isFullRoutine = true)
+    void ActSolid(ISolid target, Constants.SolidType type, 
+        Constants.AttachType attachType = Constants.AttachType.Default)
     {
-        ObjectInteraction.ActSolid(target, type, isFullRoutine);
+        ObjectInteraction.ActSolid(target, type, attachType);
     }
 }

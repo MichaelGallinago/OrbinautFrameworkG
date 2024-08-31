@@ -6,10 +6,6 @@ namespace OrbinautFramework3.Objects.Player.Physics;
 
 public readonly struct Collision(PlayerData data, IPlayerLogic logic)
 {
-	private readonly Air _air = new(data, logic);
-	private readonly Ground _ground = new(data, logic);
-
-	public void CollideAir() => _air.Collide();
-	public void CollideFloorGround() => _ground.CollideFloor();
-	public void CollideWallsGround() => _ground.CollideWalls();
+	public readonly Air Air = new(data, logic);
+	public readonly Ground Ground = new(data, logic);
 }

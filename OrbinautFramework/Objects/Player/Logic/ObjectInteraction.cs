@@ -27,17 +27,17 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		}
 	}
 
-	public void ActSolid(ISolid target, SolidType type, bool isFullRoutine = true)
+	public void ActSolid(ISolid target, SolidType type, AttachType attachType = AttachType.Default)
 	{
 		SolidBox targetBox = target.SolidBox;
 		data.Collision.TouchObjects.TryAdd(targetBox, TouchState.None);
 		data.Collision.PushObjects.Add(targetBox);
 		
-		if (!data.Collision.IsObjectInteractionEnabled) return;
+		if (!data.State.IsObjectInteractable()) return;
 		if (data.Node.SolidBox.Radius.X <= 0 || data.Node.SolidBox.Radius.Y <= 0) return;
 		if (targetBox.Radius.X <= 0 || targetBox.Radius.Y <= 0) return;
 		
-		_solidObjectData = new SolidObjectData(target, type, GetExtraSize());
+		_solidObjectData = new SolidObjectData(target, type, attachType, GetExtraSize());
 		int slopeOffset = CalculateSlopeOffset();
 		
 		RegisterCollisionCheck();
@@ -47,8 +47,6 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			StandingOnObject(slopeOffset);
 			return;
 		}
-		
-		if (!isFullRoutine) return;
 		
 		if (type != SolidType.Top)
 		{
@@ -62,8 +60,8 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	public bool CheckSolidCollision(SolidBox solidBox, CollisionSensor type)
 	{
-		if (!data.Collision.IsObjectInteractionEnabled) return false;
-
+		if (!data.State.IsObjectInteractable()) return false;
+		
 		// No solid collision data, exit collision check
 		if (!data.Collision.TouchObjects.TryGetValue(solidBox, out TouchState touchState)) return false;
 		
@@ -337,12 +335,17 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void AttachToObject(int distance)
 	{
-		if (_solidObjectData.Type is SolidType.FullReset or SolidType.TopReset)
+		switch (_solidObjectData.AttachType)
 		{
-			logic.ResetState();
-			logic.Action = ActionFsm.States.Default;
+			case AttachType.None:
+				return;
+			
+			case AttachType.ResetPlayer:
+				logic.ResetData();
+				logic.Action = ActionFsm.States.Default;
+				break;
 		}
-
+		
 		data.Node.Position = data.Node.Position with { Y = data.Node.Position.Y - distance - 1 };
 		data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
 		data.Collision.OnObject = _solidObjectData.Target;

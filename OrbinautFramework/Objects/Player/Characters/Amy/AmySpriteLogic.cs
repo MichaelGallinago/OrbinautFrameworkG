@@ -8,7 +8,7 @@ public partial class AmySpriteLogic : SpriteLogic
 {
     protected override void Animate()
     {
-        if (Player.Animation == Animations.HammerSpin)
+        if (Data.Animation == Animations.HammerSpin)
         {
             SetType(Data.Type, Node.Frame, Data.Speed);
             return;
@@ -17,13 +17,13 @@ public partial class AmySpriteLogic : SpriteLogic
         SetType(Data.Type, Data.Speed);
     }
 
-    protected override void UpdateType() => Data.Type = Player.Animation switch
+    protected override void UpdateType() => Data.Type = Data.Animation switch
     {
         Animations.Move => GetMoveAnimation(true, 6f),
-        _ => Player.Animation
+        _ => Data.Animation
     };
     
-    protected override void UpdateSpeed() => Data.Speed = Player.Animation switch
+    protected override void UpdateSpeed() => Data.Speed = Data.Animation switch
     {
         Animations.Move => GetGroundSpeed(9f),
         Animations.Push => GetGroundSpeed(9f),

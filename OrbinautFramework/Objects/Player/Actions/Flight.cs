@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
-namespace OrbinautFramework3.Objects.Player.PlayerActions;
+namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
 public struct Flight(PlayerData data)
@@ -31,12 +31,12 @@ public struct Flight(PlayerData data)
     public void Perform()
     {
 	    UpdateTimer();
-
+	    
         if (!Ascend())
         {
             Descend();
         }
-
+        
         PlayFlightSound();
         SetAnimation();
     }
@@ -94,11 +94,6 @@ public struct Flight(PlayerData data)
     	}
 	    
     	data.Movement.Gravity = GravityType.TailsDown;
-    	
-    	if (SharedData.SuperstarsTweaks && data.Input.Down.Down)
-    	{
-    		data.Movement.Gravity *= 3f;
-    	}
     }
 
     private void SetAnimation()
