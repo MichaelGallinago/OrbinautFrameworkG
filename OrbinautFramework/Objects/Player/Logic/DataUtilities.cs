@@ -8,14 +8,26 @@ public readonly struct DataUtilities(PlayerData data)
 {
     public void ResetData()
     {
-        data.Movement.IsSpinning = false;
-        data.Movement.IsGrounded = false;
-        data.Movement.IsJumping = false;
+        MovementData movement = data.Movement;
+        movement.IsSpinning = false;
+        movement.IsGrounded = false;
+        movement.IsJumping = false;
+        movement.IsForcedRoll = false;
 		
-        data.Visual.SetPushBy = null;
-        data.Collision.OnObject = null;
+        CollisionData collision = data.Collision;
+        collision.OnObject = null;
+        collision.Radius = data.Collision.RadiusNormal;
+
+        VisualData visual = data.Visual;
+        visual.SetPushBy = null;
+        visual.Angle = 0f;
         
-        data.Collision.Radius = data.Collision.RadiusNormal;
+        ClearCarryData(); //TODO: carry
+    }
+
+    public void ClearCarryData() //TODO: carry
+    {
+        
     }
 	
     public void ResetGravity()

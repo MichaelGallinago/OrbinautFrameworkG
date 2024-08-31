@@ -68,9 +68,9 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
     	}
     	else
     	{
+		    data.Death.State = States.GameOver;
     		//TODO: gui gameover
     		//instance_create_depth(0, 0, RENDERER_DEPTH_HUD, obj_gui_gameover);
-		    data.Death.State = States.GameOver;
 	    }
     }
 

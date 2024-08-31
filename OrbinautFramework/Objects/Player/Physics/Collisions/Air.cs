@@ -149,8 +149,8 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 			angle = angleLeft;
 		}
 		
-		// Exit if too far into the ground when BOTH sensors find it.
-		// So if we're landing on a ledge, it doesn't matter how far we're clipping into the ground
+		// Exit if BOTH sensors are way too far into the surface. This means the game doesn't care
+		// how far we're clipping into the ground if we're landing on a ledge
 		
 		if (distance >= 0) return true;
 		float minimalClip = -(data.Movement.Velocity.Y + 8f);

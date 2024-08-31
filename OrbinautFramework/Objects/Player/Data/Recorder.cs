@@ -1,4 +1,5 @@
 ﻿using System;
+using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Logic;
 
@@ -11,7 +12,7 @@ public class Recorder(PlayerData playerData)
     public ReadOnlySpan<DataRecord> Data => _data;
     
     private DataRecord NewRecord => new(
-        playerData.Node.Position, 
+        (Vector2I)playerData.Node.Position, 
         playerData.Input.Press, playerData.Input.Down, 
         playerData.Visual.Facing, playerData.Visual.SetPushBy, 
         playerData.Movement.IsGrounded);

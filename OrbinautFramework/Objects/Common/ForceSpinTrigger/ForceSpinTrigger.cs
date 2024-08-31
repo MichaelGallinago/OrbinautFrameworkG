@@ -18,7 +18,7 @@ public abstract partial class ForceSpinTrigger : Trigger
         float size = Sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
         Borders = new Vector2(-size, size);
     }
-
+    
     public override void _Process(double delta)
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)

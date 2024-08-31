@@ -104,7 +104,7 @@ public partial class Views : Control
         int number = Math.Min(_cameras.Length, players.Length);
         for (var i = 0; i < number; i++)
         {
-            _cameras[i].Target = players[i];
+            _cameras[i].Target = players[i].Data.Node;
         }
     }
 

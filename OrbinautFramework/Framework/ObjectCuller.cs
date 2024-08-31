@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using OrbinautFramework3.Framework.View;
-using OrbinautFramework3.Objects.Common.Spikes;
 
 namespace OrbinautFramework3.Framework;
 
@@ -12,22 +11,22 @@ public class ObjectCuller
 	
 	private bool _isCullToggled = true;
 	private readonly HashSet<ICullable> _hiddenObjectsInView = [];
-	private readonly HashSet<ICullable> _stoppedObjects = [];
+	private readonly HashSet<ICullable> _pausedObjects = [];
 	private readonly HashSet<ICullable> _activeObjects = [];
 	
 	public void Remove(ICullable target)
 	{
 		if (_activeObjects.Remove(target)) return;
-		_stoppedObjects.Remove(target);
+		_pausedObjects.Remove(target);
 	}
 
 	public void Add(ICullable target) => _activeObjects.Add(target);
 	
 	public void EarlyCull()
 	{
-		if (StopAllObjets()) return;
+		if (PauseAllObjets()) return;
 		
-		StopObjectsByBehaviour();
+		CullObjects();
 		
 		if (_isCullToggled)
 		{
@@ -39,13 +38,13 @@ public class ObjectCuller
 		ResumeRegions(Views.Instance.GetCamerasWithUpdatedRegions());
 	}
 
-    private bool StopAllObjets()
+    private bool PauseAllObjets()
     {
 	    if (Scene.Instance.State != Scene.States.Paused) return false;
 	    
 	    foreach (ICullable target in _activeObjects)
 	    {
-		    _stoppedObjects.Add(target);
+		    _pausedObjects.Add(target);
 		    target.SetProcess(false);
 	    }
 
@@ -59,13 +58,13 @@ public class ObjectCuller
     {
 	    if (cameras.Length == 0) return;
 
-	    foreach (ICullable target in _stoppedObjects)
+	    foreach (ICullable target in _pausedObjects)
 	    {
 		    var position = (Vector2I)target.Position;
 		    foreach (ICamera camera in cameras)
 		    {
 			    if (!camera.CheckPositionInActiveRegion(position)) continue;
-				_stoppedObjects.Remove(target);
+				_pausedObjects.Remove(target);
 			    _activeObjects.Add(target);
 			    target.SetProcess(true);
 			    break;
@@ -73,7 +72,7 @@ public class ObjectCuller
 	    }
     }
     
-    private void StopObjectsByBehaviour()
+    private void CullObjects()
     {
 	    foreach (ICullable target in _hiddenObjectsInView)
 	    {
@@ -83,7 +82,7 @@ public class ObjectCuller
 			    if (camera.CheckPositionInActiveRegion(position)) continue;
 			    
 			    target.Memento.Reset();
-			    _stoppedObjects.Add(target);
+			    _pausedObjects.Add(target);
 			    _hiddenObjectsInView.Remove(target);
 			    break;
 		    }
@@ -91,23 +90,22 @@ public class ObjectCuller
 	    
 	    foreach (ICullable target in _activeObjects)
 	    {
-		    StopObjectByBehaviour(target);
+		    CullObjectByBehaviour(target);
 	    }
     }
     
-    private void StopObjectByBehaviour(ICullable orbinautData)
+    private void CullObjectByBehaviour(ICullable orbinautData) // TODO: culling
     {
 	    switch (orbinautData.CullingType)
 	    {
-		    case ICullable.Types.Delete: DeleteObject(orbinautData); break;
-		    case ICullable.Types.Reset: ResetObject(orbinautData); break;
-		    case ICullable.Types.ResetX: ResetXObject(orbinautData); break;
-		    case ICullable.Types.ResetY: ResetYObject(orbinautData); break;
-		    case ICullable.Types.Pause: PauseObject(orbinautData); break;
+		    case ICullable.Types.None or ICullable.Types.PauseOnly or ICullable.Types.Active: break;
+		    //case ICullable.Types.Delete: DeleteObject(orbinautData); break;
+		    //case ICullable.Types.Reset: ResetObject(orbinautData); break;
+		    //case ICullable.Types.Basic: PauseObject(orbinautData); break;
 	    }
     }
 
-    private static void DeleteObject(ICullable target)
+    private static void RemoveObject(ICullable target)
     {
 	    var position = (Vector2I)target.Position;
 	    foreach (ICamera camera in Views.Instance.Cameras)
@@ -118,7 +116,7 @@ public class ObjectCuller
 	    target.QueueFree();
     }
 
-    private void ResetObject(ICullable target)
+    private void RespawnObject(ICullable target)
     {
 	    var position = (Vector2I)target.Position;
 	    foreach (ICamera camera in Views.Instance.Cameras)
@@ -139,55 +137,7 @@ public class ObjectCuller
 	    }
 	    
 	    target.Memento.Reset();
-	    _stoppedObjects.Add(target);
-    }
-    
-    private void ResetXObject(ICullable target)
-    {
-	    var position = (int)target.Position.X;
-	    foreach (ICamera camera in Views.Instance.Cameras)
-	    {
-		    if (camera.CheckXInActiveRegion(position)) return;
-	    }
-
-	    _activeObjects.Remove(target);
-	    target.SetProcess(false);
-	    
-	    var respawnPosition = (int)target.Memento.Position.X;
-	    foreach (ICamera camera in Views.Instance.Cameras)
-	    {
-		    if (!camera.CheckXInActiveRegion(respawnPosition)) continue;
-		    _hiddenObjectsInView.Add(target);
-		    target.Hide();
-		    return;
-	    }
-
-	    target.Memento.Reset();
-	    _stoppedObjects.Add(target);
-    }
-    
-    private void ResetYObject(ICullable target)
-    {
-	    var position = (int)target.Position.Y;
-	    foreach (ICamera camera in Views.Instance.Cameras)
-	    {
-		    if (camera.CheckYInActiveRegion(position)) return;
-	    }
-	    
-	    _activeObjects.Remove(target);
-	    target.SetProcess(false);
-
-	    var respawnPosition = (int)target.Memento.Position.Y;
-	    foreach (ICamera camera in Views.Instance.Cameras)
-	    {
-		    if (!camera.CheckYInActiveRegion(respawnPosition)) continue;
-		    _hiddenObjectsInView.Add(target);
-		    target.Hide();
-		    return;
-	    }
-	    
-	    target.Memento.Reset();
-	    _stoppedObjects.Add(target);
+	    _pausedObjects.Add(target);
     }
 
     private void PauseObject(ICullable target)
@@ -200,6 +150,6 @@ public class ObjectCuller
 	    
 	    target.SetProcess(false);
 	    _activeObjects.Remove(target);
-	    _stoppedObjects.Add(target);
+	    _pausedObjects.Add(target);
     }
 }

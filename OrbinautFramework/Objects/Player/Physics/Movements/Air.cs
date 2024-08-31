@@ -28,10 +28,10 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 	{
 		if (Mathf.IsEqualApprox(data.Movement.Angle, 0f)) return;
 		
-		float speed = Angles.ByteAngleStep * Scene.Instance.Speed;
-		data.Movement.Angle += data.Movement.Angle >= 180f ? speed : -speed;
+		float speed = Angles.ByteStep * Scene.Instance.Speed;
+		data.Movement.Angle += data.Movement.Angle >= Angles.CircleHalf ? speed : -speed;
 		
-		if (data.Movement.Angle is < 0f or >= 360f)
+		if (data.Movement.Angle is < 0f or >= Angles.CircleFull)
 		{
 			data.Movement.Angle = 0f;
 		}
@@ -90,7 +90,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Movement.Velocity.Y is < 0f and > -4f)
 		{
-			data.Movement.Velocity.AccelerationX = MathF.Floor(data.Movement.Velocity.X * 8f) * -0.00390625f;
+			data.Movement.Velocity.AccelerationX = MathF.Floor(data.Movement.Velocity.X * 8f) / -256f;
 		}
 	}
 }

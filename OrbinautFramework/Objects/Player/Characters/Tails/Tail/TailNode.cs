@@ -18,7 +18,7 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 		
 		switch (player.Data.Sprite.Animation)
 		{
-			case Animations.Idle or Animations.Duck or Animations.LookUp:
+			case Animations.Idle or Animations.Wait or Animations.Duck or Animations.LookUp:
 				SetAnimation("Idle");
 				break;
 			

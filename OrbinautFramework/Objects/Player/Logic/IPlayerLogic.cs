@@ -16,13 +16,15 @@ public interface IPlayerLogic : IRecorderStorage
     Damage Damage { get; }
     Landing Landing { get; }
     DataUtilities DataUtilities { get; }
-    public ObjectInteraction ObjectInteraction { get; }
+    
+    protected ObjectInteraction ObjectInteraction { get; } //TODO: check encapsulation?
     
     void Init();
     void Respawn() => Damage.Respawn();
     void Hurt(float positionX) => Damage.Hurt(positionX);
     void Hurt(float positionX, AudioStream sound) => Damage.Hurt(positionX, sound);
     void Kill() => Damage.Kill();
+    void Kill(AudioStream sound) => Damage.Kill(sound);
     void Land() => Landing.Land();
     void ResetData() => DataUtilities.ResetData();
     void ResetMusic() => DataUtilities.ResetMusic();

@@ -201,7 +201,7 @@ public class TileCollider
 		
 		if (!_isVertical)
 		{
-			return _direction == Direction.Positive ? (float)Angles.Circle.Quarter : (float)Angles.Circle.ThreeQuarters;
+			return _direction == Direction.Positive ? Angles.CircleQuarter : Angles.CircleThreeQuarters;
 		}
 		
 		// Reset height if the tile was found from the opposite side. This only works correctly
@@ -211,7 +211,7 @@ public class TileCollider
 			_foundTileData.Size = TileSize;
 		}
 			
-		return _direction == Direction.Positive ? 0f : (float)Angles.Circle.Half;
+		return _direction == Direction.Positive ? 0f : Angles.CircleHalf;
 	}
 
 	private void ValidateHeight()

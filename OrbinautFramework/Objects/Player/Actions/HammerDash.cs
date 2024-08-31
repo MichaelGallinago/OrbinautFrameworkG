@@ -17,7 +17,7 @@ public struct HammerDash(PlayerData data)
         data.Sprite.Animation = Animations.HammerDash;
         data.Movement.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
         
-        if (data.Super.IsSuper && data.IsCameraTarget(out ICamera camera))
+        if (data.Super.IsSuper && data.Node.IsCameraTarget(out ICamera camera))
         {
             camera.SetShakeTimer(6f);
         }

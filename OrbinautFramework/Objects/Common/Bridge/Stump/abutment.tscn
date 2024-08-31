@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ccbh6mwdu2hc5"]
+
+[ext_resource type="Texture2D" uid="uid://dfapqkhdpa6gs" path="res://Objects/Common/Bridge/Stump/abutment.png" id="1_8mgih"]
+
+[node name="Abutment" type="Sprite2D"]
+texture = ExtResource("1_8mgih")

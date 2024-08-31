@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Framework;
 
 public interface ICullable
 {
-    public enum Types : byte { None, NoBounds, Reset, ResetX, ResetY, Delete, Pause }
+    public enum Types : byte { None, PauseOnly, Active, Remove, Disable, OriginDisable, Respawn, OriginRespawn }
     
     public Types CullingType { get; set; }
     public Vector2 Position { get; }

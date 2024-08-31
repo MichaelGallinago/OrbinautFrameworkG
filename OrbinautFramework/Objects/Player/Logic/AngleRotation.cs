@@ -1,5 +1,6 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
@@ -12,7 +13,7 @@ public readonly struct AngleRotation(PlayerData data)
         float visualAngle = CalculateVisualAngle();
         data.Visual.Angle = visualAngle;
         data.Node.RotationDegrees = data.Sprite.Animation is Animations.Move or Animations.HammerDash ? 
-            360f - visualAngle : 0f;
+            Angles.CircleFull - visualAngle : 0f;
     }
 
     private float CalculateVisualAngle()
@@ -40,19 +41,20 @@ public readonly struct AngleRotation(PlayerData data)
         float angleDifference = rangeAngle - data.Visual.Angle;
 		
         float delta = Math.Abs(angleDifference);
-        float clockwiseDelta = Math.Abs(angleDifference + 360f);
-        float counterclockwiseDelta = Math.Abs(angleDifference - 360f);
+        float clockwiseDelta = Math.Abs(angleDifference + Angles.CircleFull);
+        float counterclockwiseDelta = Math.Abs(angleDifference - Angles.CircleFull);
 		
-        if (delta >= counterclockwiseDelta)
+        if (delta > counterclockwiseDelta)
         {
-            angleDifference += counterclockwiseDelta < clockwiseDelta ? -360f : 360f;
+            angleDifference -= Angles.CircleFull;
         }
-        else if (delta >= clockwiseDelta)
+        else if (delta > clockwiseDelta)
         {
-            angleDifference += 360f;
+            angleDifference += Angles.CircleFull;
         }
 
         float multiplier = Math.Abs(data.Movement.GroundSpeed) >= 6f ? 0.5f : 0.25f;
-        return (data.Visual.Angle + angleDifference * multiplier) % 360f;
+        float angle = (data.Visual.Angle + angleDifference * multiplier) % Angles.CircleFull;
+        return angle < 0f ? angle + Angles.CircleFull : angle;
     }
 }

@@ -64,11 +64,8 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 	{
 		if (SharedData.DropDash && !data.Input.Down.Abc)
 		{
-			if (data.Node.Shield.Type <= ShieldContainer.Types.Normal ||
-			    data.Super.IsSuper || data.Item.InvincibilityTimer > 0f)
-			{
-				return States.DropDash;
-			}
+			if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return States.DropDash;
+			if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return States.DropDash;
 			return States.Jump;
 		}
 
@@ -124,7 +121,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 	private void JumpFlameBarrier()
 	{
-		data.SetCameraDelayX(16f);
+		data.Node.SetCameraDelayX(16f);
 
 		data.Movement.IsAirLock = true;
 		data.Movement.Velocity.Vector = new Vector2(8f * (float)data.Visual.Facing, 0f);

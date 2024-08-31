@@ -9,7 +9,7 @@ public readonly struct PhysicsCore(PlayerData data, IPlayerLogic logic)
 {
 	private readonly Rolling _rolling = new(data, logic);
 	private readonly Movement _movement = new(data, logic);
-	public readonly Position Position = new(data, logic);
+	public readonly Position Position = new(data);
 	private readonly Balancing _balancing = new(data, logic);
 	public readonly Collision Collision = new(data, logic);
 	private readonly SlopeRepel _slopeRepel = new(data);

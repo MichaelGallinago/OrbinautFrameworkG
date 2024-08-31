@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfapqkhdpa6gs"
-path="res://.godot/imported/stump.png-0c2e7ef22277610b02469af1ed15f79d.ctex"
+path="res://.godot/imported/abutment.png-5a069ac4ca3df0074ca5f9ad989b8df2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Common/Bridge/Stump/stump.png"
-dest_files=["res://.godot/imported/stump.png-0c2e7ef22277610b02469af1ed15f79d.ctex"]
+source_file="res://Objects/Common/Bridge/Stump/abutment.png"
+dest_files=["res://.godot/imported/abutment.png-5a069ac4ca3df0074ca5f9ad989b8df2.ctex"]
 
 [params]
 

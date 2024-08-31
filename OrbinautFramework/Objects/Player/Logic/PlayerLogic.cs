@@ -85,7 +85,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
 
     private void ProcessState()
     {
-        if (ControlType.SwitchDebugMode()) return;
+        if (Data.Death.State == Death.States.Wait && ControlType.SwitchDebugMode()) return;
         
         switch (Data.State)
         {

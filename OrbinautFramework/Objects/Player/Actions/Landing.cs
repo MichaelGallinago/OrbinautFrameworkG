@@ -52,8 +52,8 @@ public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAc
     
 	private bool WaterBarrierBounce()
 	{
-		if (data.Node.Shield.State != ShieldContainer.States.Active) return false;
-		if (SharedData.PlayerShield != ShieldContainer.Types.Bubble) return false;
+		ShieldContainer shield = data.Node.Shield;
+		if (shield.State != ShieldContainer.States.Active || shield.Type != ShieldContainer.Types.Bubble) return false;
 		
 		float force = data.Water.IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(data.Movement.Angle);

@@ -40,7 +40,7 @@ public struct SpinDash(PlayerData data)
 
     private void Release()
     {
-	    data.SetCameraDelayX(16f);
+	    data.Node.SetCameraDelayX(16f);
     	
 	    data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
 	    data.Collision.Radius = data.Collision.RadiusSpin;
@@ -63,6 +63,7 @@ public struct SpinDash(PlayerData data)
     {
     	if (!data.Input.Press.Abc)
 	    {
+		    //TODO: fix Scene.Instance.Speed somehow (difficulty: extreme demon)
 		    _charge -= MathF.Floor(_charge * 8f) / 256f * Scene.Instance.Speed;
     		return;
     	}

@@ -107,7 +107,7 @@ public partial class Scene : Node2D
         int count = Math.Min(cameras.Length, Players.Count);
         for (var i = 0; i < count; i++)
         {
-            cameras[i].Target = Players.Values[i].Data;
+            cameras[i].Target = Players.Values[i].Data.Node;
         }
     }
 }

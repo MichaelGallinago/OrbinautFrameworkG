@@ -50,7 +50,7 @@ public struct DropDash(PlayerData data)
 	    data.Sprite.Animation = Animations.Spin;
 	    data.Movement.IsSpinning = true;
     	
-    	data.SetCameraDelayX(8f);
+    	data.Node.SetCameraDelayX(8f);
 	    
     	//TODO: obj_dust_dropdash
     	//instance_create(x, y + Radius.Y, obj_dust_dropdash, { image_xscale: Facing });
@@ -80,7 +80,7 @@ public struct DropDash(PlayerData data)
 	    }
 	    
 	    UpdateGroundSpeed(13f, 12f);
-	    if (data.IsCameraTarget(out ICamera camera))
+	    if (data.Node.IsCameraTarget(out ICamera camera))
 	    {
 		    camera.SetShakeTimer(6f);
 	    }

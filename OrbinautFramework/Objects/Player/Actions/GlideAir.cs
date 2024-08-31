@@ -16,8 +16,8 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 {
 	private readonly GlideCollisionLogic _collision = new(data, logic);
 	
+	// data.Physics.GroundSpeed - glide speed
 	private float _glideAngle = data.Visual.Facing == Constants.Direction.Negative ? 0f : 180f;
-	//TODO: data.Physics.GroundSpeed - glide speed
 
 	public void Enter()
 	{
@@ -29,6 +29,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		movement.Velocity.Y += 2f;
 		movement.IsAirLock = false;
 		movement.IsSpinning = false;
+		movement.IsJumping = false;
 		movement.GroundSpeed.Value = 4f;
 		
 		if (movement.Velocity.Y < 0f)
@@ -47,6 +48,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		if (data.Input.Down.Abc) return States.GlideAir;
 		
 		data.Movement.Velocity.X *= 0.25f;
+		data.Visual.OverrideFrame = 0;
 		return States.GlideFall;
 	}
 
@@ -67,7 +69,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 	
 	private void TurnAroundAir()
 	{
-		float speed = Angles.ByteAngleStep * Scene.Instance.Speed;
+		float speed = Angles.ByteStep * Scene.Instance.Speed;
 		if (data.Input.Down.Left && !Mathf.IsZeroApprox(_glideAngle))
 		{
 			if (_glideAngle > 0f)
@@ -179,19 +181,19 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 	
 	private bool CheckCollisionOnAttaching(int wallRadius, int climbY)
 	{
-		// Cast a horizontal sensor just above Knuckles. If the distance returned is not 0, he
+		// First, the game casts a horizontal sensor just above Knuckles. If the distance returned is not 0, he
 		// is either inside the ceiling or above the floor edge
 		logic.TileCollider.Position = logic.TileCollider.Position with { Y = climbY - data.Collision.Radius.Y };
 
 		Constants.Direction facing = data.Visual.Facing;
 		if (logic.TileCollider.FindDistance(wallRadius * (int)facing, 0, false, facing) == 0) return false;
 		
-		// The game casts a vertical sensor now in front of Knuckles, facing downwards. If the distance
-		// returned is negative, Knuckles is inside the ceiling, else he is above the edge
-			
-		// Note that tile behaviour here is set to Constants.TileBehaviours.Ceiling.
-		// LBR tiles are not ignored in this case
-		logic.TileCollider.TileBehaviour = Constants.TileBehaviours.Ceiling;
+		// Now the game casts a vertical sensor in front of Knuckles, facing downwards.
+		// If the distance returned is negative, Knuckles is inside the ceiling,
+		// else he is above the edge. Note that we have tile behaviour set to Constants.TileBehaviours.RightWall,
+		// because we should NOT ignore LBR tiles
+		
+		logic.TileCollider.TileBehaviour = Constants.TileBehaviours.RightWall;
 		int floorDistance = logic.TileCollider.FindDistance(
 			(wallRadius + 1) * (int)facing, -1, true, Constants.Direction.Positive);
 

@@ -23,5 +23,5 @@ public partial class ShieldContainer : AdvancedAnimatedSprite
     public States State { get; set; }
     public AnimationTypes AnimationType { get; set; }
 
-    public Types Type { get; private set; }
+    public Types Type { get; set; } = Types.None;
 }

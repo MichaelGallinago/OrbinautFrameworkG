@@ -1,41 +1,36 @@
 using System;
-using System.Diagnostics;
 using Godot;
 
 namespace OrbinautFramework3.Framework.Tiles;
 
 public static class Angles
 {
-    public const short ByteAngleLimit = 256;
-    public const float ByteAngleStep = 2.8125f;
+    public const short ByteLimit = 256;
+    public const float ByteStep = 2.8125f;
+    public const float ByteEpsilon = 1.40625f;
     
-    public enum Circle : ushort
-    {
-        Quarter = 90,
-        Half = 180,
-        ThreeQuarters = 270,
-        Full = 360,
-        OneAndAHalf = 540
-    }
+    public const float CircleQuarter = 90f;
+    public const float CircleHalf = 180f;
+    public const float CircleThreeQuarters = 270f;
+    public const float CircleFull = 360f;
+    public const float CircleFullAndQuarter = CircleFull + CircleQuarter;
+    public const float CircleFullAndHalf = CircleFull + CircleHalf;
 
-    public enum Quadrant : byte
-    {
-        Down, Right, Up, Left
-    }
+    public enum Quadrant : byte { Down, Right, Up, Left }
     
     public static float TransformTileAngle(float angle, TileTransforms tileTransforms)
     {
         if (tileTransforms.IsRotated)
         {
-            angle = (450f - angle) % 360f;
+            angle = (CircleFullAndQuarter - angle) % CircleFull;
         }
         if (tileTransforms.IsFlipped)
         {
-            angle = (540f - angle) % 360f;
+            angle = (CircleFullAndHalf - angle) % CircleFull;
         }
         if (tileTransforms.IsMirrored)
         {
-            angle = 360f - angle;
+            angle = CircleFull - angle;
         }
 
         return angle;
@@ -43,8 +38,8 @@ public static class Angles
     
     public static Quadrant GetQuadrant(float angle)
     {
-        angle = angle % 360f + (angle < 0f ? 405f : 45f);
-        return (Quadrant)(Mathf.FloorToInt(angle - Constants.AngleIncrement) / 90 & 3);
+        angle = angle % CircleFull + (angle < 0f ? 405f : 45f);
+        return (Quadrant)(Mathf.FloorToInt(angle - ByteEpsilon) / 90 & 3);
     }
     
     public static float GetVector256(Vector2 distance)
@@ -55,16 +50,16 @@ public static class Angles
     public static float GetFloatVector(Vector2 distance)
     {
         //TODO: analyze the accuracy
-        return (360f - Mathf.RadToDeg(MathF.Atan2(distance.Y, distance.X)) + 90f) % 360f;
+        return (CircleFull - Mathf.RadToDeg(MathF.Atan2(distance.Y, distance.X)) + CircleQuarter) % CircleFull;
     }
     
     public static byte GetByteAngle(float angle)
     {
-        return (byte)MathF.Round(((float)Circle.Full - angle) / (float)Circle.Full * ByteAngleLimit);
+        return (byte)MathF.Round((CircleFull - angle) / CircleFull * ByteLimit);
     }
     
     public static float GetFloatAngle(byte angle)
     {
-        return (ByteAngleLimit - angle) * (int)Circle.Full / (float)ByteAngleLimit % (float)Circle.Full;
+        return (ByteLimit - angle) * CircleFull / ByteLimit % CircleFull;
     }
 }

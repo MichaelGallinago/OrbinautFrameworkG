@@ -2,13 +2,14 @@
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Dash(PlayerData data)
+public struct Dash(PlayerData data, IPlayerLogic logic)
 {
 	private const float ChargeLimit = 30f;
 	
@@ -24,8 +25,8 @@ public struct Dash(PlayerData data)
     public States Perform()
     {
 	    if (!data.Movement.IsGrounded) return States.Dash;
-	    if (data.Id > 0 && data.Cpu.InputTimer <= 0f) return States.Dash;
-
+	    if (logic.ControlType.IsCpu && data.Cpu.InputTimer <= 0f) return States.Dash;
+	    
 	    if (Charge()) return States.Dash;
 	    
 	    if (Release())
@@ -70,7 +71,7 @@ public struct Dash(PlayerData data)
     		return false;
     	}
 
-    	data.SetCameraDelayX(16f);
+    	data.Node.SetCameraDelayX(16f);
     	
     	AudioPlayer.Sound.Play(SoundStorage.Release2);	
     	

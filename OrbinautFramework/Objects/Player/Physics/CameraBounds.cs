@@ -12,9 +12,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 {
     public void Match()
     {
-	    //TODO: check this
-	    bool isTarget = data.Node.IsCameraTarget(out ICamera camera);
-    	if (!isTarget && !Scene.Instance.Players.FirstOrDefault().Data.Node.IsCameraTarget(out camera)) return;
+	    if (!data.IsInCamera(out ICamera camera)) return;
 
 	    ShiftToLeftBound(camera);
 	    ShiftToRightBound(camera);
@@ -76,7 +74,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
     private void KillUnderBottomBound(ICamera camera)
     {
 	    if (data.Water.AirTimer <= 0f) return;
-	    if (data.Node.Position.Y <= Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; 
+	    if ((int)data.Node.Position.Y < Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; 
 	    
 	    logic.Kill();
     }
