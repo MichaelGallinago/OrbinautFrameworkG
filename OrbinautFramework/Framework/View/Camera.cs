@@ -3,13 +3,12 @@ using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Framework.View;
 
 public partial class Camera : Camera2D, ICamera
 {
-	private static readonly Vector2I CullBuffer = new(320, 288);
+	private static readonly Vector2I CullingBuffer = Vector2I.Right * 64;
 	
 	private const byte MaxViewTime = 120;
 	private const byte SpeedCap = 16;
@@ -381,7 +380,7 @@ public partial class Camera : Camera2D, ICamera
 		Vector2I position = DrawPosition + sbyte.MinValue * Vector2I.One;
 		position.X &= sbyte.MinValue;
 		position.Y &= sbyte.MinValue;
-		ActiveRegion = new Rect2I(position, SharedData.ViewSize + CullBuffer);
+		ActiveRegion = new Rect2I(position, SharedData.ViewSize * 2 + CullingBuffer);
 	}
 	
 	private static float MoveBoundaryForward(float boundary, float target, int position, float speed)
