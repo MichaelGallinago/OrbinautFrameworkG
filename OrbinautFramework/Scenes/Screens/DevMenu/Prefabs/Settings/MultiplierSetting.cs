@@ -1,14 +1,14 @@
 ﻿using System;
 
-namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs;
+namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs.Settings;
 
-public partial class PercentSetting : Setting
+public partial class MultiplierSetting : Setting
 {
-    public byte Value 
-    { 
+    public byte Value
+    {
         set
         {
-            if (value > 100)
+            if (value == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(Value));
             }

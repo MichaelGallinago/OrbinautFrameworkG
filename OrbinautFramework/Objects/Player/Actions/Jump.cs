@@ -22,7 +22,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Movement.IsGrounded) return States.Jump;
 
-		if (!data.Input.Down.Abc)
+		if (!data.Input.Down.Aby)
 		{
 			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
 		}
@@ -37,7 +37,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 			return JumpSonic();
 		}
 
-		if (!data.Input.Press.Abc) return States.Jump;
+		if (!data.Input.Press.Aby) return States.Jump;
 		
 		return data.Node.Type switch
 		{
@@ -52,7 +52,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 	private bool Transform()
 	{
-		if (!data.Input.Press.C || data.Super.IsSuper) return false;
+		if (!data.Input.Press.X || data.Super.IsSuper) return false;
 		if (SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 
 		logic.ResetData();
@@ -62,7 +62,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 	private States JumpSonic()
 	{
-		if (SharedData.DropDash && !data.Input.Down.Abc)
+		if (SharedData.DropDash && !data.Input.Down.Aby)
 		{
 			if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return States.DropDash;
 			if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return States.DropDash;
@@ -75,7 +75,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 	
 	private void PerformBarrierAbility()
 	{
-		if (!data.Input.Press.Abc || data.Super.IsSuper) return;
+		if (!data.Input.Press.Aby || data.Super.IsSuper) return;
 		if (data.Node.Shield.State != ShieldContainer.States.None || data.Item.InvincibilityTimer > 0f) return;
 
 		data.Node.Shield.State = ShieldContainer.States.Active;

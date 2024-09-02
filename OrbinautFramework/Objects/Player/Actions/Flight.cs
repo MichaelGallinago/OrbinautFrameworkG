@@ -24,8 +24,8 @@ public struct Flight(PlayerData data)
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 		
-		data.Input.Down = data.Input.Down with { Abc = false };
-		data.Input.Press = data.Input.Press with { Abc = false };
+		data.Input.Down = data.Input.Down with { Aby = false };
+		data.Input.Press = data.Input.Press with { Aby = false };
 	}
 	
     public void Perform()
@@ -87,7 +87,7 @@ public struct Flight(PlayerData data)
 
     private void Descend()
     {
-    	if (data.Input.Press.Abc && _flightTimer > 0f && (!data.Water.IsUnderwater || data.Carry.Target == null))
+    	if (data.Input.Press.Aby && _flightTimer > 0f && (!data.Water.IsUnderwater || data.Carry.Target == null))
     	{
     		//TODO: check that this works
     		_ascendTimer = 1f;

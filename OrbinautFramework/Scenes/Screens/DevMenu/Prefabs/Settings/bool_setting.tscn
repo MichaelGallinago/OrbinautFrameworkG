@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://p6qsklmdhk1h"]
 
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/BoolSetting.cs" id="1_a755f"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/BoolSetting.cs" id="1_a755f"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_6g7au"]
 
 [node name="BoolSetting" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_rightArrow", "_value")]

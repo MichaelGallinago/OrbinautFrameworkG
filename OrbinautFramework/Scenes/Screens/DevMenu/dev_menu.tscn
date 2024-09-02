@@ -1,7 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://b3y6uspbhnxrx"]
+[gd_scene load_steps=10 format=3 uid="uid://b3y6uspbhnxrx"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/DevMenu.cs" id="1_nm0pq"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
+[ext_resource type="PackedScene" uid="uid://p6qsklmdhk1h" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/bool_setting.tscn" id="3_1el5v"]
+[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Option.tscn" id="3_doob7"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/OptionStorage.cs" id="3_yeib4"]
+[ext_resource type="PackedScene" uid="uid://cm8maaj0nwrv7" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/percent_setting.tscn" id="4_4vu4k"]
+[ext_resource type="PackedScene" uid="uid://udtif2kffym6" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/multiplier_setting.tscn" id="5_nt76f"]
+[ext_resource type="PackedScene" uid="uid://qte4kfmk51eq" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/frequency_setting.tscn" id="6_ufmiy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
@@ -25,7 +31,6 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_eosdy")
 
 [node name="MainMenu" type="VBoxContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
@@ -48,40 +53,40 @@ horizontal_alignment = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
 layout_mode = 2
+script = ExtResource("3_yeib4")
 
-[node name="Label" type="Label" parent="MainMenu/VBoxContainer"]
+[node name="Option" parent="MainMenu/VBoxContainer" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("2_3l325")
-theme_override_font_sizes/font_size = 7
-text = "START GAME"
-horizontal_alignment = 1
+size_flags_horizontal = 4
 
-[node name="Label2" type="Label" parent="MainMenu/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("2_3l325")
-theme_override_font_sizes/font_size = 7
-text = "ROOM SELECT"
-horizontal_alignment = 1
+[node name="Label" parent="MainMenu/VBoxContainer/Option" index="1"]
+text = "START GAME
+"
 
-[node name="Label3" type="Label" parent="MainMenu/VBoxContainer"]
+[node name="Option2" parent="MainMenu/VBoxContainer" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("2_3l325")
-theme_override_font_sizes/font_size = 7
+size_flags_horizontal = 4
+
+[node name="Label" parent="MainMenu/VBoxContainer/Option2" index="1"]
+text = "ROOM SELECT
+"
+
+[node name="Option3" parent="MainMenu/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="MainMenu/VBoxContainer/Option3" index="1"]
 text = "SETTINGS"
-horizontal_alignment = 1
 
-[node name="Label4" type="Label" parent="MainMenu/VBoxContainer"]
+[node name="Option4" parent="MainMenu/VBoxContainer" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_vertical = 1
-theme_override_fonts/font = ExtResource("2_3l325")
-theme_override_font_sizes/font_size = 7
+size_flags_horizontal = 4
+
+[node name="Label" parent="MainMenu/VBoxContainer/Option4" index="1"]
 text = "CLOSE GAME"
-horizontal_alignment = 1
 
 [node name="Settings" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
@@ -101,3 +106,135 @@ horizontal_alignment = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Settings"]
 layout_mode = 2
+
+[node name="BoolSetting" parent="Settings/VBoxContainer" instance=ExtResource("3_1el5v")]
+layout_mode = 2
+
+[node name="Label" parent="Settings/VBoxContainer/BoolSetting" index="1"]
+text = "GAMEPAD RUMBLE:"
+
+[node name="PercentSetting" parent="Settings/VBoxContainer" instance=ExtResource("4_4vu4k")]
+layout_mode = 2
+
+[node name="Label" parent="Settings/VBoxContainer/PercentSetting" index="1"]
+text = "BGM VOLUME:"
+
+[node name="PercentSetting2" parent="Settings/VBoxContainer" instance=ExtResource("4_4vu4k")]
+layout_mode = 2
+
+[node name="Label" parent="Settings/VBoxContainer/PercentSetting2" index="1"]
+text = "SFX VOLUME:"
+
+[node name="MultiplierSetting" parent="Settings/VBoxContainer" instance=ExtResource("5_nt76f")]
+layout_mode = 2
+
+[node name="Label" parent="Settings/VBoxContainer/MultiplierSetting" index="1"]
+text = "WINDOW SCALE:"
+
+[node name="FrequencySetting" parent="Settings/VBoxContainer" instance=ExtResource("6_ufmiy")]
+layout_mode = 2
+
+[node name="BoolSetting2" parent="Settings/VBoxContainer" instance=ExtResource("3_1el5v")]
+layout_mode = 2
+
+[node name="Label" parent="Settings/VBoxContainer/BoolSetting2" index="1"]
+text = "FULLSCREEN:"
+
+[node name="BoolSetting3" parent="Settings/VBoxContainer" instance=ExtResource("3_1el5v")]
+layout_mode = 2
+
+[node name="Label" parent="Settings/VBoxContainer/BoolSetting3" index="1"]
+text = "VSYNC:"
+
+[node name="SceneSelect" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -8.5
+offset_bottom = 8.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+
+[node name="Label" type="Label" parent="SceneSelect"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "SCENE SELECT"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SceneSelect"]
+layout_mode = 2
+
+[node name="StartGame" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -8.5
+offset_bottom = 8.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="StartGame"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Label" type="Label" parent="StartGame/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "START GAME
+"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="StartGame/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="StartGame/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "press "
+horizontal_alignment = 1
+
+[node name="ButtonLabel" type="Label" parent="StartGame/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "button Y"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="StartGame/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = " to delete a save file"
+horizontal_alignment = 1
+
+[editable path="MainMenu/VBoxContainer/Option"]
+[editable path="MainMenu/VBoxContainer/Option2"]
+[editable path="MainMenu/VBoxContainer/Option3"]
+[editable path="MainMenu/VBoxContainer/Option4"]
+[editable path="Settings/VBoxContainer/BoolSetting"]
+[editable path="Settings/VBoxContainer/PercentSetting"]
+[editable path="Settings/VBoxContainer/PercentSetting2"]
+[editable path="Settings/VBoxContainer/MultiplierSetting"]
+[editable path="Settings/VBoxContainer/BoolSetting2"]
+[editable path="Settings/VBoxContainer/BoolSetting3"]

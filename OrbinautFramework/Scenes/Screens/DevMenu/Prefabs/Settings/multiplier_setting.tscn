@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://udtif2kffym6"]
 
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/MultiplierSetting.cs" id="1_s6t5o"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/MultiplierSetting.cs" id="1_s6t5o"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_wo4qo"]
 
 [node name="MultiplierSetting" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_rightArrow", "_value")]
@@ -52,7 +52,7 @@ size_flags_horizontal = 2
 size_flags_vertical = 1
 theme_override_fonts/font = ExtResource("2_wo4qo")
 theme_override_font_sizes/font_size = 7
-text = "0"
+text = "1"
 horizontal_alignment = 1
 
 [node name="X" type="Label" parent="HBoxContainer"]

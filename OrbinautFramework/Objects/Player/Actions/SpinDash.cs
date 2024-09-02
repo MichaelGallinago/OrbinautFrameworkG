@@ -61,7 +61,7 @@ public struct SpinDash(PlayerData data)
 
     private void Charge()
     {
-    	if (!data.Input.Press.Abc)
+    	if (!data.Input.Press.Aby)
 	    {
 		    //TODO: fix Scene.Instance.Speed somehow (difficulty: extreme demon)
 		    _charge -= MathF.Floor(_charge * 8f) / 256f * Scene.Instance.Speed;

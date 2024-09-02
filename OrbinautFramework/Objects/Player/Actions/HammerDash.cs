@@ -36,7 +36,7 @@ public struct HammerDash(PlayerData data)
         _timer += Scene.Instance.Speed;
         if (_timer >= 60f) return States.Default;
 
-        if (!data.Input.Down.Abc || data.Visual.SetPushBy != null) return States.Default;
+        if (!data.Input.Down.Aby || data.Visual.SetPushBy != null) return States.Default;
         if (data.Movement.Angle is >= 90f and <= 270f) return States.Default;
         
         TurnAround();

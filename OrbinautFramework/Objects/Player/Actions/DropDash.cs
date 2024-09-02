@@ -22,7 +22,7 @@ public struct DropDash(PlayerData data)
 	    if (data.Movement.IsGrounded) return States.DropDash;
 	    if (Cancel()) return States.Jump;
 		
-	    if (data.Input.Down.Abc)
+	    if (data.Input.Down.Aby)
 	    {
 		    Charge();
 		    return States.DropDash;

@@ -2,11 +2,10 @@ using Godot;
 
 namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs;
 
-public abstract partial class Setting : HBoxContainer
+public partial class Option : HBoxContainer
 {
     [Export] private Label _leftArrow;
     [Export] private Label _rightArrow;
-    [Export] private Label _value;
     
     public bool IsSelected
     {
@@ -19,6 +18,4 @@ public abstract partial class Setting : HBoxContainer
         }
     }
     private bool _isSelected;
-    
-    protected string ValueText { set => _value.Text = value; }
 }

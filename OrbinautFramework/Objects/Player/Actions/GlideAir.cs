@@ -45,7 +45,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		UpdateGravityAndHorizontalVelocity();
 		UpdateAirAnimationFrame();
 		
-		if (data.Input.Down.Abc) return States.GlideAir;
+		if (data.Input.Down.Aby) return States.GlideAir;
 		
 		data.Movement.Velocity.X *= 0.25f;
 		data.Visual.OverrideFrame = 0;

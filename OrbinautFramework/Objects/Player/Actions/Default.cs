@@ -14,7 +14,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
 {
     public States EarlyPerform()
     {
-        if (!data.Input.Press.Abc) return States.Default;
+        if (!data.Input.Press.Aby) return States.Default;
         if (SpinDash()) return States.SpinDash;
         if (Dash()) return States.Dash;
         if (Jump()) return States.Jump;

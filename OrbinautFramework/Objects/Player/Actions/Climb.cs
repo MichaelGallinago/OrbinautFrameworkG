@@ -33,7 +33,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 	    States state = data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : Release(radiusX);
 	    if (state != States.Climb) return state;
 		
-	    if (data.Input.Press.Abc)
+	    if (data.Input.Press.Aby)
 	    {
 		    Jump();
 		    return States.Jump;

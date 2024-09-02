@@ -1,4 +1,4 @@
-﻿namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs;
+﻿namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs.Settings;
 
 public partial class BoolSetting : Setting
 {

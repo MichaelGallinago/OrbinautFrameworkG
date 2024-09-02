@@ -47,7 +47,7 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
     
     private void UpdateGroundVelocityX()
     {
-        if (!data.Input.Down.Abc)
+        if (!data.Input.Down.Aby)
         {
             data.Movement.Velocity.X = 0f;
             return;

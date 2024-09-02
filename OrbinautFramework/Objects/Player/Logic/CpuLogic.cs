@@ -31,10 +31,10 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		_delay = DelayStep * data.Id;
 		
 		// Read actual player input and enable manual control for 10 seconds if detected it
-		_canReceiveInput = data.Id < Constants.MaxInputDevices;
+		_canReceiveInput = data.Id < InputUtilities.MaxInputDevices;
 		
 		if (_canReceiveInput && 
-		    data.Input.Down is not { Abc: false, Up: false, Down: false, Left: false, Right: false })
+		    data.Input.Down is not { Aby: false, Up: false, Down: false, Left: false, Right: false })
 		{
 			data.Cpu.InputTimer = 600f;
 		}
@@ -52,7 +52,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	{
 		// Take some time (up to 64 frames (on 60 fps))
 		// to respawn or do not respawn at all unless holding down any button
-		if (_canReceiveInput && data.Input.Down is { Abc: false, Start: false })
+		if (_canReceiveInput && data.Input.Down is { Aby: false, Start: false })
 		{
 			if (!Scene.Instance.IsTimePeriodLooped(64f)) return;
 		}
@@ -236,7 +236,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		if (data.Cpu.Target.Data.Sprite.Animation == Animations.Wait) return;
 		if (!Scene.Instance.IsTimePeriodLooped(JumpFrequency)) return;
 		
-		_inputPress.Abc = _inputDown.Abc = true;
+		_inputPress.Aby = _inputDown.Aby = true;
 		data.Cpu.IsJumping = true;
 	}
 
@@ -284,7 +284,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Cpu.IsJumping)
 		{
-			_inputDown.Abc = true;
+			_inputDown.Aby = true;
 				 
 			if (!data.Movement.IsGrounded) return false;
 			
@@ -313,13 +313,13 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		{
 			data.Input.Down = data.Input.Down with { Down = true };
 			if (!Scene.Instance.IsTimePeriodLooped(32f)) return;
-			data.Input.Press = data.Input.Press with { Abc = true };
+			data.Input.Press = data.Input.Press with { Aby = true };
 			
 			return;
 		}
 		
 		data.Input.Down = data.Input.Down with { Down = false };
-		data.Input.Press = data.Input.Press with { Abc = false };
+		data.Input.Press = data.Input.Press with { Aby = false };
 		data.Cpu.State = States.Main;
 	}
 	

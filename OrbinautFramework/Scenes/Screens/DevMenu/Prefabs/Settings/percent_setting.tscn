@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cm8maaj0nwrv7"]
 
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/PercentSetting.cs" id="1_puoq2"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/PercentSetting.cs" id="1_puoq2"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_4keih"]
 
 [node name="PercentSetting" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_rightArrow", "_value")]

@@ -12,7 +12,7 @@ public readonly struct CarryTargetLogic(PlayerData data, PlayerLogic logic)
     {
     	Vector2 previousPosition = carrier.CarryTargetPosition;
     	
-    	if (data.Input.Press.Abc)
+    	if (data.Input.Press.Aby)
     	{
     		Jump(carrier);
     		return;
