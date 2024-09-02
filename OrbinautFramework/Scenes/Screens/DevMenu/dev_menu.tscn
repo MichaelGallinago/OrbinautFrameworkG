@@ -1,13 +1,19 @@
-[gd_scene load_steps=10 format=3 uid="uid://b3y6uspbhnxrx"]
+[gd_scene load_steps=16 format=3 uid="uid://b3y6uspbhnxrx"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/DevMenu.cs" id="1_nm0pq"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/MainMenu.cs" id="2_etuv4"]
 [ext_resource type="PackedScene" uid="uid://p6qsklmdhk1h" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/bool_setting.tscn" id="3_1el5v"]
 [ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Option.tscn" id="3_doob7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/OptionStorage.cs" id="3_yeib4"]
 [ext_resource type="PackedScene" uid="uid://cm8maaj0nwrv7" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/percent_setting.tscn" id="4_4vu4k"]
 [ext_resource type="PackedScene" uid="uid://udtif2kffym6" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/multiplier_setting.tscn" id="5_nt76f"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Settings.cs" id="6_udeqq"]
 [ext_resource type="PackedScene" uid="uid://qte4kfmk51eq" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/frequency_setting.tscn" id="6_ufmiy"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player2Select.cs" id="9_qtrpw"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SceneSelect.cs" id="11_iqd6p"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/StartGame.cs" id="12_70ptx"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player1Select.cs" id="13_4adbt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
@@ -42,6 +48,7 @@ offset_bottom = 30.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 32
+script = ExtResource("2_etuv4")
 
 [node name="Label" type="Label" parent="MainMenu"]
 layout_mode = 2
@@ -96,6 +103,7 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 32
+script = ExtResource("6_udeqq")
 
 [node name="Label" type="Label" parent="Settings"]
 layout_mode = 2
@@ -159,6 +167,7 @@ offset_bottom = 8.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 32
+script = ExtResource("11_iqd6p")
 
 [node name="Label" type="Label" parent="SceneSelect"]
 layout_mode = 2
@@ -201,7 +210,6 @@ size_flags_horizontal = 4
 text = "CONTINUE"
 
 [node name="StartGame" type="VBoxContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
@@ -212,6 +220,7 @@ offset_bottom = 8.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 32
+script = ExtResource("12_70ptx")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="StartGame"]
 layout_mode = 2
@@ -258,7 +267,46 @@ theme_override_font_sizes/font_size = 7
 text = " to delete a save file"
 horizontal_alignment = 1
 
-[node name="PlayerSelect1" type="VBoxContainer" parent="."]
+[node name="VBoxContainer2" type="VBoxContainer" parent="StartGame"]
+layout_mode = 2
+
+[node name="Option" parent="StartGame/VBoxContainer2" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="StartGame/VBoxContainer2/Option" index="1"]
+text = "SAVE 1"
+
+[node name="Option2" parent="StartGame/VBoxContainer2" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="StartGame/VBoxContainer2/Option2" index="1"]
+text = "SAVE 2"
+
+[node name="Option3" parent="StartGame/VBoxContainer2" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="StartGame/VBoxContainer2/Option3" index="1"]
+text = "SAVE 3"
+
+[node name="Option4" parent="StartGame/VBoxContainer2" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="StartGame/VBoxContainer2/Option4" index="1"]
+text = "SAVE 4"
+
+[node name="Option5" parent="StartGame/VBoxContainer2" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="StartGame/VBoxContainer2/Option5" index="1"]
+text = "NO SAVE"
+
+[node name="Player1Select" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
@@ -269,12 +317,13 @@ offset_bottom = 8.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 32
+script = ExtResource("13_4adbt")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PlayerSelect1"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Player1Select"]
 layout_mode = 2
 theme_override_constants/separation = 32
 
-[node name="Label" type="Label" parent="PlayerSelect1/VBoxContainer"]
+[node name="Label" type="Label" parent="Player1Select/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 1
 theme_override_fonts/font = ExtResource("2_3l325")
@@ -283,8 +332,101 @@ text = "PLAYER 1 SELECT
 "
 horizontal_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PlayerSelect1/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Player1Select/VBoxContainer"]
 layout_mode = 2
+
+[node name="Option" parent="Player1Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player1Select/VBoxContainer/VBoxContainer/Option" index="1"]
+text = "SONIC"
+
+[node name="Option2" parent="Player1Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player1Select/VBoxContainer/VBoxContainer/Option2" index="1"]
+text = "TAILS"
+
+[node name="Option3" parent="Player1Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player1Select/VBoxContainer/VBoxContainer/Option3" index="1"]
+text = "KNUCKLES"
+
+[node name="Option4" parent="Player1Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player1Select/VBoxContainer/VBoxContainer/Option4" index="1"]
+text = "AMY"
+
+[node name="Player2Select" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -8.5
+offset_bottom = 8.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+script = ExtResource("9_qtrpw")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Player2Select"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="Label" type="Label" parent="Player2Select/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "PLAYER 2 SELECT
+"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Player2Select/VBoxContainer"]
+layout_mode = 2
+
+[node name="Option" parent="Player2Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player2Select/VBoxContainer/VBoxContainer/Option" index="1"]
+text = "SONIC"
+
+[node name="Option2" parent="Player2Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player2Select/VBoxContainer/VBoxContainer/Option2" index="1"]
+text = "TAILS"
+
+[node name="Option3" parent="Player2Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player2Select/VBoxContainer/VBoxContainer/Option3" index="1"]
+text = "KNUCKLES"
+
+[node name="Option4" parent="Player2Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player2Select/VBoxContainer/VBoxContainer/Option4" index="1"]
+text = "AMY"
+
+[node name="Option5" parent="Player2Select/VBoxContainer/VBoxContainer" instance=ExtResource("3_doob7")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="Player2Select/VBoxContainer/VBoxContainer/Option5" index="1"]
+text = "NO PLAYER 2"
 
 [editable path="MainMenu/VBoxContainer/Option"]
 [editable path="MainMenu/VBoxContainer/Option2"]
@@ -300,3 +442,17 @@ layout_mode = 2
 [editable path="SceneSelect/VBoxContainer/Option2"]
 [editable path="SceneSelect/VBoxContainer/Option3"]
 [editable path="SceneSelect/VBoxContainer/Option4"]
+[editable path="StartGame/VBoxContainer2/Option"]
+[editable path="StartGame/VBoxContainer2/Option2"]
+[editable path="StartGame/VBoxContainer2/Option3"]
+[editable path="StartGame/VBoxContainer2/Option4"]
+[editable path="StartGame/VBoxContainer2/Option5"]
+[editable path="Player1Select/VBoxContainer/VBoxContainer/Option"]
+[editable path="Player1Select/VBoxContainer/VBoxContainer/Option2"]
+[editable path="Player1Select/VBoxContainer/VBoxContainer/Option3"]
+[editable path="Player1Select/VBoxContainer/VBoxContainer/Option4"]
+[editable path="Player2Select/VBoxContainer/VBoxContainer/Option"]
+[editable path="Player2Select/VBoxContainer/VBoxContainer/Option2"]
+[editable path="Player2Select/VBoxContainer/VBoxContainer/Option3"]
+[editable path="Player2Select/VBoxContainer/VBoxContainer/Option4"]
+[editable path="Player2Select/VBoxContainer/VBoxContainer/Option5"]
