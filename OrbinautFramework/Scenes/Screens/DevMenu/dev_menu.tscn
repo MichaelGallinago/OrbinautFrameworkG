@@ -16,7 +16,6 @@ grow_vertical = 2
 script = ExtResource("1_nm0pq")
 
 [node name="Panel" type="Panel" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,16 +24,80 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_eosdy")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="MainMenu" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 14
+anchor_top = 0.5
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.5
+offset_top = -30.5
+offset_bottom = 30.5
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 32
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="Label" type="Label" parent="MainMenu"]
 layout_mode = 2
+size_flags_vertical = 1
 theme_override_fonts/font = ExtResource("2_3l325")
-text = "HELLO 123 hello"
+theme_override_font_sizes/font_size = 7
+text = "ORBINAUT FRAMEWORK G
+DEVELOPER MENU"
 horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "START GAME"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "ROOM SELECT"
+horizontal_alignment = 1
+
+[node name="Label3" type="Label" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="Label4" type="Label" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "CLOSE GAME"
+horizontal_alignment = 1
+
+[node name="Settings" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+
+[node name="Label" type="Label" parent="Settings"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("2_3l325")
+theme_override_font_sizes/font_size = 7
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Settings"]
+layout_mode = 2
