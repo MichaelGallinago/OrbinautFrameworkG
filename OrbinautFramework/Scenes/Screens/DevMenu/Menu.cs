@@ -11,14 +11,9 @@ public partial class Menu : VBoxContainer
     [Signal] public delegate void SelectedEventHandler(Menu menu);
     
     private Option _currentOption;
-    private Variant[] _selectParameter;
     
-    public override void _Ready()
-    {
-        _currentOption = _optionStorage.Current;
-        _selectParameter = [this];
-    }
-
+    public override void _Ready() => _currentOption = _optionStorage.Current;
+    
     public void Process(Buttons press)
     {
         if (press.Down)
@@ -37,5 +32,9 @@ public partial class Menu : VBoxContainer
         else if (press.Left) _currentOption.PressLeft();
     }
 
-    private void Select() => EmitSignal(SignalName.Selected, _selectParameter);
+    private void Select()
+    {
+        EmitSignal(SignalName.Selected, this);
+        _currentOption = _optionStorage.Current;
+    }
 }

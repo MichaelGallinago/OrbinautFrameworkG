@@ -31,7 +31,7 @@ public partial class DevMenu : Control
         _currentMenu.Process(input);
     }
     
-    private void OnMenuSelected(Menu menu)
+    public void OnMenuSelected(Menu menu)
     {
         _currentMenu.Visible = false;
         _menuStack.Push(_currentMenu);
