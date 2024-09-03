@@ -7,11 +7,24 @@ namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 
 public partial class OptionStorage : VBoxContainer
 {
-    public Option[] Options { get; private set; }
+    private Option[] _options;
+    
+    private uint _length;
+    private uint _position;
 
-    public override void _Ready()
+    public override void _EnterTree() => _options = GetOptions();
+    
+    public Option Previous => SelectNewOption(_position - 1);
+    public Option Next => SelectNewOption(_position + 1);
+
+    public Option Current
     {
-        Options = GetOptions();
+        get
+        {
+            Option option = _options[_position];
+            option.IsSelected = true;
+            return option;
+        }
     }
 
     private Option[] GetOptions()
@@ -26,7 +39,16 @@ public partial class OptionStorage : VBoxContainer
                 options.Add(option);
             }
         }
-
+        
+        _length = (uint)options.Count;
         return options.ToArray();
+    }
+
+    private Option SelectNewOption(uint position)
+    {
+        _options[_position].IsSelected = false;
+        Option option = _options[_position = position % _length];
+        option.IsSelected = true;
+        return option;
     }
 }

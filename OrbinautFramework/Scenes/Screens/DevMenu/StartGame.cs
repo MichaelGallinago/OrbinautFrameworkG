@@ -1,7 +1,8 @@
 using Godot;
-using System;
 
-public partial class StartGame : VBoxContainer
+namespace OrbinautFramework3.Scenes.Screens.DevMenu;
+
+public partial class StartGame : Menu
 {
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()

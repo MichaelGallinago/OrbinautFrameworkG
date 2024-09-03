@@ -1,7 +1,6 @@
-using Godot;
-using System;
+namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 
-public partial class Player2Select : VBoxContainer
+public partial class Player2Select : Menu
 {
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
