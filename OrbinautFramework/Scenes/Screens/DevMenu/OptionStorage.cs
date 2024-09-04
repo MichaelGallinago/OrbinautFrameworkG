@@ -16,7 +16,8 @@ public partial class OptionStorage : VBoxContainer
     
     public Option Previous => SelectNewOption(_position - 1);
     public Option Next => SelectNewOption(_position + 1);
-
+    public Option First => SelectNewOption(0);
+    
     public Option Current
     {
         get
@@ -26,7 +27,7 @@ public partial class OptionStorage : VBoxContainer
             return option;
         }
     }
-
+    
     private Option[] GetOptions()
     {
         Array<Node> children = GetChildren();

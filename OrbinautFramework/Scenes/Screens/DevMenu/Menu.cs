@@ -35,6 +35,6 @@ public partial class Menu : VBoxContainer
     private void Select()
     {
         EmitSignal(SignalName.Selected, this);
-        _currentOption = _optionStorage.Current;
+        _currentOption = _optionStorage.First;
     }
 }
