@@ -9,20 +9,21 @@ public partial class OptionStorage : VBoxContainer
 {
     private Option[] _options;
     
+    protected uint Index { get; private set; }
+    
     private uint _length;
-    private uint _position;
 
     public override void _EnterTree() => _options = GetOptions();
     
-    public Option Previous => SelectNewOption(_position - 1);
-    public Option Next => SelectNewOption(_position + 1);
+    public Option Previous => SelectNewOption(Index - 1);
+    public Option Next => SelectNewOption(Index + 1);
     public Option First => SelectNewOption(0);
     
     public Option Current
     {
         get
         {
-            Option option = _options[_position];
+            Option option = _options[Index];
             option.IsSelected = true;
             return option;
         }
@@ -47,8 +48,8 @@ public partial class OptionStorage : VBoxContainer
 
     private Option SelectNewOption(uint position)
     {
-        _options[_position].IsSelected = false;
-        Option option = _options[_position = position % _length];
+        _options[Index].IsSelected = false;
+        Option option = _options[Index = position % _length];
         option.IsSelected = true;
         return option;
     }

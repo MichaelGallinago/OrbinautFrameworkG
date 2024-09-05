@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Option.cs" id="1_ekg14"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="1_ux44t"]
 
-[node name="Option" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_rightArrow")]
+[node name="Option" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_text", "_rightArrow")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -17,6 +17,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ekg14")
 _leftArrow = NodePath(">")
+_text = NodePath("Label")
 _rightArrow = NodePath("<")
 
 [node name=">" type="Label" parent="."]

@@ -2,6 +2,7 @@ using Godot;
 
 namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs;
 
+[GlobalClass]
 public partial class Option : HBoxContainer
 {
     [Export] private Label _leftArrow;
@@ -24,7 +25,7 @@ public partial class Option : HBoxContainer
         }
     }
     private bool _isSelected;
-    
+
     public void PressRight() => EmitSignal(SignalName.PressedRight);
     public void PressLeft() => EmitSignal(SignalName.PressedLeft);
     public void PressSelect() => EmitSignal(SignalName.PressedSelect);

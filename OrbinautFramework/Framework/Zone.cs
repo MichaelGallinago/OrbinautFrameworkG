@@ -3,16 +3,16 @@ using OrbinautFramework3.Audio.Player;
 
 namespace OrbinautFramework3.Framework;
 
-public abstract partial class Stage : Scene
+public abstract partial class Zone : Scene
 {
-    public static Stage Local { get; private set; } //TODO: singleton
+    public static Zone Local { get; private set; } //TODO: singleton
     
-    public string ZoneName { get; set; } = "UNKNOWN";
-    public byte ActId { get; set; }
-    public int InitialWaterLevel { get; } = ushort.MaxValue;
-    public int WaterLevel { get; set; } = ushort.MaxValue;
-    public bool IsWaterEnabled { get; set; }
-    public AudioStream Music { get; set; }
+    [Export] public string ZoneName { get; set; } = "UNKNOWN";
+    [Export] public byte ActId { get; set; }
+    [Export] private uint InitialWaterLevel { get; set; } = ushort.MaxValue;
+    [Export] public bool IsWaterEnabled { get; set; }
+    [Export] public AudioStream Music { get; set; }
+    public uint WaterLevel { get; set; }
     
     /*
     animal_set       =  [];
@@ -34,7 +34,7 @@ public abstract partial class Stage : Scene
     
     public override void _Ready()
     {
-        //TODO: CommonStage init
+        //TODO: Zone init
         base._Ready();
         if (Music != null)
         {
