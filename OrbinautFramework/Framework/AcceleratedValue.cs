@@ -25,8 +25,8 @@ public class AcceleratedValue
     
     public float Sum(float value)
     {
-        return value + ((Scene.Instance.Speed - 1f) * _instantValue + 
-                        (Scene.Instance.Speed + 1f) * _value) * 0.5f;
+        float speed = Scene.Instance.Speed;
+        return value + ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
     }
 
     public float Add(float value)
@@ -38,10 +38,12 @@ public class AcceleratedValue
     
     public void SetClamp(float min, float max)
     {
+#if TOOLS
         if (min > max)
         {
             throw new ArgumentException("max should be no less than min");
         }
+#endif
         
         if (_value < min)
         {

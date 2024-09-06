@@ -49,9 +49,9 @@ public readonly struct DataUtilities(PlayerData data)
         {
             AudioPlayer.Music.Play(MusicStorage.HighSpeed);
         }
-        else if (Zone.Local != null && Zone.Local.Music != null)
+        else if (Zone.Instance != null && Zone.Instance.Music != null)
         {
-            AudioPlayer.Music.Play(Zone.Local.Music);
+            AudioPlayer.Music.Play(Zone.Instance.Music);
         }
     }
 }

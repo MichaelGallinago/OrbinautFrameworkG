@@ -24,11 +24,11 @@ public static class PlayerDataUtilities
         {
             AudioPlayer.Music.Play(MusicStorage.HighSpeed);
         }
-        else if (Zone.Local != null)
+        else if (Zone.Instance != null)
         {
-            if (Zone.Local.Music != null)
+            if (Zone.Instance.Music != null)
             {
-                AudioPlayer.Music.Play(Zone.Local.Music);
+                AudioPlayer.Music.Play(Zone.Instance.Music);
                 return;
             }
             

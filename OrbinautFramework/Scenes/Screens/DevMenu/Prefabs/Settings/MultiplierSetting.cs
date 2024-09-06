@@ -8,10 +8,12 @@ public partial class MultiplierSetting : Setting
     {
         set
         {
+#if TOOLS
             if (value == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(Value));
             }
+#endif
             
             ValueText = value.ToString();
         }

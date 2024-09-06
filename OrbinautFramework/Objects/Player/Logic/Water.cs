@@ -13,7 +13,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 {
     public void Process()
 	{
-		if (Zone.Local == null || !Zone.Local.IsWaterEnabled) return;
+		if (Zone.Instance == null || !Zone.Instance.IsWaterEnabled) return;
 
 		if (Dive()) return;
 		if (UpdateAirTimer()) return;
@@ -24,7 +24,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Water.IsUnderwater) return false;
 		
-		if ((int)data.Node.Position.Y < Zone.Local.WaterLevel) return true;
+		if ((int)data.Node.Position.Y < Zone.Instance.WaterLevel) return true;
 		
 		data.Water.IsUnderwater = true;
 		data.Water.AirTimer = Constants.DefaultAirTimer;
@@ -138,7 +138,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 
 	private void Leave()
 	{
-		if ((int)data.Node.Position.Y >= Zone.Local.WaterLevel) return;
+		if ((int)data.Node.Position.Y >= Zone.Instance.WaterLevel) return;
 
 		data.Water.IsUnderwater = false;
 		ResetGravityOnEdge();

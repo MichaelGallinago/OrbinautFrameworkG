@@ -162,6 +162,7 @@ layout_mode = 2
 text = "VSYNC:"
 
 [node name="SceneSelect" type="VBoxContainer" parent="." node_paths=PackedStringArray("_optionStorage")]
+visible = false
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5

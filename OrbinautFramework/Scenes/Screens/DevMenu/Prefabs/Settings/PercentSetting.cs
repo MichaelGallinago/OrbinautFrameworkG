@@ -8,10 +8,12 @@ public partial class PercentSetting : Setting
     { 
         set
         {
+#if TOOLS
             if (value > 100)
             {
                 throw new ArgumentOutOfRangeException(nameof(Value));
             }
+#endif
             
             ValueText = value.ToString();
         }
