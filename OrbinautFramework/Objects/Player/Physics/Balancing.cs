@@ -72,39 +72,41 @@ public readonly struct Balancing(PlayerData data, IPlayerLogic logic)
 
 	private void BalanceToDirection(Constants.Direction direction, bool isPanic)
 	{
+		IPlayerSprite sprite = data.Sprite;
+		VisualData visual = data.Visual;
 		switch (data.Node.Type)
 		{
 			case PlayerNode.Types.Amy or PlayerNode.Types.Tails:
 			case PlayerNode.Types.Sonic when data.Super.IsSuper:
-				data.Sprite.Animation = Animations.Balance;
-				data.Visual.Facing = direction;
+				sprite.Animation = Animations.Balance;
+				visual.Facing = direction;
 				break;
 			
 			case PlayerNode.Types.Knuckles:
-				if (data.Visual.Facing == direction)
+				if (visual.Facing == direction)
 				{
-					data.Sprite.Animation = Animations.Balance;
+					sprite.Animation = Animations.Balance;
 				}
-				else if (data.Sprite.Animation != Animations.BalanceFlip)
+				else if (sprite.Animation != Animations.BalanceFlip)
 				{
-					data.Sprite.Animation = Animations.BalanceFlip;
-					data.Visual.Facing = direction;
+					sprite.Animation = Animations.BalanceFlip;
+					visual.Facing = direction;
 				}
 				break;
 			
 			case PlayerNode.Types.Sonic:
 				if (!isPanic)
 				{
-					data.Sprite.Animation = data.Visual.Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+					sprite.Animation = visual.Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 				}
-				else if (data.Visual.Facing != direction)
+				else if (visual.Facing != direction)
 				{
-					data.Sprite.Animation = Animations.BalanceTurn;
-					data.Visual.Facing = direction;
+					sprite.Animation = Animations.BalanceTurn;
+					visual.Facing = direction;
 				}
-				else if (data.Sprite.Animation != Animations.BalanceTurn)
+				else if (sprite.Animation != Animations.BalanceTurn)
 				{
-					data.Sprite.Animation = Animations.BalancePanic;
+					sprite.Animation = Animations.BalancePanic;
 				}
 				break;
 		}

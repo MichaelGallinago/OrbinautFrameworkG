@@ -21,7 +21,7 @@ public readonly struct DataUtilities(PlayerData data)
         VisualData visual = data.Visual;
         visual.SetPushBy = null;
         visual.Angle = 0f;
-        
+
         ClearCarryData(); //TODO: carry
     }
 

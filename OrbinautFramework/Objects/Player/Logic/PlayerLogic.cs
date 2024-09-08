@@ -22,7 +22,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     
     private ActionFsm _actionFsm;
     
-    //private Carry _carry; //TODO: carry
     private readonly Death _death;
     private readonly Water _water;
     private readonly Status _status;
@@ -48,7 +47,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         
         _actionFsm = new ActionFsm(Data, this);
         
-        //_carry = new Carry(Data, this); //TODO: carry
         _death = new Death(Data, this);
         _water = new Water(Data, this);
         _status = new Status(Data, this);
@@ -90,50 +88,63 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         
         switch (Data.State)
         {
-            case PlayerStates.Control or PlayerStates.NoControl:
-                Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
-                ControlType.UpdateCpu();
-                
-                if (Data.State == PlayerStates.Control)
-                {
-                    RunControlRoutine();
-                }
-                
-                //_carry.Process(); TODO: carry
-                _water.Process();
-                _status.Update();
-                _angleRotation.Process();
-                Data.Sprite.Process();
-                Recorder.Record();
+            case PlayerStates.NoControl:
+                ProcessEarlyControl();
+                ProcessLateControl();
                 break;
             
-            case PlayerStates.Hurt:
-                _physicsCore.CameraBounds.Match();
-                _physicsCore.Position.UpdateAir();
-                _physicsCore.Collision.Air.Collide();
-                _angleRotation.Process();
-                Data.Sprite.Process();
-                Recorder.Record();
+            case PlayerStates.Control:
+                ProcessEarlyControl();
+                RunControlRoutine();
+                ProcessLateControl();
                 break;
             
-            case PlayerStates.Death:
-                _death.Process();
-                _physicsCore.Position.UpdateAir();
-                _angleRotation.Process();
-                Data.Sprite.Process();
-                Recorder.Record();
-                break;
-            
-            case PlayerStates.DebugMode:
-                ControlType.UpdateDebugMode();
-                break;
-            
-            case PlayerStates.Respawn:
-                if (Data.IsInCamera(out ICamera camera) && camera.IsMoved)
-                {
-                    Data.State = PlayerStates.Control;
-                }
-                break;
+            case PlayerStates.Hurt: ProcessHurtState(); break;
+            case PlayerStates.Death: ProcessDeathState(); break;
+            case PlayerStates.DebugMode: ControlType.UpdateDebugMode(); break;
+            case PlayerStates.Respawn: ProcessRespawnState(); break;
+        }
+    }
+
+    private void ProcessEarlyControl()
+    {
+        Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
+        ControlType.UpdateCpu();
+    }
+
+    protected virtual void ProcessLateControl()
+    {
+        _water.Process();
+        _status.Update();
+        _angleRotation.Process();
+        Data.Sprite.Process();
+        Recorder.Record();
+    }
+
+    private void ProcessHurtState()
+    {
+        _physicsCore.CameraBounds.Match();
+        _physicsCore.Position.UpdateAir();
+        _physicsCore.Collision.Air.Collide();
+        _angleRotation.Process();
+        Data.Sprite.Process();
+        Recorder.Record();
+    }
+    
+    private void ProcessDeathState()
+    {
+        _death.Process();
+        _physicsCore.Position.UpdateAir();
+        _angleRotation.Process();
+        Data.Sprite.Process();
+        Recorder.Record();
+    }
+    
+    private void ProcessRespawnState()
+    {
+        if (Data.IsInCamera(out ICamera camera) && camera.IsMoved)
+        {
+            Data.State = PlayerStates.Control;
         }
     }
     

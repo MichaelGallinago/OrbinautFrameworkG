@@ -3,7 +3,7 @@ using OrbinautFramework3.Objects.Player.Characters.Tails.Tail;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Tails;
 
-public partial class TailsNode : PlayerNode//TODO: ICarrier
+public partial class TailsNode : PlayerNode
 {
     [Export] private TailNode _tailNode;
 

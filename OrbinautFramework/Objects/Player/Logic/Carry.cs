@@ -7,22 +7,20 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct Carry(PlayerData data, IPlayerLogic logic) //TODO: carry
+public readonly struct Carry(PlayerData data, IPlayerLogic logic, ICarrier carrier)
 {
-    /*
     public void Process()
     {
-        if (data.Node.Type != PlayerNode.Types.Tails) return;
-
-        if (data.Carry.Timer > 0f)
+        CarryData carry = data.Carry;
+        if (carry.Cooldown > 0f)
         {
-            data.Carry.Timer -= Scene.Instance.ProcessSpeed;
-            if (data.Carry.Timer > 0f) return;
+            carry.Cooldown -= Scene.Instance.Speed;
+            return;
         }
-	
-        if (data.Carry.Target != null)
+        
+        if (carry.Target != null)
         {
-            data.Carry.Target.CarryTargetLogic.OnAttached(data);
+            carry.Target.CarryTargetLogic.OnAttached(carrier);
             return;
         }
 		
@@ -35,23 +33,22 @@ public readonly struct Carry(PlayerData data, IPlayerLogic logic) //TODO: carry
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player.Data == data) continue;
+            if (player == logic) continue;
             if (player.Action is States.SpinDash or States.Carried) continue;
-            if (!player.Data.Movement.IsControlRoutineEnabled) continue; 
-            if (!player.Data.Collision.IsObjectInteractionEnabled) continue;
-
-            Vector2 delta = (player.Data.Node.Position - data.Node.Position).Abs();
-            if (delta.X >= 16f || delta.Y >= 48f) continue;
-				
-            player.ResetState();
-            AudioPlayer.Sound.Play(SoundStorage.Grab);
-				
-            player.Data.Sprite.Animation = Animations.Grab;
-            player.Action = States.Carried;
+            if (player.Data.State.IsObjectInteractable()) continue; 
+            
+            Vector2I delta = ((Vector2I)player.Data.Node.Position - (Vector2I)data.Node.Position).Abs();
+            if (delta.X >= 16 || delta.Y >= 48) continue;
+            
             data.Carry.Target = player;
-
-            player.CarryTargetLogic.AttachToCarrier(this);
+            
+            player.ResetData();
+            player.Action = States.Carried;
+            player.Data.Sprite.Animation = Animations.Grab;
+            
+            player.CarryTargetLogic.AttachToCarrier(carrier);
+            
+            AudioPlayer.Sound.Play(SoundStorage.Grab);
         }
     }
-    */
 }

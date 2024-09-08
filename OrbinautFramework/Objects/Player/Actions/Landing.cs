@@ -10,7 +10,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
-public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
+public readonly struct Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 {
 	public void Land()
 	{

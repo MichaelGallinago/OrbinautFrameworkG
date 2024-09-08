@@ -6,7 +6,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct CarryTargetLogic(PlayerData data, PlayerLogic logic)
+public readonly struct CarryTargetLogic(PlayerData data, IPlayerLogic logic)
 {
     public void OnAttached(ICarrier carrier)
     {
