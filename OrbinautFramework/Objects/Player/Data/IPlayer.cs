@@ -11,6 +11,7 @@ public interface IPlayer : IPlayerLogic, IPlayerEditor, ICarryTarget
 {
     void IEditor.OnEnableDebugMode()
     {
+        Data.Node.Visible = true;
         Data.State = PlayerStates.DebugMode;
         
         if (Data.Node.IsCameraTarget(out ICamera camera))

@@ -54,13 +54,15 @@ public partial class Camera : Camera2D, ICamera
 	public bool IsActiveRegionChanged { get; private set; }
 	
 	public Vector2I DrawPosition { get; private set; }
-	public Vector2I PreviousPosition { get; private set; }
+	public Vector2 PreviousPosition { get; private set; }
 	public int BoundSpeed { get; set; }
 
 	public Vector4 TargetBoundary { get; set; }
 	public Vector4 Boundary { get; private set; }
 	public bool IsMovementAllowed { get; set; } = true;
 
+	public bool IsMoved => PreviousPosition == _rawPosition;
+	
 	private Vector4I _bounds;
 	private Vector2 _delay;
 	private Vector2I _shakeOffset;
@@ -69,14 +71,13 @@ public partial class Camera : Camera2D, ICamera
 	private Vector2 _rawPosition;
 	private Vector2 _bufferOffset;
 	private Vector2I _maxVelocity;
-	private Vector2 _velocity;
-
+	
 	public Camera()
 	{
-		Vector2I size = Scene.Instance.InitialSize;
+		Vector2I size = Scene.Instance.Size;
 		TargetBoundary = new Vector4I(0, 0, size.X, size.Y);
 		Boundary = TargetBoundary;
-
+		
 		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
 		_maxVelocity = new Vector2I(maxSpeed, maxSpeed);
 		
@@ -85,18 +86,17 @@ public partial class Camera : Camera2D, ICamera
 			LimitBottom = SharedData.CheckpointData.BottomCameraBound;
 		}
 	}
-
+	
 	public override void _Process(double delta)
 	{
 		IsActiveRegionChanged = false;
 		
 		MoveCamera();
-
-		PreviousPosition = DrawPosition;
+		
 		DrawPosition = _shakeOffset + ((Vector2I)_rawPosition + (Vector2I)_bufferOffset).Clamp(
-			new Vector2I((int)Boundary.X, (int)Boundary.Y), 
+			new Vector2I((int)Boundary.X, (int)Boundary.Y),
 			new Vector2I((int)Boundary.Z, (int)Boundary.W) - SharedData.ViewSize);
-
+		
 		Views.Instance.UpdateBottomCamera(this);
 		
 		Position = new Vector2(DrawPosition.X - Constants.RenderBuffer, DrawPosition.Y);
@@ -104,10 +104,10 @@ public partial class Camera : Camera2D, ICamera
 		ForceUpdateScroll();
 		UpdateActiveRegion();
 	}
-
+	
 	public void SetCameraDelayX(float delay) => _delay.X = delay;
 	public void SetShakeTimer(float shakeTimer) => _shakeTimer = shakeTimer;
-
+	
 	public bool CheckRectInside(Rect2 rect)
 	{
 		var cameraRect = new Rect2(Position, SharedData.ViewSize);
@@ -115,7 +115,7 @@ public partial class Camera : Camera2D, ICamera
 		return rect.End.X >= cameraRect.Position.X && rect.Position.X < cameraRect.End.X
 		    && rect.End.Y >= cameraRect.Position.Y && rect.Position.Y < cameraRect.End.Y;
 	}
-
+	
 	public bool CheckPositionInSafeRegion(Vector2I position)
 	{
 		int distanceY = position.Y - DrawPosition.Y + 128;
@@ -125,18 +125,8 @@ public partial class Camera : Camera2D, ICamera
 		       distanceY  >= 0 && distanceY  < ActiveRegion.Size.Y && 
 		       position.Y < Boundary.W;
 	}
-
-	public bool CheckPositionInActiveRegion(Vector2I position) => ActiveRegion.HasPoint(position);
 	
-	public bool CheckXInActiveRegion(int position)
-	{
-		return position >= ActiveRegion.Position.X && position < ActiveRegion.Position.X + ActiveRegion.Size.X;
-	}
-
-	public bool CheckYInActiveRegion(int position)
-	{
-		return position >= ActiveRegion.Position.Y && position < ActiveRegion.Position.Y + ActiveRegion.Size.Y;
-	}
+	public bool CheckPositionInActiveRegion(Vector2I position) => ActiveRegion.HasPoint(position);
 	
 	private void FollowPlayer(Vector2 targetPosition, IPlayer player)
 	{
@@ -182,7 +172,7 @@ public partial class Camera : Camera2D, ICamera
 			_bufferOffset.Y -= offsetSpeed;
 		}
 	}
-
+	
 	private bool UpdateBufferOffset(float offsetSpeed)
 	{
 		if (_viewTimer <= 0f) return false;
@@ -216,6 +206,7 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (!IsMovementAllowed || Scene.Instance.State == Scene.States.Paused) return;
 
+		PreviousPosition = _rawPosition;
 		FollowTarget();
 		UpdateShakeOffset();
 		
@@ -229,7 +220,7 @@ public partial class Camera : Camera2D, ICamera
 			MoveBoundaryBackward(Boundary.W, TargetBoundary.W, farBounds.Y, boundSpeed) // Bottom
 		);
 	}
-
+	
 	private void FollowTarget()
 	{
 		if (_godotObjectTarget != null && !IsInstanceValid(_godotObjectTarget))
@@ -249,7 +240,7 @@ public partial class Camera : Camera2D, ICamera
 		FollowTargetX(targetPosition.X);
 		FollowTargetY(targetPosition.Y);
 	}
-		
+	
 	private void FollowTargetX(float targetPosition)
 	{
 		if (_delay.X > 0f)
@@ -264,10 +255,8 @@ public partial class Camera : Camera2D, ICamera
 		
 		_rawPosition.X = distance switch
 		{
-			> 0 => distance <= speed ? 
-				targetPosition : _rawPosition.X + speed,
-			< -freeSpaceX => distance + freeSpaceX >= -speed ? 
-				targetPosition + freeSpaceX : _rawPosition.X - speed,
+			> 0 => distance <= speed ? targetPosition : _rawPosition.X + speed,
+			< -freeSpaceX => distance + freeSpaceX >= -speed ? targetPosition + freeSpaceX : _rawPosition.X - speed,
 			_ => _rawPosition.X
 		};
 	}
@@ -280,12 +269,7 @@ public partial class Camera : Camera2D, ICamera
 			return;
 		}
 		
-		float distance = targetPosition - _rawPosition.X;
-		float speed = _maxVelocity.X * Scene.Instance.Speed;
-		
-		if (distance == 0f) return;
-		
-		_rawPosition.X = Math.Abs(distance) > speed ? _rawPosition.X + speed * Math.Sign(distance) : targetPosition;
+		_rawPosition.X = _rawPosition.X.MoveToward(targetPosition, _maxVelocity.X * Scene.Instance.Speed);
 	}
 	
 	private void FollowTargetY(float targetPosition)
@@ -333,9 +317,7 @@ public partial class Camera : Camera2D, ICamera
 			}
 
 			float limit = Scene.Instance.Speed * (Math.Abs(movement.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
-			
-			_rawPosition.Y = distance <= limit && distance >= -limit ? 
-				targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);
+			_rawPosition.Y = distance <= limit && distance >= -limit ? targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);
 			
 			return;
 		}

@@ -13,7 +13,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 {
 	public enum States : byte
 	{
-		RespawnInit, Respawn, Main, Fly, Stuck
+		Main, Stuck, RespawnInit, Respawn
 	}
 	
 	public const int DelayStep = 16;
@@ -41,10 +41,10 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		
 		switch (data.Cpu.State)
 		{
-			case States.RespawnInit: InitRespawn(); break;
-			case States.Respawn: ProcessRespawn(); break;
 			case States.Main: ProcessMain(); break;
 			case States.Stuck: ProcessStuck(); break;
+			case States.RespawnInit: InitRespawn(); break;
+			case States.Respawn: ProcessRespawn(); break;
 		}
 	}
 
@@ -60,6 +60,10 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		data.Node.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		data.Cpu.State = States.Respawn;
+		if (data.Node.IsCameraTarget(out ICamera camera))
+		{
+			camera.IsMovementAllowed = true;
+		}
 	}
 
 	private void ProcessRespawn()
@@ -86,9 +90,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		
 		if (MoveToLeadPlayer(targetPosition)) return;
 #if S3_CPU
-		if (_leadPlayer.Data.State == PlayerStates.Death) return;
+		if (Scene.Instance.State != Scene.States.Normal || _leadPlayer.Data.State == PlayerStates.Death) return;
 #endif
-		if (!_leadPlayer.Recorder.Data[_delay].IsGrounded) return;
 		
 		data.Cpu.State = States.Main;
 		data.Sprite.Animation = Animations.Move;
@@ -204,7 +207,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 	private void TryJump()
 	{
 		IPlayer target = data.Cpu.Target;
-		(Vector2I targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush, _) = 
+		(Vector2I targetPosition, _inputPress, _inputDown, Constants.Direction direction, object isTargetPush) = 
 			target.Recorder.Data[_delay];
 		
 #if S3_CPU

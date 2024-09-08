@@ -2,7 +2,7 @@
 
 public enum PlayerStates : byte
 {
-    Control, Hurt, NoControl, Death, DebugMode
+    Control, Hurt, NoControl, Death, DebugMode, Respawn
 }
 
 public static class PlayerStatesUtilities

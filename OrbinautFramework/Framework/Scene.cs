@@ -19,9 +19,7 @@ public partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
     [Export] public PackedScene[] DebugModePrefabs { get; private set; }
-    
-    [Export(PropertyHint.Range, "0,65535,")] 
-    public uint BottomBound { get; private set; } = ushort.MaxValue;
+    [Export] public LimitedSize Size { get; private set; } = new();
     
     public PlayerList Players { get; } = new();
     

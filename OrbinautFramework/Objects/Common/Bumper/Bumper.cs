@@ -75,7 +75,7 @@ public partial class Bumper : InteractiveNode
         movement.IsAirLock = false;
         data.Visual.SetPushBy = null;
         
-        float radians = Mathf.DegToRad(Angles.GetVector256(data.Node.Position - position));
+        float radians = Mathf.DegToRad(Angles.GetRoundedVector(data.Node.Position - position));
         movement.Velocity.Vector = Force * new Vector2(MathF.Sin(radians), MathF.Cos(radians));
     }
 

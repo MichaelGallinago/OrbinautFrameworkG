@@ -11,7 +11,7 @@ public partial class TailsSpriteLogic : SpriteLogic
         SetType(Data.Type, Data.Speed);
 		
         if (Data.Type != Animations.FlyCarry) return;
-        Node.Frame = Player.Data.Movement.Velocity.Y < 0f ? 1 : 0;
+        Node.Frame = Player.Data.Movement.Velocity.Y <= 0f ? 1 : 0;
     }
     
     protected override void UpdateType() => Data.Type = Data.Animation switch
@@ -26,7 +26,7 @@ public partial class TailsSpriteLogic : SpriteLogic
     {
         Animations.Move => GetGroundSpeed(9f),
         Animations.Push => GetGroundSpeed(9f),
-        Animations.Swim => Player.Data.Movement.Velocity.Y < 0f ? 1f : 0.5f,
+        Animations.Swim => Player.Data.Movement.Velocity.Y <= 0f ? 1f : 0.5f,
         _ => 1f
     };
 }

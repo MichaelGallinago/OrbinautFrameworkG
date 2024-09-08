@@ -14,7 +14,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		if (logic.Action is States.GlideAir or States.GlideFall or States.GlideGround or States.Climb) return;
 		
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
+		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetRoundedVector(data.Movement.Velocity));
 		
 		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 

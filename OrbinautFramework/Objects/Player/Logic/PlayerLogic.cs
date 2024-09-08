@@ -1,5 +1,6 @@
 ﻿using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Actions;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -125,6 +126,13 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
             
             case PlayerStates.DebugMode:
                 ControlType.UpdateDebugMode();
+                break;
+            
+            case PlayerStates.Respawn:
+                if (Data.IsInCamera(out ICamera camera) && camera.IsMoved)
+                {
+                    Data.State = PlayerStates.Control;
+                }
                 break;
         }
     }

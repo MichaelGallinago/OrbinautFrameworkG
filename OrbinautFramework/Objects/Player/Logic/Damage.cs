@@ -140,7 +140,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    if (data.Node.IsCameraTarget(out ICamera camera))
 	    {
 		    camera.IsMovementAllowed = true;
-		    data.Damage.InvincibilityTimer = 60f;
+		    data.State = PlayerStates.Respawn;
 		    return;
 	    }
 

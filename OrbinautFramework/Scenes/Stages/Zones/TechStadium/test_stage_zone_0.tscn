@@ -24,6 +24,7 @@
 process_priority = -1
 texture_filter = 1
 script = ExtResource("1_hs30b")
+ZoneName = "TECH STADIUM"
 Music = ExtResource("2_x70dy")
 CollisionTileMapMain = NodePath("TileMaps/CollisionTileMapMain")
 CollisionTileMapSecondary = NodePath("TileMaps/CollisionTIleMapSecondary")

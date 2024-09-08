@@ -13,7 +13,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 {
     public void Process()
 	{
-		if (Zone.Instance == null || !Zone.Instance.IsWaterEnabled) return;
+		if (data.State == PlayerStates.Death || Zone.Instance == null || !Zone.Instance.IsWaterEnabled) return;
 
 		if (Dive()) return;
 		if (UpdateAirTimer()) return;

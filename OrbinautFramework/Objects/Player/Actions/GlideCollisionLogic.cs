@@ -27,7 +27,7 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 	{
 		var isWallCollided = false;
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
+		moveQuadrant = Angles.GetQuadrant(Angles.GetRoundedVector(data.Movement.Velocity));
 
 		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
 		
