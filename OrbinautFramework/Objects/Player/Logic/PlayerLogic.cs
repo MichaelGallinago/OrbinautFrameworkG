@@ -13,7 +13,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     public Recorder Recorder { get; }
     public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
-    public CarryTargetLogic CarryTargetLogic { get; }
     public CharacterCpuLogic CharacterCpuLogic { get; }
     public CharacterFlightLogic CharacterFlightLogic { get; }
     
@@ -38,7 +37,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         Data = new PlayerData(playerNode, sprite);
         
         Recorder = new Recorder(Data);
-        CarryTargetLogic = new CarryTargetLogic(Data, this);
         ControlType = new ControlType(this, CharacterCpuLogic) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
         

@@ -14,4 +14,13 @@ public class CarryData
         Target = null;
         TargetPosition = Vector2.Zero;
     }
+    
+    public void Free()
+    {
+        if (Target == null) return;
+        
+        Target.OnFree();
+        Target = null;
+        Cooldown = 60f;
+    }
 }

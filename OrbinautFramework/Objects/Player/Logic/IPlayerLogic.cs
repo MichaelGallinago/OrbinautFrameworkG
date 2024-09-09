@@ -7,9 +7,8 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public interface IPlayerLogic : IRecorderStorage
+public interface IPlayerLogic : IRecorderStorage, IPlayerActionStorage
 {
-    ActionFsm.States Action { get; set; }
     TileCollider TileCollider { get; }
     ControlType ControlType { get; }
     

@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
@@ -7,7 +8,7 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct Carry(IPlayerData data, CarryData carryData, IPlayerLogic logic, ICarrier carrier)
+public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerLogic logic)
 {
     public void Process()
     {
@@ -17,15 +18,31 @@ public readonly struct Carry(IPlayerData data, CarryData carryData, IPlayerLogic
             return;
         }
         
-        if (carryData.Target != null)
+        if (carryData.Target == null)
         {
-            carryData.Target.CarryTargetLogic.OnAttached(carrier);
+            if (logic.Action != States.Flight) return;
+
+            GrabAnotherPlayer();
             return;
         }
 		
-        if (logic.Action != States.Flight) return;
-
-        GrabAnotherPlayer();
+        if (carryData.Target.IsFree)
+        {
+            carryData.Free();
+        }
+        else
+        {
+            carryData.Target.CarryTargetLogic.OnAttached(carrier);
+        }
+        else if ((Vector2I)carryData.Target.Position != (Vector2I)carryData.TargetPosition)
+        {
+            carryData.Free();
+        }
+        else
+        {
+            AttachToCarrier();
+            carryData.Target.scr_player_collision_air();
+        }
     }
 
     private void GrabAnotherPlayer()
@@ -45,9 +62,19 @@ public readonly struct Carry(IPlayerData data, CarryData carryData, IPlayerLogic
             player.Action = States.Carried;
             player.Data.Sprite.Animation = Animations.Grab;
             
-            player.CarryTargetLogic.AttachToCarrier(carrier);
+            AttachToCarrier();
             
             AudioPlayer.Sound.Play(SoundStorage.Grab);
+            return;
         }
+    }
+
+    private void AttachToCarrier()
+    {
+        ICarryTarget target = carryData.Target;
+        target.Facing = data.Visual.Facing;
+        target.Velocity = data.Movement.Velocity;
+        target.Scale = new Vector2(Math.Abs(target.Scale.X) * (float)data.Visual.Facing, target.Scale.Y);
+        target.Position = carryData.TargetPosition = data.Node.Position + new Vector2(0f, 28f);
     }
 }

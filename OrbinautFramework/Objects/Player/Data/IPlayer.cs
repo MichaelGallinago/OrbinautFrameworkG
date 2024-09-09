@@ -7,7 +7,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public interface IPlayer : IPlayerLogic, IPlayerEditor, ICarryTarget
+public interface IPlayer : IPlayerLogic, IPlayerEditor, IPlayerCarryTarget
 {
     void IEditor.OnEnableDebugMode()
     {

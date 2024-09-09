@@ -1,12 +1,15 @@
-﻿using OrbinautFramework3.Audio.Player;
+﻿using System;
+using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct DataUtilities(PlayerData data)
+public class DataUtilities(PlayerData data)
 {
-    public void ResetData()
+    public event Action DataReset;
+    
+    public void ResetData() 
     {
         MovementData movement = data.Movement;
         movement.IsSpinning = false;
@@ -22,12 +25,7 @@ public readonly struct DataUtilities(PlayerData data)
         visual.SetPushBy = null;
         visual.Angle = 0f;
 
-        ClearCarryData(); //TODO: carry
-    }
-
-    public void ClearCarryData() //TODO: carry
-    {
-        
+        DataReset?.Invoke();
     }
 	
     public void ResetGravity()
