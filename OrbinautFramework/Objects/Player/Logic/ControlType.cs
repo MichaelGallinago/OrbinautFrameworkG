@@ -5,7 +5,7 @@ using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public class ControlType(IPlayer player)
+public class ControlType(IPlayer player, CharacterCpuLogic characterCpuLogic)
 {
     public bool IsCpu
     {
@@ -14,7 +14,7 @@ public class ControlType(IPlayer player)
         {
             if (value)
             {
-                _cpuLogic = new CpuLogic(player.Data, player);
+                _cpuLogic = new CpuLogic(player.Data, player, characterCpuLogic);
                 return;
             }
             

@@ -1,12 +1,13 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Flight(PlayerData data)
+public struct Flight(PlayerData data, CharacterFlightLogic flightLogic)
 {
 	private float _flightTimer = 480f;
 	private float _ascendTimer = 0f;
@@ -87,9 +88,8 @@ public struct Flight(PlayerData data)
 
     private void Descend()
     {
-    	if (data.Input.Press.Aby && _flightTimer > 0f && (!data.Water.IsUnderwater || data.Carry.Target == null))
+    	if (_flightTimer > 0f && data.Input.Press.Aby && flightLogic.CheckAscendAllowed())
     	{
-    		//TODO: check that this works
     		_ascendTimer = 1f;
     	}
 	    

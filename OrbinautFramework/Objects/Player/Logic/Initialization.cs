@@ -14,7 +14,6 @@ public readonly struct Initialization(PlayerData data)
         
         data.Cpu.Init();
         data.Item.Init();
-        data.Carry.Init();
         data.Death.Init();
         data.Super.Init();
         data.Water.Init();

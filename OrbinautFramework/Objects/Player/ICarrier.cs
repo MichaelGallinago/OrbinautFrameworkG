@@ -9,12 +9,7 @@ public interface ICarrier
     ActionFsm.States State { get; }
     Vector2 Position { get; }
     Constants.Direction Facing { get; }
-    float CarryTimer { get; set; }
-    ICarryTarget CarryTarget { get; set; }
-    Vector2 CarryTargetPosition { get; set; }
-
-    private void Carry()
-    {
-        CarryTarget.CarryTargetLogic.OnAttached(this);
-    }
+    float Cooldown { get; set; }
+    ICarryTarget Target { get; set; }
+    Vector2 TargetPosition { get; set; }
 }

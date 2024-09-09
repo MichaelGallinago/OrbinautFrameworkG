@@ -7,20 +7,19 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct Carry(PlayerData data, IPlayerLogic logic, ICarrier carrier)
+public readonly struct Carry(IPlayerData data, CarryData carryData, IPlayerLogic logic, ICarrier carrier)
 {
     public void Process()
     {
-        CarryData carry = data.Carry;
-        if (carry.Cooldown > 0f)
+        if (carryData.Cooldown > 0f)
         {
-            carry.Cooldown -= Scene.Instance.Speed;
+            carryData.Cooldown -= Scene.Instance.Speed;
             return;
         }
         
-        if (carry.Target != null)
+        if (carryData.Target != null)
         {
-            carry.Target.CarryTargetLogic.OnAttached(carrier);
+            carryData.Target.CarryTargetLogic.OnAttached(carrier);
             return;
         }
 		
@@ -35,12 +34,12 @@ public readonly struct Carry(PlayerData data, IPlayerLogic logic, ICarrier carri
         {
             if (player == logic) continue;
             if (player.Action is States.SpinDash or States.Carried) continue;
-            if (player.Data.State.IsObjectInteractable()) continue; 
+            if (!player.Data.State.IsObjectInteractable()) continue; 
             
             Vector2I delta = ((Vector2I)player.Data.Node.Position - (Vector2I)data.Node.Position).Abs();
             if (delta.X >= 16 || delta.Y >= 48) continue;
             
-            data.Carry.Target = player;
+            carryData.Target = player;
             
             player.ResetData();
             player.Action = States.Carried;

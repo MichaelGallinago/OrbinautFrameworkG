@@ -10,7 +10,7 @@ public readonly struct CarryTargetLogic(PlayerData data, IPlayerLogic logic)
 {
     public void OnAttached(ICarrier carrier)
     {
-    	Vector2 previousPosition = carrier.CarryTargetPosition;
+    	Vector2 previousPosition = carrier.TargetPosition;
     	
     	if (data.Input.Press.Aby)
     	{
@@ -21,8 +21,8 @@ public readonly struct CarryTargetLogic(PlayerData data, IPlayerLogic logic)
     	if (logic.Action != States.Carried || carrier.State != States.Flight || 
 	        !data.Node.Position.IsEqualApprox(previousPosition))
     	{
-    		carrier.CarryTarget = null;
-    		carrier.CarryTimer = 60f;
+    		carrier.Target = null;
+    		carrier.Cooldown = 60f;
 		    logic.Action = States.Default;
     		return;
     	}
@@ -35,18 +35,18 @@ public readonly struct CarryTargetLogic(PlayerData data, IPlayerLogic logic)
 	    data.Visual.Facing = carrier.Facing;
     	data.Movement.Velocity.Vector = carrier.Velocity.Vector;
 	    
-	    IPlayerNode player = data.Node;
-	    player.Position = carrier.Position + new Vector2(0f, 28f);
-	    player.Scale = new Vector2(Math.Abs(player.Scale.X) * (float)carrier.Facing, player.Scale.Y);
+	    IPlayerNode node = data.Node;
+	    node.Position = carrier.Position + new Vector2(0f, 28f);
+	    node.Scale = new Vector2(Math.Abs(node.Scale.X) * (float)carrier.Facing, node.Scale.Y);
     	
-    	carrier.CarryTargetPosition = player.Position;
+    	carrier.TargetPosition = node.Position;
     }
 
     private void Jump(ICarrier carrier)
     {
-	    carrier.CarryTarget = null;
-	    carrier.CarryTimer = 18f;
-		    
+	    carrier.Target = null;
+	    carrier.Cooldown = 18f;
+	    
 	    logic.Action = States.Jump;
 	    data.Collision.Radius = data.Collision.RadiusSpin;
 

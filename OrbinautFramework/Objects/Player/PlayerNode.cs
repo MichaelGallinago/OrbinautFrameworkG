@@ -17,7 +17,7 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 	
 	[Export] public Types Type { get; private set; }
 	[Export] public ShieldContainer Shield { get; private set; }
-	[Export] private Sprite.SpriteNode _spriteNode;
+	[Export] protected Sprite.SpriteNode SpriteNode { get; private set; }
 	
 	public IMemento Memento { get; private set; }
 
@@ -26,11 +26,8 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 	public override void _EnterTree()
 	{
 		base._EnterTree();
-		PlayerLogic = new PlayerLogic(this, _spriteNode.PlayerSprite);
 		Scene.Instance.Players.Add(PlayerLogic);
-		
 		Memento = new PlayerMemento(this);
-		_spriteNode.SetPlayer(PlayerLogic);
 	}
 
 	public override void _Ready()

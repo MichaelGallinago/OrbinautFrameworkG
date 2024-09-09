@@ -11,7 +11,6 @@ public class PlayerData(IPlayerNode node, IPlayerSprite sprite) : IPlayerData //
 	
 	public CpuData Cpu { get; } = new();
 	public ItemData Item { get; } = new();
-	public CarryData Carry { get; } = new();
 	public DeathData Death { get; } = new();
 	public InputData Input { get; } = new();
 	public SuperData Super { get; } = new();

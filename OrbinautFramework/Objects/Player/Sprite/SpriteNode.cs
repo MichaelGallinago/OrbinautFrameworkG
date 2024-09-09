@@ -8,20 +8,26 @@ namespace OrbinautFramework3.Objects.Player.Sprite;
 [Tool]
 public partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode
 {
-	[Export] private SpriteLogic _spriteLogic;
-	
-	public IPlayerSprite PlayerSprite => _spriteLogic;
-
-	public override void _Ready()
+	public SpriteLogic SpriteLogic
 	{
-		base._Ready();
+		private get => _spriteLogic;
+		set
+		{
 #if TOOLS
-		if (Engine.IsEditorHint()) return;
+			if (Engine.IsEditorHint()) return;
 #endif
-		AnimationFinished += _spriteLogic.OnFinished;
+			if (_spriteLogic != null)
+			{
+				AnimationFinished -= SpriteLogic.OnFinished;
+			}
+			
+			_spriteLogic = value;
+			AnimationFinished += SpriteLogic.OnFinished;
+		}
 	}
-
-	public void SetPlayer(IPlayer player) => _spriteLogic.SetPlayer(player, this);
+	private SpriteLogic _spriteLogic;
+	
+	public IPlayerSprite PlayerSprite => SpriteLogic;
 	
 	public int GetAnimationFrameCount(Animations animation)
 	{

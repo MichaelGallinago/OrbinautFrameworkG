@@ -9,7 +9,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public class CpuLogic(PlayerData data, IPlayerLogic logic)
+public class CpuLogic(PlayerData data, IPlayerLogic logic, CharacterCpuLogic characterCpuLogic)
 {
 	public enum States : byte
 	{
@@ -182,8 +182,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		
 		if (CheckRespawn()) return; // Exit if respawned
 		
-		if (data.State == PlayerStates.NoControl) return; 
-		if (data.Carry.Target != null || logic.Action == ActionFsm.States.Carried) return;
+		if (data.State == PlayerStates.NoControl) return;
+		if (characterCpuLogic.CheckCarry()) return;
 		
 		data.Cpu.Target ??= _leadPlayer; // Follow lead player
 		
@@ -203,7 +203,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic)
 		
 		data.Input.Set(_inputPress, _inputDown);
 	}
-
+	
 	private void TryJump()
 	{
 		IPlayer target = data.Cpu.Target;

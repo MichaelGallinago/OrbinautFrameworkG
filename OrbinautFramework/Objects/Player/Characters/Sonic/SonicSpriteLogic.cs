@@ -1,18 +1,19 @@
 ﻿using System;
-using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Sonic;
 
-[Tool, GlobalClass]
-public partial class SonicSpriteLogic : SpriteLogic
+public partial class SonicSpriteLogic(IPlayer player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
 {
+    private readonly IPlayer _player = player;
+
     protected override void Animate()
     {
         SetType(Data.Type, Data.Speed);
 
-        if (!Player.Data.Super.IsSuper || Data.Type != Animations.Walk) return;
+        if (!_player.Data.Super.IsSuper || Data.Type != Animations.Walk) return;
         
         if (Scene.Instance.Time % 4d >= 2d) return;
         int frame = (Node.Frame + Data.FrameCount / 2) % Data.FrameCount;
@@ -27,8 +28,8 @@ public partial class SonicSpriteLogic : SpriteLogic
             Animations.Bounce or Animations.Breathe or Animations.Flip or Animations.Transform => Animations.Move,
             Animations.Idle => Animations.Wait,
             Animations.Skid when
-                Player.Data.Input.Down is { Left: false, Right: false } || 
-                Math.Abs(Player.Data.Movement.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold 
+                _player.Data.Input.Down is { Left: false, Right: false } || 
+                Math.Abs(_player.Data.Movement.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold 
                     => Animations.Move, 
             _ => Data.Animation
         };
@@ -44,7 +45,7 @@ public partial class SonicSpriteLogic : SpriteLogic
 	
     protected override void UpdateType() => Data.Type = Data.Animation switch
     {
-        Animations.Move => Player.Data.Super.IsSuper ? 
+        Animations.Move => _player.Data.Super.IsSuper ? 
             GetMoveAnimation(false, 8f) :
             GetMoveAnimation(SharedData.Dash, 6f),
         _ => Data.Animation

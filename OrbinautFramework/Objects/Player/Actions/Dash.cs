@@ -38,6 +38,7 @@ public struct Dash(PlayerData data, IPlayerLogic logic)
     }
 
     public static void Exit() => AudioPlayer.Sound.Stop(SoundStorage.Charge2);
+    
     public States OnLand()
     {
 	    data.Movement.GroundSpeed.Value = _charge;

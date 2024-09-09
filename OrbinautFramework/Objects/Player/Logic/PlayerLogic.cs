@@ -14,6 +14,8 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
     public CarryTargetLogic CarryTargetLogic { get; }
+    public CharacterCpuLogic CharacterCpuLogic { get; }
+    public CharacterFlightLogic CharacterFlightLogic { get; }
     
     public Damage Damage { get; }
     public Landing Landing { get; }
@@ -37,7 +39,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         
         Recorder = new Recorder(Data);
         CarryTargetLogic = new CarryTargetLogic(Data, this);
-        ControlType = new ControlType(this) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
+        ControlType = new ControlType(this, CharacterCpuLogic) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
         
         Damage = new Damage(Data, this);
@@ -45,7 +47,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
-        _actionFsm = new ActionFsm(Data, this);
+        _actionFsm = new ActionFsm(Data, this, CharacterFlightLogic);
         
         _death = new Death(Data, this);
         _water = new Water(Data, this);
@@ -63,7 +65,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         set => _actionFsm.State = value;
     }
 
-    public void Init()
+    public virtual void Init()
     {
         _actionFsm.State = ActionFsm.States.Default;
         _initialization.Init();

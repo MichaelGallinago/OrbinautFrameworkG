@@ -1,16 +1,17 @@
-﻿using Godot;
+﻿using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Knuckles;
 
-[Tool, GlobalClass]
-public partial class KnucklesSpriteLogic : SpriteLogic
+public partial class KnucklesSpriteLogic(IPlayer player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
 {
+    private readonly IPlayer _player = player;
+
     protected override void Animate()
     {
         if (Data.Animation == Animations.GlideFall)
         {
-            int frame = Player.Data.Visual.OverrideFrame ?? Node.Frame; //TODO: check this
+            int frame = _player.Data.Visual.OverrideFrame ?? Node.Frame; //TODO: check this
             SetType(Data.Type, frame, Data.Speed);
             return;
         }
