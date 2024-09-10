@@ -1,6 +1,5 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Physics.Collisions;
 
 namespace OrbinautFramework3.Objects.Player.Logic;

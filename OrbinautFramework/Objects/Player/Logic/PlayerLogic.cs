@@ -7,15 +7,13 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public class PlayerLogic : IPlayer, IPlayerCountObserver
+public abstract class PlayerLogic : IPlayer, IPlayerCountObserver
 {
     public PlayerData Data { get; }
     public Recorder Recorder { get; }
     public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
     public DataUtilities DataUtilities { get; }
-    public CharacterCpuLogic CharacterCpuLogic { get; }
-    public CharacterFlightLogic CharacterFlightLogic { get; }
     
     public Damage Damage { get; }
     public Landing Landing { get; }
@@ -36,12 +34,9 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         CharacterCpuLogic cpuLogic, CharacterFlightLogic flightLogic)
     {
         Data = new PlayerData(playerNode, sprite);
-
-        CharacterCpuLogic = cpuLogic;
-        CharacterFlightLogic = flightLogic;
         
         Recorder = new Recorder(Data);
-        ControlType = new ControlType(this, CharacterCpuLogic) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
+        ControlType = new ControlType(this, cpuLogic) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
         DataUtilities = new DataUtilities(Data);
         
@@ -49,7 +44,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
-        _actionFsm = new ActionFsm(Data, this, CharacterFlightLogic);
+        _actionFsm = new ActionFsm(Data, this, flightLogic);
         
         _death = new Death(Data, this);
         _water = new Water(Data, this);
@@ -59,6 +54,11 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _angleRotation = new AngleRotation(Data);
         _collisionBoxes = new CollisionBoxes(Data, this);
         _initialization = new Initialization(Data);
+    }
+
+    protected T SetFlightLogic<T>() where T : CharacterFlightLogic, new()
+    {
+        return new T();
     }
     
     public ActionFsm.States Action
