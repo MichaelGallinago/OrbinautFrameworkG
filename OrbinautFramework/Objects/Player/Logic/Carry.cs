@@ -3,12 +3,11 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerLogic logic)
+public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerActionStorage logic)
 {
     public void Process()
     {
@@ -26,13 +25,9 @@ public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerLogic 
             return;
         }
 		
-        if (carryData.Target.IsFree)
+        if (carryData.Target.TryFree(out float cooldown))
         {
-            carryData.Free();
-        }
-        else
-        {
-            carryData.Target.CarryTargetLogic.OnAttached(carrier);
+            carryData.Free(cooldown);
         }
         else if ((Vector2I)carryData.Target.Position != (Vector2I)carryData.TargetPosition)
         {
@@ -41,7 +36,7 @@ public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerLogic 
         else
         {
             AttachToCarrier();
-            carryData.Target.scr_player_collision_air();
+            carryData.Target.Collide();
         }
     }
 
@@ -57,10 +52,7 @@ public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerLogic 
             if (delta.X >= 16 || delta.Y >= 48) continue;
             
             carryData.Target = player;
-            
-            player.ResetData();
             player.Action = States.Carried;
-            player.Data.Sprite.Animation = Animations.Grab;
             
             AttachToCarrier();
             

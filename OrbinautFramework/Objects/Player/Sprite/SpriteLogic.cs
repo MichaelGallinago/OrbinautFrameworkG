@@ -5,7 +5,7 @@ using OrbinautFramework3.Objects.Player.Extensions;
 
 namespace OrbinautFramework3.Objects.Player.Sprite;
 
-public abstract partial class SpriteLogic(IPlayer player, ISpriteNode spriteNode) : Resource, IPlayerSprite
+public abstract partial class SpriteLogic(PlayerData playerData, ISpriteNode spriteNode) : Resource, IPlayerSprite
 {
     public SpriteData Data { get; } = new();
     public ISpriteNode Node { get; } = spriteNode;
@@ -27,8 +27,8 @@ public abstract partial class SpriteLogic(IPlayer player, ISpriteNode spriteNode
         {
             Animations.Bounce or Animations.Breathe or Animations.Flip or Animations.Transform => Animations.Move,
             Animations.Skid when
-                player.Data.Input.Down is { Left: false, Right: false } || 
-                Math.Abs(player.Data.Movement.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold 
+                playerData.Input.Down is { Left: false, Right: false } || 
+                Math.Abs(playerData.Movement.GroundSpeed) < Physics.Movements.Ground.SkidSpeedThreshold 
                     => Animations.Move, 
             _ => Data.Animation
         };
@@ -49,7 +49,7 @@ public abstract partial class SpriteLogic(IPlayer player, ISpriteNode spriteNode
     {
         const float dashThreshold = 10f;
 		
-        float speed = Math.Abs(player.Data.Movement.GroundSpeed);
+        float speed = Math.Abs(playerData.Movement.GroundSpeed);
 
         if (speed < runThreshold) return Animations.Walk;
         return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
@@ -57,7 +57,7 @@ public abstract partial class SpriteLogic(IPlayer player, ISpriteNode spriteNode
 	
     protected float GetGroundSpeed(float speedBound)
     {
-        return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(player.Data.Movement.GroundSpeed)));
+        return 1f / MathF.Floor(Math.Max(1f, speedBound - Math.Abs(playerData.Movement.GroundSpeed)));
     }
 
     protected void SetType(Animations type, float speed)
@@ -72,7 +72,7 @@ public abstract partial class SpriteLogic(IPlayer player, ISpriteNode spriteNode
     
     private void OverrideFrame()
     {
-        VisualData visual = player.Data.Visual;
+        VisualData visual = playerData.Visual;
         if (visual.OverrideFrame == null) return;
         Node.Frame = (int)visual.OverrideFrame;
         visual.OverrideFrame = null;
@@ -81,6 +81,6 @@ public abstract partial class SpriteLogic(IPlayer player, ISpriteNode spriteNode
     private void UpdateScale()
     {
         if (Data.Animation == Animations.Spin && !Data.IsFrameChanged) return;
-        Node.Scale = new Vector2(Math.Abs(Node.Scale.X) * (float)player.Facing, Node.Scale.Y);
+        Node.Scale = new Vector2(Math.Abs(Node.Scale.X) * (float)playerData.Visual.Facing, Node.Scale.Y);
     }
 }

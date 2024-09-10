@@ -3,15 +3,16 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Knuckles;
 
-public partial class KnucklesSpriteLogic(IPlayer player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
+public partial class KnucklesSpriteLogic(PlayerData player, ISpriteNode spriteNode) :
+    SpriteLogic(player, spriteNode)
 {
-    private readonly IPlayer _player = player;
+    private readonly PlayerData _player = player;
 
     protected override void Animate()
     {
         if (Data.Animation == Animations.GlideFall)
         {
-            int frame = _player.Data.Visual.OverrideFrame ?? Node.Frame; //TODO: check this
+            int frame = _player.Visual.OverrideFrame ?? Node.Frame; //TODO: check this
             SetType(Data.Type, frame, Data.Speed);
             return;
         }

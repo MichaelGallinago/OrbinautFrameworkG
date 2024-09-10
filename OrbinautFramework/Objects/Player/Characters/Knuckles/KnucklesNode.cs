@@ -8,6 +8,6 @@ public partial class KnucklesNode : PlayerNode
     {
         PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
         base._EnterTree();
-        SpriteNode.SpriteLogic = new KnucklesSpriteLogic(PlayerLogic, SpriteNode);
+        SpriteNode.SpriteLogic = new KnucklesSpriteLogic(PlayerLogic.Data, SpriteNode);
     }
 }

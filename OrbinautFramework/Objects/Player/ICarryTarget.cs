@@ -9,6 +9,7 @@ public interface ICarryTarget : IPosition
     Constants.Direction Facing { get; set; }
     Vector2 Velocity { get; set; }
     Vector2 Scale { get; set; }
-    bool IsFree { get; }
+    bool TryFree(out float cooldown);
+    void Collide();
     void OnFree();
 }

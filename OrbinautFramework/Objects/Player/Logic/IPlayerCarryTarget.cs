@@ -1,20 +1,16 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Objects.Player.Physics.Collisions;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public interface IPlayerCarryTarget : ICarryTarget, IPlayerDataStorage, IPlayerActionStorage
+public interface IPlayerCarryTarget : ICarryTarget, IPlayerLogic, IPlayerPosition
 {
     Constants.Direction ICarryTarget.Facing
     {
         get => Data.Visual.Facing;
         set => Data.Visual.Facing = value;
-    }
-    
-    Vector2 ICarryTarget.Position 
-    {
-        get => Data.Node.Position;
-        set => Data.Node.Position = value;
     }
     
     Vector2 ICarryTarget.Velocity 
@@ -28,8 +24,31 @@ public interface IPlayerCarryTarget : ICarryTarget, IPlayerDataStorage, IPlayerA
         get => Data.Node.Scale;
         set => Data.Node.Scale = value;
     }
-
-    bool ICarryTarget.IsFree => Action != ActionFsm.States.Carried;
     
-    void ICarryTarget.OnFree() => Action = ActionFsm.States.Default;
+    bool ICarryTarget.TryFree(out float cooldown)
+    {
+        if (Action != ActionFsm.States.Carried)
+        {
+            cooldown = 60f;
+            return true;
+        }
+        
+        if (Data.Input.Press.Aby)
+        {
+            Action = ActionFsm.States.Jump;
+            cooldown = 18f;
+            return true;
+        }
+        
+        cooldown = 0f;
+        return false;
+    }
+    
+    void ICarryTarget.OnFree()
+    {
+        if (Action == ActionFsm.States.Jump) return;
+        Action = ActionFsm.States.Default;
+    }
+    
+    void ICarryTarget.Collide() => new Air(Data, this).Collide();
 }

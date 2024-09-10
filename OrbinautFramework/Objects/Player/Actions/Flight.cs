@@ -16,7 +16,7 @@ public struct Flight(PlayerData data, CharacterFlightLogic flightLogic)
 	{
 		data.Collision.Radius = data.Collision.RadiusNormal;
 		
-		data.Movement.Gravity = GravityType.TailsDown;
+		data.Movement.Gravity = GravityType.FlightDown;
 		data.Movement.IsAirLock = false;
 		data.Movement.IsSpinning = false;
 		
@@ -75,7 +75,7 @@ public struct Flight(PlayerData data, CharacterFlightLogic flightLogic)
     		return true;
     	}
     	
-    	data.Movement.Gravity = GravityType.TailsUp;
+    	data.Movement.Gravity = GravityType.FlightUp;
     			
     	_ascendTimer += Scene.Instance.Speed;
     	if (_ascendTimer >= 31f)
@@ -93,7 +93,7 @@ public struct Flight(PlayerData data, CharacterFlightLogic flightLogic)
     		_ascendTimer = 1f;
     	}
 	    
-    	data.Movement.Gravity = GravityType.TailsDown;
+    	data.Movement.Gravity = GravityType.FlightDown;
     }
 
     private void SetAnimation()

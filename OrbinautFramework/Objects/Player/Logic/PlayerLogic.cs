@@ -13,12 +13,12 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     public Recorder Recorder { get; }
     public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
+    public DataUtilities DataUtilities { get; }
     public CharacterCpuLogic CharacterCpuLogic { get; }
     public CharacterFlightLogic CharacterFlightLogic { get; }
     
     public Damage Damage { get; }
     public Landing Landing { get; }
-    public DataUtilities DataUtilities { get; }
     public ObjectInteraction ObjectInteraction { get; }
     
     private ActionFsm _actionFsm;
@@ -32,16 +32,20 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     private readonly CollisionBoxes _collisionBoxes;
     private readonly Initialization _initialization;
     
-    public PlayerLogic(IPlayerNode playerNode, IPlayerSprite sprite)
+    public PlayerLogic(IPlayerNode playerNode, IPlayerSprite sprite, 
+        CharacterCpuLogic cpuLogic, CharacterFlightLogic flightLogic)
     {
         Data = new PlayerData(playerNode, sprite);
+
+        CharacterCpuLogic = cpuLogic;
+        CharacterFlightLogic = flightLogic;
         
         Recorder = new Recorder(Data);
         ControlType = new ControlType(this, CharacterCpuLogic) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
+        DataUtilities = new DataUtilities(Data);
         
         Damage = new Damage(Data, this);
-        DataUtilities = new DataUtilities(Data);
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         

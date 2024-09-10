@@ -3,17 +3,17 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Tails;
 
-public partial class TailsSpriteLogic(IPlayer player, ISpriteNode spriteNode, CarryData carryData) : 
+public partial class TailsSpriteLogic(PlayerData player, ISpriteNode spriteNode, CarryData carryData) : 
     SpriteLogic(player, spriteNode)
 {
-    private readonly IPlayer _player = player;
+    private readonly PlayerData _player = player;
 
     protected override void Animate()
     {
         SetType(Data.Type, Data.Speed);
 		
         if (Data.Type != Animations.FlyCarry) return;
-        Node.Frame = _player.Data.Movement.Velocity.Y <= 0f ? 1 : 0;
+        Node.Frame = _player.Movement.Velocity.Y <= 0f ? 1 : 0;
     }
     
     protected override void UpdateType() => Data.Type = Data.Animation switch
@@ -28,7 +28,7 @@ public partial class TailsSpriteLogic(IPlayer player, ISpriteNode spriteNode, Ca
     {
         Animations.Move => GetGroundSpeed(9f),
         Animations.Push => GetGroundSpeed(9f),
-        Animations.Swim => _player.Data.Movement.Velocity.Y <= 0f ? 1f : 0.5f,
+        Animations.Swim => _player.Movement.Velocity.Y <= 0f ? 1f : 0.5f,
         _ => 1f
     };
 }

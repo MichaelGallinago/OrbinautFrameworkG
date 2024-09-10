@@ -3,7 +3,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Amy;
 
-public partial class AmySpriteLogic(IPlayer player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
+public partial class AmySpriteLogic(PlayerData player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
 {
     protected override void Animate()
     {

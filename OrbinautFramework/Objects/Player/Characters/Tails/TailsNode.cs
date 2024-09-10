@@ -14,7 +14,7 @@ public partial class TailsNode : PlayerNode
         
         base._EnterTree();
         
-        SpriteNode.SpriteLogic = new TailsSpriteLogic(PlayerLogic, SpriteNode, tailsLogic.CarryData);
+        SpriteNode.SpriteLogic = new TailsSpriteLogic(PlayerLogic.Data, SpriteNode, tailsLogic.CarryData);
     }
     
     public override void _Process(double delta)

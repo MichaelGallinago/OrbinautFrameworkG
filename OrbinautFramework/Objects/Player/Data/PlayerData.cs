@@ -2,12 +2,13 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public class PlayerData(IPlayerNode node, IPlayerSprite sprite) : IPlayerData //TODO: remove or edit interface?
+public class PlayerData(IPlayerNode node, IPlayerSprite sprite)
 {
 	public int Id { get; set; }
+	public PlayerStates State { get; set; }
+	
 	public IPlayerNode Node { get; } = node;
 	public IPlayerSprite Sprite { get; } = sprite;
-	public PlayerStates State { get; set; }
 	
 	public CpuData Cpu { get; } = new();
 	public ItemData Item { get; } = new();

@@ -99,7 +99,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		
 		if (logic.Action == States.Flight)
 		{
-			movement.Gravity = GravityType.TailsDown;
+			movement.Gravity = GravityType.FlightDown;
 		}
 		
 		return true;

@@ -8,6 +8,6 @@ public partial class AmyNode : PlayerNode
     {
         PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
         base._EnterTree();
-        SpriteNode.SpriteLogic = new AmySpriteLogic(PlayerLogic, SpriteNode);
+        SpriteNode.SpriteLogic = new AmySpriteLogic(PlayerLogic.Data, SpriteNode);
     }
 }

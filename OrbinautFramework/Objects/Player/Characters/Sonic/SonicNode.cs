@@ -8,6 +8,6 @@ public partial class SonicNode : PlayerNode
     {
         PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
         base._EnterTree();
-        SpriteNode.SpriteLogic = new SonicSpriteLogic(PlayerLogic, SpriteNode);
+        SpriteNode.SpriteLogic = new SonicSpriteLogic(PlayerLogic.Data, SpriteNode);
     }
 }

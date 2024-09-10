@@ -20,10 +20,14 @@ public readonly struct PhysicsCore(PlayerData data, IPlayerLogic logic)
 	{
 		if (!data.Movement.IsGrounded)
 		{
+			if (logic.Action == ActionFsm.States.Carried)
+			{
+				CameraBounds.Match();
+				return;
+			}
+			
 			_movement.Air.Move();
 			CameraBounds.Match();
-
-			if (logic.Action == ActionFsm.States.Carried) return;
 			Position.UpdateAir();
 			Collision.Air.Collide();
 			return;

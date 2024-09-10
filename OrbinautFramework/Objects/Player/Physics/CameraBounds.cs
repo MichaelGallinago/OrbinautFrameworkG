@@ -13,7 +13,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
     public void Match()
     {
 	    if (!data.IsInCamera(out ICamera camera)) return;
-
+	    
 	    ShiftToLeftBound(camera);
 	    ShiftToRightBound(camera);
 	    ShiftToTopBound(camera);
@@ -55,14 +55,14 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 	    {
 		    case States.Flight or States.Climb:
 			    if (data.Node.Position.Y + data.Movement.Velocity.Y >= topBound) break;
-    
-			    if (logic.Action == States.Flight)
-			    {
-				    data.Movement.Gravity = GravityType.TailsDown;
-			    }
 
 			    data.Movement.Velocity.Y = 0f;
 			    data.Node.Position = new Vector2(data.Node.Position.X, topBound);
+			    
+			    if (logic.Action == States.Flight)
+			    {
+				    data.Movement.Gravity = GravityType.FlightDown;
+			    }
 			    break;
     		
 		    case States.GlideAir or States.GlideFall or States.GlideGround when data.Node.Position.Y < topBound - 6:
