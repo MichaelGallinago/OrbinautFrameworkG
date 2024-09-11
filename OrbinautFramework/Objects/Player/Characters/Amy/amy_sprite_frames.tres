@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=99 format=3 uid="uid://ives1jru75cc"]
+[gd_resource type="SpriteFrames" load_steps=99 format=3 uid="uid://ives1jru75cc"]
 
 [ext_resource type="Texture2D" uid="uid://c0dcxkn3l54ff" path="res://Objects/Player/Characters/Amy/Sprites/balance.png" id="1_xcqa4"]
 [ext_resource type="Texture2D" uid="uid://d3riui6la2ve6" path="res://Objects/Player/Characters/Amy/Sprites/bounce.png" id="2_wy7fb"]

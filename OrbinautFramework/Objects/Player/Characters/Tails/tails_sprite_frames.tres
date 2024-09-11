@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=78 format=3 uid="uid://b00rdxd033mnj"]
+[gd_resource type="SpriteFrames" load_steps=78 format=3 uid="uid://b00rdxd033mnj"]
 
 [ext_resource type="Texture2D" uid="uid://drjg2mymcn23l" path="res://Objects/Player/Characters/Tails/Sprites/balance.png" id="1_2xak0"]
 [ext_resource type="Script" path="res://Framework/Animations/AdvancedSpriteFrames.cs" id="1_p3xy2"]
