@@ -14,6 +14,7 @@ public struct Flight(PlayerData data, CharacterFlightLogic flightLogic)
 
 	public void Enter()
 	{
+		flightLogic.OnStarted();
 		data.Collision.Radius = data.Collision.RadiusNormal;
 		
 		data.Movement.Gravity = GravityType.FlightDown;
