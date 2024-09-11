@@ -2,18 +2,19 @@
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Actions;
+using OrbinautFramework3.Objects.Player.Characters.Logic;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public abstract class PlayerLogic : IPlayer, IPlayerCountObserver
+public class PlayerLogic : IPlayer, IPlayerCountObserver
 {
     public PlayerData Data { get; }
     public Recorder Recorder { get; }
-    public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
     public DataUtilities DataUtilities { get; }
+    public ControlType ControlType { get; private set; }
     
     public Damage Damage { get; }
     public Landing Landing { get; }
@@ -30,21 +31,17 @@ public abstract class PlayerLogic : IPlayer, IPlayerCountObserver
     private readonly CollisionBoxes _collisionBoxes;
     private readonly Initialization _initialization;
     
-    public PlayerLogic(IPlayerNode playerNode, IPlayerSprite sprite, 
-        CharacterCpuLogic cpuLogic, CharacterFlightLogic flightLogic)
+    public PlayerLogic(IPlayerNode playerNode, IPlayerSprite sprite)
     {
         Data = new PlayerData(playerNode, sprite);
         
         Recorder = new Recorder(Data);
-        ControlType = new ControlType(this, cpuLogic) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
         DataUtilities = new DataUtilities(Data);
         
         Damage = new Damage(Data, this);
         ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
-        
-        _actionFsm = new ActionFsm(Data, this, flightLogic);
         
         _death = new Death(Data, this);
         _water = new Water(Data, this);
@@ -55,10 +52,11 @@ public abstract class PlayerLogic : IPlayer, IPlayerCountObserver
         _collisionBoxes = new CollisionBoxes(Data, this);
         _initialization = new Initialization(Data);
     }
-
-    protected T SetFlightLogic<T>() where T : CharacterFlightLogic, new()
+    
+    public void SetDependencies(CharacterDependencyGenerator dependencies)
     {
-        return new T();
+        ControlType = new ControlType(this, dependencies.Cpu) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
+        _actionFsm = new ActionFsm(Data, this, dependencies.Flight);
     }
     
     public ActionFsm.States Action

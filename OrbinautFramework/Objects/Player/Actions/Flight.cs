@@ -1,5 +1,7 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Characters.Logic;
+using OrbinautFramework3.Objects.Player.Characters.Logic.Base;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -7,7 +9,7 @@ using OrbinautFramework3.Objects.Player.Sprite;
 namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Flight(PlayerData data, CharacterFlightLogic flightLogic)
+public struct Flight(PlayerData data, FlightLogic flightLogic)
 {
 	private float _flightTimer = 480f;
 	private float _ascendTimer = 0f;

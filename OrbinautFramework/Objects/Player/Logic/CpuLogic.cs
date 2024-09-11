@@ -4,12 +4,14 @@ using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 using OrbinautFramework3.Framework.View;
+using OrbinautFramework3.Objects.Player.Characters.Logic;
+using OrbinautFramework3.Objects.Player.Characters.Logic.Base;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public class CpuLogic(PlayerData data, IPlayerLogic logic, CharacterCpuLogic characterCpuLogic)
+public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base.CpuLogic cpuLogic)
 {
 	public enum States : byte
 	{
@@ -183,7 +185,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, CharacterCpuLogic cha
 		if (CheckRespawn()) return; // Exit if respawned
 		
 		if (data.State == PlayerStates.NoControl) return;
-		if (characterCpuLogic.CheckCarry()) return;
+		if (cpuLogic.CheckCarry()) return;
 		
 		data.Cpu.Target ??= _leadPlayer; // Follow lead player
 		

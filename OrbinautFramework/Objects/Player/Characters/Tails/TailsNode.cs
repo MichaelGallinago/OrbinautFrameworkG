@@ -1,4 +1,5 @@
 ﻿using Godot;
+using OrbinautFramework3.Objects.Player.Characters.Logic.Carrier;
 using OrbinautFramework3.Objects.Player.Characters.Tails.Tail;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Tails;
@@ -11,6 +12,8 @@ public partial class TailsNode : PlayerNode
     {
         var tailsLogic = new TailsLogic(this, SpriteNode.PlayerSprite);
         PlayerLogic = tailsLogic;
+        PlayerLogic.SetDependencies(
+            new CarrierDependencyGenerator(PlayerLogic, PlayerLogic.Data, tailsLogic.CarryData));
         
         base._EnterTree();
         

@@ -1,8 +1,8 @@
 ﻿using OrbinautFramework3.Objects.Player.Data;
 
-namespace OrbinautFramework3.Objects.Player.Logic;
+namespace OrbinautFramework3.Objects.Player.Characters.Logic.Carrier;
 
-public class CarrierFlightLogic(PlayerData data, CarryData carryData) : CharacterFlightLogic(data)
+public class FlightLogic(PlayerData data, CarryData carryData) : Base.FlightLogic(data)
 {
     public override bool CheckAscendAllowed() => carryData.Target == null || base.CheckAscendAllowed();
     public override void OnStarted() => carryData.Target = null;
