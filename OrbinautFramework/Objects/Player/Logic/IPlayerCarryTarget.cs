@@ -20,8 +20,8 @@ public interface IPlayerCarryTarget : ICarryTarget, IPlayerLogic, IPlayerPositio
     
     Vector2 ICarryTarget.Scale
     {
-        get => Data.Node.Scale;
-        set => Data.Node.Scale = value;
+        get => Data.Visual.Scale;
+        set => Data.Visual.Scale = value;
     }
     
     bool ICarryTarget.TryFree(out float cooldown)

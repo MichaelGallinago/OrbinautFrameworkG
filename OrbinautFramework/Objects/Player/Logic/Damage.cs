@@ -28,8 +28,8 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 
 	    IPlayerNode node = data.Node;
 	    node.Shield.Type = ShieldContainer.Types.None;
-	    node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-	    node.Visible = true;
+	    data.Visual.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+	    data.Visual.Visible = true;
 	    
 	    MovementData movement = data.Movement;
 	    movement.Gravity = GravityType.Default;
@@ -67,7 +67,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    data.Damage.InvincibilityTimer = 120f;
 	    
     	const float velocityX = 2f, velocityY = 4f;
-	    float velocity = (int)data.Node.Position.X < (int)positionX ? -velocityX : velocityX;
+	    float velocity = (int)data.Movement.Position.X < (int)positionX ? -velocityX : velocityX;
 	    
 	    MovementData movement = data.Movement;
 	    movement.Velocity.Vector = new Vector2(velocity, velocityY);
@@ -144,8 +144,8 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 		    return;
 	    }
 
-	    data.Node.Position = new Vector2(byte.MaxValue, 0f);
-	    data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
+	    data.Movement.Position = new Vector2(byte.MaxValue, 0f);
+	    data.Visual.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
 	    
 	    data.Cpu.State = CpuLogic.States.RespawnInit;
 	    data.State = PlayerStates.NoControl;

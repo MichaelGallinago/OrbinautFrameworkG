@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using Godot.Collections;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Player.Data;
@@ -120,7 +119,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		if (heightMap is not { Length: > 0 }) return 0;
 
 		int sign = _solidObjectData.Target.Scale.X >= 0 ? 1 : -1;
-		int distance = sign * Mathf.FloorToInt(data.Node.Position.X - _solidObjectData.Position.X);
+		int distance = sign * Mathf.FloorToInt(data.Movement.Position.X - _solidObjectData.Position.X);
 		
 		int index = Math.Clamp(distance + _solidObjectData.Target.SolidBox.Radius.X, 0, heightMap.Length - 1);
 		
@@ -153,21 +152,25 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void StandingOnObject(int slopeOffset)
 	{
-		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = TouchState.Top;
-		
-		data.Node.Position = _solidObjectData.Position + new Vector2(
-			data.Node.Position.X - _solidObjectData.Target.PreviousPosition.X, 
-			slopeOffset - _solidObjectData.Target.SolidBox.Radius.Y - data.Node.SolidBox.Radius.Y - 1);
+		ISolid target = _solidObjectData.Target;
+		SolidBox targetSolidBox = target.SolidBox;
+		CollisionData collision = data.Collision;
+		collision.TouchObjects[targetSolidBox] = TouchState.Top;
 
-		float relativeX = Math.Abs(MathF.Floor(data.Node.Position.X - _solidObjectData.Position.X)) - 
-		                  _solidObjectData.Target.SolidBox.Radius.X;
+		MovementData movement = data.Movement;
+		movement.Position = _solidObjectData.Position + new Vector2(
+			movement.Position.X - target.PreviousPosition.X, 
+			slopeOffset - targetSolidBox.Radius.Y - data.Node.SolidBox.Radius.Y - 1);
+
+		float distance = movement.Position.X - _solidObjectData.Position.X;
+		float relativeX = Math.Abs(MathF.Floor(distance)) - targetSolidBox.Radius.X;
 
 		if (_solidObjectData.Type == SolidType.Top ? 
 			    relativeX <= _solidObjectData.ExtraSize.X : relativeX < data.Node.SolidBox.Radius.X + 1) return;
 			
 		// Reset touch flags and player's on-object status if they are out of bounds
-		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = TouchState.None;
-		data.Collision.OnObject = null;
+		collision.TouchObjects[targetSolidBox] = TouchState.None;
+		collision.OnObject = null;
 	}
 	
 	private void CollideWithRegularObject(int slopeOffset)
@@ -176,7 +179,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		Vector2I combinedSize = _solidObjectData.Target.SolidBox.Radius + data.Node.SolidBox.Radius;
 		combinedSize.X++;
 		
-		Vector2I distance = (Vector2I)(data.Node.Position - _solidObjectData.Position) + combinedSize;
+		Vector2I distance = (Vector2I)(data.Movement.Position - _solidObjectData.Position) + combinedSize;
 		distance.Y += GripY - slopeOffset;
 		
 		// Check if player is out of bounds
@@ -187,7 +190,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 
-		Vector2I flooredDistance = (Vector2I)data.Node.Position - (Vector2I)_solidObjectData.Position;
+		Vector2I flooredDistance = (Vector2I)data.Movement.Position - (Vector2I)_solidObjectData.Position;
 		
 		Vector2I clip = distance - new Vector2I(
 			flooredDistance.X < 0 ? 0 : combinedSize.X * 2, 
@@ -225,30 +228,32 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 #endif
-		
-		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = 
-			flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
+
+		TouchState touchState = flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
+		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = touchState;
 
 		UpdatePushingStatus(clipX, flooredDistanceX);
 	}
 	
 	private void UpdatePushingStatus(int clipX, int flooredDistanceX)
 	{
-		data.Visual.SetPushBy = data.Movement.IsGrounded && 
-			Math.Sign((int)data.Visual.Facing) == Math.Sign(-flooredDistanceX) ? _solidObjectData.Target : null;
+		MovementData movement = data.Movement;
+		VisualData visual = data.Visual;
+		bool isFaced = movement.IsGrounded && Math.Sign((int)visual.Facing) == Math.Sign(-flooredDistanceX);
+		visual.SetPushBy = isFaced ? _solidObjectData.Target : null;
 		
-		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(data.Movement.Velocity.X))
+		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(movement.Velocity.X))
 		{
-			data.Movement.GroundSpeed.Value = 0f;
-			data.Movement.Velocity.X = 0f;
-
-			if (data.Movement.IsGrounded)
+			movement.GroundSpeed.Value = 0f;
+			movement.Velocity.X = 0f;
+			
+			if (movement.IsGrounded)
 			{
 				data.Collision.PushObjects.Add(_solidObjectData.Target.SolidBox);
 			}
 		}
 
-		data.Node.Position -= new Vector2(clipX, 0f);
+		movement.Position -= new Vector2(clipX, 0f);
 	}
 	
 	private bool CollideVertically(int clipY)
@@ -290,16 +295,17 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void HandleUpwardCollision(SolidBox box, int clipY)
 	{
-		if (data.Movement.Velocity.Y < 0f)
+		MovementData movement = data.Movement;
+		if (movement.Velocity.Y < 0f)
 		{
 #if S3_PHYSICS || SK_PHYSICS
-			if (!data.Movement.IsGrounded)
+			if (!movement.IsGrounded)
 			{
-				data.Movement.GroundSpeed.Value = 0f;
+				movement.GroundSpeed.Value = 0f;
 			}
 #endif
-			data.Node.Position -= new Vector2(0, clipY);
-			data.Movement.Velocity.Y = 0f;
+			movement.Position -= new Vector2(0, clipY);
+			movement.Velocity.Y = 0f;
 		}
 
 		data.Collision.TouchObjects[box] = TouchState.Bottom;
@@ -309,7 +315,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Movement.Velocity.Y < 0f) return;
 		
-		float relativeX = Math.Abs(MathF.Floor(data.Node.Position.X - _solidObjectData.Position.X));
+		float relativeX = Math.Abs(MathF.Floor(data.Movement.Position.X - _solidObjectData.Position.X));
 		if (relativeX > _solidObjectData.Target.SolidBox.Radius.X + _solidObjectData.ExtraSize.X) return;
 		
 		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = TouchState.Top;
@@ -318,14 +324,14 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void CollideWithPlatformObject()
 	{
-		if ((int)Math.Abs(data.Node.Position.X - _solidObjectData.Position.X) > 
-		    _solidObjectData.Target.SolidBox.Radius.X + _solidObjectData.ExtraSize.X)
-		{
-			return;
-		}
-			
-		float clipY = MathF.Floor(_solidObjectData.Position.Y - _solidObjectData.Target.SolidBox.Radius.Y) - 
-		              MathF.Floor(data.Node.Position.Y + data.Node.SolidBox.Radius.Y) - GripY;
+		Vector2 position = data.Movement.Position;
+		Vector2 solidObjectPosition = _solidObjectData.Position;
+		Vector2 targetRadius = _solidObjectData.Target.SolidBox.Radius;
+		
+		if ((int)Math.Abs(position.X - solidObjectPosition.X) > targetRadius.X + _solidObjectData.ExtraSize.X) return;
+
+		float clipY = MathF.Floor(solidObjectPosition.Y - targetRadius.Y);
+		clipY -= MathF.Floor(position.Y + data.Node.SolidBox.Radius.Y) + GripY;
 			
 		if (clipY is < -16 or >= 0) return;
 		
@@ -345,14 +351,20 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 				logic.Action = ActionFsm.States.Default;
 				break;
 		}
-		
-		data.Node.Position = data.Node.Position with { Y = data.Node.Position.Y - distance - 1 };
-		data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
-		data.Collision.OnObject = _solidObjectData.Target;
-		data.Movement.Velocity.Y = 0f;
-		data.Movement.Angle = 0f;
 
-		if (data.Movement.IsGrounded) return;
+		MovementData movement = data.Movement;
+		
+		Vector2 position = movement.Position;
+		position.Y -= distance + 1;
+		movement.Position = position;
+		
+		movement.GroundSpeed.Value = movement.Velocity.X;
+		movement.Velocity.Y = 0f;
+		movement.Angle = 0f;
+		
+		data.Collision.OnObject = _solidObjectData.Target;
+		
+		if (movement.IsGrounded) return;
 		logic.Land();
 	}
 }

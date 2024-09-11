@@ -59,7 +59,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 			if (!Scene.Instance.IsTimePeriodLooped(64f)) return;
 		}
 		
-		data.Node.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
+		data.Movement.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
 		
 		data.Cpu.State = States.Respawn;
 		if (data.Node.IsCameraTarget(out ICamera camera))
@@ -124,8 +124,8 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 	private bool MoveToLeadPlayer(Vector2I targetPosition)
 	{
 		var distance = new Vector2I(
-			(int)data.Node.Position.X - targetPosition.X, 
-			targetPosition.Y - (int)data.Node.Position.Y);
+			(int)data.Movement.Position.X - targetPosition.X, 
+			targetPosition.Y - (int)data.Movement.Position.Y);
 
 		Vector2 positionOffset = Vector2.Zero;
 		if (distance.X != 0)
@@ -170,7 +170,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 			positionOffset.Y = Math.Sign(distance.Y) * Scene.Instance.Speed;
 		}
 
-		data.Node.Position += positionOffset;
+		data.Movement.Position += positionOffset;
 		
 		return distance.X != 0 || distance.Y != 0;
 	}
@@ -178,7 +178,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 	private void ProcessMain()
 	{
 		//TODO: check that ZIndex works
-		data.Node.ZIndex = _leadPlayer.Data.Node.ZIndex + data.Id;
+		data.Visual.ZIndex = _leadPlayer.Data.Visual.ZIndex + data.Id;
 		
 		FreezeOrFlyIfLeaderDied();
 		
@@ -226,7 +226,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 			return;
 		}
 		
-		int distanceX = targetPosition.X - (int)data.Node.Position.X;
+		int distanceX = targetPosition.X - (int)data.Movement.Position.X;
 		Push(distanceX, direction);
 		if (CheckJump(distanceX, targetPosition.Y))
 		{
@@ -281,7 +281,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 						
 		if (data.Movement.GroundSpeed != 0f && (int)data.Visual.Facing == sign)
 		{
-			data.Node.Position += Vector2.Right * sign;
+			data.Movement.Position += Vector2.Right * sign;
 		}
 	}
 	
@@ -299,7 +299,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 
 		const float jumpPeriod = JumpFrequency * 4f;
 		if (distanceX >= 64 && !Scene.Instance.IsTimePeriodLooped(jumpPeriod)) return false;
-		return targetPositionY - (int)data.Node.Position.Y <= -32;
+		return targetPositionY - (int)data.Movement.Position.Y <= -32;
 	}
 	
 	private void ProcessStuck()
@@ -310,7 +310,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 		
 		if (data.Sprite.Animation == Animations.Idle)
 		{
-			data.Visual.Facing = (int)data.Cpu.Target.Position.X >= (int)data.Node.Position.X ? 
+			data.Visual.Facing = (int)data.Cpu.Target.Position.X >= (int)data.Movement.Position.X ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
 		
@@ -331,7 +331,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 	private bool CheckRespawn()
 	{
 		bool isBehindLeader = _leadPlayer.Data.Node.IsCameraTarget(out ICamera camera) && 
-		                      camera.TargetBoundary.Z <= data.Node.Position.X;
+		                      camera.TargetBoundary.Z <= data.Movement.Position.X;
 		
 		if (isBehindLeader || data.Sprite != null && data.Sprite.CheckInCameras())
 		{

@@ -25,7 +25,7 @@ public readonly struct Initialization(PlayerData data)
         data.Input.NoControl = false;
 
         IPlayerNode node = data.Node;
-        node.Visible = true;
+        data.Visual.Visible = true;
         node.Shield.State = ShieldContainer.States.None;
         node.RotationDegrees = 0f;
         
@@ -46,14 +46,14 @@ public readonly struct Initialization(PlayerData data)
     {
         if (SharedData.GiantRingData != null)
         {
-            data.Node.Position = SharedData.GiantRingData.Position;
+            data.Movement.Position = SharedData.GiantRingData.Position;
             return;
         }
         
         if (SharedData.CheckpointData != null)
         {
-            data.Node.Position = SharedData.CheckpointData.Position;
+            data.Movement.Position = SharedData.CheckpointData.Position;
         }
-        data.Node.Position -= new Vector2(0, data.Collision.Radius.Y + 1);
+        data.Movement.Position -= new Vector2(0, data.Collision.Radius.Y + 1);
     }
 }

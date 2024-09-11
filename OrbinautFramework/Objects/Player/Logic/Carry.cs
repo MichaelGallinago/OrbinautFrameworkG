@@ -48,7 +48,7 @@ public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerAction
             if (player.Action is States.SpinDash or States.Carried) continue;
             if (!player.Data.State.IsObjectInteractable()) continue; 
             
-            Vector2I delta = ((Vector2I)player.Data.Node.Position - (Vector2I)data.Node.Position).Abs();
+            Vector2I delta = ((Vector2I)player.Data.Movement.Position - (Vector2I)data.Movement.Position).Abs();
             if (delta.X >= 16 || delta.Y >= 48) continue;
             
             carryData.Target = player;
@@ -67,6 +67,6 @@ public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerAction
         target.Facing = data.Visual.Facing;
         target.Velocity = data.Movement.Velocity;
         target.Scale = new Vector2(Math.Abs(target.Scale.X) * (float)data.Visual.Facing, target.Scale.Y);
-        target.Position = carryData.TargetPosition = data.Node.Position + new Vector2(0f, 28f);
+        target.Position = carryData.TargetPosition = data.Movement.Position + new Vector2(0f, 28f);
     }
 }

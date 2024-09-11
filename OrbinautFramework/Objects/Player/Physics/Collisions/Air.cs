@@ -16,7 +16,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
 		Angles.Quadrant moveQuadrant = Angles.GetQuadrant(Angles.GetRoundedVector(data.Movement.Velocity));
 		
-		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+		logic.TileCollider.SetData((Vector2I)data.Movement.Position, data.Collision.TileLayer);
 
 		var moveQuadrantValue = (int)moveQuadrant;
 
@@ -39,14 +39,15 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		if (moveQuadrantValue == (int)Angles.Quadrant.Up + sign) return false;
 		
 		int wallDistance = logic.TileCollider.FindDistance(sign * wallRadius, 0, false, direction);
-		
 		if (wallDistance >= 0f) return false;
-		data.Node.Position += new Vector2(sign * wallDistance, 0f);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		data.Movement.Velocity.X = 0f;
+
+		MovementData movement = data.Movement;
+		movement.Position += new Vector2(sign * wallDistance, 0f);
+		logic.TileCollider.Position = (Vector2I)movement.Position;
+		movement.Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return false;
-		data.Movement.GroundSpeed.Value = data.Movement.Velocity.Y;
+		movement.GroundSpeed.Value = movement.Velocity.Y;
 		return true;
 	}
 
@@ -70,7 +71,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 
 			if (wallDist >= 0) return false;
 			
-			data.Node.Position += new Vector2(wallDist, 0f);
+			data.Movement.Position += new Vector2(wallDist, 0f);
 			data.Movement.Velocity.X = 0f;
 			return true;
 		}
@@ -80,7 +81,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 
 		MovementData movement = data.Movement;
 		
-		data.Node.Position -= new Vector2(0f, roofDistance);
+		movement.Position -= new Vector2(0f, roofDistance);
 		if (moveQuadrant == Angles.Quadrant.Up && logic.Action != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
@@ -116,13 +117,17 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		{
 			if (LandOnFeet(out distance, out angle)) return;
 		}
-		else if (data.Movement.Velocity.Y >= 0) // If moving mostly left or right, continue if our vertical velocity is positive
+		else if (data.Movement.Velocity.Y >= 0)
 		{
+			// If moving mostly left or right, continue if our vertical velocity is positive
 			if (FallOnGround(out distance, out angle)) return;
 		}
-		else return;
+		else
+		{
+			return;
+		}
 		
-		data.Node.Position += new Vector2(0f, distance);
+		data.Movement.Position += new Vector2(0f, distance);
 		data.Movement.Angle = angle;
 		
 		logic.Land();
@@ -191,18 +196,16 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 
 	private bool FallOnGround(out int distance, out float angle)
 	{
+		Vector2I radius = data.Collision.Radius;
 		(distance, angle) = logic.TileCollider.FindClosestTile(
-			-data.Collision.Radius.X, 
-			data.Collision.Radius.Y, 
-			data.Collision.Radius.X, 
-			data.Collision.Radius.Y,
-			true, 
-			Constants.Direction.Positive);
+			-radius.X, radius.Y, radius.X, radius.Y, 
+			true, Constants.Direction.Positive);
 		
 		if (distance >= 0) return true;
-		
-		data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
-		data.Movement.Velocity.Y = 0f;
+
+		MovementData movement = data.Movement;
+		movement.GroundSpeed.Value = movement.Velocity.X;
+		movement.Velocity.Y = 0f;
 		
 		return false;
 	}

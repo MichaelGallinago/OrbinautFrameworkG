@@ -61,7 +61,7 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 		
 		float angle = Mathf.RadToDeg(MathF.Atan2(data.Movement.Velocity.Y, data.Movement.Velocity.X));
 			
-		if (data.Node.Scale.X < 0f)
+		if (data.Visual.Scale.X < 0f)
 		{
 			angle += 180f;
 		}
@@ -74,6 +74,6 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 	private void ChangeDirection(PlayerData data)
 	{
 		Scale = Scale with { X = data.Movement.IsSpinning && data.Movement.IsGrounded ? 
-			data.Movement.GroundSpeed.Value >= 0f ? 1f : -1f : data.Node.Scale.X };
+			data.Movement.GroundSpeed.Value >= 0f ? 1f : -1f : data.Visual.Scale.X };
 	}
 }

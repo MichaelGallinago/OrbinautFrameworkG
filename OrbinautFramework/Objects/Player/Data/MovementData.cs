@@ -11,6 +11,7 @@ public class MovementData
     public bool IsJumping { get; set; }
     public bool IsGrounded { get; set; }
     public bool IsSpinning { get; set; }
+    public Vector2 Position { get; set; }
     public bool IsForcedRoll { get; set; }
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }

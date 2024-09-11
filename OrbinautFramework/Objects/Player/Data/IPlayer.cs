@@ -11,7 +11,7 @@ public interface IPlayer : IPlayerEditor, IPlayerCarryTarget
 {
     void IEditor.OnEnableDebugMode()
     {
-        Data.Node.Visible = true;
+        Data.Visual.Visible = true;
         Data.State = PlayerStates.DebugMode;
         
         if (Data.Node.IsCameraTarget(out ICamera camera))
@@ -41,7 +41,7 @@ public interface IPlayer : IPlayerEditor, IPlayerCarryTarget
         Data.Sprite.Animation = Animations.Move;
         Data.Water.IsUnderwater = false;
 
-        Data.Node.Position = (Vector2I)Data.Node.Position;
+        Data.Movement.Position = (Vector2I)Data.Movement.Position;
         
         ResetGravity();
         ResetData();

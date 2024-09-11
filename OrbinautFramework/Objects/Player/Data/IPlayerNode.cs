@@ -1,23 +1,19 @@
 ﻿using Godot;
-using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public interface IPlayerNode : IPosition
+public interface IPlayerNode // : IPosition
 {
     Vector2 PreviousPosition { get; }
-    Vector2 Scale { get; set; }
-    int ZIndex { get; set; }
-    float RotationDegrees { get; set; }
-    float Rotation { get; set; }
-    bool Visible { get; set; }
+    //Vector2 Scale { get; set; }
+    //int ZIndex { get; set; }
+    //float RotationDegrees { get; set; }
+    //bool Visible { get; set; }
     
     PlayerNode.Types Type { get; }
     HitBox HitBox { get; }
     SolidBox SolidBox { get; }
     ShieldContainer Shield { get; }
-    
-    void Init();
 }
