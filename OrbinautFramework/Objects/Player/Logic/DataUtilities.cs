@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public class DataUtilities(PlayerData data)
 {
-    public event Action DataReset;
+    public event Action DataReseted;
     
     public void ResetData() 
     {
@@ -25,7 +25,7 @@ public class DataUtilities(PlayerData data)
         visual.SetPushBy = null;
         visual.Angle = 0f;
 
-        DataReset?.Invoke();
+        DataReseted?.Invoke();
     }
 	
     public void ResetGravity()

@@ -10,8 +10,12 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
-public readonly struct Landing(PlayerData data, IPlayerLogic logic, Action landAction)
+public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 {
+	public event Action Landed = landAction;
+	
+	private readonly Action _landAction = landAction;
+	
 	public void Land()
 	{
 		MovementData movement = data.Movement;
@@ -21,7 +25,7 @@ public readonly struct Landing(PlayerData data, IPlayerLogic logic, Action landA
 		switch (logic.Action)
 		{
 			case States.SpinDash or States.HammerDash: return;
-			case States.Dash: landAction(); return;
+			case States.Dash: _landAction(); return;
 		}
 		
 		if (WaterBarrierBounce()) return;
@@ -49,8 +53,8 @@ public readonly struct Landing(PlayerData data, IPlayerLogic logic, Action landA
 
 		IPlayerNode node = data.Node;
 		node.Shield.State = ShieldContainer.States.None;
-		
-		landAction();
+
+		Landed();
 		
 		if (movement.IsSpinning) return;
 		node.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusNormal.Y);

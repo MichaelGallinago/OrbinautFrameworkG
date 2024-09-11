@@ -11,12 +11,11 @@ public interface IPlayerLogic : IRecorderStorage, IPlayerActionStorage
 {
     TileCollider TileCollider { get; }
     ControlType ControlType { get; }
-    
-    Damage Damage { get; }
-    Landing Landing { get; }
     DataUtilities DataUtilities { get; }
     
-    protected ObjectInteraction ObjectInteraction { get; } //TODO: check encapsulation?
+    protected Landing Landing { get; }
+    protected ref Damage Damage { get; }
+    protected ref ObjectInteraction ObjectInteraction { get; }
     
     void Init();
     void Respawn() => Damage.Respawn();

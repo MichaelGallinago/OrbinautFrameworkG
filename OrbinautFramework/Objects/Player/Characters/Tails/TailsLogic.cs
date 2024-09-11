@@ -12,7 +12,8 @@ public class TailsLogic : PlayerLogic
     public TailsLogic(IPlayerNode playerNode, IPlayerSprite sprite) : base(playerNode, sprite)
     {
         _carry = new Carry(Data, CarryData, this);
-        DataUtilities.DataReset += CarryData.Free;
+        DataUtilities.DataReseted += CarryData.Free;
+        Landing.Landed += () => CarryData.Target?.OnFree();
     }
     
     protected override void ProcessLateControl()

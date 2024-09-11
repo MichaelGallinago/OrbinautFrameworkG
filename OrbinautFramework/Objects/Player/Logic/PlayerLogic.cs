@@ -10,17 +10,19 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public class PlayerLogic : IPlayer, IPlayerCountObserver
 {
+    public Landing Landing { get; }
     public PlayerData Data { get; }
     public Recorder Recorder { get; }
     public TileCollider TileCollider { get; }
     public DataUtilities DataUtilities { get; }
     public ControlType ControlType { get; private set; }
+
+    public ref Damage Damage => ref _damage;
+    public ref ObjectInteraction ObjectInteraction => ref _objectInteraction;
     
-    public Damage Damage { get; }
-    public Landing Landing { get; }
-    public ObjectInteraction ObjectInteraction { get; }
-    
+    private Damage _damage;
     private ActionFsm _actionFsm;
+    private ObjectInteraction _objectInteraction;
     
     private readonly Death _death;
     private readonly Water _water;
@@ -38,10 +40,10 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         Recorder = new Recorder(Data);
         TileCollider = new TileCollider();
         DataUtilities = new DataUtilities(Data);
+        Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
         Damage = new Damage(Data, this);
         ObjectInteraction = new ObjectInteraction(Data, this);
-        Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
         _death = new Death(Data, this);
         _water = new Water(Data, this);
