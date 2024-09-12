@@ -69,15 +69,17 @@ public partial class ChopChop : InteractiveNode, IResetable
             Scale = scale;
         }
         
-        Position = Position with { X = Position.X + _velocity.X * Scene.Instance.Speed };
+        Vector2 position = Position;
+        position.X += _velocity.X * Scene.Instance.Speed;
+        Position = position;
 
-        StartWaiting();
+        StartWaiting(position);
     }
 
-    private void StartWaiting()
+    private void StartWaiting(Vector2 position)
     {
         IPlayer player = null; // TODO: instance_nearest(x, y, obj_player)
-        Vector2I dist = (Vector2I)Position - (Vector2I)player.Position;
+        Vector2I dist = (Vector2I)position - (Vector2I)player.Position;
         int absDistX = Math.Abs(dist.X);
 
         if (absDistX is < 32 or >= 100 || Math.Abs(dist.Y) >= 32f) return;
