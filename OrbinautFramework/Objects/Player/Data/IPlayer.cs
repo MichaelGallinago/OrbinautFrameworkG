@@ -7,10 +7,11 @@ using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
-public interface IPlayer : IPlayerLogic, IPlayerEditor, ICarryTarget
+public interface IPlayer : IPlayerEditor, IPlayerCarryTarget
 {
     void IEditor.OnEnableDebugMode()
     {
+        Data.Visual.Visible = true;
         Data.State = PlayerStates.DebugMode;
         
         if (Data.Node.IsCameraTarget(out ICamera camera))
@@ -40,7 +41,7 @@ public interface IPlayer : IPlayerLogic, IPlayerEditor, ICarryTarget
         Data.Sprite.Animation = Animations.Move;
         Data.Water.IsUnderwater = false;
 
-        Data.Node.Position = (Vector2I)Data.Node.Position;
+        Data.Movement.Position = (Vector2I)Data.Movement.Position;
         
         ResetGravity();
         ResetData();

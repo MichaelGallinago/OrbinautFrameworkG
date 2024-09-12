@@ -7,7 +7,7 @@ public partial class Debug : Node
 {
 	private const int DebugFrameLimit = 2;
 	private const string StartupPath = "res://Scenes/Screens/Startup/startup.tscn";
-	private const string DevMenuPath = "res://Scenes/Screens/Startup/startup.tscn"; // TODO: replace
+	private const string DevMenuPath = "res://Scenes/Screens/DevMenu/dev_menu.tscn";
 	
 	private enum DebugKeys
 	{

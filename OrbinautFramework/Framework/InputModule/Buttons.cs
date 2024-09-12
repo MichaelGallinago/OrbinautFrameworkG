@@ -8,7 +8,8 @@ public struct Buttons
     public bool Right;
     public bool A;
     public bool B;
-    public bool C;
-    public bool Abc;
+    public bool X;
+    public bool Y;
+    public bool Aby;
     public bool Start;
 }

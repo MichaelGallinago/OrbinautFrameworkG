@@ -13,7 +13,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 {
     public void Process()
 	{
-		if (Stage.Local == null || !Stage.Local.IsWaterEnabled) return;
+		if (data.State == PlayerStates.Death || Zone.Instance == null || !Zone.Instance.IsWaterEnabled) return;
 
 		if (Dive()) return;
 		if (UpdateAirTimer()) return;
@@ -24,7 +24,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Water.IsUnderwater) return false;
 		
-		if ((int)data.Node.Position.Y < Stage.Local.WaterLevel) return true;
+		if ((int)data.Movement.Position.Y < Zone.Instance.WaterLevel) return true;
 		
 		data.Water.IsUnderwater = true;
 		data.Water.AirTimer = Constants.DefaultAirTimer;
@@ -119,8 +119,8 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 		logic.ResetData();
 		logic.Action = States.Default;
 
-		data.Node.ZIndex = (int)Constants.ZIndexes.AboveForeground;
-		data.Node.Visible = true;
+		data.Visual.ZIndex = (int)Constants.ZIndexes.AboveForeground;
+		data.Visual.Visible = true;
 		
 		data.Sprite.Animation = Animations.Drown;
 		data.State = PlayerStates.Death;
@@ -138,7 +138,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 
 	private void Leave()
 	{
-		if ((int)data.Node.Position.Y >= Stage.Local.WaterLevel) return;
+		if ((int)data.Movement.Position.Y >= Zone.Instance.WaterLevel) return;
 
 		data.Water.IsUnderwater = false;
 		ResetGravityOnEdge();

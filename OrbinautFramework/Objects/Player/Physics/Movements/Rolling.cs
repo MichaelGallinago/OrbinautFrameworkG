@@ -9,7 +9,8 @@ public readonly struct Rolling(PlayerData data)
 {
     public void Roll()
     {
-        if (data.Movement.GroundLockTimer <= 0f)
+        MovementData movement = data.Movement;
+        if (movement.GroundLockTimer <= 0f)
         {
             if (data.Input.Down.Left)
             {
@@ -22,9 +23,9 @@ public readonly struct Rolling(PlayerData data)
             }
         }
 
-        data.Movement.GroundSpeed.ApplyFriction(data.Physics.FrictionRoll);
+        movement.GroundSpeed.ApplyFriction(data.Physics.FrictionRoll);
 
-        if (data.Movement.IsForcedRoll)
+        if (movement.IsForcedRoll)
         {
             ForceSpin();
         }
@@ -33,14 +34,15 @@ public readonly struct Rolling(PlayerData data)
             StopSpinning();
         }
 	
-        data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
-        data.Movement.Velocity.ClampX(-16f, 16f);
+        movement.Velocity.SetDirectionalValue(movement.GroundSpeed, movement.Angle);
+        movement.Velocity.ClampX(-16f, 16f);
     }
     
     private void RollOnGround(Constants.Direction direction)
     {
         var sign = (float)direction;
-        float absoluteSpeed = sign * data.Movement.GroundSpeed;
+        MovementData movement = data.Movement;
+        float absoluteSpeed = sign * movement.GroundSpeed;
 		
         if (absoluteSpeed >= 0f)
         {
@@ -48,40 +50,43 @@ public readonly struct Rolling(PlayerData data)
             data.Visual.Facing = direction;
             return;
         }
-		
-        data.Movement.GroundSpeed.Acceleration = sign * data.Physics.DecelerationRoll;
-        if (direction == Constants.Direction.Positive == data.Movement.GroundSpeed < 0f) return;
-        data.Movement.GroundSpeed.Value = sign * 0.5f;
+
+        AcceleratedValue groundSpeed = movement.GroundSpeed;
+        groundSpeed.Acceleration = sign * data.Physics.DecelerationRoll;
+        if (direction == Constants.Direction.Positive == groundSpeed < 0f) return;
+        groundSpeed.Value = sign * 0.5f;
     }
     
     private void StopSpinning()
     {
+        MovementData movement = data.Movement;
 #if SK_PHYSICS
-        if (data.Movement.GroundSpeed != 0f && Math.Abs(data.Movement.GroundSpeed) >= 0.5f) return;
+        if (movement.GroundSpeed != 0f && Math.Abs(movement.GroundSpeed) >= 0.5f) return;
 #else
-        if (data.Movement.GroundSpeed != 0f) return;
+        if (movement.GroundSpeed != 0f) return;
 #endif
 		
-        data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
+        movement.Position.Y += data.Collision.Radius.Y - data.Collision.RadiusNormal.Y;
 		
-        data.Movement.IsSpinning = false;
+        movement.IsSpinning = false;
         data.Collision.Radius = data.Collision.RadiusNormal;
         data.Sprite.Animation = Animations.Idle;
     }
 	
     private void ForceSpin()
     {
+        AcceleratedValue groundSpeed = data.Movement.GroundSpeed;
 #if CD_PHYSICS
-        if (data.Movement.GroundSpeed.Value is >= 0f and < 2f)
+        if (groundSpeed.Value is >= 0f and < 2f)
         {
-            data.Movement.GroundSpeed.Value = 2f;
+            groundSpeed.Value = 2f;
         }
 #else
-        if (data.Movement.GroundSpeed != 0f) return;
+        if (groundSpeed != 0f) return;
 #if S1_PHYSICS
-        data.Movement.GroundSpeed.Value = 2f;
+        groundSpeed.Value = 2f;
 #else
-        data.Movement.GroundSpeed.Value = 4f * (float)data.Visual.Facing; //TODO: check Triangly
+        groundSpeed.Value = 4f * (float)data.Visual.Facing;
 #endif
 #endif
     }

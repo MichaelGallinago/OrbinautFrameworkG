@@ -1,10 +1,9 @@
-﻿using Godot;
+﻿using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Amy;
 
-[Tool, GlobalClass]
-public partial class AmySpriteLogic : SpriteLogic
+public partial class AmySpriteLogic(PlayerData player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
 {
     protected override void Animate()
     {

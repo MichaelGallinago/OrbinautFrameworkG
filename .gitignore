@@ -2,6 +2,7 @@
 .godot/
 
 # Godot-specific ignores
+OrbinautFramework/.godot/
 OrbinautFramework/.import/
 OrbinautFramework/export.cfg
 OrbinautFramework/export_presets.cfg
@@ -17,6 +18,11 @@ OrbinautFramework/mono_crash.*.json
 # Source generations
 Generated/
 
+# EnumToStringNameSourceGenerator compilations ignores
+EnumToStringNameSourceGenerator/bin/
+EnumToStringNameSourceGenerator/obj/
+EnumToStringNameSourceGenerator/.idea/
+
 # AudioStorageSourceGenerator compilations ignores
 AudioStorageSourceGenerator/bin/
 AudioStorageSourceGenerator/obj/
@@ -29,6 +35,9 @@ FsmSourceGenerator/.idea/
 
 # Rider-specific ignores
 .idea/
+OrbinautFramework/.idea/
+OrbinautFramework/OrbinautFramework3.sln.DotSettings
+OrbinautFramework/OrbinautFramework3.sln.DotSettings.user
 
 # VisualStudio-specific ignores
 .vs/

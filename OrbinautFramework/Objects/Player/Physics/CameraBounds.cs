@@ -13,7 +13,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
     public void Match()
     {
 	    if (!data.IsInCamera(out ICamera camera)) return;
-
+	    
 	    ShiftToLeftBound(camera);
 	    ShiftToRightBound(camera);
 	    ShiftToTopBound(camera);
@@ -23,11 +23,12 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
     private void ShiftToLeftBound(ICamera camera)
     {
 	    float leftBound = camera.Boundary.X + 16f;
-	    if (data.Node.Position.X + data.Movement.Velocity.X >= leftBound) return;
+	    MovementData movement = data.Movement;
+	    if (movement.Position.X + movement.Velocity.X >= leftBound) return;
 	    
-	    data.Movement.GroundSpeed.Value = 0f;
-	    data.Movement.Velocity.X = 0f;
-	    data.Node.Position = new Vector2(leftBound, data.Node.Position.Y);
+	    movement.GroundSpeed.Value = 0f;
+	    movement.Velocity.X = 0f;
+	    movement.Position = new Vector2(leftBound, movement.Position.Y);
     }
     
     private void ShiftToRightBound(ICamera camera)
@@ -40,33 +41,35 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 	    {
 		    _right_bound += 64;
 	    }*/
+
+	    MovementData movement = data.Movement;
+	    if (movement.Position.X + movement.Velocity.X <= rightBound) return;
 	    
-	    if (data.Node.Position.X + data.Movement.Velocity.X <= rightBound) return;
-	    
-	    data.Movement.GroundSpeed.Value = 0f;
-	    data.Movement.Velocity.X = 0f;
-	    data.Node.Position = new Vector2(rightBound, data.Node.Position.Y);
+	    movement.GroundSpeed.Value = 0f;
+	    movement.Velocity.X = 0f;
+	    movement.Position = new Vector2(rightBound, movement.Position.Y);
     }
 
     private void ShiftToTopBound(ICamera camera)
     {
 	    float topBound = camera.Boundary.Y + 16f;
+	    MovementData movement = data.Movement;
 	    switch (logic.Action)
 	    {
 		    case States.Flight or States.Climb:
-			    if (data.Node.Position.Y + data.Movement.Velocity.Y >= topBound) break;
-    
+			    if (movement.Position.Y + movement.Velocity.Y >= topBound) break;
+
+			    movement.Velocity.Y = 0f;
+			    movement.Position = new Vector2(movement.Position.X, topBound);
+			    
 			    if (logic.Action == States.Flight)
 			    {
-				    data.Movement.Gravity = GravityType.TailsDown;
+				    movement.Gravity = GravityType.FlightDown;
 			    }
-
-			    data.Movement.Velocity.Y = 0f;
-			    data.Node.Position = new Vector2(data.Node.Position.X, topBound);
 			    break;
     		
-		    case States.GlideAir or States.GlideFall or States.GlideGround when data.Node.Position.Y < topBound - 6:
-			    data.Movement.GroundSpeed.Value = 0f;
+		    case States.GlideAir or States.GlideFall or States.GlideGround when movement.Position.Y < topBound - 6:
+			    movement.GroundSpeed.Value = 0f;
 			    break;
 	    }
     }
@@ -74,7 +77,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
     private void KillUnderBottomBound(ICamera camera)
     {
 	    if (data.Water.AirTimer <= 0f) return;
-	    if ((int)data.Node.Position.Y < Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; 
+	    if ((int)data.Movement.Position.Y < Math.Max(camera.Boundary.W, camera.TargetBoundary.W)) return; 
 	    
 	    logic.Kill();
     }

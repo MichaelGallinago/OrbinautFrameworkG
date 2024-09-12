@@ -17,12 +17,17 @@ public class MovementData
     
     public Velocity Velocity { get; } = new();
     public AcceleratedValue GroundSpeed { get; } = new();
+
+    public ref Vector2 Position => ref _position;
+    private Vector2 _position;
     
-    public void Init()
+    public void Init(Vector2 position)
     {
         IsGrounded = true;
         IsJumping = false;
         IsForcedRoll = false;
+        
+        _position = position;
         
         Gravity = GravityType.Default;
         Velocity.Vector = Vector2.Zero;

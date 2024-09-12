@@ -1,5 +1,4 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
@@ -56,11 +55,10 @@ public readonly struct CollisionBoxes(PlayerData data, IPlayerLogic logic)
     {
         (int radiusX, int radiusY, int offsetX, int offsetY) = (data.Sprite.Frame & 3) switch
         {
-            0 => (16, 16,  6,  0),
             1 => (16, 16, -7,  0),
             2 => (14, 20, -4, -4),
             3 => (17, 21,  7, -5),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => (16, 16,  6,  0)
         };
         data.Node.HitBox.SetExtra(radiusX, radiusY, offsetX * (int)data.Visual.Facing, offsetY);
     }

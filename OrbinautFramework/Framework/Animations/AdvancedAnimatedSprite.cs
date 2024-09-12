@@ -7,8 +7,6 @@ namespace OrbinautFramework3.Framework.Animations;
 [Tool, GlobalClass]
 public partial class AdvancedAnimatedSprite : AnimatedSprite2D
 {
-    public static float GlobalSpeedScale { get; set; } = 1f;
-    
     [Export] private int FrameLoop
     {
         get => _frameLoop;
@@ -69,19 +67,29 @@ public partial class AdvancedAnimatedSprite : AnimatedSprite2D
     public bool CheckInCamera(ICamera camera) => camera.CheckRectInside(CullRect);
     public bool CheckInCameras() => Views.Instance.CheckRectInCameras(CullRect);
 
-    public void SetAnimation(StringName animation, float customSpeed = 1f)
+    public void PlayAnimation(StringName animation)
     {
-        SpeedScale = GlobalSpeedScale * customSpeed;
         if (Animation == animation) return;
         Play(animation);
     }
     
-    public void SetAnimation(StringName animation, int startFrame, float customSpeed = 1f)
+    public void PlayAnimation(StringName animation, float speedScale)
     {
-        SpeedScale = GlobalSpeedScale * customSpeed;
+        SpeedScale = speedScale;
+        PlayAnimation(animation);
+    }
+    
+    public void PlayAnimation(StringName animation, int startFrame)
+    {
         if (Animation == animation) return;
         Play(animation);
         Frame = startFrame;
+    }
+    
+    public void PlayAnimation(StringName animation, int startFrame, float speedScale)
+    {
+        SpeedScale = speedScale;
+        PlayAnimation(animation, startFrame);
     }
     
     private void UpdateSpriteFrames()

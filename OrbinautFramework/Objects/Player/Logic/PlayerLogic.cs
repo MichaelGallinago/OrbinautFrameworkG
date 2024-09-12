@@ -1,6 +1,8 @@
 ﻿using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Tiles;
+using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Actions;
+using OrbinautFramework3.Objects.Player.Characters.Logic;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
@@ -8,20 +10,20 @@ namespace OrbinautFramework3.Objects.Player.Logic;
 
 public class PlayerLogic : IPlayer, IPlayerCountObserver
 {
+    public Landing Landing { get; }
     public PlayerData Data { get; }
     public Recorder Recorder { get; }
-    public ControlType ControlType { get; }
     public TileCollider TileCollider { get; }
-    public CarryTargetLogic CarryTargetLogic { get; }
-    
-    public Damage Damage { get; }
-    public Landing Landing { get; }
     public DataUtilities DataUtilities { get; }
-    public ObjectInteraction ObjectInteraction { get; }
+    public ControlType ControlType { get; private set; }
     
+    public ref Damage Damage => ref _damage;
+    public ref ObjectInteraction ObjectInteraction => ref _objectInteraction;
+    
+    private Damage _damage;
     private ActionFsm _actionFsm;
+    private ObjectInteraction _objectInteraction;
     
-    //private Carry _carry; //TODO: carry
     private readonly Death _death;
     private readonly Water _water;
     private readonly Status _status;
@@ -36,18 +38,13 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         Data = new PlayerData(playerNode, sprite);
         
         Recorder = new Recorder(Data);
-        CarryTargetLogic = new CarryTargetLogic(Data, this);
-        ControlType = new ControlType(this) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
         TileCollider = new TileCollider();
-        
-        Damage = new Damage(Data, this);
         DataUtilities = new DataUtilities(Data);
-        ObjectInteraction = new ObjectInteraction(Data, this);
         Landing = new Landing(Data, this, () => _actionFsm.OnLand());
         
-        _actionFsm = new ActionFsm(Data, this);
+        Damage = new Damage(Data, this);
+        ObjectInteraction = new ObjectInteraction(Data, this);
         
-        //_carry = new Carry(Data, this); //TODO: carry
         _death = new Death(Data, this);
         _water = new Water(Data, this);
         _status = new Status(Data, this);
@@ -58,13 +55,19 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         _initialization = new Initialization(Data);
     }
     
+    public void SetDependencies(CharacterDependencyGenerator dependencies)
+    {
+        ControlType = new ControlType(this, dependencies.Cpu) { IsCpu = Data.Id >= SharedData.RealPlayerCount };
+        _actionFsm = new ActionFsm(Data, this, dependencies.Flight);
+    }
+    
     public ActionFsm.States Action
     {
         get => _actionFsm.State;
         set => _actionFsm.State = value;
     }
 
-    public void Init()
+    public virtual void Init()
     {
         _actionFsm.State = ActionFsm.States.Default;
         _initialization.Init();
@@ -81,51 +84,74 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         
         _collisionBoxes.Update();
         _palette.Process();
-    }
 
+        VisualData visual = Data.Visual;
+        Data.Node.SetData(visual.ZIndex, visual.Visible, visual.Scale, Data.Movement.Position);
+    }
+    
     private void ProcessState()
     {
         if (Data.Death.State == Death.States.Wait && ControlType.SwitchDebugMode()) return;
         
         switch (Data.State)
         {
-            case PlayerStates.Control or PlayerStates.NoControl:
-                Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
-                ControlType.UpdateCpu();
-                
-                if (Data.State == PlayerStates.Control)
-                {
-                    RunControlRoutine();
-                }
-                
-                //_carry.Process(); TODO: carry
-                _water.Process();
-                _status.Update();
-                _angleRotation.Process();
-                Data.Sprite.Process();
-                Recorder.Record();
+            case PlayerStates.NoControl:
+                ProcessEarlyControl();
+                ProcessLateControl();
                 break;
             
-            case PlayerStates.Hurt:
-                _physicsCore.CameraBounds.Match();
-                _physicsCore.Position.UpdateAir();
-                _physicsCore.Collision.Air.Collide();
-                _angleRotation.Process();
-                Data.Sprite.Process();
-                Recorder.Record();
+            case PlayerStates.Control:
+                ProcessEarlyControl();
+                RunControlRoutine();
+                ProcessLateControl();
                 break;
             
-            case PlayerStates.Death:
-                _death.Process();
-                _physicsCore.Position.UpdateAir();
-                _angleRotation.Process();
-                Data.Sprite.Process();
-                Recorder.Record();
-                break;
-            
-            case PlayerStates.DebugMode:
-                ControlType.UpdateDebugMode();
-                break;
+            case PlayerStates.Hurt: ProcessHurtState(); break;
+            case PlayerStates.Death: ProcessDeathState(); break;
+            case PlayerStates.DebugMode: ControlType.UpdateDebugMode(); break;
+            case PlayerStates.Respawn: ProcessRespawnState(); break;
+        }
+    }
+
+    private void ProcessEarlyControl()
+    {
+        Data.Physics.Update(Data.Water.IsUnderwater, Data.Super.IsSuper, Data.Node.Type, Data.Item.SpeedTimer);
+        ControlType.UpdateCpu();
+    }
+
+    protected virtual void ProcessLateControl()
+    {
+        _water.Process();
+        _status.Update();
+        _angleRotation.Process();
+        Data.Sprite.Process();
+        Recorder.Record();
+    }
+
+    private void ProcessHurtState()
+    {
+        _physicsCore.CameraBounds.Match();
+        _physicsCore.Position.UpdateAir();
+        _physicsCore.Collision.Air.Collide();
+        _angleRotation.Process();
+        Data.Sprite.Process();
+        Recorder.Record();
+    }
+    
+    private void ProcessDeathState()
+    {
+        _death.Process();
+        _physicsCore.Position.UpdateAir();
+        _angleRotation.Process();
+        Data.Sprite.Process();
+        Recorder.Record();
+    }
+    
+    private void ProcessRespawnState()
+    {
+        if (Data.IsInCamera(out ICamera camera) && camera.IsMoved)
+        {
+            Data.State = PlayerStates.Control;
         }
     }
     

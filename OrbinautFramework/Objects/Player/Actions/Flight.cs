@@ -1,21 +1,25 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Objects.Player.Characters.Logic;
+using OrbinautFramework3.Objects.Player.Characters.Logic.Base;
 using OrbinautFramework3.Objects.Player.Data;
+using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
 [FsmSourceGenerator.FsmState("Action")]
-public struct Flight(PlayerData data)
+public struct Flight(PlayerData data, FlightLogic flightLogic)
 {
 	private float _flightTimer = 480f;
 	private float _ascendTimer = 0f;
 
 	public void Enter()
 	{
+		flightLogic.OnStarted();
 		data.Collision.Radius = data.Collision.RadiusNormal;
 		
-		data.Movement.Gravity = GravityType.TailsDown;
+		data.Movement.Gravity = GravityType.FlightDown;
 		data.Movement.IsAirLock = false;
 		data.Movement.IsSpinning = false;
 		
@@ -24,8 +28,8 @@ public struct Flight(PlayerData data)
 			AudioPlayer.Sound.Play(SoundStorage.Flight);
 		}
 		
-		data.Input.Down = data.Input.Down with { Abc = false };
-		data.Input.Press = data.Input.Press with { Abc = false };
+		data.Input.Down = data.Input.Down with { Aby = false };
+		data.Input.Press = data.Input.Press with { Aby = false };
 	}
 	
     public void Perform()
@@ -74,7 +78,7 @@ public struct Flight(PlayerData data)
     		return true;
     	}
     	
-    	data.Movement.Gravity = GravityType.TailsUp;
+    	data.Movement.Gravity = GravityType.FlightUp;
     			
     	_ascendTimer += Scene.Instance.Speed;
     	if (_ascendTimer >= 31f)
@@ -87,13 +91,12 @@ public struct Flight(PlayerData data)
 
     private void Descend()
     {
-    	if (data.Input.Press.Abc && _flightTimer > 0f && (!data.Water.IsUnderwater || data.Carry.Target == null))
+    	if (_flightTimer > 0f && data.Input.Press.Aby && flightLogic.CheckAscendAllowed())
     	{
-    		//TODO: check that this works
     		_ascendTimer = 1f;
     	}
 	    
-    	data.Movement.Gravity = GravityType.TailsDown;
+    	data.Movement.Gravity = GravityType.FlightDown;
     }
 
     private void SetAnimation()

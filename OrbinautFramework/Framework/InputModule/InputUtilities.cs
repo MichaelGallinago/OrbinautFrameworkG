@@ -5,35 +5,32 @@ namespace OrbinautFramework3.Framework.InputModule;
 
 public static class InputUtilities
 {
+    // Input (keyboard and first joypad slot are treated as one device)
+    public const byte MaxInputDevices = 4;
+    
     private const byte KeyboardId = 0;
-    private const byte BaseDeviceCount = 4;
     
-    public static List<Buttons> Down { get; } = new(BaseDeviceCount);
-    public static List<Buttons> Press { get; } = new(BaseDeviceCount);
-    public static List<bool> BlockInput { get; } = new(BaseDeviceCount);
-    public static int DeviceCount { get; private set; } = BaseDeviceCount;
-    public static bool GamepadVibration { get; set; } = true;
+    public static List<Buttons> Down { get; } = new(MaxInputDevices);
+    public static List<Buttons> Press { get; } = new(MaxInputDevices);
+    public static List<bool> BlockInput { get; } = new(MaxInputDevices);
+    public static int DeviceCount { get; private set; } = MaxInputDevices;
+    public static bool JoypadVibration { get; set; } = true;
     
 
-    private static Godot.Collections.Array<int> _gamepads;
-    
-#if DEBUG
-    public static bool DebugButtonDown { get; private set; }
-    public static bool DebugButtonPress { get; private set; }
-#endif
+    private static Godot.Collections.Array<int> _joypads;
 
-    private static List<KeyboardControl> KeyboardControl { get; set; } =
+    private static List<KeyboardControl> KeyboardControl { get; } =
     [
         new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
-            Key.A, Key.S, Key.D, Key.Enter, Key.Space),
+            Key.A, Key.S, Key.Space, Key.D, Key.Enter),
 
         new KeyboardControl(Key.None, Key.None, Key.None, Key.None,
-            Key.Z, Key.X, Key.C, Key.None, Key.None)
+            Key.Z, Key.X, Key.None, Key.C, Key.None)
     ];
 
     static InputUtilities()
-    {
-        for (var i = 0; i < BaseDeviceCount; i++)
+    { 
+        for (var i = 0; i < MaxInputDevices; i++)
         {
             Down.Add(new Buttons());
             Press.Add(new Buttons());
@@ -43,10 +40,10 @@ public static class InputUtilities
 
     public static void Update()
     {
-        _gamepads = Input.GetConnectedJoypads();
+        _joypads = Input.GetConnectedJoypads();
         for (var device = 0; device < DeviceCount; device++)
         {
-            if (device == KeyboardId || _gamepads.Contains(device)) continue;
+            if (device == KeyboardId || _joypads.Contains(device)) continue;
             Down.RemoveAt(device);
             Press.RemoveAt(device);
             BlockInput.RemoveAt(device);
@@ -54,11 +51,11 @@ public static class InputUtilities
         }
 
         var isKeyboardOnly = true;
-        foreach (int device in _gamepads)
+        foreach (int device in _joypads)
         {
             switch (device)
             {
-                case >= Constants.MaxInputDevices:
+                case >= MaxInputDevices:
                     continue;
                 case KeyboardId:
                     isKeyboardOnly = false;
@@ -80,7 +77,7 @@ public static class InputUtilities
 
     public static void SetVibration(int device, float weakMagnitude, float strongMagnitude, float duration)
     {
-        if (!GamepadVibration || device > Constants.MaxInputDevices || _gamepads.Contains(device)) return;
+        if (!JoypadVibration || device > MaxInputDevices || _joypads.Contains(device)) return;
         Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
     }
 
@@ -91,7 +88,7 @@ public static class InputUtilities
         var down = new Buttons();
         if (!isKeyboardOnly)
         {
-            GamepadProcess(device, ref down);
+            JoypadProcess(device, ref down);
         }
         
         if (device == KeyboardId)
@@ -99,18 +96,20 @@ public static class InputUtilities
             KeyboardProcess(ref down);
         }
         
-        down.Abc = down.A || down.B || down.C;
+        down.Aby = down.A || down.B || down.Y;
 
         Buttons press = Down[KeyboardId];
+        press.A = !press.A && down.A;
+        press.B = !press.B && down.B;
+        press.X = !press.X && down.X;
+        press.Y = !press.Y && down.Y;
         press.Up = !press.Up && down.Up;
         press.Down = !press.Down && down.Down;
         press.Left = !press.Left && down.Left;
         press.Right = !press.Right && down.Right;
-        press.A = !press.A && down.A;
-        press.B = !press.B && down.B;
-        press.C = !press.C && down.C;
         press.Start = !press.Start && down.Start;
-        press.Abc = press.A || press.B || press.C;
+        
+        press.Aby = press.A || press.B || press.Y;
         
         if (down is { Left: true, Right: true })
         {
@@ -128,38 +127,30 @@ public static class InputUtilities
     
     private static void KeyboardProcess(ref Buttons down)
     {
-#if DEBUG
-        bool previousDebugButtonDownState = DebugButtonDown;
-        DebugButtonDown = false;
-#endif
         foreach (KeyboardControl control in KeyboardControl)
         {
-            down.Up = down.Up || Input.IsPhysicalKeyPressed(control.Up);
-            down.Down = down.Down || Input.IsPhysicalKeyPressed(control.Down);
-            down.Left = down.Left || Input.IsPhysicalKeyPressed(control.Left);
+            down.A     = down.A     || Input.IsPhysicalKeyPressed(control.A);
+            down.B     = down.B     || Input.IsPhysicalKeyPressed(control.B);
+            down.X     = down.X     || Input.IsPhysicalKeyPressed(control.X);
+            down.Y     = down.Y     || Input.IsPhysicalKeyPressed(control.Y);
+            down.Up    = down.Up    || Input.IsPhysicalKeyPressed(control.Up);
+            down.Down  = down.Down  || Input.IsPhysicalKeyPressed(control.Down);
+            down.Left  = down.Left  || Input.IsPhysicalKeyPressed(control.Left);
             down.Right = down.Right || Input.IsPhysicalKeyPressed(control.Right);
-            down.A = down.A || Input.IsPhysicalKeyPressed(control.A);
-            down.B = down.B || Input.IsPhysicalKeyPressed(control.B);
-            down.C = down.C || Input.IsPhysicalKeyPressed(control.C);
             down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
-#if DEBUG
-            DebugButtonDown |= Input.IsPhysicalKeyPressed(control.Debug);
-#endif
         }
-#if DEBUG
-        DebugButtonPress = !previousDebugButtonDownState && DebugButtonDown;
-#endif
     }
 
-    private static void GamepadProcess(int device, ref Buttons down)
+    private static void JoypadProcess(int device, ref Buttons down)
     {
-        down.Up = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
-        down.Down = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
-        down.Left = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
+        down.A     = Input.IsJoyButtonPressed(device, JoyButton.A);
+        down.B     = Input.IsJoyButtonPressed(device, JoyButton.B);
+        down.X     = Input.IsJoyButtonPressed(device, JoyButton.X);
+        down.Y     = Input.IsJoyButtonPressed(device, JoyButton.Y);
+        down.Up    = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
+        down.Down  = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
+        down.Left  = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
         down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
-        down.A = Input.IsJoyButtonPressed(device, JoyButton.A);
-        down.B = Input.IsJoyButtonPressed(device, JoyButton.B);
-        down.C = Input.IsJoyButtonPressed(device, JoyButton.Y);
         down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
     }
 }

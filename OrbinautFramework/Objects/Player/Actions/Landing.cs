@@ -10,44 +10,54 @@ using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
-public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAction)
+public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 {
+	public event Action Landed = landAction;
+	
+	private readonly Action _landAction = landAction;
+	
 	public void Land()
 	{
+		MovementData movement = data.Movement;
 		data.ResetGravity();
-		data.Movement.IsGrounded = true;
+		movement.IsGrounded = true;
 		
 		switch (logic.Action)
 		{
 			case States.SpinDash or States.HammerDash: return;
-			case States.Dash: landAction(); return;
+			case States.Dash: _landAction(); return;
 		}
 		
 		if (WaterBarrierBounce()) return;
 		
 		if (data.State == PlayerStates.Hurt)
 		{
-			data.Movement.GroundSpeed.Value = 0f;
+			movement.GroundSpeed.Value = 0f;
 		}
 		
-		data.Movement.IsAirLock = false;
-		data.Movement.IsJumping = false;
-		data.Movement.IsSpinning = false;
-		
-		data.Visual.SetPushBy = null;
+		movement.IsAirLock = false;
+		movement.IsJumping = false;
+		movement.IsSpinning = false;
+
+		VisualData visual = data.Visual;
+		visual.SetPushBy = null;
+		visual.Angle = movement.Angle;
 		data.Sprite.Animation = Animations.Move;
 		
 		data.State = PlayerStates.Control;
 		data.Cpu.State = CpuLogic.States.Main;
-		data.Node.Shield.State = ShieldContainer.States.None;
 		data.Item.ComboCounter = 0;
-		data.Collision.TileBehaviour = Constants.TileBehaviours.Floor;
+
+		CollisionData collision = data.Collision;
+		collision.TileBehaviour = Constants.TileBehaviours.Floor;
 		
-		landAction();
+		data.Node.Shield.State = ShieldContainer.States.None;
+
+		Landed();
 		
-		if (data.Movement.IsSpinning) return;
-		data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
-		data.Collision.Radius = data.Collision.RadiusNormal;
+		if (movement.IsSpinning) return;
+		movement.Position.Y += collision.Radius.Y - collision.RadiusNormal.Y;
+		collision.Radius = collision.RadiusNormal;
 	}
     
 	private bool WaterBarrierBounce()
@@ -55,16 +65,17 @@ public readonly struct Landing(PlayerData data, PlayerLogic logic, Action landAc
 		ShieldContainer shield = data.Node.Shield;
 		if (shield.State != ShieldContainer.States.Active || shield.Type != ShieldContainer.Types.Bubble) return false;
 		
+		MovementData movement = data.Movement;
 		float force = data.Water.IsUnderwater ? -4f : -7.5f;
-		float radians = Mathf.DegToRad(data.Movement.Angle);
-		data.Movement.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
+		float radians = Mathf.DegToRad(movement.Angle);
+		movement.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
 	    
-		data.Node.Shield.State = ShieldContainer.States.None;
+		shield.State = ShieldContainer.States.None;
 		data.Collision.OnObject = null;
-		data.Movement.IsGrounded = false;
+		movement.IsGrounded = false;
 	    
 		//TODO: replace animation
-		data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
+		shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
 	    
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 		

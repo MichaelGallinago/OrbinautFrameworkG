@@ -2,11 +2,9 @@ namespace OrbinautFramework3.Framework;
 
 public static class GravityType
 {
-    public const float KnucklesUp = -0.125f;
-    public const float KnucklesDown = 0.125f;
-    public const float TailsUp = -0.125f;
-    public const float TailsDown = 0.03125f;
     public const float Default = 0.21875f;
     public const float Underwater = 0.0625f;
+    public const float FlightUp = -0.125f;
+    public const float FlightDown = 0.03125f;
     public const float HurtFall = 0.1875f;
 }

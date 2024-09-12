@@ -34,7 +34,7 @@ public readonly struct Balancing(PlayerData data, IPlayerLogic logic)
 		const int panicOffset = 4;
 		
 		int rightEdge = onObject.SolidBox.Radius.X * 2 - leftEdge;
-		int playerX = Mathf.FloorToInt(onObject.SolidBox.Radius.X - onObject.Position.X + data.Node.Position.X);
+		int playerX = Mathf.FloorToInt(onObject.SolidBox.Radius.X - onObject.Position.X + data.Movement.Position.X);
 		
 		if (playerX < leftEdge)
 		{
@@ -48,63 +48,66 @@ public readonly struct Balancing(PlayerData data, IPlayerLogic logic)
 	
 	private bool BalanceOnTiles()
 	{
-		if (data.Collision.OnObject != null) return false;
+		CollisionData collision = data.Collision;
+		if (collision.OnObject != null) return false;
 		
 		const Constants.Direction direction = Constants.Direction.Positive;	
 		
 		if (Angles.GetQuadrant(data.Movement.Angle) > Angles.Quadrant.Down) return true;
-		logic.TileCollider.SetData(
-			(Vector2I)data.Node.Position + new Vector2I(0, data.Collision.Radius.Y), 
-			data.Collision.TileLayer);
 		
-		if (logic.TileCollider.FindDistance(0, 0, true, direction) < 12) return true;
+		Vector2I position = (Vector2I)data.Movement.Position + new Vector2I(0, collision.Radius.Y);
+		TileCollider collider = logic.TileCollider;
+		collider.SetData(position, collision.TileLayer);
+		if (collider.FindDistance(0, 0, true, direction) < 12) return true;
 		
-		(_, float angleLeft) = logic.TileCollider.FindTile(-data.Collision.Radius.X, 0, true, direction);
-		(_, float angleRight) = logic.TileCollider.FindTile(data.Collision.Radius.X, 0, true, direction);
+		(_, float angleLeft) = collider.FindTile(-collision.Radius.X, 0, true, direction);
+		(_, float angleRight) = collider.FindTile(collision.Radius.X, 0, true, direction);
 		
 		if (float.IsNaN(angleLeft) == float.IsNaN(angleRight)) return true;
 		
 		int sign = float.IsNaN(angleLeft) ? -1 : 1;
-		bool isPanic = logic.TileCollider.FindDistance(-6 * sign, 0, true, direction) >= 12;
+		bool isPanic = collider.FindDistance(-6 * sign, 0, true, direction) >= 12;
 		BalanceToDirection((Constants.Direction)sign, isPanic);
 		return true;
 	}
 
 	private void BalanceToDirection(Constants.Direction direction, bool isPanic)
 	{
+		IPlayerSprite sprite = data.Sprite;
+		VisualData visual = data.Visual;
 		switch (data.Node.Type)
 		{
 			case PlayerNode.Types.Amy or PlayerNode.Types.Tails:
 			case PlayerNode.Types.Sonic when data.Super.IsSuper:
-				data.Sprite.Animation = Animations.Balance;
-				data.Visual.Facing = direction;
+				sprite.Animation = Animations.Balance;
+				visual.Facing = direction;
 				break;
 			
 			case PlayerNode.Types.Knuckles:
-				if (data.Visual.Facing == direction)
+				if (visual.Facing == direction)
 				{
-					data.Sprite.Animation = Animations.Balance;
+					sprite.Animation = Animations.Balance;
 				}
-				else if (data.Sprite.Animation != Animations.BalanceFlip)
+				else if (sprite.Animation != Animations.BalanceFlip)
 				{
-					data.Sprite.Animation = Animations.BalanceFlip;
-					data.Visual.Facing = direction;
+					sprite.Animation = Animations.BalanceFlip;
+					visual.Facing = direction;
 				}
 				break;
 			
 			case PlayerNode.Types.Sonic:
 				if (!isPanic)
 				{
-					data.Sprite.Animation = data.Visual.Facing == direction ? Animations.Balance : Animations.BalanceFlip;
+					sprite.Animation = visual.Facing == direction ? Animations.Balance : Animations.BalanceFlip;
 				}
-				else if (data.Visual.Facing != direction)
+				else if (visual.Facing != direction)
 				{
-					data.Sprite.Animation = Animations.BalanceTurn;
-					data.Visual.Facing = direction;
+					sprite.Animation = Animations.BalanceTurn;
+					visual.Facing = direction;
 				}
-				else if (data.Sprite.Animation != Animations.BalanceTurn)
+				else if (sprite.Animation != Animations.BalanceTurn)
 				{
-					data.Sprite.Animation = Animations.BalancePanic;
+					sprite.Animation = Animations.BalancePanic;
 				}
 				break;
 		}

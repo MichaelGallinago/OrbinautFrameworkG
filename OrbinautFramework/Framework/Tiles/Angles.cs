@@ -42,7 +42,7 @@ public static class Angles
         return (Quadrant)(Mathf.FloorToInt(angle - ByteEpsilon) / 90 & 3);
     }
     
-    public static float GetVector256(Vector2 distance)
+    public static float GetRoundedVector(Vector2 distance)
     {
         return GetFloatAngle(GetByteAngle(GetFloatVector(distance)));
     }

@@ -45,7 +45,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		UpdateGravityAndHorizontalVelocity();
 		UpdateAirAnimationFrame();
 		
-		if (data.Input.Down.Abc) return States.GlideAir;
+		if (data.Input.Down.Aby) return States.GlideAir;
 		
 		data.Movement.Velocity.X *= 0.25f;
 		data.Visual.OverrideFrame = 0;
@@ -142,7 +142,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			return States.GlideGround;
 		}
 		
-		return isWallCollided ? AttachToWall(wallRadius, (int)data.Node.Position.Y) : States.Default;
+		return isWallCollided ? AttachToWall(wallRadius, (int)data.Movement.Position.Y) : States.Default;
 	}
 	
 	private void Land()
@@ -166,7 +166,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			
 		if (data.Visual.Facing == Constants.Direction.Negative)
 		{
-			data.Node.Position += Vector2.Right;
+			data.Movement.Position.X++;
 		}
 		
 		data.Sprite.Animation = Animations.ClimbWall;
@@ -200,7 +200,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		if (floorDistance is < 0 or >= 12) return true;
 
 		// Adjust Knuckles' y-position to place him just below the edge
-		data.Node.Position += new Vector2(0f, floorDistance);
+		data.Movement.Position.Y += floorDistance;
 		return false;
 	}
 }

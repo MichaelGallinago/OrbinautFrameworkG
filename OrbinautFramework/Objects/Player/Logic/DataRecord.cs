@@ -9,6 +9,5 @@ public readonly record struct DataRecord(
     Buttons InputPress,
     Buttons InputDown,
     Constants.Direction Facing,
-    object SetPushAnimationBy,
-    bool IsGrounded
+    object SetPushAnimationBy
 );

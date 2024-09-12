@@ -1,9 +1,8 @@
 using Godot;
-using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Scenes.Screens.Startup;
 
-public partial class Startup : Scene
+public partial class Startup : Node2D
 {
     [Export] private PackedScene _nextScene;
     
@@ -11,20 +10,18 @@ public partial class Startup : Scene
     {
         PhysicsServer2D.SetActive(false);
         PhysicsServer3D.SetActive(false);
-
-        ChangeScene();
     }
 
-    private void ChangeScene()
+    public override void _Process(double delta)
     {
         SceneTree sceneTree = GetTree();
-        
+
         if (_nextScene == null)
         {
             sceneTree.Quit();
             return;
         }
-        
-        sceneTree.CallDeferred("change_scene_to_packed", _nextScene);
+
+        sceneTree.ChangeSceneToPacked(_nextScene);
     }
 }

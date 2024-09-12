@@ -4,26 +4,24 @@ namespace OrbinautFramework3.Objects.Player.Sprite;
 
 public interface IPlayerSprite
 {
-    protected SpriteData Data { get; }
-    protected ISpriteNode Node { get; }
-
-    int Frame => Node.Frame;
-    int FrameCount => Data.FrameCount;
-    bool IsFinished => Data.IsFinished;
-    bool IsFrameChanged => Data.IsFrameChanged;
+    protected SpriteLogic SpriteLogic { get; }
+    
+    int Frame { get; }
+    int FrameCount => SpriteLogic.Data.FrameCount;
+    bool IsFinished => SpriteLogic.Data.IsFinished;
+    bool IsFrameChanged => SpriteLogic.Data.IsFrameChanged;
     
     Animations Animation
     {
-        get => Data.Animation; //TODO: remove this somehow?
+        get => SpriteLogic.Data.Animation; //TODO: remove this somehow?
         set
         {
-            Data.Animation = value;
-            OnAnimationChanged(value);
+            SpriteLogic.Data.Animation = value;
+            SpriteLogic.OnAnimationChanged(value);
         }
     }
-
-    bool CheckInCamera(ICamera camera) => Node.CheckInCamera(camera);
-    bool CheckInCameras() => Node.CheckInCameras();
-    protected void OnAnimationChanged(Animations animation);
-    void Process();
+    
+    bool CheckInCameras();
+    bool CheckInCamera(ICamera camera);
+    void Process() => SpriteLogic.Process();
 }

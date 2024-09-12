@@ -2,15 +2,14 @@
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
-using OrbinautNode = OrbinautFramework3.Framework.ObjectBase.AbstractTypes.OrbinautNode;
 
 namespace OrbinautFramework3.Objects.Player.Data;
 
 public class CollisionData
 {
-    public Vector2I Radius;
-    public Vector2I RadiusNormal;
-    public Vector2I RadiusSpin;
+    public Vector2I Radius { get; set; }
+    public Vector2I RadiusNormal { get; private set; }
+    public Vector2I RadiusSpin { get; private set; }
     
     public bool IsStickToConvex { get; set; }
     public Constants.TileLayers TileLayer { get; set; }

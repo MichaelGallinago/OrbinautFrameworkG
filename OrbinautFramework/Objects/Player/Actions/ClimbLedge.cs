@@ -12,16 +12,17 @@ public readonly struct ClimbLedge(PlayerData data, IPlayerLogic logic)
 {
     public States Perform()
     {
-        if (data.Sprite.Animation != Animations.ClimbLedge)
+        IPlayerSprite sprite = data.Sprite;
+        if (sprite.Animation != Animations.ClimbLedge)
         {
-            data.Sprite.Animation = Animations.ClimbLedge;
-            data.Node.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
+            sprite.Animation = Animations.ClimbLedge;
+            data.Movement.Position += new Vector2(3f * (float)data.Visual.Facing, -3f);
         }
-        else if (data.Sprite.IsFrameChanged)
+        else if (sprite.IsFrameChanged)
         {
             OffsetPlayerByFrame();
         }
-        else if (data.Sprite.IsFinished)
+        else if (sprite.IsFinished)
         {
             StandUp();
             return States.Default;
@@ -34,8 +35,8 @@ public readonly struct ClimbLedge(PlayerData data, IPlayerLogic logic)
     {
         switch (data.Sprite.Frame)
         {
-            case 1: data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
-            case 2: data.Node.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
+            case 1: data.Movement.Position += new Vector2(8f * (float)data.Visual.Facing, -10f); break;
+            case 2: data.Movement.Position -= new Vector2(8f * (float)data.Visual.Facing, 12f); break;
         }
     }
 
@@ -43,12 +44,12 @@ public readonly struct ClimbLedge(PlayerData data, IPlayerLogic logic)
     {
         logic.Land();
         data.Sprite.Animation = Animations.Idle;
-        data.Node.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
+        data.Movement.Position += new Vector2(8f * (float)data.Visual.Facing, 4f);
 
         // Subtract that 1px that was applied when we attached to the wall
         if (data.Visual.Facing == Constants.Direction.Negative)
         {
-            data.Node.Position += Vector2.Left;
+            data.Movement.Position.X--;
         }
     }
 }

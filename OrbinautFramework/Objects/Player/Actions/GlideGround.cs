@@ -40,40 +40,42 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
 	
         if (floorDistance > 14) return false;
 			
-        data.Node.Position += new Vector2(0f, floorDistance);
+        data.Movement.Position.Y += floorDistance;
         data.Movement.Angle = floorAngle;
         return true;
     }
     
     private void UpdateGroundVelocityX()
     {
-        if (!data.Input.Down.Abc)
+        MovementData movement = data.Movement;
+        if (!data.Input.Down.Aby)
         {
-            data.Movement.Velocity.X = 0f;
+            movement.Velocity.X = 0f;
             return;
         }
 		
         const float slideFriction = -0.09375f;
 		
-        float speedX = data.Movement.Velocity.X;
-        data.Movement.Velocity.AccelerationX = Math.Sign(data.Movement.Velocity.X) * slideFriction;
+        float speedX = movement.Velocity.X;
+        movement.Velocity.AccelerationX = Math.Sign(movement.Velocity.X) * slideFriction;
         switch (speedX)
         {
-            case > 0f: data.Movement.Velocity.MaxX(0f); break;
-            case < 0f: data.Movement.Velocity.MinX(0f); break;
+            case > 0f: movement.Velocity.MaxX(0f); break;
+            case < 0f: movement.Velocity.MinX(0f); break;
         }
     }
-
+    
     private bool StopSliding()
     {
-        if (data.Movement.Velocity.X != 0f) return false;
+        MovementData movement = data.Movement;
+        if (movement.Velocity.X != 0f) return false;
         
         logic.Land();
         data.Visual.OverrideFrame = 1;
 			
         data.Sprite.Animation = Animations.GlideGround;
-        data.Movement.GroundLockTimer = 16f;
-        data.Movement.GroundSpeed.Value = 0f;
+        movement.GroundLockTimer = 16f;
+        movement.GroundSpeed.Value = 0f;
 			
         return true;
     }

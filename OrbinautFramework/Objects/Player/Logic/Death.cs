@@ -30,7 +30,8 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 	    const int drownScreenOffset = 276;
 	    if (data.Water.AirTimer <= 0f)
 	    {
-		    if ((int)data.Node.Position.Y <= camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset) return;
+		    int bottomBound = camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset;
+		    if ((int)data.Movement.Position.Y <= bottomBound) return;
 
 		    if (!logic.ControlType.IsCpu)
 		    {
@@ -43,7 +44,7 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 #else
 	    float bound = camera.Boundary.W;
 #endif
-    	if ((int)data.Node.Position.Y <= 32f + bound) return;
+    	if ((int)data.Movement.Position.Y <= 32f + bound) return;
     	SetNextState();
     }
 

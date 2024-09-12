@@ -15,20 +15,22 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 	
 	public void CollideWalls()
     {
+	    MovementData movement = data.Movement;
+	    float angle = movement.Angle;
 #if SK_PHYSICS
 		// Exit collision while on a left wall or a ceiling, unless angle is cardinal
-	    if (data.Movement.Angle is > 90f and <= 270f && data.Movement.Angle % 90f != 0f) return;
+	    if (angle is > 90f and <= 270f && angle % 90f != 0f) return;
 #else
 	    // Exit collision while on a left wall or a ceiling
-	    if (data.Movement.Angle is > 90f and <= 270f) return;
+	    if (angle is > 90f and <= 270f) return;
 #endif
 
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		int offsetY = data.Movement.Angle == 0f ? 8 : 0;
+		int offsetY = angle == 0f ? 8 : 0;
 		
 		int sign;
 		Direction firstDirection, secondDirection;
-		switch (data.Movement.GroundSpeed.Value)
+		switch (movement.GroundSpeed.Value)
 		{
 			case < 0f:
 				sign = (int)Direction.Positive;
@@ -45,71 +47,74 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 			
 			default: return;
 		}
-		
-		logic.TileCollider.SetData(
-			(Vector2I)data.Movement.Velocity.CalculateNewPosition(data.Node.Position), 
+
+		TileCollider tileCollider = logic.TileCollider;
+		tileCollider.SetData(
+			(Vector2I)movement.Velocity.CalculateNewPosition(movement.Position), 
 			data.Collision.TileLayer,
 			data.Collision.TileBehaviour);
 		
-		int castQuadrant = data.Movement.Angle switch
+		int wallDistance = GetWallCastQuadrant(angle) switch
 		{
-			>= 45f and <= 128f => 1,
-			> 128f and < 225f => 2,
-			>= 225f and < 315f => 3,
-			_ => 0
-		};
-		
-		int wallDistance = castQuadrant switch
-		{
-			0 => logic.TileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
-			1 => logic.TileCollider.FindDistance(0, wallRadius, true, secondDirection),
-			2 => logic.TileCollider.FindDistance(wallRadius, 0, false, secondDirection),
-			3 => logic.TileCollider.FindDistance(0, -wallRadius, true, firstDirection),
+			0 => tileCollider.FindDistance(-wallRadius, offsetY, false, firstDirection),
+			1 => tileCollider.FindDistance(0, wallRadius, true, secondDirection),
+			2 => tileCollider.FindDistance(wallRadius, 0, false, secondDirection),
+			3 => tileCollider.FindDistance(0, -wallRadius, true, firstDirection),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
 		if (wallDistance >= 0) return;
 		
-		Angles.Quadrant quadrant = Angles.GetQuadrant(data.Movement.Angle);
+		Angles.Quadrant quadrant = Angles.GetQuadrant(angle);
 		wallDistance *= quadrant > Angles.Quadrant.Right ? -sign : sign;
 		float offset = wallDistance / Scene.Instance.Speed;
 		
 		switch (quadrant)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
-				data.Movement.Velocity.Modify(new Vector2(-offset, 0f));
-				data.Movement.GroundSpeed.Value = 0f;
+				movement.Velocity.Modify(new Vector2(-offset, 0f));
+				movement.GroundSpeed.Value = 0f;
 				
-				if (data.Visual.Facing == firstDirection && !data.Movement.IsSpinning)
+				if (data.Visual.Facing == firstDirection && !movement.IsSpinning)
 				{
 					data.Visual.SetPushBy = data.Node;
 				}
 				break;
 				
 			case Angles.Quadrant.Right or Angles.Quadrant.Left:
-				data.Movement.Velocity.Modify(new Vector2(0f, offset));
+				movement.Velocity.Modify(new Vector2(0f, offset));
 				break;
 		}
     }
+
+	private static int GetWallCastQuadrant(float angle) => angle switch
+	{
+		>= 45f and <= 128f => 1,
+		> 128f and < 225f => 2,
+		>= 225f and < 315f => 3,
+		_ => 0
+	};
     
 	// Each tile type has its own rules about how it should react to a specific tile check
 	// Since we're going to rotate player's sensors, "rotate" tile properties as well
 	public void CollideFloor()
 	{
-		if (data.Collision.OnObject != null) return;
+		CollisionData collision = data.Collision;
+		if (collision.OnObject != null) return;
 		
-		data.Collision.TileBehaviour = GetTileBehaviour();
+		collision.TileBehaviour = GetTileBehaviour();
 		logic.TileCollider.SetData(
-			(Vector2I)data.Node.Position,
-			data.Collision.TileLayer,
-			data.Collision.TileBehaviour);
+			(Vector2I)data.Movement.Position,
+			collision.TileLayer,
+			collision.TileBehaviour);
 		
 		(int distance, float angle) = FindTile();
 		
 		if (GoAirborne(distance)) return;
 		if (distance < -MaxTolerance) return;
-		
-		data.Node.Position += data.Collision.TileBehaviour switch
+
+		MovementData movement = data.Movement;
+		movement.Position += collision.TileBehaviour switch
 		{
 			TileBehaviours.Floor => new Vector2(0f, distance),
 			TileBehaviours.RightWall => new Vector2(distance, 0f),
@@ -119,9 +124,9 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		};
 
 #if S3_PHYSICS || SK_PHYSICS
-		data.Movement.Angle = SnapFloorAngle(angle);
+		movement.Angle = SnapFloorAngle(angle);
 #else
-		data.Movement.Angle = angle;
+		movement.Angle = angle;
 #endif
 	}
 
@@ -171,11 +176,10 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		float tolerance = Math.Min(MinTolerance + Math.Abs(MathF.Floor(toleranceCheckSpeed)), MaxTolerance);
 		if (distance <= tolerance) return false;
 #endif
-		
 		data.Visual.SetPushBy = null;
-		data.Movement.IsGrounded = false;
-						
 		data.Visual.OverrideFrame = 0;
+		data.Movement.IsGrounded = false;
+		
 		return true;
 	}
 	

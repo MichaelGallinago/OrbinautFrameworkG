@@ -1,57 +1,72 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
 
 namespace OrbinautFramework3.Objects.Player.Logic;
 
-public readonly struct Carry(PlayerData data, IPlayerLogic logic) //TODO: carry
+public readonly struct Carry(PlayerData data, CarryData carryData, IPlayerActionStorage logic)
 {
-    /*
     public void Process()
     {
-        if (data.Node.Type != PlayerNode.Types.Tails) return;
-
-        if (data.Carry.Timer > 0f)
+        if (carryData.Cooldown > 0f)
         {
-            data.Carry.Timer -= Scene.Instance.ProcessSpeed;
-            if (data.Carry.Timer > 0f) return;
+            carryData.Cooldown -= Scene.Instance.Speed;
+            return;
         }
-	
-        if (data.Carry.Target != null)
+        
+        if (carryData.Target == null)
         {
-            data.Carry.Target.CarryTargetLogic.OnAttached(data);
+            if (logic.Action != States.Flight) return;
+
+            GrabAnotherPlayer();
             return;
         }
 		
-        if (logic.Action != States.Flight) return;
-
-        GrabAnotherPlayer();
+        if (carryData.Target.TryFree(out float cooldown))
+        {
+            carryData.Free(cooldown);
+        }
+        else if ((Vector2I)carryData.Target.Position != (Vector2I)carryData.TargetPosition)
+        {
+            carryData.Free();
+        }
+        else
+        {
+            AttachToCarrier();
+            carryData.Target.Collide();
+        }
     }
 
     private void GrabAnotherPlayer()
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            if (player.Data == data) continue;
+            if (player == logic) continue;
             if (player.Action is States.SpinDash or States.Carried) continue;
-            if (!player.Data.Movement.IsControlRoutineEnabled) continue; 
-            if (!player.Data.Collision.IsObjectInteractionEnabled) continue;
-
-            Vector2 delta = (player.Data.Node.Position - data.Node.Position).Abs();
-            if (delta.X >= 16f || delta.Y >= 48f) continue;
-				
-            player.ResetState();
-            AudioPlayer.Sound.Play(SoundStorage.Grab);
-				
-            player.Data.Sprite.Animation = Animations.Grab;
+            if (!player.Data.State.IsObjectInteractable()) continue; 
+            
+            Vector2I delta = ((Vector2I)player.Data.Movement.Position - (Vector2I)data.Movement.Position).Abs();
+            if (delta.X >= 16 || delta.Y >= 48) continue;
+            
+            carryData.Target = player;
             player.Action = States.Carried;
-            data.Carry.Target = player;
-
-            player.CarryTargetLogic.AttachToCarrier(this);
+            
+            AttachToCarrier();
+            
+            AudioPlayer.Sound.Play(SoundStorage.Grab);
+            return;
         }
     }
-    */
+
+    private void AttachToCarrier()
+    {
+        ICarryTarget target = carryData.Target;
+        target.Facing = data.Visual.Facing;
+        target.Velocity = data.Movement.Velocity;
+        target.Scale = new Vector2(Math.Abs(target.Scale.X) * (float)data.Visual.Facing, target.Scale.Y);
+        target.Position = carryData.TargetPosition = data.Movement.Position + new Vector2(0f, 28f);
+    }
 }

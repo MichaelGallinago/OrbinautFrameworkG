@@ -28,7 +28,7 @@ public class DebugMode(IEditor editor)
 #if !DEBUG
 	    if (!SharedData.IsDebugModeEnabled) return false;  
 #endif
-		if (!IsDebugButtonPressed(IsEnabled, editor.Input.Press.B)) return false;
+		if (!IsDebugButtonPressed(IsEnabled, editor.Input.Press)) return false;
 		
 		SwitchMode();
 		return true;
@@ -62,14 +62,14 @@ public class DebugMode(IEditor editor)
 	{
 		UpdateSpeedAndPosition();
 		
-		if (SwapPrefab() || !editor.Input.Press.C) return;
+		if (SwapPrefab() || !editor.Input.Press.X) return;
 		
 		SpawnPrefab();
 	}
 
 	private bool SwapPrefab()
 	{
-		if (editor.Input.Down is { A: true, C: true })
+		if (editor.Input.Down is { A: true, X: true })
 		{
 			if (--_index < 0)
 			{
@@ -135,12 +135,12 @@ public class DebugMode(IEditor editor)
 		editor.Position = position;
 	}
 
-    private static bool IsDebugButtonPressed(bool isDebugMode, bool isPressB)
+    private static bool IsDebugButtonPressed(bool isDebugMode, Buttons press)
     {
 #if DEBUG
-	    return isDebugMode && isPressB || InputUtilities.DebugButtonPress;
+	    return isDebugMode && press.B || press.X;
 #else
-		return isPressB;
+		return press.B;
 #endif
     }
 }

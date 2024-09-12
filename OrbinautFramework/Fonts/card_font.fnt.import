@@ -14,4 +14,4 @@ dest_files=["res://.godot/imported/card_font.fnt-a9a69550e75cf496ed6d997b8189a02
 
 fallbacks=[]
 compress=true
-scaling_mode=2
+scaling_mode=1

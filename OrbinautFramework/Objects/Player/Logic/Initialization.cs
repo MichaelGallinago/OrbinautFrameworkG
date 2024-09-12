@@ -1,5 +1,4 @@
-﻿using Godot;
-using OrbinautFramework3.Framework;
+﻿using OrbinautFramework3.Framework;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using OrbinautFramework3.Objects.Spawnable.Shield;
@@ -10,25 +9,23 @@ public readonly struct Initialization(PlayerData data)
 {
     public void Init()
     {
-        data.Collision.Init(data.Node.Type);
+        IPlayerNode node = data.Node;
+        data.Collision.Init(node.Type);
+        data.Movement.Init(node.Position);
+        data.Visual.Init(node.Scale, node.ZIndex);
+        
+        node.Shield.State = ShieldContainer.States.None;
+        node.RotationDegrees = 0f;
         
         data.Cpu.Init();
         data.Item.Init();
-        data.Carry.Init();
         data.Death.Init();
         data.Super.Init();
         data.Water.Init();
         data.Damage.Init();
-        data.Visual.Init();
-        data.Movement.Init();
         
         data.Input.Clear();
         data.Input.NoControl = false;
-
-        IPlayerNode node = data.Node;
-        node.Visible = true;
-        node.Shield.State = ShieldContainer.States.None;
-        node.RotationDegrees = 0f;
         
         data.Sprite.Animation = Animations.Idle;
         
@@ -47,14 +44,14 @@ public readonly struct Initialization(PlayerData data)
     {
         if (SharedData.GiantRingData != null)
         {
-            data.Node.Position = SharedData.GiantRingData.Position;
+            data.Movement.Position = SharedData.GiantRingData.Position;
             return;
         }
         
         if (SharedData.CheckpointData != null)
         {
-            data.Node.Position = SharedData.CheckpointData.Position;
+            data.Movement.Position = SharedData.CheckpointData.Position;
         }
-        data.Node.Position -= new Vector2(0, data.Collision.Radius.Y + 1);
+        data.Movement.Position.Y -= data.Collision.Radius.Y + 1;
     }
 }

@@ -12,8 +12,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 {
 	public void Move()
 	{
-		if (logic.Action is States.Carried or States.Climb or 
-		    States.SpinDash or States.GlideAir or States.GlideFall) return;
+		if (logic.Action is States.Climb or States.SpinDash or States.GlideAir or States.GlideFall) return;
 		
 		Rotate();
 		LimitVerticalVelocity();

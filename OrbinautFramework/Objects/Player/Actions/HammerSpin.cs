@@ -27,7 +27,7 @@ public struct HammerSpin(PlayerData data)
     {
         if (data.Movement.IsGrounded) return States.HammerSpin;
         
-        if (data.Input.Down.Abc)
+        if (data.Input.Down.Aby)
         {
             Charge();
             return States.HammerSpin;

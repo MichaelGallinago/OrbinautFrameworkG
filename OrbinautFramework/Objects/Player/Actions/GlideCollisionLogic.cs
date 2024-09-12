@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
-public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) //TODO: refactor this somehow????
+public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic)
 {
 	public bool CollideFloor()
 	{
@@ -16,10 +16,11 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 
 		if (floorDistance >= 0) return false;
 		
-		data.Node.Position += new Vector2(0f, floorDistance);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		data.Movement.Angle = floorAngle;
-		data.Movement.Velocity.Y = 0f;
+		MovementData movement = data.Movement;
+		movement.Angle = floorAngle;
+		movement.Velocity.Y = 0f;
+		movement.Position.Y += floorDistance;
+		logic.TileCollider.Position = (Vector2I)movement.Position;
 		return true;
 	}
 	
@@ -27,9 +28,9 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 	{
 		var isWallCollided = false;
 		int wallRadius = data.Collision.RadiusNormal.X + 1;
-		moveQuadrant = Angles.GetQuadrant(Angles.GetVector256(data.Movement.Velocity));
+		moveQuadrant = Angles.GetQuadrant(Angles.GetRoundedVector(data.Movement.Velocity));
 
-		logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+		logic.TileCollider.SetData((Vector2I)data.Movement.Position, data.Collision.TileLayer);
 		
 		if (moveQuadrant != Angles.Quadrant.Right)
 		{
@@ -63,10 +64,11 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 		int wallDistance = logic.TileCollider.FindDistance(sing * wallRadius, 0, false, direction);
 
 		if (wallDistance >= 0) return false;
-		
-		data.Node.Position += new Vector2(sing * wallDistance, 0f);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		data.Movement.Velocity.X = 0f;
+
+		MovementData movement = data.Movement;
+		movement.Velocity.X = 0f;
+		movement.Position.X += sing * wallDistance;
+		logic.TileCollider.Position = (Vector2I)movement.Position;
 		return true;
 	}
 	
@@ -74,14 +76,15 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 	{
 		if (roofDistance >= 0) return;
 		
-		data.Node.Position -= new Vector2(0f, roofDistance);
-		logic.TileCollider.Position = (Vector2I)data.Node.Position;
-		if (data.Movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
+		MovementData movement = data.Movement;
+		movement.Position.Y -= roofDistance;
+		logic.TileCollider.Position = (Vector2I)movement.Position;
+		if (movement.Velocity.Y < 0f || moveQuadrant == Angles.Quadrant.Up)
 		{
-			data.Movement.Velocity.Y = 0f;
+			movement.Velocity.Y = 0f;
 		}
 	}
-
+	
 	private int GetRoofDistance()
 	{
 		Vector2I radius = data.Collision.Radius;

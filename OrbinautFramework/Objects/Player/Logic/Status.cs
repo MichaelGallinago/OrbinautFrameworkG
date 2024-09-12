@@ -41,13 +41,11 @@ public readonly struct Status(PlayerData data, IPlayerLogic logic)
 	private void FlickAfterGettingHit()
 	{
 		DamageData damage = data.Damage;
-		if (damage.InvincibilityTimer <= 0f) return;
-		
-		data.Node.Visible = ((int)damage.InvincibilityTimer & 4) > 0;
+		float timer = damage.InvincibilityTimer;
+		if (timer <= 0f) return;
+
 		damage.InvincibilityTimer -= Scene.Instance.Speed;
-		
-		if (damage.InvincibilityTimer > 0f) return;
-		data.Node.Visible = true;
+		data.Visual.Visible = damage.InvincibilityTimer <= 0f || ((int)timer & 4) > 0;
 	}
 	
 	private float UpdateItemTimer(float timer, AudioStream itemMusic)

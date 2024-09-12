@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Godot;
 using OrbinautFramework3.Framework.MultiTypeDelegate;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -42,10 +43,12 @@ public readonly struct PlayerList
 
     public void MovePlayer(int fromIndex, int toIndex) //TODO: use this
     {
+#if TOOLS
         if (fromIndex >= _players.Count || toIndex >= _players.Count)
         {
             throw new IndexOutOfRangeException();
         }
+#endif
 
         IPlayer firstPlayer = _players[fromIndex];
         IPlayer secondPlayer = _players[toIndex];

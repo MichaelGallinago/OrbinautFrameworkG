@@ -24,7 +24,7 @@ public struct Transform(PlayerData data, IPlayerLogic logic)
         data.State = PlayerStates.NoControl;
         
         data.Sprite.Animation = Animations.Transform;
-        data.Node.Visible = true;
+        data.Visual.Visible = true;
         
         data.Damage.InvincibilityTimer = 0f;
         data.Super.Timer = 1f;

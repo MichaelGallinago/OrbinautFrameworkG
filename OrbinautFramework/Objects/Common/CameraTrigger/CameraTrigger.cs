@@ -84,10 +84,11 @@ public partial class CameraTrigger : Trigger
 
     private void SetNewBound(int viewIndex, ICamera camera, Vector2I triggerBounds)
     {
-        _previousBounds[viewIndex] = new Vector2I((int)camera.TargetBoundary.Y, (int)camera.TargetBoundary.W);
+        Vector4 targetBoundary = camera.TargetBoundary;
+        _previousBounds[viewIndex] = new Vector2I((int)targetBoundary.Y, (int)targetBoundary.W);
         
         camera.BoundSpeed = (int)_boundSpeed;
-        camera.TargetBoundary = camera.TargetBoundary with { Y = triggerBounds.X, W = triggerBounds.Y };
+        camera.TargetBoundary = targetBoundary with { Y = triggerBounds.X, W = triggerBounds.Y };
     }
 
     private void SetPreviousBound(int viewIndex, ICamera camera)

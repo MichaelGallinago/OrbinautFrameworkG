@@ -6,16 +6,16 @@ namespace OrbinautFramework3.Framework;
 [GlobalClass]
 public partial class PlayerPrefabs : Resource
 {
-    [Export] public PackedScene Sonic { get; private set; }
-    [Export] public PackedScene Tails { get; private set; }
-    [Export] public PackedScene Knuckles { get; private set; }
-    [Export] public PackedScene Amy { get; private set; }
+    [Export] private PackedScene _sonic;
+    [Export] private PackedScene _tails;
+    [Export] private PackedScene _knuckles;
+    [Export] private PackedScene _amy;
     
     public PackedScene Get(PlayerNode.Types type) => type switch
     {
-        PlayerNode.Types.Tails => Tails,
-        PlayerNode.Types.Knuckles => Knuckles,
-        PlayerNode.Types.Amy => Amy,
-        _ => Sonic
+        PlayerNode.Types.Tails => _tails,
+        PlayerNode.Types.Knuckles => _knuckles,
+        PlayerNode.Types.Amy => _amy,
+        _ => _sonic
     };
 }

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scenes/Screens/Startup/Startup.cs" id="1_5grtg"]
 [ext_resource type="Shader" path="res://Shaders/fade.gdshader" id="1_v4hqx"]
-[ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/TSZ/test_stage_zone_0.tscn" id="3_q26sk"]
+[ext_resource type="PackedScene" uid="uid://b3y6uspbhnxrx" path="res://Scenes/Screens/DevMenu/dev_menu.tscn" id="3_g26hk"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_da42i"]
 shader = ExtResource("1_v4hqx")
@@ -12,4 +12,4 @@ shader_parameter/u_type = null
 [node name="Startup" type="Node2D"]
 material = SubResource("ShaderMaterial_da42i")
 script = ExtResource("1_5grtg")
-_nextScene = ExtResource("3_q26sk")
+_nextScene = ExtResource("3_g26hk")

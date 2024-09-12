@@ -124,10 +124,12 @@ public class Velocity
     
     private void ClampAxis(byte index, float min, float max)
     {
+#if TOOLS
         if (min > max)
         {
             throw new ArgumentException("max should be no less than min");
         }
+#endif
         
         if (_velocity[index] < min)
         {

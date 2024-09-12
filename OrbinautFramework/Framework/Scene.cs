@@ -19,20 +19,17 @@ public partial class Scene : Node2D
     [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
     [Export] public PackedScene[] DebugModePrefabs { get; private set; }
-    [Export] public Vector2I InitialSize { get; private set; }
+    [Export] public LimitedSize Size { get; private set; } = new();
     
     public PlayerList Players { get; } = new();
-    public int PlayerCount { get; set; }
     
     public SceneTree Tree { get; private set; }
-    public World2D World2D { get; private set; }
-    public bool IsStage { get; protected set; }
     public ObjectCuller Culler { get; } = new();
     public float Speed { get; private set; }
     public float RingSpillTimer { get; set; }
     public bool AllowPause { get; set; }
     public States State { get; set; } = States.Normal;
-    public float Time { get; set; }
+    public float Time { get; private set; }
     
     public IMultiTypeEvent<ITypeDelegate> FrameEndProcess { get; }
     
@@ -55,8 +52,6 @@ public partial class Scene : Node2D
         AddChild(_frameEnd);
         
         Tree = GetTree();
-        
-        AttachCamerasToPlayer();
         
 #if DEBUG
         AddChild(_debug);
@@ -82,7 +77,7 @@ public partial class Scene : Node2D
 
     public override void _Process(double deltaTime)
     {
-        Speed = Engine.MaxFps is <= 60 and > 0 ? 1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
+        UpdateSpeed(deltaTime);
         
         if (State != States.Paused)
         {
@@ -97,17 +92,13 @@ public partial class Scene : Node2D
             player.Data.Collision.PushObjects.Clear();
         }
     }
-    
+
     public bool IsTimePeriodLooped(float period) => Time % period - Speed < 0f;
     public bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - Speed < 0f;
-
-    private void AttachCamerasToPlayer()
+    
+    private void UpdateSpeed(double deltaTime)
     {
-        ReadOnlySpan<ICamera> cameras = Views.Cameras;
-        int count = Math.Min(cameras.Length, Players.Count);
-        for (var i = 0; i < count; i++)
-        {
-            cameras[i].Target = Players.Values[i].Data.Node;
-        }
+        Speed = Engine.MaxFps is <= Constants.BaseFramerate and > 0 ? 
+            1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
     }
 }
