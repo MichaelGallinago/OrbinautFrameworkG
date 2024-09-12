@@ -7,12 +7,14 @@ namespace OrbinautFramework3.Objects.Player.Sprite;
 public partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode, IPlayerSprite
 {
 	public SpriteLogic SpriteLogic { get; set; }
-
+	
 	public SpriteNode()
 	{
 #if TOOLS
 		if (Engine.IsEditorHint()) return;
 #endif
-		AnimationFinished += () => SpriteLogic?.OnFinished();
+		AnimationFinished += OnAnimationFinished;
 	}
+	
+	private void OnAnimationFinished() => SpriteLogic.OnFinished();
 }

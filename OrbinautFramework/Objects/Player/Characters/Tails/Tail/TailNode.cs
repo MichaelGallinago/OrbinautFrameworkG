@@ -19,13 +19,13 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 		switch (player.Data.Sprite.Animation)
 		{
 			case Animations.Idle or Animations.Wait or Animations.Duck or Animations.LookUp:
-				SetAnimation("Idle");
+				PlayAnimation("Idle");
 				break;
 			
 			case Animations.Fly or Animations.FlyTired:
 				float speed = player.Data.Movement.Velocity.Y >= 0f || 
 				              player.Data.Sprite.Animation == Animations.FlyTired ? 0.5f : 1f;
-				SetAnimation("Fly", speed);
+				PlayAnimation("Fly", speed);
 				break;
 			
 			case Animations.Push or Animations.Skid or Animations.Spin or 
@@ -41,11 +41,11 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 				}
 				
 				Offset = offset;
-				SetAnimation("Move");
+				PlayAnimation("Move");
 				break;
 			
 			default:
-				SetAnimation("Hidden");
+				PlayAnimation("Hidden");
 				break;
 		}
 		
