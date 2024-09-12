@@ -32,9 +32,10 @@ public partial class ChopChop : InteractiveNode, IResetable
     
     public void Reset()
     {
-        _velocity = new Vector2(0.25f * MathF.Sign(Scale.X), 0);
+        _state = State.Roam;
         _moveTimer = 0f;
         _bubbleTimer = 0f;
+        _velocity = new Vector2(0.25f * MathF.Sign(Scale.X), 0);
     }
 
     public override void _Process(double delta)
