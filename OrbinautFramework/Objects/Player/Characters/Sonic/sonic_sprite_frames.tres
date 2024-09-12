@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=102 format=3 uid="uid://b0sykgqai1k4o"]
+[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=102 format=3 uid="uid://b0sykgqai1k4o"]
 
 [ext_resource type="Texture2D" uid="uid://f2ljxnxouy3s" path="res://Objects/Player/Characters/Sonic/Sprites/balance.png" id="1_cwt22"]
 [ext_resource type="Texture2D" uid="uid://dukscekr1uoc7" path="res://Objects/Player/Characters/Sonic/Sprites/balance_flip.png" id="2_sgtmc"]

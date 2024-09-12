@@ -88,7 +88,7 @@ public partial class ChopChop : InteractiveNode, IResetable
         _state = State.Wait;
         _moveTimer = 16f;
         _velocity.X = 0f;
-        _sprite.SetAnimation("Idle", 1);
+        _sprite.PlayAnimation("Idle", 1);
     }
 
     private void Wait()
@@ -112,8 +112,5 @@ public partial class ChopChop : InteractiveNode, IResetable
         Scale = scale;
     }
     
-    private void Charge()
-    {
-        Position += _velocity * Scene.Instance.Speed;
-    }
+    private void Charge() => Position += _velocity * Scene.Instance.Speed;
 }
