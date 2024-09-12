@@ -10,8 +10,8 @@ public partial class Camera : Camera2D, ICamera
 {
 	private static readonly Vector2I CullingBuffer = Vector2I.Right * 64;
 	
-	private const byte MaxViewTime = 120;
-	private const byte SpeedCap = 16;
+	private const float ViewDuration = 120f;
+	private const int SpeedCap = 16;
 	
 	public IPosition Target
 	{
@@ -26,7 +26,7 @@ public partial class Camera : Camera2D, ICamera
 			}
 			
 			_target = value;
-			_viewTimer = MaxViewTime;
+			_viewTimer = ViewDuration;
 			_playerTarget = value as IPlayer;
 			_godotObjectTarget = value as GodotObject;
 			
@@ -156,7 +156,7 @@ public partial class Camera : Camera2D, ICamera
 		}
 		else if (SharedData.SpinDash || SharedData.Dash)
 		{
-			_viewTimer = MaxViewTime;
+			_viewTimer = ViewDuration;
 		}
 
 		float offsetSpeed = 2f * Scene.Instance.Speed;

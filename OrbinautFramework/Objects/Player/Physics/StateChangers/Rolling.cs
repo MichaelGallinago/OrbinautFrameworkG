@@ -21,7 +21,7 @@ public readonly struct Rolling(PlayerData data, IPlayerLogic logic)
         if (!CheckSpinPossibility() && !movement.IsForcedRoll) return;
 
         CollisionData collision = data.Collision;
-        movement.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusSpin.Y);
+        movement.Position.Y += collision.Radius.Y - collision.RadiusSpin.Y;
         movement.IsSpinning = true;
         
         collision.Radius = collision.RadiusSpin;

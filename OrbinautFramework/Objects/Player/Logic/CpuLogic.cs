@@ -281,7 +281,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 						
 		if (data.Movement.GroundSpeed != 0f && (int)data.Visual.Facing == sign)
 		{
-			data.Movement.Position += Vector2.Right * sign;
+			data.Movement.Position.X += sign;
 		}
 	}
 	
@@ -305,26 +305,29 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 	private void ProcessStuck()
 	{
 		if (CheckRespawn()) return;
-		
-		if (data.Movement.GroundLockTimer > 0f || data.Cpu.InputTimer > 0f || data.Movement.GroundSpeed != 0f) return;
+
+		MovementData movement = data.Movement;
+		if (movement.GroundLockTimer > 0f || data.Cpu.InputTimer > 0f || movement.GroundSpeed != 0f) return;
 		
 		if (data.Sprite.Animation == Animations.Idle)
 		{
-			data.Visual.Facing = (int)data.Cpu.Target.Position.X >= (int)data.Movement.Position.X ? 
+			data.Visual.Facing = (int)data.Cpu.Target.Position.X >= (int)movement.Position.X ? 
 				Constants.Direction.Positive : Constants.Direction.Negative;
 		}
-		
+
+		InputData input = data.Input;
 		if (!Scene.Instance.IsTimePeriodLooped(128f))
 		{
-			data.Input.Down = data.Input.Down with { Down = true };
-			if (!Scene.Instance.IsTimePeriodLooped(32f)) return;
-			data.Input.Press = data.Input.Press with { Aby = true };
+			input.Down = input.Down with { Down = true };
 			
+			if (!Scene.Instance.IsTimePeriodLooped(32f)) return;
+			
+			input.Press = input.Press with { Aby = true };
 			return;
 		}
 		
-		data.Input.Down = data.Input.Down with { Down = false };
-		data.Input.Press = data.Input.Press with { Aby = false };
+		input.Down = input.Down with { Down = false };
+		input.Press = input.Press with { Aby = false };
 		data.Cpu.State = States.Main;
 	}
 	

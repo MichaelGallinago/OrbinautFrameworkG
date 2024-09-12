@@ -42,7 +42,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		if (wallDistance >= 0f) return false;
 
 		MovementData movement = data.Movement;
-		movement.Position += new Vector2(sign * wallDistance, 0f);
+		movement.Position.X += sign * wallDistance;
 		logic.TileCollider.Position = (Vector2I)movement.Position;
 		movement.Velocity.X = 0f;
 		
@@ -67,11 +67,12 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		if (moveQuadrant == Angles.Quadrant.Up && roofDistance <= -14f)
 		{
 			// Perform right wall collision if moving mostly left and too far into the ceiling
-			int wallDist = logic.TileCollider.FindDistance(wallRadius, 0, false, Constants.Direction.Positive);
+			int wallDistance = logic.TileCollider.FindDistance(
+				wallRadius, 0, false, Constants.Direction.Positive);
 
-			if (wallDist >= 0) return false;
+			if (wallDistance >= 0) return false;
 			
-			data.Movement.Position += new Vector2(wallDist, 0f);
+			data.Movement.Position.X += wallDistance;
 			data.Movement.Velocity.X = 0f;
 			return true;
 		}
@@ -81,7 +82,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 
 		MovementData movement = data.Movement;
 		
-		movement.Position -= new Vector2(0f, roofDistance);
+		movement.Position.Y -= roofDistance;
 		if (moveQuadrant == Angles.Quadrant.Up && logic.Action != States.Flight && 
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
@@ -127,7 +128,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 		
-		data.Movement.Position += new Vector2(0f, distance);
+		data.Movement.Position.Y += distance;
 		data.Movement.Angle = angle;
 		
 		logic.Land();

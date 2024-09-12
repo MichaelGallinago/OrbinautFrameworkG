@@ -53,7 +53,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
 	
         if (!movement.IsSpinning)
         {
-            movement.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusSpin.Y);
+            movement.Position.Y += collision.Radius.Y - collision.RadiusSpin.Y;
             collision.Radius = collision.RadiusSpin;
         }
 #if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS

@@ -166,7 +166,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 			
 		if (data.Visual.Facing == Constants.Direction.Negative)
 		{
-			data.Movement.Position += Vector2.Right;
+			data.Movement.Position.X++;
 		}
 		
 		data.Sprite.Animation = Animations.ClimbWall;
@@ -200,7 +200,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		if (floorDistance is < 0 or >= 12) return true;
 
 		// Adjust Knuckles' y-position to place him just below the edge
-		data.Movement.Position += new Vector2(0f, floorDistance);
+		data.Movement.Position.Y += floorDistance;
 		return false;
 	}
 }

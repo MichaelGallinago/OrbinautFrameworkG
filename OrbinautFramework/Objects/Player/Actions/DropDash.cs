@@ -42,7 +42,7 @@ public struct DropDash(PlayerData data)
     {
     	if (_charge < MaxCharge) return States.Default;
     	
-    	data.Movement.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+    	data.Movement.Position.Y += data.Collision.Radius.Y - data.Collision.RadiusSpin.Y;
 	    data.Collision.Radius = data.Collision.RadiusSpin;
 
 	    SetGroundSpeed();

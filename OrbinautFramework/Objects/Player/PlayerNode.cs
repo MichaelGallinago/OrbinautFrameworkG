@@ -22,7 +22,7 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 	public IMemento Memento { get; private set; }
 
 	protected PlayerLogic PlayerLogic;
-
+	
 	public override void _EnterTree()
 	{
 		base._EnterTree();

@@ -49,7 +49,7 @@ public readonly struct ClimbLedge(PlayerData data, IPlayerLogic logic)
         // Subtract that 1px that was applied when we attached to the wall
         if (data.Visual.Facing == Constants.Direction.Negative)
         {
-            data.Movement.Position += Vector2.Left;
+            data.Movement.Position.X--;
         }
     }
 }

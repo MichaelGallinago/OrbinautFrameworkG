@@ -66,7 +66,7 @@ public readonly struct Rolling(PlayerData data)
         if (movement.GroundSpeed != 0f) return;
 #endif
 		
-        movement.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusNormal.Y);
+        movement.Position.Y += data.Collision.Radius.Y - data.Collision.RadiusNormal.Y;
 		
         movement.IsSpinning = false;
         data.Collision.Radius = data.Collision.RadiusNormal;

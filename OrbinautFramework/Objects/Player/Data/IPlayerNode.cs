@@ -6,14 +6,23 @@ namespace OrbinautFramework3.Objects.Player.Data;
 
 public interface IPlayerNode : IPosition
 {
-    Vector2 PreviousPosition { get; }
-    //Vector2 Scale { get; set; }
-    //int ZIndex { get; set; }
-    //float RotationDegrees { get; set; }
-    //bool Visible { get; set; }
+    //TODO: limit set access in player
+    int ZIndex { get; set; }
+    bool Visible { get; set; }
+    Vector2 Scale { get; set; }
+    float RotationDegrees { get; set; }
+
+    void SetData(int zIndex, bool visible, Vector2 scale, Vector2 position)
+    {
+        Scale = scale;
+        ZIndex = zIndex;
+        Visible = visible;
+        Position = position;
+    }
     
-    PlayerNode.Types Type { get; }
     HitBox HitBox { get; }
     SolidBox SolidBox { get; }
+    PlayerNode.Types Type { get; }
     ShieldContainer Shield { get; }
+    Vector2 PreviousPosition { get; }
 }

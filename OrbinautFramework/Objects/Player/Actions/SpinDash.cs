@@ -42,21 +42,22 @@ public struct SpinDash(PlayerData data)
     {
 	    data.Node.SetCameraDelayX(16f);
     	
-	    data.Movement.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+	    MovementData movement = data.Movement;
+	    movement.Position.Y += data.Collision.Radius.Y - data.Collision.RadiusSpin.Y;
 	    data.Collision.Radius = data.Collision.RadiusSpin;
 	    data.Sprite.Animation = Animations.Spin;
-	    data.Movement.IsSpinning = true;
+	    movement.IsSpinning = true;
 
 	    float baseSpeed = data.Super.IsSuper ? 11f : 8f;
-	    data.Movement.GroundSpeed.Value = (baseSpeed + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
+	    movement.GroundSpeed.Value = (baseSpeed + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
     	
 	    AudioPlayer.Sound.Stop(SoundStorage.Charge);
 	    AudioPlayer.Sound.Play(SoundStorage.Release);
     	
-	    data.Movement.IsCorePhysicsSkipped = true;
+	    movement.IsCorePhysicsSkipped = true;
 	    
 	    if (!SharedData.FixDashRelease) return;
-	    data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
+	    movement.Velocity.SetDirectionalValue(movement.GroundSpeed, movement.Angle);
     }
 
     private void Charge()

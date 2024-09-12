@@ -7,7 +7,7 @@ public interface IPlayerPosition : IPosition, IPlayerDataStorage
 {
     Vector2 IPosition.Position
     {
-        get => Data.Movement.Position; 
-        set => Data.Movement.Position = value;
+        get => Data.Node.Position; 
+        set => Data.Node.Position = value;
     }
 }

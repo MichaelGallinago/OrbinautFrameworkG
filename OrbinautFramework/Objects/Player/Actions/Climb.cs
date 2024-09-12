@@ -99,8 +99,8 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 			Constants.Direction.Negative);
 
 		if (ceilDistance >= 0) return;
-		data.Movement.Position -= new Vector2(0f, ceilDistance);
 		data.Movement.Velocity.Y = 0f;
+		data.Movement.Position.Y -= ceilDistance;
 	}
 
 	private States Release(int radiusX)
@@ -125,10 +125,9 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 		
 		if (distance >= 0) return States.Climb;
 		
-		var position = new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
-		data.Movement.Position += position;
+		data.Movement.Position.Y += distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y;
 		data.Movement.Angle = angle;
-				
+		
 		logic.Land();
 
 		data.Sprite.Animation = Animations.Idle;
@@ -146,7 +145,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 			{
 				_animationValue = 0f;
 			}
-
+			
 			data.Movement.Velocity.Y = -data.Physics.AccelerationClimb;
 			return;
 		}

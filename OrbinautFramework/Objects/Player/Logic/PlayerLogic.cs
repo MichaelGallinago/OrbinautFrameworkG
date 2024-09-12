@@ -16,7 +16,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
     public TileCollider TileCollider { get; }
     public DataUtilities DataUtilities { get; }
     public ControlType ControlType { get; private set; }
-
+    
     public ref Damage Damage => ref _damage;
     public ref ObjectInteraction ObjectInteraction => ref _objectInteraction;
     
@@ -84,8 +84,11 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
         
         _collisionBoxes.Update();
         _palette.Process();
-    }
 
+        VisualData visual = Data.Visual;
+        Data.Node.SetData(visual.ZIndex, visual.Visible, visual.Scale, Data.Movement.Position);
+    }
+    
     private void ProcessState()
     {
         if (Data.Death.State == Death.States.Wait && ControlType.SwitchDebugMode()) return;

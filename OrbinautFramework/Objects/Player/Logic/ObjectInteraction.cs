@@ -253,7 +253,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			}
 		}
 
-		movement.Position -= new Vector2(clipX, 0f);
+		movement.Position.X -= clipX;
 	}
 	
 	private bool CollideVertically(int clipY)
@@ -304,7 +304,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 				movement.GroundSpeed.Value = 0f;
 			}
 #endif
-			movement.Position -= new Vector2(0, clipY);
+			movement.Position.Y -= clipY;
 			movement.Velocity.Y = 0f;
 		}
 

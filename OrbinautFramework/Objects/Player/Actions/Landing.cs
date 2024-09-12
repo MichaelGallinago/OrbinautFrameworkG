@@ -56,7 +56,7 @@ public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 		Landed();
 		
 		if (movement.IsSpinning) return;
-		movement.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusNormal.Y);
+		movement.Position.Y += collision.Radius.Y - collision.RadiusNormal.Y;
 		collision.Radius = collision.RadiusNormal;
 	}
     
