@@ -17,12 +17,13 @@ public readonly struct Position(PlayerData data)
     
     public void UpdateGround()
     {
+        MovementData movement = data.Movement;
         if (data.Collision.IsStickToConvex)
         {
-            data.Movement.Velocity.Clamp(MinimalVelocity, MaximalVelocity);
+            movement.Velocity.Clamp(MinimalVelocity, MaximalVelocity);
         }
 		
-        data.Node.Position = data.Movement.Velocity.CalculateNewPosition(data.Node.Position);
-        data.Movement.Velocity.ResetInstantVelocity();
+        movement.Position = movement.Velocity.CalculateNewPosition(movement.Position);
+        movement.Velocity.ResetInstantVelocity();
     }
 }

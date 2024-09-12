@@ -50,14 +50,13 @@ public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 
 		CollisionData collision = data.Collision;
 		collision.TileBehaviour = Constants.TileBehaviours.Floor;
-
-		IPlayerNode node = data.Node;
-		node.Shield.State = ShieldContainer.States.None;
+		
+		data.Node.Shield.State = ShieldContainer.States.None;
 
 		Landed();
 		
 		if (movement.IsSpinning) return;
-		node.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusNormal.Y);
+		movement.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusNormal.Y);
 		collision.Radius = collision.RadiusNormal;
 	}
     

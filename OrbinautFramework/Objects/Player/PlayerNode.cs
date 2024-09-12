@@ -43,10 +43,6 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 		Scene.Instance.Players.CountChanged.Unsubscribe(PlayerLogic);
 	}
 	
-	public override void _Process(double delta)
-	{
-		PlayerLogic.Process();
-	}
-
+	public override void _Process(double delta) => PlayerLogic.Process();
 	public void Init() => PlayerLogic.Init();
 }

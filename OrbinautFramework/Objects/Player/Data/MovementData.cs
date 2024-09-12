@@ -11,19 +11,23 @@ public class MovementData
     public bool IsJumping { get; set; }
     public bool IsGrounded { get; set; }
     public bool IsSpinning { get; set; }
-    public Vector2 Position { get; set; }
     public bool IsForcedRoll { get; set; }
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }
     
     public Velocity Velocity { get; } = new();
     public AcceleratedValue GroundSpeed { get; } = new();
+
+    public ref Vector2 Position => ref _position;
+    private Vector2 _position;
     
-    public void Init()
+    public void Init(Vector2 position)
     {
         IsGrounded = true;
         IsJumping = false;
         IsForcedRoll = false;
+        
+        _position = position;
         
         Gravity = GravityType.Default;
         Velocity.Vector = Vector2.Zero;

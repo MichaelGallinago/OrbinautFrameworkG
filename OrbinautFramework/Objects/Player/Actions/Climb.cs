@@ -16,9 +16,10 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 	private float _animationValue = 0f;
 	
 	public States Perform()
-    {
-	    if (!Mathf.IsEqualApprox(data.Node.Position.X, data.Node.PreviousPosition.X)) return Release(); 
-	    if (data.Movement.Velocity.X != 0f) return Release();
+	{
+		MovementData movement = data.Movement;
+	    if (!Mathf.IsEqualApprox(movement.Position.X, data.Node.PreviousPosition.X)) return Release(); 
+	    if (movement.Velocity.X != 0f) return Release();
 	    
 	    UpdateVerticalVelocity(data.Sprite.FrameCount * StepsPerClimbFrame);
 		
@@ -28,9 +29,9 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 		    radiusX++;
 	    }
 		
-	    logic.TileCollider.SetData((Vector2I)data.Node.Position, data.Collision.TileLayer);
+	    logic.TileCollider.SetData((Vector2I)movement.Position, data.Collision.TileLayer);
 
-	    States state = data.Movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : Release(radiusX);
+	    States state = movement.Velocity.Y < 0 ? ClimbUpOntoWall(radiusX) : Release(radiusX);
 	    if (state != States.Climb) return state;
 		
 	    if (data.Input.Press.Aby)
@@ -57,10 +58,9 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 	
 	private void UpdateAnimationFrame()
 	{
-		if (data.Movement.Velocity.Y != 0)
-		{
-			data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / StepsPerClimbFrame);
-		}
+		if (data.Movement.Velocity.Y == 0f) return;
+		
+		data.Visual.OverrideFrame = Mathf.FloorToInt(_animationValue / StepsPerClimbFrame);
 	}
 	
 	private States ClimbUpOntoWall(int radiusX)
@@ -99,7 +99,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 			Constants.Direction.Negative);
 
 		if (ceilDistance >= 0) return;
-		data.Node.Position -= new Vector2(0f, ceilDistance);
+		data.Movement.Position -= new Vector2(0f, ceilDistance);
 		data.Movement.Velocity.Y = 0f;
 	}
 
@@ -126,7 +126,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 		if (distance >= 0) return States.Climb;
 		
 		var position = new Vector2(0f, distance + data.Collision.RadiusNormal.Y - data.Collision.Radius.Y);
-		data.Node.Position += position;
+		data.Movement.Position += position;
 		data.Movement.Angle = angle;
 				
 		logic.Land();

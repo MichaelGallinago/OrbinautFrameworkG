@@ -40,7 +40,7 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
 	
         if (floorDistance > 14) return false;
 			
-        data.Node.Position += new Vector2(0f, floorDistance);
+        data.Movement.Position += new Vector2(0f, floorDistance);
         data.Movement.Angle = floorAngle;
         return true;
     }

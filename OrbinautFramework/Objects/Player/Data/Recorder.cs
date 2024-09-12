@@ -12,7 +12,7 @@ public class Recorder(PlayerData playerData)
     public ReadOnlySpan<DataRecord> Data => _data;
     
     private DataRecord NewRecord => new(
-        (Vector2I)playerData.Node.Position,
+        (Vector2I)playerData.Movement.Position,
         playerData.Input.Press, 
         playerData.Input.Down, 
         playerData.Visual.Facing, 

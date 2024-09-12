@@ -53,8 +53,6 @@ public partial class Scene : Node2D
         
         Tree = GetTree();
         
-        AttachCamerasToPlayer();
-        
 #if DEBUG
         AddChild(_debug);
 #endif
@@ -97,20 +95,10 @@ public partial class Scene : Node2D
 
     public bool IsTimePeriodLooped(float period) => Time % period - Speed < 0f;
     public bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - Speed < 0f;
-
+    
     private void UpdateSpeed(double deltaTime)
     {
         Speed = Engine.MaxFps is <= Constants.BaseFramerate and > 0 ? 
             1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
-    }
-    
-    private void AttachCamerasToPlayer()
-    {
-        ReadOnlySpan<ICamera> cameras = Views.Cameras;
-        int count = Math.Min(cameras.Length, Players.Count);
-        for (var i = 0; i < count; i++)
-        {
-            cameras[i].Target = Players.Values[i].Data.Node;
-        }
     }
 }

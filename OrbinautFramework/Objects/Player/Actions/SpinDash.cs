@@ -42,7 +42,7 @@ public struct SpinDash(PlayerData data)
     {
 	    data.Node.SetCameraDelayX(16f);
     	
-	    data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
+	    data.Movement.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
 	    data.Collision.Radius = data.Collision.RadiusSpin;
 	    data.Sprite.Animation = Animations.Spin;
 	    data.Movement.IsSpinning = true;

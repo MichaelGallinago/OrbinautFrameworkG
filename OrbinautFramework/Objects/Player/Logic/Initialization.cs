@@ -10,7 +10,9 @@ public readonly struct Initialization(PlayerData data)
 {
     public void Init()
     {
-        data.Collision.Init(data.Node.Type);
+        IPlayerNode node = data.Node;
+        data.Collision.Init(node.Type);
+        data.Movement.Init(node.Position);
         
         data.Cpu.Init();
         data.Item.Init();
@@ -19,12 +21,10 @@ public readonly struct Initialization(PlayerData data)
         data.Water.Init();
         data.Damage.Init();
         data.Visual.Init();
-        data.Movement.Init();
         
         data.Input.Clear();
         data.Input.NoControl = false;
-
-        IPlayerNode node = data.Node;
+        
         data.Visual.Visible = true;
         node.Shield.State = ShieldContainer.States.None;
         node.RotationDegrees = 0f;

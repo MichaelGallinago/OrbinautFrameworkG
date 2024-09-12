@@ -136,8 +136,8 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 			data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.FireDash;
 		}
 
-		//TODO: check data.PlayerNode.ZIndex
-		data.Node.ZIndex = -1;
+		//TODO: check data.Visual.ZIndex
+		data.Visual.ZIndex = -1;
 
 		AudioPlayer.Sound.Play(SoundStorage.ShieldFire2);
 	}

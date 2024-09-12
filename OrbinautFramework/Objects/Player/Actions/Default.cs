@@ -38,43 +38,45 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
     
     private bool Jump()
     {
-        if (data.Movement.IsForcedRoll || !data.Movement.IsGrounded) return false;
+        MovementData movement = data.Movement;
+        if (movement.IsForcedRoll || !movement.IsGrounded) return false;
         if (!CheckCeilingDistance()) return false;
-        
+
+        CollisionData collision = data.Collision;
 #if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
         if (!SharedData.FixJumpSize)
         {
             // Why do they even do that?
-            data.Collision.Radius = data.Collision.RadiusNormal;
+            collision.Radius = collision.RadiusNormal;
         }
 #endif
 	
-        if (!data.Movement.IsSpinning)
+        if (!movement.IsSpinning)
         {
-            data.Node.Position += new Vector2(0f, data.Collision.Radius.Y - data.Collision.RadiusSpin.Y);
-            data.Collision.Radius = data.Collision.RadiusSpin;
+            movement.Position += new Vector2(0f, collision.Radius.Y - collision.RadiusSpin.Y);
+            collision.Radius = collision.RadiusSpin;
         }
 #if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
         else if (!SharedData.NoRollLock)
         {
-            data.Movement.IsAirLock = true;
+            movement.IsAirLock = true;
         }
 #endif
 		
-        float radians = Mathf.DegToRad(data.Movement.Angle);
+        float radians = Mathf.DegToRad(movement.Angle);
         var velocity = new Vector2(MathF.Sin(radians), MathF.Cos(radians));
-        data.Movement.Velocity.Vector += data.Physics.JumpSpeed * velocity;
+        movement.Velocity.Vector += data.Physics.JumpSpeed * velocity;
         
-        data.Movement.IsGrounded = false;
-        data.Movement.IsCorePhysicsSkipped = true;
+        movement.IsGrounded = false;
+        movement.IsCorePhysicsSkipped = true;
 		
-        data.Collision.OnObject = null;
-        data.Collision.IsStickToConvex = false;
+        collision.OnObject = null;
+        collision.IsStickToConvex = false;
 		
         data.Visual.SetPushBy = null;
         
         AudioPlayer.Sound.Play(SoundStorage.Jump);
-
+        
         return true;
     }
     
@@ -83,7 +85,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
         const int maxCeilingDistance = 6;
 
         CollisionData collision = data.Collision;
-        logic.TileCollider.SetData((Vector2I)data.Node.Position, collision.TileLayer, collision.TileBehaviour);
+        logic.TileCollider.SetData((Vector2I)data.Movement.Position, collision.TileLayer, collision.TileBehaviour);
 
         Vector2I radius = collision.Radius;
         int distance = collision.TileBehaviour switch
