@@ -2,8 +2,7 @@ namespace OrbinautFramework3.Framework;
 
 public static class Constants
 {
-	public const byte BaseFramerate = 60;
-	
+	public const byte BaseFrameRate = 60;
 	public const byte RenderBuffer = 8;
 	
 	public const ushort TileLimit = 256;
@@ -42,7 +41,7 @@ public static class Constants
 		Full, Top, Sides, ItemBox
 	}
 	
-	public enum AttachType
+	public enum AttachType : byte
 	{
 		Default, None, ResetPlayer
 	}

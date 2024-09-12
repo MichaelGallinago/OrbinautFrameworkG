@@ -98,7 +98,7 @@ public partial class Scene : Node2D
     
     private void UpdateSpeed(double deltaTime)
     {
-        Speed = Engine.MaxFps is <= Constants.BaseFramerate and > 0 ? 
-            1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFramerate));
+        Speed = Engine.MaxFps is <= Constants.BaseFrameRate and > 0 ? 
+            1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFrameRate));
     }
 }

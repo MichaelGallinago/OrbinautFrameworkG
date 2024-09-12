@@ -17,8 +17,9 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValuesProvider<EnumToProcess?> enums = context.SyntaxProvider.CreateSyntaxProvider(
-            predicate: static (syntax, cancellationToken) => syntax.IsKind(SyntaxKind.Attribute),
-            transform: static (ctx, cancellationToken) => GetSemanticTargetForGeneration(ctx, cancellationToken))
+            predicate: static (syntax, _) => syntax.IsKind(SyntaxKind.Attribute),
+            transform: static (ctx, cancellationToken) => 
+                GetSemanticTargetForGeneration(ctx, cancellationToken))
         .Where(static m => m is not null);
 
         IncrementalValueProvider<ImmutableArray<EnumToProcess?>> enumToProcess = enums.Collect();
@@ -27,50 +28,47 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
             (spc, source) => GenerateCode(spc, source!));
     }
     
-    private static EnumToProcess? GetSemanticTargetForGeneration(GeneratorSyntaxContext ctx, CancellationToken cancellationToken)
+    private static EnumToProcess? GetSemanticTargetForGeneration(
+        GeneratorSyntaxContext ctx, CancellationToken cancellationToken)
     {
         Compilation compilation = ctx.SemanticModel.Compilation;
-        INamedTypeSymbol? fastEnumToStringAttributeSymbol = 
+        INamedTypeSymbol? attributeSymbol = 
             compilation.GetTypeByMetadataName("EnumToStringNameSourceGenerator.EnumToStringNameAttribute");
-        if (fastEnumToStringAttributeSymbol is null)
-            return null;
+        
+        if (attributeSymbol is null) return null;
 
         var attributeSyntax = (AttributeSyntax)ctx.Node;
         foreach (AttributeData? attribute in compilation.Assembly.GetAttributes())
         {
             if (attribute.ApplicationSyntaxReference?.GetSyntax(cancellationToken) != attributeSyntax) continue;
-
-            if (!fastEnumToStringAttributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) continue;
-
+            if (!attributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) continue;
             if (attribute.ConstructorArguments.Length != 1) continue;
-
+            
             TypedConstant argument = attribute.ConstructorArguments[0];
             if (argument.Value is null) continue;
 
             var enumType = (ITypeSymbol)argument.Value;
             if (enumType.TypeKind != TypeKind.Enum) continue;
 
-            return new EnumToProcess(enumType, GetMembers(), IsPublic(enumType, attribute), GetNamespace(attribute));
-
-            List<EnumMemberToProcess> GetMembers()
-            {
-                var result = new List<EnumMemberToProcess>();
-                foreach (var member in enumType.GetMembers())
-                {
-                    if (member is not IFieldSymbol field)
-                        continue;
-
-                    if (field.ConstantValue is null)
-                        continue;
-
-                    result.Add(new(member.Name, field.ConstantValue));
-                }
-
-                return result;
-            }
+            bool isPublic = IsPublic(enumType, attribute);
+            return new EnumToProcess(enumType, GetMembers(enumType), isPublic, GetNamespace(attribute));
         }
 
         return null;
+    }
+    
+    private static List<EnumMemberToProcess> GetMembers(INamespaceOrTypeSymbol enumType)
+    {
+        var result = new List<EnumMemberToProcess>();
+        foreach (ISymbol? member in enumType.GetMembers())
+        {
+            if (member is not IFieldSymbol field) continue;
+            if (field.ConstantValue is null) continue;
+
+            result.Add(new EnumMemberToProcess(member.Name, field.ConstantValue));
+        }
+
+        return result;
     }
 
     private static bool IsPublic(ISymbol enumType, AttributeData attribute)
@@ -93,68 +91,92 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         {
             if (argument.Key == "ExtensionMethodNamespace") return (string?)argument.Value.Value;
         }
-
+        
         return null;
     }
 
     private static void GenerateCode(SourceProductionContext context, ImmutableArray<EnumToProcess> enumToProcess)
     {
         string code = GenerateCode(enumToProcess);
-        context.AddSource("FastEnumToStringExtensions.g.cs", SourceText.From(code, Encoding.UTF8));
+        context.AddSource("EnumToStringNameExtensions.g.cs", SourceText.From(code, Encoding.UTF8));
     }
 
     private static string GenerateCode(ImmutableArray<EnumToProcess> enums)
     {
         var sb = new StringBuilder();
-
-        foreach (IGrouping<string?, EnumToProcess>? enumerationGroup in enums.GroupBy(en => en.FullNamespace, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.Ordinal))
+        var tempSb = new StringBuilder();
+        
+        IOrderedEnumerable<IGrouping<string?, EnumToProcess>> groups = 
+            enums.GroupBy(en => en.FullNamespace, StringComparer.Ordinal)
+                .OrderBy(g => g.Key, StringComparer.Ordinal);
+        
+        foreach (IGrouping<string?, EnumToProcess>? enumerationGroup in groups)
         {
             bool typeIsPublic = enumerationGroup.Any(enumeration => enumeration.IsPublic);
             string typeVisibility = typeIsPublic ? "public" : "internal";
 
-            foreach (EnumToProcess? enumeration in enumerationGroup.OrderBy(e => e.FullCsharpName, StringComparer.Ordinal))
+            IOrderedEnumerable<EnumToProcess> enumerations = 
+                enumerationGroup.OrderBy(e => e.FullCsharpName, StringComparer.Ordinal);
+            
+            foreach (EnumToProcess? enumeration in enumerations)
             {
-                string methodVisibility = enumeration.IsPublic ? "public" : "internal";
-
-                if (!string.IsNullOrEmpty(enumeration.FullNamespace))
-                {
-                    sb.Append("namespace ").Append(enumeration.FullNamespace).AppendLine();
-                    sb.AppendLine("{");
-                }
-
-                sb.AppendLine($"/// <summary>A class with memory-optimized alternative to regular ToString() on enums.</summary>");
-                sb.Append(typeVisibility).AppendLine(" static partial class FastEnumToStringExtensions");
-                sb.AppendLine("{");
-
-                sb.Append("    ")
-                  .Append("/// <summary>A memory-optimized alternative to regular ToString() method on <see cref=\"")
-                  .Append(enumeration.DocumentationId)
-                  .Append("\">")
-                  .Append(enumeration.FullCsharpName)
-                  .Append(" enum</see>.</summary>\"")
-                  .AppendLine();
-                sb.Append("    ").Append(methodVisibility).Append(" static string ToStringFast(this global::").Append(enumeration.FullCsharpName).AppendLine(" value)");
-                sb.AppendLine("    {");
-                sb.AppendLine("        return value switch");
-                sb.AppendLine("        {");
-                foreach (EnumMemberToProcess? member in enumeration.Members)
-                {
-                    sb.Append("            ").Append(enumeration.FullCsharpName).Append('.').Append(member.Name).Append(" => nameof(").Append(enumeration.FullCsharpName).Append('.').Append(member.Name).AppendLine("),");
-                }
-
-                sb.AppendLine("        _ => value.ToString(),");
-                sb.AppendLine("        };");
-                sb.AppendLine("    }");
-                sb.AppendLine("}");
-
-                if (!string.IsNullOrEmpty(enumeration.FullNamespace))
-                {
-                    sb.AppendLine("}");
-                }
+                AddClass(sb, tempSb, enumeration, typeVisibility);
             }
         }
 
         return sb.ToString();
+    }
+
+    private static void AddClass(
+        StringBuilder sb, StringBuilder tempSb, EnumToProcess enumeration, string typeVisibility)
+    {
+        string methodVisibility = enumeration.IsPublic ? "public" : "internal";
+
+        bool addNamespace = !string.IsNullOrEmpty(enumeration.FullNamespace);
+        if (addNamespace)
+        {
+            sb.Append(
+$$"""
+namespace {{enumeration.FullNamespace}}
+{
+"""
+            );
+        }
+
+        sb.Append(
+$$"""
+    /// <summary>A class with memory-optimized alternative to regular ToString() on enums.</summary>
+    {{typeVisibility}} static partial class FastEnumToStringExtensions
+    {
+        /// <summary>A memory-optimized alternative to regular ToString() method on <see cref="{{enumeration.DocumentationId}}>{{enumeration.FullCsharpName}} enum</see>.</summary>"
+        {{methodVisibility}} static string ToStringFast(this global::{{enumeration.FullCsharpName}} value)
+        {
+            return value switch
+            {
+{{GenerateSwitchCases(tempSb, enumeration)}}
+                _ => value.ToString()
+            }
+        }
+    }
+"""
+        );
+
+        if (addNamespace)
+        {
+            sb.AppendLine("}");
+        }
+    }
+
+    private static string GenerateSwitchCases(StringBuilder tempSb, EnumToProcess enumeration)
+    {
+        tempSb.Clear();
+        foreach (EnumMemberToProcess? member in enumeration.Members)
+        {
+            tempSb.Append(
+$"                {enumeration.FullCsharpName}.{member.Name} => nameof({enumeration.FullCsharpName}.{member.Name}),");
+        }
+
+        return tempSb.ToString();
     }
 
     private static bool IsVisibleOutsideOfAssembly([NotNullWhen(true)] ISymbol? symbol)
@@ -177,7 +199,7 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         public string? FullNamespace { get; } = Namespace ?? GetNamespace(EnumSymbol);
         public string DocumentationId { get; } = DocumentationCommentId.CreateDeclarationId(EnumSymbol);
 
-        private static string? GetNamespace(ITypeSymbol symbol)
+        private static string? GetNamespace(ISymbol symbol)
         {
             string? result = null;
             INamespaceSymbol? ns = symbol.ContainingNamespace;
