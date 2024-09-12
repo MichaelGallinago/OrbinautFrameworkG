@@ -1,9 +1,10 @@
-[gd_scene load_steps=20 format=4 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=22 format=4 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Framework/Zone.cs" id="1_hs30b"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="AudioStream" uid="uid://bwmucj4rmfb0v" path="res://Audio/Music/woofle.wav" id="2_x70dy"]
 [ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="3_8004u"]
+[ext_resource type="Script" path="res://Framework/LimitedSize.cs" id="3_buo2i"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="Script" path="res://CollisionTileMap.cs" id="5_movty"]
@@ -20,6 +21,10 @@
 [ext_resource type="PackedScene" uid="uid://bwifksf6vle21" path="res://Objects/Player/Spawner/player_spawner.tscn" id="21_cuvbg"]
 [ext_resource type="PackedScene" uid="uid://cblfy0r4gctwc" path="res://Objects/Common/Bridge/Stump/tsz_abutment.tscn" id="27_5j4pt"]
 
+[sub_resource type="Resource" id="Resource_a08h0"]
+script = ExtResource("3_buo2i")
+Vector = Vector2i(65535, 65535)
+
 [node name="StageTSZ" type="Node2D" node_paths=PackedStringArray("CollisionTileMapMain", "CollisionTileMapSecondary", "Views")]
 process_priority = -1
 texture_filter = 1
@@ -29,6 +34,7 @@ Music = ExtResource("2_x70dy")
 CollisionTileMapMain = NodePath("TileMaps/CollisionTileMapMain")
 CollisionTileMapSecondary = NodePath("TileMaps/CollisionTIleMapSecondary")
 Views = NodePath("Views")
+Size = SubResource("Resource_a08h0")
 
 [node name="Views" parent="." instance=ExtResource("3_8004u")]
 

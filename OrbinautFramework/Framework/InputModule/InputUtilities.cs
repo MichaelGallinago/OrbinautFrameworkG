@@ -5,7 +5,7 @@ namespace OrbinautFramework3.Framework.InputModule;
 
 public static class InputUtilities
 {
-    // Input (keyboard and first gamepad slot are treated as one device)
+    // Input (keyboard and first joypad slot are treated as one device)
     public const byte MaxInputDevices = 4;
     
     private const byte KeyboardId = 0;
@@ -99,15 +99,16 @@ public static class InputUtilities
         down.Aby = down.A || down.B || down.Y;
 
         Buttons press = Down[KeyboardId];
-        press.Up = !press.Up && down.Up;
-        press.Down = !press.Down && down.Down;
-        press.Left = !press.Left && down.Left;
-        press.Right = !press.Right && down.Right;
         press.A = !press.A && down.A;
         press.B = !press.B && down.B;
         press.X = !press.X && down.X;
         press.Y = !press.Y && down.Y;
+        press.Up = !press.Up && down.Up;
+        press.Down = !press.Down && down.Down;
+        press.Left = !press.Left && down.Left;
+        press.Right = !press.Right && down.Right;
         press.Start = !press.Start && down.Start;
+        
         press.Aby = press.A || press.B || press.Y;
         
         if (down is { Left: true, Right: true })
@@ -128,28 +129,28 @@ public static class InputUtilities
     {
         foreach (KeyboardControl control in KeyboardControl)
         {
-            down.Up    = down.Up    || Input.IsPhysicalKeyPressed(control.Up);
-            down.Down  = down.Down  || Input.IsPhysicalKeyPressed(control.Down);
-            down.Left  = down.Left  || Input.IsPhysicalKeyPressed(control.Left);
-            down.Right = down.Right || Input.IsPhysicalKeyPressed(control.Right);
             down.A     = down.A     || Input.IsPhysicalKeyPressed(control.A);
             down.B     = down.B     || Input.IsPhysicalKeyPressed(control.B);
             down.X     = down.X     || Input.IsPhysicalKeyPressed(control.X);
             down.Y     = down.Y     || Input.IsPhysicalKeyPressed(control.Y);
+            down.Up    = down.Up    || Input.IsPhysicalKeyPressed(control.Up);
+            down.Down  = down.Down  || Input.IsPhysicalKeyPressed(control.Down);
+            down.Left  = down.Left  || Input.IsPhysicalKeyPressed(control.Left);
+            down.Right = down.Right || Input.IsPhysicalKeyPressed(control.Right);
             down.Start = down.Start || Input.IsPhysicalKeyPressed(control.Start);
         }
     }
 
     private static void JoypadProcess(int device, ref Buttons down)
     {
-        down.Up    = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
-        down.Down  = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
-        down.Left  = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
-        down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
         down.A     = Input.IsJoyButtonPressed(device, JoyButton.A);
         down.B     = Input.IsJoyButtonPressed(device, JoyButton.B);
         down.X     = Input.IsJoyButtonPressed(device, JoyButton.X);
         down.Y     = Input.IsJoyButtonPressed(device, JoyButton.Y);
+        down.Up    = Input.IsJoyButtonPressed(device, JoyButton.DpadUp);
+        down.Down  = Input.IsJoyButtonPressed(device, JoyButton.DpadDown);
+        down.Left  = Input.IsJoyButtonPressed(device, JoyButton.DpadLeft);
+        down.Right = Input.IsJoyButtonPressed(device, JoyButton.DpadRight);
         down.Start = Input.IsJoyButtonPressed(device, JoyButton.Start);
     }
 }

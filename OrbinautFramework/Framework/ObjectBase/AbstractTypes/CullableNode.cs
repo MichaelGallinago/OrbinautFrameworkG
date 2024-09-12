@@ -4,26 +4,27 @@ namespace OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 
 public partial class CullableNode : Node2D, ICullable, IPosition
 {
-    [Export] public ICullable.Types CullingType
+    public ICullable.Types CullingType
     {
-        get => _culling;
+        get => _cullingType;
         set
         {
-            switch (_culling) //TODO: remove this?
+            bool isCullable = value != ICullable.Types.None;
+            switch (_cullingType)
             {
-                case ICullable.Types.None:
-                    ObjectCuller.Local.Add(this);
+                case ICullable.Types.None when isCullable:
+                    Scene.Instance.Culler.Add(this);
                     break;
                 default:
-                    if (value != ICullable.Types.None) break;
-                    ObjectCuller.Local.Remove(this);
+                    if (isCullable) break;
+                    Scene.Instance.Culler.Remove(this);
                     break;
             }
-
-            _culling = value;
+            
+            _cullingType = value;
         }
     }
-    private ICullable.Types _culling;
+    [Export] private ICullable.Types _cullingType;
     
     public new Vector2 Position
     {
@@ -40,7 +41,7 @@ public partial class CullableNode : Node2D, ICullable, IPosition
     {
         if (CullingType != ICullable.Types.None)
         {
-            ObjectCuller.Local.Add(this);
+            Scene.Instance.Culler.Add(this);
         }
     }
     
@@ -48,7 +49,7 @@ public partial class CullableNode : Node2D, ICullable, IPosition
     {
         if (CullingType != ICullable.Types.None)
         {
-            ObjectCuller.Local.Remove(this);
+            Scene.Instance.Culler.Remove(this);
         }
     }
 }

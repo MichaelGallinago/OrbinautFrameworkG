@@ -64,7 +64,7 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
             case < 0f: movement.Velocity.MinX(0f); break;
         }
     }
-
+    
     private bool StopSliding()
     {
         MovementData movement = data.Movement;

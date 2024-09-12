@@ -6,7 +6,7 @@ using OrbinautFramework3.Objects.Player.Logic;
 
 namespace OrbinautFramework3.Objects.Player.Actions;
 
-public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) //TODO: refactor this somehow????
+public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic)
 {
 	public bool CollideFloor()
 	{
@@ -15,7 +15,7 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 			-radius.X, radius.Y, radius.X, radius.Y, true, Constants.Direction.Positive);
 
 		if (floorDistance >= 0) return false;
-
+		
 		MovementData movement = data.Movement;
 		movement.Angle = floorAngle;
 		movement.Velocity.Y = 0f;
@@ -84,7 +84,7 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic) 
 			movement.Velocity.Y = 0f;
 		}
 	}
-
+	
 	private int GetRoofDistance()
 	{
 		Vector2I radius = data.Collision.Radius;
