@@ -7,9 +7,10 @@ public partial class SonicNode : PlayerNode
 {
     public override void _EnterTree()
     {
-        PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
+        PlayerLogic = new PlayerLogic(this, SpriteNode);
         PlayerLogic.SetDependencies(new BaseDependencyGenerator(PlayerLogic, PlayerLogic.Data));
-        base._EnterTree();
         SpriteNode.SpriteLogic = new SonicSpriteLogic(PlayerLogic.Data, SpriteNode);
+        
+        base._EnterTree();
     }
 }

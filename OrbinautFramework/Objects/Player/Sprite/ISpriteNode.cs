@@ -8,7 +8,6 @@ public interface ISpriteNode
     int Frame { get; set; }
     Vector2 Scale { get; set; }
     float FrameProgress { get; }
-    StringName Animation { get; }
     SpriteFrames SpriteFrames { get; }
     
     void SetFrameAndProgress(int frame, float progress);

@@ -7,9 +7,10 @@ public partial class KnucklesNode : PlayerNode
 {
     public override void _EnterTree()
     {
-        PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
+        PlayerLogic = new PlayerLogic(this, SpriteNode);
         PlayerLogic.SetDependencies(new BaseDependencyGenerator(PlayerLogic, PlayerLogic.Data));
-        base._EnterTree();
         SpriteNode.SpriteLogic = new KnucklesSpriteLogic(PlayerLogic.Data, SpriteNode);
+        
+        base._EnterTree();
     }
 }

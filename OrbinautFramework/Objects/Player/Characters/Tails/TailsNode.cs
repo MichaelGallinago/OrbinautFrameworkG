@@ -10,14 +10,12 @@ public partial class TailsNode : PlayerNode
 
     public override void _EnterTree()
     {
-        var tailsLogic = new TailsLogic(this, SpriteNode.PlayerSprite);
+        var tailsLogic = new TailsLogic(this, SpriteNode);
+        tailsLogic.SetDependencies(new CarrierDependencyGenerator(tailsLogic, tailsLogic.Data, tailsLogic.CarryData));
         PlayerLogic = tailsLogic;
-        PlayerLogic.SetDependencies(
-            new CarrierDependencyGenerator(PlayerLogic, PlayerLogic.Data, tailsLogic.CarryData));
+        SpriteNode.SpriteLogic = new TailsSpriteLogic(tailsLogic.Data, SpriteNode, tailsLogic.CarryData);
         
         base._EnterTree();
-        
-        SpriteNode.SpriteLogic = new TailsSpriteLogic(PlayerLogic.Data, SpriteNode, tailsLogic.CarryData);
     }
     
     public override void _Process(double delta)

@@ -7,9 +7,10 @@ public partial class AmyNode : PlayerNode
 {
     public override void _EnterTree()
     {
-        PlayerLogic = new PlayerLogic(this, SpriteNode.PlayerSprite);
+        PlayerLogic = new PlayerLogic(this, SpriteNode);
         PlayerLogic.SetDependencies(new BaseDependencyGenerator(PlayerLogic, PlayerLogic.Data));
-        base._EnterTree();
         SpriteNode.SpriteLogic = new AmySpriteLogic(PlayerLogic.Data, SpriteNode);
+        
+        base._EnterTree();
     }
 }
