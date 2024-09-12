@@ -64,9 +64,7 @@ public partial class ChopChop : InteractiveNode, IResetable
         {
             _moveTimer = MoveDuration;
             _velocity.X = -_velocity.X;
-            Vector2 scale = Scale;
-            scale.X = -scale.X;
-            Scale = scale;
+            Scale = VectorUtilities.FlipX(Scale);
         }
         
         Vector2 position = Position;
@@ -79,11 +77,11 @@ public partial class ChopChop : InteractiveNode, IResetable
     private void StartWaiting(Vector2 position)
     {
         IPlayer player = null; // TODO: instance_nearest(x, y, obj_player)
-        Vector2I dist = (Vector2I)position - (Vector2I)player.Position;
-        int absDistX = Math.Abs(dist.X);
+        Vector2I distance = (Vector2I)position - (Vector2I)player.Position;
+        int absDistanceX = Math.Abs(distance.X);
 
-        if (absDistX is < 32 or >= 100 || Math.Abs(dist.Y) >= 32f) return;
-        if (MathF.Sign(_velocity.X) == Math.Sign(dist.X)) return;
+        if (absDistanceX is < 32 or >= 100 || Math.Abs(distance.Y) >= 32f) return;
+        if (MathF.Sign(_velocity.X) == Math.Sign(distance.X)) return;
         
         _state = State.Wait;
         _moveTimer = 16f;
@@ -97,11 +95,11 @@ public partial class ChopChop : InteractiveNode, IResetable
         if (_moveTimer >= 0f) return;
         
         IPlayer player = null; // TODO: instance_nearest(x, y, obj_player)
-        Vector2I dist = (Vector2I)Position - (Vector2I)player.Position;
+        Vector2I distance = (Vector2I)Position - (Vector2I)player.Position;
         
-        _velocity.X = MathF.Sign(dist.X) * -2;
+        _velocity.X = MathF.Sign(distance.X) * -2;
 
-        if (MathF.Abs(dist.X) >= 16f)
+        if (MathF.Abs(distance.X) >= 16f)
         {
             _velocity.Y = 0.5f;
         }
