@@ -3,7 +3,7 @@
 namespace EnumToStringNameSourceGenerator;
 
 [System.Diagnostics.Conditional("EnumToStringName_Attributes")]
-[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Enum, AllowMultiple = true)]
 public sealed class EnumToStringNameAttribute(Type enumType, string className) : Attribute
 {
     public Type EnumType { get; } = enumType;

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -14,47 +12,48 @@ namespace EnumToStringNameSourceGenerator;
 [Generator]
 public sealed class EnumToStringNameGenerator : IIncrementalGenerator
 {
+    private const string AttributeName = nameof(EnumToStringNameAttribute);
+    private const string FullAttributeName = $"{nameof(EnumToStringNameSourceGenerator)}.{AttributeName}";
+    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValuesProvider<EnumToProcess?> enums = context.SyntaxProvider.CreateSyntaxProvider(
-            predicate: static (syntax, _) => syntax.IsKind(SyntaxKind.Attribute),
-            transform: static (ctx, cancellationToken) => 
-                GetSemanticTargetForGeneration(ctx, cancellationToken))
-        .Where(static m => m is not null);
+        IncrementalValueProvider<ImmutableArray<EnumToProcess?>> provider = 
+            context.SyntaxProvider.ForAttributeWithMetadataName(
+                FullAttributeName,
+                predicate: static (node, _) => node is EnumDeclarationSyntax,
+                transform: static (context, _) => GetSemanticTargetForGeneration(context))
+            .Collect();
 
-        IncrementalValueProvider<ImmutableArray<EnumToProcess?>> enumToProcess = enums.Collect();
-        
-        context.RegisterSourceOutput(enumToProcess, 
-            (spc, source) => GenerateCode(source!, spc));
+        context.RegisterSourceOutput(provider, 
+            (spc, source) => GenerateCode(spc, source!));
     }
     
-    private static EnumToProcess? GetSemanticTargetForGeneration(
-        GeneratorSyntaxContext ctx, CancellationToken cancellationToken)
+    private static EnumToProcess? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext ctx)
     {
+        var enumSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
+        
         Compilation compilation = ctx.SemanticModel.Compilation;
-        INamedTypeSymbol? attributeSymbol = 
-            compilation.GetTypeByMetadataName("EnumToStringNameSourceGenerator.EnumToStringNameAttribute");
         
-        if (attributeSymbol is null) return null;
+        AttributeData? attribute = enumSymbol.GetAttributes()
+            .FirstOrDefault(ad => ad.AttributeClass?.ToDisplayString() == FullAttributeName);
 
-        var attributeSyntax = (AttributeSyntax)ctx.Node;
-        foreach (AttributeData? attribute in compilation.Assembly.GetAttributes())
-        {
-            if (attribute.ApplicationSyntaxReference?.GetSyntax(cancellationToken) != attributeSyntax) continue;
-            if (!attributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) continue;
-            if (attribute.ConstructorArguments.Length != 1) continue;
-            
-            TypedConstant enumTypeArgument = attribute.ConstructorArguments[0];
-            if (enumTypeArgument.Value == null) continue;
-            
-            var enumType = (ITypeSymbol)enumTypeArgument.Value;
-            if (enumType.TypeKind != TypeKind.Enum) continue;
-            
-            (bool isPublic, string? @namespace, string className) = GetArguments(enumType, attribute); 
-            return new EnumToProcess(enumType, GetMembers(enumType), isPublic, @namespace, className);
-        }
+        if (attribute == null) return null;
         
-        return null;
+        INamedTypeSymbol? attributeSymbol = compilation.GetTypeByMetadataName(FullAttributeName);
+        if (attributeSymbol != null && !attributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) return null;
+        
+        if (attribute.ConstructorArguments.Length != 2) return null;
+        
+        TypedConstant enumTypeArgument = attribute.ConstructorArguments[0];
+        TypedConstant classNameArgument = attribute.ConstructorArguments[1];
+        if (enumTypeArgument.Value == null || classNameArgument.Value == null) return null;
+            
+        var enumType = (ITypeSymbol)enumTypeArgument.Value;
+        var className = (string)classNameArgument.Value;
+        if (enumType.TypeKind != TypeKind.Enum) return null;
+            
+        (bool isPublic, string? @namespace) = GetArguments(enumType, attribute); 
+        return new EnumToProcess(enumType, GetMembers(enumType), isPublic, @namespace, className);
     }
     
     private static List<string> GetMembers(INamespaceOrTypeSymbol enumType)
@@ -71,11 +70,9 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static (bool isPublic, string? @namespace, string className) GetArguments(
-        ISymbol enumType, AttributeData attribute)
+    private static (bool isPublic, string? @namespace) GetArguments(ISymbol enumType, AttributeData attribute)
     {
-        (bool isPublic, string? @namespace, string className) result = 
-            (IsVisibleOutsideOfAssembly(enumType), null, string.Empty);
+        (bool isPublic, string? @namespace) result = (IsVisibleOutsideOfAssembly(enumType), null);
         
         foreach (KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments)
         {
@@ -87,16 +84,13 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
                 case "ExtensionMethodNamespace": 
                     result.@namespace = (string?)argument.Value.Value; 
                     break;
-                case "ClassName": 
-                    result.className = argument.Value.Value == null ? string.Empty : (string)argument.Value.Value;
-                    break;
             }
         }
 
         return result;
     }
     
-    private static void GenerateCode(ImmutableArray<EnumToProcess> enums, SourceProductionContext context)
+    private static void GenerateCode(SourceProductionContext context, ImmutableArray<EnumToProcess> enums)
     {
         var sb = new StringBuilder();
         var tempSb = new StringBuilder();
@@ -157,6 +151,7 @@ $$"""
             };
         }
     }
+
 """
         );
 

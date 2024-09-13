@@ -1,4 +1,5 @@
 using System;
+using EnumToStringNameSourceGenerator;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
@@ -10,6 +11,10 @@ namespace OrbinautFramework3.Objects.Player.Characters.Tails.Tail;
 [Tool]
 public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 {
+	[EnumToStringName(typeof(TailAnimations), $"{nameof(TailAnimations)}StringNames", 
+		ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Characters.Tails.Tail")]
+	public enum TailAnimations : byte { Idle, Fly, Move, Hidden }
+	
 	public void Animate(IPlayer player)
 	{
 		if (Scene.Instance.State == Scene.States.Paused) return;
@@ -19,7 +24,7 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 		switch (player.Data.Sprite.Animation)
 		{
 			case Animations.Idle or Animations.Wait or Animations.Duck or Animations.LookUp:
-				PlayAnimation("Idle");
+				PlayAnimation(TailAnimations.Idle.ToStringName());
 				break;
 			
 			case Animations.Fly or Animations.FlyTired:
