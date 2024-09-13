@@ -41,7 +41,7 @@ public readonly struct PlayerList
         _countChanged.Invoke(_players.Count);
     }
 
-    public void MovePlayer(int fromIndex, int toIndex) //TODO: use this
+    public void Move(int fromIndex, int toIndex) //TODO: use this
     {
 #if TOOLS
         if (fromIndex >= _players.Count || toIndex >= _players.Count)
@@ -58,6 +58,26 @@ public readonly struct PlayerList
 
         _players[toIndex] = firstPlayer;
         _players[fromIndex] = secondPlayer;
+    }
+
+    public IPlayer FindNearest(Vector2 position)
+    {
+        if (Count == 1) return _players[0];
+        
+        float minDistance = float.MaxValue;
+        IPlayer nearestPlayer = null;
+        
+        foreach (IPlayer player in _players)
+        {
+            float currentDistance = position.DistanceSquaredTo(player.Position);
+            if (currentDistance < minDistance)
+            {
+                minDistance = currentDistance;
+                nearestPlayer = player;
+            }
+        }
+        
+        return nearestPlayer;
     }
 
     public IPlayer FirstOrDefault() => _players.FirstOrDefault();
