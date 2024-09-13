@@ -131,7 +131,8 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         StringBuilder sb, StringBuilder tempSb, EnumToProcess enumeration, string typeVisibility)
     {
         string visibility = enumeration.IsPublicEnum ? "public" : "internal";
-
+        sb.AppendLine("using Godot;\n");
+        
         bool addNamespace = !string.IsNullOrEmpty(enumeration.FullNamespace);
         if (addNamespace)
         {
@@ -139,25 +140,24 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
 $$"""
 namespace {{enumeration.FullNamespace}}
 {
+
 """
             );
         }
         
         sb.Append(
 $$"""
-    /// <summary>A class with memory-optimized alternative to regular ToString() on enums.</summary>
-    {{typeVisibility}} static partial class FastEnumToStringExtensions
+    /// <summary>A class with generated StringNames from enum.</summary>
+    {{typeVisibility}} static partial class EnumToStringNameExtensions
     {
 {{GenerateStringNames(tempSb, enumeration, visibility)}}
-        
-        /// <summary>A memory-optimized alternative to regular ToString() method on <see cref="{{enumeration.DocumentationId}}>{{enumeration.FullCsharpName}} enum</see>.</summary>"
-        {{visibility}} static string ToStringFast(this global::{{enumeration.FullCsharpName}} value)
+        /// <summary>Returns the StringName corresponding to the enum <see cref="{{enumeration.DocumentationId}}>{{enumeration.FullCsharpName}} enum</see>.</summary>"
+        {{visibility}} static StringName ToStringName(this global::{{enumeration.FullCsharpName}} value)
         {
             return value switch
             {
-{{GenerateSwitchCases(tempSb, enumeration)}}
-                _ => value.ToString()
-            }
+{{GenerateSwitchCases(tempSb, enumeration)}}                _ => value.ToString()
+            };
         }
     }
 """
@@ -174,8 +174,8 @@ $$"""
         tempSb.Clear();
         foreach (string? member in enumeration.Members)
         {
-            tempSb.Append(
-$"        {visibility} static readonly StringName {member} = nameof({enumeration.FullCsharpName}.{member}),");
+            tempSb.AppendLine(
+$"        {visibility} static readonly StringName {member} = nameof({enumeration.FullCsharpName}.{member});");
         }
         
         return tempSb.ToString();
@@ -186,8 +186,7 @@ $"        {visibility} static readonly StringName {member} = nameof({enumeration
         tempSb.Clear();
         foreach (string? member in enumeration.Members)
         {
-            tempSb.Append(
-$"                {enumeration.FullCsharpName}.{member} => nameof({enumeration.FullCsharpName}.{member}),");
+            tempSb.AppendLine($"                {enumeration.FullCsharpName}.{member} => {member},");
         }
 
         return tempSb.ToString();

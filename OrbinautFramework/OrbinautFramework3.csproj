@@ -40,6 +40,7 @@
     <ProjectPath>$(MSBuildProjectDirectory)</ProjectPath>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\EnumToStringNameSourceGenerator\EnumToStringNameSourceGenerator.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\AudioStorageSourceGenerator\AudioStorageSourceGenerator.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\FsmSourceGenerator\FsmSourceGenerator.csproj" OutputItemType="Analyzer" />
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />

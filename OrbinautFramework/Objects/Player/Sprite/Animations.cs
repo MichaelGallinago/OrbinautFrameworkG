@@ -1,7 +1,11 @@
+using EnumToStringNameSourceGenerator;
 using Meziantou.Framework.Annotations;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 [assembly: FastEnumToString(typeof(Animations),
+    ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Extensions")]
+
+[assembly: EnumToStringName(typeof(Animations),
     ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Extensions")]
 
 namespace OrbinautFramework3.Objects.Player.Sprite;

@@ -62,7 +62,7 @@ public abstract partial class SpriteLogic(PlayerData playerData, ISpriteNode spr
 
     protected void SetType(Animations type, float speed)
     {
-        Node.PlayAnimation(type.ToStringFast(), speed);
+        Node.PlayAnimation(type.ToStringName(), speed);
     }
 
     protected void SetType(Animations type, int startFrame, float speed)
