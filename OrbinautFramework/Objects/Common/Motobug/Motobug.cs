@@ -9,14 +9,14 @@ namespace OrbinautFramework3.Objects.Common.Motobug;
 
 public partial class Motobug : InteractiveNode, IResetable
 {
-    public enum State { Init, Wait, Move }
+    public enum State : byte { Init, Wait, Move }
     
     [Export] private AnimatedSprite2D _sprite;
 
     public IMemento Memento { get; }
     
     private State _state;
-    private Vector2 _velocity;
+    private readonly Velocity _velocity = new ();
     private float _smokeTimer;
     private float _moveTimer;
 
@@ -37,7 +37,7 @@ public partial class Motobug : InteractiveNode, IResetable
         _state = State.Init;
         _smokeTimer = 0f;
         _moveTimer = 0f;
-        _velocity = Vector2.Zero;
+        _velocity.Vector = Vector2.Zero;
         Visible = false;
     }
     
@@ -56,8 +56,8 @@ public partial class Motobug : InteractiveNode, IResetable
     private void Init()
     {
         Vector2 position = Position;
-        position.Y += _velocity.Y * Scene.Instance.Speed;
-        _velocity.Y += GravityType.Default * Scene.Instance.Speed;
+        position.Y = _velocity.CalculateNewPositionY(position.Y);
+        _velocity.AccelerationY = GravityType.Default;
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);
@@ -86,7 +86,7 @@ public partial class Motobug : InteractiveNode, IResetable
     private void Move()
     {
         Vector2 position = Position;
-        position.X += _velocity.X * Scene.Instance.Speed;
+        position.X = _velocity.CalculateNewPositionX(position.X);
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);
