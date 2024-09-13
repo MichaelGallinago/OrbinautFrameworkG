@@ -45,17 +45,15 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
             if (attribute.ConstructorArguments.Length != 1) continue;
             
             TypedConstant enumTypeArgument = attribute.ConstructorArguments[0];
-            TypedConstant classNameArgument = attribute.ConstructorArguments[1];
-            if (enumTypeArgument.Value == null || classNameArgument.Value == null) continue;
+            if (enumTypeArgument.Value == null) continue;
 
             var enumType = (ITypeSymbol)enumTypeArgument.Value;
-            var className = (string)classNameArgument.Value;
-            if (enumType.TypeKind != TypeKind.Enum || className != TypeKind.Class) continue;
+            if (enumType.TypeKind != TypeKind.Enum) continue;
 
-            bool isPublic = IsPublic(enumType, attribute);
-            return new EnumToProcess(enumType, GetMembers(enumType), isPublic, GetNamespace(attribute));
+            (bool isPublic, string? @namespace, string className) = GetArguments(enumType, attribute); 
+            return new EnumToProcess(enumType, GetMembers(enumType), isPublic, @namespace, className);
         }
-
+        
         return null;
     }
     
@@ -73,28 +71,29 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static bool IsPublic(ISymbol enumType, AttributeData attribute)
+    private static (bool isPublic, string? @namespace, string className) GetArguments(
+        ISymbol enumType, AttributeData attribute)
     {
-        bool result = IsVisibleOutsideOfAssembly(enumType);
+        (bool isPublic, string? @namespace, string className) result = 
+            (IsVisibleOutsideOfAssembly(enumType), null, string.Empty);
+        
         foreach (KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments)
         {
-            if (argument.Key == "IsPublic")
+            switch (argument.Key)
             {
-                return result && (bool)argument.Value.Value!;
+                case "IsPublic":
+                    result.isPublic = result.isPublic && (bool)argument.Value.Value!;
+                    break;
+                case "ExtensionMethodNamespace":
+                    result.@namespace = (string?)argument.Value.Value;
+                    break;
+                case "ClassName":
+                    result.className = argument.Value.Value == null ? string.Empty : (string)argument.Value.Value;
+                    break;
             }
         }
 
         return result;
-    }
-    
-    private static string? GetNamespace(AttributeData attribute)
-    {
-        foreach (KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments)
-        {
-            if (argument.Key == "ExtensionMethodNamespace") return (string?)argument.Value.Value;
-        }
-        
-        return null;
     }
 
     private static void GenerateCode(SourceProductionContext context, ImmutableArray<EnumToProcess> enumToProcess)
@@ -109,8 +108,7 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         var tempSb = new StringBuilder();
         
         IOrderedEnumerable<IGrouping<string?, EnumToProcess>> groups = 
-            enums.GroupBy(en => en.FullNamespace, StringComparer.Ordinal)
-                .OrderBy(g => g.Key, StringComparer.Ordinal);
+            enums.GroupBy(en => en.FullNamespace, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.Ordinal);
         
         foreach (IGrouping<string?, EnumToProcess>? enumerationGroup in groups)
         {
@@ -150,7 +148,7 @@ namespace {{enumeration.FullNamespace}}
         sb.Append(
 $$"""
     /// <summary>A class with generated StringNames from enum.</summary>
-    {{typeVisibility}} static partial class EnumToStringNameExtensions
+    {{typeVisibility}} static partial class {{enumeration.ClassName}}
     {
 {{GenerateStringNames(tempSb, enumeration, visibility)}}
         /// <summary>Returns the StringName corresponding to the enum <see cref="{{enumeration.DocumentationId}}">{{enumeration.FullCsharpName}} enum</see>.</summary>"
@@ -206,8 +204,9 @@ $"        {visibility} static readonly StringName {member} = nameof({enumeration
     }
 
     private sealed class EnumToProcess(
-        ISymbol enumSymbol, List<string> members, bool isPublicEnum, string? @namespace)
+        ISymbol enumSymbol, List<string> members, bool isPublicEnum, string? @namespace, string className)
     {
+        public string ClassName { get; } = className;
         public bool IsPublicEnum { get; } = isPublicEnum;
         public string FullCsharpName { get; } = enumSymbol.ToString()!;
         public string? FullNamespace { get; } = @namespace ?? GetNamespace(enumSymbol);

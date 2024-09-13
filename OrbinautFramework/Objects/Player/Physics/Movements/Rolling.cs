@@ -83,11 +83,11 @@ public readonly struct Rolling(PlayerData data)
         }
 #else
         if (groundSpeed != 0f) return;
-#if S1_PHYSICS
+    #if S1_PHYSICS
         groundSpeed.Value = 2f;
-#else
+    #else
         groundSpeed.Value = 4f * (float)data.Visual.Facing;
-#endif
+    #endif
 #endif
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using Godot;
 using OrbinautFramework3.Objects.Player.Data;
-using OrbinautFramework3.Objects.Player.Extensions;
 
 namespace OrbinautFramework3.Objects.Player.Sprite;
 
