@@ -44,11 +44,13 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
             if (!attributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) continue;
             if (attribute.ConstructorArguments.Length != 1) continue;
             
-            TypedConstant argument = attribute.ConstructorArguments[0];
-            if (argument.Value is null) continue;
+            TypedConstant enumTypeArgument = attribute.ConstructorArguments[0];
+            TypedConstant classNameArgument = attribute.ConstructorArguments[1];
+            if (enumTypeArgument.Value == null || classNameArgument.Value == null) continue;
 
-            var enumType = (ITypeSymbol)argument.Value;
-            if (enumType.TypeKind != TypeKind.Enum) continue;
+            var enumType = (ITypeSymbol)enumTypeArgument.Value;
+            var className = (string)classNameArgument.Value;
+            if (enumType.TypeKind != TypeKind.Enum || className != TypeKind.Class) continue;
 
             bool isPublic = IsPublic(enumType, attribute);
             return new EnumToProcess(enumType, GetMembers(enumType), isPublic, GetNamespace(attribute));

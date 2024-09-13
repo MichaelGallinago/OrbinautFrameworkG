@@ -38,7 +38,7 @@ public abstract partial class SpriteLogic(PlayerData playerData, ISpriteNode spr
     {
         UpdateSpeed();
         UpdateType();
-        Data.FrameCount = Node.SpriteFrames.GetFrameCount(Data.Type.ToStringFast());
+        Data.FrameCount = Node.SpriteFrames.GetFrameCount(Data.Type.ToStringName());
     }
     
     protected abstract void Animate();
