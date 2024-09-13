@@ -57,15 +57,15 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         return null;
     }
     
-    private static List<EnumMemberToProcess> GetMembers(INamespaceOrTypeSymbol enumType)
+    private static List<string> GetMembers(INamespaceOrTypeSymbol enumType)
     {
-        var result = new List<EnumMemberToProcess>();
+        var result = new List<string>();
         foreach (ISymbol? member in enumType.GetMembers())
         {
             if (member is not IFieldSymbol field) continue;
             if (field.ConstantValue is null) continue;
 
-            result.Add(new EnumMemberToProcess(member.Name, field.ConstantValue));
+            result.Add(member.Name);
         }
 
         return result;
@@ -112,7 +112,7 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         
         foreach (IGrouping<string?, EnumToProcess>? enumerationGroup in groups)
         {
-            bool typeIsPublic = enumerationGroup.Any(enumeration => enumeration.IsPublic);
+            bool typeIsPublic = enumerationGroup.Any(enumeration => enumeration.IsPublicEnum);
             string typeVisibility = typeIsPublic ? "public" : "internal";
 
             IOrderedEnumerable<EnumToProcess> enumerations = 
@@ -130,7 +130,7 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
     private static void AddClass(
         StringBuilder sb, StringBuilder tempSb, EnumToProcess enumeration, string typeVisibility)
     {
-        string methodVisibility = enumeration.IsPublic ? "public" : "internal";
+        string visibility = enumeration.IsPublicEnum ? "public" : "internal";
 
         bool addNamespace = !string.IsNullOrEmpty(enumeration.FullNamespace);
         if (addNamespace)
@@ -142,14 +142,16 @@ namespace {{enumeration.FullNamespace}}
 """
             );
         }
-
+        
         sb.Append(
 $$"""
     /// <summary>A class with memory-optimized alternative to regular ToString() on enums.</summary>
     {{typeVisibility}} static partial class FastEnumToStringExtensions
     {
+{{GenerateStringNames(tempSb, enumeration, visibility)}}
+        
         /// <summary>A memory-optimized alternative to regular ToString() method on <see cref="{{enumeration.DocumentationId}}>{{enumeration.FullCsharpName}} enum</see>.</summary>"
-        {{methodVisibility}} static string ToStringFast(this global::{{enumeration.FullCsharpName}} value)
+        {{visibility}} static string ToStringFast(this global::{{enumeration.FullCsharpName}} value)
         {
             return value switch
             {
@@ -167,25 +169,34 @@ $$"""
         }
     }
 
+    private static string GenerateStringNames(StringBuilder tempSb, EnumToProcess enumeration, string visibility)
+    {
+        tempSb.Clear();
+        foreach (string? member in enumeration.Members)
+        {
+            tempSb.Append(
+$"        {visibility} static readonly StringName {member} = nameof({enumeration.FullCsharpName}.{member}),");
+        }
+        
+        return tempSb.ToString();
+    }
+    
     private static string GenerateSwitchCases(StringBuilder tempSb, EnumToProcess enumeration)
     {
         tempSb.Clear();
-        foreach (EnumMemberToProcess? member in enumeration.Members)
+        foreach (string? member in enumeration.Members)
         {
             tempSb.Append(
-$"                {enumeration.FullCsharpName}.{member.Name} => nameof({enumeration.FullCsharpName}.{member.Name}),");
+$"                {enumeration.FullCsharpName}.{member} => nameof({enumeration.FullCsharpName}.{member}),");
         }
 
         return tempSb.ToString();
     }
 
-    private static bool IsVisibleOutsideOfAssembly([NotNullWhen(true)] ISymbol? symbol)
+    private static bool IsVisibleOutsideOfAssembly(ISymbol? symbol)
     {
-        if (symbol is null) return false;
-
-        if (symbol.DeclaredAccessibility != Accessibility.Public &&
-            symbol.DeclaredAccessibility != Accessibility.Protected &&
-            symbol.DeclaredAccessibility != Accessibility.ProtectedOrInternal)
+        if (symbol?.DeclaredAccessibility 
+            is not (Accessibility.Public or Accessibility.Protected or Accessibility.ProtectedOrInternal))
         {
             return false;
         }
@@ -193,11 +204,14 @@ $"                {enumeration.FullCsharpName}.{member.Name} => nameof({enumerat
         return symbol.ContainingType is null || IsVisibleOutsideOfAssembly(symbol.ContainingType);
     }
 
-    private sealed record EnumToProcess(ITypeSymbol EnumSymbol, List<EnumMemberToProcess> Members, bool IsPublic, string? Namespace)
+    private sealed class EnumToProcess(
+        ISymbol enumSymbol, List<string> members, bool isPublicEnum, string? @namespace)
     {
-        public string FullCsharpName { get; } = EnumSymbol.ToString()!;
-        public string? FullNamespace { get; } = Namespace ?? GetNamespace(EnumSymbol);
-        public string DocumentationId { get; } = DocumentationCommentId.CreateDeclarationId(EnumSymbol);
+        public bool IsPublicEnum { get; } = isPublicEnum;
+        public string FullCsharpName { get; } = enumSymbol.ToString()!;
+        public string? FullNamespace { get; } = @namespace ?? GetNamespace(enumSymbol);
+        public string DocumentationId { get; } = DocumentationCommentId.CreateDeclarationId(enumSymbol);
+        public List<string> Members { get; } = members;
 
         private static string? GetNamespace(ISymbol symbol)
         {
@@ -205,21 +219,11 @@ $"                {enumeration.FullCsharpName}.{member.Name} => nameof({enumerat
             INamespaceSymbol? ns = symbol.ContainingNamespace;
             while (ns is not null && !ns.IsGlobalNamespace)
             {
-                if (result is not null)
-                {
-                    result = ns.Name + "." + result;
-                }
-                else
-                {
-                    result = ns.Name;
-                }
-
+                result = result is not null ? ns.Name + "." + result : ns.Name;
                 ns = ns.ContainingNamespace;
             }
-
+            
             return result;
         }
     }
-    
-    private sealed record EnumMemberToProcess(string Name, object Value);
 }
