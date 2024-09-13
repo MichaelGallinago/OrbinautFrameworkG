@@ -1,29 +1,18 @@
 using System;
 using EnumToStringNameSourceGenerator;
 using Godot;
-using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Characters.Tails.Tail;
 
 [Tool]
-public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
+public partial class TailNode : AdvancedAnimatedSprite
 {
-	[EnumToStringName]
-	public enum TailAnimations : byte { Idle, Fly, Move, Hidden }
-
-	private TailAnimations _animation = TailAnimations.Hidden;
-
-	public void Test()
-	{
-		StringName stringName1 = TailAnimations.Fly.ToStringName();
-		StringName stringName2 = _animation.ToStringName();
-
-		StringName stringName3 = TailAnimationsStringNames.Move;
-	}
+	[EnumToStringName] public enum TailAnimations : byte { Idle, Fly, Move, Hidden }
 	
 	public void Animate(IPlayer player)
 	{
@@ -78,7 +67,7 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 			
 		if (data.Visual.Scale.X < 0f)
 		{
-			angle += 180f;
+			angle += Angles.CircleHalf;
 		}
 		
 		if (SharedData.RotationMode != 0) return angle;

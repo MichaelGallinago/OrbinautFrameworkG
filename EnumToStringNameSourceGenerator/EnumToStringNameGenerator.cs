@@ -56,7 +56,7 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
         {
             if (member is not IFieldSymbol field) continue;
             if (field.ConstantValue is null) continue;
-
+            
             result.Add(member.Name);
         }
 

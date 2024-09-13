@@ -1,4 +1,5 @@
 using System;
+using EnumToStringNameSourceGenerator;
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
@@ -12,10 +13,9 @@ namespace OrbinautFramework3.Objects.Common.Bumper;
 
 public partial class Bumper : InteractiveNode
 {
-    private enum HitsLimit : sbyte
-    {
-        Sonic1 = 10, Sonic2 = -1
-    }
+    [EnumToStringName] public enum Animationss { Default, Bump } // TODO: fix "Animations"
+    
+    private enum HitsLimit : sbyte { Sonic1 = 10, Sonic2 = -1 }
 
     private const float Force = 7f;
     
@@ -40,9 +40,9 @@ public partial class Bumper : InteractiveNode
         {
             if (!HitBox.CheckPlayerCollision(player.Data, (Vector2I)Position)) continue;
             
-            if (_sprite.Animation == "Default")
+            if (_sprite.Animation == AnimationssStringNames.Default)
             {
-                _sprite.Play("Bump");
+                _sprite.Play(AnimationssStringNames.Bump);
             }
             
             AudioPlayer.Sound.Play(SoundStorage.Bumper);
@@ -81,7 +81,7 @@ public partial class Bumper : InteractiveNode
 
     private void OnAnimationFinished()
     {
-        if (_sprite.Animation != "Bump") return; 
-        _sprite.Play("Default");
+        if (_sprite.Animation != AnimationssStringNames.Bump) return; 
+        _sprite.Play(AnimationssStringNames.Default);
     }
 }
