@@ -72,7 +72,9 @@ public class Velocity
 
     public static Vector2 GetFromSpeedWithAngle(float speed, float angle)
     {
-        (float sine, float cosine) = MathF.SinCos(Mathf.DegToRad(angle));
+        float radians = Mathf.DegToRad(angle);
+        float sine = MathF.Sin(radians);
+        float cosine = MathF.Cos(radians);
         return speed * new Vector2(sine, cosine);
     }
 
@@ -80,6 +82,16 @@ public class Velocity
     {
         return position + ((Scene.Instance.Speed - 1f) * _instantVector + 
                            (Scene.Instance.Speed + 1f) * _velocity) * 0.5f;
+    }
+    public float CalculateNewPositionX(float positionX)
+    {
+        return positionX + ((Scene.Instance.Speed - 1f) * _instantVector.X + 
+                           (Scene.Instance.Speed + 1f) * _velocity.X) * 0.5f;
+    }
+    public float CalculateNewPositionY(float positionY)
+    {
+        return positionY + ((Scene.Instance.Speed - 1f) * _instantVector.Y + 
+                           (Scene.Instance.Speed + 1f) * _velocity.Y) * 0.5f;
     }
 
     public void SetDirectionalValue(AcceleratedValue value, float angle)

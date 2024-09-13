@@ -10,7 +10,7 @@ namespace OrbinautFramework3.Objects.Common.ChopChop;
 
 public partial class ChopChop : InteractiveNode, IResetable
 {
-    public enum State { Roam, Wait, Charge }
+    public enum State : byte { Roam, Wait, Charge }
     
     private const float MoveDuration = 512f;
     private const float BubbleDuration = 80f;
@@ -24,6 +24,8 @@ public partial class ChopChop : InteractiveNode, IResetable
     private float _bubbleTimer;
     private State _state;
 
+    private static readonly StringName IdleAnimation = "Idle";
+    
     public ChopChop()
     {
         Memento = new ResetMemento(this);
@@ -86,7 +88,7 @@ public partial class ChopChop : InteractiveNode, IResetable
         _state = State.Wait;
         _moveTimer = 16f;
         _velocity.X = 0f;
-        _sprite.PlayAnimation("Idle", 1);
+        _sprite.PlayAnimation(IdleAnimation, 1);
     }
 
     private void Wait()
