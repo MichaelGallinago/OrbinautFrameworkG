@@ -151,7 +151,7 @@ $$"""
     {{typeVisibility}} static partial class EnumToStringNameExtensions
     {
 {{GenerateStringNames(tempSb, enumeration, visibility)}}
-        /// <summary>Returns the StringName corresponding to the enum <see cref="{{enumeration.DocumentationId}}>{{enumeration.FullCsharpName}} enum</see>.</summary>"
+        /// <summary>Returns the StringName corresponding to the enum <see cref="{{enumeration.DocumentationId}}">{{enumeration.FullCsharpName}} enum</see>.</summary>"
         {{visibility}} static StringName ToStringName(this global::{{enumeration.FullCsharpName}} value)
         {
             return value switch
