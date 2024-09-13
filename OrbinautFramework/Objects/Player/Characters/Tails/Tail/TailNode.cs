@@ -1,6 +1,7 @@
 using System;
 using EnumToStringNameSourceGenerator;
 using Godot;
+using JetBrains.Annotations;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
 using OrbinautFramework3.Objects.Player.Data;
@@ -11,9 +12,18 @@ namespace OrbinautFramework3.Objects.Player.Characters.Tails.Tail;
 [Tool]
 public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 {
-	[EnumToStringName(typeof(TailAnimations), $"{nameof(TailAnimations)}StringNames", 
-		ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Characters.Tails.Tail")]
+	[EnumToStringName]
 	public enum TailAnimations : byte { Idle, Fly, Move, Hidden }
+
+	private TailAnimations _animation = TailAnimations.Hidden;
+
+	public void Test()
+	{
+		StringName stringName1 = TailAnimations.Fly.ToStringName();
+		StringName stringName2 = _animation.ToStringName();
+
+		StringName stringName3 = TailAnimationsStringNames.Move;
+	}
 	
 	public void Animate(IPlayer player)
 	{
@@ -24,13 +34,13 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 		switch (player.Data.Sprite.Animation)
 		{
 			case Animations.Idle or Animations.Wait or Animations.Duck or Animations.LookUp:
-				PlayAnimation(TailAnimations.Idle.ToStringName());
+				PlayAnimation(TailAnimationsStringNames.Idle);
 				break;
 			
 			case Animations.Fly or Animations.FlyTired:
 				float speed = player.Data.Movement.Velocity.Y >= 0f || 
 				              player.Data.Sprite.Animation == Animations.FlyTired ? 0.5f : 1f;
-				PlayAnimation("Fly", speed);
+				PlayAnimation(TailAnimationsStringNames.Fly, speed);
 				break;
 			
 			case Animations.Push or Animations.Skid or Animations.Spin or 
@@ -46,11 +56,11 @@ public partial class TailNode : AdvancedAnimatedSprite //TODO: refactor this
 				}
 				
 				Offset = offset;
-				PlayAnimation("Move");
+				PlayAnimation(TailAnimationsStringNames.Move);
 				break;
 			
 			default:
-				PlayAnimation("Hidden");
+				PlayAnimation(TailAnimationsStringNames.Hidden);
 				break;
 		}
 		

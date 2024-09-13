@@ -40,20 +40,13 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
         if (attribute == null) return null;
         
         INamedTypeSymbol? attributeSymbol = compilation.GetTypeByMetadataName(FullAttributeName);
-        if (attributeSymbol != null && !attributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) return null;
+        if (attributeSymbol != null && 
+            !attributeSymbol.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default)) return null;
         
-        if (attribute.ConstructorArguments.Length != 2) return null;
+        if (attribute.ConstructorArguments.Length != 0) return null;
         
-        TypedConstant enumTypeArgument = attribute.ConstructorArguments[0];
-        TypedConstant classNameArgument = attribute.ConstructorArguments[1];
-        if (enumTypeArgument.Value == null || classNameArgument.Value == null) return null;
-            
-        var enumType = (ITypeSymbol)enumTypeArgument.Value;
-        var className = (string)classNameArgument.Value;
-        if (enumType.TypeKind != TypeKind.Enum) return null;
-            
-        (bool isPublic, string? @namespace) = GetArguments(enumType, attribute); 
-        return new EnumToProcess(enumType, GetMembers(enumType), isPublic, @namespace, className);
+        (bool isPublic, string className, string? @namespace) = GetArguments(enumSymbol, attribute); 
+        return new EnumToProcess(enumSymbol, GetMembers(enumSymbol), isPublic, @namespace, className);
     }
     
     private static List<string> GetMembers(INamespaceOrTypeSymbol enumType)
@@ -70,9 +63,10 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static (bool isPublic, string? @namespace) GetArguments(ISymbol enumType, AttributeData attribute)
+    private static (bool, string, string?) GetArguments(ISymbol enumType, AttributeData attribute)
     {
-        (bool isPublic, string? @namespace) result = (IsVisibleOutsideOfAssembly(enumType), null);
+        (bool isPublic, string className, string? @namespace) result = 
+            (IsVisibleOutsideOfAssembly(enumType), $"{enumType.Name}StringNames", null);
         
         foreach (KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments)
         {
@@ -80,6 +74,10 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
             {
                 case "IsPublic": 
                     result.isPublic = result.isPublic && (bool)argument.Value.Value!; 
+                    break;
+                case "ClassName":
+                    if (argument.Value.Value == null) break;
+                    result.className = (string)argument.Value.Value;
                     break;
                 case "ExtensionMethodNamespace": 
                     result.@namespace = (string?)argument.Value.Value; 
@@ -142,7 +140,11 @@ $$"""
     {{typeVisibility}} static partial class {{enumeration.ClassName}}
     {
 {{GenerateStringNames(tempSb, enumeration, visibility)}}
-        /// <summary>Returns the StringName corresponding to the enum <see cref="{{enumeration.DocumentationId}}">{{enumeration.FullCsharpName}} enum</see>.</summary>"
+        /// <summary>
+        /// Returns the StringName corresponding to the enum.
+        /// </summary>
+        /// <param name="value"><see cref="{{enumeration.DocumentationId}}">{{enumeration.FullCsharpName}}</see>.</param>
+        /// <returns><see cref="T:Godot.StringName">Godot.StringName</see>.</returns>
         {{visibility}} static StringName ToStringName(this global::{{enumeration.FullCsharpName}} value)
         {
             return value switch

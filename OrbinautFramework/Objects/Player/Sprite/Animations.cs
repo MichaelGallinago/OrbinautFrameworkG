@@ -1,10 +1,8 @@
 using EnumToStringNameSourceGenerator;
-using OrbinautFramework3.Objects.Player.Sprite;
 
 namespace OrbinautFramework3.Objects.Player.Sprite;
 
-[EnumToStringName(typeof(Animations), $"{nameof(Animations)}StringNames", 
-    ExtensionMethodNamespace = "OrbinautFramework3.Objects.Player.Extensions")]
+[EnumToStringName]
 public enum Animations : byte
 {
     None,

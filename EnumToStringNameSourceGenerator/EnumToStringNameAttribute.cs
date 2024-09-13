@@ -4,11 +4,9 @@ namespace EnumToStringNameSourceGenerator;
 
 [System.Diagnostics.Conditional("EnumToStringName_Attributes")]
 [AttributeUsage(AttributeTargets.Enum, AllowMultiple = true)]
-public sealed class EnumToStringNameAttribute(Type enumType, string className) : Attribute
+public sealed class EnumToStringNameAttribute : Attribute
 {
-    public Type EnumType { get; } = enumType;
-    public string ClassName { get; } = className;
-    
     public bool IsPublic { get; set; } = true;
+    public string? ClassName { get; set; }
     public string? ExtensionMethodNamespace { get; set; }
 }
