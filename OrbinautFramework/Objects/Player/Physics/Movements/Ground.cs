@@ -117,7 +117,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
         
         if (data.Movement.GroundSpeed * sign < 0f)
         {
-            data.Movement.GroundSpeed.Acceleration = sign * data.Physics.Deceleration;
+            data.Movement.GroundSpeed.AddAcceleration(sign * data.Physics.Deceleration);
             if (direction == Constants.Direction.Positive == data.Movement.GroundSpeed >= 0f)
             {
                 data.Movement.GroundSpeed.Value = 0.5f * sign;
@@ -129,7 +129,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
         if (!SharedData.NoSpeedCap || data.Movement.GroundSpeed * sign < data.Physics.AccelerationTop)
         {
             float acceleration = data.Physics.Acceleration;
-            data.Movement.GroundSpeed.Acceleration = acceleration * (float)direction;
+            data.Movement.GroundSpeed.AddAcceleration(acceleration * (float)direction);
             
             switch (direction)
             {

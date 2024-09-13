@@ -37,7 +37,7 @@ public abstract partial class SpriteLogic(PlayerData playerData, ISpriteNode spr
     {
         UpdateSpeed();
         UpdateType();
-        Data.FrameCount = Node.SpriteFrames.GetFrameCount(Data.Type.ToStringName());
+        //Data.FrameCount = Node.SpriteFrames.GetFrameCount(Data.Type.ToStringName());
     }
     
     protected abstract void Animate();
@@ -61,12 +61,12 @@ public abstract partial class SpriteLogic(PlayerData playerData, ISpriteNode spr
 
     protected void SetType(Animations type, float speed)
     {
-        Node.PlayAnimation(type.ToStringName(), speed);
+        //Node.PlayAnimation(type.ToStringName(), speed);
     }
 
     protected void SetType(Animations type, int startFrame, float speed)
     {
-        Node.PlayAnimation(type.ToStringName(), startFrame, speed);
+        //Node.PlayAnimation(type.ToStringName(), startFrame, speed);
     }
     
     private void OverrideFrame()

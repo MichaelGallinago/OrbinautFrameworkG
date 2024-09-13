@@ -21,7 +21,7 @@ public readonly struct SlopeResist(PlayerData data, IPlayerLogic logic)
         if (data.Movement.GroundSpeed == 0f) return;
         float slopeGravity = 0.125f * MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
 #endif
-        data.Movement.GroundSpeed.Acceleration = -slopeGravity;
+        data.Movement.GroundSpeed.AddAcceleration(-slopeGravity);
     }
     
     public void ResistRoll()
@@ -30,6 +30,6 @@ public readonly struct SlopeResist(PlayerData data, IPlayerLogic logic)
         
         float angleSine = MathF.Sin(Mathf.DegToRad(data.Movement.Angle));
         float slopeGravity = Math.Sign(data.Movement.GroundSpeed) == Math.Sign(angleSine) ? 0.078125f : 0.3125f;
-        data.Movement.GroundSpeed.Acceleration = -slopeGravity * angleSine;
+        data.Movement.GroundSpeed.AddAcceleration(-slopeGravity * angleSine);
     }
 }

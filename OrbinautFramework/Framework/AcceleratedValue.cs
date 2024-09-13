@@ -16,25 +16,14 @@ public class AcceleratedValue
     
     public static implicit operator float(AcceleratedValue value) => value.Value;
     
-    public float Acceleration
-    {
-        set => _value += value * Scene.Instance.Speed;
-    }
-
+    public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
+    
     public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
-    public float Sum(float value)
-    {
-        float speed = Scene.Instance.Speed;
-        return value + ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
-    }
-
-    public float Add(float value)
-    {
-        float result = Sum(value);
-        _instantValue = _value;
-        return result;
-    }
+    public static float operator+ (float value, AcceleratedValue acceleratedValue) => acceleratedValue.Sum(value);
+    public static float operator+ (AcceleratedValue acceleratedValue, float value) => acceleratedValue.Sum(value);
+    
+    public void ResetInstantValue() => _instantValue = _value;
     
     public void SetClamp(float min, float max)
     {
@@ -70,12 +59,18 @@ public class AcceleratedValue
     public void ApplyFriction(float friction)
     {
         int sign = Math.Sign(_value);
-        Acceleration = -sign * friction;
+        AddAcceleration(-sign * friction);
 		
         switch (sign)
         {
             case  1: SetMax(0f); break;
             case -1: SetMin(0f); break;
         }
+    }
+    
+    private float Sum(float value)
+    {
+        float speed = Scene.Instance.Speed;
+        return value + ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
     }
 }

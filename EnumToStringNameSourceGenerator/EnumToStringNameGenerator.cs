@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace EnumToStringNameSourceGenerator;
 
 [Generator]
-public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
+public sealed class EnumToStringNameGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -25,7 +25,7 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         IncrementalValueProvider<ImmutableArray<EnumToProcess?>> enumToProcess = enums.Collect();
         
         context.RegisterSourceOutput(enumToProcess, 
-            (spc, source) => GenerateCode(spc, source!));
+            (spc, source) => GenerateCode(source!, spc));
     }
     
     private static EnumToProcess? GetSemanticTargetForGeneration(
@@ -46,10 +46,10 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
             
             TypedConstant enumTypeArgument = attribute.ConstructorArguments[0];
             if (enumTypeArgument.Value == null) continue;
-
+            
             var enumType = (ITypeSymbol)enumTypeArgument.Value;
             if (enumType.TypeKind != TypeKind.Enum) continue;
-
+            
             (bool isPublic, string? @namespace, string className) = GetArguments(enumType, attribute); 
             return new EnumToProcess(enumType, GetMembers(enumType), isPublic, @namespace, className);
         }
@@ -81,13 +81,13 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
         {
             switch (argument.Key)
             {
-                case "IsPublic":
-                    result.isPublic = result.isPublic && (bool)argument.Value.Value!;
+                case "IsPublic": 
+                    result.isPublic = result.isPublic && (bool)argument.Value.Value!; 
                     break;
-                case "ExtensionMethodNamespace":
-                    result.@namespace = (string?)argument.Value.Value;
+                case "ExtensionMethodNamespace": 
+                    result.@namespace = (string?)argument.Value.Value; 
                     break;
-                case "ClassName":
+                case "ClassName": 
                     result.className = argument.Value.Value == null ? string.Empty : (string)argument.Value.Value;
                     break;
             }
@@ -95,41 +95,38 @@ public sealed class EnumToStringNameSourceGenerator : IIncrementalGenerator
 
         return result;
     }
-
-    private static void GenerateCode(SourceProductionContext context, ImmutableArray<EnumToProcess> enumToProcess)
-    {
-        string code = GenerateCode(enumToProcess);
-        context.AddSource("EnumToStringNameExtensions.g.cs", SourceText.From(code, Encoding.UTF8));
-    }
-
-    private static string GenerateCode(ImmutableArray<EnumToProcess> enums)
+    
+    private static void GenerateCode(ImmutableArray<EnumToProcess> enums, SourceProductionContext context)
     {
         var sb = new StringBuilder();
         var tempSb = new StringBuilder();
         
         IOrderedEnumerable<IGrouping<string?, EnumToProcess>> groups = 
-            enums.GroupBy(en => en.FullNamespace, StringComparer.Ordinal).OrderBy(g => g.Key, StringComparer.Ordinal);
+            enums.GroupBy(en => en.FullNamespace, StringComparer.Ordinal)
+                .OrderBy(g => g.Key, StringComparer.Ordinal);
         
         foreach (IGrouping<string?, EnumToProcess>? enumerationGroup in groups)
         {
             bool typeIsPublic = enumerationGroup.Any(enumeration => enumeration.IsPublicEnum);
             string typeVisibility = typeIsPublic ? "public" : "internal";
-
+            
             IOrderedEnumerable<EnumToProcess> enumerations = 
                 enumerationGroup.OrderBy(e => e.FullCsharpName, StringComparer.Ordinal);
             
             foreach (EnumToProcess? enumeration in enumerations)
             {
                 AddClass(sb, tempSb, enumeration, typeVisibility);
+                var hintName = $"{enumeration.ClassName}.g.cs";
+                context.AddSource(hintName, SourceText.From(sb.ToString(), Encoding.UTF8));
             }
         }
-
-        return sb.ToString();
     }
-
+    
     private static void AddClass(
         StringBuilder sb, StringBuilder tempSb, EnumToProcess enumeration, string typeVisibility)
     {
+        sb.Clear();
+        
         string visibility = enumeration.IsPublicEnum ? "public" : "internal";
         sb.AppendLine("using Godot;\n");
         
@@ -144,7 +141,7 @@ namespace {{enumeration.FullNamespace}}
 """
             );
         }
-        
+//{{enumeration.ClassName}}
         sb.Append(
 $$"""
     /// <summary>A class with generated StringNames from enum.</summary>

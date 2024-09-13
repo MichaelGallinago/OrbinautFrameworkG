@@ -52,7 +52,7 @@ public readonly struct Rolling(PlayerData data)
         }
 
         AcceleratedValue groundSpeed = movement.GroundSpeed;
-        groundSpeed.Acceleration = sign * data.Physics.DecelerationRoll;
+        groundSpeed.AddAcceleration(sign * data.Physics.DecelerationRoll);
         if (direction == Constants.Direction.Positive == groundSpeed < 0f) return;
         groundSpeed.Value = sign * 0.5f;
     }

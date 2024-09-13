@@ -58,12 +58,12 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		if (groundSpeed < 4f)
 		{
 			const float glideAcceleration = 0.03125f;
-			groundSpeed.Acceleration = glideAcceleration;
+			groundSpeed.AddAcceleration(glideAcceleration);
 			return;
 		}
 
 		if (_glideAngle % 180f != 0f) return;
-		groundSpeed.Acceleration = data.Physics.AccelerationGlide;
+		groundSpeed.AddAcceleration(data.Physics.AccelerationGlide);
 		groundSpeed.SetMin(24f);
 	}
 	
