@@ -169,14 +169,14 @@ public class PlayerContainer
     {
         if (!_activePlayers.TryGetValue(music, out AudioStreamPlayer musicPlayer)) return;
         
-        float speed = (value - musicPlayer.VolumeDb) / (seconds * Constants.BaseFramerate);
+        float speed = (value - musicPlayer.VolumeDb) / (seconds * Constants.BaseFrameRate);
         if (_volumeChangeList.TryAdd(musicPlayer, (speed, stop))) return;
         _volumeChangeList[musicPlayer] = (speed, stop);
     }
     
     private void SetBusMuteSpeed(float seconds, float value)
     {
-        _busMuteSpeed = (value - AudioServer.GetBusVolumeDb(_busIndex)) / (seconds * Constants.BaseFramerate);
+        _busMuteSpeed = (value - AudioServer.GetBusVolumeDb(_busIndex)) / (seconds * Constants.BaseFrameRate);
     }
     
     private AudioStreamPlayer CreatePlayer()

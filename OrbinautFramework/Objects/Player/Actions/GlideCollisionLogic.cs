@@ -13,7 +13,7 @@ public readonly struct GlideCollisionLogic(PlayerData data, IPlayerLogic logic)
 		Vector2I radius = data.Collision.Radius;
 		(int floorDistance, float floorAngle) = logic.TileCollider.FindClosestTile(
 			-radius.X, radius.Y, radius.X, radius.Y, true, Constants.Direction.Positive);
-
+		
 		if (floorDistance >= 0) return false;
 		
 		MovementData movement = data.Movement;
