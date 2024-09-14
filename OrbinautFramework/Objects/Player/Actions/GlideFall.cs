@@ -37,13 +37,13 @@ public readonly struct GlideFall(PlayerData data, IPlayerLogic logic)
 		
         if (Angles.GetQuadrant(data.Movement.Angle) != Angles.Quadrant.Down)
         {
-            data.Movement.GroundSpeed.Value = data.Movement.Velocity.X;
+            data.Movement.GroundSpeed = data.Movement.Velocity.X;
             return;
         }
 					
         data.Sprite.Animation = Animations.GlideLand;
         data.Movement.GroundLockTimer = 16f;
-        data.Movement.GroundSpeed.Value = 0f;
+        data.Movement.GroundSpeed = 0f;
         data.Movement.Velocity.X = 0f;
     }
 }

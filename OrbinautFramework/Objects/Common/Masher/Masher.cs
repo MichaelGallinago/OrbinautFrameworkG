@@ -18,7 +18,7 @@ public partial class Masher : InteractiveNode, IResetable
 
     public IMemento Memento { get; }
     
-    private readonly AcceleratedValue _velocityY = new ();
+    private AcceleratedValue _velocityY;
     private float _velocityYDefault;
     
     private float _startYPosition;
@@ -33,7 +33,7 @@ public partial class Masher : InteractiveNode, IResetable
     public void Reset()
     {
         _velocityYDefault = (float)_jumpVelocity;
-        _velocityY.Value = _velocityYDefault;
+        _velocityY = _velocityYDefault;
     }
 
     public override void _Ready() => _startYPosition = Position.Y;
@@ -43,14 +43,14 @@ public partial class Masher : InteractiveNode, IResetable
         if (false) return; // TODO: obj_act_enemy
 
         Vector2 position = Position;
-        position.Y += _velocityY;
+        position.Y += _velocityY.ValueDelta;
         _velocityY.ResetInstantValue();
         _velocityY.AddAcceleration(0.09375f);
 
         if (position.Y >= _startYPosition)
         {
             position.Y = _startYPosition;
-            _velocityY.Value = _velocityYDefault;
+            _velocityY = _velocityYDefault;
         }
 
         Animation currentAnimation;

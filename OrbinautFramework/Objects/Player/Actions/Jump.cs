@@ -24,7 +24,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 		if (!data.Input.Down.Aby)
 		{
-			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
+			data.Movement.Velocity.Y.SetMax(data.Physics.MinimalJumpSpeed);
 		}
 
 		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed) return States.Jump;
@@ -114,7 +114,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 	private void JumpWaterBarrier()
 	{
 		data.Node.Shield.AnimationType = ShieldContainer.AnimationTypes.BubbleBounce;
-		data.Movement.Velocity.Vector = new Vector2(0f, 8f);
+		data.Movement.Velocity = new Vector2(0f, 8f);
 		//TODO: update shield animation
 		AudioPlayer.Sound.Play(SoundStorage.ShieldBubble2);
 	}
@@ -124,7 +124,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 		data.Node.SetCameraDelayX(16f);
 
 		data.Movement.IsAirLock = true;
-		data.Movement.Velocity.Vector = new Vector2(8f * (float)data.Visual.Facing, 0f);
+		data.Movement.Velocity = new Vector2(8f * (float)data.Visual.Facing, 0f);
 
 		//TODO: update shield animation
 		if (data.Node.Shield.AnimationType == ShieldContainer.AnimationTypes.FireDash)

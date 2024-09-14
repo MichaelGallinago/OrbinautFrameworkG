@@ -15,7 +15,7 @@ public partial class MotoBug : InteractiveNode, IResetable
 
     public IMemento Memento { get; }
     
-    private readonly Velocity _velocity = new();
+    private AcceleratedVector2 _velocity;
     private readonly TileCollider _tileCollider = new()
     {
         TileBehaviour = Constants.TileBehaviours.Floor,
@@ -34,10 +34,10 @@ public partial class MotoBug : InteractiveNode, IResetable
 
     public void Reset()
     {
+        _velocity = new AcceleratedVector2();
         _state = State.Init;
         _smokeTimer = 0f;
         _moveTimer = 0f;
-        _velocity.Vector = Vector2.Zero;
         Visible = false;
     }
     
@@ -56,8 +56,9 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Init()
     {
         Vector2 position = Position;
-        position.Y = _velocity.CalculateNewPositionY(position.Y);
-        _velocity.AccelerationY = GravityType.Default;
+        position.Y += _velocity.Y.ValueDelta;
+        _velocity.Y.ResetInstantValue();
+        _velocity.Y.AddAcceleration(GravityType.Default);
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);
@@ -86,7 +87,7 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Move()
     {
         Vector2 position = Position;
-        position.X = _velocity.CalculateNewPositionX(position.X);
+        position.X += _velocity.X;
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);

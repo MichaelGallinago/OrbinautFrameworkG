@@ -14,9 +14,12 @@ public class MovementData
     public bool IsForcedRoll { get; set; }
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }
+
+    public ref AcceleratedVector2 Velocity => ref _velocity;
+    private AcceleratedVector2 _velocity;
     
-    public Velocity Velocity { get; } = new();
-    public AcceleratedValue GroundSpeed { get; } = new();
+    public ref AcceleratedValue GroundSpeed => ref _groundSpeed;
+    private AcceleratedValue _groundSpeed;
 
     public ref Vector2 Position => ref _position;
     private Vector2 _position;
@@ -30,9 +33,9 @@ public class MovementData
         _position = position;
         
         Gravity = GravityType.Default;
-        Velocity.Vector = Vector2.Zero;
-        GroundSpeed.Value = 0f;
+        Velocity = Vector2.Zero;
         GroundLockTimer = 0f;
+        GroundSpeed = 0f;
         Angle = 0f;
     }
 }

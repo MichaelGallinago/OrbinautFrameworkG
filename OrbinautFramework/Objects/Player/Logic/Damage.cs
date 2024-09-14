@@ -33,8 +33,8 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    
 	    MovementData movement = data.Movement;
 	    movement.Gravity = GravityType.Default;
-	    movement.Velocity.Vector = new Vector2(0f, -7f);
-	    movement.GroundSpeed.Value = 0f;
+	    movement.Velocity = new Vector2(0f, -7f);
+	    movement.GroundSpeed = 0f;
 	    
 	    logic.Action = States.Default;
     	data.Sprite.Animation = Animations.Death;
@@ -70,14 +70,14 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 	    float velocity = (int)data.Movement.Position.X < (int)positionX ? -velocityX : velocityX;
 	    
 	    MovementData movement = data.Movement;
-	    movement.Velocity.Vector = new Vector2(velocity, velocityY);
-	    movement.GroundSpeed.Value = 0f;
+	    movement.Velocity = new Vector2(velocity, velocityY);
+	    movement.GroundSpeed = 0f;
 	    movement.Gravity = GravityType.HurtFall;
 	    movement.IsAirLock = true;
 	    
     	if (data.Water.IsUnderwater)
     	{
-		    movement.Velocity.Vector *= 0.5f;
+		    movement.Velocity = (Vector2)movement.Velocity * 0.5f;
 		    movement.Gravity -= 0.15625f;
     	}
     	

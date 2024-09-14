@@ -120,7 +120,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
             data.Movement.GroundSpeed.AddAcceleration(sign * data.Physics.Deceleration);
             if (direction == Constants.Direction.Positive == data.Movement.GroundSpeed >= 0f)
             {
-                data.Movement.GroundSpeed.Value = 0.5f * sign;
+                data.Movement.GroundSpeed = 0.5f * sign;
             }
 			
             return true;

@@ -78,6 +78,6 @@ public partial class TailNode : AdvancedAnimatedSprite
 	private void ChangeDirection(PlayerData data)
 	{
 		Scale = Scale with { X = data.Movement.IsSpinning && data.Movement.IsGrounded ? 
-			data.Movement.GroundSpeed.Value >= 0f ? 1f : -1f : data.Visual.Scale.X };
+			data.Movement.GroundSpeed >= 0f ? 1f : -1f : data.Visual.Scale.X };
 	}
 }

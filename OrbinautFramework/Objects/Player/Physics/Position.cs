@@ -12,7 +12,7 @@ public readonly struct Position(PlayerData data)
     public void UpdateAir()
     {
         UpdateGround();
-        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
+        data.Movement.Velocity.Y.AddAcceleration(data.Movement.Gravity);
     }
     
     public void UpdateGround()
@@ -23,7 +23,7 @@ public readonly struct Position(PlayerData data)
             movement.Velocity.Clamp(MinimalVelocity, MaximalVelocity);
         }
 		
-        movement.Position = movement.Velocity.CalculateNewPosition(movement.Position);
-        movement.Velocity.ResetInstantVelocity();
+        movement.Position += movement.Velocity.ValueDelta;
+        movement.Velocity.ResetInstanceValue();
     }
 }

@@ -187,7 +187,7 @@ public partial class Camera : Camera2D, ICamera
 		const int shiftSpeedX = 2;
 		float delta = shiftSpeedX * Scene.Instance.Speed;
 		
-		float groundSpeed = player.Data.Movement.GroundSpeed.Value;
+		float groundSpeed = player.Data.Movement.GroundSpeed;
 		if (Math.Abs(groundSpeed) < 6f && player.Action != ActionFsm.States.SpinDash)
 		{
 			_bufferOffset.X = _bufferOffset.X.MoveToward(0f, delta);

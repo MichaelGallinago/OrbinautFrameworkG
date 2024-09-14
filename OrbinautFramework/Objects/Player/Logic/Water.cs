@@ -36,7 +36,7 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 		//TODO: obj_bubbles_player
 		//instance_create(x, y, obj_bubbles_player, { TargetPlayer: id });
 		
-		data.Movement.Velocity.Vector *= new Vector2(0.5f, 0.25f);
+		data.Movement.Velocity *= new Vector2(0.5f, 0.25f);
 		
 		RemoveShieldUnderwater();
 		
@@ -127,8 +127,8 @@ public readonly struct Water(PlayerData data, IPlayerLogic logic)
 
 		MovementData movement = data.Movement;
 		movement.Gravity = GravityType.Underwater;
-		movement.Velocity.Vector = Vector2.Zero;
-		movement.GroundSpeed.Value = 0f;
+		movement.Velocity = Vector2.Zero;
+		movement.GroundSpeed = 0f;
 		
 		if (data.Node.IsCameraTarget(out ICamera camera))
 		{

@@ -35,7 +35,7 @@ public readonly struct Rolling(PlayerData data)
         }
 	
         movement.Velocity.SetDirectionalValue(movement.GroundSpeed, movement.Angle);
-        movement.Velocity.ClampX(-16f, 16f);
+        movement.Velocity.X.SetClamp(-16f, 16f);
     }
     
     private void RollOnGround(Constants.Direction direction)
@@ -50,11 +50,10 @@ public readonly struct Rolling(PlayerData data)
             data.Visual.Facing = direction;
             return;
         }
-
-        AcceleratedValue groundSpeed = movement.GroundSpeed;
-        groundSpeed.AddAcceleration(sign * data.Physics.DecelerationRoll);
-        if (direction == Constants.Direction.Positive == groundSpeed < 0f) return;
-        groundSpeed.Value = sign * 0.5f;
+        
+        movement.GroundSpeed.AddAcceleration(sign * data.Physics.DecelerationRoll);
+        if (direction == Constants.Direction.Positive == movement.GroundSpeed < 0f) return;
+        movement.GroundSpeed = sign * 0.5f;
     }
     
     private void StopSpinning()
@@ -75,18 +74,18 @@ public readonly struct Rolling(PlayerData data)
 	
     private void ForceSpin()
     {
-        AcceleratedValue groundSpeed = data.Movement.GroundSpeed;
+        MovementData movement = data.Movement;
 #if CD_PHYSICS
-        if (groundSpeed.Value is >= 0f and < 2f)
+        if ((float)movement.GroundSpeed is >= 0f and < 2f)
         {
-            groundSpeed.Value = 2f;
+            movement.GroundSpeed = 2f;
         }
 #else
-        if (groundSpeed != 0f) return;
+        if (movement.GroundSpeed != 0f) return;
     #if S1_PHYSICS
-        groundSpeed.Value = 2f;
+        movement.GroundSpeed = 2f;
     #else
-        groundSpeed.Value = 4f * (float)data.Visual.Facing;
+        movement.GroundSpeed = 4f * (float)data.Visual.Facing;
     #endif
 #endif
     }

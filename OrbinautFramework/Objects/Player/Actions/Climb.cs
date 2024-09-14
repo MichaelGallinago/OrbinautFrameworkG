@@ -51,7 +51,7 @@ public struct Climb(PlayerData data, IPlayerLogic logic)
 		data.Visual.Facing = (Constants.Direction)(-(int)data.Visual.Facing);
 		
 		var velocity = new Vector2(3.5f * (float)data.Visual.Facing, data.Physics.MinimalJumpSpeed);
-		data.Movement.Velocity.Vector = velocity;
+		data.Movement.Velocity = velocity;
 		
 		AudioPlayer.Sound.Play(SoundStorage.Jump);
 	}

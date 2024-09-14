@@ -50,7 +50,6 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
             collision.Radius = collision.RadiusNormal;
         }
 #endif
-	
         if (!movement.IsSpinning)
         {
             movement.Position.Y += collision.Radius.Y - collision.RadiusSpin.Y;
@@ -62,10 +61,9 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
             movement.IsAirLock = true;
         }
 #endif
-		
         float radians = Mathf.DegToRad(movement.Angle);
         var velocity = new Vector2(MathF.Sin(radians), MathF.Cos(radians));
-        movement.Velocity.Vector += data.Physics.JumpSpeed * velocity;
+        movement.Velocity += data.Physics.JumpSpeed * velocity;
         
         movement.IsGrounded = false;
         movement.IsCorePhysicsSkipped = true;

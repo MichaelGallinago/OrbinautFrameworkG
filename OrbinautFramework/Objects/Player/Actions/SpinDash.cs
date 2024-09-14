@@ -17,7 +17,7 @@ public struct SpinDash(PlayerData data)
 	public void Enter()
 	{
 		data.Sprite.Animation = Animations.SpinDash;
-		data.Movement.Velocity.Vector = Vector2.Zero;
+		data.Movement.Velocity = Vector2.Zero;
 		
 		// TODO: SpinDash dust 
 		//instance_create(x, y + Radius.Y, obj_dust_spindash, { TargetPlayer: id });
@@ -49,7 +49,7 @@ public struct SpinDash(PlayerData data)
 	    movement.IsSpinning = true;
 
 	    float baseSpeed = data.Super.IsSuper ? 11f : 8f;
-	    movement.GroundSpeed.Value = (baseSpeed + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
+	    movement.GroundSpeed = (baseSpeed + MathF.Round(_charge) / 2f) * (float)data.Visual.Facing;
     	
 	    AudioPlayer.Sound.Stop(SoundStorage.Charge);
 	    AudioPlayer.Sound.Play(SoundStorage.Release);

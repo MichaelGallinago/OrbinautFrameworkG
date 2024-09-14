@@ -1,30 +1,38 @@
 using System;
+using System.Runtime.CompilerServices;
 using Godot;
 
 namespace OrbinautFramework3.Framework;
 
-public class AcceleratedValue
+public struct AcceleratedValue(float value)
 {
-    public float Value
-    {
-        set => _value = _instantValue = value;
-        get => _value;
-    }
-
-    private float _value;
-    private float _instantValue;
-    
-    public static implicit operator float(AcceleratedValue value) => value.Value;
-    
-    public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
+    private float _value = value;
+    private float _instantValue = value;
     
     public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
-    public static float operator+ (float value, AcceleratedValue acceleratedValue) => acceleratedValue.Sum(value);
-    public static float operator+ (AcceleratedValue acceleratedValue, float value) => acceleratedValue.Sum(value);
+    public float ValueDelta
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            float speed = Scene.Instance.Speed;
+            return ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
+        }
+    }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator float(AcceleratedValue value) => value._value;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator AcceleratedValue(float value) => new(value);
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ResetInstantValue() => _instantValue = _value;
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetClamp(float min, float max)
     {
 #if TOOLS
@@ -33,29 +41,31 @@ public class AcceleratedValue
             throw new ArgumentException("max should be no less than min");
         }
 #endif
-        
         if (_value < min)
         {
-            Value = _instantValue = min;
+            _value = _instantValue = min;
         }
         else if (_value > max)
         {
-            Value = _instantValue = max;
+            _value = _instantValue = max;
         }
     }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetMax(float value)
     {
         if (_value >= value) return;
-        Value = value;
+        _value = _instantValue = value;
     }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetMin(float value)
     {
         if (_value <= value) return;
-        Value = value;
+        _value = _instantValue = value;
     }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ApplyFriction(float friction)
     {
         int sign = Math.Sign(_value);
@@ -68,9 +78,22 @@ public class AcceleratedValue
         }
     }
     
-    private float Sum(float value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Limit(float value, Constants.Direction direction)
     {
-        float speed = Scene.Instance.Speed;
-        return value + ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
+        if (direction == Constants.Direction.Positive)
+        {
+            SetMin(value);
+            return;
+        }
+        
+        SetMax(value);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Modify(float modificator)
+    {
+        _instantValue += modificator;
+        _value += modificator;
     }
 }

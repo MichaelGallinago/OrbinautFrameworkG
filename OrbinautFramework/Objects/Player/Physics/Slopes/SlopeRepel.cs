@@ -36,7 +36,7 @@ public readonly struct SlopeRepel(PlayerData data)
                 break;
 			
             default:
-                data.Movement.GroundSpeed.Acceleration = data.Movement.Angle < 180f ? -0.5f : 0.5f;
+                data.Movement.GroundSpeed.AddAcceleration(data.Movement.Angle < 180f ? -0.5f : 0.5f);
                 break;
         }
 
@@ -44,7 +44,7 @@ public readonly struct SlopeRepel(PlayerData data)
 #else
         if (Angles.GetQuadrant(data.Movement.Angle) == Angles.Quadrant.Down) return;
         
-        data.Movement.GroundSpeed.Value = 0f;	
+        data.Movement.GroundSpeed = 0f;	
         data.Movement.GroundLockTimer = 30f;
         data.Movement.IsGrounded = false;
 #endif

@@ -57,11 +57,11 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
         const float slideFriction = -0.09375f;
 		
         float speedX = movement.Velocity.X;
-        movement.Velocity.AccelerationX = Math.Sign(movement.Velocity.X) * slideFriction;
+        movement.Velocity.X.AddAcceleration(Math.Sign(movement.Velocity.X) * slideFriction);
         switch (speedX)
         {
-            case > 0f: movement.Velocity.MaxX(0f); break;
-            case < 0f: movement.Velocity.MinX(0f); break;
+            case > 0f: movement.Velocity.X.SetMax(0f); break;
+            case < 0f: movement.Velocity.X.SetMin(0f); break;
         }
     }
     
@@ -75,8 +75,8 @@ public struct GlideGround(PlayerData data, IPlayerLogic logic)
 			
         data.Sprite.Animation = Animations.GlideGround;
         movement.GroundLockTimer = 16f;
-        movement.GroundSpeed.Value = 0f;
-			
+        movement.GroundSpeed = 0f;
+        
         return true;
     }
 

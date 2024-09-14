@@ -30,7 +30,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		
 		int sign;
 		Direction firstDirection, secondDirection;
-		switch (movement.GroundSpeed.Value)
+		switch ((float)movement.GroundSpeed)
 		{
 			case < 0f:
 				sign = (int)Direction.Positive;
@@ -49,10 +49,8 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		}
 
 		TileCollider tileCollider = logic.TileCollider;
-		tileCollider.SetData(
-			(Vector2I)movement.Velocity.CalculateNewPosition(movement.Position), 
-			data.Collision.TileLayer,
-			data.Collision.TileBehaviour);
+		var position = (Vector2I)(movement.Position + movement.Velocity.ValueDelta);
+		tileCollider.SetData(position, data.Collision.TileLayer, data.Collision.TileBehaviour);
 		
 		int wallDistance = GetWallCastQuadrant(angle) switch
 		{
@@ -73,7 +71,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		{
 			case Angles.Quadrant.Down or Angles.Quadrant.Up:
 				movement.Velocity.Modify(new Vector2(-offset, 0f));
-				movement.GroundSpeed.Value = 0f;
+				movement.GroundSpeed = 0f;
 				
 				if (data.Visual.Facing == firstDirection && !movement.IsSpinning)
 				{

@@ -244,7 +244,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		
 		if (clipX != 0 && Math.Sign(clipX) == Math.Sign(movement.Velocity.X))
 		{
-			movement.GroundSpeed.Value = 0f;
+			movement.GroundSpeed = 0f;
 			movement.Velocity.X = 0f;
 			
 			if (movement.IsGrounded)
@@ -358,7 +358,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		position.Y -= distance + 1;
 		movement.Position = position;
 		
-		movement.GroundSpeed.Value = movement.Velocity.X;
+		movement.GroundSpeed = movement.Velocity.X;
 		movement.Velocity.Y = 0f;
 		movement.Angle = 0f;
 		
