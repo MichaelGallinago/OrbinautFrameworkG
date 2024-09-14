@@ -14,9 +14,12 @@ public class MovementData
     public bool IsForcedRoll { get; set; }
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }
+
+    public ref AcceleratedVector2 Velocity => ref _velocity;
+    private AcceleratedVector2 _velocity;
     
-    public AcceleratedVector2 Velocity { get; } = new();
-    public AcceleratedValue GroundSpeed { get; } = new();
+    public ref AcceleratedValue GroundSpeed => ref _groundSpeed;
+    private AcceleratedValue _groundSpeed;
 
     public ref Vector2 Position => ref _position;
     private Vector2 _position;

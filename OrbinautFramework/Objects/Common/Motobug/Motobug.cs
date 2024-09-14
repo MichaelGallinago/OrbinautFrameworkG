@@ -15,7 +15,7 @@ public partial class MotoBug : InteractiveNode, IResetable
 
     public IMemento Memento { get; }
     
-    private readonly AcceleratedVector2 _acceleratedVector2 = new();
+    private AcceleratedVector2 _velocity;
     private readonly TileCollider _tileCollider = new()
     {
         TileBehaviour = Constants.TileBehaviours.Floor,
@@ -37,7 +37,7 @@ public partial class MotoBug : InteractiveNode, IResetable
         _state = State.Init;
         _smokeTimer = 0f;
         _moveTimer = 0f;
-        _acceleratedVector2.Vector = Vector2.Zero;
+        _velocity.Vector = Vector2.Zero;
         Visible = false;
     }
     
@@ -56,15 +56,15 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Init()
     {
         Vector2 position = Position;
-        position.Y = _acceleratedVector2.CalculateNewPositionY(position.Y);
-        _acceleratedVector2.SetAccelerationY(GravityType.Default);
+        position.Y = _velocity.CalculateNewPositionY(position.Y);
+        _velocity.SetAccelerationY(GravityType.Default);
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);
         if (floorDistance < 0f)
         {
             position.Y += floorDistance;
-            _acceleratedVector2.Y = 0f;
+            _velocity.Y = 0f;
             _state = State.Wait;
             Scale = VectorUtilities.FlipX(Scale);
         }
@@ -77,7 +77,7 @@ public partial class MotoBug : InteractiveNode, IResetable
         if (_moveTimer >= 0f) return;
         
         _sprite.Play();
-        _acceleratedVector2.X = MathF.Sign(Scale.X);
+        _velocity.X = MathF.Sign(Scale.X);
         _state = State.Move;
         Scale = VectorUtilities.FlipX(Scale);
         Visible = true;
@@ -86,7 +86,7 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Move()
     {
         Vector2 position = Position;
-        position.X = _acceleratedVector2.CalculateNewPositionX(position.X);
+        position.X = _velocity.CalculateNewPositionX(position.X);
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);
@@ -94,7 +94,7 @@ public partial class MotoBug : InteractiveNode, IResetable
         {
             _state = State.Wait;
             _moveTimer = 59f;
-            _acceleratedVector2.X = -_acceleratedVector2.X;
+            _velocity.X = -_velocity.X;
             _sprite.Frame = 0;
             _sprite.Stop();
             Position = position;

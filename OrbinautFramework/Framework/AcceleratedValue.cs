@@ -4,26 +4,20 @@ using Godot;
 
 namespace OrbinautFramework3.Framework;
 
-public class AcceleratedValue
+public struct AcceleratedValue(float value)
 {
-    public float Value
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => _value = _instantValue = value;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _value;
-    }
+    private float _value = value;
+    private float _instantValue = value;
     
-    private float _value;
-    private float _instantValue;
+    public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator float(AcceleratedValue value) => value.Value;
+    public static implicit operator float(AcceleratedValue value) => value._value;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator AcceleratedValue(float value) => new(value);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
-    
-    public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float operator+ (float value, AcceleratedValue acceleratedValue) => acceleratedValue.Sum(value);
@@ -45,11 +39,11 @@ public class AcceleratedValue
         
         if (_value < min)
         {
-            Value = _instantValue = min;
+            _value = _instantValue = min;
         }
         else if (_value > max)
         {
-            Value = _instantValue = max;
+            _value = _instantValue = max;
         }
     }
     
@@ -57,14 +51,14 @@ public class AcceleratedValue
     public void SetMax(float value)
     {
         if (_value >= value) return;
-        Value = value;
+        _value = _instantValue = value;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetMin(float value)
     {
         if (_value <= value) return;
-        Value = value;
+        _value = _instantValue = value;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,6 +72,25 @@ public class AcceleratedValue
             case  1: SetMax(0f); break;
             case -1: SetMin(0f); break;
         }
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Limit(float value, Constants.Direction direction)
+    {
+        if (direction == Constants.Direction.Positive)
+        {
+            SetMin(value);
+            return;
+        }
+        
+        SetMax(value);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Modify(float modificator)
+    {
+        _instantValue += modificator;
+        _value += modificator;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
