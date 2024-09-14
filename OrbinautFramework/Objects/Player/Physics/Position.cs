@@ -23,7 +23,7 @@ public readonly struct Position(PlayerData data)
             movement.Velocity.Clamp(MinimalVelocity, MaximalVelocity);
         }
 		
-        movement.Position += movement.Velocity;
+        movement.Position += movement.Velocity.Acceleration;
         movement.Velocity.ResetInstantVelocity();
     }
 }

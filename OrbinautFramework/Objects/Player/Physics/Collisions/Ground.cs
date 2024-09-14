@@ -49,10 +49,8 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		}
 
 		TileCollider tileCollider = logic.TileCollider;
-		tileCollider.SetData(
-			(Vector2I)(movement.Velocity + movement.Position), 
-			data.Collision.TileLayer,
-			data.Collision.TileBehaviour);
+		var position = (Vector2I)(movement.Position + movement.Velocity.Acceleration);
+		tileCollider.SetData(position, data.Collision.TileLayer, data.Collision.TileBehaviour);
 		
 		int wallDistance = GetWallCastQuadrant(angle) switch
 		{

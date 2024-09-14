@@ -9,12 +9,13 @@ public struct AcceleratedVector2
     public AcceleratedValue X;
     public AcceleratedValue Y;
     
+    public Vector2 Acceleration => new(X.Acceleration, Y.Acceleration);
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Vector2(AcceleratedVector2 vector) => new(vector.X, vector.Y);
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator AcceleratedVector2(Vector2 vector) => new(vector);
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public AcceleratedVector2(Vector2 vector) 
     {
@@ -70,15 +71,6 @@ public struct AcceleratedVector2
         X.SetMax(value.X);
         Y.SetMax(value.Y);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 GetFromSpeedWithAngle(float speed, float angle)
-    {
-        float radians = Mathf.DegToRad(angle);
-        float sine = MathF.Sin(radians);
-        float cosine = MathF.Cos(radians);
-        return speed * new Vector2(sine, cosine);
-    }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetDirectionalValue(AcceleratedValue value, float angle)
@@ -98,7 +90,4 @@ public struct AcceleratedVector2
         X.ResetInstantValue();
         Y.ResetInstantValue();
     }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Vector2 Sum(Vector2 position) => new(position.X + X, position.Y + Y);
 }

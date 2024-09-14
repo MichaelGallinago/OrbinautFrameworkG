@@ -56,7 +56,7 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Init()
     {
         Vector2 position = Position;
-        position.Y += _velocity.Y;
+        position.Y += _velocity.Y.Acceleration;
         _velocity.Y.AddAcceleration(GravityType.Default);
         
         _tileCollider.Position = (Vector2I)position;

@@ -11,6 +11,16 @@ public struct AcceleratedValue(float value)
     
     public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
+    public float Acceleration
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            float speed = Scene.Instance.Speed;
+            return ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
+        }
+    }
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator float(AcceleratedValue value) => value._value;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -18,11 +28,6 @@ public struct AcceleratedValue(float value)
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float operator+ (float value, AcceleratedValue acceleratedValue) => acceleratedValue.Sum(value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float operator+ (AcceleratedValue acceleratedValue, float value) => acceleratedValue.Sum(value);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ResetInstantValue() => _instantValue = _value;
@@ -36,7 +41,6 @@ public struct AcceleratedValue(float value)
             throw new ArgumentException("max should be no less than min");
         }
 #endif
-        
         if (_value < min)
         {
             _value = _instantValue = min;
@@ -91,12 +95,5 @@ public struct AcceleratedValue(float value)
     {
         _instantValue += modificator;
         _value += modificator;
-    }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private float Sum(float value)
-    {
-        float speed = Scene.Instance.Speed;
-        return value + ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
     }
 }

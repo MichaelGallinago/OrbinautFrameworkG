@@ -58,7 +58,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 	    {
 		    case States.Flight or States.Climb:
 			    if (movement.Position.Y + movement.Velocity.Y >= topBound) break;
-
+			    
 			    movement.Velocity.Y = 0f;
 			    movement.Position = new Vector2(movement.Position.X, topBound);
 			    
