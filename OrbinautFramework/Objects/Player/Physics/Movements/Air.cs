@@ -74,11 +74,11 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		
 		if (velocity < 0f)
 		{
-			data.Movement.Velocity.AccelerationX = acceleration;
+			data.Movement.Velocity.SetAccelerationX(acceleration);
 		}
 		else if (!SharedData.NoSpeedCap || velocity < data.Physics.AccelerationTop)
 		{
-			data.Movement.Velocity.AccelerationX = acceleration;
+			data.Movement.Velocity.SetAccelerationX(acceleration);
 			data.Movement.Velocity.LimitX(sign * data.Physics.AccelerationTop, direction);
 		}
 		
@@ -89,7 +89,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 	{
 		if (data.Movement.Velocity.Y is < 0f and > -4f)
 		{
-			data.Movement.Velocity.AccelerationX = MathF.Floor(data.Movement.Velocity.X * 8f) / -256f;
+			data.Movement.Velocity.SetAccelerationX(MathF.Floor(data.Movement.Velocity.X * 8f) / -256f);
 		}
 	}
 }

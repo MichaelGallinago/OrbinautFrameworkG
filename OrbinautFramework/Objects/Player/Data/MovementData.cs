@@ -15,7 +15,7 @@ public class MovementData
     public float GroundLockTimer { get; set; }
     public bool IsCorePhysicsSkipped { get; set; }
     
-    public Velocity Velocity { get; } = new();
+    public AcceleratedVector2 Velocity { get; } = new();
     public AcceleratedValue GroundSpeed { get; } = new();
 
     public ref Vector2 Position => ref _position;

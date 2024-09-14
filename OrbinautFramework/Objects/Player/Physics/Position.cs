@@ -12,7 +12,7 @@ public readonly struct Position(PlayerData data)
     public void UpdateAir()
     {
         UpdateGround();
-        data.Movement.Velocity.AccelerationY = data.Movement.Gravity;
+        data.Movement.Velocity.SetAccelerationY(data.Movement.Gravity);
     }
     
     public void UpdateGround()

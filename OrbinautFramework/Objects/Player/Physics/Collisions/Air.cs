@@ -170,28 +170,28 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 	private void SetLandingSpeedAndVelocity(float angle)
 	{
 		MovementData movement = data.Movement;
-		Velocity velocity = movement.Velocity;
+		AcceleratedVector2 acceleratedVector2 = movement.Velocity;
 		AcceleratedValue groundSpeed = movement.GroundSpeed;
 		
 		if (Angles.GetQuadrant(angle) != Angles.Quadrant.Down)
 		{
-			if (velocity.Y > 15.75f)
+			if (acceleratedVector2.Y > 15.75f)
 			{
-				velocity.Y = 15.75f;
+				acceleratedVector2.Y = 15.75f;
 			}
 			
-			groundSpeed.Value = angle < 180f ? -velocity.Y : velocity.Y;
-			velocity.X = 0f;
+			groundSpeed.Value = angle < 180f ? -acceleratedVector2.Y : acceleratedVector2.Y;
+			acceleratedVector2.X = 0f;
 		}
 		else if (angle is > 22.5f and <= 337.5f)
 		{
-			groundSpeed.Value = angle < 180f ? -velocity.Y : velocity.Y;
+			groundSpeed.Value = angle < 180f ? -acceleratedVector2.Y : acceleratedVector2.Y;
 			groundSpeed.Value *= 0.5f;
 		}
 		else
 		{
-			groundSpeed.Value = velocity.X;
-			velocity.Y = 0f;
+			groundSpeed.Value = acceleratedVector2.X;
+			acceleratedVector2.Y = 0f;
 		}
 	}
 

@@ -24,7 +24,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 		if (!data.Input.Down.Aby)
 		{
-			data.Movement.Velocity.MaxY(data.Physics.MinimalJumpSpeed);
+			data.Movement.Velocity.SetMaxY(data.Physics.MinimalJumpSpeed);
 		}
 
 		if (data.Movement.Velocity.Y < data.Physics.MinimalJumpSpeed) return States.Jump;

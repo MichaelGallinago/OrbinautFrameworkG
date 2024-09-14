@@ -23,15 +23,15 @@ public readonly struct Carried(PlayerData data, IPlayerLogic logic)
         data.Movement.IsJumping = true;
         data.Collision.Radius = data.Collision.RadiusSpin;
 
-        Velocity velocity = data.Movement.Velocity;
-        velocity.Y = data.Physics.MinimalJumpSpeed;
+        AcceleratedVector2 acceleratedVector2 = data.Movement.Velocity;
+        acceleratedVector2.Y = data.Physics.MinimalJumpSpeed;
         if (data.Input.Down.Left)
         {
-            velocity.X = -2f;
+            acceleratedVector2.X = -2f;
         }
         else if (data.Input.Down.Right)
         {
-            velocity.X = 2f;
+            acceleratedVector2.X = 2f;
         }
 
         AudioPlayer.Sound.Play(SoundStorage.Jump);

@@ -35,7 +35,7 @@ public readonly struct Rolling(PlayerData data)
         }
 	
         movement.Velocity.SetDirectionalValue(movement.GroundSpeed, movement.Angle);
-        movement.Velocity.ClampX(-16f, 16f);
+        movement.Velocity.SetClampX(-16f, 16f);
     }
     
     private void RollOnGround(Constants.Direction direction)
