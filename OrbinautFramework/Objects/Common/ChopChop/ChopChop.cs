@@ -78,7 +78,7 @@ public partial class ChopChop : InteractiveNode, IResetable
 
     private void StartWaiting(Vector2 position)
     {
-        IPlayer player = null; // TODO: instance_nearest(x, y, obj_player)
+        IPlayer player = Scene.Instance.Players.FindNearest(position);
         Vector2I distance = (Vector2I)position - (Vector2I)player.Position;
         int absDistanceX = Math.Abs(distance.X);
 
@@ -96,8 +96,9 @@ public partial class ChopChop : InteractiveNode, IResetable
         _moveTimer -= Scene.Instance.Speed;
         if (_moveTimer >= 0f) return;
         
-        IPlayer player = null; // TODO: instance_nearest(x, y, obj_player)
-        Vector2I distance = (Vector2I)Position - (Vector2I)player.Position;
+        Vector2 position = Position;
+        IPlayer player = Scene.Instance.Players.FindNearest(position);
+        Vector2I distance = (Vector2I)position - (Vector2I)player.Position;
         
         _velocity.X = MathF.Sign(distance.X) * -2;
 
