@@ -13,7 +13,7 @@ namespace OrbinautFramework3.Objects.Common.Bumper;
 
 public partial class Bumper : InteractiveNode
 {
-    [EnumToStringName] public enum Animationss { Default, Bump } // TODO: fix "Animations"
+    [EnumToStringName] public enum Animations { Default, Bump }
     
     private enum HitsLimit : sbyte { Sonic1 = 10, Sonic2 = -1 }
 
@@ -40,9 +40,9 @@ public partial class Bumper : InteractiveNode
         {
             if (!HitBox.CheckPlayerCollision(player.Data, (Vector2I)Position)) continue;
             
-            if (_sprite.Animation == AnimationssStringNames.Default)
+            if (_sprite.Animation == AnimationsStringNames.Default)
             {
-                _sprite.Play(AnimationssStringNames.Bump);
+                _sprite.Play(AnimationsStringNames.Bump);
             }
             
             AudioPlayer.Sound.Play(SoundStorage.Bumper);
@@ -81,7 +81,7 @@ public partial class Bumper : InteractiveNode
 
     private void OnAnimationFinished()
     {
-        if (_sprite.Animation != AnimationssStringNames.Bump) return; 
-        _sprite.Play(AnimationssStringNames.Default);
+        if (_sprite.Animation != AnimationsStringNames.Bump) return; 
+        _sprite.Play(AnimationsStringNames.Default);
     }
 }

@@ -108,7 +108,8 @@ public sealed class EnumToStringNameGenerator : IIncrementalGenerator
             foreach (EnumToProcess? enumeration in enumerations)
             {
                 AddClass(sb, tempSb, enumeration, typeVisibility);
-                var hintName = $"{enumeration.ClassName}.g.cs";
+                string hintName = enumeration.FullNamespace == null ?
+                    $"{enumeration.ClassName}.g.cs" : $"{enumeration.FullNamespace}.{enumeration.ClassName}.g.cs";
                 context.AddSource(hintName, SourceText.From(sb.ToString(), Encoding.UTF8));
             }
         }

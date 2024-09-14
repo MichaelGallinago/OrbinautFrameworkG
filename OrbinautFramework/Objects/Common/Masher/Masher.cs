@@ -11,7 +11,7 @@ public partial class Masher : InteractiveNode, IResetable
 {
     public enum JumpVelocity : sbyte { Sonic1 = -5, Sonic2 = -4 }
     
-    [EnumToStringName] private enum Animation : byte { Jump, Chomp, Fall }
+    [EnumToStringName] public enum Animation : byte { Jump, Chomp, Fall }
     
     [Export] private JumpVelocity _jumpVelocity = JumpVelocity.Sonic1;
     [Export] private AdvancedAnimatedSprite _sprite;
