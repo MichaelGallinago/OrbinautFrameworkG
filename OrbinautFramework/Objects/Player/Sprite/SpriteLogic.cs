@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Objects.Player.Sprite;
 public abstract partial class SpriteLogic(PlayerData playerData, ISpriteNode spriteNode) : Resource
 {
     public SpriteData Data { get; } = new();
-    public ISpriteNode Node { get; } = spriteNode;
+    protected ISpriteNode Node { get; } = spriteNode;
 
     public void Process()
     {

@@ -2,8 +2,7 @@ using EnumToStringNameSourceGenerator;
 
 namespace OrbinautFramework3.Objects.Player.Sprite;
 
-[EnumToStringName]
-public enum Animations : byte
+[EnumToStringName] public enum Animations : byte
 {
     None,
     Push,

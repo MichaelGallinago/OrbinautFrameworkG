@@ -5,9 +5,9 @@ using OrbinautFramework3.Framework.ObjectBase;
 using OrbinautFramework3.Framework.ObjectBase.AbstractTypes;
 using OrbinautFramework3.Framework.Tiles;
 
-namespace OrbinautFramework3.Objects.Common.Motobug;
+namespace OrbinautFramework3.Objects.Common.MotoBug;
 
-public partial class Motobug : InteractiveNode, IResetable
+public partial class MotoBug : InteractiveNode, IResetable
 {
     public enum State : byte { Init, Wait, Move }
     
@@ -15,18 +15,18 @@ public partial class Motobug : InteractiveNode, IResetable
 
     public IMemento Memento { get; }
     
-    private State _state;
-    private readonly Velocity _velocity = new ();
-    private float _smokeTimer;
-    private float _moveTimer;
-
-    private readonly TileCollider _tileCollider = new ()
+    private readonly Velocity _velocity = new();
+    private readonly TileCollider _tileCollider = new()
     {
         TileBehaviour = Constants.TileBehaviours.Floor,
         LayerType = Constants.TileLayers.Main
     };
     
-    public Motobug()
+    private float _smokeTimer;
+    private float _moveTimer;
+    private State _state;
+    
+    public MotoBug()
     {
         Memento = new ResetMemento(this);
         Reset();

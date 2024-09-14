@@ -1,3 +1,4 @@
+using EnumToStringNameSourceGenerator;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
@@ -10,7 +11,7 @@ public partial class Masher : InteractiveNode, IResetable
 {
     public enum JumpVelocity : sbyte { Sonic1 = -5, Sonic2 = -4 }
     
-    private enum Animation : byte  { Jump, Chomp, Fall }
+    [EnumToStringName] public enum Animation : byte { Jump, Chomp, Fall }
     
     [Export] private JumpVelocity _jumpVelocity = JumpVelocity.Sonic1;
     [Export] private AdvancedAnimatedSprite _sprite;
@@ -35,18 +36,16 @@ public partial class Masher : InteractiveNode, IResetable
         _velocityY.Value = _velocityYDefault;
     }
 
-    public override void _Ready()
-    {
-        _startYPosition = Position.Y;
-    }
+    public override void _Ready() => _startYPosition = Position.Y;
     
     public override void _Process(double delta)
     {
         if (false) return; // TODO: obj_act_enemy
 
         Vector2 position = Position;
-        position.Y = _velocityY.Add(position.Y);
-        _velocityY.Acceleration = 0.09375f;
+        position.Y += _velocityY;
+        _velocityY.ResetInstantValue();
+        _velocityY.AddAcceleration(0.09375f);
 
         if (position.Y >= _startYPosition)
         {
@@ -54,8 +53,7 @@ public partial class Masher : InteractiveNode, IResetable
             _velocityY.Value = _velocityYDefault;
         }
 
-        Animation currentAnimation = Animation.Jump;
-
+        Animation currentAnimation;
         if (position.Y < _startYPosition - 192f)
         {
             currentAnimation = Animation.Chomp;
@@ -64,11 +62,14 @@ public partial class Masher : InteractiveNode, IResetable
         {
             currentAnimation = Animation.Fall;
         }
-
-        if (_previousAnimation != currentAnimation)
+        else
         {
-            _previousAnimation = currentAnimation;
-            _sprite.Play(currentAnimation.ToString()); // TODO: ToStringName
+            currentAnimation = Animation.Jump;
         }
+
+        if (_previousAnimation == currentAnimation) return;
+        
+        _previousAnimation = currentAnimation;
+        _sprite.Play(currentAnimation.ToStringName());
     }
 }
