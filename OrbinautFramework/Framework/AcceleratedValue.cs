@@ -11,7 +11,7 @@ public struct AcceleratedValue(float value)
     
     public bool IsAccelerated => !Mathf.IsEqualApprox(_value, _instantValue);
     
-    public float Acceleration
+    public float ValueDelta
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get

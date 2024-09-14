@@ -9,7 +9,7 @@ public struct AcceleratedVector2
     public AcceleratedValue X;
     public AcceleratedValue Y;
     
-    public Vector2 Acceleration => new(X.Acceleration, Y.Acceleration);
+    public Vector2 ValueDelta => new(X.ValueDelta, Y.ValueDelta);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Vector2(AcceleratedVector2 vector) => new(vector.X, vector.Y);
@@ -80,14 +80,7 @@ public struct AcceleratedVector2
         X = floatValue * MathF.Cos(radians);
         Y = floatValue * -Mathf.Sin(radians);
         //TODO: check IsAccelerated
-        //if (value.IsAccelerated) return;
+        //if (value.IsAccelerated) return; 
         ResetInstanceValue();
-    }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void ResetInstantVelocity()
-    {
-        X.ResetInstantValue();
-        Y.ResetInstantValue();
     }
 }

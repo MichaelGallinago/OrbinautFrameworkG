@@ -43,7 +43,7 @@ public partial class Masher : InteractiveNode, IResetable
         if (false) return; // TODO: obj_act_enemy
 
         Vector2 position = Position;
-        position.Y += _velocityY;
+        position.Y += _velocityY.ValueDelta;
         _velocityY.ResetInstantValue();
         _velocityY.AddAcceleration(0.09375f);
 
