@@ -30,7 +30,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		movement.IsAirLock = false;
 		movement.IsSpinning = false;
 		movement.IsJumping = false;
-		movement.GroundSpeed.Value = 4f;
+		movement.GroundSpeed = 4f;
 		
 		if (movement.Velocity.Y < 0f)
 		{
@@ -150,7 +150,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		MovementData movement = data.Movement;
 		if (Angles.GetQuadrant(movement.Angle) != Angles.Quadrant.Down)
 		{
-			movement.GroundSpeed.Value = movement.Angle < 180 ? movement.Velocity.X : -movement.Velocity.X;
+			movement.GroundSpeed = movement.Angle < 180 ? movement.Velocity.X : -movement.Velocity.X;
 			
 			logic.Land();
 			return;
@@ -170,7 +170,7 @@ public struct GlideAir(PlayerData data, IPlayerLogic logic)
 		}
 		
 		data.Sprite.Animation = Animations.ClimbWall;
-		data.Movement.GroundSpeed.Value = 0f;
+		data.Movement.GroundSpeed = 0f;
 		data.Movement.Velocity.Y = 0f;
 		data.Movement.Gravity = 0f;
 			

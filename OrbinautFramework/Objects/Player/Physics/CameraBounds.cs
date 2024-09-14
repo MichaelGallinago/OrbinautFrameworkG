@@ -26,7 +26,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 	    MovementData movement = data.Movement;
 	    if (movement.Position.X + movement.Velocity.X >= leftBound) return;
 	    
-	    movement.GroundSpeed.Value = 0f;
+	    movement.GroundSpeed = 0f;
 	    movement.Velocity.X = 0f;
 	    movement.Position = new Vector2(leftBound, movement.Position.Y);
     }
@@ -45,7 +45,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 	    MovementData movement = data.Movement;
 	    if (movement.Position.X + movement.Velocity.X <= rightBound) return;
 	    
-	    movement.GroundSpeed.Value = 0f;
+	    movement.GroundSpeed = 0f;
 	    movement.Velocity.X = 0f;
 	    movement.Position = new Vector2(rightBound, movement.Position.Y);
     }
@@ -69,7 +69,7 @@ public readonly struct CameraBounds(PlayerData data, IPlayerLogic logic)
 			    break;
     		
 		    case States.GlideAir or States.GlideFall or States.GlideGround when movement.Position.Y < topBound - 6:
-			    movement.GroundSpeed.Value = 0f;
+			    movement.GroundSpeed = 0f;
 			    break;
 	    }
     }

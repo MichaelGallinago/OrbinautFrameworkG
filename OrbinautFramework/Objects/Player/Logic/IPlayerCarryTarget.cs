@@ -15,7 +15,7 @@ public interface IPlayerCarryTarget : ICarryTarget, IPlayerLogic, IPlayerPositio
     Vector2 ICarryTarget.Velocity 
     {
         get => Data.Movement.Velocity;
-        set => Data.Movement.Velocity.Vector = value;
+        set => Data.Movement.Velocity = value;
     }
     
     Vector2 ICarryTarget.Scale

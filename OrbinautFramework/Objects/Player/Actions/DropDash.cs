@@ -94,17 +94,16 @@ public struct DropDash(PlayerData data)
 	    
 	    if (data.Movement.Velocity.X * sign >= 0f)
 	    {
-		    AcceleratedValue groundSpeed = data.Movement.GroundSpeed;
-		    groundSpeed.Value = MathF.Floor(groundSpeed / 4f) + force;
-		    if (sign * groundSpeed <= limitSpeed) return;
-		    groundSpeed.Value = limitSpeed;
+		    float groundSpeed = data.Movement.GroundSpeed;
+		    groundSpeed = MathF.Floor(groundSpeed / 4f) + force;
+		    data.Movement.GroundSpeed = sign * groundSpeed <= limitSpeed ? groundSpeed : limitSpeed;
 		    return;
 	    }
     	
-	    data.Movement.GroundSpeed.Value = force;
+	    data.Movement.GroundSpeed = force;
 	    if (Mathf.IsZeroApprox(data.Movement.Angle)) return;
     	
-	    data.Movement.GroundSpeed.Value += MathF.Floor(data.Movement.GroundSpeed / 2f);
+	    data.Movement.GroundSpeed += MathF.Floor(data.Movement.GroundSpeed / 2f);
     }
 
     private bool Cancel()

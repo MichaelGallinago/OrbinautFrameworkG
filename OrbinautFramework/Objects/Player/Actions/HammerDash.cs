@@ -15,7 +15,7 @@ public struct HammerDash(PlayerData data)
     public void Enter()
     {
         data.Sprite.Animation = Animations.HammerDash;
-        data.Movement.GroundSpeed.Value = 6f * (float)data.Visual.Facing;
+        data.Movement.GroundSpeed = 6f * (float)data.Visual.Facing;
         
         if (data.Super.IsSuper && data.Node.IsCameraTarget(out ICamera camera))
         {
@@ -59,7 +59,7 @@ public struct HammerDash(PlayerData data)
         if (!data.Movement.IsGrounded) return;
         
         const float hammerDashSpeed = 6f;
-        data.Movement.GroundSpeed.Value = hammerDashSpeed * (float)data.Visual.Facing;
+        data.Movement.GroundSpeed = hammerDashSpeed * (float)data.Visual.Facing;
         data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
     }
 }

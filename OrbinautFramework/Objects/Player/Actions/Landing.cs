@@ -32,7 +32,7 @@ public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 		
 		if (data.State == PlayerStates.Hurt)
 		{
-			movement.GroundSpeed.Value = 0f;
+			movement.GroundSpeed = 0f;
 		}
 		
 		movement.IsAirLock = false;
@@ -68,7 +68,7 @@ public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 		MovementData movement = data.Movement;
 		float force = data.Water.IsUnderwater ? -4f : -7.5f;
 		float radians = Mathf.DegToRad(movement.Angle);
-		movement.Velocity.Vector = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
+		movement.Velocity = new Vector2(MathF.Sin(radians), MathF.Cos(radians)) * force;
 	    
 		shield.State = ShieldContainer.States.None;
 		data.Collision.OnObject = null;

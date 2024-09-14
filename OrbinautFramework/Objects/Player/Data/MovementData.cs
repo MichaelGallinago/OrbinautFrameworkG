@@ -33,9 +33,9 @@ public class MovementData
         _position = position;
         
         Gravity = GravityType.Default;
-        Velocity.Vector = Vector2.Zero;
-        GroundSpeed.Value = 0f;
+        Velocity = Vector2.Zero;
         GroundLockTimer = 0f;
+        GroundSpeed = 0f;
         Angle = 0f;
     }
 }

@@ -34,8 +34,8 @@ public interface IPlayer : IPlayerEditor, IPlayerCarryTarget
         
         MovementData movement = Data.Movement;
         movement.IsAirLock = false;
-        movement.GroundSpeed.Value = 0f;
-        movement.Velocity.Vector = Vector2.Zero;
+        movement.GroundSpeed = 0f;
+        movement.Velocity = Vector2.Zero;
         
         Data.State = PlayerStates.Control;
         Data.Sprite.Animation = Animations.Move;

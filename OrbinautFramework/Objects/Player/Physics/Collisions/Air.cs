@@ -47,7 +47,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		movement.Velocity.X = 0f;
 		
 		if (moveQuadrantValue != (int)Angles.Quadrant.Up - sign) return false;
-		movement.GroundSpeed.Value = movement.Velocity.Y;
+		movement.GroundSpeed = movement.Velocity.Y;
 		return true;
 	}
 
@@ -87,7 +87,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		    Angles.GetQuadrant(roofAngle) is Angles.Quadrant.Right or Angles.Quadrant.Left)
 		{
 			movement.Angle = roofAngle;
-			movement.GroundSpeed.Value = roofAngle < 180f ? -movement.Velocity.Y : movement.Velocity.Y;
+			movement.GroundSpeed = roofAngle < 180f ? -movement.Velocity.Y : movement.Velocity.Y;
 			movement.Velocity.Y = 0f;
 					
 			logic.Land();
@@ -170,28 +170,27 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 	private void SetLandingSpeedAndVelocity(float angle)
 	{
 		MovementData movement = data.Movement;
-		AcceleratedVector2 acceleratedVector2 = movement.Velocity;
-		AcceleratedValue groundSpeed = movement.GroundSpeed;
+		AcceleratedVector2 velocity = movement.Velocity;
 		
 		if (Angles.GetQuadrant(angle) != Angles.Quadrant.Down)
 		{
-			if (acceleratedVector2.Y > 15.75f)
+			if (velocity.Y > 15.75f)
 			{
-				acceleratedVector2.Y = 15.75f;
+				velocity.Y = 15.75f;
 			}
 			
-			groundSpeed.Value = angle < 180f ? -acceleratedVector2.Y : acceleratedVector2.Y;
-			acceleratedVector2.X = 0f;
+			movement.GroundSpeed = angle < 180f ? -velocity.Y : velocity.Y;
+			velocity.X = 0f;
 		}
 		else if (angle is > 22.5f and <= 337.5f)
 		{
-			groundSpeed.Value = angle < 180f ? -acceleratedVector2.Y : acceleratedVector2.Y;
-			groundSpeed.Value *= 0.5f;
+			movement.GroundSpeed = angle < 180f ? -velocity.Y : velocity.Y;
+			movement.GroundSpeed *= 0.5f;
 		}
 		else
 		{
-			groundSpeed.Value = acceleratedVector2.X;
-			acceleratedVector2.Y = 0f;
+			movement.GroundSpeed = velocity.X;
+			velocity.Y = 0f;
 		}
 	}
 
@@ -205,7 +204,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		if (distance >= 0) return true;
 
 		MovementData movement = data.Movement;
-		movement.GroundSpeed.Value = movement.Velocity.X;
+		movement.GroundSpeed = movement.Velocity.X;
 		movement.Velocity.Y = 0f;
 		
 		return false;

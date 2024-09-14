@@ -41,7 +41,7 @@ public struct Dash(PlayerData data, IPlayerLogic logic)
     
     public States OnLand()
     {
-	    data.Movement.GroundSpeed.Value = _charge;
+	    data.Movement.GroundSpeed = _charge;
 	    return States.Default;
 	    //TODO: check this
     }
@@ -60,7 +60,7 @@ public struct Dash(PlayerData data, IPlayerLogic logic)
     	launchSpeed *= data.Physics.AccelerationTop;
 	    
     	_releaseSpeed = Math.Clamp(_releaseSpeed + acceleration, -launchSpeed, launchSpeed);
-    	data.Movement.GroundSpeed.Value = _releaseSpeed;
+    	data.Movement.GroundSpeed = _releaseSpeed;
     	return true;
     }
 
@@ -68,7 +68,7 @@ public struct Dash(PlayerData data, IPlayerLogic logic)
     {
     	if (_charge < ChargeLimit)
     	{
-    		data.Movement.GroundSpeed.Value = 0f;
+    		data.Movement.GroundSpeed = 0f;
     		return false;
     	}
 

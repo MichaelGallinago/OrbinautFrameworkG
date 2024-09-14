@@ -34,10 +34,10 @@ public partial class MotoBug : InteractiveNode, IResetable
 
     public void Reset()
     {
+        _velocity = new AcceleratedVector2();
         _state = State.Init;
         _smokeTimer = 0f;
         _moveTimer = 0f;
-        _velocity.Vector = Vector2.Zero;
         Visible = false;
     }
     
@@ -56,8 +56,8 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Init()
     {
         Vector2 position = Position;
-        position.Y = _velocity.CalculateNewPositionY(position.Y);
-        _velocity.SetAccelerationY(GravityType.Default);
+        position.Y += _velocity.Y;
+        _velocity.Y.AddAcceleration(GravityType.Default);
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);
@@ -86,7 +86,7 @@ public partial class MotoBug : InteractiveNode, IResetable
     private void Move()
     {
         Vector2 position = Position;
-        position.X = _velocity.CalculateNewPositionX(position.X);
+        position.X += _velocity.X;
         
         _tileCollider.Position = (Vector2I)position;
         int floorDistance = _tileCollider.FindDistance(0, 14, true, Constants.Direction.Positive);

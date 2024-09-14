@@ -65,7 +65,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
 		
         float radians = Mathf.DegToRad(movement.Angle);
         var velocity = new Vector2(MathF.Sin(radians), MathF.Cos(radians));
-        movement.Velocity.Vector += data.Physics.JumpSpeed * velocity;
+        movement.Velocity += data.Physics.JumpSpeed * velocity;
         
         movement.IsGrounded = false;
         movement.IsCorePhysicsSkipped = true;
