@@ -4,18 +4,18 @@
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/MainMenu.cs" id="2_etuv4"]
 [ext_resource type="PackedScene" uid="uid://p6qsklmdhk1h" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/bool_setting.tscn" id="3_1el5v"]
-[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/option.tscn" id="3_doob7"]
+[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Option.tscn" id="3_doob7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/OptionStorage.cs" id="3_yeib4"]
 [ext_resource type="PackedScene" uid="uid://cm8maaj0nwrv7" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/percent_setting.tscn" id="4_4vu4k"]
 [ext_resource type="PackedScene" uid="uid://udtif2kffym6" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/multiplier_setting.tscn" id="5_nt76f"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Settings.cs" id="6_udeqq"]
 [ext_resource type="PackedScene" uid="uid://qte4kfmk51eq" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/frequency_setting.tscn" id="6_ufmiy"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SettingsMenu.cs" id="6_v6y2d"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player2Select.cs" id="9_qtrpw"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SceneSelect.cs" id="11_iqd6p"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/StartGame.cs" id="12_70ptx"]
 [ext_resource type="PackedScene" uid="uid://r6whvuxkuy38" path="res://Scenes/Screens/DevMenu/Prefabs/scene_option.tscn" id="12_h01w3"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player1Select.cs" id="13_4adbt"]
-[ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
+[ext_resource type="PackedScene" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
@@ -97,7 +97,7 @@ size_flags_horizontal = 4
 [node name="Label" parent="MainMenu/OptionStorage/Option4" index="1"]
 text = "CLOSE GAME"
 
-[node name="Settings" type="VBoxContainer" parent="." node_paths=PackedStringArray("_optionStorage")]
+[node name="Settings" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 14
 anchor_top = 0.5
@@ -106,8 +106,7 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 32
-script = ExtResource("6_udeqq")
-_optionStorage = NodePath("OptionStorage")
+script = ExtResource("6_v6y2d")
 
 [node name="Label" type="Label" parent="Settings"]
 layout_mode = 2
@@ -152,13 +151,13 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="Label" parent="Settings/OptionStorage/BoolSetting2" index="1"]
-text = "FULLSCREEN:"
+text = "WINDOW MODE:"
 
 [node name="BoolSetting3" parent="Settings/OptionStorage" instance=ExtResource("3_1el5v")]
 layout_mode = 2
 
 [node name="Label" parent="Settings/OptionStorage/BoolSetting3" index="1"]
-text = "VSYNC:"
+text = "VSYNC MODE:"
 
 [node name="SceneSelect" type="VBoxContainer" parent="." node_paths=PackedStringArray("_optionStorage")]
 visible = false
