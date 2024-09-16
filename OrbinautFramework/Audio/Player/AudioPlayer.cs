@@ -5,24 +5,33 @@ namespace OrbinautFramework3.Audio.Player;
 public partial class AudioPlayer : Node2D
 {
     [ExportGroup("AudioStreamPlayers")]
-    [Export] private AudioStreamPlayer _jinglePlayer;
+    [Export] private AudioStreamPlayer   _jinglePlayer;
     [Export] private AudioStreamPlayer[] _musicPlayers;
     [Export] private AudioStreamPlayer[] _soundPlayers;
     
-    //TODO: singleton 
     public static MusicPlayerContainer Music { get; private set; }
     public static PlayerContainer Sound { get; private set; }
     
-    public override void _Ready()
-    {
-        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer);
-        Sound = new PlayerContainer(_soundPlayers, 16);
-
-        _jinglePlayer = null;
-        _musicPlayers = null;
-        _soundPlayers = null;
-    }
+    private static AudioPlayer _instance;
     
+    public override void _EnterTree()
+    {
+        if (_instance == null)
+        {
+            _instance = this;
+            CreateContainers();
+            return;
+        }
+        
+        QueueFree();
+    }
+
+    public override void _ExitTree()
+    {
+        if (_instance != this) return;
+        _instance = null;
+    }
+
     public override void _Process(double delta)
     {
         Music.UpdateVolume();
@@ -33,5 +42,15 @@ public partial class AudioPlayer : Node2D
     {
         Music.SetPauseState(isPaused);
         Sound.SetPauseState(isPaused);
+    }
+    
+    private void CreateContainers()
+    {
+        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer);
+        Sound = new PlayerContainer(_soundPlayers, 16);
+        
+        _jinglePlayer = null;
+        _musicPlayers = null;
+        _soundPlayers = null;
     }
 }

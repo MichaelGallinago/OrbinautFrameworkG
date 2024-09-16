@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://b1d20f5ei38br"]
+[gd_scene load_steps=9 format=3 uid="uid://b1d20f5ei38br"]
 
 [ext_resource type="Script" path="res://Objects/Player/Characters/Amy/AmyNode.cs" id="1_1unfw"]
 [ext_resource type="PackedScene" uid="uid://b2q2gooc40jhe" path="res://Objects/Spawnable/Shield/shield_container.tscn" id="1_48jnd"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="3_njvl8"]
 [ext_resource type="SpriteFrames" uid="uid://ives1jru75cc" path="res://Objects/Player/Characters/Amy/amy_sprite_frames.tres" id="3_sd4hi"]
 [ext_resource type="Script" path="res://Objects/Player/Sprite/SpriteNode.cs" id="4_pt5uh"]
-[ext_resource type="Script" path="res://Objects/Player/Characters/Amy/AmySpriteLogic.cs" id="7_y1sjr"]
 
 [sub_resource type="Resource" id="Resource_rl2vy"]
 script = ExtResource("2_bh2pw")
@@ -22,16 +21,13 @@ Radius = Vector2i(0, 0)
 Offset = Vector2i(0, 0)
 HeightMapArray = null
 
-[sub_resource type="Resource" id="Resource_fymbs"]
-script = ExtResource("7_y1sjr")
-
-[node name="Amy" type="Node2D" node_paths=PackedStringArray("Shield", "_spriteNode")]
+[node name="Amy" type="Node2D" node_paths=PackedStringArray("Shield", "SpriteNode")]
 process_priority = -1
 z_index = -2
 script = ExtResource("1_1unfw")
 Type = 3
 Shield = NodePath("ShieldContainer")
-_spriteNode = NodePath("Sprite")
+SpriteNode = NodePath("Sprite")
 HitBox = SubResource("Resource_rl2vy")
 SolidBox = SubResource("Resource_pmxxj")
 
@@ -42,4 +38,3 @@ FrameLoop = 0
 sprite_frames = ExtResource("3_sd4hi")
 animation = &"None"
 script = ExtResource("4_pt5uh")
-_spriteLogic = SubResource("Resource_fymbs")

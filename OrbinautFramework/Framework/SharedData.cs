@@ -2,7 +2,6 @@
 using Godot;
 using OrbinautFramework3.Objects.Common.GiantRing;
 using OrbinautFramework3.Objects.Player;
-using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Spawnable.Shield;
 
 namespace OrbinautFramework3.Framework;
@@ -11,12 +10,11 @@ public static class SharedData
 {
 	// Default settings. May be overwritten by the config file
     private static Vector2I _viewSize = new(400, 224);
-    public static byte WindowScale { get; set; } = 2;
+    public static byte WindowScale { get; set; } = 1;
     public static int TargetFps { get; set; } = 165;
     public static bool ShowSplash { get; set; } = false;
     public static float MusicVolume { get; set; } = 0.5f;
     public static float SoundVolume { get; set; } = 0.5f;
-    //public static Room StartRoom { get; set; } = rm_devmenu; // TODO: add StartRoom
     public static bool SkipBranding { get; set; } = true;
 
     // Common

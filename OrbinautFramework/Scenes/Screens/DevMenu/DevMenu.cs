@@ -7,15 +7,14 @@ namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 
 public partial class DevMenu : Control
 {
+    [Signal] public delegate void PreviousMenuSelectedEventHandler(Menu menu);
+    
     [Export] private Menu _currentMenu;
     private PackedScene _nextScene;
     
     private readonly Stack<Menu> _menuStack = new();
     
-    public override void _Ready()
-    {
-        _currentMenu.Visible = true;
-    }
+    public override void _Ready() => _currentMenu.Visible = true;
     
     public override void _Process(double delta)
     {
@@ -27,6 +26,7 @@ public partial class DevMenu : Control
             _currentMenu.Visible = false;
             _currentMenu = _menuStack.Pop();
             _currentMenu.Visible = true;
+            EmitSignal(SignalName.PreviousMenuSelected, _currentMenu);
         }
         
         _currentMenu.Process(input);
