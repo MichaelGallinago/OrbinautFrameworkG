@@ -1,6 +1,7 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework.MultiTypeDelegate;
+using OrbinautFramework3.Framework.StaticStorages;
 
 namespace OrbinautFramework3.Framework;
 

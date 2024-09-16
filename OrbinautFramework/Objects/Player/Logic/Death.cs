@@ -1,5 +1,6 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -30,7 +31,7 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
 	    const int drownScreenOffset = 276;
 	    if (data.Water.AirTimer <= 0f)
 	    {
-		    int bottomBound = camera.DrawPosition.Y + SharedData.ViewSize.Y + drownScreenOffset;
+		    int bottomBound = camera.DrawPosition.Y + Settings.ViewSize.Y + drownScreenOffset;
 		    if ((int)data.Movement.Position.Y <= bottomBound) return;
 
 		    if (!logic.ControlType.IsCpu)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 
 namespace OrbinautFramework3.Framework.View;
@@ -39,11 +40,11 @@ public partial class Views : Control
     {
         CreateViews();
         AttachCamerasToPlayers();
-        OnViewSizeChanged(SharedData.ViewSize);
+        OnViewSizeChanged(Settings.ViewSize);
     }
     
-    public override void _EnterTree() => SharedData.ViewSizeChanged += OnViewSizeChanged;
-    public override void _ExitTree() => SharedData.ViewSizeChanged -= OnViewSizeChanged;
+    public override void _EnterTree() => Settings.ViewSizeChanged += OnViewSizeChanged;
+    public override void _ExitTree() => Settings.ViewSizeChanged -= OnViewSizeChanged;
 
     private void OnViewSizeChanged(Vector2I viewSize)
     {

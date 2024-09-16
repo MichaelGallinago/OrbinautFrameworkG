@@ -1,6 +1,7 @@
 ﻿using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
@@ -76,7 +77,7 @@ public readonly struct Air(PlayerData data, IPlayerLogic logic)
 		{
 			data.Movement.Velocity.X.AddAcceleration(acceleration);
 		}
-		else if (!SharedData.NoSpeedCap || velocity < data.Physics.AccelerationTop)
+		else if (!Improvements.NoSpeedCap || velocity < data.Physics.AccelerationTop)
 		{
 			data.Movement.Velocity.X.AddAcceleration(acceleration);
 			data.Movement.Velocity.X.Limit(sign * data.Physics.AccelerationTop, direction);

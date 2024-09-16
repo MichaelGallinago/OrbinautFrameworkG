@@ -4,6 +4,9 @@ namespace OrbinautFramework3.Audio.Player;
 
 public partial class AudioPlayer : Node2D
 {
+    public const float DefaultMusicVolume = 0.5f;
+    public const float DefaultSoundVolume = 0.5f;
+    
     [ExportGroup("AudioStreamPlayers")]
     [Export] private AudioStreamPlayer   _jinglePlayer;
     [Export] private AudioStreamPlayer[] _musicPlayers;
@@ -46,8 +49,8 @@ public partial class AudioPlayer : Node2D
     
     private void CreateContainers()
     {
-        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer);
-        Sound = new PlayerContainer(_soundPlayers, 16);
+        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer) { Volume = DefaultMusicVolume };
+        Sound = new PlayerContainer(_soundPlayers, 16) { Volume = DefaultSoundVolume };
         
         _jinglePlayer = null;
         _musicPlayers = null;

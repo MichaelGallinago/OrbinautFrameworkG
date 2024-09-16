@@ -1,5 +1,6 @@
 #if DEBUG
 using Godot;
+using OrbinautFramework3.Framework.StaticStorages;
 
 namespace OrbinautFramework3.Framework;
 
@@ -40,7 +41,7 @@ public partial class Debug : Node
 	
 	private static void OnGameSpeedPressed()
 	{
-		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? SharedData.TargetFps : DebugFrameLimit;
+		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? Settings.TargetFps : DebugFrameLimit;
 	}
 	
 	private static void OnRestartRoomPressed() => Scene.Instance.Tree.ReloadCurrentScene();

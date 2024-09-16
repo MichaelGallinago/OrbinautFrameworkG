@@ -2,6 +2,7 @@ using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Framework.Constants;
@@ -108,7 +109,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	private Vector2I GetExtraSize()
 	{
 		// Extend the radiuses for better & fair solid collision (if enabled)
-		return SharedData.BetterSolidCollision ? new Vector2I(data.Node.SolidBox.Radius.X, GripY) : Vector2I.Zero;
+		return Improvements.BetterSolidCollision ? new Vector2I(data.Node.SolidBox.Radius.X, GripY) : Vector2I.Zero;
 	}
 	
 	private int CalculateSlopeOffset()

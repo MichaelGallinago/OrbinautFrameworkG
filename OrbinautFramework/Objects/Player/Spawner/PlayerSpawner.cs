@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using static OrbinautFramework3.Objects.Player.PlayerNode;
 
 namespace OrbinautFramework3.Objects.Player.Spawner;

@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Characters.Logic;
 using OrbinautFramework3.Objects.Player.Characters.Logic.Base;
@@ -59,7 +60,7 @@ public class CpuLogic(PlayerData data, IPlayerLogic logic, Characters.Logic.Base
 			if (!Scene.Instance.IsTimePeriodLooped(64f)) return;
 		}
 		
-		data.Movement.Position = _leadPlayer.Position - new Vector2(0f, SharedData.ViewSize.Y - 32);
+		data.Movement.Position = _leadPlayer.Position - new Vector2(0f, Settings.ViewSize.Y - 32);
 		
 		data.Cpu.State = States.Respawn;
 		if (data.Node.IsCameraTarget(out ICamera camera))

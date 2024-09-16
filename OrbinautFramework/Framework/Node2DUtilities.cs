@@ -1,5 +1,6 @@
 ﻿using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -15,7 +16,7 @@ public static class Node2DUtilities
     
     public static void SetCameraDelayX(this IPosition node, float delay)
     {
-        if (!SharedData.CdCamera && node.IsCameraTarget(out ICamera camera))
+        if (!OriginalDifferences.CdCamera && node.IsCameraTarget(out ICamera camera))
         {
             camera.SetCameraDelayX(delay);
         }

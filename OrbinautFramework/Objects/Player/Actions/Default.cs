@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -23,14 +24,14 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
     
     private bool SpinDash()
     {
-        if (!SharedData.SpinDash || !data.Movement.IsGrounded) return false;
+        if (!OriginalDifferences.SpinDash || !data.Movement.IsGrounded) return false;
         
         return data.Sprite.Animation is Animations.Duck or Animations.GlideLand && data.Input.Down.Down;
     }
     
     private bool Dash()
     {
-        if (!SharedData.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
+        if (!OriginalDifferences.Dash || data.Node.Type != PlayerNode.Types.Sonic) return false;
         if (logic.ControlType.IsCpu && data.Cpu.InputTimer <= 0f) return false;
         
         return data.Sprite.Animation == Animations.LookUp && data.Input.Down.Up;
@@ -44,7 +45,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
 
         CollisionData collision = data.Collision;
 #if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
-        if (!SharedData.FixJumpSize)
+        if (!Improvements.FixJumpSize)
         {
             // Why do they even do that?
             collision.Radius = collision.RadiusNormal;
@@ -56,7 +57,7 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
             collision.Radius = collision.RadiusSpin;
         }
 #if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
-        else if (!SharedData.NoRollLock)
+        else if (!Improvements.NoRollLock)
         {
             movement.IsAirLock = true;
         }

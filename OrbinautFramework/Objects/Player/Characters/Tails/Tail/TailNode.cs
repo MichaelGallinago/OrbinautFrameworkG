@@ -3,6 +3,7 @@ using EnumToStringNameSourceGenerator;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.Animations;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -70,7 +71,7 @@ public partial class TailNode : AdvancedAnimatedSprite
 			angle += Angles.CircleHalf;
 		}
 		
-		if (SharedData.RotationMode != 0) return angle;
+		if (Improvements.RotationMode != 0) return angle;
 		
 		return MathF.Ceiling((angle - 22.5f) / 45f) * 45f;
 	}

@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
@@ -126,7 +127,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
             return true;
         }
         
-        if (!SharedData.NoSpeedCap || data.Movement.GroundSpeed * sign < data.Physics.AccelerationTop)
+        if (!Improvements.NoSpeedCap || data.Movement.GroundSpeed * sign < data.Physics.AccelerationTop)
         {
             float acceleration = data.Physics.Acceleration;
             data.Movement.GroundSpeed.AddAcceleration(acceleration * (float)direction);

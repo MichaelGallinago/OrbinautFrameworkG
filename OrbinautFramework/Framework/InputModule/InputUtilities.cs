@@ -14,7 +14,7 @@ public static class InputUtilities
     public static List<Buttons> Press { get; } = new(MaxInputDevices);
     public static List<bool> BlockInput { get; } = new(MaxInputDevices);
     public static int DeviceCount { get; private set; } = MaxInputDevices;
-    public static bool JoypadRumble { get; set; }
+    public static bool JoypadRumble { get; set; } = true;
     
 
     private static Godot.Collections.Array<int> _joypads;

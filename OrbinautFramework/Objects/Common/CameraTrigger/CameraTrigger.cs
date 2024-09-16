@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.View;
 using static OrbinautFramework3.Framework.Constants;
 
@@ -56,7 +57,7 @@ public partial class CameraTrigger : Trigger
 
     public override void _Process(double delta)
     {
-        Vector2I halfSize = SharedData.ViewSize / 2;
+        Vector2I halfSize = Settings.ViewSize / 2;
         ReadOnlySpan<ICamera> cameras = Views.Instance.Cameras;
         var triggerBounds = new Vector2I((int)Position.Y - _height, (int)Position.Y + _height);
         

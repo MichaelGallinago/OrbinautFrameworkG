@@ -1,5 +1,6 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 
@@ -47,7 +48,7 @@ public partial class SonicSpriteLogic(PlayerData player, ISpriteNode spriteNode)
     {
         Animations.Move => _player.Super.IsSuper ? 
             GetMoveAnimation(false, 8f) :
-            GetMoveAnimation(SharedData.Dash, 6f),
+            GetMoveAnimation(OriginalDifferences.Dash, 6f),
         _ => Data.Animation
     };
 }
