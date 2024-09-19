@@ -41,4 +41,6 @@ public partial class DevMenu : Control
     }
     
     private void OnSceneSelected(PackedScene scene) => _nextScene = scene;
+    
+    private void OnSceneSwitch() => GetTree().ChangeSceneToPacked(_nextScene);
 }

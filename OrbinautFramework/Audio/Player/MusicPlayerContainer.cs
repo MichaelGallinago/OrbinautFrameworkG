@@ -14,8 +14,6 @@ public class MusicPlayerContainer : PlayerContainer
         set
         {
             base.MaxVolume = value;
-            
-            if (!Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(_jingleBusIndex), VolumeDb)) return;
             AudioServer.SetBusVolumeDb(_jingleBusIndex, VolumeDb);
         }
     }

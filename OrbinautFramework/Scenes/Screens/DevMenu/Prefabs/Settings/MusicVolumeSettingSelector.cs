@@ -19,6 +19,8 @@ public partial class MusicVolumeSettingSelector : SettingSelectorLogic
             > 100 => 0f,
             _ => newVolume / 100f
         };
+        
+        AudioPlayer.Music.PlayJingle(MusicStorage.ActClear);
     }
 
     private static int PercentVolume => (int)(AudioPlayer.Music.MaxVolume * 100f);

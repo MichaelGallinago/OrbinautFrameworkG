@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://b3y6uspbhnxrx"]
+[gd_scene load_steps=33 format=3 uid="uid://b3y6uspbhnxrx"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/DevMenu.cs" id="1_nm0pq"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
@@ -21,6 +21,9 @@
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/WindowModeSettingSelector.cs" id="13_3tp1k"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player1Select.cs" id="13_4adbt"]
 [ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
+[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/bonus.tscn" id="19_3xv5p"]
+[ext_resource type="PackedScene" uid="uid://vvusup7obee5" path="res://Scenes/Stages/Specials/special.tscn" id="20_e6yu1"]
+[ext_resource type="PackedScene" uid="uid://yiyajukipmwg" path="res://Scenes/Screens/Continue/continue.tscn" id="21_6hcnj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
@@ -245,7 +248,6 @@ text = "VSYNC MODE:"
 text = "Disabled"
 
 [node name="SceneSelect" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -286,7 +288,7 @@ text = "TECH STADIUM"
 [node name="SceneOption2" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
 size_flags_horizontal = 4
-_scene = ExtResource("13_xxftl")
+_scene = ExtResource("19_3xv5p")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption2" index="1"]
 text = "BONUS STAGE"
@@ -294,7 +296,7 @@ text = "BONUS STAGE"
 [node name="SceneOption3" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
 size_flags_horizontal = 4
-_scene = ExtResource("13_xxftl")
+_scene = ExtResource("20_e6yu1")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption3" index="1"]
 text = "SPECIAL STAGE"
@@ -302,7 +304,7 @@ text = "SPECIAL STAGE"
 [node name="SceneOption4" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
 size_flags_horizontal = 4
-_scene = ExtResource("13_xxftl")
+_scene = ExtResource("21_6hcnj")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption4" index="1"]
 text = "CONTINUE SCREEN"
@@ -562,6 +564,11 @@ text = "NO PLAYER 2"
 [connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option3" to="MenuStorage/Player2Select" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option4" to="MenuStorage/Player2Select" method="Select"]
 [connection signal="Selected" from="MenuStorage/Player2Select" to="." method="OnMenuSelected"]
+[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option" to="." method="OnSceneSwitch"]
+[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option2" to="." method="OnSceneSwitch"]
+[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option3" to="." method="OnSceneSwitch"]
+[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option4" to="." method="OnSceneSwitch"]
+[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option5" to="." method="OnSceneSwitch"]
 
 [editable path="MenuStorage/MainMenu/OptionStorage/Option"]
 [editable path="MenuStorage/MainMenu/OptionStorage/Option2"]

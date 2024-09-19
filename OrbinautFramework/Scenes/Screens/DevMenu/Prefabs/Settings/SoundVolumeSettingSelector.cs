@@ -19,6 +19,9 @@ public partial class SoundVolumeSettingSelector : SettingSelectorLogic
             > 100 => 0f,
             _ => newVolume / 100f
         };
+        
+        AudioPlayer.Sound.Play(SoundStorage.RingLeft);
+        AudioPlayer.Sound.Play(SoundStorage.RingRight);
     }
 
     private static int PercentVolume => (int)(AudioPlayer.Sound.MaxVolume * 100f);
