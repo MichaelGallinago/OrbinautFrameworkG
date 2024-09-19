@@ -23,5 +23,12 @@ public partial class SettingSelector : Option
         Update();
     }
     
+    public override void PressSelect()
+    {
+        base.PressLeft();
+        _logic.OnSelectPressed();
+        Update();
+    }
+    
     private void Update() => _value.Text = _logic.GetText();
 }

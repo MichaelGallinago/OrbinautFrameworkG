@@ -1,4 +1,3 @@
-using System;
 using Godot;
 using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.StaticStorages;
@@ -30,5 +29,24 @@ public partial class FpsLimitSettingSelector : SettingSelectorLogic
         }
         
         Settings.TargetFps = 0;
+    }
+
+    public override void OnSelectPressed()
+    {
+        var screenRefreshRate = (ushort)DisplayServer.ScreenGetRefreshRate();
+
+        ushort targetFps = Settings.TargetFps;
+        if (targetFps == 0)
+        {
+            Settings.TargetFps = screenRefreshRate;
+        }
+        else if (targetFps == screenRefreshRate)
+        {
+            Settings.TargetFps = (ushort)(screenRefreshRate * 2);
+        }
+        else
+        {
+            Settings.TargetFps = 0;
+        }
     }
 }
