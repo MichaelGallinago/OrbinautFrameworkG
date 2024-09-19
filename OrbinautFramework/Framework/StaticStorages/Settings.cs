@@ -10,7 +10,7 @@ public static class Settings
         get => _windowScale;
         set => DisplayServer.WindowSetSize(ViewSize * (_windowScale = value));
     }
-    private static byte _windowScale;
+    private static byte _windowScale = 1;
 
     public static ushort TargetFps
     {
@@ -25,14 +25,14 @@ public static class Settings
         set => DisplayServer.WindowSetMode(_windowMode = value);
     }
     private static DisplayServer.WindowMode _windowMode;
-
+    
     public static DisplayServer.VSyncMode VSyncMode
     {
         get => _vSyncMode;
         set => DisplayServer.WindowSetVsyncMode(_vSyncMode = value);
     }
     private static DisplayServer.VSyncMode _vSyncMode;
-
+    
     public static event Action<Vector2I> ViewSizeChanged;
     public static Vector2I ViewSize
     {

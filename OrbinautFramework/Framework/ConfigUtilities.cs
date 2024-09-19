@@ -37,8 +37,8 @@ public static class ConfigUtilities
     {
         var dto = new Dto(
             InputUtilities.JoypadRumble, 
-            AudioPlayer.DefaultMusicVolume, 
-            AudioPlayer.DefaultSoundVolume,
+            AudioPlayer.Music.MaxVolume, 
+            AudioPlayer.Sound.MaxVolume,
             Settings.WindowScale,
             Settings.TargetFps,
             Settings.WindowMode,
@@ -51,14 +51,14 @@ public static class ConfigUtilities
     private static void SetData(ref Dto dto)
     {
         InputUtilities.JoypadRumble = dto.JoypadRumble;
-        AudioPlayer.Music.Volume = dto.MusicVolume;
-        AudioPlayer.Sound.Volume = dto.SoundVolume;
+        AudioPlayer.Music.MaxVolume = dto.MusicVolume;
+        AudioPlayer.Sound.MaxVolume = dto.SoundVolume;
         Settings.WindowScale = dto.WindowScale;
         Settings.TargetFps = dto.Frequency;
         Settings.WindowMode = dto.WindowMode;
         Settings.VSyncMode = dto.VSyncMode;
     }
-
+    
     private static void Set(ref Dto dto)
     {
         Config.SetValue(SectionSettings, "joypad_rumble", dto.JoypadRumble);

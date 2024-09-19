@@ -8,15 +8,15 @@ public class MusicPlayerContainer : PlayerContainer
     private readonly AudioStreamPlayer _jinglePlayer;
     private readonly int _jingleBusIndex;
     
-    public override float Volume 
+    public override float MaxVolume 
     { 
-        get => base.Volume;
+        get => base.MaxVolume;
         set
         {
-            base.Volume = value;
+            base.MaxVolume = value;
             
-            if (!Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(_jingleBusIndex), MaxVolume)) return;
-            AudioServer.SetBusVolumeDb(_jingleBusIndex, MaxVolume);
+            if (!Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(_jingleBusIndex), VolumeDb)) return;
+            AudioServer.SetBusVolumeDb(_jingleBusIndex, VolumeDb);
         }
     }
     

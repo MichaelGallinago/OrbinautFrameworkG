@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://d3sf1hh7wojhf"]
+[gd_scene load_steps=6 format=3 uid="uid://d3sf1hh7wojhf"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/Startup/Startup.cs" id="1_5grtg"]
 [ext_resource type="Shader" path="res://Shaders/fade.gdshader" id="1_v4hqx"]
@@ -9,7 +9,16 @@ shader = ExtResource("1_v4hqx")
 shader_parameter/u_step = null
 shader_parameter/u_type = null
 
-[node name="Startup" type="Node2D"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_naed7"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="Startup" type="Panel"]
 material = SubResource("ShaderMaterial_da42i")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_naed7")
 script = ExtResource("1_5grtg")
 _nextScene = ExtResource("3_g26hk")

@@ -3,7 +3,7 @@ using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Scenes.Screens.Startup;
 
-public partial class Startup : Node2D
+public partial class Startup : Panel
 {
     [Export] private PackedScene _nextScene;
     

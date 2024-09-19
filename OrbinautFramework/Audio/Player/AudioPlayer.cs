@@ -1,12 +1,10 @@
 using Godot;
+using OrbinautFramework3.Framework;
 
 namespace OrbinautFramework3.Audio.Player;
 
 public partial class AudioPlayer : Node2D
 {
-    public const float DefaultMusicVolume = 0.5f;
-    public const float DefaultSoundVolume = 0.5f;
-    
     [ExportGroup("AudioStreamPlayers")]
     [Export] private AudioStreamPlayer   _jinglePlayer;
     [Export] private AudioStreamPlayer[] _musicPlayers;
@@ -35,10 +33,11 @@ public partial class AudioPlayer : Node2D
         _instance = null;
     }
 
-    public override void _Process(double delta)
+    public override void _Process(double deltaTime)
     {
-        Music.UpdateVolume();
-        Sound.UpdateVolume();
+        float speed = DeltaTimeUtilities.CalculateSpeed(deltaTime);
+        Music.UpdateVolume(speed);
+        Sound.UpdateVolume(speed);
     }
     
     public static void SetPauseState(bool isPaused)
@@ -49,8 +48,11 @@ public partial class AudioPlayer : Node2D
     
     private void CreateContainers()
     {
-        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer) { Volume = DefaultMusicVolume };
-        Sound = new PlayerContainer(_soundPlayers, 16) { Volume = DefaultSoundVolume };
+        const float defaultMusicVolume = 0.5f;
+        const float defaultSoundVolume = 0.5f;
+        
+        Music = new MusicPlayerContainer(_musicPlayers, 3, _jinglePlayer) { MaxVolume = defaultMusicVolume };
+        Sound = new PlayerContainer(_soundPlayers, 16) { MaxVolume = defaultSoundVolume };
         
         _jinglePlayer = null;
         _musicPlayers = null;

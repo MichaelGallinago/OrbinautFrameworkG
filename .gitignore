@@ -23,6 +23,11 @@ EnumToStringNameSourceGenerator/bin/
 EnumToStringNameSourceGenerator/obj/
 EnumToStringNameSourceGenerator/.idea/
 
+# FastEnumToStringSourceGenerator compilations ignores
+FastEnumToStringSourceGenerator/bin/
+FastEnumToStringSourceGenerator/obj/
+FastEnumToStringSourceGenerator/.idea/
+
 # AudioStorageSourceGenerator compilations ignores
 AudioStorageSourceGenerator/bin/
 AudioStorageSourceGenerator/obj/

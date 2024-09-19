@@ -32,13 +32,13 @@ public partial class DevMenu : Control
         _currentMenu.Process(input);
     }
     
-    private void OnSceneSelected(PackedScene scene) => _nextScene = scene;
-    
-    private void OnMenuSelected(Menu menu)
+    public void OnMenuSelected(Menu menu)
     {
         _currentMenu.Visible = false;
         _menuStack.Push(_currentMenu);
         menu.Visible = true;
         _currentMenu = menu;
     }
+    
+    private void OnSceneSelected(PackedScene scene) => _nextScene = scene;
 }
