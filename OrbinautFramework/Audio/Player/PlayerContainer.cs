@@ -210,5 +210,5 @@ public class PlayerContainer
         _freePlayers.Push(player);
     }
     
-    private static float GetVolumeDb(float volume) => 20f * MathF.Log10(Math.Clamp(volume * 0.01f, 0.0001f, 1f));
+    private static float GetVolumeDb(float volume) => 20f * MathF.Log10(Math.Clamp(volume, 0.0001f, 1f));
 }

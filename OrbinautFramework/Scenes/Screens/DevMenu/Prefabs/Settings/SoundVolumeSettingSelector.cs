@@ -1,5 +1,4 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 
 namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs.SettingButtons;
@@ -7,12 +6,20 @@ namespace OrbinautFramework3.Scenes.Screens.DevMenu.Prefabs.SettingButtons;
 [GlobalClass]
 public partial class SoundVolumeSettingSelector : SettingSelectorLogic
 {
-    public override string GetText() => ((int)AudioPlayer.Sound.MaxVolume).ToString();
-    public override void OnLeftPressed() => SetNewVolume(-5f);
-    public override void OnRightPressed() => SetNewVolume(5f);
+    public override string GetText() => PercentVolume.ToString();
+    public override void OnLeftPressed() => SetNewVolume(-5);
+    public override void OnRightPressed() => SetNewVolume(5);
     
-    private static void SetNewVolume(float offset)
+    private static void SetNewVolume(int offset)
     {
-        AudioPlayer.Sound.MaxVolume = Math.Clamp(AudioPlayer.Sound.MaxVolume + offset, 0f, 100f);
+        int newVolume = PercentVolume + offset;
+        AudioPlayer.Sound.MaxVolume = newVolume switch
+        {
+            < 0 => 1f,
+            > 100 => 0f,
+            _ => newVolume / 100f
+        };
     }
+
+    private static int PercentVolume => (int)(AudioPlayer.Sound.MaxVolume * 100f);
 }

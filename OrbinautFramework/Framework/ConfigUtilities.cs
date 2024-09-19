@@ -7,7 +7,7 @@ namespace OrbinautFramework3.Framework;
 
 public static class ConfigUtilities
 {
-    private const string ConfigPath = "res://options.cfg";
+    private const string ConfigPath = "user://options.cfg";
     private const string SectionSettings = "settings";
     private static readonly ConfigFile Config = new();
 
@@ -16,7 +16,11 @@ public static class ConfigUtilities
         Error error = Config.Load(ConfigPath);
         if (error != Error.Ok)
         {
-            Config.Clear(); 
+            if (error == Error.FileNotFound)
+            {
+                Save();
+            }
+            Config.Clear();
             return;
         }
         
@@ -46,6 +50,7 @@ public static class ConfigUtilities
         );
         
         Set(ref dto);
+        Config.Save(ConfigPath);
     }
 
     private static void SetData(ref Dto dto)

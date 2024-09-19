@@ -144,7 +144,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 		    data.State = PlayerStates.Respawn;
 		    return;
 	    }
-
+	    
 	    data.Movement.Position = new Vector2(byte.MaxValue, 0f);
 	    data.Visual.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
 	    

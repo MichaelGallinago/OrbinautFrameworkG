@@ -538,6 +538,7 @@ size_flags_horizontal = 4
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option5" index="1"]
 text = "NO PLAYER 2"
 
+[connection signal="PreviousMenuSelected" from="." to="MenuStorage/Settings" method="OnExit"]
 [connection signal="Selected" from="MenuStorage/MainMenu" to="." method="OnMenuSelected"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option" to="MenuStorage/StartGame" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option2" to="MenuStorage/SceneSelect" method="Select"]
