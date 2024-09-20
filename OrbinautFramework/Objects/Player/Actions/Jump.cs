@@ -54,7 +54,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 	private bool Transform()
 	{
 		if (!data.Input.Press.X || data.Super.IsSuper) return false;
-		if (SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
+		if (SaveData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 
 		logic.ResetData();
 		data.Movement.IsCorePhysicsSkipped = true;

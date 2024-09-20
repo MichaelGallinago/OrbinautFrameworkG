@@ -55,7 +55,7 @@ public partial class Bumper : InteractiveNode
             
             //TODO: obj_score
             //instance_create(x, y, obj_score);
-            SharedData.IncreaseComboScore();
+            SaveData.IncreaseComboScore();
             
             break;
         }

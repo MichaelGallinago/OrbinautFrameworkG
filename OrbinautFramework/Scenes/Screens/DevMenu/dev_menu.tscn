@@ -4,7 +4,7 @@
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/MenuStorage.cs" id="2_4shst"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/MainMenu.cs" id="2_etuv4"]
-[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Option.tscn" id="3_doob7"]
+[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/option.tscn" id="3_doob7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/OptionStorage.cs" id="3_yeib4"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SettingsMenu.cs" id="6_v6y2d"]
 [ext_resource type="PackedScene" uid="uid://p6qsklmdhk1h" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/setting_selector.tscn" id="7_20khq"]
@@ -20,8 +20,8 @@
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/VSyncModeSettingSelector.cs" id="12_uboi7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/WindowModeSettingSelector.cs" id="13_3tp1k"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player1Select.cs" id="13_4adbt"]
-[ext_resource type="PackedScene" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
-[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/Bonus.tscn" id="19_3xv5p"]
+[ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
+[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/bonus.tscn" id="19_3xv5p"]
 [ext_resource type="PackedScene" uid="uid://vvusup7obee5" path="res://Scenes/Stages/Specials/special.tscn" id="20_e6yu1"]
 [ext_resource type="PackedScene" uid="uid://yiyajukipmwg" path="res://Scenes/Screens/Continue/continue.tscn" id="21_6hcnj"]
 
@@ -388,28 +388,28 @@ layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/StartGame/OptionStorage/Option2" index="1"]
-text = "SAVE 0"
+text = "SAVE 1"
 
 [node name="Option3" parent="MenuStorage/StartGame/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/StartGame/OptionStorage/Option3" index="1"]
-text = "SAVE 1"
+text = "SAVE 2"
 
 [node name="Option4" parent="MenuStorage/StartGame/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/StartGame/OptionStorage/Option4" index="1"]
-text = "SAVE 2"
+text = "SAVE 3"
 
 [node name="Option5" parent="MenuStorage/StartGame/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/StartGame/OptionStorage/Option5" index="1"]
-text = "SAVE 3"
+text = "SAVE 4"
 
 [node name="Player1Select" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
 visible = false

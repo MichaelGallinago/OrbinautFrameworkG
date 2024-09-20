@@ -63,7 +63,7 @@ public readonly struct Death(PlayerData data, IPlayerLogic logic)
     		obj_gui_hud.update_timer = false;
     	}*/
     				
-    	if (--SharedData.LifeCount > 0 && Scene.Instance.Time < 36000f)
+    	if (--SaveData.LifeCount > 0 && Scene.Instance.Time < 36000f)
     	{
     		data.Death.State = States.Restart;
     		data.Death.RestartTimer = 60f;

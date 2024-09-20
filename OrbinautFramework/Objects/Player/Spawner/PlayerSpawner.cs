@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Godot;
 using OrbinautFramework3.Framework;
-using OrbinautFramework3.Framework.StaticStorages;
 using static OrbinautFramework3.Objects.Player.PlayerNode;
 
 namespace OrbinautFramework3.Objects.Player.Spawner;
@@ -32,13 +31,13 @@ public partial class PlayerSpawner : Sprite2D
     {
         if (Scene.Instance.Players.Count > 0) return;
 
-        Types type = SharedData.PlayerTypes.First();
+        Types type = SaveData.PlayerTypes.First();
         if (!_allowedTypes.HasFlag((AllowedTypes)(1 << (int)type))) return;
         
         SpawnPlayer(type, Position);
 
         Vector2 offsetPosition = Position + _cpuOffset;
-        for (var i = 1; i < SharedData.PlayerTypes.Length; i++)
+        for (var i = 1; i < SaveData.PlayerTypes.Count; i++)
         {
             SpawnPlayer(type, offsetPosition);
         }

@@ -32,14 +32,14 @@ public partial class SceneFrameEnd : Node
         {
             SharedData.LifeRewards = new Vector2I(
                 (int)(SharedData.PlayerRings / ringIncrement * ringIncrement + ringIncrement), 
-                (int)SharedData.ScoreCount / scoreIncrement * scoreIncrement + scoreIncrement);
+                (int)SaveData.ScoreCount / scoreIncrement * scoreIncrement + scoreIncrement);
         }
 		
         if (SharedData.PlayerRings >= SharedData.LifeRewards.X && SharedData.LifeRewards.X <= 200)
         {
             AddLife(0, ringIncrement);
         }
-        else if (SharedData.ScoreCount >= SharedData.LifeRewards.Y)
+        else if (SaveData.ScoreCount >= SharedData.LifeRewards.Y)
         {
             AddLife(1, scoreIncrement);
         }
@@ -48,7 +48,7 @@ public partial class SceneFrameEnd : Node
     private static void AddLife(byte rewardIndex, int rewardValue)
     {
         AudioPlayer.Music.PlayJingle(MusicStorage.ExtraLife);
-        SharedData.LifeCount++;
+        SaveData.LifeCount++;
 		
         Vector2I rewards = SharedData.LifeRewards;
         rewards[rewardIndex] += rewardValue;

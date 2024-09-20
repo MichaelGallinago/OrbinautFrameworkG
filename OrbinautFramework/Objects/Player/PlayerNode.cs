@@ -10,10 +10,7 @@ namespace OrbinautFramework3.Objects.Player;
 
 public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 {
-	public enum Types : byte //TODO: remove this somehow
-	{
-		Sonic, Tails, Knuckles, Amy
-	}
+	public enum Types : byte { Sonic, Tails, Knuckles, Amy } //TODO: remove this somehow
 	
 	[Export] public Types Type { get; private set; }
 	[Export] public ShieldContainer Shield { get; private set; }

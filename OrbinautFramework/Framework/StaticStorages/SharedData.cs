@@ -10,8 +10,6 @@ public static class SharedData
 {
     public static bool ShowSplash { get; set; } = false;
     public static bool SkipBranding { get; set; } = true;
-    public static byte StageIndex { get; set; } = 0; // TODO: make stage prefab storage with enum "Stage"
-    public static byte PreviousRoomId { get; set; } = 0; // TODO: Replace to room
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
     
     // Common global variables
@@ -22,14 +20,8 @@ public static class SharedData
     public static Vector2I LifeRewards { get; set; }
     public static bool IsDebugModeEnabled { get; set; } = false;
     public static int RealPlayerCount { get; set; } = 1;
-    public static PlayerNode.Types[] PlayerTypes { get; set; } = [PlayerNode.Types.Sonic]; //[PlayerNode.Types.Sonic, PlayerNode.Types.Tails]; TODO: menu and CPU
-    public static byte ContinueCount { get; set; } = 3;
-    public static byte EmeraldCount { get; set; } = 7;
-    
-    public static uint ScoreCount { get; set; }
     public static uint PlayerRings { get; set; }
     public static ShieldContainer.Types[] SavedShields { get; set; }
-    public static ushort LifeCount { get; set; }
     
     
     private static SensorDebugTypes _sensorDebugType = SensorDebugTypes.None;
@@ -69,11 +61,5 @@ public static class SharedData
 	    
 	    PlayerRings = 0;
 	    LifeRewards = Vector2I.Zero;
-    }
-    
-    private static ReadOnlySpan<uint> ComboScoreValues => [10, 100, 200, 500, 1000, 10000];
-    public static void IncreaseComboScore(int comboCounter = 0)
-    {
-	    ScoreCount += ComboScoreValues[comboCounter < 4 ? comboCounter : comboCounter < 16 ? 4 : 5];
     }
 }
