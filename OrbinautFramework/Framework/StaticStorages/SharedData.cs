@@ -29,7 +29,7 @@ public static class SharedData
     public static uint ScoreCount { get; set; }
     public static uint PlayerRings { get; set; }
     public static ShieldContainer.Types[] SavedShields { get; set; }
-    public static uint LifeCount { get; set; }
+    public static ushort LifeCount { get; set; }
     
     
     private static SensorDebugTypes _sensorDebugType = SensorDebugTypes.None;
