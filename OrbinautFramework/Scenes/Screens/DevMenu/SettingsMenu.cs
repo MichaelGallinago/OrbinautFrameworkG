@@ -8,8 +8,8 @@ namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 
 public partial class SettingsMenu : Menu
 {
-	private static void OnExit() => ConfigUtilities.Save();
-	
+	public override void OnExit() => ConfigUtilities.Save();
+
 	private static void OnJoypadRumbleChanged(bool isEnabled) => InputUtilities.JoypadRumble = isEnabled;
 	private static void OnMusicVolumeChanged(float volume) => AudioPlayer.Music.MaxVolume = volume;
 	private static void OnSoundVolumeChanged(float volume) => AudioPlayer.Sound.MaxVolume = volume;

@@ -540,7 +540,6 @@ size_flags_horizontal = 4
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option5" index="1"]
 text = "NO PLAYER 2"
 
-[connection signal="PreviousMenuSelected" from="." to="MenuStorage/Settings" method="OnExit"]
 [connection signal="Selected" from="MenuStorage/MainMenu" to="." method="OnMenuSelected"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option" to="MenuStorage/StartGame" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option2" to="MenuStorage/SceneSelect" method="Select"]
@@ -548,6 +547,7 @@ text = "NO PLAYER 2"
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option4" to="MenuStorage/MainMenu" method="CloseGame"]
 [connection signal="Selected" from="MenuStorage/Settings" to="." method="OnMenuSelected"]
 [connection signal="Selected" from="MenuStorage/SceneSelect" to="." method="OnMenuSelected"]
+[connection signal="SelectedScene" from="MenuStorage/SceneSelect" to="." method="OnSceneSelected"]
 [connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption" to="MenuStorage/Player1Select" method="Select"]
 [connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption" to="." method="OnSceneSelected"]
 [connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption2" to="MenuStorage/Player1Select" method="Select"]
@@ -558,6 +558,10 @@ text = "NO PLAYER 2"
 [connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption4" to="." method="OnSceneSelected"]
 [connection signal="Selected" from="MenuStorage/StartGame" to="." method="OnMenuSelected"]
 [connection signal="PressedSelect" from="MenuStorage/StartGame/OptionStorage/Option" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/OptionStorage/Option2" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/OptionStorage/Option3" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/OptionStorage/Option4" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/OptionStorage/Option5" to="MenuStorage/Player1Select" method="Select"]
 [connection signal="Selected" from="MenuStorage/Player1Select" to="." method="OnMenuSelected"]
 [connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option" to="MenuStorage/Player2Select" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option2" to="MenuStorage/Player2Select" method="Select"]

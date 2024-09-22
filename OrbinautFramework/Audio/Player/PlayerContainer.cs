@@ -19,7 +19,7 @@ public class PlayerContainer
    
     private float _busMuteSpeed;
     private float _targetVolume;
-    private float _volume; // TODO: Where is NaN?
+    private float _volume;
     
     public virtual float MaxVolume
     {

@@ -30,8 +30,10 @@ public partial class Menu : VBoxContainer
         else if (press.Right) _currentOption.PressRight();
         else if (press.Left) _currentOption.PressLeft();
     }
+    
+    public virtual void OnExit() {}
 
-    protected virtual void Select()
+    private void Select()
     {
         EmitSignal(SignalName.Selected, this);
         _currentOption = _optionStorage.First;

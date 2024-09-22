@@ -1,14 +1,13 @@
-using System.Collections.Generic;
-using System.Linq;
 using Godot;
+using System.Linq;
+using System.Collections.Generic;
+using OrbinautFramework3.Framework;
 using OrbinautFramework3.Framework.InputModule;
 
 namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 
 public partial class DevMenu : Control
 {
-    [Signal] public delegate void PreviousMenuSelectedEventHandler();
-    
     [Export] private Menu _currentMenu;
     private PackedScene _nextScene;
     
@@ -23,16 +22,16 @@ public partial class DevMenu : Control
         
         if (_menuStack.Count > 0 && input.B)
         {
+            _currentMenu.OnExit();
             _currentMenu.Visible = false;
             _currentMenu = _menuStack.Pop();
             _currentMenu.Visible = true;
-            EmitSignal(SignalName.PreviousMenuSelected);
         }
         
         _currentMenu.Process(input);
     }
-    
-    public void OnMenuSelected(Menu menu)
+
+    private void OnMenuSelected(Menu menu)
     {
         _currentMenu.Visible = false;
         _menuStack.Push(_currentMenu);
@@ -42,5 +41,15 @@ public partial class DevMenu : Control
     
     private void OnSceneSelected(PackedScene scene) => _nextScene = scene;
     
-    private void OnSceneSwitch() => GetTree().ChangeSceneToPacked(_nextScene);
+    private void OnSceneSwitch()
+    {
+        SaveData.Load();
+        if (_nextScene != null)
+        {
+            GetTree().ChangeSceneToPacked(_nextScene);
+            return;
+        }
+        
+        GetTree().ChangeSceneToFile(SaveData.ScenePath);
+    }
 }
