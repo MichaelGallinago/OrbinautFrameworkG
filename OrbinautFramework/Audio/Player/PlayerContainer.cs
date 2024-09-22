@@ -191,6 +191,12 @@ public class PlayerContainer
     
     private void SetBusMuteSpeed(float seconds, float value)
     {
+        if (seconds <= 0f)
+        {
+            _busMuteSpeed = float.PositiveInfinity;
+            return;
+        }
+        
         _busMuteSpeed = MathF.Abs(value - _volume) / (seconds * Constants.BaseFrameRate);
     }
     

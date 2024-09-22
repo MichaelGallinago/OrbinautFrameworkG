@@ -42,7 +42,7 @@ public static class SaveData
     public static void Save()
     {
 	    if (Slot == 0) return;
-
+	    
 	    byte[] playerTypes = PlayerTypes.Select(type => (byte)type).ToArray();
         File.WriteAllBytes(_currentBinaryPath, GD.VarToBytesWithObjects(new DataFile(
 	        ScenePath, EmeraldCount, ContinueCount, LifeCount, ScoreCount, playerTypes)));
