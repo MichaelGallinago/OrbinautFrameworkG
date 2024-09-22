@@ -37,7 +37,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		if (data.Node.SolidBox.Radius.X <= 0 || data.Node.SolidBox.Radius.Y <= 0) return;
 		if (targetBox.Radius.X <= 0 || targetBox.Radius.Y <= 0) return;
 		
-		_solidObjectData = new SolidObjectData(target, type, attachType, GetExtraSize());
+		_solidObjectData = new SolidObjectData(target, type, attachType, ExtraSize);
 		int slopeOffset = CalculateSlopeOffset();
 		
 		RegisterCollisionCheck();
@@ -105,12 +105,13 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		
 		return player.Data.Collision.PushObjects.Contains(data.Node.SolidBox);
 	}
-	
-	private Vector2I GetExtraSize()
-	{
-		// Extend the radiuses for better & fair solid collision (if enabled)
-		return Improvements.BetterSolidCollision ? new Vector2I(data.Node.SolidBox.Radius.X, GripY) : Vector2I.Zero;
-	}
+
+// Extend the radiuses for better & fair solid collision (if enabled)
+#if BETTER_SOLID_COLLISION
+	private Vector2I ExtraSize => new(data.Node.SolidBox.Radius.X, GripY);
+#else
+	private static Vector2I ExtraSize => Vector2I.Zero;
+#endif
 	
 	private int CalculateSlopeOffset()
 	{

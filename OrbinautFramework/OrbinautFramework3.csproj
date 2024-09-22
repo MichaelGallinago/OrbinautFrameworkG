@@ -16,12 +16,11 @@
     <DefineConstants>$(DefineConstants);S3_CPU;S2_PHYSICS</DefineConstants>
   </PropertyGroup>
   
-  <!-- Improvements --> <PropertyGroup>
+  <!-- Fixes --> <PropertyGroup>
     <!-- Select the ones you need -->
     <!-- DO NOT REMOVE "$(DefineConstants);", otherwise the Godot constants will be overwritten -->
-    <!-- SMOOTH_ROTATION FIX_JUMP_SIZE FIX_DASH_RELEASE BETTER_SOLID_COLLISION -->
-    <!-- NO_ROLL_LOCK NO_SPEED_CAP NO_CAMERA_CAP -->
-    <DefineConstants>$(DefineConstants);SMOOTH_ROTATION;NO_SPEED_CAP;FIX_JUMP_SIZE;FIX_DASH_RELEASE</DefineConstants>
+    <!-- FIX_JUMP_SIZE FIX_DASH_RELEASE BETTER_SOLID_COLLISION -->
+    <DefineConstants>$(DefineConstants);FIX_JUMP_SIZE;FIX_DASH_RELEASE</DefineConstants>
   </PropertyGroup>
   
   <!-- NativeAOT only --> <ItemGroup>

@@ -76,9 +76,10 @@ public struct Dash(PlayerData data, IPlayerLogic logic)
     	data.Node.SetCameraDelayX(16f);
     	
     	AudioPlayer.Sound.Play(SoundStorage.Release2);	
-    	
-    	if (!Improvements.FixDashRelease) return true;
+	    
+#if FIX_DASH_RELEASE
     	data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
+#endif
     	return true;
     }
 }

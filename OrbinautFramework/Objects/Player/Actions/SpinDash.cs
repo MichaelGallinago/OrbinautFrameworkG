@@ -57,8 +57,9 @@ public struct SpinDash(PlayerData data)
     	
 	    movement.IsCorePhysicsSkipped = true;
 	    
-	    if (!Improvements.FixDashRelease) return;
+#if FIX_DASH_RELEASE
 	    movement.Velocity.SetDirectionalValue(movement.GroundSpeed, movement.Angle);
+#endif
     }
 
     private void Charge()

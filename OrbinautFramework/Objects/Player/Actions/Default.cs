@@ -44,12 +44,10 @@ public readonly struct Default(PlayerData data, IPlayerLogic logic)
         if (!CheckCeilingDistance()) return false;
 
         CollisionData collision = data.Collision;
-#if S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS
-        if (!Improvements.FixJumpSize)
-        {
-            // Why do they even do that?
-            collision.Radius = collision.RadiusNormal;
-        }
+        
+#if (S1_PHYSICS || S2_PHYSICS || S3_PHYSICS || SK_PHYSICS) && !FIX_JUMP_SIZE
+        // Why do they even do that?
+        collision.Radius = collision.RadiusNormal;
 #endif
         if (!movement.IsSpinning)
         {
