@@ -71,7 +71,7 @@ public partial class TailNode : AdvancedAnimatedSprite
 			angle += Angles.CircleHalf;
 		}
 		
-		if (Improvements.RotationMode != 0) return angle;
+		if (Improvements.SmoothRotation) return angle;
 		
 		return MathF.Ceiling((angle - 22.5f) / 45f) * 45f;
 	}
