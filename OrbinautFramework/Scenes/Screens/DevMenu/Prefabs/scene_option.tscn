@@ -6,3 +6,6 @@
 [node name="SceneOption" instance=ExtResource("1_6dwf5")]
 script = ExtResource("2_my8wo")
 _scene = null
+
+[node name="Label" parent="." index="1"]
+text = "SCENE OPTION"

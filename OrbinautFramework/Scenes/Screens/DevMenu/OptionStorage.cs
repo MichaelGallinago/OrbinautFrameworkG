@@ -11,7 +11,7 @@ public partial class OptionStorage : VBoxContainer
     private uint _length;
     private uint _index;
     
-    public override void _EnterTree() => _options = GetOptions();
+    public override void _EnterTree() => _options = FilterNodes<Option>();
     
     public Option Previous => SelectNewOption(_index - 1);
     public Option Next => SelectNewOption(_index + 1);
@@ -27,21 +27,21 @@ public partial class OptionStorage : VBoxContainer
         }
     }
     
-    private Option[] GetOptions()
+    protected T[] FilterNodes<T>() where T : Node
     {
         Array<Node> children = GetChildren();
-        var options = new List<Option>(children.Count);
+        var nodes = new List<T>(children.Count);
         
         for (var i = 0; i < children.Count; i++)
         {
-            if (children[i] is Option option)
+            if (children[i] is T node)
             {
-                options.Add(option);
+                nodes.Add(node);
             }
         }
         
-        _length = (uint)options.Count;
-        return options.ToArray();
+        _length = (uint)nodes.Count;
+        return nodes.ToArray();
     }
 
     private Option SelectNewOption(uint position)
