@@ -1,6 +1,7 @@
 ﻿using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -53,7 +54,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 	private bool Transform()
 	{
 		if (!data.Input.Press.X || data.Super.IsSuper) return false;
-		if (SharedData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
+		if (SaveData.EmeraldCount != 7 || SharedData.PlayerRings < 50) return false;
 
 		logic.ResetData();
 		data.Movement.IsCorePhysicsSkipped = true;
@@ -62,7 +63,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 	private States JumpSonic()
 	{
-		if (SharedData.DropDash && !data.Input.Down.Aby)
+		if (OriginalDifferences.DropDash && !data.Input.Down.Aby)
 		{
 			if (data.Node.Shield.Type <= ShieldContainer.Types.Normal) return States.DropDash;
 			if (data.Super.IsSuper || data.Item.InvincibilityTimer > 0f) return States.DropDash;
@@ -92,7 +93,7 @@ public readonly struct Jump(PlayerData data, IPlayerLogic logic)
 
 	private void JumpDoubleSpin()
 	{
-		if (!SharedData.DoubleSpin) return;
+		if (!OriginalDifferences.DoubleSpin) return;
 
 		data.Node.Shield.State = ShieldContainer.States.DoubleSpin;
 		//TODO: obj_double_spin

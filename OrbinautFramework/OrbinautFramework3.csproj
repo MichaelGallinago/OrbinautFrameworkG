@@ -2,14 +2,32 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    <ProjectPath>$(MSBuildProjectDirectory)</ProjectPath>
+    <!-- <PublishAot>true</PublishAot> --> <!-- NativeAOT only -->
   </PropertyGroup>
-  <PropertyGroup>
+  
+  <!-- Game differences --> <PropertyGroup>
     <!-- Physics and CPU type constants. Select only one per group -->
     <!-- DO NOT REMOVE "$(DefineConstants);", otherwise the Godot constants will be overwritten -->
     <!-- S2_CPU S3_CPU -->
     <!-- S1_PHYSICS CD_PHYSICS S2_PHYSICS S3_PHYSICS SK_PHYSICS -->
     <DefineConstants>$(DefineConstants);S3_CPU;S2_PHYSICS</DefineConstants>
   </PropertyGroup>
+  
+  <!-- Fixes --> <PropertyGroup>
+    <!-- Select the ones you need -->
+    <!-- DO NOT REMOVE "$(DefineConstants);", otherwise the Godot constants will be overwritten -->
+    <!-- FIX_JUMP_SIZE FIX_DASH_RELEASE BETTER_SOLID_COLLISION -->
+    <DefineConstants>$(DefineConstants);FIX_JUMP_SIZE;FIX_DASH_RELEASE</DefineConstants>
+  </PropertyGroup>
+  
+  <!-- NativeAOT only --> <!-- <ItemGroup>
+    <TrimmerRootAssembly Include="GodotSharp" />
+    <TrimmerRootAssembly Include="$(TargetName)" />
+  </ItemGroup> -->
+  
   <ItemGroup>
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.6.1-beta.1">
       <PrivateAssets>all</PrivateAssets>
@@ -22,6 +40,7 @@
     <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
   </ItemGroup>
+  
   <ItemGroup>
     <AdditionalFiles Include="**/*.ogg" />
     <AdditionalFiles Include="**/*.wav" />
@@ -34,13 +53,10 @@
     <AdditionalFiles Remove="Objects\Resources\**" />
     <AdditionalFiles Remove="Framework\Prefabs\**" />
   </ItemGroup>
-  <PropertyGroup>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-    <ProjectPath>$(MSBuildProjectDirectory)</ProjectPath>
-  </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\EnumToStringNameSourceGenerator\EnumToStringNameSourceGenerator.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\FastEnumToStringSourceGenerator\FastEnumToStringSourceGenerator.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\AudioStorageSourceGenerator\AudioStorageSourceGenerator.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\FsmSourceGenerator\FsmSourceGenerator.csproj" OutputItemType="Analyzer" />
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
@@ -52,6 +68,7 @@
     <Compile Remove="Objects\Resources\**" />
     <Compile Remove="Framework\Prefabs\**" />
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Remove="Framework\Camera\**" />
     <EmbeddedResource Remove="Framework\CameraAndSurface\**" />

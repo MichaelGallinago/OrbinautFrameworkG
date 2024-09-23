@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dl707w72scv17"]
+[gd_scene load_steps=9 format=3 uid="uid://dl707w72scv17"]
 
 [ext_resource type="PackedScene" uid="uid://b2q2gooc40jhe" path="res://Objects/Spawnable/Shield/shield_container.tscn" id="1_0pcuy"]
 [ext_resource type="Script" path="res://Objects/Player/Characters/Knuckles/KnucklesNode.cs" id="1_612g0"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://Framework/ObjectBase/HitBox.cs" id="2_tfa62"]
 [ext_resource type="Script" path="res://Framework/ObjectBase/SolidBox.cs" id="3_ig28u"]
 [ext_resource type="Script" path="res://Objects/Player/Sprite/SpriteNode.cs" id="4_tx7uj"]
-[ext_resource type="Script" path="res://Objects/Player/Characters/Knuckles/KnucklesSpriteLogic.cs" id="7_ya4pr"]
 
 [sub_resource type="Resource" id="Resource_55v0h"]
 script = ExtResource("2_tfa62")
@@ -22,16 +21,13 @@ Radius = Vector2i(0, 0)
 Offset = Vector2i(0, 0)
 HeightMapArray = null
 
-[sub_resource type="Resource" id="Resource_5a00r"]
-script = ExtResource("7_ya4pr")
-
-[node name="Knuckles" type="Node2D" node_paths=PackedStringArray("Shield", "_spriteNode")]
+[node name="Knuckles" type="Node2D" node_paths=PackedStringArray("Shield", "SpriteNode")]
 process_priority = -1
 z_index = -2
 script = ExtResource("1_612g0")
 Type = 2
 Shield = NodePath("ShieldContainer")
-_spriteNode = NodePath("Sprite")
+SpriteNode = NodePath("Sprite")
 HitBox = SubResource("Resource_55v0h")
 SolidBox = SubResource("Resource_2aact")
 
@@ -42,4 +38,3 @@ FrameLoop = 0
 sprite_frames = ExtResource("2_0y7po")
 animation = &"None"
 script = ExtResource("4_tx7uj")
-_spriteLogic = SubResource("Resource_5a00r")

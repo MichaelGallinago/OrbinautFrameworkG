@@ -1,35 +1,59 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace OrbinautFramework3.Audio.Player;
 
 public class PlayerContainer
 {
-    private const float MinimalVolume = -80f;
-    private const float DefaultVolume = 0f;
+    private readonly record struct VolumeChangeData(float Speed, float TargetVolume, bool Stop);
     
     private readonly Dictionary<AudioStream, AudioStreamPlayer> _activePlayers;
-    private readonly Dictionary<AudioStreamPlayer, (float speed, bool stop)> _volumeChangeList;
+    private readonly Dictionary<AudioStreamPlayer, VolumeChangeData> _volumeChangeList;
     private readonly Stack<AudioStreamPlayer> _freePlayers;
+    private readonly Dictionary<AudioStreamPlayer, float> _audioStreamVolumes;
     private readonly byte _playersLimit;
     private readonly int _busIndex;
+   
     private float _busMuteSpeed;
-
+    private float _targetVolume;
+    private float _volume;
+    
+    public virtual float MaxVolume
+    {
+        get => _maxVolume;
+        set
+        {
+            _volume = _targetVolume = _maxVolume = value;
+            VolumeDb = GetVolumeDb(value);
+            AudioServer.SetBusVolumeDb(_busIndex, VolumeDb);
+        }
+    }
+    private float _maxVolume;
+    protected float VolumeDb { get; private set; }
+    
     public PlayerContainer(IEnumerable<AudioStreamPlayer> players, byte playersLimit)
     {
         _freePlayers = new Stack<AudioStreamPlayer>(players);
-        _volumeChangeList = new Dictionary<AudioStreamPlayer, (float speed, bool stop)>(_freePlayers.Count);
+        _volumeChangeList = new Dictionary<AudioStreamPlayer, VolumeChangeData>(_freePlayers.Count);
         _activePlayers = new Dictionary<AudioStream, AudioStreamPlayer>(_freePlayers.Count);
+        _audioStreamVolumes = _freePlayers.ToDictionary(key => key, _ => 1f);
         
         foreach (AudioStreamPlayer soundPlayer in _freePlayers)
         {
             soundPlayer.Finished += () => FreePlayer(soundPlayer);
         }
-
+        
         _playersLimit = playersLimit;
-        _busIndex = AudioServer.GetBusIndex(_freePlayers.Peek().Bus);
+        
+        StringName busName = _freePlayers.Peek().Bus;
+        foreach (AudioStreamPlayer player in _freePlayers)
+        {
+            player.Bus = busName;
+        }
+        _busIndex = AudioServer.GetBusIndex(busName);
     }
     
     public bool IsPlaying(AudioStream audio) => _activePlayers.ContainsKey(audio);
@@ -50,17 +74,17 @@ public class PlayerContainer
         soundPlayer.Stop();
         FreePlayer(soundPlayer);
     }
-
+    
     public void StopWithMute(float seconds, AudioStream music)
     {
-        SetMuteSpeed(seconds, music, MinimalVolume, true);
+        SetMuteSpeed(seconds, music, 0, true);
     }
-
+    
     public void StopAllWithMute(float seconds)
     {
         foreach (AudioStreamPlayer player in _activePlayers.Values)
         {
-            SetMuteSpeed(seconds, player.Stream, MinimalVolume, true);
+            SetMuteSpeed(seconds, player.Stream, 0, true);
         }
     }
     
@@ -72,13 +96,13 @@ public class PlayerContainer
             FreePlayer(player);
         }
     }
-
-    public void Mute(float seconds, AudioStream audio) => SetMuteSpeed(seconds, audio, MinimalVolume);
-    public void Unmute(float seconds, AudioStream audio) => SetMuteSpeed(seconds, audio, DefaultVolume);
-
-    public void MuteBus(float seconds) => SetBusMuteSpeed(seconds, MinimalVolume);
-    public void UnmuteBus(float seconds) => SetBusMuteSpeed(seconds, DefaultVolume);
-
+    
+    public void Mute(float seconds, AudioStream audio) => SetMuteSpeed(seconds, audio, 0f);
+    public void Unmute(float seconds, AudioStream audio) => SetMuteSpeed(seconds, audio, 1f);
+    
+    public void MuteBus(float seconds) => SetBusMuteSpeed(seconds, 0f);
+    public void UnmuteBus(float seconds) => SetBusMuteSpeed(seconds, MaxVolume);
+    
     public void SetPauseState(bool isPaused)
     {
         foreach (AudioStreamPlayer soundPlayers in _activePlayers.Values)
@@ -92,56 +116,47 @@ public class PlayerContainer
         }
     }
     
-    public void UpdateVolume()
+    public void UpdateVolume(float speed)
     {
-        UpdateBusVolume();
-        UpdatePlayersVolume();
+        UpdateBusVolume(speed);
+        UpdatePlayersVolume(speed);
     }
-
-    private void UpdateBusVolume()
+    
+    private void UpdateBusVolume(float speed)
     {
         if (_busMuteSpeed == 0f) return;
         
-        float volume = AudioServer.GetBusVolumeDb(_busIndex);
-        volume += _busMuteSpeed;
-
-        if (volume is > MinimalVolume and < DefaultVolume)
+        _volume = _volume.MoveTowardChecked(_targetVolume, _busMuteSpeed * speed, out bool isFinished);
+        
+        if (isFinished)
         {
-            AudioServer.SetBusVolumeDb(_busIndex, volume);
-            return;
+            _busMuteSpeed = 0f;
         }
-
-        _busMuteSpeed = 0f;
-        AudioServer.SetBusVolumeDb(_busIndex, Math.Clamp(volume, MinimalVolume, DefaultVolume));
+        
+        AudioServer.SetBusVolumeDb(_busIndex, _volume);
     }
-
-    private void UpdatePlayersVolume()
+    
+    private void UpdatePlayersVolume(float speed)
     {
         foreach (AudioStreamPlayer player in _volumeChangeList.Keys)
         {
-            (float speed, bool stop) data = _volumeChangeList[player];
-            player.VolumeDb += Scene.Instance.Speed * data.speed;
+            (float muteSpeed, float to, bool stop) = _volumeChangeList[player];
+
+            float delta = speed * muteSpeed;
+            float newVolume = _audioStreamVolumes[player].MoveTowardChecked(to, delta, out bool isFinished);
             
-            switch (player.VolumeDb)
-            {
-                case <= MinimalVolume:
-                    player.VolumeDb = MinimalVolume;
-                    if (data.stop)
-                    {
-                        player.Stop();
-                        FreePlayer(player);
-                    }
-                    _volumeChangeList.Remove(player);
-                    break;
-                
-                case >= DefaultVolume:
-                    player.VolumeDb = DefaultVolume;
-                    _volumeChangeList.Remove(player);
-                    break;
-            }
+            _audioStreamVolumes[player] = newVolume;
+            player.VolumeDb = GetVolumeDb(newVolume);
+            
+            if (!isFinished) continue;
+            _volumeChangeList.Remove(player);
+            
+            if (!stop) continue;
+            player.Stop();
+            FreePlayer(player);
         }
     }
-
+    
     private AudioStreamPlayer GetPlayer(AudioStream audio)
     {
         if (_activePlayers.TryGetValue(audio, out AudioStreamPlayer soundPlayer)) return soundPlayer;
@@ -164,19 +179,25 @@ public class PlayerContainer
         return soundPlayer;
     }
     
-        
-    private void SetMuteSpeed(float seconds, AudioStream music, float value, bool stop = false)
+    private void SetMuteSpeed(float seconds, AudioStream music, float targetVolume, bool stop = false)
     {
         if (!_activePlayers.TryGetValue(music, out AudioStreamPlayer musicPlayer)) return;
         
-        float speed = (value - musicPlayer.VolumeDb) / (seconds * Constants.BaseFrameRate);
-        if (_volumeChangeList.TryAdd(musicPlayer, (speed, stop))) return;
-        _volumeChangeList[musicPlayer] = (speed, stop);
+        float speed = Math.Abs(targetVolume - _audioStreamVolumes[musicPlayer]) / (seconds * Constants.BaseFrameRate);
+        var volumeChangeData = new VolumeChangeData(speed, targetVolume, stop);
+        if (_volumeChangeList.TryAdd(musicPlayer, volumeChangeData)) return;
+        _volumeChangeList[musicPlayer] = volumeChangeData;
     }
     
     private void SetBusMuteSpeed(float seconds, float value)
     {
-        _busMuteSpeed = (value - AudioServer.GetBusVolumeDb(_busIndex)) / (seconds * Constants.BaseFrameRate);
+        if (seconds <= 0f)
+        {
+            _busMuteSpeed = float.PositiveInfinity;
+            return;
+        }
+        
+        _busMuteSpeed = MathF.Abs(value - _volume) / (seconds * Constants.BaseFrameRate);
     }
     
     private AudioStreamPlayer CreatePlayer()
@@ -194,4 +215,6 @@ public class PlayerContainer
         player.Stream = null;
         _freePlayers.Push(player);
     }
+    
+    private static float GetVolumeDb(float volume) => 20f * MathF.Log10(Math.Clamp(volume, 0.0001f, 1f));
 }

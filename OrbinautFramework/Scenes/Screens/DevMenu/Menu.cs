@@ -6,10 +6,9 @@ namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 
 public partial class Menu : VBoxContainer
 {
-    [Export] private OptionStorage _optionStorage;
-    
     [Signal] public delegate void SelectedEventHandler(Menu menu);
     
+    [Export] private OptionStorage _optionStorage;
     private Option _currentOption;
     
     public override void _Ready() => _currentOption = _optionStorage.Current;
@@ -31,6 +30,8 @@ public partial class Menu : VBoxContainer
         else if (press.Right) _currentOption.PressRight();
         else if (press.Left) _currentOption.PressLeft();
     }
+    
+    public virtual void OnExit() {}
 
     private void Select()
     {

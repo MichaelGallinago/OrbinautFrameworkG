@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OrbinautFramework3.Framework.StaticStorages;
 
 namespace OrbinautFramework3.Framework;
 
@@ -32,7 +33,7 @@ public static class PaletteUtilities
             Enumerable.Repeat(1, PaletteLimit).ToArray(), 
             Enumerable.Repeat(1, PaletteLimit).ToArray()
         ];
-        SplitBound = SharedData.ViewSize.Y;
+        SplitBound = Settings.ViewSize.Y;
         UpdateFlag = true;
     }
 

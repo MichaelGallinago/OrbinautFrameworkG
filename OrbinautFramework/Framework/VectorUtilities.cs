@@ -11,6 +11,7 @@ public static class VectorUtilities
         vector.X = -vector.X;
         return vector;
     }
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 FlipY(Vector2 vector)
     {
@@ -24,6 +25,7 @@ public static class VectorUtilities
         vector.X += value;
         return vector;
     }
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 AddY(Vector2 vector, float value)
     {

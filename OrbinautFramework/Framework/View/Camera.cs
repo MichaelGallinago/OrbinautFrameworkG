@@ -1,6 +1,7 @@
 using System;
 using Godot;
 using OrbinautFramework3.Framework.ObjectBase;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player;
 using OrbinautFramework3.Objects.Player.Data;
 
@@ -32,7 +33,7 @@ public partial class Camera : Camera2D, ICamera
 			
 			if (value == null) return;
 			
-			DrawPosition = (Vector2I)_target.Position - SharedData.ViewSize + 16 * Vector2I.Down;
+			DrawPosition = (Vector2I)_target.Position - Settings.ViewSize + 16 * Vector2I.Down;
 			_rawPosition = PreviousPosition = DrawPosition;
 		}
 	}
@@ -78,7 +79,7 @@ public partial class Camera : Camera2D, ICamera
 		TargetBoundary = new Vector4I(0, 0, size.X, size.Y);
 		Boundary = TargetBoundary;
 		
-		int maxSpeed = SharedData.NoCameraCap ? ushort.MaxValue : SpeedCap;
+		int maxSpeed = Improvements.NoCameraCap ? ushort.MaxValue : SpeedCap;
 		_maxVelocity = new Vector2I(maxSpeed, maxSpeed);
 		
 		if (SharedData.CheckpointData is not null)
@@ -95,7 +96,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		DrawPosition = _shakeOffset + ((Vector2I)_rawPosition + (Vector2I)_bufferOffset).Clamp(
 			new Vector2I((int)Boundary.X, (int)Boundary.Y),
-			new Vector2I((int)Boundary.Z, (int)Boundary.W) - SharedData.ViewSize);
+			new Vector2I((int)Boundary.Z, (int)Boundary.W) - Settings.ViewSize);
 		
 		Views.Instance.UpdateBottomCamera(this);
 		
@@ -110,7 +111,7 @@ public partial class Camera : Camera2D, ICamera
 	
 	public bool CheckRectInside(Rect2 rect)
 	{
-		var cameraRect = new Rect2(Position, SharedData.ViewSize);
+		var cameraRect = new Rect2(Position, Settings.ViewSize);
 	
 		return rect.End.X >= cameraRect.Position.X && rect.Position.X < cameraRect.End.X
 		    && rect.End.Y >= cameraRect.Position.Y && rect.Position.Y < cameraRect.End.Y;
@@ -133,7 +134,7 @@ public partial class Camera : Camera2D, ICamera
 		if (player.Data.State != PlayerStates.Death) return;
 		
 		FollowPlayerY(targetPosition.Y, player);
-		if (SharedData.CdCamera)
+		if (OriginalDifferences.CdCamera)
 		{
 			FollowTargetCdX(targetPosition.X);
 			UpdateCdCamera(player);
@@ -154,7 +155,7 @@ public partial class Camera : Camera2D, ICamera
 				_viewTimer -= Scene.Instance.Speed;
 			}
 		}
-		else if (SharedData.SpinDash || SharedData.Dash)
+		else if (OriginalDifferences.SpinDash || OriginalDifferences.Dash)
 		{
 			_viewTimer = ViewDuration;
 		}
@@ -212,7 +213,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		// Update boundaries
 		float boundSpeed = Math.Max(2, BoundSpeed) * Scene.Instance.Speed;
-		Vector2I farBounds = DrawPosition + SharedData.ViewSize;
+		Vector2I farBounds = DrawPosition + Settings.ViewSize;
 		Boundary = new Vector4(
 			MoveBoundaryForward(Boundary.X, TargetBoundary.X, DrawPosition.X, boundSpeed), // Left
 			MoveBoundaryForward(Boundary.Y, TargetBoundary.Y, DrawPosition.Y, boundSpeed), // Top
@@ -230,7 +231,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		if (Target == null) return;
 		
-		Vector2 targetPosition = _target.Position - SharedData.ViewSize / 2;
+		Vector2 targetPosition = _target.Position - Settings.ViewSize / 2;
 		if (_playerTarget != null)
 		{
 			FollowPlayer(targetPosition, _playerTarget);
@@ -362,7 +363,7 @@ public partial class Camera : Camera2D, ICamera
 		Vector2I position = DrawPosition + sbyte.MinValue * Vector2I.One;
 		position.X &= sbyte.MinValue;
 		position.Y &= sbyte.MinValue;
-		ActiveRegion = new Rect2I(position, SharedData.ViewSize * 2 + CullingBuffer);
+		ActiveRegion = new Rect2I(position, Settings.ViewSize * 2 + CullingBuffer);
 	}
 	
 	private static float MoveBoundaryForward(float boundary, float target, int position, float speed)

@@ -1,4 +1,5 @@
 using Godot;
+using OrbinautFramework3.Framework.StaticStorages;
 
 namespace OrbinautFramework3.Framework;
 

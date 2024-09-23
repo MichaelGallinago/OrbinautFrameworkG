@@ -1,6 +1,7 @@
 ﻿using System;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Logic;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -75,9 +76,10 @@ public struct Dash(PlayerData data, IPlayerLogic logic)
     	data.Node.SetCameraDelayX(16f);
     	
     	AudioPlayer.Sound.Play(SoundStorage.Release2);	
-    	
-    	if (!SharedData.FixDashRelease) return true;
+	    
+#if FIX_DASH_RELEASE
     	data.Movement.Velocity.SetDirectionalValue(data.Movement.GroundSpeed, data.Movement.Angle);
+#endif
     	return true;
     }
 }

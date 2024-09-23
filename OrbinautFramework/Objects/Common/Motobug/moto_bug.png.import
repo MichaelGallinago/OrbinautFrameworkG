@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ddnx6x58qsunr"
-path="res://.godot/imported/motobug_smoke.png-6e7a6a49da1a66ad86979a9a15c8fbb2.ctex"
+uid="uid://cng0f6cpcfns0"
+path="res://.godot/imported/moto_bug.png-10e4489d80e62bbd2ead232ccfaded84.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Common/MotoBug/motobug_smoke.png"
-dest_files=["res://.godot/imported/motobug_smoke.png-6e7a6a49da1a66ad86979a9a15c8fbb2.ctex"]
+source_file="res://Objects/Common/Motobug/moto_bug.png"
+dest_files=["res://.godot/imported/moto_bug.png-10e4489d80e62bbd2ead232ccfaded84.ctex"]
 
 [params]
 

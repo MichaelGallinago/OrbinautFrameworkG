@@ -1,4 +1,5 @@
 ﻿using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Actions;

@@ -1,4 +1,3 @@
-using System;
 using Godot;
 using OrbinautFramework3.Framework.MultiTypeDelegate;
 using OrbinautFramework3.Framework.View;
@@ -8,10 +7,7 @@ namespace OrbinautFramework3.Framework;
 
 public partial class Scene : Node2D
 {
-    public enum States : byte
-    {
-        Normal, StopObjects, Paused
-    }
+    public enum States : byte { Normal, StopObjects, Paused }
     
     public static Scene Instance { get; private set; }
     
@@ -77,7 +73,7 @@ public partial class Scene : Node2D
 
     public override void _Process(double deltaTime)
     {
-        UpdateSpeed(deltaTime);
+        Speed = DeltaTimeUtilities.CalculateSpeed(deltaTime);
         
         if (State != States.Paused)
         {
@@ -95,10 +91,4 @@ public partial class Scene : Node2D
 
     public bool IsTimePeriodLooped(float period) => Time % period - Speed < 0f;
     public bool IsTimePeriodLooped(float period, float offset) => (Time + offset) % period - Speed < 0f;
-    
-    private void UpdateSpeed(double deltaTime)
-    {
-        Speed = Engine.MaxFps is <= Constants.BaseFrameRate and > 0 ? 
-            1f : Math.Min(1f, (float)(deltaTime * Constants.BaseFrameRate));
-    }
 }

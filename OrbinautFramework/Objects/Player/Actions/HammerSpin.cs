@@ -1,5 +1,6 @@
 ﻿using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
 using static OrbinautFramework3.Objects.Player.ActionFsm;
@@ -13,7 +14,7 @@ public struct HammerSpin(PlayerData data)
 
     public void Enter()
     {
-        if (SharedData.NoRollLock)
+        if (Improvements.NoRollLock)
         {
             data.Movement.IsAirLock = false;
         }

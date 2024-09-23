@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFramework3.Audio.Player;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.View;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -143,7 +144,7 @@ public readonly struct Damage(PlayerData data, IPlayerLogic logic)
 		    data.State = PlayerStates.Respawn;
 		    return;
 	    }
-
+	    
 	    data.Movement.Position = new Vector2(byte.MaxValue, 0f);
 	    data.Visual.ZIndex = (int)Constants.ZIndexes.AboveForeground; //TODO: RENDERER_DEPTH_HIGHEST
 	    

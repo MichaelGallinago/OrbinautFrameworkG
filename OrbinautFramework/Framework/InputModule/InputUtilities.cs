@@ -14,7 +14,7 @@ public static class InputUtilities
     public static List<Buttons> Press { get; } = new(MaxInputDevices);
     public static List<bool> BlockInput { get; } = new(MaxInputDevices);
     public static int DeviceCount { get; private set; } = MaxInputDevices;
-    public static bool JoypadVibration { get; set; } = true;
+    public static bool JoypadRumble { get; set; } = true;
     
 
     private static Godot.Collections.Array<int> _joypads;
@@ -77,7 +77,7 @@ public static class InputUtilities
 
     public static void SetVibration(int device, float weakMagnitude, float strongMagnitude, float duration)
     {
-        if (!JoypadVibration || device > MaxInputDevices || _joypads.Contains(device)) return;
+        if (!JoypadRumble || device > MaxInputDevices || _joypads.Contains(device)) return;
         Input.StartJoyVibration(device, weakMagnitude, strongMagnitude, duration);
     }
 

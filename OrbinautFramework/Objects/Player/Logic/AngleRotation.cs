@@ -1,5 +1,6 @@
 ﻿using System;
 using OrbinautFramework3.Framework;
+using OrbinautFramework3.Framework.StaticStorages;
 using OrbinautFramework3.Framework.Tiles;
 using OrbinautFramework3.Objects.Player.Data;
 using OrbinautFramework3.Objects.Player.Sprite;
@@ -18,19 +19,18 @@ public readonly struct AngleRotation(PlayerData data)
 
     private float CalculateVisualAngle()
     {
-        bool isSmoothRotation = SharedData.RotationMode > 0;
         float angle = data.Movement.Angle;
         float visualAngle;
         
         if (!data.Movement.IsGrounded)
         {
-            if (isSmoothRotation) return angle;
+            if (Improvements.SmoothRotation) return angle;
             visualAngle = angle;
         }
         else
         {
             visualAngle = angle is > 22.5f and < 337.5f ? angle : 0f;
-            if (isSmoothRotation) return CalculateSmoothVisualAngle(visualAngle);
+            if (Improvements.SmoothRotation) return CalculateSmoothVisualAngle(visualAngle);
         }
         
         return MathF.Ceiling((visualAngle - 22.5f) / 45f) * 45f;
