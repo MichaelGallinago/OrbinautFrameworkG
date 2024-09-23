@@ -9,9 +9,10 @@ namespace OrbinautFramework3.Scenes.Screens.DevMenu;
 public partial class DevMenu : Control
 {
     [Export] private Menu _currentMenu;
-    private PackedScene _nextScene;
     
     private readonly Stack<Menu> _menuStack = new();
+    
+    private PackedScene _nextScene;
     
     public override void _Ready() => _currentMenu.Visible = true;
     
@@ -41,6 +42,12 @@ public partial class DevMenu : Control
     
     private void OnSceneSelected(PackedScene scene) => _nextScene = scene;
     
+    private void OnSaveSelected(PackedScene scene, byte slot)
+    {
+        OnSceneSelected(scene);
+        SaveData.Slot = slot;
+    }
+
     private void OnSceneSwitch()
     {
         SaveData.Load();

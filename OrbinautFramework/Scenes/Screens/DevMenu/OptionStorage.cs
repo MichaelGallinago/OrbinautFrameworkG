@@ -11,7 +11,7 @@ public partial class OptionStorage : VBoxContainer
     private uint _length;
     private uint _index;
     
-    public override void _EnterTree() => _options = FilterNodes<Option>();
+    public override void _Ready() => _options = FilterNodes<Option>();
     
     public Option Previous => SelectNewOption(_index - 1);
     public Option Next => SelectNewOption(_index + 1);

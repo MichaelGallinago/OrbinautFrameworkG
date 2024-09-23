@@ -5,7 +5,7 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     <ProjectPath>$(MSBuildProjectDirectory)</ProjectPath>
-    <PublishAot>true</PublishAot> <!-- NativeAOT only -->
+    <!-- <PublishAot>true</PublishAot> --> <!-- NativeAOT only -->
   </PropertyGroup>
   
   <!-- Game differences --> <PropertyGroup>
@@ -23,10 +23,10 @@
     <DefineConstants>$(DefineConstants);FIX_JUMP_SIZE;FIX_DASH_RELEASE</DefineConstants>
   </PropertyGroup>
   
-  <!-- NativeAOT only --> <ItemGroup>
+  <!-- NativeAOT only --> <!-- <ItemGroup>
     <TrimmerRootAssembly Include="GodotSharp" />
     <TrimmerRootAssembly Include="$(TargetName)" />
-  </ItemGroup>
+  </ItemGroup> -->
   
   <ItemGroup>
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.6.1-beta.1">

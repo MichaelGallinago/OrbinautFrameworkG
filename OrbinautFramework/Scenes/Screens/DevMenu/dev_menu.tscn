@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://b3y6uspbhnxrx"]
+[gd_scene load_steps=35 format=3 uid="uid://b3y6uspbhnxrx"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/DevMenu.cs" id="1_nm0pq"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
@@ -25,6 +25,7 @@
 [ext_resource type="PackedScene" uid="uid://vvusup7obee5" path="res://Scenes/Stages/Specials/special.tscn" id="20_e6yu1"]
 [ext_resource type="PackedScene" uid="uid://yiyajukipmwg" path="res://Scenes/Screens/Continue/continue.tscn" id="21_6hcnj"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SaveOptionStorage.cs" id="23_fxvuu"]
+[ext_resource type="PackedScene" uid="uid://wjcnf0ceap8y" path="res://Scenes/Screens/DevMenu/Prefabs/save_option.tscn" id="24_cw7bx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
@@ -111,7 +112,6 @@ script = ExtResource("3_yeib4")
 
 [node name="Option" parent="MenuStorage/MainMenu/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/MainMenu/OptionStorage/Option" index="1"]
 text = "START GAME
@@ -119,7 +119,6 @@ text = "START GAME
 
 [node name="Option2" parent="MenuStorage/MainMenu/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/MainMenu/OptionStorage/Option2" index="1"]
 text = "SCENE SELECT
@@ -127,14 +126,12 @@ text = "SCENE SELECT
 
 [node name="Option3" parent="MenuStorage/MainMenu/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/MainMenu/OptionStorage/Option3" index="1"]
 text = "SETTINGS"
 
 [node name="Option4" parent="MenuStorage/MainMenu/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/MainMenu/OptionStorage/Option4" index="1"]
 text = "CLOSE GAME"
@@ -281,7 +278,6 @@ script = ExtResource("3_yeib4")
 
 [node name="SceneOption" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
-size_flags_horizontal = 4
 _scene = ExtResource("13_xxftl")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption" index="1"]
@@ -289,7 +285,6 @@ text = "TECH STADIUM"
 
 [node name="SceneOption2" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
-size_flags_horizontal = 4
 _scene = ExtResource("19_3xv5p")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption2" index="1"]
@@ -297,7 +292,6 @@ text = "BONUS STAGE"
 
 [node name="SceneOption3" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
-size_flags_horizontal = 4
 _scene = ExtResource("20_e6yu1")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption3" index="1"]
@@ -305,7 +299,6 @@ text = "SPECIAL STAGE"
 
 [node name="SceneOption4" parent="MenuStorage/SceneSelect/OptionStorage" instance=ExtResource("12_h01w3")]
 layout_mode = 2
-size_flags_horizontal = 4
 _scene = ExtResource("21_6hcnj")
 
 [node name="Label" parent="MenuStorage/SceneSelect/OptionStorage/SceneOption4" index="1"]
@@ -376,41 +369,22 @@ horizontal_alignment = 1
 [node name="SaveOptionStorage" type="VBoxContainer" parent="MenuStorage/StartGame"]
 layout_mode = 2
 script = ExtResource("23_fxvuu")
+_defaultScene = ExtResource("13_xxftl")
 
-[node name="Option" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("3_doob7")]
+[node name="SaveOption" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("24_cw7bx")]
 layout_mode = 2
-size_flags_horizontal = 4
 
-[node name="Label" parent="MenuStorage/StartGame/SaveOptionStorage/Option" index="1"]
-text = "NO SAVE"
-
-[node name="Option2" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("3_doob7")]
+[node name="SaveOption2" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("24_cw7bx")]
 layout_mode = 2
-size_flags_horizontal = 4
 
-[node name="Label" parent="MenuStorage/StartGame/SaveOptionStorage/Option2" index="1"]
-text = "SAVE 1"
-
-[node name="Option3" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("3_doob7")]
+[node name="SaveOption3" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("24_cw7bx")]
 layout_mode = 2
-size_flags_horizontal = 4
 
-[node name="Label" parent="MenuStorage/StartGame/SaveOptionStorage/Option3" index="1"]
-text = "SAVE 2"
-
-[node name="Option4" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("3_doob7")]
+[node name="SaveOption4" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("24_cw7bx")]
 layout_mode = 2
-size_flags_horizontal = 4
 
-[node name="Label" parent="MenuStorage/StartGame/SaveOptionStorage/Option4" index="1"]
-text = "SAVE 3"
-
-[node name="Option5" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("3_doob7")]
+[node name="SaveOption5" parent="MenuStorage/StartGame/SaveOptionStorage" instance=ExtResource("24_cw7bx")]
 layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="Label" parent="MenuStorage/StartGame/SaveOptionStorage/Option5" index="1"]
-text = "SAVE 4"
 
 [node name="Player1Select" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
 visible = false
@@ -449,28 +423,24 @@ script = ExtResource("3_yeib4")
 
 [node name="Option" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option" index="1"]
 text = "SONIC"
 
 [node name="Option2" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option2" index="1"]
 text = "TAILS"
 
 [node name="Option3" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option3" index="1"]
 text = "KNUCKLES"
 
 [node name="Option4" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option4" index="1"]
 text = "AMY"
@@ -508,35 +478,30 @@ script = ExtResource("3_yeib4")
 
 [node name="Option" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option" index="1"]
 text = "SONIC"
 
 [node name="Option2" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option2" index="1"]
 text = "TAILS"
 
 [node name="Option3" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option3" index="1"]
 text = "KNUCKLES"
 
 [node name="Option4" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option4" index="1"]
 text = "AMY"
 
 [node name="Option5" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option5" index="1"]
 text = "NO PLAYER 2"
@@ -557,11 +522,17 @@ text = "NO PLAYER 2"
 [connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption4" to="MenuStorage/Player1Select" method="Select"]
 [connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption4" to="." method="OnSceneSelected"]
 [connection signal="Selected" from="MenuStorage/StartGame" to="." method="OnMenuSelected"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/Option" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/Option2" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/Option3" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/Option4" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/Option5" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="SelectedSave" from="MenuStorage/StartGame" to="." method="OnSaveSelected"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption" to="." method="OnSaveSelected"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption2" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption2" to="." method="OnSaveSelected"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption3" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption3" to="." method="OnSaveSelected"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption4" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption4" to="." method="OnSaveSelected"]
+[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption5" to="MenuStorage/Player1Select" method="Select"]
+[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption5" to="." method="OnSaveSelected"]
 [connection signal="Selected" from="MenuStorage/Player1Select" to="." method="OnMenuSelected"]
 [connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option" to="MenuStorage/Player2Select" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option2" to="MenuStorage/Player2Select" method="Select"]
@@ -589,11 +560,6 @@ text = "NO PLAYER 2"
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption2"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption3"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption4"]
-[editable path="MenuStorage/StartGame/SaveOptionStorage/Option"]
-[editable path="MenuStorage/StartGame/SaveOptionStorage/Option2"]
-[editable path="MenuStorage/StartGame/SaveOptionStorage/Option3"]
-[editable path="MenuStorage/StartGame/SaveOptionStorage/Option4"]
-[editable path="MenuStorage/StartGame/SaveOptionStorage/Option5"]
 [editable path="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option"]
 [editable path="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option2"]
 [editable path="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option3"]
