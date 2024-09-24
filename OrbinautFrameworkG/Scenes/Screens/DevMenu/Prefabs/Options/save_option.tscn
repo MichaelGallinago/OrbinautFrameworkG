@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://wjcnf0ceap8y"]
 
-[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/option.tscn" id="1_j04is"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SaveOption.cs" id="2_yodo6"]
+[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Options/Option.tscn" id="1_j04is"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Options/SaveOption.cs" id="2_yodo6"]
 
 [node name="SaveOption" node_paths=PackedStringArray("_label") instance=ExtResource("1_j04is")]
 script = ExtResource("2_yodo6")

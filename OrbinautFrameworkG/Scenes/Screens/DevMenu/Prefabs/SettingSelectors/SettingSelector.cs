@@ -1,6 +1,6 @@
 using Godot;
 
-namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelector;
+namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelectors;
 
 public partial class SettingSelector : Option
 {

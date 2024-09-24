@@ -2,23 +2,24 @@ using System;
 using Godot;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelector;
+namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelectors;
 
 [GlobalClass]
-public partial class VSyncModeSettingSelector : SettingSelectorLogic
+public partial class WindowModeSettingSelector : SettingSelectorLogic
 {
-    private static readonly DisplayServer.VSyncMode[] Variants = [
-        DisplayServer.VSyncMode.Disabled, DisplayServer.VSyncMode.Enabled, 
-        DisplayServer.VSyncMode.Adaptive, DisplayServer.VSyncMode.Mailbox
+    private static readonly DisplayServer.WindowMode[] Variants = [
+        DisplayServer.WindowMode.Windowed, 
+        DisplayServer.WindowMode.Fullscreen,
+        DisplayServer.WindowMode.ExclusiveFullscreen
     ];
     
-    public override string GetText() => Settings.VSyncMode.ToString();
+    public override string GetText() => Settings.WindowMode.ToString();
     public override void OnLeftPressed() => SetVariant(-1);
     public override void OnRightPressed() => SetVariant(1);
     
     private static void SetVariant(int offset)
     {
-        int index = Array.IndexOf(Variants, Settings.VSyncMode);
+        int index = Array.IndexOf(Variants, Settings.WindowMode);
         
         if (index == -1)
         {
@@ -32,6 +33,6 @@ public partial class VSyncModeSettingSelector : SettingSelectorLogic
             index = (index + Variants.Length) % Variants.Length;
         }
         
-        Settings.VSyncMode = Variants[index];
+        Settings.WindowMode = Variants[index];
     }
 }

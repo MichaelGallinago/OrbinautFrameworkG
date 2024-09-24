@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bij15hynay3qy"]
 
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Option.cs" id="1_ekg14"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Options/Option.cs" id="1_ekg14"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="1_ux44t"]
 
 [node name="Option" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_rightArrow")]

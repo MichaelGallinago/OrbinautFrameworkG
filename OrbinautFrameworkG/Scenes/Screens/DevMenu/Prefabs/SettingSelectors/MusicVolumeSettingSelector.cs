@@ -1,7 +1,7 @@
 ﻿using Godot;
 using OrbinautFrameworkG.Audio.Player;
 
-namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelector;
+namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelectors;
 
 [GlobalClass]
 public partial class MusicVolumeSettingSelector : SettingSelectorLogic

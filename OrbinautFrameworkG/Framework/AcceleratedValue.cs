@@ -4,7 +4,7 @@ using Godot;
 
 namespace OrbinautFrameworkG.Framework;
 
-public struct AcceleratedValue(float value)
+public struct AcceleratedValue(float value) : IEquatable<AcceleratedValue>
 {
     private float _value = value;
     private float _instantValue = value;
@@ -20,11 +20,6 @@ public struct AcceleratedValue(float value)
             return ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
         }
     }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator float(AcceleratedValue value) => value._value;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator AcceleratedValue(float value) => new(value);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
@@ -96,4 +91,23 @@ public struct AcceleratedValue(float value)
         _instantValue += modificator;
         _value += modificator;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Equals(AcceleratedValue other)
+    {
+        return _value.Equals(other._value) && _instantValue.Equals(other._instantValue);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public override bool Equals(object obj) => obj is AcceleratedValue other && Equals(other);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public override int GetHashCode() => HashCode.Combine(_value, _instantValue);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator ==(AcceleratedValue left, AcceleratedValue right) => left.Equals(right);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator !=(AcceleratedValue left, AcceleratedValue right) => !(left == right);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator float(AcceleratedValue value) => value._value;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator AcceleratedValue(float value) => new(value);
 }

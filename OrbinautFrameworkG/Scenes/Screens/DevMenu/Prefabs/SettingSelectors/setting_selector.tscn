@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://p6qsklmdhk1h"]
 
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="1_lajei"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/SettingSelector.cs" id="1_slipx"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelectors/SettingSelector.cs" id="1_slipx"]
 
 [node name="SettingButton" type="HBoxContainer" node_paths=PackedStringArray("_value", "_leftArrow", "_rightArrow")]
 anchors_preset = 8

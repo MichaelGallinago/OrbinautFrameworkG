@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://r6whvuxkuy38"]
 
-[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/option.tscn" id="1_6dwf5"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SceneOption.cs" id="2_my8wo"]
+[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Options/Option.tscn" id="1_6dwf5"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Options/SceneOption.cs" id="2_my8wo"]
 
 [node name="SceneOption" instance=ExtResource("1_6dwf5")]
 size_flags_horizontal = 4

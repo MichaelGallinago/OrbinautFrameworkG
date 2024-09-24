@@ -52,6 +52,7 @@
     <AdditionalFiles Remove="Stages\**" />
     <AdditionalFiles Remove="Objects\Resources\**" />
     <AdditionalFiles Remove="Framework\Prefabs\**" />
+    <AdditionalFiles Remove="Scenes\Screens\DevMenu\Prefabs\SettingSelector\**" />
   </ItemGroup>
   
   <ItemGroup>
@@ -67,6 +68,7 @@
     <Compile Remove="Stages\**" />
     <Compile Remove="Objects\Resources\**" />
     <Compile Remove="Framework\Prefabs\**" />
+    <Compile Remove="Scenes\Screens\DevMenu\Prefabs\SettingSelector\**" />
   </ItemGroup>
   
   <ItemGroup>
@@ -77,5 +79,10 @@
     <EmbeddedResource Remove="Stages\**" />
     <EmbeddedResource Remove="Objects\Resources\**" />
     <EmbeddedResource Remove="Framework\Prefabs\**" />
+    <EmbeddedResource Remove="Scenes\Screens\DevMenu\Prefabs\SettingSelector\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Scenes\Screens\DevMenu\Prefabs\Options\" />
   </ItemGroup>
 </Project>

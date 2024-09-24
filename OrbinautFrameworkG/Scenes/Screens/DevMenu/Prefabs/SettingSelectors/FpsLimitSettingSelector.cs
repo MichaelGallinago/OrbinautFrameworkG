@@ -2,7 +2,7 @@ using Godot;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelector;
+namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs.SettingSelectors;
 
 [GlobalClass]
 public partial class FpsLimitSettingSelector : SettingSelectorLogic
