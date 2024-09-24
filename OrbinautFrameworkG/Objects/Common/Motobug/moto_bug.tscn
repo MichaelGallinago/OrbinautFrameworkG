@@ -39,7 +39,7 @@ animations = [{
 "speed": 60.0
 }]
 
-[node name="Motobug" type="Node2D"]
+[node name="MotoBug" type="Node2D"]
 script = ExtResource("1_6f8qp")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
