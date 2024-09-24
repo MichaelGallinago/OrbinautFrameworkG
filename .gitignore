@@ -2,18 +2,18 @@
 .godot/
 
 # Godot-specific ignores
-OrbinautFramework/.godot/
-OrbinautFramework/.import/
-OrbinautFramework/export.cfg
-OrbinautFramework/export_presets.cfg
+OrbinautFrameworkG/.godot/
+OrbinautFrameworkG/.import/
+OrbinautFrameworkG/export.cfg
+OrbinautFrameworkG/export_presets.cfg
 
 # Imported translations (automatically generated from CSV files)
-OrbinautFramework/*.translation
+OrbinautFrameworkG/*.translation
 
 # Mono-specific ignores
-OrbinautFramework/.mono/
-OrbinautFramework/data_*/
-OrbinautFramework/mono_crash.*.json
+OrbinautFrameworkG/.mono/
+OrbinautFrameworkG/data_*/
+OrbinautFrameworkG/mono_crash.*.json
 
 # Source generations
 Generated/
@@ -22,27 +22,32 @@ Generated/
 EnumToStringNameSourceGenerator/bin/
 EnumToStringNameSourceGenerator/obj/
 EnumToStringNameSourceGenerator/.idea/
+EnumToStringNameSourceGenerator/.vs/
 
 # FastEnumToStringSourceGenerator compilations ignores
 FastEnumToStringSourceGenerator/bin/
 FastEnumToStringSourceGenerator/obj/
 FastEnumToStringSourceGenerator/.idea/
+FastEnumToStringSourceGenerator/.vs/
 
 # AudioStorageSourceGenerator compilations ignores
 AudioStorageSourceGenerator/bin/
 AudioStorageSourceGenerator/obj/
 AudioStorageSourceGenerator/.idea/
+AudioStorageSourceGenerator/.vs/
 
 # ActionSourceGenerator compilations ignores
 FsmSourceGenerator/bin/
 FsmSourceGenerator/obj/
 FsmSourceGenerator/.idea/
+FsmSourceGenerator/.vs/
 
 # Rider-specific ignores
 .idea/
-OrbinautFramework/.idea/
-OrbinautFramework/OrbinautFramework3.sln.DotSettings
-OrbinautFramework/OrbinautFramework3.sln.DotSettings.user
+OrbinautFrameworkG/.idea/
+OrbinautFrameworkG/OrbinautFrameworkG.sln.DotSettings
+OrbinautFrameworkG/OrbinautFrameworkG.sln.DotSettings.user
 
 # VisualStudio-specific ignores
 .vs/
+OrbinautFrameworkG/.vs/

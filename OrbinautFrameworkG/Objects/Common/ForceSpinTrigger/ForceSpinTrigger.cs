@@ -1,0 +1,37 @@
+using System;
+using Godot;
+using OrbinautFrameworkG.Objects.Player;
+using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Objects.Player.Data;
+
+namespace OrbinautFrameworkG.Objects.Common.ForceSpinTrigger;
+
+public abstract partial class ForceSpinTrigger : Trigger
+{
+    [Export] protected Sprite2D Sprite;
+
+    protected Vector2 Borders;
+    
+    public override void _Ready()
+    {
+        if (Sprite == null) return;
+        float size = Sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
+        Borders = new Vector2(-size, size);
+    }
+    
+    public override void _Process(double delta)
+    {
+        foreach (IPlayer player in Scene.Instance.Players.Values)
+        {
+            if (!player.Data.State.IsObjectInteractable()) continue;
+            if (!CheckForcePlayerSpin(player)) continue;
+            
+            player.Data.Movement.IsForcedRoll = !player.Data.Movement.IsForcedRoll;
+            player.Action = ActionFsm.States.Default;
+            
+            player.ResetGravity();
+        }
+    }
+    
+    protected abstract bool CheckForcePlayerSpin(IPlayer playerNode);
+}
