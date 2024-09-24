@@ -9,14 +9,11 @@ namespace OrbinautFrameworkG.Objects.Common.CameraTrigger;
 
 public partial class CameraTrigger : Trigger
 {
-    private enum BoundSpeeds : byte
-    {
-        Speed2 = 2, Speed4 = 4, Speed8 = 8, Speed16 = 16, Speed32 = 32
-    }
+    private enum BoundSpeeds : byte { Speed2 = 2, Speed4 = 4, Speed8 = 8, Speed16 = 16, Speed32 = 32 }
     
     [Export] private Sprite2D _sprite;
     [Export] private BoundSpeeds _boundSpeed;
-    [Export] private Constants.Direction _direction;
+    [Export] private Direction _direction;
     [Export] private bool _triggerWithin;
     
     private int _height;
@@ -72,7 +69,7 @@ public partial class CameraTrigger : Trigger
 
             if (position.X >= Position.X == previousX < Position.X) continue;
             
-            if (position.X >= Position.X == (_direction == Constants.Direction.Positive))
+            if (position.X >= Position.X == (_direction == Direction.Positive))
             {
                 SetNewBound(i, camera, triggerBounds);
             }

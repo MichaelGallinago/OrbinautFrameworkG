@@ -12,20 +12,20 @@ public partial class Spikes : SolidNode
 {
     [Export] protected Sprite2D Sprite { get; private set; }
 
-    private Constants.CollisionSensor _sensorToDamage;
+    private CollisionSensor _sensorToDamage;
     private bool _isHorizontal;
     
     public override void _Ready()
     {
         _sensorToDamage = Angles.GetQuadrant(RotationDegrees) switch
         {
-            Angles.Quadrant.Right => Scale.X < 0 ? Constants.CollisionSensor.Left   : Constants.CollisionSensor.Right,
-            Angles.Quadrant.Up    => Scale.Y < 0 ? Constants.CollisionSensor.Bottom : Constants.CollisionSensor.Top,
-            Angles.Quadrant.Left  => Scale.X < 0 ? Constants.CollisionSensor.Right  : Constants.CollisionSensor.Left,
-            _                     => Scale.Y < 0 ? Constants.CollisionSensor.Top    : Constants.CollisionSensor.Bottom
+            Angles.Quadrant.Right => Scale.X < 0 ? CollisionSensor.Left   : CollisionSensor.Right,
+            Angles.Quadrant.Up    => Scale.Y < 0 ? CollisionSensor.Bottom : CollisionSensor.Top,
+            Angles.Quadrant.Left  => Scale.X < 0 ? CollisionSensor.Right  : CollisionSensor.Left,
+            _                     => Scale.Y < 0 ? CollisionSensor.Top    : CollisionSensor.Bottom
         };
         
-        _isHorizontal = _sensorToDamage is Constants.CollisionSensor.Left or Constants.CollisionSensor.Right;
+        _isHorizontal = _sensorToDamage is CollisionSensor.Left or CollisionSensor.Right;
     }
 
     public override void _Process(double delta) => CollideWithPlayers();
@@ -34,10 +34,10 @@ public partial class Spikes : SolidNode
     {
         foreach (IPlayer player in Scene.Instance.Players.Values)
         {
-            Constants.AttachType attachType = _isHorizontal || player.Data.Damage.IsInvincible ? 
-                Constants.AttachType.Default : Constants.AttachType.ResetPlayer; //TODO: optimize this????
+            AttachType attachType = _isHorizontal || player.Data.Damage.IsInvincible ? 
+                AttachType.Default : AttachType.ResetPlayer; //TODO: optimize this????
             
-            player.ActSolid(this, Constants.SolidType.Full, attachType);
+            player.ActSolid(this, SolidType.Full, attachType);
             if (!player.CheckSolidCollision(SolidBox, _sensorToDamage)) continue;
             player.Hurt(Position.X, SoundStorage.SpikesHurt);
         }

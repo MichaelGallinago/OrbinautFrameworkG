@@ -29,19 +29,19 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		int offsetY = angle == 0f ? 8 : 0;
 		
 		int sign;
-		Constants.Direction firstDirection, secondDirection;
+		Direction firstDirection, secondDirection;
 		switch ((float)movement.GroundSpeed)
 		{
 			case < 0f:
-				sign = (int)Constants.Direction.Positive;
-				firstDirection = Constants.Direction.Negative;
-				secondDirection = Constants.Direction.Positive;
+				sign = (int)Direction.Positive;
+				firstDirection = Direction.Negative;
+				secondDirection = Direction.Positive;
 				break;
 			
 			case > 0f:
-				sign = (int)Constants.Direction.Negative;
-				firstDirection = Constants.Direction.Positive;
-				secondDirection = Constants.Direction.Negative;
+				sign = (int)Direction.Negative;
+				firstDirection = Direction.Positive;
+				secondDirection = Direction.Negative;
 				wallRadius = -wallRadius;
 				break;
 			
@@ -114,10 +114,10 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		MovementData movement = data.Movement;
 		movement.Position += collision.TileBehaviour switch
 		{
-			Constants.TileBehaviours.Floor => new Vector2(0f, distance),
-			Constants.TileBehaviours.RightWall => new Vector2(distance, 0f),
-			Constants.TileBehaviours.Ceiling => new Vector2(0f, -distance),
-			Constants.TileBehaviours.LeftWall => new Vector2(-distance, 0f),
+			TileBehaviours.Floor => new Vector2(0f, distance),
+			TileBehaviours.RightWall => new Vector2(distance, 0f),
+			TileBehaviours.Ceiling => new Vector2(0f, -distance),
+			TileBehaviours.LeftWall => new Vector2(-distance, 0f),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 
@@ -128,12 +128,12 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 #endif
 	}
 
-	private Constants.TileBehaviours GetTileBehaviour() => data.Movement.Angle switch
+	private TileBehaviours GetTileBehaviour() => data.Movement.Angle switch
 	{
-		<= 45 or >= 315 => Constants.TileBehaviours.Floor,
-		> 45 and < 135 => Constants.TileBehaviours.RightWall,
-		>= 135 and <= 225 => Constants.TileBehaviours.Ceiling,
-		_ => Constants.TileBehaviours.LeftWall
+		<= 45 or >= 315 => TileBehaviours.Floor,
+		> 45 and < 135 => TileBehaviours.RightWall,
+		>= 135 and <= 225 => TileBehaviours.Ceiling,
+		_ => TileBehaviours.LeftWall
 	};
 
 	private (int distance, float angle) FindTile()
@@ -141,17 +141,17 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		Vector2I radius = data.Collision.Radius;
 		return data.Collision.TileBehaviour switch
 		{
-			Constants.TileBehaviours.Floor => logic.TileCollider.FindClosestTile(
-				-radius.X, radius.Y, radius.X, radius.Y, true, Constants.Direction.Positive),
+			TileBehaviours.Floor => logic.TileCollider.FindClosestTile(
+				-radius.X, radius.Y, radius.X, radius.Y, true, Direction.Positive),
 
-			Constants.TileBehaviours.RightWall => logic.TileCollider.FindClosestTile(
-				radius.Y, radius.X, radius.Y, -radius.X, false, Constants.Direction.Positive),
+			TileBehaviours.RightWall => logic.TileCollider.FindClosestTile(
+				radius.Y, radius.X, radius.Y, -radius.X, false, Direction.Positive),
 
-			Constants.TileBehaviours.Ceiling => logic.TileCollider.FindClosestTile(
-				radius.X, -radius.Y, -radius.X, -radius.Y, true, Constants.Direction.Negative),
+			TileBehaviours.Ceiling => logic.TileCollider.FindClosestTile(
+				radius.X, -radius.Y, -radius.X, -radius.Y, true, Direction.Negative),
 
-			Constants.TileBehaviours.LeftWall => logic.TileCollider.FindClosestTile(
-				-radius.Y, -radius.X, -radius.Y, radius.X, false, Constants.Direction.Negative),
+			TileBehaviours.LeftWall => logic.TileCollider.FindClosestTile(
+				-radius.Y, -radius.X, -radius.Y, radius.X, false, Direction.Negative),
 
 			_ => throw new ArgumentOutOfRangeException()
 		};
@@ -163,8 +163,8 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		
 		float toleranceCheckSpeed = data.Collision.TileBehaviour switch
 		{
-			Constants.TileBehaviours.Floor or Constants.TileBehaviours.Ceiling => data.Movement.Velocity.X,
-			Constants.TileBehaviours.RightWall or Constants.TileBehaviours.LeftWall => data.Movement.Velocity.Y,
+			TileBehaviours.Floor or TileBehaviours.Ceiling => data.Movement.Velocity.X,
+			TileBehaviours.RightWall or TileBehaviours.LeftWall => data.Movement.Velocity.Y,
 			_ => throw new ArgumentOutOfRangeException(data.Collision.TileBehaviour.ToString())
 		};
 

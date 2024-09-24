@@ -6,7 +6,7 @@ using OrbinautFrameworkG.Objects.Player.Sprite;
 
 namespace OrbinautFrameworkG.Objects.Player.Characters.Sonic;
 
-public partial class SonicSpriteLogic(PlayerData player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
+public class SonicSpriteLogic(PlayerData player, ISpriteNode spriteNode) : SpriteLogic(player, spriteNode)
 {
     private readonly PlayerData _player = player;
 

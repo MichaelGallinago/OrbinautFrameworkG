@@ -1,17 +1,18 @@
 using Godot;
-using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework;
-using AbstractTypes_CullableNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.CullableNode;
-using CullableNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.CullableNode;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
 namespace OrbinautFrameworkG.Objects.Spawnable.Piece;
 
-public partial class Piece(Texture2D texture, float waitTimer, float gravity, Vector2 speed = default) : AbstractTypes_CullableNode
+public partial class Piece(Texture2D texture, float waitTimer, float gravity, Vector2 speed = default) : CullableNode
 {
+    private float _waitTimer = waitTimer;
+    private Vector2 _speed = speed;
+
     public override void _Process(double delta)
     {
-        waitTimer -= Scene.Instance.Speed;
-        if (waitTimer > 0f) return;
+        _waitTimer -= Scene.Instance.Speed;
+        if (_waitTimer > 0f) return;
 
         Fall();
     }
@@ -22,8 +23,8 @@ public partial class Piece(Texture2D texture, float waitTimer, float gravity, Ve
     {
         //TODO: fix this
         float halfAcceleration = gravity * Scene.Instance.Speed * 0.5f;
-        speed.Y += halfAcceleration;
-        Position += speed * Scene.Instance.Speed;
-        speed.Y += halfAcceleration;
+        _speed.Y += halfAcceleration;
+        Position += _speed * Scene.Instance.Speed;
+        _speed.Y += halfAcceleration;
     }
 }

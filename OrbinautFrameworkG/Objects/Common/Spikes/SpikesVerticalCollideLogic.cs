@@ -11,7 +11,7 @@ public partial class SpikesVerticalCollideLogic : SpikesCollideLogic
 {
     public override void CollideWithPlayer(ISolid spikes, IPlayer player)
     {
-        Constants.AttachType attachType = player.Data.Damage.IsInvincible ? Constants.AttachType.Default : Constants.AttachType.ResetPlayer;
-        player.ActSolid(spikes, Constants.SolidType.Full, attachType);
+        AttachType attachType = player.Data.Damage.IsInvincible ? AttachType.Default : AttachType.ResetPlayer;
+        player.ActSolid(spikes, SolidType.Full, attachType);
     }
 }

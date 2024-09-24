@@ -19,43 +19,43 @@ public class TileCollider
 	}
 	
     public Vector2I Position { get; set; }
-    public Constants.TileBehaviours TileBehaviour { set => _tileBehaviour = value; }
+    public TileBehaviours TileBehaviour { set => _tileBehaviour = value; }
 
-    public Constants.TileLayers LayerType
+    public TileLayers LayerType
     {
 	    set
 	    {
 		    _tileMap = value switch
 		    {
-			    Constants.TileLayers.Main => Scene.Instance.CollisionTileMapMain,
-			    Constants.TileLayers.Secondary => Scene.Instance.CollisionTileMapSecondary,
+			    TileLayers.Main => Scene.Instance.CollisionTileMapMain,
+			    TileLayers.Secondary => Scene.Instance.CollisionTileMapSecondary,
 			    _ => null
 		    };
 	    }
     }
     
     private bool _isVertical;
-    private Constants.Direction _direction;
+    private Direction _direction;
     private Vector2I _searchPosition;
     private CollisionTileMap _tileMap;
     private FoundTileData _foundTileData;
-    private Constants.TileBehaviours _tileBehaviour;
+    private TileBehaviours _tileBehaviour;
     
-    public void SetData(int x, int y, Constants.TileLayers type, Constants.TileBehaviours tileBehaviour = Constants.TileBehaviours.Floor)
+    public void SetData(int x, int y, TileLayers type, TileBehaviours tileBehaviour = TileBehaviours.Floor)
     {
         Position = new Vector2I(x, y);
         LayerType = type;
         TileBehaviour = tileBehaviour;
     }
     
-    public void SetData(Vector2I position, Constants.TileLayers type, Constants.TileBehaviours tileBehaviour = Constants.TileBehaviours.Floor)
+    public void SetData(Vector2I position, TileLayers type, TileBehaviours tileBehaviour = TileBehaviours.Floor)
     {
 	    Position = position;
 	    LayerType = type;
 	    TileBehaviour = tileBehaviour;
     }
 
-    public (int, float) FindTile(int x, int y, bool isVertical, Constants.Direction direction)
+    public (int, float) FindTile(int x, int y, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
@@ -64,7 +64,7 @@ public class TileCollider
         return GetTile();
     }
     
-    public int FindDistance(int x, int y, bool isVertical, Constants.Direction direction)
+    public int FindDistance(int x, int y, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
@@ -73,7 +73,7 @@ public class TileCollider
 	    return GetDistance();
     }
 
-    public (int, float) FindClosestTile(int x1, int y1, int x2, int y2, bool isVertical, Constants.Direction direction)
+    public (int, float) FindClosestTile(int x1, int y1, int x2, int y2, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
@@ -87,7 +87,7 @@ public class TileCollider
 	    return tile1.distance <= tile2.distance ? tile1 : tile2;
     }
     
-    public int FindClosestDistance(int x1, int y1, int x2, int y2, bool isVertical, Constants.Direction direction)
+    public int FindClosestDistance(int x1, int y1, int x2, int y2, bool isVertical, Direction direction)
     {
 	    _isVertical = isVertical;
 	    _direction = direction;
@@ -184,7 +184,7 @@ public class TileCollider
 		int distance = (int)_direction * (distancePosition / TileSize * TileSize - distancePosition) + 
 			_foundTileData.Shift - _foundTileData.Size;
 		
-		return _direction == Constants.Direction.Positive ? distance + (TileSize - 1) : distance;
+		return _direction == Direction.Positive ? distance + (TileSize - 1) : distance;
 	}
 
 	private float GetTileAngle()
@@ -201,17 +201,17 @@ public class TileCollider
 		
 		if (!_isVertical)
 		{
-			return _direction == Constants.Direction.Positive ? Angles.CircleQuarter : Angles.CircleThreeQuarters;
+			return _direction == Direction.Positive ? Angles.CircleQuarter : Angles.CircleThreeQuarters;
 		}
 		
 		// Reset height if the tile was found from the opposite side. This only works correctly
 		// with originals' tile sets since we can't pre-determine if the tile is flipped by default or not
-		if (_direction == Constants.Direction.Positive == _foundTileData.Transforms.IsFlipped)
+		if (_direction == Direction.Positive == _foundTileData.Transforms.IsFlipped)
 		{
 			_foundTileData.Size = TileSize;
 		}
 			
-		return _direction == Constants.Direction.Positive ? 0f : Angles.CircleHalf;
+		return _direction == Direction.Positive ? 0f : Angles.CircleHalf;
 	}
 
 	private void ValidateHeight()
@@ -220,7 +220,7 @@ public class TileCollider
 		if (GetRawTileAngle(_foundTileData.Index) > 0f) return;
 		if (!_isVertical) return;
 		
-		if (_direction == Constants.Direction.Positive == _foundTileData.Transforms.IsFlipped)
+		if (_direction == Direction.Positive == _foundTileData.Transforms.IsFlipped)
 		{
 			_foundTileData.Size = TileSize;
 		}
@@ -263,7 +263,7 @@ public class TileCollider
             TilesData.Widths[index][collisionIndex];
     }
     
-    private bool GetTileValidity(int index, Constants.Direction direction, Constants.TileBehaviours tileBehaviours)
+    private bool GetTileValidity(int index, Direction direction, TileBehaviours tileBehaviours)
     {
         return (index / TileLimit) switch
         {
@@ -273,14 +273,14 @@ public class TileCollider
         };
     }
 
-    private bool CheckTileValidity(Constants.Direction direction, Constants.TileBehaviours tileBehaviours)
+    private bool CheckTileValidity(Direction direction, TileBehaviours tileBehaviours)
     {
         return tileBehaviours switch
         {
-            Constants.TileBehaviours.Floor => _isVertical && direction == Constants.Direction.Positive,
-            Constants.TileBehaviours.Ceiling => _isVertical && direction == Constants.Direction.Negative,
-            Constants.TileBehaviours.RightWall => !_isVertical && direction == Constants.Direction.Positive,
-            Constants.TileBehaviours.LeftWall => !_isVertical && direction == Constants.Direction.Negative,
+            TileBehaviours.Floor => _isVertical && direction == Direction.Positive,
+            TileBehaviours.Ceiling => _isVertical && direction == Direction.Negative,
+            TileBehaviours.RightWall => !_isVertical && direction == Direction.Positive,
+            TileBehaviours.LeftWall => !_isVertical && direction == Direction.Negative,
             _ => false
         };
     }

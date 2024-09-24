@@ -1,8 +1,6 @@
 ﻿#if !DEBUG
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.StaticStorages;
 #endif
-using OrbinautFrameworkG.Objects.Player.Characters.Logic;
-using OrbinautFrameworkG.Objects.Player.Characters.Logic.Base;
 using OrbinautFrameworkG.Objects.Player.Data;
 
 namespace OrbinautFrameworkG.Objects.Player.Logic;

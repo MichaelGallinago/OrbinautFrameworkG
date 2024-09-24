@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 using OrbinautFrameworkG.Objects.Player;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.StaticStorages;
 
 public static class SaveData
 {

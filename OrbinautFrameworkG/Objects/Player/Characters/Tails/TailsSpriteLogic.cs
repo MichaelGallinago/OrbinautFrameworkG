@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Objects.Player.Sprite;
 
 namespace OrbinautFrameworkG.Objects.Player.Characters.Tails;
 
-public partial class TailsSpriteLogic(PlayerData player, ISpriteNode spriteNode, CarryData carryData) : 
+public class TailsSpriteLogic(PlayerData player, ISpriteNode spriteNode, CarryData carryData) : 
     SpriteLogic(player, spriteNode)
 {
     private readonly PlayerData _player = player;

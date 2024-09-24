@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Godot;
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.StaticStorages;
 using static OrbinautFrameworkG.Objects.Player.PlayerNode;
 
 namespace OrbinautFrameworkG.Objects.Player.Spawner;
@@ -10,10 +11,10 @@ public partial class PlayerSpawner : Sprite2D
 {
     [Flags] public enum AllowedTypes : byte
     {
-        Sonic = 1 << PlayerNode.Types.Sonic,
-        Tails = 1 << PlayerNode.Types.Tails,
-        Knuckles = 1 << PlayerNode.Types.Knuckles,
-        Amy = 1 << PlayerNode.Types.Amy,
+        Sonic = 1 << Types.Sonic,
+        Tails = 1 << Types.Tails,
+        Knuckles = 1 << Types.Knuckles,
+        Amy = 1 << Types.Amy,
         All = Sonic | Tails | Knuckles | Amy
     }
     
@@ -31,7 +32,7 @@ public partial class PlayerSpawner : Sprite2D
     {
         if (Scene.Instance.Players.Count > 0) return;
 
-        PlayerNode.Types type = SaveData.PlayerTypes.First();
+        Types type = SaveData.PlayerTypes.First();
         if (!_allowedTypes.HasFlag((AllowedTypes)(1 << (int)type))) return;
         
         SpawnPlayer(type, Position);
@@ -45,7 +46,7 @@ public partial class PlayerSpawner : Sprite2D
         Scene.Instance.Views.AttachCamerasToPlayers();
     }
     
-    private void SpawnPlayer(PlayerNode.Types type, Vector2 position)
+    private void SpawnPlayer(Types type, Vector2 position)
     {
         if (_playerPrefabs.Get(type).Instantiate() is not PlayerNode player) return;
         

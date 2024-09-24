@@ -1,6 +1,5 @@
 ﻿using System;
 using Godot;
-using OrbinautFrameworkG.Objects.Player;
 using OrbinautFrameworkG.Objects.Common.GiantRing;
 using OrbinautFrameworkG.Objects.Spawnable.Shield;
 
@@ -18,7 +17,6 @@ public static class SharedData
     // TODO: ds_giant_rings
     //public static ds_giant_rings { get; set; } = ds_list_create();
     public static Vector2I LifeRewards { get; set; }
-    public static bool IsDebugModeEnabled { get; set; } = false;
     public static int RealPlayerCount { get; set; } = 1;
     public static uint PlayerRings { get; set; }
     public static ShieldContainer.Types[] SavedShields { get; set; }

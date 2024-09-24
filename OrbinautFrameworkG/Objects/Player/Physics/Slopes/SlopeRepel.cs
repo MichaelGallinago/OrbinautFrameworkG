@@ -1,9 +1,7 @@
 ﻿using System;
-using OrbinautFrameworkG.Objects.Player.Logic;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Data;
-using static OrbinautFrameworkG.Objects.Player.ActionFsm;
 
 namespace OrbinautFrameworkG.Objects.Player.Physics.Slopes;
 

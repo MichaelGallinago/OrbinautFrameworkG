@@ -1,13 +1,12 @@
 using System;
 using Godot;
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Objects.Player.Data;
-using AbstractTypes_SolidNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.SolidNode;
-using SolidNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.SolidNode;
 
 namespace OrbinautFrameworkG.Objects.Common.Bridge;
 
-public partial class Bridge : AbstractTypes_SolidNode
+public partial class Bridge : SolidNode
 {
 	[Export] private BridgeEditor _editor;
 	

@@ -1,5 +1,4 @@
-﻿using Godot;
-using OrbinautFrameworkG.Framework;
+﻿using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Sprite;
 

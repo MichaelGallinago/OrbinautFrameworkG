@@ -1,11 +1,9 @@
 using Godot;
-using OrbinautFrameworkG.Framework.ObjectBase;
-using AbstractTypes_OrbinautNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.OrbinautNode;
-using OrbinautNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.OrbinautNode;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
 namespace OrbinautFrameworkG.Objects.Spawnable.PlayerParticles;
 
-public partial class DropDashDust : AbstractTypes_OrbinautNode
+public partial class DropDashDust : OrbinautNode
 {
     [Export] private AnimatedSprite2D _sprite;
     

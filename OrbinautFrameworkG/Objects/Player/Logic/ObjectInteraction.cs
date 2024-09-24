@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Data;
@@ -27,10 +26,10 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		}
 	}
 
-	public void ActSolid(ISolid target, Constants.SolidType type, Constants.AttachType attachType = Constants.AttachType.Default)
+	public void ActSolid(ISolid target, SolidType type, AttachType attachType = AttachType.Default)
 	{
 		SolidBox targetBox = target.SolidBox;
-		data.Collision.TouchObjects.TryAdd(targetBox, Constants.TouchState.None);
+		data.Collision.TouchObjects.TryAdd(targetBox, TouchState.None);
 		data.Collision.PushObjects.Add(targetBox);
 		
 		if (!data.State.IsObjectInteractable()) return;
@@ -48,7 +47,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			return;
 		}
 		
-		if (type != Constants.SolidType.Top)
+		if (type != SolidType.Top)
 		{
 			CollideWithRegularObject(slopeOffset);
 		}
@@ -58,12 +57,12 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		}
 	}
 	
-	public bool CheckSolidCollision(SolidBox solidBox, Constants.CollisionSensor type)
+	public bool CheckSolidCollision(SolidBox solidBox, CollisionSensor type)
 	{
 		if (!data.State.IsObjectInteractable()) return false;
 		
 		// No solid collision data, exit collision check
-		if (!data.Collision.TouchObjects.TryGetValue(solidBox, out Constants.TouchState touchState)) return false;
+		if (!data.Collision.TouchObjects.TryGetValue(solidBox, out TouchState touchState)) return false;
 		
 		// Register collision check if debugging
 		//TODO: debug collision
@@ -79,11 +78,11 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		
 		return type switch
 		{
-			Constants.CollisionSensor.Top => touchState == Constants.TouchState.Top,
-			Constants.CollisionSensor.Bottom => touchState == Constants.TouchState.Bottom,
-			Constants.CollisionSensor.Left => touchState == Constants.TouchState.Left,
-			Constants.CollisionSensor.Right => touchState == Constants.TouchState.Right,
-			Constants.CollisionSensor.Any => touchState != Constants.TouchState.None,
+			CollisionSensor.Top => touchState == TouchState.Top,
+			CollisionSensor.Bottom => touchState == TouchState.Bottom,
+			CollisionSensor.Left => touchState == TouchState.Left,
+			CollisionSensor.Right => touchState == TouchState.Right,
+			CollisionSensor.Any => touchState != TouchState.None,
 			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 		};
 	}
@@ -157,7 +156,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		ISolid target = _solidObjectData.Target;
 		SolidBox targetSolidBox = target.SolidBox;
 		CollisionData collision = data.Collision;
-		collision.TouchObjects[targetSolidBox] = Constants.TouchState.Top;
+		collision.TouchObjects[targetSolidBox] = TouchState.Top;
 
 		MovementData movement = data.Movement;
 		movement.Position = _solidObjectData.Position + new Vector2(
@@ -167,11 +166,11 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		float distance = movement.Position.X - _solidObjectData.Position.X;
 		float relativeX = Math.Abs(MathF.Floor(distance)) - targetSolidBox.Radius.X;
 
-		if (_solidObjectData.Type == Constants.SolidType.Top ? 
+		if (_solidObjectData.Type == SolidType.Top ? 
 			    relativeX <= _solidObjectData.ExtraSize.X : relativeX < data.Node.SolidBox.Radius.X + 1) return;
 			
 		// Reset touch flags and player's on-object status if they are out of bounds
-		collision.TouchObjects[targetSolidBox] = Constants.TouchState.None;
+		collision.TouchObjects[targetSolidBox] = TouchState.None;
 		collision.OnObject = null;
 	}
 	
@@ -231,7 +230,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		}
 #endif
 
-		Constants.TouchState touchState = flooredDistanceX < 0 ? Constants.TouchState.Left : Constants.TouchState.Right;
+		TouchState touchState = flooredDistanceX < 0 ? TouchState.Left : TouchState.Right;
 		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = touchState;
 
 		UpdatePushingStatus(clipX, flooredDistanceX);
@@ -265,7 +264,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			case < 0: 
 				return CollideUpward(_solidObjectData.Target.SolidBox, clipY);
 			
-			case < 16 when _solidObjectData.Type != Constants.SolidType.Sides: 
+			case < 16 when _solidObjectData.Type != SolidType.Sides: 
 				CollideDownward(clipY);
 				return true;
 			
@@ -277,7 +276,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private bool CollideUpward(SolidBox box, int clipY)
 	{
-		if (_solidObjectData.Type is Constants.SolidType.ItemBox or Constants.SolidType.Sides) return false;
+		if (_solidObjectData.Type is SolidType.ItemBox or SolidType.Sides) return false;
 
 		if (data.Movement.Velocity.Y == 0f && data.Movement.IsGrounded)
 		{
@@ -310,7 +309,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			movement.Velocity.Y = 0f;
 		}
 
-		data.Collision.TouchObjects[box] = Constants.TouchState.Bottom;
+		data.Collision.TouchObjects[box] = TouchState.Bottom;
 	}
 	
 	private void CollideDownward(int clipY)
@@ -320,7 +319,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 		float relativeX = Math.Abs(MathF.Floor(data.Movement.Position.X - _solidObjectData.Position.X));
 		if (relativeX > _solidObjectData.Target.SolidBox.Radius.X + _solidObjectData.ExtraSize.X) return;
 		
-		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = Constants.TouchState.Top;
+		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = TouchState.Top;
 		AttachToObject(clipY - GripY);
 	}
 	
@@ -337,7 +336,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			
 		if (clipY is < -16 or >= 0) return;
 		
-		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = Constants.TouchState.Top;
+		data.Collision.TouchObjects[_solidObjectData.Target.SolidBox] = TouchState.Top;
 		AttachToObject(-((int)clipY + GripY));
 	}
 	
@@ -345,10 +344,10 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	{
 		switch (_solidObjectData.AttachType)
 		{
-			case Constants.AttachType.None:
+			case AttachType.None:
 				return;
 			
-			case Constants.AttachType.ResetPlayer:
+			case AttachType.ResetPlayer:
 				logic.ResetData();
 				logic.Action = ActionFsm.States.Default;
 				break;

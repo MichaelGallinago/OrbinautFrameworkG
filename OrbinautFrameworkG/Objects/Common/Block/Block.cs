@@ -1,13 +1,11 @@
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Objects.Player.Data;
-using static OrbinautFrameworkG.Framework.Constants;
-using AbstractTypes_SolidNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.SolidNode;
-using SolidNode = OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes.SolidNode;
 
 namespace OrbinautFrameworkG.Objects.Common.Block;
 
 
-public partial class Block : AbstractTypes_SolidNode
+public partial class Block : SolidNode
 {
     public override void _Process(double delta)
     {

@@ -1,6 +1,4 @@
 ﻿using OrbinautFrameworkG.Audio.Player;
-using OrbinautFrameworkG.Objects.Player.Characters.Logic;
-using OrbinautFrameworkG.Objects.Player.Logic;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Objects.Player.Characters.Logic.Base;
 using OrbinautFrameworkG.Objects.Player.Data;

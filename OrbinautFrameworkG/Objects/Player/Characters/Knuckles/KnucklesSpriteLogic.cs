@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Objects.Player.Sprite;
 
 namespace OrbinautFrameworkG.Objects.Player.Characters.Knuckles;
 
-public partial class KnucklesSpriteLogic(PlayerData player, ISpriteNode spriteNode) :
+public class KnucklesSpriteLogic(PlayerData player, ISpriteNode spriteNode) :
     SpriteLogic(player, spriteNode)
 {
     private readonly PlayerData _player = player;

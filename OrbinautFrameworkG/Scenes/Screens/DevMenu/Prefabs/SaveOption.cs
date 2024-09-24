@@ -1,5 +1,5 @@
 using Godot;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Scenes.Screens.DevMenu.Prefabs;
 

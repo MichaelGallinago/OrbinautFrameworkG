@@ -1,5 +1,4 @@
 using Godot;
-using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Framework;
 
 namespace OrbinautFrameworkG.Objects.Common.PathSwapTrigger;

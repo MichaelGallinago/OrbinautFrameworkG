@@ -1,8 +1,6 @@
 ﻿using System;
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
-using OrbinautFrameworkG.Objects.Player.Characters.Logic;
-using OrbinautFrameworkG.Objects.Player.Characters.Logic.Base;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.InputModule;
 using OrbinautFrameworkG.Framework.StaticStorages;

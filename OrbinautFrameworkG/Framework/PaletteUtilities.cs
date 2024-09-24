@@ -5,7 +5,7 @@ using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Framework;
 
-public static class PaletteUtilities
+public static class PaletteUtilities // TODO: remade this
 {
     public const ushort PaletteLimit = 256;
     
