@@ -45,7 +45,6 @@ FsmSourceGenerator/.vs/
 # Rider-specific ignores
 .idea/
 OrbinautFrameworkG/.idea/
-OrbinautFrameworkG/OrbinautFrameworkG.sln.DotSettings
 OrbinautFrameworkG/OrbinautFrameworkG.sln.DotSettings.user
 
 # VisualStudio-specific ignores
