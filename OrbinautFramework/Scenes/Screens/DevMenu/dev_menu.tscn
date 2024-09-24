@@ -20,12 +20,12 @@
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/VSyncModeSettingSelector.cs" id="12_uboi7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/WindowModeSettingSelector.cs" id="13_3tp1k"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player1Select.cs" id="13_4adbt"]
-[ext_resource type="PackedScene" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
-[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/Bonus.tscn" id="19_3xv5p"]
+[ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
+[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/bonus.tscn" id="19_3xv5p"]
 [ext_resource type="PackedScene" uid="uid://vvusup7obee5" path="res://Scenes/Stages/Specials/special.tscn" id="20_e6yu1"]
 [ext_resource type="PackedScene" uid="uid://yiyajukipmwg" path="res://Scenes/Screens/Continue/continue.tscn" id="21_6hcnj"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SaveOptionStorage.cs" id="23_fxvuu"]
-[ext_resource type="PackedScene" uid="uid://wjcnf0ceap8y" path="res://Scenes/Screens/DevMenu/Prefabs/save_option.tscn" id="24_cw7bx"]
+[ext_resource type="PackedScene" path="res://Scenes/Screens/DevMenu/Prefabs/save_option.tscn" id="24_cw7bx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
