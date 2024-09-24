@@ -4,28 +4,28 @@
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/MenuStorage.cs" id="2_4shst"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/MainMenu.cs" id="2_etuv4"]
-[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/option.tscn" id="3_doob7"]
+[ext_resource type="PackedScene" uid="uid://bij15hynay3qy" path="res://Scenes/Screens/DevMenu/Prefabs/Option.tscn" id="3_doob7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/OptionStorage.cs" id="3_yeib4"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SettingsMenu.cs" id="6_v6y2d"]
-[ext_resource type="PackedScene" uid="uid://p6qsklmdhk1h" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/setting_selector.tscn" id="7_20khq"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/JoypadRumbleSettingSelector.cs" id="8_1fdo3"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/MusicVolumeSettingSelector.cs" id="9_plqqw"]
+[ext_resource type="PackedScene" uid="uid://p6qsklmdhk1h" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/setting_selector.tscn" id="7_20khq"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/JoypadRumbleSettingSelector.cs" id="8_1fdo3"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/MusicVolumeSettingSelector.cs" id="9_plqqw"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player2Select.cs" id="9_qtrpw"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/SoundVolumeSettingSelector.cs" id="10_wlo4w"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/SoundVolumeSettingSelector.cs" id="10_wlo4w"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SceneSelect.cs" id="11_iqd6p"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/WindowScaleSettingSelector.cs" id="11_tn5sw"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/WindowScaleSettingSelector.cs" id="11_tn5sw"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/StartGame.cs" id="12_70ptx"]
 [ext_resource type="PackedScene" uid="uid://r6whvuxkuy38" path="res://Scenes/Screens/DevMenu/Prefabs/scene_option.tscn" id="12_h01w3"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/FpsLimitSettingSelector.cs" id="12_i35l0"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/VSyncModeSettingSelector.cs" id="12_uboi7"]
-[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Settings/WindowModeSettingSelector.cs" id="13_3tp1k"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/FpsLimitSettingSelector.cs" id="12_i35l0"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/VSyncModeSettingSelector.cs" id="12_uboi7"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelector/WindowModeSettingSelector.cs" id="13_3tp1k"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Player1Select.cs" id="13_4adbt"]
 [ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
-[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/bonus.tscn" id="19_3xv5p"]
+[ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/Bonus.tscn" id="19_3xv5p"]
 [ext_resource type="PackedScene" uid="uid://vvusup7obee5" path="res://Scenes/Stages/Specials/special.tscn" id="20_e6yu1"]
 [ext_resource type="PackedScene" uid="uid://yiyajukipmwg" path="res://Scenes/Screens/Continue/continue.tscn" id="21_6hcnj"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/SaveOptionStorage.cs" id="23_fxvuu"]
-[ext_resource type="PackedScene" path="res://Scenes/Screens/DevMenu/Prefabs/save_option.tscn" id="24_cw7bx"]
+[ext_resource type="PackedScene" uid="uid://wjcnf0ceap8y" path="res://Scenes/Screens/DevMenu/Prefabs/save_option.tscn" id="24_cw7bx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eosdy"]
 bg_color = Color(0, 0, 0, 1)
@@ -166,83 +166,83 @@ horizontal_alignment = 1
 layout_mode = 2
 script = ExtResource("3_yeib4")
 
-[node name="SettingButton" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_wgyh3")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector" index="1"]
 text = "JOYPAD RUMBLE:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector/HBoxContainer" index="0"]
 text = "false"
 
-[node name="SettingButton2" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector2" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_i714q")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton2" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector2" index="1"]
 text = "MUSIC VOLUME:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton2/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector2/HBoxContainer" index="0"]
 text = "0"
 
-[node name="SpecialSymbol" parent="MenuStorage/Settings/OptionStorage/SettingButton2/HBoxContainer" index="1"]
+[node name="SpecialSymbol" parent="MenuStorage/Settings/OptionStorage/SettingSelector2/HBoxContainer" index="1"]
 text = "%"
 
-[node name="SettingButton3" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector3" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_3qqk7")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton3" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector3" index="1"]
 text = "SOUND VOLUME:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton3/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector3/HBoxContainer" index="0"]
 text = "0"
 
-[node name="SpecialSymbol" parent="MenuStorage/Settings/OptionStorage/SettingButton3/HBoxContainer" index="1"]
+[node name="SpecialSymbol" parent="MenuStorage/Settings/OptionStorage/SettingSelector3/HBoxContainer" index="1"]
 text = "%"
 
-[node name="SettingButton4" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector4" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_04piy")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton4" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector4" index="1"]
 text = "WINDOW SCALE:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton4/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector4/HBoxContainer" index="0"]
 text = "1"
 
-[node name="SpecialSymbol" parent="MenuStorage/Settings/OptionStorage/SettingButton4/HBoxContainer" index="1"]
+[node name="SpecialSymbol" parent="MenuStorage/Settings/OptionStorage/SettingSelector4/HBoxContainer" index="1"]
 text = "X"
 
-[node name="SettingButton5" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector5" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_kdgw3")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton5" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector5" index="1"]
 text = "FPS LIMIT:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton5/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector5/HBoxContainer" index="0"]
 text = "Unlimited"
 
-[node name="SettingButton6" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector6" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_xl3or")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton6" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector6" index="1"]
 text = "WINDOW MODE:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton6/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector6/HBoxContainer" index="0"]
 text = "Windowed"
 
-[node name="SettingButton7" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+[node name="SettingSelector7" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
 layout_mode = 2
 _logic = SubResource("Resource_xm8x4")
 
-[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingButton7" index="1"]
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector7" index="1"]
 text = "VSYNC MODE:"
 
-[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingButton7/HBoxContainer" index="0"]
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector7/HBoxContainer" index="0"]
 text = "Disabled"
 
 [node name="SceneSelect" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
@@ -506,56 +506,17 @@ layout_mode = 2
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option5" index="1"]
 text = "NO PLAYER 2"
 
-[connection signal="Selected" from="MenuStorage/MainMenu" to="." method="OnMenuSelected"]
-[connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option" to="MenuStorage/StartGame" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option2" to="MenuStorage/SceneSelect" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option3" to="MenuStorage/Settings" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option4" to="MenuStorage/MainMenu" method="CloseGame"]
-[connection signal="Selected" from="MenuStorage/Settings" to="." method="OnMenuSelected"]
-[connection signal="Selected" from="MenuStorage/SceneSelect" to="." method="OnMenuSelected"]
-[connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption" to="." method="OnSceneSelected"]
-[connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption2" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption2" to="." method="OnSceneSelected"]
-[connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption3" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption3" to="." method="OnSceneSelected"]
-[connection signal="PressedSelect" from="MenuStorage/SceneSelect/OptionStorage/SceneOption4" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedScene" from="MenuStorage/SceneSelect/OptionStorage/SceneOption4" to="." method="OnSceneSelected"]
-[connection signal="Selected" from="MenuStorage/StartGame" to="." method="OnMenuSelected"]
-[connection signal="SelectedSave" from="MenuStorage/StartGame" to="." method="OnSaveSelected"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption" to="." method="OnSaveSelected"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption2" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption2" to="." method="OnSaveSelected"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption3" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption3" to="." method="OnSaveSelected"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption4" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption4" to="." method="OnSaveSelected"]
-[connection signal="PressedSelect" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption5" to="MenuStorage/Player1Select" method="Select"]
-[connection signal="SelectedSave" from="MenuStorage/StartGame/SaveOptionStorage/SaveOption5" to="." method="OnSaveSelected"]
-[connection signal="Selected" from="MenuStorage/Player1Select" to="." method="OnMenuSelected"]
-[connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option" to="MenuStorage/Player2Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option2" to="MenuStorage/Player2Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option3" to="MenuStorage/Player2Select" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/Player1Select/VBoxContainer/OptionStorage/Option4" to="MenuStorage/Player2Select" method="Select"]
-[connection signal="Selected" from="MenuStorage/Player2Select" to="." method="OnMenuSelected"]
-[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option" to="." method="OnSceneSwitch"]
-[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option2" to="." method="OnSceneSwitch"]
-[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option3" to="." method="OnSceneSwitch"]
-[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option4" to="." method="OnSceneSwitch"]
-[connection signal="PressedSelect" from="MenuStorage/Player2Select/OptionStorage/Option5" to="." method="OnSceneSwitch"]
-
 [editable path="MenuStorage/MainMenu/OptionStorage/Option"]
 [editable path="MenuStorage/MainMenu/OptionStorage/Option2"]
 [editable path="MenuStorage/MainMenu/OptionStorage/Option3"]
 [editable path="MenuStorage/MainMenu/OptionStorage/Option4"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton2"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton3"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton4"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton5"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton6"]
-[editable path="MenuStorage/Settings/OptionStorage/SettingButton7"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector2"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector3"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector4"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector5"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector6"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector7"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption2"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption3"]
