@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://p6qsklmdhk1h"]
+
+[ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="1_lajei"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelectors/SettingSelector.cs" id="1_slipx"]
+
+[node name="SettingButton" type="HBoxContainer" node_paths=PackedStringArray("_value", "_leftArrow", "_rightArrow")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -54.5
+offset_top = -3.5
+offset_right = 54.5
+offset_bottom = 3.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_slipx")
+_value = NodePath("HBoxContainer/Value")
+_leftArrow = NodePath(">")
+_rightArrow = NodePath("<")
+
+[node name=">" type="Label" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_fonts/font = ExtResource("1_lajei")
+theme_override_font_sizes/font_size = 7
+text = ">"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 0
+theme_override_fonts/font = ExtResource("1_lajei")
+theme_override_font_sizes/font_size = 7
+text = "SETTING:"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_constants/separation = 0
+
+[node name="Value" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("1_lajei")
+theme_override_font_sizes/font_size = 7
+text = "VALUE"
+horizontal_alignment = 1
+
+[node name="SpecialSymbol" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("1_lajei")
+theme_override_font_sizes/font_size = 7
+horizontal_alignment = 1
+
+[node name="<" type="Label" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_fonts/font = ExtResource("1_lajei")
+theme_override_font_sizes/font_size = 7
+text = "<"
+horizontal_alignment = 1

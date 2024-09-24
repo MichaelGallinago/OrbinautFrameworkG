@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PlayerPrefabs" load_steps=6 format=3 uid="uid://bqx3fytcbnuy5"]
+
+[ext_resource type="Script" path="res://Framework/PlayerPrefabs.cs" id="1_pqhy3"]
+[ext_resource type="PackedScene" uid="uid://b1d20f5ei38br" path="res://Objects/Player/Characters/Amy/amy_prefab.tscn" id="1_ttllj"]
+[ext_resource type="PackedScene" uid="uid://dl707w72scv17" path="res://Objects/Player/Characters/Knuckles/knuckles_prefab.tscn" id="2_gkps1"]
+[ext_resource type="PackedScene" uid="uid://csxcjab0db8n0" path="res://Objects/Player/Characters/Sonic/sonic_prefab.tscn" id="3_y7j7l"]
+[ext_resource type="PackedScene" uid="uid://bjpxjpcb7l7qb" path="res://Objects/Player/Characters/Tails/tails_prefab.tscn" id="4_frvw7"]
+
+[resource]
+script = ExtResource("1_pqhy3")
+_sonic = ExtResource("3_y7j7l")
+_tails = ExtResource("4_frvw7")
+_knuckles = ExtResource("2_gkps1")
+_amy = ExtResource("1_ttllj")

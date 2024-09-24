@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3 uid="uid://bij15hynay3qy"]
+
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/Options/Option.cs" id="1_ekg14"]
+[ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="1_ux44t"]
+
+[node name="Option" type="HBoxContainer" node_paths=PackedStringArray("_leftArrow", "_rightArrow")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -3.5
+offset_right = 24.0
+offset_bottom = 3.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+script = ExtResource("1_ekg14")
+_leftArrow = NodePath(">")
+_rightArrow = NodePath("<")
+
+[node name=">" type="Label" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("1_ux44t")
+theme_override_font_sizes/font_size = 7
+text = ">"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("1_ux44t")
+theme_override_font_sizes/font_size = 7
+text = "OPTION"
+horizontal_alignment = 1
+
+[node name="<" type="Label" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 1
+theme_override_fonts/font = ExtResource("1_ux44t")
+theme_override_font_sizes/font_size = 7
+text = "<"
+horizontal_alignment = 1
