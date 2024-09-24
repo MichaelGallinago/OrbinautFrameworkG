@@ -21,9 +21,10 @@ public partial class Zone : Scene
     save_progress    =  false;
     */
 
-    public override void _EnterTree()
+    public Zone() => SetInstance();
+
+    private void SetInstance()
     {
-        base._EnterTree();
         if (Instance == null)
         {
             Instance = this;

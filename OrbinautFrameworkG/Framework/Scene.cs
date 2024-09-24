@@ -40,8 +40,9 @@ public partial class Scene : Node2D
     {
         FrameEndProcess = _frameEnd.Process;
         ProcessPriority = int.MinValue;
+        SetInstance();
     }
-
+    
     public override void _Ready()
     {
         AddChild(_sceneContinuousUpdate);
@@ -54,7 +55,7 @@ public partial class Scene : Node2D
 #endif
     }
     
-    public override void _EnterTree()
+    private void SetInstance()
     {
         if (Instance == null)
         {

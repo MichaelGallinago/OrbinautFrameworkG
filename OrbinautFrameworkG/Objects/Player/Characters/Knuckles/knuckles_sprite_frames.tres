@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=87 format=3 uid="uid://dqsm7lf3darvq"]
+[gd_resource type="SpriteFrames" script_class="AdvancedSpriteFrames" load_steps=87 format=3 uid="uid://dqsm7lf3darvq"]
 
 [ext_resource type="Texture2D" uid="uid://8hooju611xwo" path="res://Objects/Player/Characters/Knuckles/Sprites/climb_ledge.png" id="1_a28mi"]
 [ext_resource type="Texture2D" uid="uid://cf6y2saxvbw1b" path="res://Objects/Player/Characters/Knuckles/Sprites/climb.png" id="2_pas1g"]

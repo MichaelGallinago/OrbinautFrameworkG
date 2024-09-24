@@ -8,7 +8,7 @@ using OrbinautFrameworkG.Objects.Player.Data;
 
 namespace OrbinautFrameworkG;
 
-public readonly struct PlayerList
+public class PlayerList
 {
     private const byte BasePlayerCapacity = 4;
     

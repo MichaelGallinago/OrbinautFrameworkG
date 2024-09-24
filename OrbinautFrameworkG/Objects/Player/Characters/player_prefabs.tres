@@ -8,7 +8,7 @@
 
 [resource]
 script = ExtResource("1_pqhy3")
-Sonic = ExtResource("3_y7j7l")
-Tails = ExtResource("4_frvw7")
-Knuckles = ExtResource("2_gkps1")
-Amy = ExtResource("1_ttllj")
+_sonic = ExtResource("3_y7j7l")
+_tails = ExtResource("4_frvw7")
+_knuckles = ExtResource("2_gkps1")
+_amy = ExtResource("1_ttllj")
