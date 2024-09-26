@@ -3,7 +3,7 @@ using Godot;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Framework.View;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Objects.Common.CameraTrigger;
 

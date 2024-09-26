@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Logic;
 using OrbinautFrameworkG.Objects.Player.Sprite;

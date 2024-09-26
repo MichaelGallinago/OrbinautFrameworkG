@@ -2,6 +2,7 @@ using EnumToStringNameSourceGenerator;
 using Godot;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.Animations;
+using OrbinautFrameworkG.Framework.MathTypes;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 

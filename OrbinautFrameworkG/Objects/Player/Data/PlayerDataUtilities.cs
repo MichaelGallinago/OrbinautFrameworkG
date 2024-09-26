@@ -1,5 +1,6 @@
 ﻿using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Objects.Player.Data;
 

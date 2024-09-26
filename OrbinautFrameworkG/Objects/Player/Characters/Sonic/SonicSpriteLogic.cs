@@ -1,5 +1,5 @@
 ﻿using System;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Sprite;

@@ -4,7 +4,7 @@
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
 [ext_resource type="AudioStream" uid="uid://bwmucj4rmfb0v" path="res://Audio/Music/woofle.wav" id="2_x70dy"]
 [ext_resource type="PackedScene" uid="uid://djuush8jqlb77" path="res://Framework/View/views.tscn" id="3_8004u"]
-[ext_resource type="Script" path="res://Framework/LimitedSize.cs" id="3_buo2i"]
+[ext_resource type="Script" path="res://Framework/SceneModule/SceneSize.cs" id="3_buo2i"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
 [ext_resource type="Script" path="res://Framework/Tiles/CollisionTileMap.cs" id="5_movty"]

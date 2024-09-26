@@ -1,7 +1,9 @@
 using Godot;
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.Culling;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Logic;
 using OrbinautFrameworkG.Objects.Spawnable.Shield;
@@ -26,7 +28,7 @@ public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
 		Scene.Instance.Players.Add(PlayerLogic);
 		Memento = new PlayerMemento(this);
 	}
-
+	
 	public override void _Ready()
 	{
 		Init();

@@ -5,8 +5,9 @@ using System.Runtime.InteropServices;
 using Godot;
 using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 using OrbinautFrameworkG.Objects.Player.Data;
+using OrbinautFrameworkG.Objects.Player.Logic;
 
-namespace OrbinautFrameworkG;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public class PlayerList
 {

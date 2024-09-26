@@ -44,8 +44,8 @@ public partial class Debug : Node
 		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? Settings.TargetFps : DebugFrameLimit;
 	}
 	
-	private static void OnRestartRoomPressed() => Scene.Instance.Tree.ReloadCurrentScene();
-	private static void OnRestartGamePressed() => Scene.Instance.Tree.ChangeSceneToFile(StartupPath);
-	private static void OnDevMenuPressed() => Scene.Instance.Tree.ChangeSceneToFile(DevMenuPath);
+	private static void OnRestartRoomPressed() => SceneModule.Scene.Instance.Tree.ReloadCurrentScene();
+	private static void OnRestartGamePressed() => SceneModule.Scene.Instance.Tree.ChangeSceneToFile(StartupPath);
+	private static void OnDevMenuPressed() => SceneModule.Scene.Instance.Tree.ChangeSceneToFile(DevMenuPath);
 }
 #endif

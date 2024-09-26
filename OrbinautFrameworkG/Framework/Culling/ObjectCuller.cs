@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Godot;
 using OrbinautFrameworkG.Framework.View;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.Culling;
 
 public class ObjectCuller
 {
@@ -38,7 +38,7 @@ public class ObjectCuller
 
     private bool PauseAllObjets()
     {
-	    if (Scene.Instance.State != Scene.States.Paused) return false;
+	    if (SceneModule.Scene.Instance.State != SceneModule.Scene.States.Paused) return false;
 	    
 	    foreach (ICullable target in _activeObjects)
 	    {

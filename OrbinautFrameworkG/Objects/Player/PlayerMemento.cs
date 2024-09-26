@@ -1,8 +1,7 @@
 ﻿using Godot;
 using OrbinautFrameworkG.Framework.ObjectBase;
-using OrbinautFrameworkG.Objects.Player;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Objects.Player;
 
 public class PlayerMemento(PlayerNode originator) : IMemento
 {

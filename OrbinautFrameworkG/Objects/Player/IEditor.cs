@@ -1,5 +1,6 @@
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.InputModule;
 using OrbinautFrameworkG.Framework.ObjectBase;
+using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Objects.Player;
 

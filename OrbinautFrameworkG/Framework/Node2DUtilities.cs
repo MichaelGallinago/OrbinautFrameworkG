@@ -32,6 +32,6 @@ public static class Node2DUtilities
             if (data.Cpu.Target.Data.Node.IsCameraTarget(out camera)) return true;
         }
 
-        return Scene.Instance.Players.FirstOrDefault().Data.Node.IsCameraTarget(out camera);
+        return SceneModule.Scene.Instance.Players.FirstOrDefault().Data.Node.IsCameraTarget(out camera);
     }
 }

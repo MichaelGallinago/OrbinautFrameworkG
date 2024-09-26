@@ -1,7 +1,7 @@
 using Godot;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Objects.Player.Data;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Objects.Common.Spikes;
 

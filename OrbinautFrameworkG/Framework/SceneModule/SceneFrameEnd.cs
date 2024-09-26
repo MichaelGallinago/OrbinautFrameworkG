@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public partial class SceneFrameEnd : Node
 {

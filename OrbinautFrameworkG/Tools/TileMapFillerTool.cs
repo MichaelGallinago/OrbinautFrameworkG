@@ -1,7 +1,7 @@
 using System.IO;
 using Godot;
 
-namespace OrbinautFrameworkG;
+namespace OrbinautFrameworkG.Framework.PlayerList;
 
 [Tool]
 public partial class TileMapFillerTool : TileMapLayer

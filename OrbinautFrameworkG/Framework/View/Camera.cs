@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OrbinautFrameworkG.Framework.MathTypes;
 using OrbinautFrameworkG.Objects.Player;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.StaticStorages;
@@ -75,7 +76,7 @@ public partial class Camera : Camera2D, ICamera
 	
 	public Camera()
 	{
-		Vector2I size = Scene.Instance.Size;
+		Vector2I size = SceneModule.Scene.Instance.Size;
 		TargetBoundary = new Vector4I(0, 0, size.X, size.Y);
 		Boundary = TargetBoundary;
 		
@@ -152,7 +153,7 @@ public partial class Camera : Camera2D, ICamera
 		{
 			if (_viewTimer > 0f)
 			{
-				_viewTimer -= Scene.Instance.Speed;
+				_viewTimer -= SceneModule.Scene.Instance.Speed;
 			}
 		}
 		else if (OriginalDifferences.SpinDash || OriginalDifferences.Dash)
@@ -160,7 +161,7 @@ public partial class Camera : Camera2D, ICamera
 			_viewTimer = ViewDuration;
 		}
 
-		float offsetSpeed = 2f * Scene.Instance.Speed;
+		float offsetSpeed = 2f * SceneModule.Scene.Instance.Speed;
 		
 		if (UpdateBufferOffset(offsetSpeed)) return;
 		
@@ -186,7 +187,7 @@ public partial class Camera : Camera2D, ICamera
 	private void UpdateCdCamera(IPlayer player)
 	{
 		const int shiftSpeedX = 2;
-		float delta = shiftSpeedX * Scene.Instance.Speed;
+		float delta = shiftSpeedX * SceneModule.Scene.Instance.Speed;
 		
 		float groundSpeed = player.Data.Movement.GroundSpeed;
 		if (Math.Abs(groundSpeed) < 6f && player.Action != ActionFsm.States.SpinDash)
@@ -205,14 +206,14 @@ public partial class Camera : Camera2D, ICamera
 	
 	private void MoveCamera()
 	{
-		if (!IsMovementAllowed || Scene.Instance.State == Scene.States.Paused) return;
+		if (!IsMovementAllowed || SceneModule.Scene.Instance.State == SceneModule.Scene.States.Paused) return;
 
 		PreviousPosition = _rawPosition;
 		FollowTarget();
 		UpdateShakeOffset();
 		
 		// Update boundaries
-		float boundSpeed = Math.Max(2, BoundSpeed) * Scene.Instance.Speed;
+		float boundSpeed = Math.Max(2, BoundSpeed) * SceneModule.Scene.Instance.Speed;
 		Vector2I farBounds = DrawPosition + Settings.ViewSize;
 		Boundary = new Vector4(
 			MoveBoundaryForward(Boundary.X, TargetBoundary.X, DrawPosition.X, boundSpeed), // Left
@@ -246,13 +247,13 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (_delay.X > 0f)
 		{
-			_delay.X -= Scene.Instance.Speed;
+			_delay.X -= SceneModule.Scene.Instance.Speed;
 			return;
 		}
 		
 		const float freeSpaceX = 16f;
 		float distance = targetPosition - _rawPosition.X;
-		float speed = _maxVelocity.X * Scene.Instance.Speed;
+		float speed = _maxVelocity.X * SceneModule.Scene.Instance.Speed;
 		
 		_rawPosition.X = distance switch
 		{
@@ -266,25 +267,25 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (_delay.X > 0f)
 		{
-			_delay.X -= Scene.Instance.Speed;
+			_delay.X -= SceneModule.Scene.Instance.Speed;
 			return;
 		}
 		
-		_rawPosition.X = _rawPosition.X.MoveToward(targetPosition, _maxVelocity.X * Scene.Instance.Speed);
+		_rawPosition.X = _rawPosition.X.MoveToward(targetPosition, _maxVelocity.X * SceneModule.Scene.Instance.Speed);
 	}
 	
 	private void FollowTargetY(float targetPosition)
 	{
 		if (_delay.Y > 0f)
 		{
-			_delay.Y -= Scene.Instance.Speed;
+			_delay.Y -= SceneModule.Scene.Instance.Speed;
 			return;
 		}
 		
 		const float freeSpaceY = 32f;
 		const float offsetY = 16f;
 		float distance = targetPosition - _rawPosition.Y + offsetY;
-		float speed = _maxVelocity.Y * Scene.Instance.Speed;
+		float speed = _maxVelocity.Y * SceneModule.Scene.Instance.Speed;
 		
 		_rawPosition.Y = distance switch
 		{
@@ -300,7 +301,7 @@ public partial class Camera : Camera2D, ICamera
 	{
 		if (_delay.Y > 0f)
 		{
-			_delay.Y -= Scene.Instance.Speed;
+			_delay.Y -= SceneModule.Scene.Instance.Speed;
 			return;
 		}
 		
@@ -317,7 +318,7 @@ public partial class Camera : Camera2D, ICamera
 				targetPosition -= offset;
 			}
 
-			float limit = Scene.Instance.Speed * (Math.Abs(movement.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
+			float limit = SceneModule.Scene.Instance.Speed * (Math.Abs(movement.GroundSpeed) < 8f ? 6f : _maxVelocity.Y);
 			_rawPosition.Y = distance <= limit && distance >= -limit ? targetPosition : _rawPosition.Y + limit * MathF.Sign(distance);
 			
 			return;
@@ -327,7 +328,7 @@ public partial class Camera : Camera2D, ICamera
 		const float offsetY = 16f;
 		
 		distance += offsetY;
-		float speed = _maxVelocity.Y * Scene.Instance.Speed;
+		float speed = _maxVelocity.Y * SceneModule.Scene.Instance.Speed;
 		_rawPosition.Y = distance switch
 		{
 			> freeSpaceY => distance <= speed + freeSpaceY ? 
@@ -348,7 +349,7 @@ public partial class Camera : Camera2D, ICamera
 		
 		_shakeOffset.X = CalculateShakeOffset(_shakeTimer, _shakeOffset.X);
 		_shakeOffset.Y = CalculateShakeOffset(_shakeTimer, _shakeOffset.Y);
-		_shakeTimer -= Scene.Instance.Speed;
+		_shakeTimer -= SceneModule.Scene.Instance.Speed;
 	}
 	
 	private static int CalculateShakeOffset(float shakeTimer, int shakeOffset) => shakeOffset switch

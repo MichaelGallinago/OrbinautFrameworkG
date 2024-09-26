@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Audio.Player;
 
 namespace OrbinautFrameworkG.Framework;
 
-public partial class Zone : Scene
+public partial class Zone : SceneModule.Scene
 {
     public new static Zone Instance { get; private set; }
     

@@ -21,6 +21,6 @@ public partial class BackgroundLayer : Sprite2D
 
     public override void _Process(double delta)
     {
-        _shift += Scroll * Scene.Instance.Speed;
+        _shift += Scroll * SceneModule.Scene.Instance.Speed;
     }
 }

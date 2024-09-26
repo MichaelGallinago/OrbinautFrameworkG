@@ -1,6 +1,6 @@
 using Godot;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
+using OrbinautFrameworkG.Framework.SceneModule;
 
 namespace OrbinautFrameworkG.Objects.Spawnable.Piece;
 

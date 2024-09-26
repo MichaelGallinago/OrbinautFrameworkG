@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.MathTypes;
 
-public static class MathfExtensions
+public static class FloatExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float MoveToward(this float from, float to, float delta)

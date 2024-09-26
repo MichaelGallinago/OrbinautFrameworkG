@@ -1,4 +1,4 @@
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.MathTypes;
 
 public static class MathB
 {

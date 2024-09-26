@@ -1,21 +1,21 @@
 using System;
 using Godot;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Objects.Player;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Objects.Player.Data;
 
 namespace OrbinautFrameworkG.Objects.Common.ForceSpinTrigger;
 
 public abstract partial class ForceSpinTrigger : Trigger
 {
-    [Export] protected Sprite2D Sprite;
+    [Export] private Sprite2D _sprite;
 
     protected Vector2 Borders;
     
     public override void _Ready()
     {
-        if (Sprite == null) return;
-        float size = Sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
+        if (_sprite == null) return;
+        float size = _sprite.Texture.GetSize().Y * Math.Abs(Scale.Y) / 2f;
         Borders = new Vector2(-size, size);
     }
     

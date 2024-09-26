@@ -1,6 +1,7 @@
 using System;
 using Godot;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.SceneModule;
+using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Data;
 
 namespace OrbinautFrameworkG.Objects.Common.PathSwapTrigger;

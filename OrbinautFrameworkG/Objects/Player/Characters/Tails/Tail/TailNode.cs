@@ -1,8 +1,8 @@
 using System;
 using EnumToStringNameSourceGenerator;
 using Godot;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.Animations;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Data;

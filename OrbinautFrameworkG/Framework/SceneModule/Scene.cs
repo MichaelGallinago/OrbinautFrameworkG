@@ -1,9 +1,12 @@
 using Godot;
+using OrbinautFrameworkG.Framework.Culling;
+using OrbinautFrameworkG.Framework.MathTypes;
 using OrbinautFrameworkG.Framework.MultiTypeDelegate;
+using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Framework.View;
 using OrbinautFrameworkG.Objects.Player.Data;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public partial class Scene : Node2D
 {
@@ -11,11 +14,11 @@ public partial class Scene : Node2D
     
     public static Scene Instance { get; private set; }
     
-    [Export] public Tiles.CollisionTileMap CollisionTileMapMain { get; private set; }
-    [Export] public Tiles.CollisionTileMap CollisionTileMapSecondary { get; private set; }
+    [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
+    [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
     [Export] public PackedScene[] DebugModePrefabs { get; private set; }
-    [Export] public LimitedSize Size { get; private set; } = new();
+    [Export] public SceneSize Size { get; private set; } = new();
     
     public PlayerList Players { get; } = new();
     
