@@ -5,7 +5,7 @@ using OrbinautFrameworkG.Framework.MathUtilities;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
-namespace OrbinautFrameworkG.Objects.Common.Masher;
+namespace OrbinautFrameworkG.Objects.Badniks.Masher;
 
 public partial class Masher : InteractiveNode, IResetable
 {
@@ -22,7 +22,7 @@ public partial class Masher : InteractiveNode, IResetable
     private float _velocityYDefault;
     
     private float _startYPosition;
-    private Animation _previousAnimation = Animation.Fall;
+    private Animation _previousAnimation;
     
     public Masher()
     {
@@ -34,6 +34,7 @@ public partial class Masher : InteractiveNode, IResetable
     {
         _velocityYDefault = (float)_jumpVelocity;
         _velocityY = _velocityYDefault;
+        _previousAnimation = Animation.Fall;
     }
 
     public override void _Ready() => _startYPosition = Position.Y;
