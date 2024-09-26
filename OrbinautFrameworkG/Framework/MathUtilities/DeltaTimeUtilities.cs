@@ -1,7 +1,7 @@
 using System;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Framework.MathTypes;
+namespace OrbinautFrameworkG.Framework.MathUtilities;
 
 public static class DeltaTimeUtilities
 {

@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Godot;
 
-namespace OrbinautFrameworkG.Framework.MathTypes;
+namespace OrbinautFrameworkG.Framework.MathUtilities;
 
 public struct AcceleratedVector2
 {

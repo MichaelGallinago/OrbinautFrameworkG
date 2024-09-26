@@ -1,6 +1,5 @@
 ﻿using Godot;
-using OrbinautFrameworkG.Framework;
-using OrbinautFrameworkG.Framework.MathTypes;
+using OrbinautFrameworkG.Framework.MathUtilities;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Objects.Player.Data;

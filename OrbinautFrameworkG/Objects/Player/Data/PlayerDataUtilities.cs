@@ -1,5 +1,5 @@
 ﻿using OrbinautFrameworkG.Audio.Player;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Objects.Player.Data;

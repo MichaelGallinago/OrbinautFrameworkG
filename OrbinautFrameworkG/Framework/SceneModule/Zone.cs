@@ -1,9 +1,9 @@
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
-public partial class Zone : SceneModule.Scene
+public partial class Zone : Scene
 {
     public new static Zone Instance { get; private set; }
     

@@ -6,5 +6,6 @@
 
 [node name="PlayerSpawner" type="Sprite2D"]
 texture = ExtResource("1_615eg")
+offset = Vector2(0, -16)
 script = ExtResource("2_a3xen")
 _playerPrefabs = ExtResource("3_hftic")

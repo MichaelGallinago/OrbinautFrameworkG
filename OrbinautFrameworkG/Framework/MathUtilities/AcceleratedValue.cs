@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Godot;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Framework.MathTypes;
+namespace OrbinautFrameworkG.Framework.MathUtilities;
 
 public struct AcceleratedValue(float value) : IEquatable<AcceleratedValue>
 {

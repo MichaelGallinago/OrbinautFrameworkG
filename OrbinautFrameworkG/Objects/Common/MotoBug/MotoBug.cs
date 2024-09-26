@@ -1,7 +1,7 @@
 using System;
 using Godot;
 using OrbinautFrameworkG.Framework;
-using OrbinautFrameworkG.Framework.MathTypes;
+using OrbinautFrameworkG.Framework.MathUtilities;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Framework.SceneModule;

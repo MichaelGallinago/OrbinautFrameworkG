@@ -1,6 +1,5 @@
 using Godot;
-using OrbinautFrameworkG.Framework;
-using OrbinautFrameworkG.Framework.MathTypes;
+using OrbinautFrameworkG.Framework.MathUtilities;
 
 namespace OrbinautFrameworkG.Audio.Player;
 

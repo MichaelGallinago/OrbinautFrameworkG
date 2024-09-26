@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace OrbinautFrameworkG.Framework.MathTypes;
+namespace OrbinautFrameworkG.Framework.MathUtilities;
 
 public static class FloatExtensions
 {

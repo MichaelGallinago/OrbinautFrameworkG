@@ -1,6 +1,6 @@
 using Godot;
 using OrbinautFrameworkG.Framework.Culling;
-using OrbinautFrameworkG.Framework.MathTypes;
+using OrbinautFrameworkG.Framework.MathUtilities;
 using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Framework.View;
