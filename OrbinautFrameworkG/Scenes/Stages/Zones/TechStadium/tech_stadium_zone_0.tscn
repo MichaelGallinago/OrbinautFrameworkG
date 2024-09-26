@@ -7,7 +7,7 @@
 [ext_resource type="Script" path="res://Framework/LimitedSize.cs" id="3_buo2i"]
 [ext_resource type="Script" path="res://Framework/Background/Background.cs" id="3_i0vlt"]
 [ext_resource type="PackedScene" uid="uid://c6sk0yf3wk0xx" path="res://Framework/Background/background_layer.tscn" id="4_e23pr"]
-[ext_resource type="Script" path="res://CollisionTileMap.cs" id="5_movty"]
+[ext_resource type="Script" path="res://Framework/Tiles/CollisionTileMap.cs" id="5_movty"]
 [ext_resource type="Texture2D" uid="uid://gvy2s2xbcjw7" path="res://Scenes/Stages/Zones/TechStadium/Graphics/background_layer0.png" id="9_m4ybp"]
 [ext_resource type="PackedScene" uid="uid://djgcqtur5n565" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_horizontal.tscn" id="11_1127g"]
 [ext_resource type="PackedScene" uid="uid://b4m4b401guh28" path="res://Objects/Common/Spikes/Prefabs/moving_spikes.tscn" id="12_5gsrh"]

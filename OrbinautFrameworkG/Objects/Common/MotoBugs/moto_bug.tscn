@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://6mgd41cvafii"]
 
 [ext_resource type="Script" path="res://Objects/Common/MotoBug/MotoBug.cs" id="1_6f8qp"]
-[ext_resource type="Texture2D" uid="uid://cng0f6cpcfns0" path="res://Objects/Common/MotoBug/moto_bug.png" id="2_psybw"]
+[ext_resource type="Texture2D" uid="uid://cng0f6cpcfns0" path="res://Objects/Common/MotoBugs/moto_bug.png" id="2_psybw"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_c8k5d"]
 atlas = ExtResource("2_psybw")
