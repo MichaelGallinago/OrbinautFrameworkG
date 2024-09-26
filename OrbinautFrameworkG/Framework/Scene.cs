@@ -11,8 +11,8 @@ public partial class Scene : Node2D
     
     public static Scene Instance { get; private set; }
     
-    [Export] public CollisionTileMap CollisionTileMapMain { get; private set; }
-    [Export] public CollisionTileMap CollisionTileMapSecondary { get; private set; }
+    [Export] public Tiles.CollisionTileMap CollisionTileMapMain { get; private set; }
+    [Export] public Tiles.CollisionTileMap CollisionTileMapSecondary { get; private set; }
     [Export] public Views Views { get; private set; }
     [Export] public PackedScene[] DebugModePrefabs { get; private set; }
     [Export] public LimitedSize Size { get; private set; } = new();

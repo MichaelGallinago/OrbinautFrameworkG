@@ -1,5 +1,6 @@
 using Godot;
-namespace OrbinautFrameworkG;
+
+namespace OrbinautFrameworkG.Framework.Tiles;
 
 public partial class CollisionTileMap : TileMapLayer
 {
