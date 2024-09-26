@@ -1,6 +1,6 @@
 using System;
 using Godot;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Framework.Tiles;
 
@@ -27,8 +27,8 @@ public class TileCollider
 	    {
 		    _tileMap = value switch
 		    {
-			    TileLayers.Main => Scene.Instance.CollisionTileMapMain,
-			    TileLayers.Secondary => Scene.Instance.CollisionTileMapSecondary,
+			    TileLayers.Main => SceneModule.Scene.Instance.CollisionTileMapMain,
+			    TileLayers.Secondary => SceneModule.Scene.Instance.CollisionTileMapSecondary,
 			    _ => null
 		    };
 	    }

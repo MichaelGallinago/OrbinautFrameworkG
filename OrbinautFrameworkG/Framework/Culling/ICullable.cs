@@ -1,7 +1,7 @@
 ﻿using Godot;
 using OrbinautFrameworkG.Framework.ObjectBase;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.Culling;
 
 public interface ICullable
 {

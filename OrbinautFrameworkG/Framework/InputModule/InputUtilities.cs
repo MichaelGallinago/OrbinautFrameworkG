@@ -16,15 +16,14 @@ public static class InputUtilities
     public static int DeviceCount { get; private set; } = MaxInputDevices;
     public static bool JoypadRumble { get; set; } = true;
     
-
     private static Godot.Collections.Array<int> _joypads;
-
+    
     private static List<KeyboardControl> KeyboardControl { get; } =
     [
-        new KeyboardControl(Key.Up, Key.Down, Key.Left, Key.Right, 
+        new(Key.Up, Key.Down, Key.Left, Key.Right, 
             Key.A, Key.S, Key.Space, Key.D, Key.Enter),
 
-        new KeyboardControl(Key.None, Key.None, Key.None, Key.None,
+        new(Key.None, Key.None, Key.None, Key.None, 
             Key.Z, Key.X, Key.None, Key.C, Key.None)
     ];
 

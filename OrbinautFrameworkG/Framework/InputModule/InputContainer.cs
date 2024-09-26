@@ -1,6 +1,4 @@
-using OrbinautFrameworkG.Framework.InputModule;
-
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.InputModule;
 
 public interface IInputContainer
 {

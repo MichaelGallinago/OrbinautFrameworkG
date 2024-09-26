@@ -2,7 +2,7 @@
 using Godot;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public partial class Debug : Node
 {

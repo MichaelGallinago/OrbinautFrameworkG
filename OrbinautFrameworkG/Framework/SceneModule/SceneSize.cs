@@ -1,10 +1,10 @@
 ﻿using System;
 using Godot;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 [GlobalClass, Tool]
-public partial class LimitedSize : Resource
+public partial class SceneSize : Resource
 {
     private static readonly Vector2I SizeLimit = new(ushort.MaxValue, ushort.MaxValue);
     
@@ -27,5 +27,5 @@ public partial class LimitedSize : Resource
         set => _vector.Y = Math.Clamp(value, 0, SizeLimit.Y);
     }
 
-    public static implicit operator Vector2I(LimitedSize size) => size.Vector;
+    public static implicit operator Vector2I(SceneSize size) => size.Vector;
 }

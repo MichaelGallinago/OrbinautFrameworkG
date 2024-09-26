@@ -4,7 +4,7 @@ using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Sprite;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Objects.Player.Logic;
 

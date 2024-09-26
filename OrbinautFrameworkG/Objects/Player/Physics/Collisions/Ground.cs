@@ -1,10 +1,10 @@
 ﻿using System;
 using Godot;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Logic;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Objects.Player.Physics.Collisions;
 

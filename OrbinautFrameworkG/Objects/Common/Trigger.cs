@@ -1,7 +1,7 @@
 using Godot;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Objects.Common;
 
 public abstract partial class Trigger : Node2D
 {

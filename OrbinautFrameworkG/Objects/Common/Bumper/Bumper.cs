@@ -3,13 +3,13 @@ using EnumToStringNameSourceGenerator;
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework.StaticStorages;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.Animations;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Data;
 using static OrbinautFrameworkG.Objects.Player.ActionFsm;
-    
+
 namespace OrbinautFrameworkG.Objects.Common.Bumper;
 
 public partial class Bumper : InteractiveNode

@@ -1,7 +1,6 @@
 using Godot;
-using OrbinautFrameworkG.Objects.Player;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Objects.Player.Spawner;
 
 [GlobalClass]
 public partial class PlayerPrefabs : Resource

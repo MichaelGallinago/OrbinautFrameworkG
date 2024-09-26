@@ -1,7 +1,8 @@
 ﻿using System;
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.MathUtilities;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.View;
 
 namespace OrbinautFrameworkG.Objects.Common.Spikes;

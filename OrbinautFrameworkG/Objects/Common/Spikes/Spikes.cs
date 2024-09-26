@@ -1,10 +1,10 @@
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Data;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Objects.Common.Spikes;
 

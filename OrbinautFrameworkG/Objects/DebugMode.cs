@@ -1,7 +1,9 @@
 using System;
 using Godot;
 using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.Culling;
 using OrbinautFrameworkG.Framework.InputModule;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.View;
 using OrbinautFrameworkG.Objects.Player;
 
@@ -118,14 +120,13 @@ public class DebugMode(IEditor editor)
 		_speed = MathF.Min(_speed + Acceleration, SpeedLimit);
 		
 		Vector2 position = editor.Position;
-
 		float speed = _speed * Scene.Instance.Speed;
 
 		if (input.Up) position.Y -= speed;
 		if (input.Down) position.Y += speed;
 		if (input.Left) position.X -= speed;
 		if (input.Right) position.X += speed;
-
+		
 		if (editor.IsCameraTarget(out ICamera camera))
 		{
 			Vector4 boundary = camera.Boundary;

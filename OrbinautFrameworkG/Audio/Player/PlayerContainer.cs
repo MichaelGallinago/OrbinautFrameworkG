@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.MathUtilities;
+using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Audio.Player;
 

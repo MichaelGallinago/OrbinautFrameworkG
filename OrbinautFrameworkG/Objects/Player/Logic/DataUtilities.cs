@@ -1,13 +1,14 @@
 ﻿using System;
 using OrbinautFrameworkG.Audio.Player;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.SceneModule;
+using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Data;
 
 namespace OrbinautFrameworkG.Objects.Player.Logic;
 
 public class DataUtilities(PlayerData data)
 {
-    public event Action DataReseted;
+    public event Action DataReseted; //TODO: rename?
     
     public void ResetData() 
     {

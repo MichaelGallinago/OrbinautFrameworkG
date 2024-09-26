@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Godot;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.MathUtilities;
 
 public static class VectorUtilities
 {

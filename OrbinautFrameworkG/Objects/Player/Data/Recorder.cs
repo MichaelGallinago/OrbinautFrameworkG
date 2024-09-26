@@ -1,6 +1,6 @@
 ﻿using System;
 using Godot;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Objects.Player.Logic;
 
 namespace OrbinautFrameworkG.Objects.Player.Data;

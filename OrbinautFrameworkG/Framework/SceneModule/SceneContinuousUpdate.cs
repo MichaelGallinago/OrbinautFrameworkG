@@ -2,7 +2,7 @@ using Godot;
 using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework.InputModule;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public partial class SceneContinuousUpdate : Node
 {

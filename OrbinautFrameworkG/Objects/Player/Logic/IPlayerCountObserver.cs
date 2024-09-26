@@ -1,6 +1,6 @@
 ﻿using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 
-namespace OrbinautFrameworkG;
+namespace OrbinautFrameworkG.Objects.Player.Logic;
 
 public interface IPlayerCountObserver : ITypeDelegate<int>
 {

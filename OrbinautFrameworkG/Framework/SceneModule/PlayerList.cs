@@ -5,8 +5,9 @@ using System.Runtime.InteropServices;
 using Godot;
 using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 using OrbinautFrameworkG.Objects.Player.Data;
+using OrbinautFrameworkG.Objects.Player.Logic;
 
-namespace OrbinautFrameworkG;
+namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public class PlayerList
 {
@@ -19,10 +20,7 @@ public class PlayerList
     private readonly MultiTypeDelegate<IPlayerCountObserver, int> _countChanged = new(BasePlayerCapacity);
     private readonly List<IPlayer> _players = new(BasePlayerCapacity);
 
-    public PlayerList()
-    {
-        CountChanged = _countChanged;
-    }
+    public PlayerList() => CountChanged = _countChanged;
     
     public void Add(IPlayer player)
     {
@@ -64,17 +62,15 @@ public class PlayerList
     {
         if (Count == 1) return _players[0];
         
-        float minDistance = float.MaxValue;
+        var minDistance = float.MaxValue;
         IPlayer nearestPlayer = null;
         
         foreach (IPlayer player in _players)
         {
             float currentDistance = position.DistanceSquaredTo(player.Position);
-            if (currentDistance < minDistance)
-            {
-                minDistance = currentDistance;
-                nearestPlayer = player;
-            }
+            if (currentDistance >= minDistance) continue;
+            minDistance = currentDistance;
+            nearestPlayer = player;
         }
         
         return nearestPlayer;

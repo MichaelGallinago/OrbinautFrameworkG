@@ -1,4 +1,5 @@
 ﻿using Godot;
+using OrbinautFrameworkG.Framework.Culling;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
@@ -13,11 +14,11 @@ public partial class CullableNode : Node2D, ICullable, IPosition
             switch (_cullingType)
             {
                 case ICullable.Types.None when isCullable:
-                    Scene.Instance.Culler.Add(this);
+                    SceneModule.Scene.Instance.Culler.Add(this);
                     break;
                 default:
                     if (isCullable) break;
-                    Scene.Instance.Culler.Remove(this);
+                    SceneModule.Scene.Instance.Culler.Remove(this);
                     break;
             }
             
@@ -41,7 +42,7 @@ public partial class CullableNode : Node2D, ICullable, IPosition
     {
         if (CullingType != ICullable.Types.None)
         {
-            Scene.Instance.Culler.Add(this);
+            SceneModule.Scene.Instance.Culler.Add(this);
         }
     }
     
@@ -49,7 +50,7 @@ public partial class CullableNode : Node2D, ICullable, IPosition
     {
         if (CullingType != ICullable.Types.None)
         {
-            Scene.Instance.Culler.Remove(this);
+            SceneModule.Scene.Instance.Culler.Remove(this);
         }
     }
 }

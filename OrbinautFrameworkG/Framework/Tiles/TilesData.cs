@@ -1,6 +1,6 @@
 using System.IO;
 using Godot;
-using static OrbinautFrameworkG.Framework.Constants;
+using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
 
 namespace OrbinautFrameworkG.Framework.Tiles;
 

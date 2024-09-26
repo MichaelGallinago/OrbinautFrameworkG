@@ -1,8 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using Godot;
+using OrbinautFrameworkG.Framework.StaticStorages;
 
-namespace OrbinautFrameworkG.Framework;
+namespace OrbinautFrameworkG.Framework.MathUtilities;
 
 public struct AcceleratedValue(float value) : IEquatable<AcceleratedValue>
 {
@@ -16,13 +17,13 @@ public struct AcceleratedValue(float value) : IEquatable<AcceleratedValue>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            float speed = Scene.Instance.Speed;
+            float speed = SceneModule.Scene.Instance.Speed;
             return ((speed - 1f) * _instantValue + (speed + 1f) * _value) * 0.5f;
         }
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddAcceleration(float acceleration) => _value += acceleration * Scene.Instance.Speed;
+    public void AddAcceleration(float acceleration) => _value += acceleration * SceneModule.Scene.Instance.Speed;
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ResetInstantValue() => _instantValue = _value;
