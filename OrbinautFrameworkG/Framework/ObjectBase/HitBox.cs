@@ -47,7 +47,7 @@ public partial class HitBox : Resource
         OffsetExtra = new Vector2I(offsetX, offsetY);
     }
     
-    public bool CheckCollision(HitBox target, Vector2I position, Vector2I targetPosition, bool isExtraHitBox = false)
+    public bool CheckCollision(HitBox target, Vector2I targetPosition, Vector2I position, bool isExtraHitBox = false)
 	{
 		if (!IsInteract || !target.IsInteract) return false;
 		
