@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmoll54hypqts"
-path="res://.godot/imported/masher.png-33732f37b14c3ccd25ea07b37e286231.ctex"
+uid="uid://ddnx6x58qsunr"
+path="res://.godot/imported/moto_bug_smoke.png-d39940c094147d8da1bb5a2ff7cd12eb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Objects/Common/Masher/masher.png"
-dest_files=["res://.godot/imported/masher.png-33732f37b14c3ccd25ea07b37e286231.ctex"]
+source_file="res://Objects/Badniks/MotoBug/moto_bug_smoke.png"
+dest_files=["res://.godot/imported/moto_bug_smoke.png-d39940c094147d8da1bb5a2ff7cd12eb.ctex"]
 
 [params]
 

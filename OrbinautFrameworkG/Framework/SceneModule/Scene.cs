@@ -29,6 +29,7 @@ public partial class Scene : Node2D
     public bool AllowPause { get; set; }
     public States State { get; set; } = States.Normal;
     public float Time { get; private set; }
+    public int Frame { get; private set; }
     
     public IMultiTypeEvent<ITypeDelegate> FrameEndProcess { get; }
     
@@ -82,6 +83,7 @@ public partial class Scene : Node2D
         if (State != States.Paused)
         {
             Time += Speed;
+            Frame++;
         }
         
         Culler.EarlyCull();

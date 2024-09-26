@@ -7,7 +7,7 @@ using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Objects.Player.Data;
 
-namespace OrbinautFrameworkG.Objects.Common.ChopChop;
+namespace OrbinautFrameworkG.Objects.Badniks.ChopChop;
 
 public partial class ChopChop : InteractiveNode, IResetable
 {
