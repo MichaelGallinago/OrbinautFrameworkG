@@ -12,6 +12,7 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
     
     // Common global variables
+    public static bool IsDebugModeEnabled { get; set; }
 	public static CheckpointData CheckpointData { get; set; }
     public static GiantRingData GiantRingData { get; set; }
     // TODO: ds_giant_rings
