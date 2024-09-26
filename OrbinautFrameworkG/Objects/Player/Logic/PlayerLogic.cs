@@ -79,13 +79,15 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
 
     public void Process()
     {
+        Data.Movement.Position = Data.Node.Position;
+        
         Data.Input.Update(Data.Id);
         
         ProcessState();
         
         _collisionBoxes.Update();
         _palette.Process();
-
+        
         VisualData visual = Data.Visual;
         Data.Node.SetData(visual.ZIndex, visual.Visible, visual.Scale, Data.Movement.Position);
     }

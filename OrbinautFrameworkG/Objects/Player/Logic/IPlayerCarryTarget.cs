@@ -1,11 +1,10 @@
 ﻿using Godot;
-using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Player.Physics.Collisions;
 
 namespace OrbinautFrameworkG.Objects.Player.Logic;
 
-public interface IPlayerCarryTarget : ICarryTarget, IPlayerLogic, IPlayerPosition
+public interface IPlayerCarryTarget : ICarryTarget, IPlayerLogic, IPlayerNodePosition
 {
     Constants.Direction ICarryTarget.Facing
     {

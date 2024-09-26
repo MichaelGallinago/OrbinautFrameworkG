@@ -28,8 +28,12 @@ public class ControlType(IPlayer player, Characters.Logic.Base.CpuLogic cpuLogic
     
     private CpuLogic _cpuLogic;
     private DebugMode _debugMode;
-
-    public bool SwitchDebugMode() => _debugMode != null && _debugMode.Switch();
-    public void UpdateDebugMode() => _debugMode?.Update();
+    
     public void UpdateCpu() => _cpuLogic?.Process();
+    public bool SwitchDebugMode() => _debugMode != null && _debugMode.Switch();
+    public void UpdateDebugMode()
+    {
+        _debugMode?.Update();
+        player.Data.Movement.Position = player.Position;
+    }
 }

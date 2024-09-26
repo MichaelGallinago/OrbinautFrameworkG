@@ -39,7 +39,7 @@ Size = SubResource("Resource_a08h0")
 [node name="Views" parent="." instance=ExtResource("3_8004u")]
 
 [node name="PlayerSpawner" parent="." instance=ExtResource("21_cuvbg")]
-position = Vector2(144, 896)
+position = Vector2(144, 880)
 
 [node name="Parallax2D" type="Parallax2D" parent="."]
 visible = false
