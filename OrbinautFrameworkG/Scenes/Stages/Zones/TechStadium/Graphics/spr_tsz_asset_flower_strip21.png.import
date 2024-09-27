@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfskr42gkuary"
-path="res://.godot/imported/layer_a.png-0b284746692a8b721ff19c933573fa5f.ctex"
+uid="uid://d2hw5d8i5d80x"
+path="res://.godot/imported/spr_tsz_asset_flower_strip21.png-78ddebafac3903767e6e13aae2446d6a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/layer_a.png"
-dest_files=["res://.godot/imported/layer_a.png-0b284746692a8b721ff19c933573fa5f.ctex"]
+source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/spr_tsz_asset_flower_strip21.png"
+dest_files=["res://.godot/imported/spr_tsz_asset_flower_strip21.png-78ddebafac3903767e6e13aae2446d6a.ctex"]
 
 [params]
 

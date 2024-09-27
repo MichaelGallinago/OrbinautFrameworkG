@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5chnoh3koaw0"
-path="res://.godot/imported/asset5.png-3d76e46f20ea9c314f5554a97cd845d3.ctex"
+uid="uid://c6rpqs5jkqoe7"
+path="res://.godot/imported/spr_tsz_graphics_waterfall.png-217f84869f0384f40f5a7bd77c76bf12.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/asset5.png"
-dest_files=["res://.godot/imported/asset5.png-3d76e46f20ea9c314f5554a97cd845d3.ctex"]
+source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/spr_tsz_graphics_waterfall.png"
+dest_files=["res://.godot/imported/spr_tsz_graphics_waterfall.png-217f84869f0384f40f5a7bd77c76bf12.ctex"]
 
 [params]
 

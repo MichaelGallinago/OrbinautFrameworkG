@@ -13,12 +13,12 @@ public partial class SolidNode : CullableNode, IPreviousPosition, ISolid
         base._EnterTree();
         SceneModule.Scene.Instance.FrameEndProcess.Subscribe(this);
     }
-
+    
     public override void _ExitTree()
     {
         base._ExitTree();
         SceneModule.Scene.Instance.FrameEndProcess.Unsubscribe(this);
     }
-
+    
     public bool IsInstanceValid() => IsInstanceValid(this);
 }
