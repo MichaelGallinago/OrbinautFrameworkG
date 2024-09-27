@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqccyw248no3n"
-path="res://.godot/imported/spr_tsz_bg_layer1.png-3f29a87a5bf7ddf67593312635027740.ctex"
+uid="uid://b00a0i5fn1s3i"
+path="res://.godot/imported/tiles_tsz.png-a39c0f080504e8bc5d8b9c61d9b471e0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/spr_tsz_bg_layer1.png"
-dest_files=["res://.godot/imported/spr_tsz_bg_layer1.png-3f29a87a5bf7ddf67593312635027740.ctex"]
+source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/tiles_tsz.png"
+dest_files=["res://.godot/imported/tiles_tsz.png-a39c0f080504e8bc5d8b9c61d9b471e0.ctex"]
 
 [params]
 

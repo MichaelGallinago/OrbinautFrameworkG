@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6n10xij0jjd7"
-path="res://.godot/imported/spr_tsz_bg_layer2.png-1bd832aa3d99fdb40a6245238318639f.ctex"
+path="res://.godot/imported/bg_water_tsz.png-579827b2efea11ceb3b875fc01d069dd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/spr_tsz_bg_layer2.png"
-dest_files=["res://.godot/imported/spr_tsz_bg_layer2.png-1bd832aa3d99fdb40a6245238318639f.ctex"]
+source_file="res://Scenes/Stages/Zones/TechStadium/Graphics/bg_water_tsz.png"
+dest_files=["res://.godot/imported/bg_water_tsz.png-579827b2efea11ceb3b875fc01d069dd.ctex"]
 
 [params]
 
