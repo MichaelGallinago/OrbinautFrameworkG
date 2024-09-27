@@ -1,7 +1,7 @@
 using System.IO;
 using Godot;
 
-namespace OrbinautFrameworkG.Framework.PlayerList;
+namespace OrbinautFrameworkG.Tools;
 
 [Tool]
 public partial class TileMapFillerTool : TileMapLayer
@@ -59,7 +59,7 @@ public partial class TileMapFillerTool : TileMapLayer
             position.Y += position.X / width;
             position.X %= width;
         }
-    
+        
         reader.Close();
     }
 }
