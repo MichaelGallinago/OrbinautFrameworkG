@@ -5,6 +5,8 @@ namespace OrbinautFrameworkG.Framework.StaticStorages;
 
 public static class Settings
 {
+    public static bool IsInitialized { get; set; } = false;
+    
     public static byte WindowScale
     {
         get => _windowScale;

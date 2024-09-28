@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://b12soonmow5ef"]
+
+[ext_resource type="Script" path="res://Scenes/Screens/Branding/Branding.cs" id="1_c5et2"]
+[ext_resource type="Texture2D" uid="uid://drdd72irym40b" path="res://Scenes/Screens/Branding/branding_g.png" id="2_owsmg"]
+[ext_resource type="Texture2D" uid="uid://ilqx26uehqq3" path="res://Scenes/Screens/Branding/branding_logo.png" id="3_y1qlu"]
+[ext_resource type="Texture2D" uid="uid://ctd3gfhaa0x52" path="res://Scenes/Screens/Branding/branding_orbinaut.png" id="4_4336o"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_45enr"]
+bg_color = Color(1, 1, 1, 1)
+
+[node name="Branding" type="Panel" node_paths=PackedStringArray("_g", "_logo", "_orbinaut")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_45enr")
+script = ExtResource("1_c5et2")
+_g = NodePath("BrandingG")
+_logo = NodePath("BrandingLogo")
+_orbinaut = NodePath("BrandingOrbinaut")
+
+[node name="BrandingG" type="Sprite2D" parent="."]
+position = Vector2(299, 179)
+texture = ExtResource("2_owsmg")
+
+[node name="BrandingLogo" type="Sprite2D" parent="."]
+position = Vector2(169, 183)
+texture = ExtResource("3_y1qlu")
+
+[node name="BrandingOrbinaut" type="Sprite2D" parent="."]
+position = Vector2(200, 80)
+texture = ExtResource("4_4336o")

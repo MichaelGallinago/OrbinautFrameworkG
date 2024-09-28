@@ -6,6 +6,7 @@ namespace OrbinautFrameworkG.Scenes.Screens.Startup;
 public partial class Startup : Panel
 {
     [Export] private PackedScene _nextScene;
+    [Export] private bool _skipBranding = true;
     
     public override void _Ready()
     {
