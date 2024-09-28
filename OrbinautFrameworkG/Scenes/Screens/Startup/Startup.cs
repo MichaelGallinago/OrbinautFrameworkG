@@ -6,25 +6,32 @@ namespace OrbinautFrameworkG.Scenes.Screens.Startup;
 public partial class Startup : Panel
 {
     [Export] private PackedScene _nextScene;
-    [Export] private bool _skipBranding = true;
+    [Export] private PackedScene _packedBranding;
     
+    private Branding.Branding _branding;
+
     public override void _Ready()
     {
-        PhysicsServer2D.SetActive(false);
-        PhysicsServer3D.SetActive(false);
-    }
-    
-    public override void _Process(double delta)
-    {
-        SceneTree sceneTree = GetTree();
-
         if (_nextScene == null)
         {
-            sceneTree.Quit();
+            GetTree().Quit();
             return;
         }
+
+        SetupBranding();
+    }
+
+    public override void _Process(double delta)
+    {
+        if (_branding is { IsFinished: false }) return;
         
         ConfigUtilities.Load();
-        sceneTree.ChangeSceneToPacked(_nextScene);
+        GetTree().ChangeSceneToPacked(_nextScene);
+    }
+    
+    private void SetupBranding()
+    {
+        if (_packedBranding == null) return;
+        AddChild(_branding = _packedBranding.Instantiate<Branding.Branding>());
     }
 }

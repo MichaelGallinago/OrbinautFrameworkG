@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://d3sf1hh7wojhf"]
+[gd_scene load_steps=7 format=3 uid="uid://d3sf1hh7wojhf"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/Startup/Startup.cs" id="1_5grtg"]
 [ext_resource type="Shader" path="res://Shaders/fade.gdshader" id="1_v4hqx"]
 [ext_resource type="PackedScene" uid="uid://b3y6uspbhnxrx" path="res://Scenes/Screens/DevMenu/dev_menu.tscn" id="3_g26hk"]
+[ext_resource type="PackedScene" uid="uid://b12soonmow5ef" path="res://Scenes/Screens/Branding/branding.tscn" id="4_rurc7"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_da42i"]
 shader = ExtResource("1_v4hqx")
@@ -22,3 +23,4 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_naed7")
 script = ExtResource("1_5grtg")
 _nextScene = ExtResource("3_g26hk")
+_packedBranding = ExtResource("4_rurc7")

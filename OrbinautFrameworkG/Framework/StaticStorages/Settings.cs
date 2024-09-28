@@ -5,7 +5,7 @@ namespace OrbinautFrameworkG.Framework.StaticStorages;
 
 public static class Settings
 {
-    public static bool IsInitialized { get; set; } = false;
+    public static bool IsInitialized { get; set; }
     
     public static byte WindowScale
     {
@@ -46,6 +46,8 @@ public static class Settings
         }
     }
     private static Vector2I _viewSize;
+    
+    public static bool SkipBranding { get; set; }
     
     // Default settings. May be overwritten by the config file
     static Settings()

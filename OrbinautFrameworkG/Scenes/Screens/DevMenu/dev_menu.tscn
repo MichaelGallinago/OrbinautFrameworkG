@@ -79,6 +79,7 @@ grow_vertical = 2
 script = ExtResource("2_4shst")
 
 [node name="MainMenu" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -135,7 +136,6 @@ layout_mode = 2
 text = "CLOSE GAME"
 
 [node name="Settings" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -242,6 +242,15 @@ text = "VSYNC MODE:"
 
 [node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector7/HBoxContainer" index="0"]
 text = "Disabled"
+
+[node name="SettingSelector8" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+layout_mode = 2
+
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector8" index="1"]
+text = "SKIP BRANDING:"
+
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector8/HBoxContainer" index="0"]
+text = "false"
 
 [node name="SceneSelect" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
 visible = false
@@ -556,6 +565,7 @@ text = "NO PLAYER 2"
 [editable path="MenuStorage/Settings/OptionStorage/SettingSelector5"]
 [editable path="MenuStorage/Settings/OptionStorage/SettingSelector6"]
 [editable path="MenuStorage/Settings/OptionStorage/SettingSelector7"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector8"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption2"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption3"]
