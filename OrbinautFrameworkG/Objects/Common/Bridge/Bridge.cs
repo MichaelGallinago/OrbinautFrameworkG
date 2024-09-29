@@ -26,11 +26,7 @@ public partial class Bridge : SolidNode
 
     public override void _Ready()
     {
-	    _logAmount = _editor.LogAmount;
-	    _logWidth = _editor.LogWidth;
-	    _logTexture = _editor.LogTexture;
-	    
-	    _editor.QueueFree();
+	    GetEditorData();
 	    
 	    _width = _logWidth * _logAmount;
 	    _logHalfWidth = (byte)(_logWidth / 2);
@@ -51,33 +47,13 @@ public partial class Bridge : SolidNode
     {
 	    var maxDip = 0;
 	    var isPlayerTouch = false;
-
+	    
 	    foreach (IPlayer player in Scene.Instance.Players.Values)
 	    {
-		    player.ActSolid(this, Constants.SolidType.Top);
-		    
-		    if (!player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top)) continue;
-			
-		    isPlayerTouch = true;
-			
-		    int activeLogId = Math.Clamp(
-			    ((int)(player.Position.X - Position.X) + _logAmount * _logHalfWidth) / _logWidth + 1, 1, _logAmount);
-				
-		    int dip = _dip[activeLogId - 1];
-		    if (dip > maxDip)
-		    {
-			    _activeLogId = activeLogId;
-			    _maxDip = dip;
-				
-			    // Remember current dip value for the next player
-			    maxDip = _maxDip;
-		    }
-			
-		    player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))));
+		    CollideWithPlayer(player, ref maxDip, ref isPlayerTouch);
 	    }
-
+	    
 	    UpdateLogPositions();
-
 	    UpdateAngle(isPlayerTouch, Scene.Instance.Speed);
 		
 	    QueueRedraw();
@@ -91,6 +67,39 @@ public partial class Bridge : SolidNode
         {
             DrawTexture(_logTexture, _logPositions[i]);
         }
+    }
+
+    private void GetEditorData()
+    {
+	    _logAmount = _editor.LogAmount;
+	    _logWidth = _editor.LogWidth;
+	    _logTexture = _editor.LogTexture;
+	    
+	    _editor.QueueFree();
+    }
+
+    private void CollideWithPlayer(IPlayer player, ref int maxDip, ref bool isPlayerTouch)
+    {
+	    player.ActSolid(this, Constants.SolidType.Top);
+	    
+	    if (!player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top)) return;
+	    
+	    isPlayerTouch = true;
+	    
+	    int activeLogId = Math.Clamp(
+		    ((int)(player.Position.X - Position.X) + _logAmount * _logHalfWidth) / _logWidth + 1, 1, _logAmount);
+	    
+	    int dip = _dip[activeLogId - 1];
+	    if (dip > maxDip)
+	    {
+		    _activeLogId = activeLogId;
+		    _maxDip = dip;
+		    
+		    // Remember current dip value for the next player
+		    maxDip = _maxDip;
+	    }
+	    
+	    player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))));
     }
     
     private void UpdateLogPositions()

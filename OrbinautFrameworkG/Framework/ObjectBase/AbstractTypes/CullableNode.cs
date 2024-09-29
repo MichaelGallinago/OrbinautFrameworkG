@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Framework.Culling;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
-public partial class CullableNode : Node2D, ICullable, IPosition
+public abstract partial class CullableNode : Node2D, ICullable, IPosition
 {
     public ICullable.Types CullingType
     {
@@ -37,6 +37,8 @@ public partial class CullableNode : Node2D, ICullable, IPosition
         }
     }
     private Vector2 _floatPosition;
+
+    public override void _Ready() => _floatPosition = base.Position;
     
     public override void _EnterTree()
     {
@@ -53,4 +55,6 @@ public partial class CullableNode : Node2D, ICullable, IPosition
             SceneModule.Scene.Instance.Culler.Remove(this);
         }
     }
+    
+    public bool IsInstanceValid() => IsInstanceValid(this);
 }

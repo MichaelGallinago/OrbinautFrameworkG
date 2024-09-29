@@ -1,10 +1,11 @@
 using Godot;
+using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 using OrbinautFrameworkG.Objects.Player.Data;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase;
 
 [GlobalClass]
-public partial class HitBox : Resource
+public partial class HitBox : Resource, ITypeDelegate
 {
     public bool IsInteract { get; private set; }
     [Export] public Vector2I Radius { get; private set; }
@@ -20,7 +21,7 @@ public partial class HitBox : Resource
         RadiusExtra = radiusExtra;
         OffsetExtra = offsetExtra;
     }
-    
+
     public HitBox() : this(false, default, default, default, default) {}
     
     public void Set(Vector2I radius, Vector2I offset = default)
@@ -37,8 +38,8 @@ public partial class HitBox : Resource
 
     public void SetExtra(Vector2I radius, Vector2I offset = default)
     {
-        OffsetExtra = offset;
         RadiusExtra = radius;
+        OffsetExtra = offset;
     }
 	
     public void SetExtra(int radiusX, int radiusY, int offsetX = 0, int offsetY = 0)
@@ -104,10 +105,8 @@ public partial class HitBox : Resource
 			}
 		}*/
 		
-		// Check for collision in the x-axis
+		// Check for horizontal and vertical overlap between hitboxes
 		if (targetBoundsPositive.X < boundsNegative.X || targetBoundsNegative.X > boundsPositive.X) return false;
-		
-		// Check for collision in the y-axis
 		if (targetBoundsPositive.Y < boundsNegative.Y || targetBoundsNegative.Y > boundsPositive.Y) return false;
 		
 		// Objects should no longer interact with any other object this step
@@ -123,5 +122,7 @@ public partial class HitBox : Resource
 		IPlayerNode node = player.Node;
 		return CheckCollision(node.HitBox, (Vector2I)node.Position, position, isExtraHitBox);
 	}
+	
+	void ITypeDelegate.Invoke() => IsInteract = true;
 }
     

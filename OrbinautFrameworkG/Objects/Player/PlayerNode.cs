@@ -9,7 +9,7 @@ using OrbinautFrameworkG.Objects.Spawnable.Shield;
 
 namespace OrbinautFrameworkG.Objects.Player;
 
-public abstract partial class PlayerNode : OrbinautNode, IPlayerNode, ICullable
+public abstract partial class PlayerNode : InteractiveSolidNode, IPlayerNode, ICullable
 {
 	public enum Types : byte { Sonic, Tails, Knuckles, Amy } //TODO: remove this somehow
 	

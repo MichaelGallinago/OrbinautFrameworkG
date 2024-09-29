@@ -1,8 +1,9 @@
 ﻿using Godot;
+using OrbinautFrameworkG.Framework.SceneModule;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
-public partial class SolidNode : CullableNode, IPreviousPosition, ISolid
+public abstract partial class SolidNode : CullableNode, IPreviousPosition, ISolid
 {
     [Export] public SolidBox SolidBox { get; private set; }
     
@@ -11,14 +12,12 @@ public partial class SolidNode : CullableNode, IPreviousPosition, ISolid
     public override void _EnterTree()
     {
         base._EnterTree();
-        SceneModule.Scene.Instance.FrameEndProcess.Subscribe(this);
+        Scene.Instance.FrameEndProcess.Subscribe(this);
     }
     
     public override void _ExitTree()
     {
         base._ExitTree();
-        SceneModule.Scene.Instance.FrameEndProcess.Unsubscribe(this);
+        Scene.Instance.FrameEndProcess.Unsubscribe(this);
     }
-    
-    public bool IsInstanceValid() => IsInstanceValid(this);
 }

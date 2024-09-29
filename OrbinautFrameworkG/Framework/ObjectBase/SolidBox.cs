@@ -20,9 +20,9 @@ public partial class SolidBox : Resource
     public short[] HeightMap { get; private set; }
 
     public SolidBox() {}
-    public SolidBox(bool isInteract, Vector2I radius, Vector2I offset, short[] heightMap) : this()
+    public SolidBox(bool noBalance, Vector2I radius, Vector2I offset, short[] heightMap) : this()
     {
-        NoBalance = isInteract;
+        NoBalance = noBalance;
         Radius = radius;
         Offset = offset;
         HeightMap = heightMap;

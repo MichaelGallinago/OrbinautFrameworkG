@@ -39,11 +39,19 @@ public partial class BridgeEditor : Node2D
     }
     private byte _logWidth = 16;
     
+    private int _halfWidth;
+    
+    public BridgeEditor()
+    {
+        int logHalfWidth = _logWidth / 2;
+        _halfWidth = _logAmount * logHalfWidth - logHalfWidth;
+    }
+    
     public override void _Draw()
     {
         if (_logTexture == null) return;
         
-        var x = 0;
+        int x = -_halfWidth;
         int y = _logWidth / -2;
         for (var i = 0; i < _logAmount; i++)
         {

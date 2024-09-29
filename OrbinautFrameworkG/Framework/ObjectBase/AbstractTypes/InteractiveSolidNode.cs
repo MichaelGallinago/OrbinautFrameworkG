@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Framework.SceneModule;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
-public abstract partial class InteractiveNode : CullableNode
+public abstract partial class InteractiveSolidNode : SolidNode
 {
     [Export] public HitBox HitBox { get; private set; }
     
