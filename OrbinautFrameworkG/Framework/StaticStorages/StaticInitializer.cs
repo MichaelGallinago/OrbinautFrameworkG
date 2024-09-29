@@ -4,12 +4,15 @@ namespace OrbinautFrameworkG.Framework.StaticStorages;
 
 public partial class StaticInitializer : Node
 {
-	public StaticInitializer()
+	public override void _Ready()
 	{
-		Settings.IsInitialized = true;
-		SaveData.IsInitialized = true;
 		PhysicsServer2D.SetActive(false);
 		PhysicsServer3D.SetActive(false);
+		
+		Settings.IsInitialized = true;
+		SaveData.IsInitialized = true;
+		ConfigUtilities.Load();
+		
 		QueueFree();
 	}
 }

@@ -22,8 +22,8 @@ config/icon="res://Icons/project_icon.png"
 
 [autoload]
 
-StaticStorageInitializer="res://Framework/StaticStorages/StaticStorageInitializer.cs"
 AudioPlayer="*res://Audio/Player/audio_player.tscn"
+StaticInitializer="res://Framework/StaticStorages/StaticInitializer.cs"
 
 [display]
 

@@ -63,6 +63,7 @@ public static class ConfigUtilities
         Settings.TargetFps = dto.Frequency;
         Settings.WindowMode = (DisplayServer.WindowMode)dto.WindowMode;
         Settings.VSyncMode = (DisplayServer.VSyncMode)dto.VSyncMode;
+        Settings.SkipBranding = dto.SkipBranding;
     }
     
     private static void Set(ref Dto dto)

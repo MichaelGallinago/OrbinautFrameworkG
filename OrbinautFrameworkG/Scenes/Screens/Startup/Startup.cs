@@ -1,5 +1,5 @@
 using Godot;
-using OrbinautFrameworkG.Framework;
+using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Scenes.Screens.Startup;
 
@@ -9,7 +9,14 @@ public partial class Startup : Panel
     [Export] private PackedScene _packedBranding;
     
     private Branding.Branding _branding;
+    private Color _defaultClearColor;
 
+    public Startup()
+    {
+        _defaultClearColor = RenderingServer.GetDefaultClearColor();
+        RenderingServer.SetDefaultClearColor(Colors.Black);
+    }
+    
     public override void _Ready()
     {
         if (_nextScene == null)
@@ -17,7 +24,7 @@ public partial class Startup : Panel
             GetTree().Quit();
             return;
         }
-
+        
         SetupBranding();
     }
 
@@ -25,13 +32,13 @@ public partial class Startup : Panel
     {
         if (_branding is { IsFinished: false }) return;
         
-        ConfigUtilities.Load();
+        RenderingServer.SetDefaultClearColor(_defaultClearColor);
         GetTree().ChangeSceneToPacked(_nextScene);
     }
     
     private void SetupBranding()
     {
-        if (_packedBranding == null) return;
+        if (Settings.SkipBranding || _packedBranding == null) return;
         AddChild(_branding = _packedBranding.Instantiate<Branding.Branding>());
     }
 }

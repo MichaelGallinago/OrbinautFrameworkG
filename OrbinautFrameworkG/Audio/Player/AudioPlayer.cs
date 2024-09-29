@@ -14,17 +14,17 @@ public partial class AudioPlayer : Node2D
     public static PlayerContainer Sound { get; private set; }
     
     private static AudioPlayer _instance;
-    
+
     public override void _EnterTree()
     {
-        if (_instance == null)
+        if (_instance != null)
         {
-            _instance = this;
-            CreateContainers();
+            QueueFree();
             return;
         }
         
-        QueueFree();
+        _instance = this;
+        CreateContainers();
     }
 
     public override void _ExitTree()

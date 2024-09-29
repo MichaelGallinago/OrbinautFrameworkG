@@ -42,9 +42,11 @@ public static class Settings
         set
         {
             ViewSizeChanged?.Invoke(value);
+            HalfViewSize = value / 2;
             DisplayServer.WindowSetSize((_viewSize = value) * WindowScale);
         }
     }
+    public static Vector2I HalfViewSize { get; private set; }
     private static Vector2I _viewSize;
     
     public static bool SkipBranding { get; set; }
