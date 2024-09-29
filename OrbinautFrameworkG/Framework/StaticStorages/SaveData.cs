@@ -10,6 +10,7 @@ public static class SaveData
 {
 	private const byte SlotLimit = 4;
     
+	public static bool IsInitialized { get; set; }
     public static string ScenePath { get; set; }
     public static byte ContinueCount { get; set; } = 3;
     public static byte EmeraldCount { get; set; } = 7;

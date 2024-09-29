@@ -5,6 +5,8 @@ namespace OrbinautFrameworkG.Framework.StaticStorages;
 
 public static class Settings
 {
+    public static bool IsInitialized { get; set; }
+    
     public static byte WindowScale
     {
         get => _windowScale;
@@ -40,10 +42,14 @@ public static class Settings
         set
         {
             ViewSizeChanged?.Invoke(value);
+            HalfViewSize = value / 2;
             DisplayServer.WindowSetSize((_viewSize = value) * WindowScale);
         }
     }
+    public static Vector2I HalfViewSize { get; private set; }
     private static Vector2I _viewSize;
+    
+    public static bool SkipBranding { get; set; }
     
     // Default settings. May be overwritten by the config file
     static Settings()

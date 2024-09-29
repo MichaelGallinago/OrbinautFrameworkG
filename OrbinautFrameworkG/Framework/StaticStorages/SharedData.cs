@@ -7,8 +7,6 @@ namespace OrbinautFrameworkG.Framework.StaticStorages;
 
 public static class SharedData
 {
-    public static bool ShowSplash { get; set; } = false;
-    public static bool SkipBranding { get; set; } = true;
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
     
     // Common global variables

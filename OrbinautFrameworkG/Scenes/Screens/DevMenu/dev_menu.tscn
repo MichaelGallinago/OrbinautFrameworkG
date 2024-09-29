@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://b3y6uspbhnxrx"]
+[gd_scene load_steps=36 format=3 uid="uid://b3y6uspbhnxrx"]
 
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/DevMenu.cs" id="1_nm0pq"]
 [ext_resource type="FontFile" uid="uid://xtnxc7hva7xb" path="res://Fonts/system_font.fnt" id="2_3l325"]
@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelectors/VSyncModeSettingSelector.cs" id="12_uboi7"]
 [ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelectors/WindowModeSettingSelector.cs" id="13_3tp1k"]
 [ext_resource type="PackedScene" uid="uid://bk2gkg61pmtco" path="res://Scenes/Stages/Zones/TechStadium/tech_stadium_zone_0.tscn" id="13_xxftl"]
+[ext_resource type="Script" path="res://Scenes/Screens/DevMenu/Prefabs/SettingSelectors/SkipBrandingSettingSelectorLogic.cs" id="16_wh2au"]
 [ext_resource type="PackedScene" uid="uid://6su3aujg4crk" path="res://Scenes/Stages/Bonuses/Bonus.tscn" id="19_3xv5p"]
 [ext_resource type="PackedScene" uid="uid://vvusup7obee5" path="res://Scenes/Stages/Specials/special.tscn" id="20_e6yu1"]
 [ext_resource type="PackedScene" uid="uid://yiyajukipmwg" path="res://Scenes/Screens/Continue/continue.tscn" id="21_6hcnj"]
@@ -50,6 +51,9 @@ script = ExtResource("13_3tp1k")
 [sub_resource type="Resource" id="Resource_xm8x4"]
 script = ExtResource("12_uboi7")
 
+[sub_resource type="Resource" id="Resource_x5cv0"]
+script = ExtResource("16_wh2au")
+
 [node name="DevMenu" type="Control" node_paths=PackedStringArray("_currentMenu")]
 layout_mode = 3
 anchors_preset = 15
@@ -79,6 +83,7 @@ grow_vertical = 2
 script = ExtResource("2_4shst")
 
 [node name="MainMenu" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -135,7 +140,6 @@ layout_mode = 2
 text = "CLOSE GAME"
 
 [node name="Settings" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -242,6 +246,16 @@ text = "VSYNC MODE:"
 
 [node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector7/HBoxContainer" index="0"]
 text = "Disabled"
+
+[node name="SettingSelector8" parent="MenuStorage/Settings/OptionStorage" instance=ExtResource("7_20khq")]
+layout_mode = 2
+_logic = SubResource("Resource_x5cv0")
+
+[node name="Label" parent="MenuStorage/Settings/OptionStorage/SettingSelector8" index="1"]
+text = "SKIP BRANDING:"
+
+[node name="Value" parent="MenuStorage/Settings/OptionStorage/SettingSelector8/HBoxContainer" index="0"]
+text = "false"
 
 [node name="SceneSelect" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
 visible = false
@@ -509,7 +523,7 @@ text = "NO PLAYER 2"
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option" to="MenuStorage/StartGame" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option2" to="MenuStorage/SceneSelect" method="Select"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option3" to="MenuStorage/Settings" method="Select"]
-[connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option4" to="MenuStorage/Settings" method="Select"]
+[connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option4" to="MenuStorage/MainMenu" method="CloseGame"]
 [connection signal="Selected" from="MenuStorage/Settings" to="." method="OnMenuSelected"]
 [connection signal="Selected" from="MenuStorage/SceneSelect" to="." method="OnMenuSelected"]
 [connection signal="SelectedScene" from="MenuStorage/SceneSelect" to="." method="OnSceneSelected"]
@@ -556,6 +570,7 @@ text = "NO PLAYER 2"
 [editable path="MenuStorage/Settings/OptionStorage/SettingSelector5"]
 [editable path="MenuStorage/Settings/OptionStorage/SettingSelector6"]
 [editable path="MenuStorage/Settings/OptionStorage/SettingSelector7"]
+[editable path="MenuStorage/Settings/OptionStorage/SettingSelector8"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption2"]
 [editable path="MenuStorage/SceneSelect/OptionStorage/SceneOption3"]

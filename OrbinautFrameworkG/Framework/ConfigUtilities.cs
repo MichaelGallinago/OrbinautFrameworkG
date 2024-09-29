@@ -45,8 +45,9 @@ public static class ConfigUtilities
             AudioPlayer.Sound.MaxVolume,
             Settings.WindowScale,
             Settings.TargetFps,
-            Settings.WindowMode,
-            Settings.VSyncMode
+            (long)Settings.WindowMode,
+            (long)Settings.VSyncMode,
+            Settings.SkipBranding
         );
         
         Set(ref dto);
@@ -60,8 +61,9 @@ public static class ConfigUtilities
         AudioPlayer.Sound.MaxVolume = dto.SoundVolume;
         Settings.WindowScale = dto.WindowScale;
         Settings.TargetFps = dto.Frequency;
-        Settings.WindowMode = dto.WindowMode;
-        Settings.VSyncMode = dto.VSyncMode;
+        Settings.WindowMode = (DisplayServer.WindowMode)dto.WindowMode;
+        Settings.VSyncMode = (DisplayServer.VSyncMode)dto.VSyncMode;
+        Settings.SkipBranding = dto.SkipBranding;
     }
     
     private static void Set(ref Dto dto)
@@ -71,27 +73,30 @@ public static class ConfigUtilities
         Config.SetValue(SectionSettings, "sound_volume", dto.SoundVolume);
         Config.SetValue(SectionSettings, "window_scale", dto.WindowScale);
         Config.SetValue(SectionSettings, "frequency", dto.Frequency);
-        Config.SetValue(SectionSettings, "fullscreen", (long)dto.WindowMode);
-        Config.SetValue(SectionSettings, "vsync", (long)dto.VSyncMode);
+        Config.SetValue(SectionSettings, "fullscreen", dto.WindowMode);
+        Config.SetValue(SectionSettings, "vsync", dto.VSyncMode);
+        Config.SetValue(SectionSettings, "skip_branding", dto.SkipBranding);
     }
-
+    
     private static Dto Get() => new(
         (bool)Config.GetValue(SectionSettings, "joypad_rumble"),
         (float)Config.GetValue(SectionSettings, "music_volume"),
         (float)Config.GetValue(SectionSettings, "sound_volume"),
         (byte)Config.GetValue(SectionSettings, "window_scale"),
         (ushort)Config.GetValue(SectionSettings, "frequency"),
-        (DisplayServer.WindowMode)(long)Config.GetValue(SectionSettings, "fullscreen"),
-        (DisplayServer.VSyncMode)(long)Config.GetValue(SectionSettings, "vsync")
+        (long)Config.GetValue(SectionSettings, "fullscreen"),
+        (long)Config.GetValue(SectionSettings, "vsync"),
+        (bool)Config.GetValue(SectionSettings, "skip_branding")
     );
-
+    
     private readonly record struct Dto(
         bool JoypadRumble, 
         float MusicVolume, 
         float SoundVolume,
         byte WindowScale,
         ushort Frequency, 
-        DisplayServer.WindowMode WindowMode, 
-        DisplayServer.VSyncMode VSyncMode
+        long WindowMode, 
+        long VSyncMode,
+        bool SkipBranding
     );
 }
