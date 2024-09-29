@@ -2,6 +2,7 @@ using System;
 using Godot;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.StaticStorages;
+using OrbinautFrameworkG.Objects.Common.Spikes;
 using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Sprite;
 using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
@@ -190,7 +191,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 			ClearPush(_solidObjectData.Target);
 			return;
 		}
-
+		
 		Vector2I flooredDistance = (Vector2I)data.Movement.Position - (Vector2I)_solidObjectData.Position;
 		
 		Vector2I clip = distance - new Vector2I(

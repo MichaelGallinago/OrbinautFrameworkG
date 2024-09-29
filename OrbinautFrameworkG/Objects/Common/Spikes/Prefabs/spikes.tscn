@@ -15,7 +15,7 @@ HeightMapArray = null
 script = ExtResource("1_bkvfo")
 Sprite = NodePath("Sprite2D")
 SolidBox = SubResource("Resource_dfl48")
-CullingType = 4
+_cullingType = 4
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_k5w7w")

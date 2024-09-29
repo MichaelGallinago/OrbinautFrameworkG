@@ -39,9 +39,10 @@ public abstract partial class CullableNode : Node2D, ICullable, IPosition
     private Vector2 _floatPosition;
 
     public override void _Ready() => _floatPosition = base.Position;
-    
+
     public override void _EnterTree()
     {
+        _floatPosition = base.Position;
         if (CullingType != ICullable.Types.None)
         {
             SceneModule.Scene.Instance.Culler.Add(this);
