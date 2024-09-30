@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=4 uid="uid://bk2gkg61pmtco"]
+[gd_scene load_steps=25 format=4 uid="uid://bk2gkg61pmtco"]
 
 [ext_resource type="Script" path="res://Framework/SceneModule/Zone.cs" id="1_hs30b"]
 [ext_resource type="TileSet" uid="uid://c0g4expshkmt0" path="res://Collisions/Source/tile_set_tsz.tres" id="1_tw5fm"]
@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://b8uvs02jxyk0t" path="res://Objects/Common/Bumper/bumper.tscn" id="13_qd0sa"]
 [ext_resource type="PackedScene" uid="uid://c77b22svl3edt" path="res://Objects/Common/ForceSpinTrigger/force_spin_trigger_horizontal.tscn" id="16_p2jm1"]
 [ext_resource type="PackedScene" uid="uid://bifod3tgod01h" path="res://Objects/Common/Spikes/Prefabs/spikes.tscn" id="16_x5qvi"]
+[ext_resource type="PackedScene" uid="uid://bq8hnv76cojhh" path="res://Objects/Common/Bridge/bridge_long_tsz.tscn" id="17_b7b00"]
 [ext_resource type="PackedScene" uid="uid://1gciguema0rh" path="res://Objects/Common/PathSwapTrigger/path_swap_trigger_vertical.tscn" id="18_0iln7"]
 [ext_resource type="TileSet" uid="uid://eu1pgab1wdlu" path="res://Scenes/Stages/Zones/TechStadium/Graphics/tile_set_graphics_tsz.tres" id="19_g2kxe"]
 [ext_resource type="PackedScene" uid="uid://bvk23nefr3b0y" path="res://Scenes/Stages/Zones/TechStadium/Graphics/flower_tsz.tscn" id="19_qgny8"]
@@ -501,43 +502,43 @@ _cullingType = 0
 [node name="Bridges" type="Node" parent="Common"]
 
 [node name="BridgeTSZ" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(6144, 1160)
+position = Vector2(6200, 1160)
 
 [node name="BridgeTSZ2" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(6784, 1096)
+position = Vector2(6840, 1096)
 
 [node name="BridgeTSZ3" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(8512, 1416)
+position = Vector2(8568, 1416)
 
 [node name="BridgeTSZ4" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(1336, 904)
 
 [node name="BridgeTSZ5" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(5376, 840)
+position = Vector2(5432, 840)
 
 [node name="BridgeTSZ6" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(6016, 808)
+position = Vector2(6072, 808)
 
 [node name="BridgeTSZ7" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(6272, 808)
+position = Vector2(6328, 808)
 
 [node name="BridgeTSZ8" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(6784, 872)
+position = Vector2(6840, 872)
 
 [node name="BridgeTSZ9" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(12800, 1512)
+position = Vector2(12856, 1512)
 
-[node name="BridgeTSZ10" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(17344, 968)
+[node name="BridgeTSZ10" parent="Common/Bridges" instance=ExtResource("17_b7b00")]
+position = Vector2(17400, 968)
 
-[node name="BridgeEditor" parent="Common/Bridges/BridgeTSZ10" index="0"]
-LogAmount = 12
+[node name="BridgeTSZ13" parent="Common/Bridges" instance=ExtResource("17_b7b00")]
+position = Vector2(864, 840)
 
 [node name="BridgeTSZ11" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(18752, 648)
+position = Vector2(18808, 648)
 
 [node name="BridgeTSZ12" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
-position = Vector2(19968, 1000)
+position = Vector2(20024, 1000)
 
 [node name="Bumpers" type="Node" parent="Common"]
 
@@ -1023,5 +1024,3 @@ metadata/_edit_lock_ = true
 z_index = -11
 position = Vector2(22560, 1232)
 metadata/_edit_lock_ = true
-
-[editable path="Common/Bridges/BridgeTSZ10"]

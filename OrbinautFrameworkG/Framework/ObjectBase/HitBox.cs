@@ -5,24 +5,12 @@ using OrbinautFrameworkG.Objects.Player.Data;
 namespace OrbinautFrameworkG.Framework.ObjectBase;
 
 [GlobalClass]
-public partial class HitBox : Resource, ITypeDelegate
+public partial class HitBox : Resource
 {
-    public bool IsInteract { get; private set; }
     [Export] public Vector2I Radius { get; private set; }
     [Export] public Vector2I Offset { get; private set; }
     [Export] public Vector2I RadiusExtra { get; private set; }
     [Export] public Vector2I OffsetExtra { get; private set; }
-
-    public HitBox(bool isInteract, Vector2I radius, Vector2I offset, Vector2I radiusExtra, Vector2I offsetExtra)
-    {
-        IsInteract = isInteract;
-        Radius = radius;
-        Offset = offset;
-        RadiusExtra = radiusExtra;
-        OffsetExtra = offsetExtra;
-    }
-
-    public HitBox() : this(false, default, default, default, default) {}
     
     public void Set(Vector2I radius, Vector2I offset = default)
     {
@@ -48,72 +36,49 @@ public partial class HitBox : Resource, ITypeDelegate
         OffsetExtra = new Vector2I(offsetX, offsetY);
     }
     
-    public bool CheckCollision(HitBox target, Vector2I targetPosition, Vector2I position, bool isExtraHitBox = false)
-	{
-		if (!IsInteract || !target.IsInteract) return false;
-		
-		var hitBoxColor = new Color();
-
-		var targetOffset = new Vector2I();
-		var targetRadius = new Vector2I();
-		if (isExtraHitBox)
-		{
-			targetRadius = target.RadiusExtra;
-			if (targetRadius.X <= 0 || targetRadius.Y <= 0)
-			{
-				isExtraHitBox = false;
-			}	
-			else
-			{
-				targetOffset = target.OffsetExtra;
-				hitBoxColor = Color.Color8(0, 0, 220);
-			}
-		}
-
-		if (!isExtraHitBox)
-		{
-			targetRadius = target.Radius;
-			if (targetRadius.X <= 0 || targetRadius.Y <= 0) return false;
-			
-			targetOffset = target.Offset;
-			hitBoxColor = Color.Color8(255, 0, 220);
-		}
+    public bool CheckCollision(HitBox target, Vector2I targetPosition, Vector2I position, bool isExtra = false)
+    {
+	    if (!target.GetData(isExtra, out Vector2I targetOffset, out Vector2I targetRadius)) return false;
 		
 		// Calculate bounding boxes for both objects
 		position += Offset;
 		Vector2I boundsNegative = position - Radius;
 		Vector2I boundsPositive = position + Radius;
+		
 		targetPosition += targetOffset;
 		Vector2I targetBoundsNegative = targetPosition - targetRadius;
 		Vector2I targetBoundsPositive = targetPosition + targetRadius;
-			
-		// Register collision check if debugging
-		//TODO: debug collision
-		/*
-		if global.debug_collision == 2
-		{
-			var _ds_list = c_framework.collision.ds_interact;
-			
-			if ds_list_find_index(_ds_list, _target) == -1
-			{
-				ds_list_add(_ds_list, _target_l, _target_t, _target_r, _target_b, _hitbox_colour, _target);
-			}
-			
-			if ds_list_find_index(_ds_list, id) == -1
-			{
-				ds_list_add(_ds_list, _this_l, _this_t, _this_r, _this_b, _hitbox_colour, id);
-			}
-		}*/
 		
-		// Check for horizontal and vertical overlap between hitboxes
+		// Check for horizontal and vertical overlap between HitBoxes
 		if (targetBoundsPositive.X < boundsNegative.X || targetBoundsNegative.X > boundsPositive.X) return false;
 		if (targetBoundsPositive.Y < boundsNegative.Y || targetBoundsNegative.Y > boundsPositive.Y) return false;
 		
-		// Objects should no longer interact with any other object this step
-		IsInteract = false;
-		target.IsInteract = false;
-		
 		return true;
+	}
+
+    private bool GetData(bool isExtra, out Vector2I offset, out Vector2I radius)
+	{
+		if (isExtra)
+		{
+			radius = RadiusExtra;
+			
+			if (radius is { X: > 0, Y: > 0 })
+			{
+				offset = OffsetExtra;
+				return true;
+			}
+		}
+
+		radius = Radius;
+		
+		if (radius is { X: > 0, Y: > 0 })
+		{
+			offset = Offset;
+			return true;
+		}
+		
+		offset = default;
+		return false;
 	}
     
 	public bool CheckPlayerCollision(PlayerData player, Vector2I position, bool isExtraHitBox = false)
@@ -122,7 +87,5 @@ public partial class HitBox : Resource, ITypeDelegate
 		IPlayerNode node = player.Node;
 		return CheckCollision(node.HitBox, (Vector2I)node.Position, position, isExtraHitBox);
 	}
-	
-	void ITypeDelegate.Invoke() => IsInteract = true;
 }
     

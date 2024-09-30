@@ -3,7 +3,7 @@ using OrbinautFrameworkG.Framework.SceneModule;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 
-public abstract partial class SolidNode : CullableNode, IPreviousPosition, ISolid
+public abstract partial class SolidNode : CullableNode, ISolid
 {
     [Export] public SolidBox SolidBox { get; private set; }
     

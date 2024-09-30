@@ -38,7 +38,7 @@ public partial class Spikes : SolidNode
                 AttachType.Default : AttachType.ResetPlayer; //TODO: optimize this????
             
             player.ActSolid(this, SolidType.Full, attachType);
-            if (!player.CheckSolidCollision(SolidBox, _sensorToDamage)) continue;
+            if (!player.CheckSolidCollision(this, _sensorToDamage)) continue;
             player.Hurt(Position.X, SoundStorage.SpikesHurt);
         }
     }

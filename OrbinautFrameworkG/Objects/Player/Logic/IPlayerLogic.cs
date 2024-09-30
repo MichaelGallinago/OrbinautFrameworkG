@@ -1,6 +1,7 @@
 ﻿using Godot;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.ObjectBase;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Actions;
@@ -31,9 +32,9 @@ public interface IPlayerLogic : IRecorderStorage, IPlayerActionStorage
     void ClearPush(object target) => ObjectInteraction.ClearPush(target);
     bool CheckPushCollision(IPlayer player) => ObjectInteraction.CheckPushCollision(player);
     
-    bool CheckSolidCollision(SolidBox solidBox, Constants.CollisionSensor type)
+    bool CheckSolidCollision(ISolid target, Constants.CollisionSensor type)
     {
-        return ObjectInteraction.CheckSolidCollision(solidBox, type);
+        return ObjectInteraction.CheckSolidCollision(target, type);
     }
     
     void ActSolid(ISolid target, Constants.SolidType type, 

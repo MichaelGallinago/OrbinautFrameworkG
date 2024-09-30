@@ -7,10 +7,10 @@ namespace OrbinautFrameworkG.Framework.ObjectBase;
 [GlobalClass]
 public partial class SolidBox : Resource
 {
-    [Export] public bool NoBalance { get; set; }
+    [Export] public bool NoBalance { get; private set; }
     [Export] public Vector2I Radius { get; private set; }
     [Export] public Vector2I Offset { get; private set; }
-
+    
     [Export] private Array<short> HeightMapArray //TODO: remove this?
     {
         get => new(HeightMap);
@@ -18,16 +18,7 @@ public partial class SolidBox : Resource
     }
 
     public short[] HeightMap { get; private set; }
-
-    public SolidBox() {}
-    public SolidBox(bool noBalance, Vector2I radius, Vector2I offset, short[] heightMap) : this()
-    {
-        NoBalance = noBalance;
-        Radius = radius;
-        Offset = offset;
-        HeightMap = heightMap;
-    }
-
+    
     public void Set(Vector2I newRadius, Vector2I newOffset = default)
     {
         Offset = newOffset;

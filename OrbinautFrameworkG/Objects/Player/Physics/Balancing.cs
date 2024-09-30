@@ -1,5 +1,6 @@
 ﻿using Godot;
 using OrbinautFrameworkG.Framework.ObjectBase;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Objects.Player.Data;

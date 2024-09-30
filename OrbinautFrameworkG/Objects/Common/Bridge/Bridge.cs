@@ -50,7 +50,7 @@ public partial class Bridge : SolidNode
 	    
 	    foreach (IPlayer player in Scene.Instance.Players.Values)
 	    {
-		    CollideWithPlayer(player, ref maxDip, ref isPlayerTouch);
+		    isPlayerTouch |= CollideWithPlayer(player, ref maxDip);
 	    }
 	    
 	    UpdateLogPositions();
@@ -78,13 +78,11 @@ public partial class Bridge : SolidNode
 	    _editor.QueueFree();
     }
 
-    private void CollideWithPlayer(IPlayer player, ref int maxDip, ref bool isPlayerTouch)
+    private bool CollideWithPlayer(IPlayer player, ref int maxDip)
     {
 	    player.ActSolid(this, Constants.SolidType.Top);
 	    
-	    if (!player.CheckSolidCollision(SolidBox, Constants.CollisionSensor.Top)) return;
-	    
-	    isPlayerTouch = true;
+	    if (!player.CheckSolidCollision(this, Constants.CollisionSensor.Top)) return false;
 	    
 	    int activeLogId = Math.Clamp(
 		    ((int)(player.Position.X - Position.X) + _logAmount * _logHalfWidth) / _logWidth + 1, 1, _logAmount);
@@ -98,8 +96,11 @@ public partial class Bridge : SolidNode
 		    // Remember current dip value for the next player
 		    maxDip = _maxDip;
 	    }
+
+	    float dipper = MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle)));
+	    player.Position += new Vector2(0f, dipper);
 	    
-	    player.Position += new Vector2(0f, MathF.Round(dip * MathF.Sin(Mathf.DegToRad(_angle))));
+	    return true;
     }
     
     private void UpdateLogPositions()

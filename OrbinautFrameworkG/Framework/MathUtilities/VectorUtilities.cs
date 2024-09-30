@@ -20,14 +20,14 @@ public static class VectorUtilities
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 AddX(Vector2 vector, float value)
+    public static Vector2 AddX(this Vector2 vector, float value)
     {
         vector.X += value;
         return vector;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2 AddY(Vector2 vector, float value)
+    public static Vector2 AddY(this Vector2 vector, float value)
     {
         vector.Y += value;
         return vector;
