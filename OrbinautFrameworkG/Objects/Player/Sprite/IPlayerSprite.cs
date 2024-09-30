@@ -14,11 +14,7 @@ public interface IPlayerSprite
     Animations Animation
     {
         get => SpriteLogic.Data.Animation; //TODO: remove this somehow?
-        set
-        {
-            SpriteLogic.Data.Animation = value;
-            SpriteLogic.OnAnimationChanged(value);
-        }
+        set => SpriteLogic.ChangeAnimation(value);
     }
     
     bool CheckInCameras();

@@ -32,9 +32,12 @@ public abstract class SpriteLogic(PlayerData playerData, ISpriteNode spriteNode)
             _ => Data.Animation
         };
     }
+    
+    public void OnFrameChanged() => Data.IsFrameChanged = true;
 
-    public void OnAnimationChanged(Animations animation)
+    public void ChangeAnimation(Animations animation)
     {
+        Data.Animation = animation;
         UpdateSpeed();
         UpdateType();
         Data.FrameCount = Node.SpriteFrames.GetFrameCount(Data.Type.ToStringName());

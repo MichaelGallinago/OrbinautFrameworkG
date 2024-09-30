@@ -80,7 +80,6 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
 
     public void Process()
     {
-        GD.Print(Action);
         Data.Movement.Position = Data.Node.Position;
         
         Data.Input.Update(Data.Id);
