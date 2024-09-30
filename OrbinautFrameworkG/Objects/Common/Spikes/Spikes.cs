@@ -26,8 +26,6 @@ public partial class Spikes : SolidNode
         };
         
         _isHorizontal = _sensorToDamage is CollisionSensor.Left or CollisionSensor.Right;
-        
-        GD.Print(_sensorToDamage);
     }
 
     public override void _Process(double delta) => CollideWithPlayers();

@@ -207,271 +207,274 @@ position = Vector2(4304, 1072)
 position = Vector2(5064, 1008)
 
 [node name="Spikes4" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(8768, 1360)
+position = Vector2(8960, 1296)
 
 [node name="Spikes5" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(9984, 1104)
+position = Vector2(8000, 1264)
 
 [node name="Spikes6" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(10480, 1072)
+position = Vector2(9984, 1104)
 
 [node name="Spikes7" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(10160, 688)
+position = Vector2(10480, 1072)
 
 [node name="Spikes8" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(10752, 720)
+position = Vector2(10160, 688)
 
 [node name="Spikes9" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(10096, 240)
+position = Vector2(10752, 720)
 
 [node name="Spikes10" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(9624, 176)
+position = Vector2(10096, 240)
 
 [node name="Spikes11" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(13656, 1712)
+position = Vector2(9624, 176)
 
 [node name="Spikes12" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(14640, 2096)
+position = Vector2(13656, 1712)
 
 [node name="Spikes13" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(15056, 1808)
+position = Vector2(14640, 2096)
 
 [node name="Spikes14" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(14896, 1648)
+position = Vector2(15056, 1808)
 
 [node name="Spikes15" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(14928, 1648)
+position = Vector2(14896, 1648)
 
 [node name="Spikes16" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(16288, 1936)
+position = Vector2(14928, 1648)
 
 [node name="Spikes17" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(16352, 1936)
+position = Vector2(16288, 1936)
 
 [node name="Spikes18" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(13936, 1200)
+position = Vector2(16352, 1936)
 
 [node name="Spikes19" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
-position = Vector2(12912, 464)
+position = Vector2(13936, 1200)
 
 [node name="Spikes20" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+position = Vector2(12912, 464)
+
+[node name="Spikes21" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13168, 848)
 scale = Vector2(1, -1)
 
-[node name="Spikes21" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes22" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(13136, 848)
 scale = Vector2(1, -1)
 
-[node name="Spikes22" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes23" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16304, 784)
 scale = Vector2(1, -1)
 
-[node name="Spikes23" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes24" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16272, 784)
 scale = Vector2(1, -1)
 
-[node name="Spikes24" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes25" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16240, 784)
 scale = Vector2(1, -1)
 
-[node name="Spikes25" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes26" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16208, 688)
 
-[node name="Spikes26" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes27" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16240, 688)
 
-[node name="Spikes27" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes28" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16272, 688)
 
-[node name="Spikes28" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes29" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16304, 688)
 
-[node name="Spikes29" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes30" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16176, 656)
 
-[node name="Spikes30" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes31" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16336, 656)
 
-[node name="Spikes31" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes32" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16048, 688)
 
-[node name="Spikes32" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes33" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16528, 560)
 
-[node name="Spikes33" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes34" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16560, 560)
 
-[node name="Spikes34" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes35" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16592, 560)
 
-[node name="Spikes35" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes36" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16624, 560)
 
-[node name="Spikes36" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes37" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16656, 560)
 
-[node name="Spikes37" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes38" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16688, 560)
 
-[node name="Spikes38" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes39" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 560)
 
-[node name="Spikes39" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes40" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 560)
 
-[node name="Spikes40" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes41" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16656, 144)
 scale = Vector2(1, -1)
 
-[node name="Spikes41" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes42" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16688, 144)
 scale = Vector2(1, -1)
 
-[node name="Spikes42" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes43" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 144)
 scale = Vector2(1, -1)
 
-[node name="Spikes43" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes44" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 144)
 scale = Vector2(1, -1)
 
-[node name="Spikes44" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes45" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16784, 144)
 scale = Vector2(1, -1)
 
-[node name="Spikes45" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes46" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16848, 336)
 
-[node name="Spikes46" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes47" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16880, 336)
 
-[node name="Spikes47" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes48" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16912, 336)
 
-[node name="Spikes48" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes49" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16944, 336)
 
-[node name="Spikes49" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes50" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16976, 336)
 
-[node name="Spikes50" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes51" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17008, 336)
 
-[node name="Spikes51" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes52" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17040, 336)
 
-[node name="Spikes52" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes53" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17072, 336)
 
-[node name="Spikes53" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes54" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17744, 496)
 
-[node name="Spikes54" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes55" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17776, 496)
 
-[node name="Spikes55" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes56" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17808, 496)
 
-[node name="Spikes56" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes57" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18032, 496)
 
-[node name="Spikes57" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes58" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18064, 496)
 
-[node name="Spikes58" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes59" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18096, 496)
 
-[node name="Spikes59" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes60" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17872, 528)
 
-[node name="Spikes60" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes61" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17904, 528)
 
-[node name="Spikes61" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes62" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17936, 528)
 
-[node name="Spikes62" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes63" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17968, 528)
 
-[node name="Spikes63" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes64" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18000, 512)
 
-[node name="Spikes64" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes65" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17840, 512)
 
-[node name="Spikes65" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes66" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19248, 784)
 scale = Vector2(1, -1)
 
-[node name="Spikes66" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes67" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19152, 816)
 scale = Vector2(1, -1)
 
-[node name="Spikes67" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes68" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19696, 720)
 scale = Vector2(1, -1)
 
-[node name="Spikes68" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes69" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19664, 720)
 scale = Vector2(1, -1)
 
-[node name="Spikes69" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes70" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19632, 720)
 scale = Vector2(1, -1)
 
-[node name="Spikes70" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes71" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19600, 720)
 scale = Vector2(1, -1)
 
-[node name="Spikes71" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes72" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(19920, 976)
 
-[node name="Spikes72" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes73" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(20144, 976)
 
-[node name="Spikes73" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes74" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(20592, 1328)
 
-[node name="Spikes74" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes75" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18544, 1616)
 
-[node name="Spikes75" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes76" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18576, 1616)
 
-[node name="Spikes76" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes77" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(18032, 2032)
 
-[node name="Spikes77" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes78" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17936, 2032)
 
-[node name="Spikes78" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes79" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17520, 2160)
 
-[node name="Spikes79" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes80" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 2032)
 
-[node name="Spikes80" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes81" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16848, 1872)
 scale = Vector2(1, -1)
 
-[node name="Spikes81" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes82" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17040, 1712)
 
-[node name="Spikes82" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes83" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17008, 1712)
 
-[node name="Spikes83" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes84" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16752, 1584)
 scale = Vector2(1, -1)
 
-[node name="Spikes84" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes85" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(16720, 1584)
 scale = Vector2(1, -1)
 
-[node name="Spikes85" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes86" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(14928, 2064)
 
-[node name="Spikes86" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
+[node name="Spikes87" parent="Common/Spikes/Vertical" instance=ExtResource("16_x5qvi")]
 position = Vector2(17584, 944)
 
 [node name="Horizontal" type="Node" parent="Common/Spikes"]
@@ -503,83 +506,109 @@ _cullingType = 0
 
 [node name="BridgeTSZ" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(6200, 1160)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ2" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(6840, 1096)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ3" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(8568, 1416)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ4" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(1336, 904)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ5" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(5432, 840)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ6" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(6072, 808)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ7" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(6328, 808)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ8" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(6840, 872)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ9" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(12856, 1512)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ10" parent="Common/Bridges" instance=ExtResource("17_b7b00")]
 position = Vector2(17400, 968)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ11" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(18808, 648)
+metadata/_edit_lock_ = true
 
 [node name="BridgeTSZ12" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(20024, 1000)
+metadata/_edit_lock_ = true
 
 [node name="Bumpers" type="Node" parent="Common"]
 
-[node name="Bumper2" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
+[node name="Bumper" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(16320, 1728)
+metadata/_edit_lock_ = true
+
+[node name="Bumper2" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
+position = Vector2(17920, 892)
+metadata/_edit_lock_ = true
 
 [node name="Bumper3" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17920, 892)
+position = Vector2(17892, 840)
+metadata/_edit_lock_ = true
 
 [node name="Bumper4" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17892, 840)
+position = Vector2(17848, 868)
+metadata/_edit_lock_ = true
 
 [node name="Bumper5" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17848, 868)
+position = Vector2(18512, 1008)
+metadata/_edit_lock_ = true
 
 [node name="Bumper6" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(18512, 1008)
+position = Vector2(17992, 868)
+metadata/_edit_lock_ = true
 
 [node name="Bumper7" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17992, 868)
+position = Vector2(17948, 840)
+metadata/_edit_lock_ = true
 
 [node name="Bumper8" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17948, 840)
+position = Vector2(17808, 316)
+metadata/_edit_lock_ = true
 
 [node name="Bumper9" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17808, 316)
+position = Vector2(17852, 288)
+metadata/_edit_lock_ = true
 
 [node name="Bumper10" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17852, 288)
+position = Vector2(17988, 288)
+metadata/_edit_lock_ = true
 
 [node name="Bumper11" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(17988, 288)
+position = Vector2(18032, 316)
+metadata/_edit_lock_ = true
 
 [node name="Bumper12" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(18032, 316)
+position = Vector2(19120, 1008)
+metadata/_edit_lock_ = true
 
 [node name="Bumper13" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(19120, 1008)
+position = Vector2(14544, 2256)
+metadata/_edit_lock_ = true
 
 [node name="Bumper14" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
-position = Vector2(14544, 2256)
-
-[node name="Bumper15" parent="Common/Bumpers" instance=ExtResource("13_qd0sa")]
 position = Vector2(14576, 2256)
+metadata/_edit_lock_ = true
 
 [node name="FallingFloors" type="Node" parent="Common"]
 
