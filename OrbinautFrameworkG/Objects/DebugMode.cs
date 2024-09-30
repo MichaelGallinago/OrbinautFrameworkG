@@ -6,6 +6,9 @@ using OrbinautFrameworkG.Framework.InputModule;
 using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.View;
 using OrbinautFrameworkG.Objects.Player;
+#if !DEBUG
+using OrbinautFrameworkG.Framework.StaticStorages;
+#endif
 
 namespace OrbinautFrameworkG.Objects;
 

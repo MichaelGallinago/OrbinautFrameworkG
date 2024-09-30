@@ -1,14 +1,16 @@
-#if DEBUG
 using Godot;
+using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Framework.SceneModule;
 
 public partial class Debug : Node
 {
+	[Export] private PackedScene _startup;
+	[Export] private PackedScene _devMenu;
+	
+#if DEBUG
 	private const int DebugFrameLimit = 2;
-	private const string StartupPath = "res://Scenes/Screens/Startup/startup.tscn";
-	private const string DevMenuPath = "res://Scenes/Screens/DevMenu/dev_menu.tscn";
 	
 	private enum DebugKeys
 	{
@@ -18,7 +20,7 @@ public partial class Debug : Node
 		RestartGame = (int)Key.Key0,
 		DevMenu = (int)Key.Escape
 	}
-	
+
 	public override void _Input(InputEvent input)
 	{
 		if (input is not InputEventKey { Pressed: false } keyEvent) return;
@@ -44,8 +46,24 @@ public partial class Debug : Node
 		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? Settings.TargetFps : DebugFrameLimit;
 	}
 	
-	private static void OnRestartRoomPressed() => Scene.Instance.Tree.ReloadCurrentScene();
-	private static void OnRestartGamePressed() => Scene.Instance.Tree.ChangeSceneToFile(StartupPath);
-	private static void OnDevMenuPressed() => Scene.Instance.Tree.ChangeSceneToFile(DevMenuPath);
-}
+	private void OnRestartRoomPressed()
+	{
+		AudioPlayer.StopAll();
+		GetTree().ReloadCurrentScene();
+	}
+	
+	private void OnRestartGamePressed()
+	{
+		AudioPlayer.StopAll();
+		GetTree().ChangeSceneToPacked(_startup);
+	}
+
+	private void OnDevMenuPressed()
+	{
+		AudioPlayer.StopAll();
+		GetTree().ChangeSceneToPacked(_devMenu);
+	}
+#else
+	public Debug() => QueueFree();
 #endif
+}

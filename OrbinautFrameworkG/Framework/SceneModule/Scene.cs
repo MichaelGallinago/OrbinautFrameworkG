@@ -38,10 +38,6 @@ public partial class Scene : Node2D
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
     private SceneFrameEnd _frameEnd = new();
     
-#if DEBUG
-    private Debug _debug = new();
-#endif
-    
     protected Scene()
     {
         FrameStartProcess = _frameStartProcess;
@@ -56,9 +52,6 @@ public partial class Scene : Node2D
         AddChild(_frameEnd);
         
         Tree = GetTree();
-#if DEBUG
-        AddChild(_debug);
-#endif
     }
     
     private void SetInstance()

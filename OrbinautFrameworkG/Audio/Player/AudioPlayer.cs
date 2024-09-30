@@ -45,6 +45,12 @@ public partial class AudioPlayer : Node2D
         Music.SetPauseState(isPaused);
         Sound.SetPauseState(isPaused);
     }
+
+    public static void StopAll()
+    {
+        Music.StopAll();
+        Sound.StopAll();
+    }
     
     private void CreateContainers()
     {
