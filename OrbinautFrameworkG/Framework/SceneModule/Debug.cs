@@ -1,17 +1,16 @@
+using System;
 using Godot;
 using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Framework.SceneModule;
 
-public partial class Debug : Node
+public partial class Debug : Node2D
 {
 	[Export] private PackedScene _startup;
 	[Export] private PackedScene _devMenu;
 	
 #if DEBUG
-	private const int DebugFrameLimit = 2;
-	
 	private enum DebugKeys
 	{
 		Collision = (int)Key.Key1,
@@ -19,6 +18,36 @@ public partial class Debug : Node
 		RestartRoom = (int)Key.Key9,
 		RestartGame = (int)Key.Key0,
 		DevMenu = (int)Key.Escape
+	}
+	
+	private const int DebugFrameLimit = 2;
+	
+	private static SensorTypes _sensorType = SensorTypes.None;
+	public static event Action<SensorTypes> SensorDebugToggled;
+	public static SensorTypes SensorType 
+	{ 
+		get => _sensorType;
+		set
+		{
+			if ((value == SensorTypes.None) ^ (_sensorType == SensorTypes.None)) return;
+			SensorDebugToggled?.Invoke(value);
+			_sensorType = value;
+		}
+	}
+
+	public enum SensorTypes : byte { None, Collision, HitBox, SolidBox }
+	
+	public static Debug Instance { get; private set; }
+
+	public Debug()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			return;
+		}
+		
+		QueueFree();
 	}
 
 	public override void _Input(InputEvent input)
@@ -37,8 +66,8 @@ public partial class Debug : Node
 
 	private static void OnCollisionPressed()
 	{
-		if (++SharedData.SensorDebugType <= SharedData.SensorDebugTypes.SolidBox) return;
-		SharedData.SensorDebugType = SharedData.SensorDebugTypes.None;
+		if (++SensorType <= SensorTypes.SolidBox) return;
+		SensorType = SensorTypes.None;
 	}
 	
 	private static void OnGameSpeedPressed()
@@ -62,6 +91,12 @@ public partial class Debug : Node
 	{
 		AudioPlayer.StopAll();
 		GetTree().ChangeSceneToPacked(_devMenu);
+	}
+	
+	public override void _Draw()
+	{
+		base._Draw();
+		
 	}
 #else
 	public Debug() => QueueFree();

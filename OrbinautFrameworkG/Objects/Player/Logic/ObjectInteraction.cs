@@ -3,6 +3,7 @@ using Godot;
 using OrbinautFrameworkG.Framework.MathUtilities;
 using OrbinautFrameworkG.Framework.ObjectBase;
 using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
+using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Objects.Common.Spikes;
 using OrbinautFrameworkG.Objects.Player.Data;
@@ -133,7 +134,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void RegisterCollisionCheck()
 	{
-		if (SharedData.SensorDebugType != SharedData.SensorDebugTypes.SolidBox) return;
+		if (Debug.SensorType != Debug.SensorTypes.SolidBox) return;
 		// TODO: debug
 		/*
 		// Register collision check if debugging
