@@ -20,9 +20,9 @@ public partial class Zone : Scene
     next_stage	     =  noone;
     save_progress    =  false;
     */
-
+    
     public Zone() => SetInstance();
-
+    
     private void SetInstance()
     {
         if (Instance == null)
