@@ -1,4 +1,5 @@
-﻿using OrbinautFrameworkG.Framework;
+﻿using Godot;
+using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Framework.View;
@@ -79,6 +80,7 @@ public class PlayerLogic : IPlayer, IPlayerCountObserver
 
     public void Process()
     {
+        GD.Print(Action);
         Data.Movement.Position = Data.Node.Position;
         
         Data.Input.Update(Data.Id);

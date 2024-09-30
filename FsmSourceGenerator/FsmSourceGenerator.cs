@@ -175,8 +175,10 @@ public class FsmGenerator : IIncrementalGenerator
             index = 0;
         }
 
-        if (states.All(x => x.Identifier.Text != "None") &&
-            stateSwitchers.All(x => x.Identifier.Text != "None"))
+        bool isNoneExist = states.Any(x => x.Identifier.Text == "None") ||
+                           stateSwitchers.Any(x => x.Identifier.Text == "None");
+        
+        if (!isNoneExist)
         {
             sourceBuilder.Append("None");
         }
@@ -209,7 +211,11 @@ public class FsmGenerator : IIncrementalGenerator
 """);
         AddStateSwitchers(sourceBuilder, stateSwitchers);
         AddInitializationCases(sourceBuilder, states, stateTypes, entersMethods);
-
+        
+        if (!isNoneExist)
+        {
+            sourceBuilder.Append("\n                    case States.None: break;");
+        }
         sourceBuilder.AppendLine().Append(
 """             
                     default: throw new ArgumentOutOfRangeException();

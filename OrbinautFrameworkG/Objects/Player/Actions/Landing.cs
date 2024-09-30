@@ -53,7 +53,7 @@ public class Landing(PlayerData data, IPlayerLogic logic, Action landAction)
 		collision.TileBehaviour = Constants.TileBehaviours.Floor;
 		
 		data.Node.Shield.State = ShieldContainer.States.None;
-
+		
 		Landed();
 		
 		if (movement.IsSpinning) return;
