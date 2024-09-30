@@ -83,4 +83,7 @@ public struct AcceleratedVector2
         //if (value.IsAccelerated) return; 
         ResetInstanceValue();
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public override string ToString() => $"{{{X.ToString()}; {Y.ToString()}}}";
 }

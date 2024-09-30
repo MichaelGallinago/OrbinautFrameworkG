@@ -11,10 +11,13 @@ public abstract class SpriteLogic(PlayerData playerData, ISpriteNode spriteNode)
 
     public void Process()
     {
+        UpdateSpeed();
+        UpdateType();
+        
         Animate();
         UpdateScale();
         OverrideFrame();
-		
+        
         Data.IsFrameChanged = false;
         Data.IsFinished = false;
     }
@@ -52,7 +55,6 @@ public abstract class SpriteLogic(PlayerData playerData, ISpriteNode spriteNode)
         const float dashThreshold = 10f;
 		
         float speed = Math.Abs(playerData.Movement.GroundSpeed);
-
         if (speed < runThreshold) return Animations.Walk;
         return canDash && speed >= dashThreshold ? Animations.Dash : Animations.Run;
     }

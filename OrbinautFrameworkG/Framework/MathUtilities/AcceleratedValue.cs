@@ -98,6 +98,9 @@ public struct AcceleratedValue(float value) : IEquatable<AcceleratedValue>
     {
         return _value.Equals(other._value) && _instantValue.Equals(other._instantValue);
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public override string ToString() => $"{_value} : {_instantValue}";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object obj) => obj is AcceleratedValue other && Equals(other);
