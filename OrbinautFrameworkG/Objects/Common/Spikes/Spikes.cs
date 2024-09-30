@@ -20,12 +20,14 @@ public partial class Spikes : SolidNode
         _sensorToDamage = Angles.GetQuadrant(RotationDegrees) switch
         {
             Angles.Quadrant.Right => Scale.X < 0 ? CollisionSensor.Left   : CollisionSensor.Right,
-            Angles.Quadrant.Up    => Scale.Y < 0 ? CollisionSensor.Bottom : CollisionSensor.Top,
+            Angles.Quadrant.Up    => Scale.Y < 0 ? CollisionSensor.Top : CollisionSensor.Bottom,
             Angles.Quadrant.Left  => Scale.X < 0 ? CollisionSensor.Right  : CollisionSensor.Left,
-            _                     => Scale.Y < 0 ? CollisionSensor.Top    : CollisionSensor.Bottom
+            _                     => Scale.Y < 0 ? CollisionSensor.Bottom : CollisionSensor.Top
         };
         
         _isHorizontal = _sensorToDamage is CollisionSensor.Left or CollisionSensor.Right;
+        
+        GD.Print(_sensorToDamage);
     }
 
     public override void _Process(double delta) => CollideWithPlayers();

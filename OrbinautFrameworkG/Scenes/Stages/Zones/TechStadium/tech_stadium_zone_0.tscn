@@ -531,9 +531,6 @@ position = Vector2(12856, 1512)
 [node name="BridgeTSZ10" parent="Common/Bridges" instance=ExtResource("17_b7b00")]
 position = Vector2(17400, 968)
 
-[node name="BridgeTSZ13" parent="Common/Bridges" instance=ExtResource("17_b7b00")]
-position = Vector2(864, 840)
-
 [node name="BridgeTSZ11" parent="Common/Bridges" instance=ExtResource("12_ncrh2")]
 position = Vector2(18808, 648)
 
