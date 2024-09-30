@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Godot;
 using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.Tiles;
@@ -127,7 +128,7 @@ public readonly struct Ground(PlayerData data, IPlayerLogic logic)
 		movement.Angle = angle;
 #endif
 	}
-
+	
 	private TileBehaviours GetTileBehaviour() => data.Movement.Angle switch
 	{
 		<= 45 or >= 315 => TileBehaviours.Floor,

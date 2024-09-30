@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace OrbinautFrameworkG.Framework.MultiTypeDelegate;
@@ -7,8 +8,11 @@ public abstract class AbstractMultiTypeDelegate<T>(int capacity)
 {
     protected readonly HashSet<T> Subscribers = new(capacity);
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear() => Subscribers.Clear();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Subscribe(T subscriber) => Subscribers.Add(subscriber);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Unsubscribe(T subscriber) => Subscribers.Remove(subscriber);
 }
 

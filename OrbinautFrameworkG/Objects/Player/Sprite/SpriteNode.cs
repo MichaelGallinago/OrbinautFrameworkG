@@ -14,7 +14,9 @@ public partial class SpriteNode : AdvancedAnimatedSprite, ISpriteNode, IPlayerSp
 		if (Engine.IsEditorHint()) return;
 #endif
 		AnimationFinished += OnAnimationFinished;
+		FrameChanged += OnFrameChanged;
 	}
 	
 	private void OnAnimationFinished() => SpriteLogic.OnFinished();
+	private void OnFrameChanged() => SpriteLogic.OnFrameChanged();
 }

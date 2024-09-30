@@ -16,7 +16,7 @@ z_index = -4
 script = ExtResource("1_phedy")
 _editor = NodePath("BridgeEditor")
 SolidBox = SubResource("Resource_bqiux")
-CullingType = 6
+_cullingType = 4
 
 [node name="BridgeEditor" type="Node2D" parent="."]
 script = ExtResource("3_b23gm")

@@ -1,5 +1,4 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 using OrbinautFrameworkG.Objects.Common.GiantRing;
 using OrbinautFrameworkG.Objects.Spawnable.Shield;
 
@@ -10,7 +9,6 @@ public static class SharedData
     public static byte? CurrentSaveSlot { get; set; } = null; // null = no-save slot by default
     
     // Common global variables
-    public static bool IsDebugModeEnabled { get; set; }
 	public static CheckpointData CheckpointData { get; set; }
     public static GiantRingData GiantRingData { get; set; }
     // TODO: ds_giant_rings
@@ -19,22 +17,6 @@ public static class SharedData
     public static int RealPlayerCount { get; set; } = 1;
     public static uint PlayerRings { get; set; }
     public static ShieldContainer.Types[] SavedShields { get; set; }
-    
-    
-    private static SensorDebugTypes _sensorDebugType = SensorDebugTypes.None;
-    public static event Action<SensorDebugTypes> SensorDebugToggled;
-    public static SensorDebugTypes SensorDebugType 
-    { 
-	    get => _sensorDebugType;
-	    set
-	    {
-		    if ((value == SensorDebugTypes.None) ^ (_sensorDebugType == SensorDebugTypes.None)) return;
-		    SensorDebugToggled?.Invoke(value);
-		    _sensorDebugType = value;
-	    }
-    }
-
-    public enum SensorDebugTypes : byte { None, Collision, HitBox, SolidBox }
     
     public static void ClearFull()
     {

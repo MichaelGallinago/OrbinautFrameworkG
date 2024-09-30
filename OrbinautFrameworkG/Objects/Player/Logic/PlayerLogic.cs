@@ -1,4 +1,5 @@
-﻿using OrbinautFrameworkG.Framework;
+﻿using Godot;
+using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.StaticStorages;
 using OrbinautFrameworkG.Framework.Tiles;
 using OrbinautFrameworkG.Framework.View;

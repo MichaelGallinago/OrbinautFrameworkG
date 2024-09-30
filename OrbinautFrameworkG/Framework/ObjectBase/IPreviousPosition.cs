@@ -3,10 +3,9 @@ using OrbinautFrameworkG.Framework.MultiTypeDelegate;
 
 namespace OrbinautFrameworkG.Framework.ObjectBase;
 
-public interface IPreviousPosition : ITypeDelegate
+public interface IPreviousPosition : ITypeDelegate, IPosition
 {
     void ITypeDelegate.Invoke() => PreviousPosition = Position;
     
     Vector2 PreviousPosition { get; set; }
-    Vector2 Position { get; }
 }

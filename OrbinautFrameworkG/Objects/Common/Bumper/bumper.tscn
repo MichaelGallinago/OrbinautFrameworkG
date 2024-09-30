@@ -52,14 +52,14 @@ animations = [{
 script = ExtResource("4_thiwj")
 _frameLoops = {}
 _offsets = {}
-_cullSize = Vector2i(0, 0)
+CullSize = Vector2i(0, 0)
 
 [node name="Bumper" type="Node2D" node_paths=PackedStringArray("_sprite")]
 z_index = -1
 script = ExtResource("1_ur7uk")
 _sprite = NodePath("AdvancedAnimatedSprite")
 HitBox = SubResource("Resource_2gt8y")
-CullingType = 6
+_cullingType = 4
 
 [node name="AdvancedAnimatedSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_mun1y")

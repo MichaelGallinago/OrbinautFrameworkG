@@ -7,14 +7,14 @@
 [ext_resource type="SpriteFrames" uid="uid://b0sykgqai1k4o" path="res://Objects/Player/Characters/Sonic/sonic_sprite_frames.tres" id="3_nhco8"]
 [ext_resource type="Script" path="res://Objects/Player/Sprite/SpriteNode.cs" id="4_36viu"]
 
-[sub_resource type="Resource" id="Resource_5nc6b"]
+[sub_resource type="Resource" id="Resource_nydc5"]
 script = ExtResource("2_mrkgp")
 Radius = Vector2i(0, 0)
 Offset = Vector2i(0, 0)
 RadiusExtra = Vector2i(0, 0)
 OffsetExtra = Vector2i(0, 0)
 
-[sub_resource type="Resource" id="Resource_xs7rv"]
+[sub_resource type="Resource" id="Resource_oaeam"]
 script = ExtResource("3_ihki0")
 NoBalance = false
 Radius = Vector2i(0, 0)
@@ -27,8 +27,8 @@ z_index = -2
 script = ExtResource("1_7lvjm")
 Shield = NodePath("ShieldContainer")
 SpriteNode = NodePath("Sprite")
-HitBox = SubResource("Resource_5nc6b")
-SolidBox = SubResource("Resource_xs7rv")
+HitBox = SubResource("Resource_nydc5")
+SolidBox = SubResource("Resource_oaeam")
 
 [node name="ShieldContainer" parent="." instance=ExtResource("1_gkxe4")]
 FrameLoop = 0

@@ -6,18 +6,22 @@ using OrbinautFrameworkG.Framework.InputModule;
 using OrbinautFrameworkG.Framework.SceneModule;
 using OrbinautFrameworkG.Framework.View;
 using OrbinautFrameworkG.Objects.Player;
+#if !DEBUG
+using OrbinautFrameworkG.Framework.StaticStorages;
+#endif
 
 namespace OrbinautFrameworkG.Objects;
 
-public class DebugMode(IEditor editor)
+public class EditMode(IEditor editor)
 {
 #if DEBUG
 	private const float Acceleration = 0.046875f;
 #else
 	private const float Acceleration = 0.1875f;
+	public static bool IsAllowed { get; set; }
 #endif
 	private const byte SpeedLimit = 16;
-
+	
 	public bool IsEnabled { get; private set; }
 	
 	private readonly PackedScene[] _prefabs = Scene.Instance.DebugModePrefabs;
@@ -28,7 +32,7 @@ public class DebugMode(IEditor editor)
 	public bool Switch()
 	{
 #if !DEBUG
-	    if (!SharedData.IsDebugModeEnabled) return false;  
+	    if (!IsAllowed) return false;
 #endif
 		if (!IsDebugButtonPressed(IsEnabled, editor.Input.Press)) return false;
 		

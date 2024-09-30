@@ -24,6 +24,7 @@ config/icon="res://Icons/project_icon.png"
 
 AudioPlayer="*res://Audio/Player/audio_player.tscn"
 StaticInitializer="res://Framework/StaticStorages/StaticInitializer.cs"
+Debug="res://Framework/SceneModule/debug.tscn"
 
 [display]
 

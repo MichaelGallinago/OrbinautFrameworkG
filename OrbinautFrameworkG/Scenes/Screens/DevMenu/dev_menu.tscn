@@ -140,6 +140,7 @@ layout_mode = 2
 text = "CLOSE GAME"
 
 [node name="Settings" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -459,7 +460,6 @@ layout_mode = 2
 text = "AMY"
 
 [node name="Player2Select" type="VBoxContainer" parent="MenuStorage" node_paths=PackedStringArray("_optionStorage")]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -493,31 +493,31 @@ script = ExtResource("3_yeib4")
 layout_mode = 2
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option" index="1"]
-text = "SONIC"
+text = "NO PLAYER 2"
 
 [node name="Option2" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option2" index="1"]
-text = "TAILS"
+text = "SONIC"
 
 [node name="Option3" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option3" index="1"]
-text = "KNUCKLES"
+text = "TAILS"
 
 [node name="Option4" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option4" index="1"]
-text = "AMY"
+text = "KNUCKLES"
 
 [node name="Option5" parent="MenuStorage/Player2Select/OptionStorage" instance=ExtResource("3_doob7")]
 layout_mode = 2
 
 [node name="Label" parent="MenuStorage/Player2Select/OptionStorage/Option5" index="1"]
-text = "NO PLAYER 2"
+text = "AMY"
 
 [connection signal="Selected" from="MenuStorage/MainMenu" to="." method="OnMenuSelected"]
 [connection signal="PressedSelect" from="MenuStorage/MainMenu/OptionStorage/Option" to="MenuStorage/StartGame" method="Select"]

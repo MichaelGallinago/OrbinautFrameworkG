@@ -2,6 +2,7 @@
 using Godot;
 using OrbinautFrameworkG.Framework;
 using OrbinautFrameworkG.Framework.ObjectBase;
+using OrbinautFrameworkG.Framework.ObjectBase.AbstractTypes;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Objects.Player.Data;
@@ -17,8 +18,8 @@ public class CollisionData
     public Constants.TileBehaviours TileBehaviour { get; set; }
     
     public ISolid OnObject { get; set; }
-    public HashSet<SolidBox> PushObjects { get; } = [];
-    public Dictionary<SolidBox, Constants.TouchState> TouchObjects { get; } = [];
+    public HashSet<ISolid> PushObjects { get; } = [];
+    public Dictionary<ISolid, Constants.TouchState> TouchObjects { get; } = [];
 
     public void Init(PlayerNode.Types type)
     {

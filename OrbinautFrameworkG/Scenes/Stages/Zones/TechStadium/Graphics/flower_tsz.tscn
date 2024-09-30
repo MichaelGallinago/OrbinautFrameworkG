@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://bvk23nefr3b0y"]
+
+[ext_resource type="Texture2D" uid="uid://d2hw5d8i5d80x" path="res://Scenes/Stages/Zones/TechStadium/Graphics/flower_tsz.png" id="1_ubvtv"]
+[ext_resource type="Script" path="res://Scenes/Stages/Zones/TechStadium/Graphics/FlowerTsz.cs" id="2_8khlx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_snucj"]
+atlas = ExtResource("1_ubvtv")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gaj73"]
+atlas = ExtResource("1_ubvtv")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8vanj"]
+animations = [{
+"frames": [{
+"duration": 192.0,
+"texture": SubResource("AtlasTexture_snucj")
+}, {
+"duration": 12.0,
+"texture": SubResource("AtlasTexture_gaj73")
+}, {
+"duration": 12.0,
+"texture": SubResource("AtlasTexture_snucj")
+}, {
+"duration": 12.0,
+"texture": SubResource("AtlasTexture_gaj73")
+}, {
+"duration": 12.0,
+"texture": SubResource("AtlasTexture_snucj")
+}, {
+"duration": 12.0,
+"texture": SubResource("AtlasTexture_gaj73")
+}],
+"loop": true,
+"name": &"default",
+"speed": 60.0
+}]
+
+[node name="Flower" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_8vanj")
+script = ExtResource("2_8khlx")

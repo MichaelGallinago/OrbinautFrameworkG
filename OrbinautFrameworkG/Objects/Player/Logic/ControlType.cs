@@ -20,20 +20,20 @@ public class ControlType(IPlayer player, Characters.Logic.Base.CpuLogic cpuLogic
             
             _cpuLogic = null;
 #if !DEBUG
-            if (!SharedData.IsDebugModeEnabled) return;
+            if (!EditMode.IsAllowed) return;
 #endif
-            _debugMode = new DebugMode(player);
+            _editMode = new EditMode(player);
         }
     }
     
     private CpuLogic _cpuLogic;
-    private DebugMode _debugMode;
+    private EditMode _editMode;
     
     public void UpdateCpu() => _cpuLogic?.Process();
-    public bool SwitchDebugMode() => _debugMode != null && _debugMode.Switch();
+    public bool SwitchDebugMode() => _editMode != null && _editMode.Switch();
     public void UpdateDebugMode()
     {
-        _debugMode?.Update();
+        _editMode?.Update();
         player.Data.Movement.Position = player.Position;
     }
 }

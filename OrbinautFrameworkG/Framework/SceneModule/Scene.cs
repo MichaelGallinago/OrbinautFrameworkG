@@ -32,16 +32,15 @@ public partial class Scene : Node2D
     public int Frame { get; private set; }
     
     public IMultiTypeEvent<ITypeDelegate> FrameEndProcess { get; }
+    public IMultiTypeEvent<ITypeDelegate> FrameStartProcess { get; }
     
+    private readonly MultiTypeDelegate<ITypeDelegate> _frameStartProcess = new(256);
     private SceneContinuousUpdate _sceneContinuousUpdate = new();
     private SceneFrameEnd _frameEnd = new();
     
-#if DEBUG
-    private Debug _debug = new();
-#endif
-    
     protected Scene()
     {
+        FrameStartProcess = _frameStartProcess;
         FrameEndProcess = _frameEnd.Process;
         ProcessPriority = int.MinValue;
         SetInstance();
@@ -53,10 +52,6 @@ public partial class Scene : Node2D
         AddChild(_frameEnd);
         
         Tree = GetTree();
-        
-#if DEBUG
-        AddChild(_debug);
-#endif
     }
     
     private void SetInstance()
@@ -86,6 +81,7 @@ public partial class Scene : Node2D
             Frame++;
         }
         
+        _frameStartProcess.Invoke();
         Culler.EarlyCull();
         
         foreach (IPlayer player in Players.Values)

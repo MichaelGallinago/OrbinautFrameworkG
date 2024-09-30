@@ -28,7 +28,6 @@ public partial class Bumper : InteractiveNode
     
     public override void _Ready()
     {
-        base._Ready();
         _hitsLeft = (int)_hitsLimit;
         _sprite.AnimationFinished += OnAnimationFinished;
     }

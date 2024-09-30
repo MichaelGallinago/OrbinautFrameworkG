@@ -1,15 +1,16 @@
-#if DEBUG
+using System;
 using Godot;
+using OrbinautFrameworkG.Audio.Player;
 using OrbinautFrameworkG.Framework.StaticStorages;
 
 namespace OrbinautFrameworkG.Framework.SceneModule;
 
-public partial class Debug : Node
+public partial class Debug : Node2D
 {
-	private const int DebugFrameLimit = 2;
-	private const string StartupPath = "res://Scenes/Screens/Startup/startup.tscn";
-	private const string DevMenuPath = "res://Scenes/Screens/DevMenu/dev_menu.tscn";
+	[Export] private PackedScene _startup;
+	[Export] private PackedScene _devMenu;
 	
+#if DEBUG
 	private enum DebugKeys
 	{
 		Collision = (int)Key.Key1,
@@ -19,6 +20,36 @@ public partial class Debug : Node
 		DevMenu = (int)Key.Escape
 	}
 	
+	private const int DebugFrameLimit = 2;
+	
+	private static SensorTypes _sensorType = SensorTypes.None;
+	public static event Action<SensorTypes> SensorDebugToggled;
+	public static SensorTypes SensorType 
+	{ 
+		get => _sensorType;
+		set
+		{
+			if ((value == SensorTypes.None) ^ (_sensorType == SensorTypes.None)) return;
+			SensorDebugToggled?.Invoke(value);
+			_sensorType = value;
+		}
+	}
+
+	public enum SensorTypes : byte { None, Collision, HitBox, SolidBox }
+	
+	public static Debug Instance { get; private set; }
+
+	public Debug()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			return;
+		}
+		
+		QueueFree();
+	}
+
 	public override void _Input(InputEvent input)
 	{
 		if (input is not InputEventKey { Pressed: false } keyEvent) return;
@@ -35,8 +66,8 @@ public partial class Debug : Node
 
 	private static void OnCollisionPressed()
 	{
-		if (++SharedData.SensorDebugType <= SharedData.SensorDebugTypes.SolidBox) return;
-		SharedData.SensorDebugType = SharedData.SensorDebugTypes.None;
+		if (++SensorType <= SensorTypes.SolidBox) return;
+		SensorType = SensorTypes.None;
 	}
 	
 	private static void OnGameSpeedPressed()
@@ -44,8 +75,30 @@ public partial class Debug : Node
 		Engine.MaxFps = Engine.MaxFps == DebugFrameLimit ? Settings.TargetFps : DebugFrameLimit;
 	}
 	
-	private static void OnRestartRoomPressed() => Scene.Instance.Tree.ReloadCurrentScene();
-	private static void OnRestartGamePressed() => Scene.Instance.Tree.ChangeSceneToFile(StartupPath);
-	private static void OnDevMenuPressed() => Scene.Instance.Tree.ChangeSceneToFile(DevMenuPath);
-}
+	private void OnRestartRoomPressed()
+	{
+		AudioPlayer.StopAll();
+		GetTree().ReloadCurrentScene();
+	}
+	
+	private void OnRestartGamePressed()
+	{
+		AudioPlayer.StopAll();
+		GetTree().ChangeSceneToPacked(_startup);
+	}
+
+	private void OnDevMenuPressed()
+	{
+		AudioPlayer.StopAll();
+		GetTree().ChangeSceneToPacked(_devMenu);
+	}
+	
+	public override void _Draw()
+	{
+		base._Draw();
+		
+	}
+#else
+	public Debug() => QueueFree();
 #endif
+}

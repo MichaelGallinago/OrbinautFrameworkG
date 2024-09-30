@@ -13,7 +13,7 @@ public class SonicSpriteLogic(PlayerData player, ISpriteNode spriteNode) : Sprit
     protected override void Animate()
     {
         SetType(Data.Type, Data.Speed);
-
+        
         if (!_player.Super.IsSuper || Data.Type != Animations.Walk) return;
         
         if (Scene.Instance.Time % 4d >= 2d) return;
