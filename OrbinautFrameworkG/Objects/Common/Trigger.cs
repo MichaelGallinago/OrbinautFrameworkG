@@ -1,5 +1,6 @@
 ﻿using Godot;
 using OrbinautFrameworkG.Framework.SceneModule;
+using Debug = OrbinautFrameworkG.Framework.DebugModule.Debug;
 
 namespace OrbinautFrameworkG.Objects.Common;
 

@@ -10,6 +10,7 @@ using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Physics;
 using OrbinautFrameworkG.Objects.Player.Sprite;
 using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
+using Debug = OrbinautFrameworkG.Framework.DebugModule.Debug;
 
 namespace OrbinautFrameworkG.Objects.Player.Logic;
 
