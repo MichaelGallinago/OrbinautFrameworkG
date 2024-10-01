@@ -22,10 +22,10 @@ public partial class Debug : Node2D
 	
 	private const int DebugFrameLimit = 2;
 	
-	private static SensorTypes _sensorType = SensorTypes.None;
-	public static event Action<SensorTypes> SensorDebugToggled;
-	public static SensorTypes SensorType 
-	{ 
+	public enum SensorTypes : byte { None, Collision, HitBox, SolidBox }
+	public event Action<SensorTypes> SensorDebugToggled;
+	public SensorTypes SensorType 
+	{
 		get => _sensorType;
 		set
 		{
@@ -34,8 +34,7 @@ public partial class Debug : Node2D
 			_sensorType = value;
 		}
 	}
-
-	public enum SensorTypes : byte { None, Collision, HitBox, SolidBox }
+	private SensorTypes _sensorType = SensorTypes.None;
 	
 	public static Debug Instance { get; private set; }
 
@@ -64,7 +63,7 @@ public partial class Debug : Node2D
 		}
 	}
 
-	private static void OnCollisionPressed()
+	private void OnCollisionPressed()
 	{
 		if (++SensorType <= SensorTypes.SolidBox) return;
 		SensorType = SensorTypes.None;

@@ -8,13 +8,13 @@ public abstract partial class Trigger : Node2D
     protected Trigger()
     {
         Visible = false;
-        Debug.SensorDebugToggled += ChangeVisibility;
+        Debug.Instance.SensorDebugToggled += ChangeVisibility;
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        Debug.SensorDebugToggled -= ChangeVisibility;
+        Debug.Instance.SensorDebugToggled -= ChangeVisibility;
     }
     
     private void ChangeVisibility(Debug.SensorTypes type) => Visible = type != Debug.SensorTypes.None;

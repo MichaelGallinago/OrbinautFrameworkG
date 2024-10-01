@@ -134,7 +134,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void RegisterCollisionCheck()
 	{
-		if (Debug.SensorType != Debug.SensorTypes.SolidBox) return;
+		if (Debug.Instance.SensorType != Debug.SensorTypes.SolidBox) return;
 		// TODO: debug
 		/*
 		// Register collision check if debugging
