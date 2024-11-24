@@ -10,6 +10,7 @@ using OrbinautFrameworkG.Objects.Player.Data;
 using OrbinautFrameworkG.Objects.Player.Physics;
 using OrbinautFrameworkG.Objects.Player.Sprite;
 using static OrbinautFrameworkG.Framework.StaticStorages.Constants;
+using Debug = OrbinautFrameworkG.Framework.DebugModule.Debug;
 
 namespace OrbinautFrameworkG.Objects.Player.Logic;
 
@@ -134,7 +135,7 @@ public struct ObjectInteraction(PlayerData data, IPlayerLogic logic)
 	
 	private void RegisterCollisionCheck()
 	{
-		if (Debug.SensorType != Debug.SensorTypes.SolidBox) return;
+		//if (Debug.Instance.SensorType != Debug.SensorTypes.SolidBox) return;
 		// TODO: debug
 		/*
 		// Register collision check if debugging

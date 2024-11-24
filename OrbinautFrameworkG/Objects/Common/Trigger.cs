@@ -1,5 +1,5 @@
 ﻿using Godot;
-using OrbinautFrameworkG.Framework.SceneModule;
+using OrbinautFrameworkG.Framework.DebugModule;
 
 namespace OrbinautFrameworkG.Objects.Common;
 
@@ -8,14 +8,14 @@ public abstract partial class Trigger : Node2D
     protected Trigger()
     {
         Visible = false;
-        Debug.SensorDebugToggled += ChangeVisibility;
+        //Debug.Instance.Overlay.SensorDebugToggled += ChangeVisibility;
     }
 
     public override void _ExitTree()
     {
         base._ExitTree();
-        Debug.SensorDebugToggled -= ChangeVisibility;
+        //Debug.Instance.Overlay.SensorDebugToggled -= ChangeVisibility;
     }
     
-    private void ChangeVisibility(Debug.SensorTypes type) => Visible = type != Debug.SensorTypes.None;
+    private void ChangeVisibility(DebugOverlay.SensorTypes type) => Visible = type != DebugOverlay.SensorTypes.None;
 }
